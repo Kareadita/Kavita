@@ -443,5 +443,6 @@ $RECYCLE.BIN/
 
 # App specific
 appsettings.json
-/API/datingapp.db-shm
-/API/datingapp.db-wal
+/API/kavita.db
+/API/kavita.db-shm
+/API/kavita.db-wal

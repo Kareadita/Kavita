@@ -13,6 +13,7 @@ namespace API.Entities
         public byte[] PasswordSalt { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime LastActive { get; set; }
+        public bool IsAdmin { get; set; }
 
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
@@ -21,8 +22,6 @@ namespace API.Entities
         {
             RowVersion++;
         }
-        
-        
-        
+
     }
 }
