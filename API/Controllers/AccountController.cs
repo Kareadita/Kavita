@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using API.Data;
@@ -15,12 +16,14 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
+        private readonly IUserRepository _userRepository;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(DataContext context, ITokenService tokenService, ILogger<AccountController> logger)
+        public AccountController(DataContext context, ITokenService tokenService, IUserRepository userRepository, ILogger<AccountController> logger)
         {
             _context = context;
             _tokenService = tokenService;
+            _userRepository = userRepository;
             _logger = logger;
         }
 
@@ -39,7 +42,8 @@ namespace API.Controllers
                 UserName = registerDto.Username.ToLower(),
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
                 PasswordSalt = hmac.Key,
-                IsAdmin = registerDto.IsAdmin
+                IsAdmin = registerDto.IsAdmin,
+                LastActive = DateTime.Now
             };
 
             _context.Users.Add(user);
@@ -68,11 +72,17 @@ namespace API.Controllers
             {
                 if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
+            
+            // Update LastActive on account
+            user.LastActive = DateTime.Now;
+            _userRepository.Update(user);
+            await _userRepository.SaveAllAsync();
 
             return new UserDto()
             {
                 Username = user.UserName,
-                Token = _tokenService.CreateToken(user)
+                Token = _tokenService.CreateToken(user),
+                IsAdmin = user.IsAdmin
             };
         }
         
