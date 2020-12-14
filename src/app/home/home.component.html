@@ -1,0 +1,29 @@
+
+<h1>Welcome to Kativa</h1>
+<div class="container">
+    <ng-container *ngIf="firstTimeFlow">
+        <!-- NOTE: We don't need a first time user flow. We just need a simple component to register a new admin. Once registered, we can put them on admin/ route -->
+        <p>Please create an admin account for yourself to start your reading journey.</p>
+        <form [formGroup]="registerForm" (ngSubmit)="register()" class="form-inline mt-2 mt-md-0">
+            <label>Username:
+                <input class="form-control mr-sm-2" formControlName="username" type="text">
+            </label>
+        
+            <label>Password:
+                <input class="form-control mr-sm-2" formControlName="password" type="password">
+            </label>
+        
+            <button class="btn btn-primary my-2 my-sm-0" type="submit">Register</button>
+        </form>
+    </ng-container>
+
+    <ng-container *ngIf="!firstTimeFlow">
+        <app-user-login></app-user-login>
+    </ng-container>
+
+</div>
+
+
+
+
+
