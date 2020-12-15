@@ -13,13 +13,15 @@ import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { LibraryComponent } from './library/library.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     NavHeaderComponent,
-    UserLoginComponent
+    UserLoginComponent,
+    LibraryComponent
   ],
   imports: [
     HttpClientModule,

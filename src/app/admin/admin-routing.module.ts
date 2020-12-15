@@ -1,10 +1,17 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AdminGuard } from '../_guards/admin.guard';
 import { UsersComponent } from './users/users.component';
 
 const routes: Routes = [
   {path: '**', component: UsersComponent, pathMatch: 'full'},
-  {path: '/users', component: UsersComponent}
+  {
+    runGuardsAndResolvers: 'always',
+    canActivate: [AdminGuard],
+    children: [
+      {path: '/users', component: UsersComponent}
+    ]
+  }
 ];
 
 @NgModule({

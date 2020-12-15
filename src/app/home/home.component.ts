@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
 
     console.log('Registering: ', this.model);
     this.accountService.register(this.model).subscribe(resp => {
-      this.router.navigateByUrl('/libraries');
+      this.router.navigateByUrl('/library');
     }, err => {
       console.log('validation errors from interceptor', err);
     });

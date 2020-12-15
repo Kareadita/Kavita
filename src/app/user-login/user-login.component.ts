@@ -26,7 +26,7 @@ export class UserLoginComponent implements OnInit {
     this.accountService.login(this.model).subscribe(user => {
       if (user) {
         this.loginForm.reset();
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/library');
       }
     });
   }
