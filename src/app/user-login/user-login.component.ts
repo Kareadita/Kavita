@@ -31,10 +31,4 @@ export class UserLoginComponent implements OnInit {
     });
   }
 
-  cancel() {
-    this.loginForm.reset();
-    // Goes back to previous router state (using back in history)
-    //this.router.p
-  }
-
 }

@@ -4,6 +4,14 @@
     <ng-container *ngIf="firstTimeFlow">
         <!-- NOTE: We don't need a first time user flow. We just need a simple component to register a new admin. Once registered, we can put them on admin/ route -->
         <p>Please create an admin account for yourself to start your reading journey.</p>
+        <div class="text-warning">
+            <p>Error:</p>
+            <ul>
+                <!-- <li *ngFor="let error of errors">
+                    {{error}}
+                </li> -->
+            </ul>
+        </div>
         <form [formGroup]="registerForm" (ngSubmit)="register()">
             <div class="form-group">
                 <label>Username</label>
