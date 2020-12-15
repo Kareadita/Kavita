@@ -10,7 +10,7 @@ import { AccountService } from '../_services/account.service';
 })
 export class UserLoginComponent implements OnInit {
 
-  model: any = {};
+  model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required])
@@ -22,12 +22,19 @@ export class UserLoginComponent implements OnInit {
   }
 
   login() {
+    this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
     this.accountService.login(this.model).subscribe(user => {
-      console.log('success', user);
       if (user) {
+        this.loginForm.reset();
         this.router.navigateByUrl('/libraries');
       }
     });
+  }
+
+  cancel() {
+    this.loginForm.reset();
+    // Goes back to previous router state (using back in history)
+    //this.router.p
   }
 
 }

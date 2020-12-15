@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { MemberService } from '../member.service';
@@ -20,7 +21,7 @@ export class HomeComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(public accountService: AccountService, private memberService: MemberService) {
+  constructor(public accountService: AccountService, private memberService: MemberService, private router: Router) {
   }
 
   ngOnInit(): void {
@@ -37,7 +38,9 @@ export class HomeComponent implements OnInit {
 
     console.log('Registering: ', this.model);
     this.accountService.register(this.model).subscribe(resp => {
-      console.log('success', resp);
+      this.router.navigateByUrl('/libraries');
+    }, err => {
+      console.log('validation errors from interceptor', err);
     });
   }
 
