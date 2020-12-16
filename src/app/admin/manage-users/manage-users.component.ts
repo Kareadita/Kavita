@@ -1,8 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { take } from 'rxjs/operators';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directory-picker/directory-picker.component';
 import { MemberService } from 'src/app/member.service';
 import { Member } from 'src/app/_models/member';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -12,17 +15,38 @@ import { Member } from 'src/app/_models/member';
 export class ManageUsersComponent implements OnInit {
 
   members: Member[] = [];
-  closeResult = ''; // Debug code
-  @ViewChild('content') content: any;
+  loggedInUsername = '';
 
-  constructor(private memberService: MemberService) { }
+  // Create User functionality
+  createMemberToggle = false;
+
+  constructor(private memberService: MemberService, public accountService: AccountService) {
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
+      this.loggedInUsername = user.username;
+    });
+  }
 
   ngOnInit(): void {
     console.log('User Component');
+    this.loadMembers();
+  }
+
+  loadMembers() {
     this.memberService.getMembers().subscribe(members => {
       this.members = members;
     });
   }
 
-  
+  canEditMember(member: Member): boolean {
+    return this.loggedInUsername !== member.username;
+  }
+
+  createMember() {
+    this.createMemberToggle = true;
+  }
+
+  onMemberCreated(success: boolean) {
+    this.createMemberToggle = false;
+    this.loadMembers();
+  }
 }

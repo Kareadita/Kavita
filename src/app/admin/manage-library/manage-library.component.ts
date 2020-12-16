@@ -3,6 +3,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directory-picker/directory-picker.component';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
+import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
   selector: 'app-manage-library',
@@ -21,6 +22,10 @@ export class ManageLibraryComponent implements OnInit {
       this.libraries = libraries;
     });
 
+  }
+
+  addLibrary() {
+    const modalRef = this.modalService.open(LibraryEditorModalComponent);
   }
 
   addFolder(library: string) {

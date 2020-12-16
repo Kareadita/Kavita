@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs/operators';
+import { MemberService } from '../member.service';
+import { Library } from '../_models/library';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
+import { LibraryService } from '../_services/library.service';
 
 @Component({
   selector: 'app-library',
@@ -11,12 +14,16 @@ import { AccountService } from '../_services/account.service';
 export class LibraryComponent implements OnInit {
 
   user: User | undefined;
+  libraries: Library[] = [];
 
-  constructor(public accountService: AccountService) { }
+  constructor(public accountService: AccountService, private memberService: MemberService, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
+      // this.libraryService.getLibrariesForUser(this.user.username).subscribe(libraries => {
+      //   this.libraries = libraries;
+      // });
     });
   }
 

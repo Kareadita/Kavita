@@ -3,18 +3,22 @@
 <div class="container">
     <div class="row mb-2">
         <div class="col-8"><h3>Members</h3></div>
-        <div class="col-4"><button class="btn btn-primary pull-right">New User</button></div>
+        <div class="col-4"><button class="btn btn-primary pull-right" (click)="createMember()">New Member</button></div>
     </div>
-    <ul class="list-group">
+    <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
         <li *ngFor="let member of members" class="list-group-item">
+            <!-- We can move this into a view-member component -->
             <div>
-                <div>Name: {{member.username | titlecase}}</div>
-                <div>Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
+                <div>Name: {{member.username | titlecase}} <span *ngIf="member.isAdmin">(Admin)</span></div>
+                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
                 <div>Last Active: {{member.lastActive | date}}</div>
+
             </div>
 
-            <button class="btn btn-primary pull-right">Edit</button>
-
+            <button class="btn btn-primary pull-right" [disabled]="canEditMember(member)">Edit</button>
         </li>
     </ul>
+    <ng-template #createUser>
+        <app-register-member (created)="onMemberCreated($event)"></app-register-member>
+    </ng-template>
 </div>

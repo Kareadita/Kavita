@@ -15,6 +15,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { LibraryComponent } from './library/library.component';
 import { DirectoryPickerComponent } from './directory-picker/directory-picker.component';
+import { SharedModule } from './shared/shared.module';
 
 
 
@@ -25,7 +26,7 @@ import { DirectoryPickerComponent } from './directory-picker/directory-picker.co
     NavHeaderComponent,
     UserLoginComponent,
     LibraryComponent,
-    DirectoryPickerComponent
+    DirectoryPickerComponent,
   ],
   imports: [
     HttpClientModule,
@@ -34,6 +35,7 @@ import { DirectoryPickerComponent } from './directory-picker/directory-picker.co
     BrowserAnimationsModule,
     ReactiveFormsModule,
     NgbModule,
+    SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),

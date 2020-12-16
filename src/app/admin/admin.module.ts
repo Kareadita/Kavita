@@ -5,15 +5,18 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
+import { LibraryEditorModalComponent } from './_modals/library-editor-modal/library-editor-modal.component';
+import { SharedModule } from '../shared/shared.module';
 
 
 
 @NgModule({
-  declarations: [ManageUsersComponent, DashboardComponent, ManageLibraryComponent],
+  declarations: [ManageUsersComponent, DashboardComponent, ManageLibraryComponent, LibraryEditorModalComponent],
   imports: [
     CommonModule,
     AdminRoutingModule,
-    NgbNavModule
+    NgbNavModule,
+    SharedModule
   ],
   providers: []
 })

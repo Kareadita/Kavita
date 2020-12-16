@@ -40,15 +40,15 @@ export class AccountService {
     this.currentUserSource.next(undefined);
   }
 
-  register(model: {username: string, password: string, isAdmin?: boolean}) {
+  register(model: {username: string, password: string, isAdmin?: boolean}, login = false) {
     if (model?.isAdmin) {
       model.isAdmin = false;
     }
     
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
-        if (user) {
-          this.setCurrentUser(user);
+        if (user && login) {
+          //this.setCurrentUser(user); // Register should not act as if a user has logged in
         }
 
         return user;

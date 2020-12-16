@@ -5,10 +5,7 @@
         <!-- <li class="nav-item">
           <input type="text" placeholder="Search bar">
         </li> -->
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/errors" routerLinkActive="active">Errors</a>
-        </li>
-        
+
       </ul>
 
       <!-- TODO: Put SignalR notification button dropdown here. -->
@@ -16,8 +13,8 @@
       <div ngbDropdown class=" nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-primary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
-          <button ngbDropdownItem routerLink="/admin/users">Server Settings</button>
-          <button ngbDropdownItem *ngIf="user.isAdmin"(click)="logout()">Logout</button>
+          <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.isAdmin">Server Settings</button>
+          <button ngbDropdownItem (click)="logout()">Logout</button>
         </div>
       </div>
   

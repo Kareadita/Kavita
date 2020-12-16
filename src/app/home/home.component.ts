@@ -38,19 +38,13 @@ export class HomeComponent implements OnInit {
         });
       }
     });
-
   }
 
-  register() {
-    this.model.isAdmin = this.firstTimeFlow;
 
-    console.log('Registering: ', this.model);
-    this.accountService.register(this.model).subscribe(resp => {
+  onAdminCreated(success: boolean) {
+    if (success) {
       this.router.navigateByUrl('/library');
-    }, err => {
-      console.log('validation errors from interceptor', err);
-      //this.errors = err;
-    });
+    }
   }
 
 }
