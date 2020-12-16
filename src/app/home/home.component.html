@@ -30,9 +30,6 @@
     <ng-container *ngIf="!firstTimeFlow && (this.accountService.currentUser$ | async) == null">
         <app-user-login></app-user-login>
     </ng-container>
-
-    <app-directory-picker></app-directory-picker>
-
 </div>
 
 

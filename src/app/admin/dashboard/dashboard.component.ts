@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,7 +12,11 @@ export class DashboardComponent implements OnInit {
   counter = this.tabs.length + 1;
   active = this.tabs[0];
 
-  constructor() { }
+  constructor(private router: Router) {
+    // TODO: Depending on active route, set the tab else default to first tab.
+    console.log('current route: ', this.router.url);
+    //this.router.url === '/login'
+  }
 
   ngOnInit(): void {
   }

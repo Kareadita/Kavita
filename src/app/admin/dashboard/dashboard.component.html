@@ -6,10 +6,10 @@
       <ng-template ngbNavContent>
 
         <ng-container *ngIf="tab === 'users'">
-            <app-users></app-users>
+            <app-manage-users></app-manage-users>
         </ng-container>
         <ng-container *ngIf="tab === 'libraries'">
-            Library management here
+            <app-manage-library></app-manage-library>
         </ng-container>
       </ng-template>
     </li>
