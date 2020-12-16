@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { Library } from '../_models/library';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,10 @@ export class LibraryService {
     }
 
     return this.httpClient.get<string[]>(this.baseUrl + 'library/list' + query);
+  }
+
+  getLibraries() {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library');
   }
 
 }

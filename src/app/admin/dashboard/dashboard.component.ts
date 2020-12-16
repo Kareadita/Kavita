@@ -15,7 +15,6 @@ export class DashboardComponent implements OnInit {
   constructor(private router: Router) {
     // TODO: Depending on active route, set the tab else default to first tab.
     console.log('current route: ', this.router.url);
-    //this.router.url === '/login'
   }
 
   ngOnInit(): void {

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directory-picker/directory-picker.component';
+import { Library } from 'src/app/_models/library';
+import { LibraryService } from 'src/app/_services/library.service';
 
 @Component({
   selector: 'app-manage-library',
@@ -9,9 +11,16 @@ import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directo
 })
 export class ManageLibraryComponent implements OnInit {
 
-  constructor(private modalService: NgbModal) { }
+  libraries: Library[] = [];
+
+  constructor(private modalService: NgbModal, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
+
+    this.libraryService.getLibraries().subscribe(libraries => {
+      this.libraries = libraries;
+    });
+
   }
 
   addFolder(library: string) {

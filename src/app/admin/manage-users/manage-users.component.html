@@ -1,10 +1,20 @@
 
 
-<h2>Members:</h2>
 <div class="container">
-    <ul>
-        <li *ngFor="let member of members">
-            {{member.username}}
+    <div class="row mb-2">
+        <div class="col-8"><h3>Members</h3></div>
+        <div class="col-4"><button class="btn btn-primary pull-right">New User</button></div>
+    </div>
+    <ul class="list-group">
+        <li *ngFor="let member of members" class="list-group-item">
+            <div>
+                <div>Name: {{member.username | titlecase}}</div>
+                <div>Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
+                <div>Last Active: {{member.lastActive | date}}</div>
+            </div>
+
+            <button class="btn btn-primary pull-right">Edit</button>
+
         </li>
     </ul>
 </div>
