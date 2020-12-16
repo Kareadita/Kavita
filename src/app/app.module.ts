@@ -14,6 +14,9 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { LibraryComponent } from './library/library.component';
+import { DirectoryPickerComponent } from './directory-picker/directory-picker.component';
+
+
 
 @NgModule({
   declarations: [
@@ -21,7 +24,8 @@ import { LibraryComponent } from './library/library.component';
     HomeComponent,
     NavHeaderComponent,
     UserLoginComponent,
-    LibraryComponent
+    LibraryComponent,
+    DirectoryPickerComponent
   ],
   imports: [
     HttpClientModule,
@@ -38,6 +42,7 @@ import { LibraryComponent } from './library/library.component';
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
   ],
+  entryComponents: [DirectoryPickerComponent],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

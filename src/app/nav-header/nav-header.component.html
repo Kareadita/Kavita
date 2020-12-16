@@ -13,11 +13,11 @@
 
       <!-- TODO: Put SignalR notification button dropdown here. -->
 
-      <div class=" nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-        <a dropdownToggle class="dropdown-toggle text-light ml-2">{{user.username | titlecase}}</a>
-        <div class="dropdown-menu mt-3" *dropdownMenu>
-          <a *ngIf="user.isAdmin" class="dropdown-item" routerLink="/admin/users">Logout</a>
-          <a (click)="logout()" class="dropdown-item">Logout</a>
+      <div ngbDropdown class=" nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+        <button class="btn btn-outline-primary" ngbDropdownToggle>{{user.username | titlecase}}</button>
+        <div ngbDropdownMenu >
+          <button ngbDropdownItem routerLink="/admin/users">Server Settings</button>
+          <button ngbDropdownItem *ngIf="user.isAdmin"(click)="logout()">Logout</button>
         </div>
       </div>
   
