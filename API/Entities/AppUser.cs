@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Interfaces;
 
@@ -14,6 +16,7 @@ namespace API.Entities
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime LastActive { get; set; }
         public bool IsAdmin { get; set; }
+        public ICollection<Library> Libraries { get; set; }
 
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
