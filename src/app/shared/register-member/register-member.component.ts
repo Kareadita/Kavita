@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { MemberService } from 'src/app/member.service';
+import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
 
@@ -23,7 +23,7 @@ export class RegisterMemberComponent implements OnInit {
 
   constructor(private accountService: AccountService, private memberService: MemberService) { 
     this.memberService.getMembers().subscribe(members => {
-      this.adminExists = members.filter(m => m.isAdmin).length > 0;
+      this.adminExists = members.filter((m: Member) => m.isAdmin).length > 0;
       if (!this.adminExists) {
         this.registerForm.get('isAdmin')?.setValue(true);
         this.model.isAdmin = true;

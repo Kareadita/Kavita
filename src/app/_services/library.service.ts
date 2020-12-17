@@ -25,4 +25,8 @@ export class LibraryService {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library');
   }
 
+  getLibrariesForMember(username: string) {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/' + username);
+  }
+
 }

@@ -44,13 +44,9 @@ export class AccountService {
     if (model?.isAdmin) {
       model.isAdmin = false;
     }
-    
+
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
-        if (user && login) {
-          //this.setCurrentUser(user); // Register should not act as if a user has logged in
-        }
-
         return user;
       })
     );
