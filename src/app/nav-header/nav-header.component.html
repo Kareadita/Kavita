@@ -1,0 +1,25 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container">
+      <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home"></i> Kavita</a>
+      <ul class="navbar-nav mr-auto">
+        <!-- <li class="nav-item">
+          <input type="text" placeholder="Search bar">
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/errors" routerLinkActive="active">Errors</a>
+        </li>
+        
+      </ul>
+
+      <!-- TODO: Put SignalR notification button dropdown here. -->
+
+      <div class="dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+        <a dropdownToggle class="dropdown-toggle text-light ml-2">{{user.username | titlecase}}</a>
+        <div class="dropdown-menu mt-3" *dropdownMenu>
+            <a (click)="logout()" class="dropdown-item">Logout</a>
+        </div>
+      </div>
+  
+    </div>
+  </nav>
+  
