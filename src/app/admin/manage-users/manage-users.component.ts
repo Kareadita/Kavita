@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
-import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directory-picker/directory-picker.component';
 import { MemberService } from 'src/app/member.service';
 import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
+import { LibraryAccessModalComponent } from '../_modals/library-access-modal/library-access-modal.component';
 
 @Component({
   selector: 'app-manage-users',
@@ -20,14 +20,13 @@ export class ManageUsersComponent implements OnInit {
   // Create User functionality
   createMemberToggle = false;
 
-  constructor(private memberService: MemberService, public accountService: AccountService) {
+  constructor(private memberService: MemberService, public accountService: AccountService, private modalService: NgbModal) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
   }
 
   ngOnInit(): void {
-    console.log('User Component');
     this.loadMembers();
   }
 
@@ -48,5 +47,13 @@ export class ManageUsersComponent implements OnInit {
   onMemberCreated(success: boolean) {
     this.createMemberToggle = false;
     this.loadMembers();
+  }
+
+  openEditLibraryAccess(member: Member) {
+    const modalRef = this.modalService.open(LibraryAccessModalComponent);
+    modalRef.componentInstance.member = member;
+    modalRef.closed.subscribe((closeResult: any) => {
+      console.log('Closed Result', closeResult);
+    });
   }
 }

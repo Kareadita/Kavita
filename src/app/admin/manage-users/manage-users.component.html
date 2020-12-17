@@ -9,13 +9,19 @@
         <li *ngFor="let member of members" class="list-group-item">
             <!-- We can move this into a view-member component -->
             <div>
-                <div>Name: {{member.username | titlecase}} <span *ngIf="member.isAdmin">(Admin)</span></div>
-                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
+                <h4>
+                    {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
+                    <div class="pull-right" *ngIf="canEditMember(member)">
+                        <button class="btn btn-danger">Delete</button>
+                        <button class="btn btn-primary" (click)="openEditLibraryAccess(member)">Edit</button>
+                    </div>
+                </h4>
                 <div>Last Active: {{member.lastActive | date}}</div>
+                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
 
             </div>
 
-            <button class="btn btn-primary pull-right" [disabled]="canEditMember(member)">Edit</button>
+            
         </li>
     </ul>
     <ng-template #createUser>

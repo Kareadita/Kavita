@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject } from 'rxjs';
-import { LibraryService } from '../_services/library.service';
+import { LibraryService } from '../../../_services/library.service';
 
 class Stack {
   items: any[];

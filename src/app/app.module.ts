@@ -14,7 +14,6 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { LibraryComponent } from './library/library.component';
-import { DirectoryPickerComponent } from './directory-picker/directory-picker.component';
 import { SharedModule } from './shared/shared.module';
 
 
@@ -26,7 +25,6 @@ import { SharedModule } from './shared/shared.module';
     NavHeaderComponent,
     UserLoginComponent,
     LibraryComponent,
-    DirectoryPickerComponent,
   ],
   imports: [
     HttpClientModule,
@@ -44,7 +42,7 @@ import { SharedModule } from './shared/shared.module';
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
   ],
-  entryComponents: [DirectoryPickerComponent],
+  entryComponents: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

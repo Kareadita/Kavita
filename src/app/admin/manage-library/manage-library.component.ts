@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/directory-picker/directory-picker.component';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
+import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
@@ -13,6 +13,7 @@ import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/lib
 export class ManageLibraryComponent implements OnInit {
 
   libraries: Library[] = [];
+  createLibraryToggle = false;
 
   constructor(private modalService: NgbModal, private libraryService: LibraryService) { }
 
@@ -29,9 +30,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   addFolder(library: string) {
-
     const modalRef = this.modalService.open(DirectoryPickerComponent);
-    //modalRef.componentInstance.name = 'World';
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       console.log('Closed Result', closeResult);
       if (closeResult.success) {
