@@ -9,8 +9,6 @@ namespace API.Entities
         public string CoverImage { get; set; }
         public LibraryType Type { get; set; }
         public ICollection<FolderPath> Folders { get; set; }
-        
-        public AppUser AppUser { get; set; }
-        public int AppUserId { get; set; }
+        public ICollection<AppUser> AppUsers { get; set; }
     }
 }
