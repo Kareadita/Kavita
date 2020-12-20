@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
@@ -40,6 +41,13 @@ namespace API.Data
         public async Task<bool> LibraryExists(string libraryName)
         {
             return await _context.Library.AnyAsync(x => x.Name == libraryName);
+        }
+
+        public async Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user)
+        {
+            return await _context.Library.Where(library => library.AppUsers.Contains(user))
+                .Include(l => l.Folders)
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
     }
 }

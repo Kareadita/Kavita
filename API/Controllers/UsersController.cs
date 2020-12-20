@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -9,7 +8,6 @@ using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -36,6 +34,8 @@ namespace API.Controllers
         [HttpPost("add-library")]
         public async Task<ActionResult> AddLibrary(CreateLibraryDto createLibraryDto)
         {
+            // NOTE: I think we should move this into library controller because it gets added to all admins
+            
             //_logger.Log(LogLevel.Debug, "Creating a new " + createLibraryDto.Type + " library");
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
@@ -50,16 +50,20 @@ namespace API.Controllers
             // TODO: We probably need to clean the folders before we insert
             var library = new Library
             {
-                Name = createLibraryDto.Name,
+                Name = createLibraryDto.Name, // TODO: Ensure code handles Library name always being lowercase
                 Type = createLibraryDto.Type,
-                //Folders = createLibraryDto.Folders
                 AppUsers = new List<AppUser>() { user }
             };
+
+            library.Folders = createLibraryDto.Folders.Select(x => new FolderPath
+            {
+                Path = x,
+                Library = library
+            }).ToList();
 
             user.Libraries ??= new List<Library>(); // If user is null, then set it
             
             user.Libraries.Add(library);
-            //_userRepository.Update(user);
 
             if (await _userRepository.SaveAllAsync())
             {
@@ -68,5 +72,7 @@ namespace API.Controllers
             
             return BadRequest("Not implemented");
         }
+
+        
     }
 }

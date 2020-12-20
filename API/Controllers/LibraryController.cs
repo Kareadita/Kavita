@@ -23,15 +23,18 @@ namespace API.Controllers
         private readonly ILibraryRepository _libraryRepository;
         private readonly ILogger<LibraryController> _logger;
         private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
         public LibraryController(DataContext context, IDirectoryService directoryService, 
-            ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository)
+            ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository,
+            IMapper mapper)
         {
             _context = context;
             _directoryService = directoryService;
             _libraryRepository = libraryRepository;
             _logger = logger;
             _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -59,6 +62,43 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
         {
             return Ok(await _libraryRepository.GetLibrariesAsync());
+        }
+        
+        
+        // Do I need this method? 
+        // [HttpGet("library/{username}")]
+        // public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
+        // {
+        //     _logger.LogDebug("Method hit");
+        //     var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+        //
+        //     if (user == null) return BadRequest("Could not validate user");
+        //
+        //     return Ok(await _libraryRepository.GetLibrariesForUserAsync(user));
+        // }
+        
+        [HttpPut("update-for")]
+        public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
+        {
+            // TODO: Only admins can do this
+            var user = await _userRepository.GetUserByUsernameAsync(updateLibraryDto.Username);
+
+            if (user == null) return BadRequest("Could not validate user");
+            if (!user.IsAdmin) return Unauthorized("Only admins are permitted");
+
+            user.Libraries = new List<Library>();
+
+            foreach (var selectedLibrary in updateLibraryDto.SelectedLibraries)
+            {
+                user.Libraries.Add(_mapper.Map<Library>(selectedLibrary));
+            }
+            
+            if (await _userRepository.SaveAllAsync())
+            {
+                return Ok(user);
+            }
+
+            return BadRequest("Not Implemented");
         }
 
         

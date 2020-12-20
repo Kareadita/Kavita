@@ -16,5 +16,7 @@ namespace API.Interfaces
         /// <param name="libraryName"></param>
         /// <returns></returns>
         Task<bool> LibraryExists(string libraryName);
+
+        Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user);
     }
 }
