@@ -62,5 +62,11 @@ namespace API.Data
                 .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
+
+        public async Task<bool> AdminExists()
+        {
+            return await _context.Users.AnyAsync(x => x.IsAdmin);
+            
+        }
     }
 }
