@@ -12,13 +12,12 @@
                 <h4>
                     {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
                     <div class="pull-right" *ngIf="canEditMember(member)">
-                        <button class="btn btn-danger">Delete</button>
-                        <button class="btn btn-primary" (click)="openEditLibraryAccess(member)">Edit</button>
+                        <button class="btn btn-danger mr-2"><i class="fa fa-trash" title="Delete {{member.username | titlecase}}"></i></button>
+                        <button class="btn btn-primary" (click)="openEditLibraryAccess(member)"><i class="fa fa-pencil" title="Edit {{member.username | titlecase}}"></i></button>
                     </div>
                 </h4>
                 <div>Last Active: {{member.lastActive | date}}</div>
-                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div>
-
+                <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
             </div>
 
             

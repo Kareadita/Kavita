@@ -11,6 +11,7 @@ import { User } from '../_models/user';
 export class AccountService {
 
   baseUrl = environment.apiUrl;
+  userKey = 'kavita-user';
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User>(1);
@@ -31,12 +32,12 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUserSource.next(user);
   }
 
   logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
   }
 

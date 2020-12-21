@@ -13,13 +13,26 @@ import { LibraryService } from 'src/app/_services/library.service';
 export class LibraryAccessModalComponent implements OnInit {
 
   @Input() member: Member | undefined;
-  libraries: Library[] = [];
+  allLibraries: Library[] = [];
+  selectedLibraries: Array<{selected: boolean, data: Library}> = [];
 
   constructor(public modal: NgbActiveModal, private libraryService: LibraryService, private fb: FormBuilder) { }
 
   ngOnInit(): void {
-    this.libraryService.getLibrariesForMember(this.member?.username + '').subscribe(libs => {
-      this.libraries = libs;
+    this.libraryService.getLibraries().subscribe(libs => {
+      this.allLibraries = libs;
+      this.selectedLibraries = libs.map(item => {
+        return {selected: false, data: item};
+      });
+
+      if (this.member !== undefined) {
+        this.member.libraries.forEach(lib => {
+          const foundLibrary = this.selectedLibraries.filter(item => item.data.name === lib.name);
+          if (foundLibrary.length > 0) {
+            foundLibrary[0].selected = true;
+          }
+        });
+      }
     });
   }
 
@@ -28,11 +41,29 @@ export class LibraryAccessModalComponent implements OnInit {
   }
 
   save() {
+    if (this.member?.username === undefined) {
+      return;
+    }
 
+    this.libraryService.updateLibrariesForMember(this.member?.username, this.selectedLibraries.map(item => item.data)).subscribe(() => {
+      this.modal.close();
+    });
   }
 
   reset() {
+    this.selectedLibraries = this.allLibraries.map(item => {
+      return {selected: false, data: item};
+    });
 
+
+    if (this.member !== undefined) {
+      this.member.libraries.forEach(lib => {
+        const foundLibrary = this.selectedLibraries.filter(item => item.data.name === lib.name);
+        if (foundLibrary.length > 0) {
+          foundLibrary[0].selected = true;
+        }
+      });
+    }
   }
 
 }

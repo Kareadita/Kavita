@@ -56,4 +56,12 @@ export class ManageUsersComponent implements OnInit {
       console.log('Closed Result', closeResult);
     });
   }
+
+  formatLibraries(member: Member) {
+    if (member.libraries.length === 0) {
+      return 'None';
+    }
+
+    return member.libraries.map(item => item.name + ', ');
+  }
 }

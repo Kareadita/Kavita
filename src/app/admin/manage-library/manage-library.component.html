@@ -7,11 +7,17 @@
         <li *ngFor="let library of libraries" class="list-group-item">
             <!-- We can move this into a view-member component -->
             <div>
-                <div>{{library.name}}</div>
+                <h4>
+                    {{library.name | titlecase}}
+                    <div class="pull-right">
+                        <button class="btn btn-danger mr-2 btn-sm"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
+                        <button class="btn btn-primary btn-sm" ><i class="fa fa-pencil" title="Edit {{library.name | titlecase}}"></i></button>
+                    </div>
+                </h4>
+                <!-- <div>Last Active: {{member.lastActive | date}}</div>
+                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div> -->
 
             </div>
-
-            <!-- <button class="btn btn-primary pull-right" *ngIf="canEditMember(member)">Edit</button> -->
         </li>
     </ul>
     <ng-template #createLibrary>

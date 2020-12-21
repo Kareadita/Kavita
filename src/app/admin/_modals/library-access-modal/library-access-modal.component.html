@@ -7,16 +7,17 @@
 </div>
 <div class="modal-body">
     <div class="list-group">
-        <li class="list-group-item">
+        <li class="list-group-item" *ngFor="let library of selectedLibraries; let i = index">
             <div class="form-check">
-                <input id="library1" type="checkbox" aria-label="Library 1" class="form-check-input">
-                <label for="library1" class="form-check-label">Library 1</label>
+                <input id="library-{{i}}" type="checkbox" attr.aria-label="Library {{library.data.name}}" class="form-check-input" 
+                     [(ngModel)]="library.selected" name="library">
+                <label attr.for="library-{{i}}" class="form-check-label">{{library.data.name}}</label>
             </div>
         </li>
     </div>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="reset()">Cancel</button>
+    <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
     <button type="button" class="btn btn-primary" (click)="save()">Save</button>
 </div>

@@ -29,4 +29,9 @@ export class LibraryService {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library/' + username);
   }
 
+  updateLibrariesForMember(username: string, selectedLibraries: Library[]) {
+    return this.httpClient.post(this.baseUrl + '/library/update-for', {username, selectedLibraries});
+  }
+
+
 }

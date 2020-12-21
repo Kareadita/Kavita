@@ -5,5 +5,5 @@ export interface Member {
     lastActive: string; // datetime
     created: string; // datetime
     isAdmin: boolean;
-    libraries?: Library[];
+    libraries: Library[];
 }
