@@ -19,6 +19,8 @@ namespace API.Helpers
             
             CreateMap<AppUser, MemberDto>()
                 .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
+
+            CreateMap<RegisterDto, AppUser>();
         }
     }
 }
