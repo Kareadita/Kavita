@@ -1,9 +1,8 @@
 
 <div class="container">
     <ng-container *ngIf="firstTimeFlow">
-        <!-- NOTE: We don't need a first time user flow. We just need a simple component to register a new admin. Once registered, we can put them on admin/ route -->
         <p>Please create an admin account for yourself to start your reading journey.</p>
-        <app-register-member (created)="onAdminCreated($event)"></app-register-member>
+        <app-register-member (created)="onAdminCreated($event)" [firstTimeFlow]="firstTimeFlow"></app-register-member>
     </ng-container>
 
     <ng-container *ngIf="!firstTimeFlow && (this.accountService.currentUser$ | async) == null">

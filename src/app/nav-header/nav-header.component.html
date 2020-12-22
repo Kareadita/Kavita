@@ -13,7 +13,7 @@
       <div ngbDropdown class=" nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-primary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
-          <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.isAdmin">Server Settings</button>
+          <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>
           <button ngbDropdownItem (click)="logout()">Logout</button>
         </div>
       </div>

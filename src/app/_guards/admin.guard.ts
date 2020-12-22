@@ -16,7 +16,7 @@ export class AdminGuard implements CanActivate {
     // this automaticallys subs due to being router guard
     return this.accountService.currentUser$.pipe(
       map((user: User) => {
-        if (user && user.isAdmin) {
+        if (user && user.roles.includes('Admin')) {
           return true;
         }
 

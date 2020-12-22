@@ -1,7 +1,8 @@
-<div class="text-warning">
-    <!-- <p>Error:</p>
+<div class="text-danger" *ngIf="errors.length > 0">
+    <p>Errors:</p>
     <ul>
-    </ul> -->
+        <li *ngFor="let error of errors">{{error}}</li>
+    </ul>
 </div>
 <form [formGroup]="registerForm" (ngSubmit)="register()">
     <div class="form-group">

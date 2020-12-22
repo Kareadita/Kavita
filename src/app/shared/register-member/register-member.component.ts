@@ -1,7 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { MemberService } from 'src/app/_services/member.service';
-import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({
@@ -11,38 +9,31 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class RegisterMemberComponent implements OnInit {
 
+  @Input() firstTimeFlow = false;
   @Output() created = new EventEmitter<boolean>();
 
   adminExists = false;
-  model: any = {};
   registerForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required]),
       isAdmin: new FormControl(false, [])
   });
+  errors: string[] = [];
 
-  constructor(private accountService: AccountService, private memberService: MemberService) { 
-    this.memberService.getMembers().subscribe(members => {
-      this.adminExists = members.filter((m: Member) => m.isAdmin).length > 0;
-      if (!this.adminExists) {
-        this.registerForm.get('isAdmin')?.setValue(true);
-        this.model.isAdmin = true;
-      }
-    });
+  constructor(private accountService: AccountService) {
   }
 
   ngOnInit(): void {
+    if (this.firstTimeFlow) {
+      this.registerForm.get('isAdmin')?.setValue(true);
+    }
   }
 
   register() {
-    this.model.username = this.registerForm.get('username')?.value;
-    this.model.password = this.registerForm.get('password')?.value;
-    this.model.isAdmin = this.registerForm.get('isAdmin')?.value;
-
-    this.accountService.register(this.model).subscribe(resp => {
+    this.accountService.register(this.registerForm.value).subscribe(resp => {
       this.created.emit(true);
     }, err => {
-      console.log('validation errors from interceptor', err);
+      this.errors = err;
     });
   }
 

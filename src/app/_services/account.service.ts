@@ -12,9 +12,10 @@ export class AccountService {
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
+  currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
-  private currentUserSource = new ReplaySubject<User>(1);
+  private currentUserSource = new ReplaySubject<User>(1); // TODO: Move away from ReplaySubject. It's overly complex for what it provides
   currentUser$ = this.currentUserSource.asObservable(); // $ at end is because this is observable
 
   constructor(private httpClient: HttpClient) { 
@@ -32,13 +33,21 @@ export class AccountService {
   }
 
   setCurrentUser(user: User) {
+    if (user) {
+      user.roles = [];
+      const roles = this.getDecodedToken(user.token).role;
+      Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
+    }
+    
     localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUserSource.next(user);
+    this.currentUser = user;
   }
 
   logout() {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
+    this.currentUser = undefined;
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}, login = false) {
@@ -51,6 +60,10 @@ export class AccountService {
         return user;
       })
     );
+  }
+
+  getDecodedToken(token: string) {
+    return JSON.parse(atob(token.split('.')[1]));
   }
 
 
