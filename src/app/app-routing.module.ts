@@ -11,6 +11,7 @@ const routes: Routes = [
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
   {path: 'library', component: LibraryComponent},
+  {path: 'home', component: HomeComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];
 
