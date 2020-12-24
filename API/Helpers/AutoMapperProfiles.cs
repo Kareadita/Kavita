@@ -1,4 +1,6 @@
-﻿using API.DTOs;
+﻿using System;
+using System.Linq;
+using API.DTOs;
 using API.Entities;
 using AutoMapper;
 
@@ -8,7 +10,17 @@ namespace API.Helpers
     {
         public AutoMapperProfiles()
         {
-            CreateMap<AppUser, MemberDto>();
+            CreateMap<LibraryDto, Library>();
+            
+            CreateMap<Library, LibraryDto>()
+                .ForMember(dest => dest.Folders,
+                    opt => 
+                        opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()));
+            
+            CreateMap<AppUser, MemberDto>()
+                .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
+
+            CreateMap<RegisterDto, AppUser>();
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using API.Entities;
 
 namespace API.DTOs
 {
@@ -11,6 +14,7 @@ namespace API.DTOs
         public string Username { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastActive { get; set; }
-        public bool IsAdmin { get; set; }
+        public IEnumerable<LibraryDto> Libraries { get; set; }
+        public IEnumerable<string> Roles { get; set; }
     }
 }
