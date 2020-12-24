@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -50,7 +51,7 @@ namespace API.Controllers
             
 
             // TODO: Need a way to store Roles in enum and configure from there
-            var role = registerDto.IsAdmin ? "Admin" : "Pleb";
+            var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
             var roleResult = await _userManager.AddToRoleAsync(user, role);
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);

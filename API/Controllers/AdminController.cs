@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -25,20 +27,7 @@ namespace API.Controllers
             return users.Count > 0;
         }
 
-        [Authorize(Policy = "RequireAdminRole")]
-        [HttpDelete("delete-user")]
-        public async Task<ActionResult> DeleteUser(string username)
-        {
-            var user = await _userRepository.GetUserByUsernameAsync(username);
-            _userRepository.Delete(user);
-
-            if (await _userRepository.SaveAllAsync())
-            {
-                return Ok();
-            }
-            
-            return BadRequest("Could not delete the user.");
-        }
+        
         
         
     }
