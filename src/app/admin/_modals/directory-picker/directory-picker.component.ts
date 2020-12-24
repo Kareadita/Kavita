@@ -59,18 +59,23 @@ export class DirectoryPickerComponent implements OnInit {
   selectNode(folderName: string) {
     this.currentRoot = folderName;
     this.routeStack.push(folderName);
-    this.loadChildren(folderName);
+    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
+    this.loadChildren(fullPath);
   }
 
   goBack() {
     this.routeStack.pop();
     this.currentRoot = this.routeStack.peek();
-    this.loadChildren(this.currentRoot);
+    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
+    this.loadChildren(fullPath);
   }
 
   loadChildren(path: string) {
     this.libraryService.listDirectories(path).subscribe(folders => {
       this.folders = folders;
+    }, err => {
+      // If there was an error, pop off last directory added to stack
+      this.routeStack.pop();
     });
   }
 
