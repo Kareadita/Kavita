@@ -68,15 +68,15 @@ namespace API.Data
                     Username = u.UserName,
                     Created = u.Created,
                     LastActive = u.LastActive,
-                    Roles = u.UserRoles.Select(r => r.Role.Name).ToList()
+                    Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                    Libraries =  u.Libraries.Select(l => new LibraryDto
+                    {
+                        Name = l.Name,
+                        CoverImage = l.CoverImage,
+                        Type = l.Type,
+                        Folders = l.Folders.Select(x => x.Path).ToList()
+                    }).ToList()
                 })
-                .ToListAsync();
-            
-            //return await _context.Users.Include(x => x.Libraries)
-                
-            return await _context.Users.Include(x => x.Libraries)
-                .Include(x => x.Libraries)
-                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
