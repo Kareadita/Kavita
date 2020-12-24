@@ -22,7 +22,14 @@ export class ErrorInterceptor implements HttpInterceptor {
           console.error('error:', error);
           switch (error.status) {
             case 400:
-              if (error.error.errors) {
+              // IF type of array, this comes from signin handler
+              if (Array.isArray(error.error)) {
+                const modalStateErrors: any[] = [];
+                error.error.forEach((issue: {code: string, description: string}) => {
+                  modalStateErrors.push(issue.description);
+                });
+                throw modalStateErrors.flat();
+              } else if (error.error.errors) {
                 // Validation error
                 const modalStateErrors = [];
                 for (const key in error.error.errors) {
@@ -37,7 +44,7 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
             case 401:
               // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
-              this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status); 
+              this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
               break;
             case 404:
               this.router.navigateByUrl('/not-found');

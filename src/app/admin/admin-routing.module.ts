@@ -1,10 +1,19 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { UsersComponent } from './users/users.component';
+import { AdminGuard } from '../_guards/admin.guard';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { ManageUsersComponent } from './manage-users/manage-users.component';
 
 const routes: Routes = [
-  {path: '**', component: UsersComponent, pathMatch: 'full'},
-  {path: '/users', component: UsersComponent}
+  {path: '**', component: DashboardComponent, pathMatch: 'full'},
+  {
+    runGuardsAndResolvers: 'always',
+    canActivate: [AdminGuard],
+    children: [
+      {path: '/dashboard', component: DashboardComponent},
+      {path: '/users', component: ManageUsersComponent}
+    ]
+  }
 ];
 
 @NgModule({

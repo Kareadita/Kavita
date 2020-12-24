@@ -1,0 +1,30 @@
+
+
+<div class="container">
+    <div class="row mb-2">
+        <div class="col-8"><h3>Members</h3></div>
+        <div class="col-4"><button class="btn btn-primary pull-right" (click)="createMember()">New Member</button></div>
+    </div>
+    <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
+        <li *ngFor="let member of members" class="list-group-item">
+            <!-- We can move this into a view-member component -->
+            <div>
+                <h4>
+                    {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
+                    <div class="pull-right" *ngIf="canEditMember(member)">
+                        <button class="btn btn-danger mr-2" (click)="deleteUser(member)"><i class="fa fa-trash" title="Delete {{member.username | titlecase}}"></i></button>
+                        <!-- <button class="btn btn-primary" (click)="openChangeRole(member)"><i class="fa fa-pencil"></i>{{member.roles.includes('Admin') ? 'Demote' : 'Promote'}}</button> -->
+                        <button class="btn btn-primary" (click)="openEditLibraryAccess(member)"><i class="fa fa-pencil" title="Edit {{member.username | titlecase}}"></i></button>
+                    </div>
+                </h4>
+                <div>Last Active: {{member.lastActive | date}}</div>
+                <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
+            </div>
+
+            
+        </li>
+    </ul>
+    <ng-template #createUser>
+        <app-register-member (created)="onMemberCreated($event)"></app-register-member>
+    </ng-template>
+</div>

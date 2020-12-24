@@ -13,13 +13,18 @@ import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { LibraryComponent } from './library/library.component';
+import { SharedModule } from './shared/shared.module';
+
+
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     NavHeaderComponent,
-    UserLoginComponent
+    UserLoginComponent,
+    LibraryComponent,
   ],
   imports: [
     HttpClientModule,
@@ -28,6 +33,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
     BrowserAnimationsModule,
     ReactiveFormsModule,
     NgbModule,
+    SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),
@@ -36,6 +42,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
   ],
+  entryComponents: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

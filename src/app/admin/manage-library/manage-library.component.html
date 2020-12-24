@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row mb-2">
+        <div class="col-8"><h3>Libraries</h3></div>
+        <div class="col-4"><button class="btn btn-primary pull-right" (click)="addLibrary()">New Library</button></div>
+    </div>
+    <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
+        <li *ngFor="let library of libraries" class="list-group-item">
+            <!-- We can move this into a view-member component -->
+            <div>
+                <h4>
+                    {{library.name | titlecase}}
+                    <div class="pull-right">
+                        <button class="btn btn-danger mr-2 btn-sm"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
+                        <button class="btn btn-primary btn-sm" ><i class="fa fa-pencil" title="Edit {{library.name | titlecase}}"></i></button>
+                    </div>
+                </h4>
+                <!-- <div>Last Active: {{member.lastActive | date}}</div>
+                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div> -->
+
+            </div>
+        </li>
+    </ul>
+    <ng-template #createLibrary>
+        <app-library-editor-modal></app-library-editor-modal>
+    </ng-template>
+</div>
+
+<button class="btn btn-primary" (click)="addFolder('')">Add Folder</button>

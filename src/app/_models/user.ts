@@ -1,6 +1,6 @@
+// This interface is only used for login and storing/retreiving JWT from local storage
 export interface User {
     username: string;
     token: string;
-    isAdmin: boolean;
-    photoUrl?: string;
+    roles: string[];
 }

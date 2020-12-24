@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { MemberService } from '../member.service';
-import { User } from '../_models/user';
+import { MemberService } from '../_services/member.service';
 import { AccountService } from '../_services/account.service';
 
 @Component({
@@ -26,22 +24,25 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.memberService.getMembers().subscribe(members => {
-      this.firstTimeFlow = members.filter(m => m.isAdmin).length === 0;
-      console.log('First time user flow: ', this.firstTimeFlow);
+    this.memberService.adminExists().subscribe(adminExists => {
+      this.firstTimeFlow = !adminExists;
+      if (!this.firstTimeFlow) {
+        this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+          if (user) {
+            // User is logged in, redirect to libraries
+            this.router.navigateByUrl('/library');
+          }
+        });
+      }
     });
-
   }
 
-  register() {
-    this.model.isAdmin = this.firstTimeFlow;
 
-    console.log('Registering: ', this.model);
-    this.accountService.register(this.model).subscribe(resp => {
-      this.router.navigateByUrl('/libraries');
-    }, err => {
-      console.log('validation errors from interceptor', err);
-    });
+  onAdminCreated(success: boolean) {
+    if (success) {
+      this.router.navigateByUrl('/home');
+      this.firstTimeFlow = false;
+    }
   }
 
 }
