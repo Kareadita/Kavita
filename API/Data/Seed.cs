@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 
@@ -11,8 +12,8 @@ namespace API.Data
         {
             var roles = new List<AppRole>
             {
-                new AppRole {Name = "Admin"},
-                new AppRole {Name = "Pleb"}
+                new AppRole {Name = PolicyConstants.AdminRole},
+                new AppRole {Name = PolicyConstants.PlebRole}
             };
 
             foreach (var role in roles)
