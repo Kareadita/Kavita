@@ -53,7 +53,7 @@ namespace API.Controllers
                 return Ok(Directory.GetLogicalDrives());
             }
 
-            if (!Directory.Exists(@path)) return BadRequest("This is not a valid path");
+            if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
 
             return Ok(_directoryService.ListDirectory(path));
         }
