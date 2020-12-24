@@ -15,5 +15,6 @@ namespace API.DTOs
         public DateTime Created { get; set; }
         public DateTime LastActive { get; set; }
         public IEnumerable<LibraryDto> Libraries { get; set; }
+        public IEnumerable<string> Roles { get; set; }
     }
 }

@@ -77,14 +77,13 @@ namespace API.Controllers
         //     return Ok(await _libraryRepository.GetLibrariesForUserAsync(user));
         // }
         
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("update-for")]
         public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
         {
-            // TODO: Only admins can do this
             var user = await _userRepository.GetUserByUsernameAsync(updateLibraryDto.Username);
 
             if (user == null) return BadRequest("Could not validate user");
-            if (!user.IsAdmin) return Unauthorized("Only admins are permitted");
 
             user.Libraries = new List<Library>();
 
