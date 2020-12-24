@@ -6,6 +6,7 @@ import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { LibraryAccessModalComponent } from '../_modals/library-access-modal/library-access-modal.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-manage-users',
@@ -20,7 +21,10 @@ export class ManageUsersComponent implements OnInit {
   // Create User functionality
   createMemberToggle = false;
 
-  constructor(private memberService: MemberService, public accountService: AccountService, private modalService: NgbModal) {
+  constructor(private memberService: MemberService,
+              private accountService: AccountService,
+              private modalService: NgbModal,
+              private toastr: ToastrService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
@@ -32,7 +36,7 @@ export class ManageUsersComponent implements OnInit {
 
   loadMembers() {
     this.memberService.getMembers().subscribe(members => {
-      this.members = members;
+      this.members = members.filter(member => member.username !== this.loggedInUsername);
     });
   }
 
@@ -55,6 +59,19 @@ export class ManageUsersComponent implements OnInit {
     modalRef.closed.subscribe((closeResult: any) => {
       console.log('Closed Result', closeResult);
     });
+  }
+
+  openChangeRole(member: Member) {
+
+  }
+
+  deleteUser(member: Member) {
+    if (confirm('Are you sure you want to delete this user?')) {
+      this.memberService.deleteMember(member.username).subscribe(() => {
+        this.loadMembers();
+        this.toastr.success(member.username + ' has been deleted.');
+      });
+    }
   }
 
   formatLibraries(member: Member) {

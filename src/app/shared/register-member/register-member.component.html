@@ -15,7 +15,7 @@
         <input id="password" class="form-control" formControlName="password" type="password">
     </div>
 
-    <div class="form-check" *ngIf="adminExists">
+    <div class="form-check" *ngIf="!firstTimeFlow">
         <input id="admin" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="isAdmin">
         <label for="admin" class="form-check-label">Admin</label>
     </div>

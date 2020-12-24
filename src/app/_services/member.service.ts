@@ -24,8 +24,8 @@ export class MemberService {
     // TODO: Implement update password (use JWT to assume role)
   }
 
-  deleteMember(member: string) {
-    // TODO: Implement delete member (admin only)
+  deleteMember(username: string) {
+    return this.httpClient.delete(this.baseUrl + 'admin/delete-user?username=' + username);
   }
 
 }
