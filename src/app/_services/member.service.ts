@@ -20,12 +20,8 @@ export class MemberService {
     return this.httpClient.get<boolean>(this.baseUrl + 'admin/exists');
   }
 
-  updatePassword(newPassword: string) {
-    // TODO: Implement update password (use JWT to assume role)
-  }
-
   deleteMember(username: string) {
-    return this.httpClient.delete(this.baseUrl + 'admin/delete-user?username=' + username);
+    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + username);
   }
 
 }
