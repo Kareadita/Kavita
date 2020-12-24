@@ -42,22 +42,20 @@ namespace API.Controllers
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("list")]
         public ActionResult<IEnumerable<string>> GetDirectories(string path)
         {
-            // TODO: We need some sort of validation other than our auth layer
-            _logger.Log(LogLevel.Debug, "Listing Directories for " + path);
-
             if (string.IsNullOrEmpty(path))
             {
                 return Ok(Directory.GetLogicalDrives());
             }
 
-            if (!Directory.Exists(@path)) return BadRequest("This is not a valid path");
+            if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
 
             return Ok(_directoryService.ListDirectory(path));
         }
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
         {
