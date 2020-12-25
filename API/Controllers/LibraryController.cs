@@ -42,22 +42,20 @@ namespace API.Controllers
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("list")]
         public ActionResult<IEnumerable<string>> GetDirectories(string path)
         {
-            // TODO: We need some sort of validation other than our auth layer
-            _logger.Log(LogLevel.Debug, "Listing Directories for " + path);
-
             if (string.IsNullOrEmpty(path))
             {
                 return Ok(Directory.GetLogicalDrives());
             }
 
-            if (!Directory.Exists(@path)) return BadRequest("This is not a valid path");
+            if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
 
             return Ok(_directoryService.ListDirectory(path));
         }
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
         {
@@ -77,14 +75,13 @@ namespace API.Controllers
         //     return Ok(await _libraryRepository.GetLibrariesForUserAsync(user));
         // }
         
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("update-for")]
         public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
         {
-            // TODO: Only admins can do this
             var user = await _userRepository.GetUserByUsernameAsync(updateLibraryDto.Username);
 
             if (user == null) return BadRequest("Could not validate user");
-            if (!user.IsAdmin) return Unauthorized("Only admins are permitted");
 
             user.Libraries = new List<Library>();
 

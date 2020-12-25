@@ -6,6 +6,7 @@ using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -14,16 +15,23 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager;
 
-        public UserRepository(DataContext context, IMapper mapper)
+        public UserRepository(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
         {
             _context = context;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public void Update(AppUser user)
         {
             _context.Entry(user).State = EntityState.Modified;
+        }
+
+        public void Delete(AppUser user)
+        {
+            _context.Users.Remove(user);
         }
 
         public async Task<bool> SaveAllAsync()
@@ -49,9 +57,26 @@ namespace API.Data
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
-            return await _context.Users.Include(x => x.Libraries)
+            return await _userManager.Users
                 .Include(x => x.Libraries)
-                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
+                .Include(r => r.UserRoles)
+                .ThenInclude(r => r.Role)
+                .OrderBy(u => u.UserName)
+                .Select(u => new MemberDto
+                {
+                    Id = u.Id,
+                    Username = u.UserName,
+                    Created = u.Created,
+                    LastActive = u.LastActive,
+                    Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                    Libraries =  u.Libraries.Select(l => new LibraryDto
+                    {
+                        Name = l.Name,
+                        CoverImage = l.CoverImage,
+                        Type = l.Type,
+                        Folders = l.Folders.Select(x => x.Path).ToList()
+                    }).ToList()
+                })
                 .ToListAsync();
         }
 
@@ -62,11 +87,6 @@ namespace API.Data
                 .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
         }
-
-        public async Task<bool> AdminExists()
-        {
-            return await _context.Users.AnyAsync(x => x.IsAdmin);
-            
-        }
+        
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -37,7 +38,6 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            _logger.LogInformation("Username: " + registerDto.Password);
             if (await UserExists(registerDto.Username))
             {
                 return BadRequest("Username is taken.");
@@ -48,16 +48,18 @@ namespace API.Controllers
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 
             if (!result.Succeeded) return BadRequest(result.Errors);
+            
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "Pleb");
+            // TODO: Need a way to store Roles in enum and configure from there
+            var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
+            var roleResult = await _userManager.AddToRoleAsync(user, role);
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
             
-            return new UserDto()
+            return new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
-                IsAdmin = user.IsAdmin
             };
         }
 
@@ -79,11 +81,10 @@ namespace API.Controllers
             _userRepository.Update(user);
             await _userRepository.SaveAllAsync();
 
-            return new UserDto()
+            return new UserDto
             {
                 Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                IsAdmin = user.IsAdmin
+                Token = await _tokenService.CreateToken(user)
             };
         }
         

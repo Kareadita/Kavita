@@ -2,8 +2,7 @@
 {
     public class UserDto
     {
-        public string Username { get; set; }
-        public string Token { get; set; }
-        public bool IsAdmin { get; set; }
+        public string Username { get; init; }
+        public string Token { get; init; }
     }
 }

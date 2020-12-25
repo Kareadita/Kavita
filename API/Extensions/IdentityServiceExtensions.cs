@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,6 +36,11 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
                 });
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole));
+            });
+            
             return services;
         }
     }
