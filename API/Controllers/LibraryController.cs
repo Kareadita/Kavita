@@ -61,20 +61,7 @@ namespace API.Controllers
         {
             return Ok(await _libraryRepository.GetLibrariesAsync());
         }
-        
-        
-        // Do I need this method? 
-        // [HttpGet("library/{username}")]
-        // public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
-        // {
-        //     _logger.LogDebug("Method hit");
-        //     var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
-        //
-        //     if (user == null) return BadRequest("Could not validate user");
-        //
-        //     return Ok(await _libraryRepository.GetLibrariesForUserAsync(user));
-        // }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("update-for")]
         public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
