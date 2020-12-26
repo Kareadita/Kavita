@@ -29,7 +29,7 @@ namespace API.Services
         /// <returns>List of folder names</returns>
         public IEnumerable<string> ListDirectory(string rootPath)
         {
-            // TODO: Put some checks in here along with API to ensure that we aren't passed a file, folder exists, etc.
+           if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
             
             var di = new DirectoryInfo(rootPath);
             var dirs = di.GetDirectories()
@@ -137,7 +137,7 @@ namespace API.Services
                   else {
                      Parallel.ForEach(files, () => 0, (file, loopState, localCount) =>
                                                   { action(file);
-                                                    return (int) ++localCount;
+                                                    return ++localCount;
                                                   },
                                       (c) => {
                                                 Interlocked.Add(ref fileCount, c);

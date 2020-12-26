@@ -14,13 +14,11 @@ namespace API.Controllers
     [Authorize]
     public class UsersController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly IUserRepository _userRepository;
         private readonly ILibraryRepository _libraryRepository;
 
-        public UsersController(DataContext context, IUserRepository userRepository, ILibraryRepository libraryRepository)
+        public UsersController(IUserRepository userRepository, ILibraryRepository libraryRepository)
         {
-            _context = context;
             _userRepository = userRepository;
             _libraryRepository = libraryRepository;
         }
@@ -43,7 +41,7 @@ namespace API.Controllers
             // TODO: We probably need to clean the folders before we insert
             var library = new Library
             {
-                Name = createLibraryDto.Name, // TODO: Ensure code handles Library name always being lowercase
+                Name = createLibraryDto.Name.ToLower(),
                 Type = createLibraryDto.Type,
                 AppUsers = new List<AppUser>() { user }
             };

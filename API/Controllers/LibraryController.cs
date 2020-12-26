@@ -1,14 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
-using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -18,23 +17,23 @@ namespace API.Controllers
     [Authorize]
     public class LibraryController : BaseApiController
     {
-        private readonly DataContext _context;
         private readonly IDirectoryService _directoryService;
         private readonly ILibraryRepository _libraryRepository;
         private readonly ILogger<LibraryController> _logger;
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly ITaskScheduler _taskScheduler;
 
-        public LibraryController(DataContext context, IDirectoryService directoryService, 
+        public LibraryController(IDirectoryService directoryService, 
             ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository,
-            IMapper mapper)
+            IMapper mapper, ITaskScheduler taskScheduler)
         {
-            _context = context;
             _directoryService = directoryService;
             _libraryRepository = libraryRepository;
             _logger = logger;
             _userRepository = userRepository;
             _mapper = mapper;
+            _taskScheduler = taskScheduler;
         }
 
         /// <summary>
@@ -90,8 +89,8 @@ namespace API.Controllers
         public async Task<ActionResult> ScanLibrary(int libraryId)
         {
             var library = await _libraryRepository.GetLibraryForIdAsync(libraryId);
-
-            _directoryService.ScanLibrary(library);
+            
+            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library));
 
             return Ok();
         }

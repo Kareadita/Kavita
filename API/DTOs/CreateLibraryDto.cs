@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 using API.Entities;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace API.DTOs
 {

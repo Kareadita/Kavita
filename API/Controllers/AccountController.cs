@@ -49,8 +49,6 @@ namespace API.Controllers
 
             if (!result.Succeeded) return BadRequest(result.Errors);
             
-
-            // TODO: Need a way to store Roles in enum and configure from there
             var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
             var roleResult = await _userManager.AddToRoleAsync(user, role);
 
