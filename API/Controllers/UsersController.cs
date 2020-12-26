@@ -30,7 +30,6 @@ namespace API.Controllers
         {
             // NOTE: I think we should move this into library controller because it gets added to all admins
             
-            //_logger.Log(LogLevel.Debug, "Creating a new " + createLibraryDto.Type + " library");
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not validate user");

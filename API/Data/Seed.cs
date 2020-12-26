@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace API.Data
 {
-    public class Seed
+    public static class Seed
     {
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
