@@ -24,19 +24,12 @@ namespace API.Controllers
             _userRepository = userRepository;
             _libraryRepository = libraryRepository;
         }
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
-        {
-            return Ok(await _userRepository.GetMembersAsync());
-        }
         
         [HttpPost("add-library")]
         public async Task<ActionResult> AddLibrary(CreateLibraryDto createLibraryDto)
         {
             // NOTE: I think we should move this into library controller because it gets added to all admins
             
-            //_logger.Log(LogLevel.Debug, "Creating a new " + createLibraryDto.Type + " library");
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not validate user");
@@ -72,7 +65,27 @@ namespace API.Controllers
             
             return BadRequest("Not implemented");
         }
-
         
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpDelete("delete-user")]
+        public async Task<ActionResult> DeleteUser(string username)
+        {
+            var user = await _userRepository.GetUserByUsernameAsync(username);
+            _userRepository.Delete(user);
+
+            if (await _userRepository.SaveAllAsync())
+            {
+                return Ok();
+            }
+            
+            return BadRequest("Could not delete the user.");
+        }
+        
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+        {
+            return Ok(await _userRepository.GetMembersAsync());
+        }
     }
 }

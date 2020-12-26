@@ -42,12 +42,10 @@ namespace API.Controllers
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("list")]
         public ActionResult<IEnumerable<string>> GetDirectories(string path)
         {
-            // TODO: We need some sort of validation other than our auth layer
-            _logger.Log(LogLevel.Debug, "Listing Directories for " + path);
-
             if (string.IsNullOrEmpty(path))
             {
                 return Ok(Directory.GetLogicalDrives());
@@ -57,26 +55,13 @@ namespace API.Controllers
 
             return Ok(_directoryService.ListDirectory(path));
         }
-
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
         {
             return Ok(await _libraryRepository.GetLibrariesAsync());
         }
-        
-        
-        // Do I need this method? 
-        // [HttpGet("library/{username}")]
-        // public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
-        // {
-        //     _logger.LogDebug("Method hit");
-        //     var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
-        //
-        //     if (user == null) return BadRequest("Could not validate user");
-        //
-        //     return Ok(await _libraryRepository.GetLibrariesForUserAsync(user));
-        // }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("update-for")]
         public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
