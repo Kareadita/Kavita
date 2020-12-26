@@ -99,5 +99,16 @@ namespace API.Controllers
 
             return BadRequest("Not Implemented");
         }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet("scan")]
+        public async Task<ActionResult> ScanLibrary(int libraryId)
+        {
+            var library = await _libraryRepository.GetLibraryForIdAsync(libraryId);
+
+            _directoryService.ScanLibrary(library);
+
+            return Ok();
+        }
     }
 }
