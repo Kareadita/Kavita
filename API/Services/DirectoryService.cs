@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -16,11 +17,32 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
+       private static readonly string MangaFileExtensions = @"\.cbz|\.cbr|\.png|\.jpeg|\.jpg|\.zip|\.rar";
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
           _logger = logger;
        }
+       
+       /// <summary>
+       /// Given a set of regex search criteria, get files in the given path. 
+       /// </summary>
+       /// <param name="path">Directory to search</param>
+       /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4)</param>
+       /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
+       /// <returns>List of file paths</returns>
+       public static IEnumerable<string> GetFiles(string path, 
+          string searchPatternExpression = "",
+          SearchOption searchOption = SearchOption.TopDirectoryOnly)
+       {
+          Regex reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+          return Directory.EnumerateFiles(path, "*", searchOption)
+             .Where(file =>
+                reSearchPattern.IsMatch(Path.GetExtension(file)));
+       }
+
+       
+       
 
        /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
@@ -48,10 +70,9 @@ namespace API.Services
                  TraverseTreeParallelForEach(folderPath, (f) =>
                  {
                     // Exceptions are no-ops.
-                    try {
-                       // Do nothing with the data except read it.
-                       //byte[] data = File.ReadAllBytes(f);
-                       ProcessManga(f);
+                    try
+                    {
+                       ProcessManga(folderPath, f);
                     }
                     catch (FileNotFoundException) {}
                     catch (IOException) {}
@@ -61,15 +82,18 @@ namespace API.Services
                     Console.WriteLine(f);
                  });
               }
-              catch (ArgumentException) {
+              catch (ArgumentException ex) {
+                 _logger.LogError(ex, "There was an issue scanning the directory");
                  _logger.LogError($"The directory '{folderPath}' does not exist");
               }
            }
         }
 
-        private static void ProcessManga(string filename)
+        private static void ProcessManga(string folderPath, string filename)
         {
             Console.WriteLine($"Found {filename}");
+            var series = Parser.Parser.ParseSeries(filename);
+            Console.WriteLine($"Series: {series}");
         }
         
         public static void TraverseTreeParallelForEach(string root, Action<string> action)
@@ -109,7 +133,10 @@ namespace API.Services
                }
 
                try {
-                  files = Directory.GetFiles(currentDir);
+                  //files = Directory.GetFiles(currentDir, "*.")
+                  files = DirectoryService.GetFiles(currentDir, MangaFileExtensions)
+                     .ToArray();
+                  //files = Directory.GetFiles(currentDir);
                }
                catch (UnauthorizedAccessException e) {
                   Console.WriteLine(e.Message);
