@@ -8,12 +8,10 @@ namespace API.Controllers
 {
     public class AdminController : BaseApiController
     {
-        private readonly IUserRepository _userRepository;
         private readonly UserManager<AppUser> _userManager;
 
-        public AdminController(IUserRepository userRepository, UserManager<AppUser> userManager)
+        public AdminController(UserManager<AppUser> userManager)
         {
-            _userRepository = userRepository;
             _userManager = userManager;
         }
 

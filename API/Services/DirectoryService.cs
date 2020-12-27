@@ -62,7 +62,7 @@ namespace API.Services
                  });
               }
               catch (ArgumentException) {
-                 Console.WriteLine(@"The directory 'C:\Program Files' does not exist.");
+                 _logger.LogError($"The directory '{folderPath}' does not exist");
               }
            }
         }
@@ -79,7 +79,7 @@ namespace API.Services
             var sw = Stopwatch.StartNew();
 
             // Determine whether to parallelize file processing on each folder based on processor count.
-            int procCount = System.Environment.ProcessorCount;
+            int procCount = Environment.ProcessorCount;
 
             // Data structure to hold names of subfolders to be examined for files.
             Stack<string> dirs = new Stack<string>();

@@ -38,7 +38,7 @@ namespace API.Controllers
                 return BadRequest("Library name already exists. Please choose a unique name to the server.");
             }
             
-            // TODO: We probably need to clean the folders before we insert
+            // TODO: We probably need to normalize the folders before we insert
             var library = new Library
             {
                 Name = createLibraryDto.Name.ToLower(),

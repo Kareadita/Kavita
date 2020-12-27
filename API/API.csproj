@@ -32,4 +32,8 @@
     <Folder Include="Tasks" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Hangfire-log.db" />
+  </ItemGroup>
+
 </Project>
