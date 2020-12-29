@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace API.Parser
@@ -47,9 +48,19 @@ namespace API.Parser
                 @"(?<Series>.*)(\b|_)(v|vo|c)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
+            // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
+            new Regex(
+                
+                @"(?<Series>.*)\(\d",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's always last)
             new Regex(
                 @"(?<Series>.*)(\b|_)(c)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Darker Than Black (This takes anything, we have to account for perfectly named folders)
+            new Regex(
+                @"(?<Series>.*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
             
@@ -72,6 +83,18 @@ namespace API.Parser
                 @"(c|ch)(\.? ?)(?<Chapter>\d+-?\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
+
+
+        public static ParserInfo Parse(string filePath)
+        {
+            return new ParserInfo()
+            {
+                Chapters = ParseChapter(filePath),
+                Series = ParseSeries(filePath),
+                Volumes = ParseVolume(filePath),
+                File = filePath
+            };
+        }
         
         public static string ParseSeries(string filename)
         {

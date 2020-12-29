@@ -13,7 +13,9 @@ namespace API.Tests
         [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", "1")]
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1")]
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "16-17")]
+        [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             var result = ParseVolume(filename);
@@ -29,6 +31,7 @@ namespace API.Tests
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "Gokukoku no Brynhildr")]
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "Dance in the Vampire Bund")]
         [InlineData("v001", "")]
+        [InlineData("Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)", "Akame ga KILL! ZERO")]
         public void ParseSeriesTest(string filename, string expected)
         {
             var result = ParseSeries(filename);
@@ -44,6 +47,7 @@ namespace API.Tests
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1-8")]
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "")]
         [InlineData("c001", "1")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "12")]
         public void ParseChaptersTest(string filename, string expected)
         {
             var result = ParseChapter(filename);
