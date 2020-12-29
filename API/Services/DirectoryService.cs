@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Interfaces;
 using API.Parser;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -20,7 +19,6 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
-       private static readonly string MangaFileExtensions = @"\.cbz|\.cbr|\.png|\.jpeg|\.jpg|\.zip|\.rar";
        private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
 
        public DirectoryService(ILogger<DirectoryService> logger)
@@ -66,26 +64,18 @@ namespace API.Services
             return dirs;
         }
 
-       // TODO: Refactor API layer to use this 
-       public IEnumerable<DirectoryInfo> ListDirectories(string rootPath)
-       {
-          if (!Directory.Exists(rootPath)) return ImmutableList<DirectoryInfo>.Empty;
-            
-          var di = new DirectoryInfo(rootPath);
-          var dirs = di.GetDirectories()
-             .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
-             .ToImmutableList();
-            
-            
-          return dirs;
-       }
 
+       /// <summary>
+       /// Processes files found during a library scan. 
+       /// </summary>
+       /// <param name="path"></param>
        private void Process(string path)
        {
+          // NOTE: In current implementation, this never runs. We can probably remove. 
           if (Directory.Exists(path))
           {
              DirectoryInfo di = new DirectoryInfo(path);
-             Console.WriteLine($"Parsing directory {di.Name}");
+             _logger.LogDebug($"Parsing directory {di.Name}");
 
              var seriesName = Parser.Parser.ParseSeries(di.Name);
              if (string.IsNullOrEmpty(seriesName))
@@ -102,7 +92,7 @@ namespace API.Services
           else
           {
              var fileName = Path.GetFileName(path);
-             Console.WriteLine($"Parsing file {fileName}");
+             _logger.LogDebug($"Parsing file {fileName}");
              
              var info = Parser.Parser.Parse(fileName);
              if (info.Volumes != string.Empty)
@@ -138,109 +128,40 @@ namespace API.Services
         public void ScanLibrary(LibraryDto library)
         {
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
-           //Dictionary<string, IList<ParserInfo>> series = new Dictionary<string, IList<ParserInfo>>();   
            _logger.LogInformation($"Beginning scan on {library.Name}");
+           
            foreach (var folderPath in library.Folders)
            {
               try {
-                 // // Temporarily, let's build a simple scanner then optimize to parallelization
-                 //
-                 // // First, let's see if there are any files in rootPath
-                 // var files = GetFiles(folderPath, MangaFileExtensions);
-                 //
-                 // foreach (var file in files)
-                 // {
-                 //     // These do not have a folder, so we need to parse them directly
-                 //     var parserInfo = Parser.Parser.Parse(file);
-                 //     Console.WriteLine(parserInfo);
-                 // }
-                 //
-                 // // Get Directories
-                 // var directories = ListDirectories(folderPath);
-                 // foreach (var directory in directories)
-                 // {
-                 //    _logger.LogDebug($"Scanning {directory.Name}");
-                 //    var parsedSeries = Parser.Parser.ParseSeries(directory.Name);
-                 //
-                 //    // For now, let's skip directories we can't parse information out of. (we are assuming one level deep root)
-                 //    if (string.IsNullOrEmpty(parsedSeries)) continue;
-                 //    
-                 //    _logger.LogDebug($"Parsed Series: {parsedSeries}");
-                 //
-                 //    if (!series.ContainsKey(parsedSeries))
-                 //    {
-                 //       series[parsedSeries] = new List<ParserInfo>();
-                 //    }
-                 //    
-                 //    var foundFiles = GetFiles(directory.FullName, MangaFileExtensions);
-                 //    foreach (var foundFile in foundFiles)
-                 //    {
-                 //       var info = Parser.Parser.Parse(foundFile);
-                 //       if (info.Volumes != string.Empty)
-                 //       {
-                 //          series[parsedSeries].Add(info);
-                 //       }
-                 //    }
-                 // }
-
-
                  TraverseTreeParallelForEach(folderPath, (f) =>
                  {
                     // Exceptions are no-ops.
                     try
                     {
                        Process(f);
-                       //ProcessManga(folderPath, f);
                     }
                     catch (FileNotFoundException) {}
                     catch (IOException) {}
                     catch (UnauthorizedAccessException) {}
                     catch (SecurityException) {}
-                    // Display the filename.
-                    Console.WriteLine(f);
                  });
               }
               catch (ArgumentException ex) {
-                 _logger.LogError(ex, "There was an issue scanning the directory");
-                 _logger.LogError($"The directory '{folderPath}' does not exist");
+                 _logger.LogError(ex, "The directory '{folderPath}' does not exist");
               }
            }
-
-           // var filtered = series.Where(kvp => kvp.Value.Count > 0);
-           // series = filtered.ToDictionary(v => v.Key, v => v.Value);
-           // Console.WriteLine(series);
            
-           // var filtered = _scannedSeries.Where(kvp => kvp.Value.Count > 0);
-           // series = filtered.ToDictionary(v => v.Key, v => v.Value);
-           // Console.WriteLine(series);
            var filtered = _scannedSeries.Where(kvp => !kvp.Value.IsEmpty);
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
-           Console.WriteLine(series);
-           
+
            // TODO: Perform DB activities on ImmutableDictionary
            
            
-           //_logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count} series.");
            _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
            _scannedSeries = null;
-           
-           
         }
 
-        private static void ProcessManga(string folderPath, string filename)
-        {
-           Console.WriteLine($"[ProcessManga] Folder: {folderPath}");
-           
-            Console.WriteLine($"Found {filename}");
-            var series = Parser.Parser.ParseSeries(filename);
-            if (series == string.Empty)
-            {
-               series = Parser.Parser.ParseSeries(folderPath);
-            }
-            Console.WriteLine($"Series: {series}");
-        }
-        
-        public static void TraverseTreeParallelForEach(string root, Action<string> action)
+        private static void TraverseTreeParallelForEach(string root, Action<string> action)
          {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
@@ -253,14 +174,14 @@ namespace API.Services
             Stack<string> dirs = new Stack<string>();
 
             if (!Directory.Exists(root)) {
-                   throw new ArgumentException();
+                   throw new ArgumentException("The directory doesn't exist");
             }
             dirs.Push(root);
 
             while (dirs.Count > 0) {
                string currentDir = dirs.Pop();
-               string[] subDirs = {};
-               string[] files = {};
+               string[] subDirs;
+               string[] files;
 
                try {
                   subDirs = Directory.GetDirectories(currentDir);
@@ -277,10 +198,8 @@ namespace API.Services
                }
 
                try {
-                  //files = Directory.GetFiles(currentDir, "*.")
-                  files = DirectoryService.GetFiles(currentDir, MangaFileExtensions)
+                  files = DirectoryService.GetFiles(currentDir, Parser.Parser.MangaFileExtensions)
                      .ToArray();
-                  //files = Directory.GetFiles(currentDir);
                }
                catch (UnauthorizedAccessException e) {
                   Console.WriteLine(e.Message);
@@ -306,7 +225,7 @@ namespace API.Services
                      }
                   }
                   else {
-                     Parallel.ForEach(files, () => 0, (file, loopState, localCount) =>
+                     Parallel.ForEach(files, () => 0, (file, _, localCount) =>
                                                   { action(file);
                                                     return ++localCount;
                                                   },

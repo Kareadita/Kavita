@@ -5,11 +5,11 @@ namespace API.Services
 {
     public class TaskScheduler : ITaskScheduler
     {
-        private readonly BackgroundJobServer _client;
-        
+        private BackgroundJobServer Client { get; }
+
         public TaskScheduler()
         {
-            _client = new BackgroundJobServer();
+            Client = new BackgroundJobServer();
         }
         
         

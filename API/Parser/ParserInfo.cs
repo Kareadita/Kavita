@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace API.Parser
 {
     /// <summary>
@@ -13,6 +12,5 @@ namespace API.Parser
         // This can be multiple
         public string Volumes { get; set; }
         public string File { get; init; }
-        //public IEnumerable<string> Files { get; init; }
     }
 }

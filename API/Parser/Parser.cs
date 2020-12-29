@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace API.Parser
 {
     public static class Parser
     {
+        public static readonly string MangaFileExtensions = @"\.cbz|\.cbr|\.png|\.jpeg|\.jpg|\.zip|\.rar";
+
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -217,7 +218,7 @@ namespace API.Parser
         
         public static string RemoveLeadingZeroes(string title)
         {
-            return title.TrimStart(new Char[] { '0' });
+            return title.TrimStart(new[] { '0' });
         }
     }
 }
