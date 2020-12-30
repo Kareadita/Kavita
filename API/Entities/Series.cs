@@ -4,6 +4,7 @@ namespace API.Entities
 {
     public class Series
     {
+        public int Id { get; set; }
         /// <summary>
         /// The UI visible Name of the Series. This may or may not be the same as the OriginalName
         /// </summary>
@@ -20,8 +21,10 @@ namespace API.Entities
         /// Summary information related to the Series
         /// </summary>
         public string Summary { get; set; }
-        
         public ICollection<Volume> Volumes { get; set; }
+        
+        public Library Library { get; set; }
+        public int LibraryId { get; set; }
         
         
     }

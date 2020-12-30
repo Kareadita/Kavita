@@ -16,7 +16,9 @@ namespace API.Interfaces
         /// <param name="libraryName"></param>
         /// <returns></returns>
         Task<bool> LibraryExists(string libraryName);
-
-        public Task<LibraryDto> GetLibraryForIdAsync(int libraryId);
+        Task<LibraryDto> GetLibraryDtoForIdAsync(int libraryId);
+        Task<Library> GetLibraryForIdAsync(int libraryId);
+        bool SaveAll();
+        Library GetLibraryForName(string libraryName);
     }
 }

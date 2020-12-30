@@ -10,5 +10,6 @@ namespace API.Entities
         public LibraryType Type { get; set; }
         public ICollection<FolderPath> Folders { get; set; }
         public ICollection<AppUser> AppUsers { get; set; }
+        public ICollection<Series> Series { get; set; }
     }
 }

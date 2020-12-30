@@ -86,8 +86,10 @@ namespace API.Controllers
         [HttpGet("scan")]
         public async Task<ActionResult> ScanLibrary(int libraryId)
         {
-            var library = await _libraryRepository.GetLibraryForIdAsync(libraryId);
+            var library = await _libraryRepository.GetLibraryDtoForIdAsync(libraryId);
             
+            // We have to send a json encoded Library (aka a DTO) to the Background Job thread. 
+            // Because we use EF, we have circular dependencies back to Library and it will crap out
             BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library));
 
             return Ok();

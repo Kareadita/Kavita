@@ -5,13 +5,16 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Entities;
 using API.Interfaces;
 using API.Parser;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -19,11 +22,15 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
+       private readonly ISeriesRepository _seriesRepository;
+       private readonly ILibraryRepository _libraryRepository;
        private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
 
-       public DirectoryService(ILogger<DirectoryService> logger)
+       public DirectoryService(ILogger<DirectoryService> logger, ISeriesRepository seriesRepository, ILibraryRepository libraryRepository)
        {
           _logger = logger;
+          _seriesRepository = seriesRepository;
+          _libraryRepository = libraryRepository;
        }
        
        /// <summary>
@@ -125,6 +132,42 @@ namespace API.Services
           }
        }
 
+       private Series UpdateSeries(string seriesName, ParserInfo[] infos)
+       {
+          var series = _seriesRepository.GetSeriesByName(seriesName);
+
+          if (series == null)
+          {
+             series = new Series()
+             {
+                Name = seriesName,
+                OriginalName = seriesName,
+                SortName = seriesName,
+                Summary = "",
+             };
+          }
+          
+          ICollection<Volume> volumes = new List<Volume>();
+          foreach (var info in infos)
+          {
+             volumes.Add(new Volume()
+             {
+                Number = info.Volumes,
+                Files = new List<MangaFile>() {new MangaFile()
+                {
+                   FilePath = info.File
+                }}
+             });
+          }
+
+          series.Volumes = volumes;
+          
+
+          //_seriesRepository.Update(series);
+
+          return series;
+       }
+
         public void ScanLibrary(LibraryDto library)
         {
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
@@ -154,10 +197,62 @@ namespace API.Services
            var filtered = _scannedSeries.Where(kvp => !kvp.Value.IsEmpty);
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
 
-           // TODO: Perform DB activities on ImmutableDictionary
+           // Perform DB activities on ImmutableDictionary
+           var libraryEntity = _libraryRepository.GetLibraryForName(library.Name);
+           libraryEntity.Series = new List<Series>(); // Temp delete everything for testing
+           foreach (var seriesKey in series.Keys)
+           {
+              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray());
+              Console.WriteLine($"Created/Updated series {s.Name}");
+              libraryEntity.Series.Add(s);
+           }
            
+           _libraryRepository.Update(libraryEntity);
+
+           // This is throwing a DbUpdateConcurrencyException due to multiple threads modifying Library at one time. 
+           try
+           {
+              if (_libraryRepository.SaveAll())
+              {
+                 _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
+              }
+              else
+              {
+                 _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
+              }
+           }
+           catch (DbUpdateConcurrencyException ex)
+           {
+              foreach (var entry in ex.Entries)
+              {
+                 if (entry.Entity is Series)
+                 {
+                    var proposedValues = entry.CurrentValues;
+                    var databaseValues = entry.GetDatabaseValues();
+
+                    foreach (var property in proposedValues.Properties)
+                    {
+                       var proposedValue = proposedValues[property];
+                       var databaseValue = databaseValues[property];
+
+                       // TODO: decide which value should be written to database
+                       // proposedValues[property] = <value to be saved>;
+                       Console.WriteLine($"Proposed ({proposedValue}) vs Database ({databaseValue})");
+                    }
+
+                    // Refresh original values to bypass next concurrency check
+                    entry.OriginalValues.SetValues(databaseValues);
+                 }
+                 else
+                 {
+                    throw new NotSupportedException(
+                       "Don't know how to handle concurrency conflicts for "
+                       + entry.Metadata.Name);
+                 }
+              }
+           }
            
-           _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
+
            _scannedSeries = null;
         }
 
