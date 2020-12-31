@@ -61,11 +61,8 @@ export class ManageUsersComponent implements OnInit {
     });
   }
 
-  openChangeRole(member: Member) {
-
-  }
-
   deleteUser(member: Member) {
+    // TODO: Use a modal for this confirm
     if (confirm('Are you sure you want to delete this user?')) {
       this.memberService.deleteMember(member.username).subscribe(() => {
         this.loadMembers();

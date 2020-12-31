@@ -1,1 +1,7 @@
-<p>library works!</p>
+
+<h2>Libraries</h2>
+<div class="row">
+    <div class="col-sm-6 col-md-4 col-lg-2" *ngFor="let library of libraries">
+        <app-card-item [imageUrl]="library.coverImage" [title]="library.name" (clicked)="handleNavigation($event, library)"></app-card-item>
+    </div>
+  </div>

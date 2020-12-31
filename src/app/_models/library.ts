@@ -1,4 +1,5 @@
 export interface Library {
+    id: number;
     name: string;
     coverImage: string;
     type: any;

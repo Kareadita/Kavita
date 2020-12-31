@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
+import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { LibraryComponent } from './library/library.component';
-import { AdminGuard } from './_guards/admin.guard';
 
 const routes: Routes = [
   {path: '', component: HomeComponent},
@@ -11,6 +11,7 @@ const routes: Routes = [
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
   {path: 'library', component: LibraryComponent},
+  {path: 'library/:id', component: LibraryDetailComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];
 
