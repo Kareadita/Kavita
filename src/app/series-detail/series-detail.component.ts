@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Series } from '../_models/series';
 
 @Component({
   selector: 'app-series-detail',
@@ -6,6 +7,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./series-detail.component.scss']
 })
 export class SeriesDetailComponent implements OnInit {
+
+  series: Series | undefined;
 
   constructor() { }
 

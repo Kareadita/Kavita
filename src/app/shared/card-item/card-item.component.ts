@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
-export interface CardItemTitle {
+
+export interface CardItemAction {
   title: string;
-  linkUrl: string;
+  callback: (data: any) => void;
 }
 
 @Component({
@@ -14,15 +15,15 @@ export class CardItemComponent implements OnInit {
 
   @Input() imageUrl = '';
   @Input() title = '';
+  @Input() actions: CardItemAction[] = [];
+  @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed. 
   @Output() clicked = new EventEmitter<string>();
 
-  placeholderImage = 'assets/images/image-placeholder.jpg'; //../../..
+  placeholderImage = 'assets/images/image-placeholder.jpg';
 
   constructor() { }
 
   ngOnInit(): void {
-    console.log('card item');
-    console.log('imageUrl: ', this.imageUrl);
   }
 
   handleClick() {
@@ -31,6 +32,13 @@ export class CardItemComponent implements OnInit {
 
   isNullOrEmpty(val: string) {
     return val === null || val === undefined || val === '';
+  }
+
+  performAction(event: any, action: CardItemAction) {
+    event.stopPropagation();
+    if (typeof action.callback === 'function') {
+      action.callback(this.entity);
+    }
   }
 
 }

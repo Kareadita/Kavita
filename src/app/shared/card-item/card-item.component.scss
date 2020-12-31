@@ -7,3 +7,7 @@
 .card-body {
     padding: 5px !important;
 }
+
+.dropdown-toggle:after {
+    content: none !important;
+}

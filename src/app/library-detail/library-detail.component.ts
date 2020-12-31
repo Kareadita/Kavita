@@ -31,4 +31,8 @@ export class LibraryDetailComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  seriesClicked(series: Series) {
+    this.router.navigateByUrl('/series/' + series.id);
+  }
+
 }

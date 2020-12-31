@@ -21,7 +21,7 @@ export class MemberService {
   }
 
   updatePassword(newPassword: string) {
-    // TODO: Implement update password (use JWT to assume role)
+    // TODO: Implement update password
   }
 
   deleteMember(username: string) {
