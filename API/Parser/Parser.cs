@@ -83,6 +83,12 @@ namespace API.Parser
 
                 @"(c|ch)(\.? ?)(?<Chapter>\d+-?\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            new Regex(
+
+                @"v\d+\.(?<Chapter>\d+-?\d*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            
         };
 
 
