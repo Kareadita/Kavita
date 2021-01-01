@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using API.Entities;
-using API.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

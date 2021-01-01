@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -39,7 +38,6 @@ namespace API.Controllers
                 return BadRequest("Library name already exists. Please choose a unique name to the server.");
             }
             
-            // TODO: We probably need to normalize the folders before we insert
             var library = new Library
             {
                 Name = createLibraryDto.Name.ToLower(),

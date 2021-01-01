@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
-using Microsoft.AspNetCore.Mvc;
 
 namespace API.Interfaces
 {
@@ -22,6 +21,5 @@ namespace API.Interfaces
         bool SaveAll();
         Library GetLibraryForName(string libraryName);
         Task<IEnumerable<LibraryDto>> GetLibrariesForUsernameAysnc(string userName);
-        //Task<IEnumerable<Series>> GetSeriesForIdAsync(int libraryId);
     }
 }

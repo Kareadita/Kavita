@@ -5,7 +5,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -14,7 +13,6 @@ using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using API.Parser;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -135,7 +133,7 @@ namespace API.Services
        private Series UpdateSeries(string seriesName, ParserInfo[] infos)
        {
           var series = _seriesRepository.GetSeriesByName(seriesName);
-          ICollection<Volume> volumes = new List<Volume>();;
+          ICollection<Volume> volumes = new List<Volume>();
 
           if (series == null)
           {
@@ -150,7 +148,7 @@ namespace API.Services
 
           
           // BUG: This is creating new volume entries and not resetting each run.
-          IEnumerable<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id);
+          IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Number == info.Volumes);
