@@ -1,7 +1,7 @@
 <div class="card" style="width: 18rem;">
     <img (click)="handleClick()" class="card-img-top" src="{{isNullOrEmpty(imageUrl) ? placeholderImage : imageUrl}}" alt="{{title}}">
 
-    <div class="card-body text-center">
+    <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
         <h5 class="card-title" (click)="handleClick()">{{title}}</h5>
         <ng-container *ngIf="actions.length > 0">
             <div class="col">

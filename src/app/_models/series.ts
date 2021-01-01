@@ -6,5 +6,6 @@ export interface Series {
     originalName: string;
     sortName: string;
     summary: string;
+    coverImage: string;
     volumes: Volume[];
 }

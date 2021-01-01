@@ -15,7 +15,7 @@ export class CardItemComponent implements OnInit {
 
   @Input() imageUrl = '';
   @Input() title = '';
-  @Input() actions: CardItemAction[] = [];
+  @Input() actions: CardItemAction[] = []; // TODO: Create a factory that generates actions based on if admin, etc. for each card type.
   @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed. 
   @Output() clicked = new EventEmitter<string>();
 

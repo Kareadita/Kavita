@@ -23,7 +23,7 @@ export class LibraryDetailComponent implements OnInit {
       return;
     }
     this.libraryId = parseInt(routeId, 10);
-    this.seriesService.getSeries(this.libraryId).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
       this.series = series;
     });
   }
