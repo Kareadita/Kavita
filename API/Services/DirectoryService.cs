@@ -135,6 +135,7 @@ namespace API.Services
        private Series UpdateSeries(string seriesName, ParserInfo[] infos)
        {
           var series = _seriesRepository.GetSeriesByName(seriesName);
+          ICollection<Volume> volumes = new List<Volume>();;
 
           if (series == null)
           {
@@ -146,24 +147,45 @@ namespace API.Services
                 Summary = "",
              };
           }
+
           
-          ICollection<Volume> volumes = new List<Volume>();
+          // BUG: This is creating new volume entries and not resetting each run.
+          IEnumerable<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id);
           foreach (var info in infos)
           {
-             volumes.Add(new Volume()
+             var existingVolume = existingVolumes.SingleOrDefault(v => v.Number == info.Volumes);
+             if (existingVolume != null)
              {
-                Number = info.Volumes,
-                Files = new List<MangaFile>() {new MangaFile()
+                // Temp let's overwrite all files (we need to enhance to update files)
+                existingVolume.Files = new List<MangaFile>()
                 {
-                   FilePath = info.File
-                }}
-             });
+                   new MangaFile()
+                   {
+                      FilePath = info.File
+                   }
+                };
+                volumes.Add(existingVolume);
+             }
+             else
+             {
+                var vol = new Volume()
+                {
+                   Number = info.Volumes,
+                   Files = new List<MangaFile>()
+                   {
+                      new MangaFile()
+                      {
+                         FilePath = info.File
+                      }
+                   }
+                };
+                volumes.Add(vol);
+             }
+             
+             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.File}");
           }
 
           series.Volumes = volumes;
-          
-
-          //_seriesRepository.Update(series);
 
           return series;
        }
@@ -208,48 +230,14 @@ namespace API.Services
            }
            
            _libraryRepository.Update(libraryEntity);
-
-           // This is throwing a DbUpdateConcurrencyException due to multiple threads modifying Library at one time. 
-           try
+           
+           if (_libraryRepository.SaveAll())
            {
-              if (_libraryRepository.SaveAll())
-              {
-                 _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
-              }
-              else
-              {
-                 _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
-              }
+              _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
            }
-           catch (DbUpdateConcurrencyException ex)
+           else
            {
-              foreach (var entry in ex.Entries)
-              {
-                 if (entry.Entity is Series)
-                 {
-                    var proposedValues = entry.CurrentValues;
-                    var databaseValues = entry.GetDatabaseValues();
-
-                    foreach (var property in proposedValues.Properties)
-                    {
-                       var proposedValue = proposedValues[property];
-                       var databaseValue = databaseValues[property];
-
-                       // TODO: decide which value should be written to database
-                       // proposedValues[property] = <value to be saved>;
-                       Console.WriteLine($"Proposed ({proposedValue}) vs Database ({databaseValue})");
-                    }
-
-                    // Refresh original values to bypass next concurrency check
-                    entry.OriginalValues.SetValues(databaseValues);
-                 }
-                 else
-                 {
-                    throw new NotSupportedException(
-                       "Don't know how to handle concurrency conflicts for "
-                       + entry.Metadata.Name);
-                 }
-              }
+              _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
            }
            
 

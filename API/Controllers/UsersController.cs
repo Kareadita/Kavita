@@ -23,6 +23,7 @@ namespace API.Controllers
             _libraryRepository = libraryRepository;
         }
         
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("add-library")]
         public async Task<ActionResult> AddLibrary(CreateLibraryDto createLibraryDto)
         {

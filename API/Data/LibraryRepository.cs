@@ -6,6 +6,7 @@ using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
@@ -43,6 +44,14 @@ namespace API.Data
                 .Include(f => f.Folders)
                 .Include(s => s.Series)
                 .Single();
+        }
+
+        public async Task<IEnumerable<LibraryDto>> GetLibrariesForUsernameAysnc(string userName)
+        {
+            return await _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(x => x.UserName == userName))
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
         public async Task<IEnumerable<LibraryDto>> GetLibrariesAsync()

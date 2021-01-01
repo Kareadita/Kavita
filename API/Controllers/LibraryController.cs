@@ -21,10 +21,11 @@ namespace API.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
+        private readonly ISeriesRepository _seriesRepository;
 
         public LibraryController(IDirectoryService directoryService, 
             ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository,
-            IMapper mapper, ITaskScheduler taskScheduler)
+            IMapper mapper, ITaskScheduler taskScheduler, ISeriesRepository seriesRepository)
         {
             _directoryService = directoryService;
             _libraryRepository = libraryRepository;
@@ -32,6 +33,7 @@ namespace API.Controllers
             _userRepository = userRepository;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
+            _seriesRepository = seriesRepository;
         }
 
         /// <summary>
@@ -79,7 +81,7 @@ namespace API.Controllers
                 return Ok(user);
             }
 
-            return BadRequest("Not Implemented");
+            return BadRequest("There was a critical issue. Please try again.");
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -91,8 +93,20 @@ namespace API.Controllers
             // We have to send a json encoded Library (aka a DTO) to the Background Job thread. 
             // Because we use EF, we have circular dependencies back to Library and it will crap out
             BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library));
-
             return Ok();
+        }
+
+        [HttpGet("libraries-for")]
+        public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
+        {
+            return Ok(await _libraryRepository.GetLibrariesForUsernameAysnc(username));
+        }
+
+        [HttpGet("series")]
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
+        {
+            return Ok(await _seriesRepository.GetSeriesForLibraryIdAsync(libraryId));
+
         }
     }
 }

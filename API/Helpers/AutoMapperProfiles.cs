@@ -10,6 +10,12 @@ namespace API.Helpers
         public AutoMapperProfiles()
         {
             CreateMap<LibraryDto, Library>();
+
+            CreateMap<Volume, VolumeDto>()
+                .ForMember(dest => dest.Files,
+                    opt => opt.MapFrom(src => src.Files.Select(x => x.FilePath).ToList()));
+
+            CreateMap<Series, SeriesDto>();
             
             CreateMap<Library, LibraryDto>()
                 .ForMember(dest => dest.Folders,
