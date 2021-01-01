@@ -12,8 +12,8 @@ namespace API.Data
         {
             var roles = new List<AppRole>
             {
-                new AppRole {Name = PolicyConstants.AdminRole},
-                new AppRole {Name = PolicyConstants.PlebRole}
+                new() {Name = PolicyConstants.AdminRole},
+                new() {Name = PolicyConstants.PlebRole}
             };
 
             foreach (var role in roles)

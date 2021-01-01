@@ -37,6 +37,15 @@ namespace API.Data
                 .Include(f => f.Folders)
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
+        
+        public async Task<LibraryDto> GetLibraryForIdAsync(int libraryId)
+        {
+            return await _context.Library
+                .Where(x => x.Id == libraryId)
+                .Include(f => f.Folders)
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).SingleAsync();
+        }
+        
 
         public async Task<bool> LibraryExists(string libraryName)
         {

@@ -1,5 +1,4 @@
-﻿using System;
-using API.Entities;
+﻿using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
