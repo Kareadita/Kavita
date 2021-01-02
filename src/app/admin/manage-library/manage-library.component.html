@@ -10,7 +10,7 @@
                 <h4>
                     {{library.name | titlecase}}
                     <div class="pull-right">
-                        <button class="btn btn-danger mr-2 btn-sm"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
+                        <button class="btn btn-danger mr-2 btn-sm" (click)="deleteLibrary(library)"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
                         <button class="btn btn-primary btn-sm" ><i class="fa fa-pencil" title="Edit {{library.name | titlecase}}"></i></button>
                     </div>
                 </h4>
@@ -24,5 +24,3 @@
         <app-library-editor-modal></app-library-editor-modal>
     </ng-template>
 </div>
-
-<button class="btn btn-primary" (click)="addFolder('')">Add Folder</button>

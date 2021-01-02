@@ -41,4 +41,8 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/create', model);
   }
 
+  delete(libraryId: number) {
+    return this.httpClient.delete(this.baseUrl + 'library/delete?libraryId=' + libraryId, {});
+  }
+
 }
