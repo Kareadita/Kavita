@@ -84,5 +84,17 @@ namespace API.Controllers
         {
             return Ok(await _userRepository.GetMembersAsync());
         }
+
+        [HttpGet("has-library-access")]
+        public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
+        {
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            if (user == null) return BadRequest("Could not validate user");
+
+            var libs = await _libraryRepository.GetLibrariesForUsernameAysnc(user.UserName);
+
+            return Ok(libs.Any(x => x.Id == libraryId));
+        }
     }
 }

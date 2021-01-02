@@ -85,7 +85,7 @@ namespace API.Controllers
         }
 
         [Authorize(Policy = "RequireAdminRole")]
-        [HttpGet("scan")]
+        [HttpPost("scan")]
         public async Task<ActionResult> ScanLibrary(int libraryId)
         {
             var library = await _libraryRepository.GetLibraryDtoForIdAsync(libraryId);
