@@ -15,7 +15,7 @@
         <button *ngIf="routeStack.peek() !== undefined" (click)="goBack()" class="list-group-item list-group-item-action"><i class="fa fa-arrow-left mr-2"></i>Back</button>
         <button *ngFor="let folder of folders" class="list-group-item list-group-item-action" (click)="selectNode(folder)">
             <span>{{getStem(folder)}}</span>
-            <button class="btn btn-primary pull-right" (click)="shareFolder(folder, $event)">Share</button>
+            <button type="button" class="btn btn-primary pull-right" (click)="shareFolder(folder, $event)">Share</button>
         </button>
         <div class="text-center" *ngIf="folders.length === 0">
             There are no folders here

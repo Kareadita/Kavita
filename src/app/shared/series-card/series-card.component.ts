@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/internal/operators/take';
+import { take } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { SeriesService } from 'src/app/_services/series.service';
