@@ -12,11 +12,10 @@ namespace API.Interfaces
         Task<Series> GetSeriesByNameAsync(string name);
         Series GetSeriesByName(string name);
         bool SaveAll();
-        Task<IEnumerable<SeriesDto>> GetSeriesForLibraryIdAsync(int libraryId);
-        Task<IEnumerable<VolumeDto>> GetVolumesAsync(int seriesId);
-        IEnumerable<VolumeDto> GetVolumesDto(int seriesId);
+        Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId);
+        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId);
         IEnumerable<Volume> GetVolumes(int seriesId);
-        Task<SeriesDto> GetSeriesByIdAsync(int seriesId);
+        Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId);
         
     }
 }

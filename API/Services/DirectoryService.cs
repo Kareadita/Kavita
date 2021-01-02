@@ -5,11 +5,9 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using API.Parser;
@@ -149,6 +147,7 @@ namespace API.Services
           
           // BUG: This is creating new volume entries and not resetting each run.
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
+          //IList<Volume> existingVolumes = Task.Run(() => _seriesRepository.GetVolumesAsync(series.Id)).Result.ToList();
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
@@ -189,46 +188,45 @@ namespace API.Services
           return series;
        }
 
-        public void ScanLibrary(LibraryDto library)
+        public void ScanLibrary(int libraryId)
         {
+           var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
            _logger.LogInformation($"Beginning scan on {library.Name}");
            
            foreach (var folderPath in library.Folders)
            {
               try {
-                 TraverseTreeParallelForEach(folderPath, (f) =>
+                 TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
-                    // Exceptions are no-ops.
                     try
                     {
                        Process(f);
                     }
-                    catch (FileNotFoundException) {}
-                    catch (IOException) {}
-                    catch (UnauthorizedAccessException) {}
-                    catch (SecurityException) {}
+                    catch (FileNotFoundException exception)
+                    {
+                       _logger.LogError(exception, "The file could not be found");
+                    }
                  });
               }
               catch (ArgumentException ex) {
-                 _logger.LogError(ex, "The directory '{folderPath}' does not exist");
+                 _logger.LogError(ex, $"The directory '{folderPath}' does not exist");
               }
            }
            
            var filtered = _scannedSeries.Where(kvp => !kvp.Value.IsEmpty);
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
 
-           // Perform DB activities on ImmutableDictionary
-           var libraryEntity = _libraryRepository.GetLibraryForName(library.Name);
-           libraryEntity.Series = new List<Series>(); // Temp delete everything for testing
+           // Perform DB activities
+           library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
               var s = UpdateSeries(seriesKey, series[seriesKey].ToArray());
               _logger.LogInformation($"Created/Updated series {s.Name}");
-              libraryEntity.Series.Add(s);
+              library.Series.Add(s);
            }
            
-           _libraryRepository.Update(libraryEntity);
+           _libraryRepository.Update(library);
            
            if (_libraryRepository.SaveAll())
            {

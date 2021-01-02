@@ -70,8 +70,9 @@ namespace API.Controllers
 
 
             if (await _userRepository.SaveAllAsync())
-            {   
-                //TODO: Enqueue scan library task
+            {
+                var createdLibrary = await _libraryRepository.GetLibraryForNameAsync(library.Name);
+                BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id));
                 return Ok();
             }
             
@@ -128,27 +129,22 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public async Task<ActionResult> ScanLibrary(int libraryId)
+        public ActionResult ScanLibrary(int libraryId)
         {
-            var library = await _libraryRepository.GetLibraryDtoForIdAsync(libraryId);
-            
-            // We have to send a json encoded Library (aka a DTO) to the Background Job thread. 
-            // Because we use EF, we have circular dependencies back to Library and it will crap out
-            // TODO: Refactor this to use libraryId and move Library call in method.
-            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library));
+            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId));
             return Ok();
         }
 
         [HttpGet("libraries-for")]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
         {
-            return Ok(await _libraryRepository.GetLibrariesForUsernameAysnc(username));
+            return Ok(await _libraryRepository.GetLibrariesDtoForUsernameAsync(username));
         }
 
         [HttpGet("series")]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
         {
-            return Ok(await _seriesRepository.GetSeriesForLibraryIdAsync(libraryId));
+            return Ok(await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId));
         }
     }
 }

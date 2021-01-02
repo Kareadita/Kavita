@@ -27,13 +27,13 @@ namespace API.Controllers
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
-            return Ok(await _seriesRepository.GetSeriesByIdAsync(seriesId));
+            return Ok(await _seriesRepository.GetSeriesDtoByIdAsync(seriesId));
         }
 
         [HttpGet("volumes")]
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
-            return Ok(await _seriesRepository.GetVolumesAsync(seriesId));
+            return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId));
         }
     }
 }

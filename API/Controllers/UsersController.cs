@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Entities;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -51,7 +50,7 @@ namespace API.Controllers
 
             if (user == null) return BadRequest("Could not validate user");
 
-            var libs = await _libraryRepository.GetLibrariesForUsernameAysnc(user.UserName);
+            var libs = await _libraryRepository.GetLibrariesDtoForUsernameAsync(user.UserName);
 
             return Ok(libs.Any(x => x.Id == libraryId));
         }
