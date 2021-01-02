@@ -19,6 +19,7 @@ export class CardItemComponent implements OnInit {
   @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed. 
   @Output() clicked = new EventEmitter<string>();
 
+
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
   constructor() { }

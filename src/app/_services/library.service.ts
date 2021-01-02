@@ -33,6 +33,8 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/update-for', {username, selectedLibraries});
   }
 
-
+  scan(libraryId: number) {
+    return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
+  }
 
 }

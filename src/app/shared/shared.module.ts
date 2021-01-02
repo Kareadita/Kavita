@@ -4,11 +4,12 @@ import { RegisterMemberComponent } from './register-member/register-member.compo
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { LibraryCardComponent } from './library-card/library-card.component';
 
 
 
 @NgModule({
-  declarations: [RegisterMemberComponent, CardItemComponent],
+  declarations: [RegisterMemberComponent, CardItemComponent, LibraryCardComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -16,7 +17,8 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
   ],
   exports: [
     RegisterMemberComponent,
-    CardItemComponent
+    CardItemComponent,
+    LibraryCardComponent
   ]
 })
 export class SharedModule { }
