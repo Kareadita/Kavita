@@ -146,5 +146,12 @@ namespace API.Controllers
         {
             return Ok(await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId));
         }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpDelete("delete")]
+        public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
+        {
+            return Ok(await _libraryRepository.DeleteLibrary(libraryId));
+        } 
     }
 }

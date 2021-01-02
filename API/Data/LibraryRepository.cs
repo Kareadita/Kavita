@@ -53,6 +53,13 @@ namespace API.Data
                 .SingleAsync();
         }
 
+        public async Task<bool> DeleteLibrary(int libraryId)
+        {
+            var library = await GetLibraryForIdAsync(libraryId);
+            _context.Library.Remove(library);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         public async Task<IEnumerable<LibraryDto>> GetLibrariesAsync()
         {
             return await _context.Library
