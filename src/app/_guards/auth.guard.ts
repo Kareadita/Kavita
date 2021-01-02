@@ -13,7 +13,7 @@ export class AuthGuard implements CanActivate {
   constructor(private accountService: AccountService, private toastr: ToastrService) {}
 
   canActivate(): Observable<boolean> {
-    // this automaticallys subs due to being router guard
+    // TODO: on failure, can we bring them back to home to show login screen
     return this.accountService.currentUser$.pipe(
       map((user: User) => {
         if (user) {
