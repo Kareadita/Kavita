@@ -32,7 +32,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   seriesClicked(series: Series) {
-    this.router.navigateByUrl('/series/' + series.id);
+    this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
 }
