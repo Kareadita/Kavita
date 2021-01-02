@@ -25,6 +25,11 @@ export class LibraryComponent implements OnInit {
       this.user = user;
       this.libraryService.getLibrariesForMember(this.user.username).subscribe(libraries => {
         this.libraries = libraries;
+        if (this.libraries.length > 0) {
+          // TODO: Remove this debug code
+          console.warn('Warning, debug code is being used!');
+          this.libraries[0].coverImage = '/assets/images/mock-cover.jpg';
+        }
       });
     });
   }

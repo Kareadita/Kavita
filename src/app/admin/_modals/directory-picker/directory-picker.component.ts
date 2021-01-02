@@ -84,7 +84,9 @@ export class DirectoryPickerComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
 
-    this.modal.close({success: true, folderPath: folderName});
+    const fullPath = (this.routeStack.items.join('\\') + '\\' + folderName).replace('\\\\', '\\');
+
+    this.modal.close({success: true, folderPath: fullPath});
   }
 
   close() {

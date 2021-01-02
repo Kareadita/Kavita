@@ -40,16 +40,32 @@ export class LibraryCardComponent implements OnInit, OnChanges {
   }
 
   generateActions() {
-    this.actions = [];
+    this.actions = [
+      {
+        title: 'Mark as Read',
+        callback: () => this.markAsRead
+      },
+      {
+        title: 'Mark as Unread',
+        callback: () => this.markAsUnread
+      }
+    ];
 
     if (this.isAdmin) {
       this.actions.push({title: 'Scan Library', callback: (data: Library) => {
-        console.log('You tried to scan library: ' + data.name);
         this.libraryService.scan(data?.id).subscribe((res: any) => {
           this.toastr.success('Scan started for ' + data.name);
         });
       }});
     }
+  }
+
+  markAsUnread(library: any) {
+
+  }
+
+  markAsRead(library: any) {
+
   }
 
   handleClick() {

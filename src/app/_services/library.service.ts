@@ -37,4 +37,8 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
   }
 
+  create(model: {name: string, type: number, folders: string[]}) {
+    return this.httpClient.post(this.baseUrl + 'library/create', model);
+  }
+
 }
