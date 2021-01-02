@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using API.Entities.Interfaces;
 
 namespace API.Entities
 {
-    public class Series
+    public class Series : IEntityDate
     {
         public int Id { get; set; }
         /// <summary>
@@ -22,6 +24,8 @@ namespace API.Entities
         /// </summary>
         public string Summary { get; set; }
         public string CoverImage { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime LastModified { get; set; }
         public ICollection<Volume> Volumes { get; set; }
         
         public Library Library { get; set; }

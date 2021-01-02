@@ -1,16 +1,21 @@
-﻿using API.Entities;
+﻿using System;
+using API.Entities;
+using API.Entities.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace API.Data
 {
-    public class DataContext : IdentityDbContext<AppUser, AppRole, int, 
+    public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int, 
         IdentityUserClaim<int>, AppUserRole, IdentityUserLogin<int>,
         IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         public DataContext(DbContextOptions options) : base(options)
         {
+            ChangeTracker.Tracked += OnEntityTracked;
+            ChangeTracker.StateChanged += OnEntityStateChanged;
             
         }
         public DbSet<Library> Library { get; set; }
@@ -33,12 +38,18 @@ namespace API.Data
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
-            
-            // builder.Entity<Library>()
-            //     .HasMany(s => s.Series)
-            //     .WithOne(l => l.Library)
-            //     .HasForeignKey(x => x.Id)
-                
+        }
+        
+        void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+        {
+            if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
+                entity.Created = DateTime.Now;
+        }
+
+        void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+        {
+            if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
+                entity.LastModified = DateTime.Now;
         }
     }
 }

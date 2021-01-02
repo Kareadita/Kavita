@@ -223,7 +223,7 @@ namespace API.Services
            foreach (var seriesKey in series.Keys)
            {
               var s = UpdateSeries(seriesKey, series[seriesKey].ToArray());
-              Console.WriteLine($"Created/Updated series {s.Name}");
+              _logger.LogInformation($"Created/Updated series {s.Name}");
               libraryEntity.Series.Add(s);
            }
            
