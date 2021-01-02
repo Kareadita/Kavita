@@ -50,6 +50,7 @@ namespace API.Data
         {
             return await _context.Series
                 .Where(series => series.LibraryId == libraryId)
+                .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
@@ -57,6 +58,7 @@ namespace API.Data
         {
             return await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .OrderBy(volume => volume.Number)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
         
@@ -64,6 +66,7 @@ namespace API.Data
         {
             return _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .OrderBy(vol => vol.Number)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToList();
         }
         
@@ -71,6 +74,7 @@ namespace API.Data
         {
             return _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .OrderBy(vol => vol.Number)
                 .ToList();
         }
 

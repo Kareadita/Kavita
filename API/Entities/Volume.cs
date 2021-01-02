@@ -7,7 +7,8 @@ namespace API.Entities
     public class Volume : IEntityDate
     {
         public int Id { get; set; }
-        public string Number { get; set; }
+        public string Name { get; set; }
+        public int Number { get; set; }
         public ICollection<MangaFile> Files { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }

@@ -151,7 +151,7 @@ namespace API.Services
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
           foreach (var info in infos)
           {
-             var existingVolume = existingVolumes.SingleOrDefault(v => v.Number == info.Volumes);
+             var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
              if (existingVolume != null)
              {
                 // Temp let's overwrite all files (we need to enhance to update files)
@@ -168,7 +168,8 @@ namespace API.Services
              {
                 var vol = new Volume()
                 {
-                   Number = info.Volumes,
+                   Name = info.Volumes,
+                   Number = Int32.Parse(info.Volumes),
                    Files = new List<MangaFile>()
                    {
                       new MangaFile()

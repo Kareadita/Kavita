@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Entities.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 
 namespace API.Entities
 {
-    public class AppUser : IdentityUser<int>
+    public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     {
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime LastActive { get; set; }
-        public bool IsAdmin { get; set; }
         public ICollection<Library> Libraries { get; set; }
 
         [ConcurrencyCheck]

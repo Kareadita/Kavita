@@ -78,6 +78,8 @@ namespace API.Controllers
             user.LastActive = DateTime.Now;
             _userRepository.Update(user);
             await _userRepository.SaveAllAsync();
+            
+            _logger.LogInformation($"{user.UserName} logged in at {user.LastActive}");
 
             return new UserDto
             {
