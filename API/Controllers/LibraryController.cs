@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
@@ -34,6 +35,48 @@ namespace API.Controllers
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _seriesRepository = seriesRepository;
+        }
+        
+        /// <summary>
+        /// Creates a new Library. Upon library creation, adds new library to all Admin accounts.
+        /// </summary>
+        /// <param name="createLibraryDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("create")]
+        public async Task<ActionResult> AddLibrary(CreateLibraryDto createLibraryDto)
+        {
+            if (await _libraryRepository.LibraryExists(createLibraryDto.Name))
+            {
+                return BadRequest("Library name already exists. Please choose a unique name to the server.");
+            }
+
+            var admins = (await _userRepository.GetAdminUsersAsync()).ToList();
+            
+            var library = new Library
+            {
+                Name = createLibraryDto.Name,
+                Type = createLibraryDto.Type,
+                AppUsers = admins,
+                Folders = createLibraryDto.Folders.Select(x => new FolderPath {Path = x}).ToList()
+            };
+
+            foreach (var admin in admins)
+            {
+                // If user is null, then set it
+                admin.Libraries ??= new List<Library>();
+                admin.Libraries.Add(library);
+            }
+
+
+            if (await _userRepository.SaveAllAsync())
+            {
+                var createdLibrary = await _libraryRepository.GetLibraryForNameAsync(library.Name);
+                BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id));
+                return Ok();
+            }
+            
+            return BadRequest("There was a critical issue. Please try again.");
         }
 
         /// <summary>
@@ -85,28 +128,30 @@ namespace API.Controllers
         }
 
         [Authorize(Policy = "RequireAdminRole")]
-        [HttpGet("scan")]
-        public async Task<ActionResult> ScanLibrary(int libraryId)
+        [HttpPost("scan")]
+        public ActionResult ScanLibrary(int libraryId)
         {
-            var library = await _libraryRepository.GetLibraryDtoForIdAsync(libraryId);
-            
-            // We have to send a json encoded Library (aka a DTO) to the Background Job thread. 
-            // Because we use EF, we have circular dependencies back to Library and it will crap out
-            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library));
+            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId));
             return Ok();
         }
 
         [HttpGet("libraries-for")]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
         {
-            return Ok(await _libraryRepository.GetLibrariesForUsernameAysnc(username));
+            return Ok(await _libraryRepository.GetLibrariesDtoForUsernameAsync(username));
         }
 
         [HttpGet("series")]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
         {
-            return Ok(await _seriesRepository.GetSeriesForLibraryIdAsync(libraryId));
-
+            return Ok(await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId));
         }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpDelete("delete")]
+        public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
+        {
+            return Ok(await _libraryRepository.DeleteLibrary(libraryId));
+        } 
     }
 }

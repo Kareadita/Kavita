@@ -46,35 +46,31 @@ namespace API.Data
             return _context.Series.SingleOrDefault(x => x.Name == name);
         }
         
-        public async Task<IEnumerable<SeriesDto>> GetSeriesForLibraryIdAsync(int libraryId)
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId)
         {
             return await _context.Series
                 .Where(series => series.LibraryId == libraryId)
+                .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
 
-        public async Task<IEnumerable<VolumeDto>> GetVolumesAsync(int seriesId)
+        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId)
         {
             return await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .OrderBy(volume => volume.Number)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
-        
-        public IEnumerable<VolumeDto> GetVolumesDto(int seriesId)
-        {
-            return _context.Volume
-                .Where(vol => vol.SeriesId == seriesId)
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToList();
-        }
-        
+
         public IEnumerable<Volume> GetVolumes(int seriesId)
         {
             return _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .OrderBy(vol => vol.Number)
                 .ToList();
         }
 
-        public async Task<SeriesDto> GetSeriesByIdAsync(int seriesId)
+        public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId)
         {
             return await _context.Series.Where(x => x.Id == seriesId)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).SingleAsync();

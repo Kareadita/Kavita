@@ -10,16 +10,12 @@ namespace API.Interfaces
         void Update(Library library);
         Task<bool> SaveAllAsync();
         Task<IEnumerable<LibraryDto>> GetLibrariesAsync();
-        /// <summary>
-        /// Checks to see if a library of the same name exists. We only allow unique library names, no duplicates per LibraryType.
-        /// </summary>
-        /// <param name="libraryName"></param>
-        /// <returns></returns>
         Task<bool> LibraryExists(string libraryName);
-        Task<LibraryDto> GetLibraryDtoForIdAsync(int libraryId);
         Task<Library> GetLibraryForIdAsync(int libraryId);
         bool SaveAll();
-        Library GetLibraryForName(string libraryName);
-        Task<IEnumerable<LibraryDto>> GetLibrariesForUsernameAysnc(string userName);
+        Task<IEnumerable<LibraryDto>> GetLibrariesDtoForUsernameAsync(string userName);
+        Task<Library> GetLibraryForNameAsync(string libraryName);
+
+        Task<bool> DeleteLibrary(int libraryId);
     }
 }

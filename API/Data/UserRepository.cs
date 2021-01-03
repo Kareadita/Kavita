@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -53,6 +54,11 @@ namespace API.Data
         {
             return await _context.Users
                 .SingleOrDefaultAsync(x => x.UserName == username);
+        }
+
+        public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         }
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()

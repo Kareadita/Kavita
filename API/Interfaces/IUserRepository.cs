@@ -15,5 +15,6 @@ namespace API.Interfaces
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
         Task<MemberDto> GetMemberAsync(string username);
         public void Delete(AppUser user);
+        Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     }
 }

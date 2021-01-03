@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using API.DTOs;
 
 namespace API.Interfaces
 {
@@ -7,6 +6,6 @@ namespace API.Interfaces
     {
         IEnumerable<string> ListDirectory(string rootPath);
 
-        void ScanLibrary(LibraryDto library);
+        void ScanLibrary(int libraryId);
     }
 }
