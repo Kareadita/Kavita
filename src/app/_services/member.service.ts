@@ -19,7 +19,7 @@ export class MemberService {
   adminExists() {
     return this.httpClient.get<boolean>(this.baseUrl + 'admin/exists');
   }
-
+  
   deleteMember(username: string) {
     return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + username);
   }

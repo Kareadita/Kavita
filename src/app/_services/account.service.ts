@@ -21,6 +21,10 @@ export class AccountService {
   constructor(private httpClient: HttpClient) { 
   }
 
+  hasAdminRole(user: User) {
+    return user && user.roles.includes('Admin');
+  }
+
   login(model: any): Observable<any> {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {

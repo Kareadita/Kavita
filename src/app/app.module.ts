@@ -15,6 +15,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
+import { LibraryDetailComponent } from './library-detail/library-detail.component';
+import { SeriesDetailComponent } from './series-detail/series-detail.component';
 
 
 
@@ -25,6 +27,8 @@ import { SharedModule } from './shared/shared.module';
     NavHeaderComponent,
     UserLoginComponent,
     LibraryComponent,
+    LibraryDetailComponent,
+    SeriesDetailComponent,
   ],
   imports: [
     HttpClientModule,

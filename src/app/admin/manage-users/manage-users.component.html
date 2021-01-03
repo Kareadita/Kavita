@@ -13,7 +13,6 @@
                     {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
                     <div class="pull-right" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)"><i class="fa fa-trash" title="Delete {{member.username | titlecase}}"></i></button>
-                        <!-- <button class="btn btn-primary" (click)="openChangeRole(member)"><i class="fa fa-pencil"></i>{{member.roles.includes('Admin') ? 'Demote' : 'Promote'}}</button> -->
                         <button class="btn btn-primary" (click)="openEditLibraryAccess(member)"><i class="fa fa-pencil" title="Edit {{member.username | titlecase}}"></i></button>
                     </div>
                 </h4>
