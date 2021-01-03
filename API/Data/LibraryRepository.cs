@@ -30,6 +30,28 @@ namespace API.Data
         {
             return await _context.SaveChangesAsync() > 0;
         }
+        
+        public bool SaveAll()
+        {
+            return _context.SaveChanges() > 0;
+        }
+
+        public Library GetLibraryForName(string libraryName)
+        {
+            return _context.Library
+                .Where(x => x.Name == libraryName)
+                .Include(f => f.Folders)
+                .Include(s => s.Series)
+                .Single();
+        }
+
+        public async Task<IEnumerable<LibraryDto>> GetLibrariesForUsernameAysnc(string userName)
+        {
+            return await _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(x => x.UserName == userName))
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
+        }
 
         public async Task<IEnumerable<LibraryDto>> GetLibrariesAsync()
         {
@@ -38,7 +60,7 @@ namespace API.Data
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
         }
         
-        public async Task<LibraryDto> GetLibraryForIdAsync(int libraryId)
+        public async Task<LibraryDto> GetLibraryDtoForIdAsync(int libraryId)
         {
             return await _context.Library
                 .Where(x => x.Id == libraryId)
@@ -46,7 +68,14 @@ namespace API.Data
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).SingleAsync();
         }
         
-
+        public async Task<Library> GetLibraryForIdAsync(int libraryId)
+        {
+            return await _context.Library
+                .Where(x => x.Id == libraryId)
+                .Include(f => f.Folders)
+                .SingleAsync();
+        }
+        
         public async Task<bool> LibraryExists(string libraryName)
         {
             return await _context.Library.AnyAsync(x => x.Name == libraryName);

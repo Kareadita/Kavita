@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Tasks" />
+    <None Remove="Hangfire-log.db" />
   </ItemGroup>
 
 </Project>

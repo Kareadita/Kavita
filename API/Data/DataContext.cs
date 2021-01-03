@@ -14,6 +14,9 @@ namespace API.Data
             
         }
         public DbSet<Library> Library { get; set; }
+        public DbSet<Series> Series { get; set; }
+        public DbSet<Volume> Volume { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -30,6 +33,12 @@ namespace API.Data
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
+            
+            // builder.Entity<Library>()
+            //     .HasMany(s => s.Series)
+            //     .WithOne(l => l.Library)
+            //     .HasForeignKey(x => x.Id)
+                
         }
     }
 }
