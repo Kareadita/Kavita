@@ -33,6 +33,20 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/update-for', {username, selectedLibraries});
   }
 
+  scan(libraryId: number) {
+    return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
+  }
 
+  create(model: {name: string, type: number, folders: string[]}) {
+    return this.httpClient.post(this.baseUrl + 'library/create', model);
+  }
+
+  delete(libraryId: number) {
+    return this.httpClient.delete(this.baseUrl + 'library/delete?libraryId=' + libraryId, {});
+  }
+
+  update(model: {name: string, folders: string[], id: number}) {
+    return this.httpClient.post(this.baseUrl + 'library/update', model);
+  }
 
 }

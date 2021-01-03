@@ -9,7 +9,7 @@ import { LibraryEditorModalComponent } from './_modals/library-editor-modal/libr
 import { SharedModule } from '../shared/shared.module';
 import { LibraryAccessModalComponent } from './_modals/library-access-modal/library-access-modal.component';
 import { DirectoryPickerComponent } from './_modals/directory-picker/directory-picker.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -25,9 +25,10 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     AdminRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
     NgbNavModule,
     SharedModule,
-    FormsModule
   ],
   providers: []
 })

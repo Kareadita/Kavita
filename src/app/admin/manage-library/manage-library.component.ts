@@ -19,25 +19,42 @@ export class ManageLibraryComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.getLibraries();
+
+  }
+
+  getLibraries() {
     this.libraryService.getLibraries().subscribe(libraries => {
       this.libraries = libraries;
     });
+  }
 
+  editLibrary(library: Library) {
+    const modalRef = this.modalService.open(LibraryEditorModalComponent);
+    console.log('component instance: ', modalRef.componentInstance);
+    modalRef.componentInstance.library = library;
+    modalRef.closed.subscribe(refresh => {
+      if (refresh) {
+        this.getLibraries();
+      }
+    });
   }
 
   addLibrary() {
     const modalRef = this.modalService.open(LibraryEditorModalComponent);
-  }
-
-  addFolder(library: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
-    modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
-      console.log('Closed Result', closeResult);
-      if (closeResult.success) {
-        console.log('Add folder path to Library');
+    modalRef.closed.subscribe(refresh => {
+      if (refresh) {
+        this.getLibraries();
       }
     });
+  }
 
+  deleteLibrary(library: Library) {
+    if (confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
+      this.libraryService.delete(library.id).subscribe(() => {
+        this.getLibraries();
+      });
+    }
   }
 
 }

@@ -1,6 +1,7 @@
 export interface Volume {
     id: number;
-    number: string;
+    number: number;
+    name: string;
     files: Array<string>;
     coverImage: string;
 }

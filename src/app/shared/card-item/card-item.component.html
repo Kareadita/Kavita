@@ -1,17 +1,24 @@
 <div class="card" style="width: 18rem;">
+    <!-- TODO: I need an anchor around this so you can open in new page easily -->
     <img (click)="handleClick()" class="card-img-top" src="{{isNullOrEmpty(imageUrl) ? placeholderImage : imageUrl}}" alt="{{title}}">
 
     <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
-        <h5 class="card-title" (click)="handleClick()">{{title}}</h5>
-        <ng-container *ngIf="actions.length > 0">
-            <div class="col">
-                <div ngbDropdown class="d-inline-block">
+      
+        <span class="card-title" (click)="handleClick()">
+          {{title}}
+        </span>
+        <div class="pull-right">
+          <ng-container *ngIf="actions.length > 0">
+                <div ngbDropdown container="body" class="d-inline-block">
                   <button class="btn" id="actions-{{title}}" ngbDropdownToggle><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
                   <div ngbDropdownMenu attr.aria-labelledby="actions-{{title}}">
                     <button ngbDropdownItem *ngFor="let action of actions" (click)="performAction($event, action)">{{action.title}}</button>
                   </div>
                 </div>
-            </div>
-        </ng-container>
+          </ng-container>
+        </div>
+      
+        
+        
     </div>
 </div>
