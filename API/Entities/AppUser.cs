@@ -12,7 +12,6 @@ namespace API.Entities
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime LastActive { get; set; }
         public ICollection<Library> Libraries { get; set; }
-
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
         
