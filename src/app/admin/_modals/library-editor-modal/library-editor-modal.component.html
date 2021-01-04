@@ -7,6 +7,9 @@
         </button>
     </div>
     <div class="modal-body">
+        <div class="alert alert-info" *ngIf="errorMessage !== ''">
+            <strong>Error: </strong> {{errorMessage}}
+        </div>
         <div class="form-group">
             <label for="library-name">Name</label>
             <input id="library-name" class="form-control" formControlName="name" type="text">
@@ -25,13 +28,13 @@
         <div class="list-group">
             <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
                 {{folder}}
-                <!-- TODO: Implement ability to remove folders added-->
+                <button class="btn pull-right mr-2 btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle"></i></button>
             </li>
         </div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
         <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-        <button type="submit" class="btn btn-primary" (click)="submitLibrary()">Save</button>
+        <button type="submit" class="btn btn-primary" (click)="submitLibrary()" [disabled]="!libraryForm.dirty">Save</button>
     </div>
 </form>

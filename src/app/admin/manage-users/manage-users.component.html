@@ -16,7 +16,7 @@
                         <button class="btn btn-primary" (click)="openEditLibraryAccess(member)"><i class="fa fa-pencil" title="Edit {{member.username | titlecase}}"></i></button>
                     </div>
                 </h4>
-                <div>Last Active: {{member.lastActive | date}}</div>
+                <div>Last Active: {{member.lastActive | date: 'dd/MM/yyyy'}}</div>
                 <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
             </div>
 

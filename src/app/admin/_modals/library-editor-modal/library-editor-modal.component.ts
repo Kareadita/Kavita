@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Library } from 'src/app/_models/library';
@@ -10,7 +10,7 @@ import { DirectoryPickerComponent, DirectoryPickerResult } from '../directory-pi
   templateUrl: './library-editor-modal.component.html',
   styleUrls: ['./library-editor-modal.component.scss']
 })
-export class LibraryEditorModalComponent implements OnInit, OnChanges {
+export class LibraryEditorModalComponent implements OnInit {
 
   @Input() library: Library | undefined = undefined;
 
@@ -20,6 +20,7 @@ export class LibraryEditorModalComponent implements OnInit, OnChanges {
   });
 
   selectedFolders: string[] = [];
+  errorMessage = '';
 
   constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal) { }
 
@@ -27,27 +28,37 @@ export class LibraryEditorModalComponent implements OnInit, OnChanges {
     this.setValues();
   }
 
-  ngOnChanges() {
-    console.log('Library: ', this.library);
+
+  removeFolder(folder: string) {
+    this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
   }
 
   submitLibrary() {
     const model = this.libraryForm.value;
     model.folders = this.selectedFolders;
 
+    if (this.libraryForm.errors) {
+      return;
+    }
+
     if (this.library !== undefined) {
       model.id = this.library.id;
       this.libraryService.update(model).subscribe(() => {
         this.close(true);
+      }, err => {
+        this.errorMessage = err;
       });
     } else {
       this.libraryService.create(model).subscribe(() => {
         this.close(true);
+      }, err => {
+        this.errorMessage = err;
       });
     }
   }
 
   close(returnVal= false) {
+    const model = this.libraryForm.value;
     this.modal.close(returnVal);
   }
 
