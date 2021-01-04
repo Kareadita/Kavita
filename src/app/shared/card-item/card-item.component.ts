@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 
 export interface CardItemAction {
@@ -19,12 +20,13 @@ export class CardItemComponent implements OnInit {
   @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed.
   @Output() clicked = new EventEmitter<string>();
 
-
+  safeImage: any;
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
-  constructor() { }
+  constructor(private sanitizer: DomSanitizer) { }
 
   ngOnInit(): void {
+    this.createSafeImage(this.imageUrl);
   }
 
   handleClick() {
@@ -40,6 +42,11 @@ export class CardItemComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(this.entity);
     }
+  }
+
+  createSafeImage(coverImage: string) {
+    let imageUrl = 'data:image/jpeg;base64,' + coverImage;  
+    this.safeImage = this.sanitizer.bypassSecurityTrustUrl(imageUrl);
   }
 
 }

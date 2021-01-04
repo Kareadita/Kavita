@@ -1,6 +1,6 @@
 <div class="card" style="width: 18rem;">
     <!-- TODO: I need an anchor around this so you can open in new page easily -->
-    <img (click)="handleClick()" class="card-img-top" src="{{isNullOrEmpty(imageUrl) ? placeholderImage : imageUrl}}" alt="{{title}}">
+    <img (click)="handleClick()" class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}">
 
     <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
       
