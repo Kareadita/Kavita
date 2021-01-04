@@ -12,5 +12,6 @@ namespace API.Parser
         // This can be multiple
         public string Volumes { get; set; }
         public string File { get; init; }
+        public string FullFilePath { get; set; }
     }
 }

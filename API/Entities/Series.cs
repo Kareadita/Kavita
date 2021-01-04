@@ -23,14 +23,11 @@ namespace API.Entities
         /// Summary information related to the Series
         /// </summary>
         public string Summary { get; set; }
-        public string CoverImage { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
+        public byte[] CoverImage { get; set; }
         public ICollection<Volume> Volumes { get; set; }
-        
         public Library Library { get; set; }
         public int LibraryId { get; set; }
-        
-        
     }
 }
