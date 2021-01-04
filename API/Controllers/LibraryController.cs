@@ -106,15 +106,15 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPut("update-for")]
-        public async Task<ActionResult<MemberDto>> UpdateLibrary(UpdateLibraryDto updateLibraryDto)
+        public async Task<ActionResult<MemberDto>> AddLibraryToUser(UpdateLibraryForUserDto updateLibraryForUserDto)
         {
-            var user = await _userRepository.GetUserByUsernameAsync(updateLibraryDto.Username);
+            var user = await _userRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
 
             if (user == null) return BadRequest("Could not validate user");
 
             user.Libraries = new List<Library>();
 
-            foreach (var selectedLibrary in updateLibraryDto.SelectedLibraries)
+            foreach (var selectedLibrary in updateLibraryForUserDto.SelectedLibraries)
             {
                 user.Libraries.Add(_mapper.Map<Library>(selectedLibrary));
             }
@@ -152,6 +152,35 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
         {
             return Ok(await _libraryRepository.DeleteLibrary(libraryId));
-        } 
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("update")]
+        public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
+        {
+            var library = await _libraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id);
+
+            var originalFolders = library.Folders.Select(x => x.Path);
+            var differenceBetweenFolders = originalFolders.Except(libraryForUserDto.Folders);
+
+            library.Name = libraryForUserDto.Name;
+            library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
+            
+            
+            
+            _libraryRepository.Update(library);
+
+            if (await _libraryRepository.SaveAllAsync())
+            {
+                if (differenceBetweenFolders.Any())
+                {
+                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id));    
+                }
+                
+                return Ok();
+            }
+            
+            return BadRequest("There was a critical issue updating the library.");
+        }
     }
 }
