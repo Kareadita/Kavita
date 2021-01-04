@@ -159,14 +159,24 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
         {
             var library = await _libraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id);
+
+            var originalFolders = library.Folders.Select(x => x.Path);
+            var differenceBetweenFolders = originalFolders.Except(libraryForUserDto.Folders);
+
             library.Name = libraryForUserDto.Name;
             library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
+            
+            
             
             _libraryRepository.Update(library);
 
             if (await _libraryRepository.SaveAllAsync())
             {
-                // TODO: We should probably call ScanLibrary after this
+                if (differenceBetweenFolders.Any())
+                {
+                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id));    
+                }
+                
                 return Ok();
             }
             
