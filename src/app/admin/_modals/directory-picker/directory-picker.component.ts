@@ -80,7 +80,6 @@ export class DirectoryPickerComponent implements OnInit {
   }
 
   shareFolder(folderName: string, event: any) {
-    console.log(`You selected ${folderName} as your folder to share!`);
     event.preventDefault();
     event.stopPropagation();
 

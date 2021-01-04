@@ -5,12 +5,15 @@
         <!-- <li class="nav-item">
           <input type="text" placeholder="Search bar">
         </li> -->
-
       </ul>
+      <div class="container-fluid" style="max-width: 400px">
+        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <!-- TODO: Implement autocomplete for searching -->
+      </div>
 
       <!-- TODO: Put SignalR notification button dropdown here. -->
 
-      <div ngbDropdown class=" nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+      <div ngbDropdown class="nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
           <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>
