@@ -9,7 +9,7 @@
                 <h4>
                     {{library.name | titlecase}}
                     <div class="pull-right">
-                        <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)"><i class="fa fa-sync-alt" title="Scan"></i></button>
+                        <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)"><i class="fa fa-refresh" title="Scan"></i></button>
                         <button class="btn btn-danger mr-2 btn-sm" (click)="deleteLibrary(library)"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
                         <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pencil" title="Edit {{library.name | titlecase}}"></i></button>
                     </div>
