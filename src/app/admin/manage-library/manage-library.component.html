@@ -5,18 +5,15 @@
     </div>
     <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
         <li *ngFor="let library of libraries" class="list-group-item">
-            <!-- We can move this into a view-member component -->
             <div>
                 <h4>
                     {{library.name | titlecase}}
                     <div class="pull-right">
+                        <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)"><i class="fa fa-sync-alt" title="Scan"></i></button>
                         <button class="btn btn-danger mr-2 btn-sm" (click)="deleteLibrary(library)"><i class="fa fa-trash" title="Delete {{library.name | titlecase}}"></i></button>
                         <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pencil" title="Edit {{library.name | titlecase}}"></i></button>
                     </div>
                 </h4>
-                <!-- <div>Last Active: {{member.lastActive | date}}</div>
-                <div *ngIf="!member.isAdmin">Sharing: {{member?.libraries ? member?.libraries : 'None'}}</div> -->
-
             </div>
         </li>
     </ul>
