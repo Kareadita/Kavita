@@ -82,5 +82,15 @@ namespace API.Tests
         {
             Assert.Equal(expected, CleanTitle(input));
         }
+        
+        [Theory]
+        [InlineData("test.cbz", true)]
+        [InlineData("test.cbr", true)]
+        [InlineData("test.zip", true)]
+        [InlineData("test.rar", true)]
+        public void IsArchiveTest(string input, bool expected)
+        {
+            Assert.Equal(expected, IsArchive(input));
+        }
     }
 }

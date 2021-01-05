@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
+using API.IO;
 using API.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -183,7 +183,7 @@ namespace API.Services
                 {
                    Name = info.Volumes,
                    Number = Int32.Parse(info.Volumes),
-                   CoverImage = getCoverImage(info.FullFilePath),
+                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath),
                    Files = new List<MangaFile>()
                    {
                       new MangaFile()
@@ -352,31 +352,8 @@ namespace API.Services
             Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
         }
 
-        /// <summary>
-        /// Generates byte array of cover image.
-        /// Looks for first valid image file (folder.png, first jpg/png file)
-        /// </summary>
-        /// <param name="filepath"></param>
-        /// <returns></returns>
-        private byte[] getCoverImage(string filepath)
-        {
-           // TODO: Sort and file type
-           // if file not zip (folder or txt)
-           using (ZipArchive archive = ZipFile.OpenRead(filepath))
-           {
+        
 
-              if (archive.Entries.Count <= 0) {return null;}
-              var stream = archive.Entries[0].Open();
-              byte[] data;
-              using (var ms = new MemoryStream())
-              {
-                 stream.CopyTo(ms);
-                 data = ms.ToArray();
-              }
-
-              return data;
-           }
-         
-        }
+        
     }
 }
