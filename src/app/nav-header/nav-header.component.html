@@ -2,17 +2,16 @@
     <div class="container">
       <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home"></i> Kavita</a>
       <ul class="navbar-nav mr-auto">
-        <!-- <li class="nav-item">
-          <input type="text" placeholder="Search bar">
-        </li> -->
+
+        <div class="nav-item">
+          <div class="col-xs-4">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          </div>
+        </div>
       </ul>
-      <div class="container-fluid" style="max-width: 400px">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <!-- TODO: Implement autocomplete for searching -->
-      </div>
+      
 
       <!-- TODO: Put SignalR notification button dropdown here. -->
-
       <div ngbDropdown class="nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
@@ -20,6 +19,7 @@
           <button ngbDropdownItem (click)="logout()">Logout</button>
         </div>
       </div>
+      
   
     </div>
   </nav>

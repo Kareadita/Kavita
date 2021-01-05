@@ -1,15 +1,52 @@
+$primary-color: #cc7b19;
+
 .card {
     margin: 10px;
     // max-width: 130px;
     // max-height: 195px;
     max-width: 160px;
-    max-height: 320px;
+    //max-height: 320px;
 
     // 370 x 210 roughly
 }
 
 .card-title {
     margin-top: 5px;
+    line-height: 20px;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-width: 150px;
+    height: 52px;
+    padding-top: 10px;
+}
+
+.card-img-top {
+    height: 230px;
+}
+
+.overlay {
+    height: 230px;
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+        visibility: visible;
+
+        .overlay-item {
+            visibility: visible;
+        }
+    }
+    
+    .overlay-item {
+        visibility: hidden;
+    }
+    
+    z-index: 10;
+}
+
+.card-actions {
+    position: absolute;
+    top: 195px;
+    right: -5px;
 }
 
 .card-body {
