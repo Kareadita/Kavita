@@ -37,16 +37,21 @@ export class CardItemComponent implements OnInit {
     return val === null || val === undefined || val === '';
   }
 
-  performAction(event: any, action: CardItemAction) {
+  preventClick(event: any) {
     event.stopPropagation();
+    event.preventDefault();
+  }
+
+  performAction(event: any, action: CardItemAction) {
+    this.preventClick(event);
+
     if (typeof action.callback === 'function') {
       action.callback(this.entity);
     }
   }
 
   createSafeImage(coverImage: string) {
-    let imageUrl = 'data:image/jpeg;base64,' + coverImage;  
-    this.safeImage = this.sanitizer.bypassSecurityTrustUrl(imageUrl);
+    this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + coverImage);
   }
 
 }
