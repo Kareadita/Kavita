@@ -12,6 +12,7 @@ using API.Entities;
 using API.Interfaces;
 using API.IO;
 using API.Parser;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -21,7 +22,7 @@ namespace API.Services
        private readonly ILogger<DirectoryService> _logger;
        private readonly ISeriesRepository _seriesRepository;
        private readonly ILibraryRepository _libraryRepository;
-       
+
        private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
 
        public DirectoryService(ILogger<DirectoryService> logger, 
@@ -70,67 +71,45 @@ namespace API.Services
 
 
        /// <summary>
-       /// Processes files found during a library scan. 
+       /// Processes files found during a library scan. Generates a collection of series->volume->files for DB processing later.
        /// </summary>
-       /// <param name="path"></param>
+       /// <param name="path">Path of a file</param>
        private void Process(string path)
        {
-          // NOTE: In current implementation, this never runs. We can probably remove. 
-          if (Directory.Exists(path))
+          var fileName = Path.GetFileName(path);
+          _logger.LogDebug($"Parsing file {fileName}");
+
+          var info = Parser.Parser.Parse(fileName);
+          info.FullFilePath = path;
+          if (info.Volumes == string.Empty)
           {
-             DirectoryInfo di = new DirectoryInfo(path);
-             _logger.LogDebug($"Parsing directory {di.Name}");
+             return;
+          }
 
-             var seriesName = Parser.Parser.ParseSeries(di.Name);
-             if (string.IsNullOrEmpty(seriesName))
+          ConcurrentBag<ParserInfo> tempBag;
+          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
+          if (_scannedSeries.TryGetValue(info.Series, out tempBag))
+          {
+             var existingInfos = tempBag.ToArray();
+             foreach (var existingInfo in existingInfos)
              {
-                return;
-             }
-
-             // We don't need ContainsKey, this is a race condition. We can replace with TryAdd instead
-             if (!_scannedSeries.ContainsKey(seriesName))
-             {
-                _scannedSeries.TryAdd(seriesName, new ConcurrentBag<ParserInfo>());
+                newBag.Add(existingInfo);
              }
           }
           else
           {
-             var fileName = Path.GetFileName(path);
-             _logger.LogDebug($"Parsing file {fileName}");
+             tempBag = new ConcurrentBag<ParserInfo>();
+          }
 
-             var info = Parser.Parser.Parse(fileName);
-             info.FullFilePath = path;
-             if (info.Volumes == string.Empty)
-             {
-                return;
-             }
+          newBag.Add(info);
 
-             ConcurrentBag<ParserInfo> tempBag;
-             ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-             if (_scannedSeries.TryGetValue(info.Series, out tempBag))
-             {
-                var existingInfos = tempBag.ToArray();
-                foreach (var existingInfo in existingInfos)
-                {
-                   newBag.Add(existingInfo);
-                }
-             }
-             else
-             {
-                tempBag = new ConcurrentBag<ParserInfo>();
-             }
-
-             newBag.Add(info);
-
-             if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
-             {
-                _scannedSeries.TryAdd(info.Series, newBag);
-             }
-
+          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
+          {
+             _scannedSeries.TryAdd(info.Series, newBag);
           }
        }
        
-       private Series UpdateSeries(string seriesName, ParserInfo[] infos)
+       private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
        {
           var series = _seriesRepository.GetSeriesByName(seriesName);
 
@@ -145,8 +124,9 @@ namespace API.Services
              };
           }
           
-          var volumes = UpdateVolumes(series, infos);
+          var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
+          // TODO: Instead of taking first entry, re-calculate without compression 
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
           return series;
        }
@@ -156,12 +136,13 @@ namespace API.Services
        /// </summary>
        /// <param name="series">Series wanting to be updated</param>
        /// <param name="infos">Parser info</param>
+       /// <param name="forceUpdate">Forces metadata update (cover image) even if it's already been set.</param>
        /// <returns>Updated Volumes for given series</returns>
-       private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos)
+       private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos, bool forceUpdate)
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
-          //IList<Volume> existingVolumes = Task.Run(() => _seriesRepository.GetVolumesAsync(series.Id)).Result.ToList();
+          
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
@@ -175,6 +156,11 @@ namespace API.Services
                       FilePath = info.File
                    }
                 };
+
+                if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
+                {
+                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
+                }
                 volumes.Add(existingVolume);
              }
              else
@@ -183,7 +169,7 @@ namespace API.Services
                 {
                    Name = info.Volumes,
                    Number = Int32.Parse(info.Volumes),
-                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath),
+                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
                    Files = new List<MangaFile>()
                    {
                       new MangaFile()
@@ -201,7 +187,7 @@ namespace API.Services
           return volumes;
        }
 
-        public void ScanLibrary(int libraryId)
+        public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
            var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
@@ -234,7 +220,7 @@ namespace API.Services
            library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
-              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray());
+              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
               _logger.LogInformation($"Created/Updated series {s.Name}");
               library.Series.Add(s);
            }
@@ -251,7 +237,6 @@ namespace API.Services
            {
               _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
            }
-           
 
            _scannedSeries = null;
         }
@@ -351,9 +336,6 @@ namespace API.Services
             // For diagnostic purposes.
             Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
         }
-
-        
-
         
     }
 }

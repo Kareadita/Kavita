@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using API.IO;
+using NetVips;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {
@@ -10,6 +12,8 @@ namespace API.Tests.Services
         [Theory]
         [InlineData("v10.cbz", "v10.expected.jpg")]
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
+        //[InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
+        [InlineData("Akame ga KILL! ZERO v06 (2017) (Digital) (LuCaZ).cbz", "Akame ga KILL! ZERO v06 (2017) (Digital) (LuCaZ).expected.jpg")]
         public void GetCoverImageTest(string inputFile, string expectedOutputFile)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ImageProvider");

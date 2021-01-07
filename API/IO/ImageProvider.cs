@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using NetVips;
 
 namespace API.IO
 {
@@ -13,28 +14,51 @@ namespace API.IO
         /// a folder.extension exists in the root directory of the compressed file.
         /// </summary>
         /// <param name="filepath"></param>
+        /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
         /// <returns></returns>
-        public static byte[] GetCoverImage(string filepath)
+        public static byte[] GetCoverImage(string filepath, bool createThumbnail = false)
         {
             if (!File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
             using ZipArchive archive = ZipFile.OpenRead(filepath);
             if (archive.Entries.Count <= 0) return Array.Empty<byte>();
+            
+            
 
             var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-            var entry = archive.Entries[0];
-              
+            var entry = archive.Entries.OrderBy(x => x.FullName).ToList()[0];
+
             if (folder != null)
             {
                 entry = folder;
             }
-              
-            return ExtractEntryToImage(entry);
-        }
 
+            if (entry.FullName.EndsWith(Path.PathSeparator))
+            {
+                // TODO: Implement nested directory support
+            }
+
+            if (createThumbnail)
+            {
+                try
+                {
+                    using var stream = entry.Open();
+                    var thumbnail = Image.ThumbnailStream(stream, 320); 
+                    Console.WriteLine(thumbnail.ToString());
+                    return thumbnail.WriteToBuffer(".jpg");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("There was a critical error and prevented thumbnail generation.");
+                }
+            }
+            
+            return  ExtractEntryToImage(entry);
+        }
+        
         private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)
         {
-            var stream = entry.Open();
+            using var stream = entry.Open();
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
             var data = ms.ToArray();
