@@ -2,8 +2,12 @@
     <ng-container *ngIf="isLoading">
         Loading indicator here
     </ng-container>
+
+    <div (click)="nextPage()">
+        <canvas #content></canvas>
     
-    <canvas #content></canvas>
+        <!-- <img [src]="imageUrl" [width]="width" [height]="height"> -->
+    </div>
     
-    <img [src]="imageUrl" [width]="width" [height]="height">
+    
 </div>

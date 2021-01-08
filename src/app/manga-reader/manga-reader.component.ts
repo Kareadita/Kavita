@@ -47,12 +47,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit {
 
     this.readerService.getMangaInfo(this.volumeId).subscribe(numOfPages => {
       console.log('Number of pages: ', numOfPages);
-      this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
-        const reader = new FileReader();
-        const that = this;
-        this.isLoading = false;
-        this.renderPage(image, '');
-      });
+      this.loadPage();
     });
 
   }
@@ -80,12 +75,35 @@ export class MangaReaderComponent implements OnInit, AfterViewInit {
     this.height = image.height;
 
     console.log('image', image);
+    const that = this;
     const img = new Image();
+    img.onload = () => {
+      if (that.ctx) {
+        that.ctx.drawImage(img, 0, 0);
+      }
+    };
+
     img.src = 'data:image/jpeg;base64,' + image.content;
+    
     this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(img.src);
 
-    this.ctx.drawImage(img, 0, 0); // , image.width, image.height
+    //this.ctx.drawImage(img, 0, 0); // , image.width, image.height
     
+  }
+
+  nextPage() {
+    this.pageNum++;
+    this.loadPage();
+  }
+
+  loadPage() {
+    this.isLoading = true;
+    this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
+      const reader = new FileReader();
+      const that = this;
+      this.isLoading = false;
+      this.renderPage(image, '');
+    });
   }
 
 }
