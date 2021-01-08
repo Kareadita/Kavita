@@ -66,6 +66,7 @@ namespace API.Data
         {
             return _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .Include(vol => vol.Files)
                 .OrderBy(vol => vol.Number)
                 .ToList();
         }

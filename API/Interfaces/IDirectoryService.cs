@@ -6,6 +6,6 @@ namespace API.Interfaces
     {
         IEnumerable<string> ListDirectory(string rootPath);
 
-        void ScanLibrary(int libraryId);
+        void ScanLibrary(int libraryId, bool forceUpdate);
     }
 }

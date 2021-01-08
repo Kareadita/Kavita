@@ -10,7 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
+using API.IO;
 using API.Parser;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -20,9 +22,12 @@ namespace API.Services
        private readonly ILogger<DirectoryService> _logger;
        private readonly ISeriesRepository _seriesRepository;
        private readonly ILibraryRepository _libraryRepository;
+
        private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
 
-       public DirectoryService(ILogger<DirectoryService> logger, ISeriesRepository seriesRepository, ILibraryRepository libraryRepository)
+       public DirectoryService(ILogger<DirectoryService> logger, 
+          ISeriesRepository seriesRepository, 
+          ILibraryRepository libraryRepository)
        {
           _logger = logger;
           _seriesRepository = seriesRepository;
@@ -45,10 +50,7 @@ namespace API.Services
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
-
        
-       
-
        /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
@@ -69,69 +71,47 @@ namespace API.Services
 
 
        /// <summary>
-       /// Processes files found during a library scan. 
+       /// Processes files found during a library scan. Generates a collection of series->volume->files for DB processing later.
        /// </summary>
-       /// <param name="path"></param>
+       /// <param name="path">Path of a file</param>
        private void Process(string path)
        {
-          // NOTE: In current implementation, this never runs. We can probably remove. 
-          if (Directory.Exists(path))
-          {
-             DirectoryInfo di = new DirectoryInfo(path);
-             _logger.LogDebug($"Parsing directory {di.Name}");
+          var fileName = Path.GetFileName(path);
+          _logger.LogDebug($"Parsing file {fileName}");
 
-             var seriesName = Parser.Parser.ParseSeries(di.Name);
-             if (string.IsNullOrEmpty(seriesName))
+          var info = Parser.Parser.Parse(fileName);
+          info.FullFilePath = path;
+          if (info.Volumes == string.Empty)
+          {
+             return;
+          }
+
+          ConcurrentBag<ParserInfo> tempBag;
+          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
+          if (_scannedSeries.TryGetValue(info.Series, out tempBag))
+          {
+             var existingInfos = tempBag.ToArray();
+             foreach (var existingInfo in existingInfos)
              {
-                return;
-             }
-            
-             // We don't need ContainsKey, this is a race condition. We can replace with TryAdd instead
-             if (!_scannedSeries.ContainsKey(seriesName))
-             {
-                _scannedSeries.TryAdd(seriesName, new ConcurrentBag<ParserInfo>());
+                newBag.Add(existingInfo);
              }
           }
           else
           {
-             var fileName = Path.GetFileName(path);
-             _logger.LogDebug($"Parsing file {fileName}");
-             
-             var info = Parser.Parser.Parse(fileName);
-             if (info.Volumes != string.Empty)
-             {
-                ConcurrentBag<ParserInfo> tempBag;
-                ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-                if (_scannedSeries.TryGetValue(info.Series, out tempBag))
-                {
-                   var existingInfos = tempBag.ToArray();
-                   foreach (var existingInfo in existingInfos)
-                   {
-                      newBag.Add(existingInfo);
-                   }
-                }
-                else
-                {
-                   tempBag = new ConcurrentBag<ParserInfo>();
-                }
-                
-                newBag.Add(info);
+             tempBag = new ConcurrentBag<ParserInfo>();
+          }
 
-                if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
-                {
-                   _scannedSeries.TryAdd(info.Series, newBag);
-                }
-                
-             }
-             
-             
+          newBag.Add(info);
+
+          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
+          {
+             _scannedSeries.TryAdd(info.Series, newBag);
           }
        }
-
-       private Series UpdateSeries(string seriesName, ParserInfo[] infos)
+       
+       private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
        {
           var series = _seriesRepository.GetSeriesByName(seriesName);
-          ICollection<Volume> volumes = new List<Volume>();
 
           if (series == null)
           {
@@ -140,14 +120,29 @@ namespace API.Services
                 Name = seriesName,
                 OriginalName = seriesName,
                 SortName = seriesName,
-                Summary = "",
+                Summary = ""
              };
           }
-
           
-          // BUG: This is creating new volume entries and not resetting each run.
+          var volumes = UpdateVolumes(series, infos, forceUpdate);
+          series.Volumes = volumes;
+          // TODO: Instead of taking first entry, re-calculate without compression 
+          series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
+          return series;
+       }
+
+       /// <summary>
+       /// Creates or Updates volumes for a given series
+       /// </summary>
+       /// <param name="series">Series wanting to be updated</param>
+       /// <param name="infos">Parser info</param>
+       /// <param name="forceUpdate">Forces metadata update (cover image) even if it's already been set.</param>
+       /// <returns>Updated Volumes for given series</returns>
+       private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos, bool forceUpdate)
+       {
+          ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
-          //IList<Volume> existingVolumes = Task.Run(() => _seriesRepository.GetVolumesAsync(series.Id)).Result.ToList();
+          
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
@@ -161,6 +156,11 @@ namespace API.Services
                       FilePath = info.File
                    }
                 };
+
+                if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
+                {
+                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
+                }
                 volumes.Add(existingVolume);
              }
              else
@@ -169,6 +169,7 @@ namespace API.Services
                 {
                    Name = info.Volumes,
                    Number = Int32.Parse(info.Volumes),
+                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
                    Files = new List<MangaFile>()
                    {
                       new MangaFile()
@@ -183,12 +184,10 @@ namespace API.Services
              Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.File}");
           }
 
-          series.Volumes = volumes;
-
-          return series;
+          return volumes;
        }
 
-        public void ScanLibrary(int libraryId)
+        public void ScanLibrary(int libraryId, bool forceUpdate)
         {
            var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
@@ -221,10 +220,12 @@ namespace API.Services
            library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
-              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray());
+              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
               _logger.LogInformation($"Created/Updated series {s.Name}");
               library.Series.Add(s);
            }
+           
+           
            
            _libraryRepository.Update(library);
            
@@ -236,13 +237,12 @@ namespace API.Services
            {
               _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
            }
-           
 
            _scannedSeries = null;
         }
 
         private static void TraverseTreeParallelForEach(string root, Action<string> action)
-         {
+        {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
             var sw = Stopwatch.StartNew();
@@ -335,6 +335,7 @@ namespace API.Services
 
             // For diagnostic purposes.
             Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
-         }
+        }
+        
     }
 }

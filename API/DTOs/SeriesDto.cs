@@ -7,5 +7,6 @@
         public string OriginalName { get; set; }
         public string SortName { get; set; }
         public string Summary { get; set; }
+        public byte[] CoverImage { get; set; }
     }
 }

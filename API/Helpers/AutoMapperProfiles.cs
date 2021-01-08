@@ -11,9 +11,7 @@ namespace API.Helpers
         {
             CreateMap<LibraryDto, Library>();
 
-            CreateMap<Volume, VolumeDto>()
-                .ForMember(dest => dest.Files,
-                    opt => opt.MapFrom(src => src.Files.Select(x => x.FilePath).ToList()));
+            CreateMap<Volume, VolumeDto>();
 
             CreateMap<Series, SeriesDto>();
             

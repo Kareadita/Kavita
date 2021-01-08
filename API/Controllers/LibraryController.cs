@@ -72,7 +72,7 @@ namespace API.Controllers
             if (await _userRepository.SaveAllAsync())
             {
                 var createdLibrary = await _libraryRepository.GetLibraryForNameAsync(library.Name);
-                BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id));
+                BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id, false));
                 return Ok();
             }
             
@@ -129,9 +129,9 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public ActionResult ScanLibrary(int libraryId)
+        public ActionResult Scan(int libraryId)
         {
-            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId));
+            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId, true));
             return Ok();
         }
 

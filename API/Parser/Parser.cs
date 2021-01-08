@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace API.Parser
@@ -225,6 +226,13 @@ namespace API.Parser
         public static string RemoveLeadingZeroes(string title)
         {
             return title.TrimStart(new[] { '0' });
+        }
+        
+        public static bool IsArchive(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+
+            return MangaFileExtensions.Contains(fileInfo.Extension);
         }
     }
 }

@@ -23,4 +23,8 @@
       <ProjectReference Include="..\API\API.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\Test Data" />
+    </ItemGroup>
+
 </Project>

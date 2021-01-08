@@ -12,8 +12,9 @@ namespace API.Entities
         public ICollection<MangaFile> Files { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
+        public byte[] CoverImage { get; set; }
 
-        // Many-to-Many relationships
+        // Many-to-One relationships
         public Series Series { get; set; }
         public int SeriesId { get; set; }
     }
