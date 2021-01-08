@@ -174,7 +174,7 @@ namespace API.Controllers
             {
                 if (differenceBetweenFolders.Any())
                 {
-                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id));    
+                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id, true));    
                 }
                 
                 return Ok();
