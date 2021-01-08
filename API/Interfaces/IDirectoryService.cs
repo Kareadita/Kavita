@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using API.DTOs;
 
 namespace API.Interfaces
 {
+    // TODO: Refactor this into IDiskService to encapsulate all disk based IO
     public interface IDirectoryService
     {
         /// <summary>
@@ -36,6 +39,14 @@ namespace API.Interfaces
         /// <param name="volumeId">Id of volume being extracted.</param>
         /// <returns></returns>
         string ExtractArchive(string archivePath, int volumeId);
-        
+
+        /// <summary>
+        /// Returns the path a volume would be extracted to.
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
+        string GetExtractPath(int volumeId);
+
+        Task<ImageDto> ReadImageAsync(string imagePath);
     }
 }

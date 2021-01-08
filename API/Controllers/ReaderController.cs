@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -38,9 +40,23 @@ namespace API.Controllers
                 return BadRequest("There file is no longer there or has no images. Please rescan.");
             }
 
+            // NOTE: I'm starting to think this should actually cache the information about Volume/Manga file in the DB. 
+            // It will be updated each time this is called which is on open of a manga.
             return Ok(_directoryService.ListFiles(extractPath).Count());
         }
-        
-        
+
+        [HttpGet("image")]
+        public async Task<ActionResult<ImageDto>> GetImage(int volumeId, int page)
+        {
+            // Temp let's iterate the directory each call to get next image
+            var files = _directoryService.ListFiles(_directoryService.GetExtractPath(volumeId));
+            var path = files.ElementAt(page);
+            var file = await _directoryService.ReadImageAsync(path);
+            file.Page = page;
+
+            return Ok(file);
+
+            //return File(await _directoryService.ReadImageAsync(path), "image/jpg", filename);
+        }
     }
 }

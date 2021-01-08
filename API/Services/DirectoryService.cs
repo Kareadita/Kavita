@@ -9,12 +9,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
 using API.Interfaces;
 using API.IO;
 using API.Parser;
-using Hangfire;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Services
 {
@@ -244,8 +245,11 @@ namespace API.Services
            _scannedSeries = null;
            Console.WriteLine("Processed {0} files in {1} milliseconds", library.Name, sw.ElapsedMilliseconds);
         }
-        
-        
+
+        public string GetExtractPath(int volumeId)
+        {
+           return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
+        }
 
         public string ExtractArchive(string archivePath, int volumeId)
         {
@@ -255,7 +259,7 @@ namespace API.Services
               return "";
            }
            
-           var extractPath = Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
+           var extractPath = GetExtractPath(volumeId);
 
            if (Directory.Exists(extractPath))
            {
@@ -273,11 +277,26 @@ namespace API.Services
            return extractPath;
         }
 
+        public async Task<ImageDto> ReadImageAsync(string imagePath)
+        {
+           using var image = Image.NewFromFile(imagePath);
+
+           return new ImageDto
+           {
+              Content = await File.ReadAllBytesAsync(imagePath),
+              Filename = Path.GetFileNameWithoutExtension(imagePath),
+              FullPath = Path.GetFullPath(imagePath),
+              Width = image.Width,
+              Height = image.Height,
+              Format = image.Format
+           };
+        }
+
         private static void TraverseTreeParallelForEach(string root, Action<string> action)
         {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
-            var sw = Stopwatch.StartNew();
+            //var sw = Stopwatch.StartNew();
 
             // Determine whether to parallelize file processing on each folder based on processor count.
             int procCount = Environment.ProcessorCount;
@@ -366,7 +385,7 @@ namespace API.Services
             }
 
             // For diagnostic purposes.
-            Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
+            //Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
         }
         
     }
