@@ -187,7 +187,7 @@ namespace API.Services
           return volumes;
        }
 
-        public void ScanLibrary(int libraryId, bool forceUpdate = false)
+        public void ScanLibrary(int libraryId, bool forceUpdate)
         {
            var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
