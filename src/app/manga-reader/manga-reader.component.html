@@ -1,0 +1,9 @@
+<div class="reader">
+    <ng-container *ngIf="isLoading">
+        Loading indicator here
+    </ng-container>
+    
+    <canvas #content></canvas>
+    
+    <img [src]="imageUrl" [width]="width" [height]="height">
+</div>

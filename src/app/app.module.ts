@@ -17,6 +17,7 @@ import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 
 
 
@@ -29,6 +30,7 @@ import { SeriesDetailComponent } from './series-detail/series-detail.component';
     LibraryComponent,
     LibraryDetailComponent,
     SeriesDetailComponent,
+    MangaReaderComponent,
   ],
   imports: [
     HttpClientModule,
