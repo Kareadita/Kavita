@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
@@ -15,7 +16,7 @@ export class ManageLibraryComponent implements OnInit {
   libraries: Library[] = [];
   createLibraryToggle = false;
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService) { }
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
@@ -55,6 +56,12 @@ export class ManageLibraryComponent implements OnInit {
         this.getLibraries();
       });
     }
+  }
+
+  scanLibrary(library: Library) {
+    this.libraryService.scan(library.id).subscribe(() => {
+      this.toastr.success('A scan has been queued for ' + library.name);
+    });
   }
 
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { SeriesService } from '../_services/series.service';
@@ -14,7 +15,9 @@ export class SeriesDetailComponent implements OnInit {
   series: Series | undefined;
   volumes: Volume[] = [];
 
-  constructor(private route: ActivatedRoute, private seriesService: SeriesService) { }
+  constructor(private route: ActivatedRoute, private seriesService: SeriesService, private ratingConfig: NgbRatingConfig) {
+    ratingConfig.max = 5;
+  }
 
   ngOnInit(): void {
 
