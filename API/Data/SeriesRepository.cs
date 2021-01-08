@@ -76,5 +76,12 @@ namespace API.Data
             return await _context.Series.Where(x => x.Id == seriesId)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).SingleAsync();
         }
+
+        public async Task<Volume> GetVolumeAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Include(vol => vol.Files)
+                .SingleOrDefaultAsync(vol => vol.Id == volumeId);
+        }
     }
 }

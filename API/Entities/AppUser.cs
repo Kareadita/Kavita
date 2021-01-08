@@ -16,6 +16,8 @@ namespace API.Entities
         public uint RowVersion { get; set; }
         
         public ICollection<AppUserRole> UserRoles { get; set; }
+        
+        //public ICollection<SeriesProgress> SeriesProgresses { get; set; }
 
         public void OnSavingChanges()
         {

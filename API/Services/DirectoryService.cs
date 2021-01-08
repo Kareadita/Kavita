@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -51,11 +52,6 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
        
-       /// <summary>
-        /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
-        /// </summary>
-        /// <param name="rootPath">Absolute path </param>
-        /// <returns>List of folder names</returns>
         public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
@@ -68,6 +64,12 @@ namespace API.Services
             
             return dirs;
         }
+
+       public IEnumerable<string> ListFiles(string rootPath)
+       {
+          if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+          return Directory.GetFiles(rootPath);
+       }
 
 
        /// <summary>
@@ -153,7 +155,7 @@ namespace API.Services
                 {
                    new MangaFile()
                    {
-                      FilePath = info.File
+                      FilePath = info.FullFilePath
                    }
                 };
 
@@ -189,6 +191,7 @@ namespace API.Services
 
         public void ScanLibrary(int libraryId, bool forceUpdate)
         {
+           var sw = Stopwatch.StartNew();
            var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
            _logger.LogInformation($"Beginning scan on {library.Name}");
@@ -239,6 +242,35 @@ namespace API.Services
            }
 
            _scannedSeries = null;
+           Console.WriteLine("Processed {0} files in {1} milliseconds", library.Name, sw.ElapsedMilliseconds);
+        }
+        
+        
+
+        public string ExtractArchive(string archivePath, int volumeId)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return "";
+           }
+           
+           var extractPath = Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
+
+           if (Directory.Exists(extractPath))
+           {
+              _logger.LogInformation($"Archive {archivePath} has already been extracted. Returning existing folder.");
+              return extractPath;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           
+           if (archive.Entries.Count <= 0) return "";
+            
+           archive.ExtractToDirectory(extractPath);
+           _logger.LogInformation($"Extracting archive to {extractPath}");
+
+           return extractPath;
         }
 
         private static void TraverseTreeParallelForEach(string root, Action<string> action)
