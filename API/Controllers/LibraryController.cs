@@ -129,7 +129,7 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public ActionResult ScanLibrary(int libraryId)
+        public ActionResult Scan(int libraryId)
         {
             BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId, true));
             return Ok();
