@@ -9,3 +9,13 @@ canvas {
         align-items: center;
     }
 }
+
+.full-height {
+    position: absolute;
+    margin: auto;
+    top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    height: 100%;
+}
