@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using API.IO;
 using API.Parser;
@@ -43,11 +44,11 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4)</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       public static IEnumerable<string> GetFiles(string path, 
+       private static IEnumerable<string> GetFiles(string path, 
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
-          Regex reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+          var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
           return Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
@@ -89,9 +90,8 @@ namespace API.Services
              return;
           }
 
-          ConcurrentBag<ParserInfo> tempBag;
           ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-          if (_scannedSeries.TryGetValue(info.Series, out tempBag))
+          if (_scannedSeries.TryGetValue(info.Series, out var tempBag))
           {
              var existingInfos = tempBag.ToArray();
              foreach (var existingInfo in existingInfos)
@@ -118,7 +118,7 @@ namespace API.Services
 
           if (series == null)
           {
-             series = new Series()
+             series = new Series
              {
                 Name = seriesName,
                 OriginalName = seriesName,
@@ -159,11 +159,10 @@ namespace API.Services
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
-          Volume existingVolume = null;
 
           foreach (var info in infos)
           {
-             existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
+             var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
              if (existingVolume != null)
              {
                 var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -177,14 +176,6 @@ namespace API.Services
                 {
                    existingVolume.Files.Add(CreateMangaFile(info));
                 }
-                // existingVolume.Files = new List<MangaFile>()
-                // {
-                //    new MangaFile()
-                //    {
-                //       FilePath = info.FullFilePath,
-                //       Chapter = Int32.Parse(info.Chapters)
-                //    }
-                // };
 
                 if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
                 {
@@ -301,10 +292,34 @@ namespace API.Services
            
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
            
-           if (archive.Entries.Count <= 0) return "";
+           if (!archive.HasFiles()) return "";
             
            archive.ExtractToDirectory(extractPath);
            _logger.LogInformation($"Extracting archive to {extractPath}");
+
+           return extractPath;
+        }
+        
+        public string ExtractArchive(string archivePath, string extractPath)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return "";
+           }
+
+           if (Directory.Exists(extractPath))
+           {
+              _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
+              return extractPath;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           
+           if (!archive.HasFiles()) return "";
+            
+           archive.ExtractToDirectory(extractPath);
+           _logger.LogDebug($"Extracting archive to {extractPath}");
 
            return extractPath;
         }
@@ -320,6 +335,7 @@ namespace API.Services
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
            return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
         }
+        
 
         public async Task<ImageDto> ReadImageAsync(string imagePath)
         {
@@ -347,7 +363,6 @@ namespace API.Services
         {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
-            //var sw = Stopwatch.StartNew();
 
             // Determine whether to parallelize file processing on each folder based on processor count.
             int procCount = Environment.ProcessorCount;
@@ -434,9 +449,6 @@ namespace API.Services
                foreach (string str in subDirs)
                   dirs.Push(str);
             }
-
-            // For diagnostic purposes.
-            //Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
         }
         
     }

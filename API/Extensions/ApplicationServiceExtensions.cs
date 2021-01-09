@@ -19,6 +19,7 @@ namespace API.Extensions
             services.AddScoped<ITaskScheduler, TaskScheduler>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<ISeriesRepository, SeriesRepository>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ILibraryRepository, LibraryRepository>();

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using API.DTOs;
 
@@ -16,7 +18,7 @@ namespace API.Interfaces
 
         /// <summary>
         /// Lists out top-level files for a given directory.
-        /// TODO: Implement ability to provide a filter for file types
+        /// TODO: Implement ability to provide a filter for file types (done in another implementation on DirectoryService)
         /// </summary>
         /// <param name="rootPath">Absolute path </param>
         /// <returns>List of folder names</returns>
@@ -34,6 +36,7 @@ namespace API.Interfaces
         /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
         /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
         /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
+        /// Deprecated.
         /// </summary>
         /// <param name="archivePath">A valid file to an archive file.</param>
         /// <param name="volumeId">Id of volume being extracted.</param>
@@ -42,11 +45,23 @@ namespace API.Interfaces
 
         /// <summary>
         /// Returns the path a volume would be extracted to.
+        /// Deprecated.
         /// </summary>
         /// <param name="volumeId"></param>
         /// <returns></returns>
         string GetExtractPath(int volumeId);
 
         Task<ImageDto> ReadImageAsync(string imagePath);
+
+        /// <summary>
+        /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
+        /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
+        /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
+        /// </summary>
+        /// <param name="archivePath">A valid file to an archive file.</param>
+        /// <param name="extractPath">Path to extract to</param>
+        /// <returns></returns>
+        string ExtractArchive(string archivePath, string extractPath);
+        
     }
 }

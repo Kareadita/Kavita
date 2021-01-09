@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using API.Extensions;
 using NetVips;
 
 namespace API.IO
@@ -21,7 +22,7 @@ namespace API.IO
             if (!File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
             using ZipArchive archive = ZipFile.OpenRead(filepath);
-            if (archive.Entries.Count <= 0) return Array.Empty<byte>();
+            if (!archive.HasFiles()) return Array.Empty<byte>();
             
             
 
@@ -48,7 +49,7 @@ namespace API.IO
                 }
             }
             
-            return  ExtractEntryToImage(entry);
+            return ExtractEntryToImage(entry);
         }
         
         private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)
