@@ -1,11 +1,21 @@
 <div class="reader">
-    <ng-container *ngIf="isLoading">
-        Loading indicator here
-    </ng-container>
+
+    <div class="{{isLoading ? 'overlay' : ''}}">
+        <ng-container *ngIf="isLoading">
+            Loading indicator here
+        </ng-container>
+    </div>
+
+    <div class="{{menuOpen ? 'overlay' : ''}}">
+        <ng-container *ngIf="menuOpen">
+            Menu code here
+        </ng-container>
+    </div>
 
     <div (click)="nextPage()">
         <canvas #content class="full-height"></canvas>
     </div>
+    
     
     
 </div>

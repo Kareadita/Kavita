@@ -17,6 +17,36 @@ enum READING_DIRECTION {
   RIGHT_TO_LEFT = 2
 }
 
+const MAX_CACHED_PAGES = 5;
+
+export class Queue<T> {
+  elements: T[];
+
+  constructor() {
+    this.elements = [];
+  }
+
+  enqueue(data: T) {
+    this.elements.push(data);
+  }
+
+  dequeue() {
+    return this.elements.shift();
+  }
+
+  isEmpty() {
+    return this.elements.length === 0;
+  }
+
+  peek() {
+    return !this.isEmpty() ? this.elements[0] : undefined;
+  }
+
+  length = () => {
+    return this.elements.length;
+  }
+}
+
 @Component({
   selector: 'app-manga-reader',
   templateUrl: './manga-reader.component.html',
@@ -25,7 +55,6 @@ enum READING_DIRECTION {
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Is there a way to turn off the nav bar? Perhaps a service?
-  isLoading = true;
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
@@ -39,6 +68,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readingDirection = READING_DIRECTION.LEFT_TO_RIGHT; // TODO: Refactor to user settings
 
+  images: MangaImage[] = [];
+  cachedImages = new Queue<MangaImage>();
+  cachedPages = new Queue<number>();
+
+  menuOpen = false;
+  isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -86,6 +121,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     console.log('onDestroy - cleaning up cache');
+    for (let i = 0; i < this.maxPages; i++) {
+      localStorage.removeItem(this.getPageKey(i));
+    }
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -109,6 +147,43 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  /**
+   * @description Checks the cache interface if this page is cached.
+   * @param pageNum Page number to check against
+   * @return The MangaImage or undefined if it doesn't exist
+   */
+  checkCache(pageNum: number): MangaImage | undefined {
+    const key = this.getPageKey(pageNum);
+    console.log('checking cache for key: ', key);
+    const image = localStorage.getItem(key);
+    if (image !== null) {
+      return JSON.parse(image);
+    }
+    return undefined;
+  }
+
+  cache(image: MangaImage, pageNum: number) {
+    this.cachedPages.enqueue(pageNum);
+    this.cachedImages.enqueue(image);
+
+    try {
+      const key = this.getPageKey(pageNum);
+      if (localStorage.getItem(key) === null) {
+        localStorage.setItem(key, JSON.stringify(image));
+      }
+    } catch (error) {
+      const pageToRemove = this.cachedPages.dequeue();
+      if (pageToRemove === undefined) {
+        return;
+      }
+      const key = this.getPageKey(pageToRemove);
+      if (localStorage.getItem(key) !== null) {
+        localStorage.removeItem(key);
+      }
+    }
+
+  }
+
   clearCanvas() {
     if (!this.canvas || !this.ctx) {
       return;
@@ -119,14 +194,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
+  getPageKey(pageNum: number) {
+    return `kavita-${this.user.username}-${this.volumeId}--${pageNum}`;
+  }
+
   renderPage(image: MangaImage) {
     if (!this.canvas || !this.ctx) {
       return;
     }
+    this.isLoading = false;
     this.clearCanvas();
 
     this.canvas.nativeElement.width = image.width;
     this.canvas.nativeElement.height = image.height;
+
+    this.cache(image, this.pageNum);
 
     const that = this;
     const img = new Image();
@@ -157,15 +239,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPage() {
     this.isLoading = true;
-    // TODO: Check cache if we already have this page
-    const key = `kavita-${this.user.username}-${this.volumeId}--${this.pageNum}`;
-    console.log('checking cache for key: ', key);
-    const existingImage = localStorage.getItem(key);
 
-    this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
-      this.isLoading = false;
-      this.renderPage(image);
-    });
+    // Check cache if we already have this page
+    const existingImage = this.checkCache(this.pageNum);
+    if (existingImage) {
+      console.log('Using a cached image');
+      this.renderPage(existingImage);
+    } else {
+      this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
+        this.renderPage(image);
+      });
+    }
   }
 
 }
