@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using API.DTOs;
 
@@ -31,17 +29,6 @@ namespace API.Interfaces
         /// <param name="libraryId">Library to scan against</param>
         /// <param name="forceUpdate">Force overwriting for cover images</param>
         void ScanLibrary(int libraryId, bool forceUpdate);
-
-        /// <summary>
-        /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
-        /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
-        /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
-        /// Deprecated.
-        /// </summary>
-        /// <param name="archivePath">A valid file to an archive file.</param>
-        /// <param name="volumeId">Id of volume being extracted.</param>
-        /// <returns></returns>
-        string ExtractArchive(string archivePath, int volumeId);
 
         /// <summary>
         /// Returns the path a volume would be extracted to.

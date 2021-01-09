@@ -46,6 +46,7 @@ namespace API.IO
                 catch (Exception ex)
                 {
                     Console.WriteLine("There was a critical error and prevented thumbnail generation.");
+                    Console.WriteLine(ex.Message);
                 }
             }
             

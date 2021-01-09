@@ -1,9 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using API.IO;
-using NetVips;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {

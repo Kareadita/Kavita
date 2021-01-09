@@ -37,8 +37,7 @@ namespace API.Services
 
         public string GetCachePath(int volumeId)
         {
-            // TODO: Make this an absolute path, no ..'s in it.
-            return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
+            return Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
         }
         
         
