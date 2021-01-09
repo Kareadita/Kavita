@@ -151,7 +151,14 @@ namespace API.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
         {
-            return Ok(await _libraryRepository.DeleteLibrary(libraryId));
+            var result = await _libraryRepository.DeleteLibrary(libraryId);
+
+            if (result)
+            {
+                // TODO: This should clear out any cache items associated with library
+            }
+            
+            return Ok(result);
         }
 
         [Authorize(Policy = "RequireAdminRole")]

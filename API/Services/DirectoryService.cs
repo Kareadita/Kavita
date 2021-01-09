@@ -123,15 +123,29 @@ namespace API.Services
                 Name = seriesName,
                 OriginalName = seriesName,
                 SortName = seriesName,
-                Summary = ""
+                Summary = "" // TODO: Check if comicInfo.xml in file
              };
           }
           
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
-          // TODO: Instead of taking first entry, re-calculate without compression 
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
+          
           return series;
+       }
+
+       private MangaFile CreateMangaFile(ParserInfo info)
+       {
+          _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
+          int chapter;
+          int.TryParse(info.Chapters, out chapter);
+          _logger.LogDebug($"Chapter? {chapter}");
+          return new MangaFile()
+          {
+             FilePath = info.FullFilePath,
+             Chapter = chapter,
+             NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath)
+          };
        }
 
        /// <summary>
@@ -145,20 +159,32 @@ namespace API.Services
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
-          
+          Volume existingVolume = null;
+
           foreach (var info in infos)
           {
-             var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
+             existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
              if (existingVolume != null)
              {
-                // Temp let's overwrite all files (we need to enhance to update files)
-                existingVolume.Files = new List<MangaFile>()
+                var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+                if (existingFile != null)
                 {
-                   new MangaFile()
-                   {
-                      FilePath = info.FullFilePath
-                   }
-                };
+                   existingFile.Chapter = Int32.Parse(info.Chapters);
+                   existingFile.Format = info.Format;
+                   existingFile.NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath);
+                }
+                else
+                {
+                   existingVolume.Files.Add(CreateMangaFile(info));
+                }
+                // existingVolume.Files = new List<MangaFile>()
+                // {
+                //    new MangaFile()
+                //    {
+                //       FilePath = info.FullFilePath,
+                //       Chapter = Int32.Parse(info.Chapters)
+                //    }
+                // };
 
                 if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
                 {
@@ -168,23 +194,29 @@ namespace API.Services
              }
              else
              {
-                var vol = new Volume()
+                existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
+                if (existingVolume != null)
                 {
-                   Name = info.Volumes,
-                   Number = Int32.Parse(info.Volumes),
-                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
-                   Files = new List<MangaFile>()
+                   existingVolume.Files.Add(CreateMangaFile(info));
+                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
+                }
+                else
+                {
+                   var vol = new Volume()
                    {
-                      new MangaFile()
+                      Name = info.Volumes,
+                      Number = Int32.Parse(info.Volumes),
+                      CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
+                      Files = new List<MangaFile>()
                       {
-                         FilePath = info.File
+                         CreateMangaFile(info)
                       }
-                   }
-                };
-                volumes.Add(vol);
+                   };
+                   volumes.Add(vol);
+                }
              }
              
-             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.File}");
+             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
           }
 
           return volumes;
@@ -224,9 +256,9 @@ namespace API.Services
            library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
-              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
-              _logger.LogInformation($"Created/Updated series {s.Name}");
-              library.Series.Add(s);
+              var mangaSeries = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
+              _logger.LogInformation($"Created/Updated series {mangaSeries.Name}");
+              library.Series.Add(mangaSeries);
            }
            
            
@@ -277,6 +309,18 @@ namespace API.Services
            return extractPath;
         }
 
+        private int GetNumberOfPagesFromArchive(string archivePath)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return 0;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+        }
+
         public async Task<ImageDto> ReadImageAsync(string imagePath)
         {
            using var image = Image.NewFromFile(imagePath);
@@ -292,6 +336,13 @@ namespace API.Services
            };
         }
 
+        /// <summary>
+        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
+        /// up processing.
+        /// </summary>
+        /// <param name="root">Directory to scan</param>
+        /// <param name="action">Action to apply on file path</param>
+        /// <exception cref="ArgumentException"></exception>
         private static void TraverseTreeParallelForEach(string root, Action<string> action)
         {
             //Count of files traversed and timer for diagnostic output

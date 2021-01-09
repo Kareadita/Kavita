@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
@@ -55,8 +52,6 @@ namespace API.Controllers
             file.Page = page;
 
             return Ok(file);
-
-            //return File(await _directoryService.ReadImageAsync(path), "image/jpg", filename);
         }
     }
 }
