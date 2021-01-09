@@ -26,16 +26,11 @@ namespace API.IO
             
 
             var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-            var entry = archive.Entries.OrderBy(x => x.FullName).ToList()[0];
+            var entry = archive.Entries.Where(x => Path.HasExtension(x.FullName)).OrderBy(x => x.FullName).ToList()[0];
 
             if (folder != null)
             {
                 entry = folder;
-            }
-
-            if (entry.FullName.EndsWith(Path.PathSeparator))
-            {
-                // TODO: Implement nested directory support
             }
 
             if (createThumbnail)
