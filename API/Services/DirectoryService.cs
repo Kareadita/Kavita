@@ -67,7 +67,7 @@ namespace API.Services
             return dirs;
         }
 
-       public IEnumerable<string> ListFiles(string rootPath)
+       public IList<string> ListFiles(string rootPath)
        {
           if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
           return Directory.GetFiles(rootPath);

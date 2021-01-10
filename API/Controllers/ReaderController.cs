@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -12,27 +16,26 @@ namespace API.Controllers
         private readonly ISeriesRepository _seriesRepository;
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
+        private readonly NumericComparer _numericComparer;
 
         public ReaderController(ISeriesRepository seriesRepository, IDirectoryService directoryService, ICacheService cacheService)
         {
             _seriesRepository = seriesRepository;
             _directoryService = directoryService;
             _cacheService = cacheService;
+            _numericComparer = new NumericComparer();
         }
 
         [HttpGet("info")]
         public async Task<ActionResult<int>> GetInformation(int volumeId)
         {
-            // TODO: This will be refactored out. No longer needed.
-            Volume volume = await _seriesRepository.GetVolumeAsync(volumeId);
+            Volume volume = await _cacheService.Ensure(volumeId);
             
-            // Assume we always get first Manga File
             if (volume == null || !volume.Files.Any())
             {
+                // TODO: Move this into Ensure and return negative numbers for different error codes.
                 return BadRequest("There are no files in the volume to read.");
             }
-            
-            _cacheService.Ensure(volumeId);
 
             return Ok(volume.Files.Select(x => x.NumberOfPages).Sum());
 
@@ -42,12 +45,12 @@ namespace API.Controllers
         public async Task<ActionResult<ImageDto>> GetImage(int volumeId, int page)
         {
             // Temp let's iterate the directory each call to get next image
-            _cacheService.Ensure(volumeId);
-            
-            
-            
-            var files = _directoryService.ListFiles(_directoryService.GetExtractPath(volumeId));
-            var path = files.ElementAt(page);
+            var volume = await _cacheService.Ensure(volumeId);
+
+            var files = _directoryService.ListFiles(_cacheService.GetCachedPagePath(volume, page));
+            var array = files.ToArray();
+            Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
+            var path = array.ElementAt(page);
             var file = await _directoryService.ReadImageAsync(path);
             file.Page = page;
 

@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
 
@@ -15,31 +17,46 @@ namespace API.Services
             _seriesRepository = seriesRepository;
         }
 
-        public async void Ensure(int volumeId)
+        public async Task<Volume> Ensure(int volumeId)
         {
             Volume volume = await _seriesRepository.GetVolumeAsync(volumeId);
             foreach (var file in volume.Files)
             {
-                var extractPath = GetCachePath(volumeId);
-                if (file.Chapter > 0)
-                {
-                    extractPath = Path.Join(extractPath, file.Chapter + "");
-                }
-                
+                var extractPath = GetVolumeCachePath(volumeId, file);
+
                 _directoryService.ExtractArchive(file.FilePath, extractPath);
             }
+
+            return volume;
         }
+        
 
         public bool Cleanup(Volume volume)
         {
             throw new System.NotImplementedException();
         }
 
-        public string GetCachePath(int volumeId)
+        private string GetVolumeCachePath(int volumeId, MangaFile file)
         {
-            return Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
+            var extractPath = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
+            if (file.Chapter > 0)
+            {
+                extractPath = Path.Join(extractPath, file.Chapter + "");
+            }
+            return extractPath;
         }
-        
-        
+
+        public string GetCachedPagePath(Volume volume, int page)
+        {
+            // Calculate what chapter the page belongs to
+            foreach (var mangaFile in volume.Files.OrderBy(f => f.Chapter))
+            {
+                if (page + 1 < mangaFile.NumberOfPages)
+                {
+                    return GetVolumeCachePath(volume.Id, mangaFile);
+                }
+            }
+            return "";
+        }
     }
 }

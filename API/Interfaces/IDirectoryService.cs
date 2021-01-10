@@ -20,7 +20,7 @@ namespace API.Interfaces
         /// </summary>
         /// <param name="rootPath">Absolute path </param>
         /// <returns>List of folder names</returns>
-        IEnumerable<string> ListFiles(string rootPath);
+        IList<string> ListFiles(string rootPath);
 
         /// <summary>
         /// Given a library id, scans folders for said library. Parses files and generates DB updates. Will overwrite

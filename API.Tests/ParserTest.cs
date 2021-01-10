@@ -48,6 +48,7 @@ namespace API.Tests
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "")]
         [InlineData("c001", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "12")]
+        [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             var result = ParseChapter(filename);

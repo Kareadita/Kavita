@@ -71,6 +71,7 @@ namespace API.Controllers
 
             if (await _userRepository.SaveAllAsync())
             {
+                _logger.LogInformation($"Created a new library: {library.Name}");
                 var createdLibrary = await _libraryRepository.GetLibraryForNameAsync(library.Name);
                 BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id, false));
                 return Ok();
@@ -121,6 +122,7 @@ namespace API.Controllers
             
             if (await _userRepository.SaveAllAsync())
             {
+                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
                 return Ok(user);
             }
 

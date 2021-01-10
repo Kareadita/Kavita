@@ -178,7 +178,7 @@ namespace API.Parser
                 }
             }
 
-            return "";
+            return "0";
         }
         
         /// <summary>
