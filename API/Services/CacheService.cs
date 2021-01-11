@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -14,6 +15,7 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private readonly ISeriesRepository _seriesRepository;
         private readonly ILogger<CacheService> _logger;
+        private readonly NumericComparer _numericComparer;
         private readonly string _cacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
         public CacheService(IDirectoryService directoryService, ISeriesRepository seriesRepository, ILogger<CacheService> logger)
@@ -21,6 +23,7 @@ namespace API.Services
             _directoryService = directoryService;
             _seriesRepository = seriesRepository;
             _logger = logger;
+            _numericComparer = new NumericComparer();
         }
 
         public async Task<Volume> Ensure(int volumeId)
@@ -85,12 +88,21 @@ namespace API.Services
         public string GetCachedPagePath(Volume volume, int page)
         {
             // Calculate what chapter the page belongs to
+            var pagesSoFar = 0;
             foreach (var mangaFile in volume.Files.OrderBy(f => f.Chapter))
             {
-                if (page + 1 < mangaFile.NumberOfPages)
+                if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
                 {
-                    return GetVolumeCachePath(volume.Id, mangaFile);
+                    var path = GetVolumeCachePath(volume.Id, mangaFile);
+                    
+                    var files = _directoryService.ListFiles(path);
+                    var array = files.ToArray();
+                    Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
+                    
+                    return array.ElementAt((page + 1) - pagesSoFar);
                 }
+
+                pagesSoFar += mangaFile.NumberOfPages;
             }
             return "";
         }

@@ -114,24 +114,17 @@ namespace API.Services
        
        private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
        {
-          var series = _seriesRepository.GetSeriesByName(seriesName);
-
-          if (series == null)
+          var series = _seriesRepository.GetSeriesByName(seriesName) ?? new Series
           {
-             series = new Series
-             {
-                Name = seriesName,
-                OriginalName = seriesName,
-                SortName = seriesName,
-                Summary = "" // TODO: Check if comicInfo.xml in file and parse metadata out.
-             };
-          }
-          
+             Name = seriesName,
+             OriginalName = seriesName,
+             SortName = seriesName,
+             Summary = "" // TODO: Check if comicInfo.xml in file and parse metadata out.
+          };
+
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
-          //GetFiles()
-
           return series;
        }
 
