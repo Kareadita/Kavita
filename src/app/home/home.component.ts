@@ -33,6 +33,8 @@ export class HomeComponent implements OnInit {
             this.router.navigateByUrl('/library');
           }
         });
+
+        
       }
     });
   }
@@ -40,8 +42,7 @@ export class HomeComponent implements OnInit {
 
   onAdminCreated(success: boolean) {
     if (success) {
-      this.router.navigateByUrl('/home');
-      this.firstTimeFlow = false;
+      this.router.navigateByUrl('/library');
     }
   }
 
