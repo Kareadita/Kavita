@@ -5,6 +5,7 @@ import { LibraryDetailComponent } from './library-detail/library-detail.componen
 import { LibraryComponent } from './library/library.component';
 import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 
@@ -26,6 +27,7 @@ const routes: Routes = [
       {path: 'library/:libraryId/series/:seriesId/manga/:volumeId', component: MangaReaderComponent},
     ]
   },
+  {path: 'login', component: UserLoginComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];
 

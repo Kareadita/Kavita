@@ -45,6 +45,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             case 401:
               // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
               this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
+              this.router.navigateByUrl('/login');
               break;
             case 404:
               this.router.navigateByUrl('/not-found');
