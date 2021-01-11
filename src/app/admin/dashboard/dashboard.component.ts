@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
 
-  tabs = ['users', 'libraries'];
+  tabs = ['general', 'users', 'libraries'];
   counter = this.tabs.length + 1;
   active = this.tabs[0];
 

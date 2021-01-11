@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { MangaImage } from '../_models/manga-image';
@@ -9,7 +10,8 @@ import { ReaderService } from '../_services/reader.service';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
-  LEFT_ARROW = 'ArrowLeft'
+  LEFT_ARROW = 'ArrowLeft',
+  ESC_KEY = 'Escape'
 }
 
 enum READING_DIRECTION {
@@ -80,7 +82,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-              private memberService: MemberService, private readerService: ReaderService) { }
+              private memberService: MemberService, private readerService: ReaderService, private location: Location) { }
 
   ngOnInit(): void {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -104,6 +106,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.getMangaInfo(this.volumeId).subscribe(numOfPages => {
       this.maxPages = numOfPages;
       this.loadPage();
+    }, err => {
+      setTimeout(() => {
+        this.location.back();
+      }, 200);
     });
 
   }
@@ -132,6 +138,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.nextPage() : this.prevPage();
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
       this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage() : this.nextPage();
+    } else if (event.key === KEY_CODES.ESC_KEY) {
+      this.location.back();
     }
   }
 
