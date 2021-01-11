@@ -35,5 +35,11 @@ namespace API.Controllers
         {
             return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId));
         }
+        
+        [HttpGet("volume")]
+        public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
+        {
+            return Ok(await _seriesRepository.GetVolumeDtoAsync(volumeId));
+        }
     }
 }

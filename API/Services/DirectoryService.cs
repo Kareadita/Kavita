@@ -204,6 +204,8 @@ namespace API.Services
                 var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault()?.FilePath;
                 volume.CoverImage = ImageProvider.GetCoverImage(firstFile, true);
              }
+
+             volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
           }
 
           return volumes;

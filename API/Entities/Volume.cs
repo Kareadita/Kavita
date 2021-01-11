@@ -13,7 +13,7 @@ namespace API.Entities
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
-        //public int Pages { get; set; }
+        public int Pages { get; set; }
         
         // public string CachePath {get; set;} // Path where cache is located. Default null, resets to null on deletion.
         //public ICollection<AppUserProgress> AppUserProgress { get; set; }

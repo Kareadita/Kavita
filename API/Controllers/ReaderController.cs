@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
@@ -18,20 +16,6 @@ namespace API.Controllers
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
-        }
-
-        [HttpGet("info")]
-        public async Task<ActionResult<int>> GetInformation(int volumeId)
-        {
-            Volume volume = await _cacheService.Ensure(volumeId);
-            
-            if (volume == null || !volume.Files.Any())
-            {
-                // TODO: Move this into Ensure and return negative numbers for different error codes.
-                return BadRequest("There are no files in the volume to read.");
-            }
-
-            return Ok(volume.Files.Select(x => x.NumberOfPages).Sum());
         }
 
         [HttpGet("image")]

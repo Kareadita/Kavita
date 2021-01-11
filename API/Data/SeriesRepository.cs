@@ -84,6 +84,15 @@ namespace API.Data
                 .SingleOrDefaultAsync(vol => vol.Id == volumeId);
         }
 
+        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Where(vol => vol.Id == volumeId)
+                .Include(vol => vol.Files)
+                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+                .SingleAsync(vol => vol.Id == volumeId);
+        }
+
         /// <summary>
         /// Returns all volumes that contain a seriesId in passed array.
         /// </summary>
