@@ -1,8 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
@@ -10,11 +13,14 @@ namespace API.Services
     {
         private readonly IDirectoryService _directoryService;
         private readonly ISeriesRepository _seriesRepository;
+        private readonly ILogger<CacheService> _logger;
+        private readonly string _cacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
-        public CacheService(IDirectoryService directoryService, ISeriesRepository seriesRepository)
+        public CacheService(IDirectoryService directoryService, ISeriesRepository seriesRepository, ILogger<CacheService> logger)
         {
             _directoryService = directoryService;
             _seriesRepository = seriesRepository;
+            _logger = logger;
         }
 
         public async Task<Volume> Ensure(int volumeId)
@@ -31,10 +37,40 @@ namespace API.Services
         }
         
 
-        public bool Cleanup(Volume volume)
+        public void Cleanup()
         {
-            throw new System.NotImplementedException();
+            _logger.LogInformation("Performing cleanup of Cache directory");
+            
+            DirectoryInfo di = new DirectoryInfo(_cacheDirectory);
+
+            try
+            {
+                di.Empty();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("There was an issue deleting one or more folders/files during cleanup.", ex);
+            }
+            
+            _logger.LogInformation("Cache directory purged.");
         }
+        
+        public void CleanupLibrary(int libraryId, int[] volumeIds)
+        {
+            _logger.LogInformation($"Running Cache cleanup on Library: {libraryId}");
+            
+            foreach (var volume in volumeIds)
+            {
+                var di = new DirectoryInfo(Path.Join(_cacheDirectory, volume + ""));
+                if (di.Exists)
+                {
+                    di.Delete(true);    
+                }
+                
+            }
+            _logger.LogInformation("Cache directory purged");
+        }
+        
 
         private string GetVolumeCachePath(int volumeId, MangaFile file)
         {

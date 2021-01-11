@@ -23,6 +23,8 @@ namespace API.Extensions
             services.AddScoped<ISeriesRepository, SeriesRepository>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ILibraryRepository, LibraryRepository>();
+            
+            
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));

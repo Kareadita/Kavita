@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
 using Hangfire;
@@ -23,10 +24,11 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly ISeriesRepository _seriesRepository;
+        private readonly ICacheService _cacheService;
 
         public LibraryController(IDirectoryService directoryService, 
             ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository,
-            IMapper mapper, ITaskScheduler taskScheduler, ISeriesRepository seriesRepository)
+            IMapper mapper, ITaskScheduler taskScheduler, ISeriesRepository seriesRepository, ICacheService cacheService)
         {
             _directoryService = directoryService;
             _libraryRepository = libraryRepository;
@@ -35,6 +37,7 @@ namespace API.Controllers
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _seriesRepository = seriesRepository;
+            _cacheService = cacheService;
         }
         
         /// <summary>
@@ -153,11 +156,16 @@ namespace API.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
         {
+            var username = User.GetUsername();
+            _logger.LogInformation($"Library {libraryId} is being deleted by {username}.");
+            var series = await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId);
+            var volumes = (await _seriesRepository.GetVolumesForSeriesAsync(series.Select(x => x.Id).ToArray())).ToList();
             var result = await _libraryRepository.DeleteLibrary(libraryId);
 
-            if (result)
+            
+            if (result && volumes.Any())
             {
-                // TODO: This should clear out any cache items associated with library
+                BackgroundJob.Enqueue(() => _cacheService.CleanupLibrary(libraryId, volumes.Select(x => x.Id).ToArray()));
             }
             
             return Ok(result);

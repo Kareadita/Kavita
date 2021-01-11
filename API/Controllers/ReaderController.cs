@@ -38,7 +38,6 @@ namespace API.Controllers
             }
 
             return Ok(volume.Files.Select(x => x.NumberOfPages).Sum());
-
         }
 
         [HttpGet("image")]
@@ -48,6 +47,7 @@ namespace API.Controllers
             var volume = await _cacheService.Ensure(volumeId);
 
             var files = _directoryService.ListFiles(_cacheService.GetCachedPagePath(volume, page));
+            //files.OrderBy(t => t, _numericComparer);
             var array = files.ToArray();
             Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
             var path = array.ElementAt(page);

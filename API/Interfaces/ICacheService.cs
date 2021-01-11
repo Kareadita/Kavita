@@ -13,9 +13,18 @@ namespace API.Interfaces
         /// <returns>Volume for the passed volumeId. Side-effect from ensuring cache.</returns>
         Task<Volume> Ensure(int volumeId);
 
-        bool Cleanup(Volume volume);
+        /// <summary>
+        /// Clears cache directory of all folders and files.
+        /// </summary>
+        /// <param name="volume"></param>
+        void Cleanup();
 
-        //bool CleanupAll();
+        /// <summary>
+        /// Clears cache directory of all volumes that belong to a given library.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        void CleanupLibrary(int libraryId, int[] volumeIds);
+        
 
         /// <summary>
         /// Returns the absolute path of a cached page. 

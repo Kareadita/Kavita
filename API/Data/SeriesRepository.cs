@@ -83,5 +83,17 @@ namespace API.Data
                 .Include(vol => vol.Files)
                 .SingleOrDefaultAsync(vol => vol.Id == volumeId);
         }
+
+        /// <summary>
+        /// Returns all volumes that contain a seriesId in passed array.
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds)
+        {
+            return await _context.Volume
+                .Where(v => seriesIds.Contains(v.SeriesId))
+                .ToListAsync();
+        }
     }
 }

@@ -123,23 +123,23 @@ namespace API.Services
                 Name = seriesName,
                 OriginalName = seriesName,
                 SortName = seriesName,
-                Summary = "" // TODO: Check if comicInfo.xml in file
+                Summary = "" // TODO: Check if comicInfo.xml in file and parse metadata out.
              };
           }
           
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
-          
+          //GetFiles()
+
           return series;
        }
 
        private MangaFile CreateMangaFile(ParserInfo info)
        {
           _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
-          int chapter;
-          int.TryParse(info.Chapters, out chapter);
-          _logger.LogDebug($"Chapter? {chapter}");
+          int.TryParse(info.Chapters, out var chapter);
+          _logger.LogDebug($"Found Chapter: {chapter}");
           return new MangaFile()
           {
              FilePath = info.FullFilePath,
@@ -176,11 +176,7 @@ namespace API.Services
                 {
                    existingVolume.Files.Add(CreateMangaFile(info));
                 }
-
-                if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
-                {
-                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
-                }
+                
                 volumes.Add(existingVolume);
              }
              else
@@ -189,7 +185,6 @@ namespace API.Services
                 if (existingVolume != null)
                 {
                    existingVolume.Files.Add(CreateMangaFile(info));
-                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
                 }
                 else
                 {
@@ -197,7 +192,6 @@ namespace API.Services
                    {
                       Name = info.Volumes,
                       Number = Int32.Parse(info.Volumes),
-                      CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
                       Files = new List<MangaFile>()
                       {
                          CreateMangaFile(info)
@@ -210,20 +204,41 @@ namespace API.Services
              Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
           }
 
+          foreach (var volume in volumes)
+          {
+             if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
+             {
+                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault()?.FilePath;
+                volume.CoverImage = ImageProvider.GetCoverImage(firstFile, true);
+             }
+          }
+
           return volumes;
        }
 
         public void ScanLibrary(int libraryId, bool forceUpdate)
         {
            var sw = Stopwatch.StartNew();
-           var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+           Library library;
+           try
+           {
+              library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+           }
+           catch (Exception ex)
+           {
+              // This usually only fails if user is not authenticated.
+              _logger.LogError($"There was an issue fetching Library {libraryId}.", ex);
+              return;
+           }
+           
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
            _logger.LogInformation($"Beginning scan on {library.Name}");
-           
+
+           var totalFiles = 0;
            foreach (var folderPath in library.Folders)
            {
               try {
-                 TraverseTreeParallelForEach(folderPath.Path, (f) =>
+                 totalFiles = TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
                     try
                     {
@@ -266,7 +281,7 @@ namespace API.Services
            }
 
            _scannedSeries = null;
-           Console.WriteLine("Processed {0} files in {1} milliseconds", library.Name, sw.ElapsedMilliseconds);
+           _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
         }
 
         public string GetExtractPath(int volumeId)
@@ -359,7 +374,7 @@ namespace API.Services
         /// <param name="root">Directory to scan</param>
         /// <param name="action">Action to apply on file path</param>
         /// <exception cref="ArgumentException"></exception>
-        private static void TraverseTreeParallelForEach(string root, Action<string> action)
+        private static int TraverseTreeParallelForEach(string root, Action<string> action)
         {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
@@ -449,6 +464,8 @@ namespace API.Services
                foreach (string str in subDirs)
                   dirs.Push(str);
             }
+
+            return fileCount;
         }
         
     }

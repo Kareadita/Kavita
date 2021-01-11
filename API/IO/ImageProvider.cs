@@ -19,7 +19,7 @@ namespace API.IO
         /// <returns></returns>
         public static byte[] GetCoverImage(string filepath, bool createThumbnail = false)
         {
-            if (!File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
+            if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
             using ZipArchive archive = ZipFile.OpenRead(filepath);
             if (!archive.HasFiles()) return Array.Empty<byte>();
