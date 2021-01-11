@@ -54,6 +54,7 @@ export class ManageLibraryComponent implements OnInit {
     if (confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
       this.libraryService.delete(library.id).subscribe(() => {
         this.getLibraries();
+        this.toastr.success('Library has been removed');
       });
     }
   }
