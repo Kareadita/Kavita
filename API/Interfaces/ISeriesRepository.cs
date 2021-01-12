@@ -21,5 +21,6 @@ namespace API.Interfaces
         Task<VolumeDto> GetVolumeDtoAsync(int volumeId);
 
         Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
+        Task<bool> DeleteSeriesAsync(int seriesId);
     }
 }

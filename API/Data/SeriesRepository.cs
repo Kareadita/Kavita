@@ -104,5 +104,13 @@ namespace API.Data
                 .Where(v => seriesIds.Contains(v.SeriesId))
                 .ToListAsync();
         }
+
+        public async Task<bool> DeleteSeriesAsync(int seriesId)
+        {
+            var series = await _context.Series.Where(s => s.Id == seriesId).SingleOrDefaultAsync();
+            _context.Series.Remove(series);
+            
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

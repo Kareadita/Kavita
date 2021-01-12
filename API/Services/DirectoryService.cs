@@ -343,6 +343,7 @@ namespace API.Services
            }
            
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           Console.WriteLine();
            return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
         }
         

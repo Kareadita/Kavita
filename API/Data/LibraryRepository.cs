@@ -38,10 +38,12 @@ namespace API.Data
 
         public async Task<IEnumerable<LibraryDto>> GetLibrariesDtoForUsernameAsync(string userName)
         {
+            // TODO: Speed this query up
             return await _context.Library
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(x => x.UserName == userName))
-                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
         public async Task<Library> GetLibraryForNameAsync(string libraryName)

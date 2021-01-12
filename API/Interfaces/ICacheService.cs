@@ -16,15 +16,13 @@ namespace API.Interfaces
         /// <summary>
         /// Clears cache directory of all folders and files.
         /// </summary>
-        /// <param name="volume"></param>
         void Cleanup();
 
         /// <summary>
-        /// Clears cache directory of all volumes that belong to a given library.
+        /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
         /// </summary>
-        /// <param name="libraryId"></param>
         /// <param name="volumeIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
-        void CleanupLibrary(int libraryId, int[] volumeIds);
+        void CleanupVolumes(int[] volumeIds);
         
 
         /// <summary>

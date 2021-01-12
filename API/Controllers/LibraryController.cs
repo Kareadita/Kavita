@@ -159,13 +159,13 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation($"Library {libraryId} is being deleted by {username}.");
             var series = await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId);
-            var volumes = (await _seriesRepository.GetVolumesForSeriesAsync(series.Select(x => x.Id).ToArray())).ToList();
+            var volumes = (await _seriesRepository.GetVolumesForSeriesAsync(series.Select(x => x.Id).ToArray()))
+                                .Select(x => x.Id).ToArray();
             var result = await _libraryRepository.DeleteLibrary(libraryId);
-
             
             if (result && volumes.Any())
             {
-                BackgroundJob.Enqueue(() => _cacheService.CleanupLibrary(libraryId, volumes.Select(x => x.Id).ToArray()));
+                BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumes));
             }
             
             return Ok(result);

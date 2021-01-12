@@ -48,7 +48,6 @@ namespace API.Services
 
             return volume;
         }
-        
 
         public void Cleanup()
         {
@@ -74,9 +73,9 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged.");
         }
         
-        public void CleanupLibrary(int libraryId, int[] volumeIds)
+        public void CleanupVolumes(int[] volumeIds)
         {
-            _logger.LogInformation($"Running Cache cleanup on Library: {libraryId}");
+            _logger.LogInformation($"Running Cache cleanup on Volumes");
             
             foreach (var volume in volumeIds)
             {
@@ -89,7 +88,7 @@ namespace API.Services
             }
             _logger.LogInformation("Cache directory purged");
         }
-        
+
 
         private string GetVolumeCachePath(int volumeId, MangaFile file)
         {
