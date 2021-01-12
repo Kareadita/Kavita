@@ -161,6 +161,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bodyNode.style.background = this.originalBodyColor;
       bodyNode.style.height = '100%';
     }
+    this.navService.showNavBar();
   }
 
   @HostListener('window:keyup', ['$event'])
