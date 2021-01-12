@@ -9,6 +9,7 @@ import { MemberService } from '../_services/member.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { NavService } from '../_services/nav.service';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -95,7 +96,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-              private formBuilder: FormBuilder) { }
+              private formBuilder: FormBuilder, private navService: NavService) {
+                this.navService.hideNavBar();
+  }
 
   ngOnInit(): void {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -107,11 +110,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const bodyNode = document.querySelector('body');
-    if (bodyNode !== undefined && bodyNode !== null) {
-      this.originalBodyColor = bodyNode.style.background;
-      bodyNode.style.background = 'black';
-    }
+    this.setOverrideStyles();
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -152,13 +151,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    console.log('onDestroy')
     for (let i = 0; i < this.maxPages; i++) {
       localStorage.removeItem(this.getPageKey(i));
     }
 
     const bodyNode = document.querySelector('body');
-    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor) {
+    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
+      bodyNode.style.height = '100%';
     }
   }
 
@@ -170,6 +171,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage() : this.nextPage();
     } else if (event.key === KEY_CODES.ESC_KEY) {
       this.location.back();
+    }
+  }
+
+  setOverrideStyles() {
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null) {
+      this.originalBodyColor = bodyNode.style.background;
+      bodyNode.style.background = 'black';
+      bodyNode.style.height = '0%';
     }
   }
 
