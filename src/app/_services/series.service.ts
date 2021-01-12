@@ -28,4 +28,8 @@ export class SeriesService {
   getVolume(volumeId: number) {
     return this.httpClient.get<Volume>(this.baseUrl + 'series/volume?volumeId=' + volumeId);
   }
+
+  delete(seriesId: number) {
+    return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
+  }
 }
