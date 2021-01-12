@@ -26,8 +26,18 @@ namespace API.Services
             _numericComparer = new NumericComparer();
         }
 
+        private bool CacheDirectoryIsAccessible()
+        {
+            var di = new DirectoryInfo(_cacheDirectory);
+            return di.Exists;
+        }
+
         public async Task<Volume> Ensure(int volumeId)
         {
+            if (!CacheDirectoryIsAccessible())
+            {
+                return null;
+            }
             Volume volume = await _seriesRepository.GetVolumeAsync(volumeId);
             foreach (var file in volume.Files)
             {
@@ -43,6 +53,12 @@ namespace API.Services
         public void Cleanup()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
+            
+            if (!CacheDirectoryIsAccessible())
+            {
+                _logger.LogError($"Cache directory {_cacheDirectory} is not accessible or does not exist.");
+                return;
+            }
             
             DirectoryInfo di = new DirectoryInfo(_cacheDirectory);
 
