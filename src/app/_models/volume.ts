@@ -6,5 +6,5 @@ export interface Volume {
     coverImage: string;
     created: string;
     lastModified: string;
-    
+    pages: number;
 }

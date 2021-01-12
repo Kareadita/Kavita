@@ -21,6 +21,7 @@ import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 
 
 
+
 @NgModule({
   declarations: [
     AppComponent,

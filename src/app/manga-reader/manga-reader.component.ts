@@ -7,6 +7,8 @@ import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
 import { ReaderService } from '../_services/reader.service';
+import { SeriesService } from '../_services/series.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -17,6 +19,12 @@ enum KEY_CODES {
 enum READING_DIRECTION {
   LEFT_TO_RIGHT = 1,
   RIGHT_TO_LEFT = 2
+}
+
+enum FITTING_OPTION {
+  HEIGHT = 'full-height',
+  WIDTH = 'full-width',
+  ORIGINAL = 'original'
 }
 
 const MAX_CACHED_PAGES = 5;
@@ -67,6 +75,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   documentHeight = 0;
   maxPages = 1;
   user!: User;
+  fittingForm: FormGroup | undefined;
 
   readingDirection = READING_DIRECTION.LEFT_TO_RIGHT; // TODO: Refactor to user settings
 
@@ -80,9 +89,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
 
+  // Temp hack: Override background color for reader and restore it onDestroy
+  originalBodyColor: string | undefined;
+
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-              private memberService: MemberService, private readerService: ReaderService, private location: Location) { }
+              private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
+              private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
@@ -93,6 +106,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigateByUrl('/home');
       return;
     }
+
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null) {
+      this.originalBodyColor = bodyNode.style.background;
+      bodyNode.style.background = 'black';
+    }
+
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
@@ -103,8 +123,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.volumeId = parseInt(volumeId, 10);
 
-    this.readerService.getMangaInfo(this.volumeId).subscribe(numOfPages => {
-      this.maxPages = numOfPages;
+    this.fittingForm = this.formBuilder.group({
+      fittingOption: FITTING_OPTION.HEIGHT
+    });
+
+
+    this.seriesService.getVolume(this.volumeId).subscribe(volume => {
+      console.log('volume.pages', volume.pages);
+      this.maxPages = volume.pages;
       this.loadPage();
     }, err => {
       setTimeout(() => {
@@ -118,7 +144,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canvas) {
       return;
     }
-    this.ctx = this.canvas.nativeElement.getContext('2d');
+    this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
 
     this.documentHeight = this.getDocumentHeight();
 
@@ -126,9 +152,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('onDestroy - cleaning up cache');
     for (let i = 0; i < this.maxPages; i++) {
       localStorage.removeItem(this.getPageKey(i));
+    }
+
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor) {
+      bodyNode.style.background = this.originalBodyColor;
     }
   }
 
@@ -143,6 +173,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  getFittingOptionClass() {
+    if (this.fittingForm === undefined) {
+      return FITTING_OPTION.HEIGHT;
+    }
+    return this.fittingForm.value.fittingOption;
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
   getDocumentHeight() {
     // Do I need this?
     return Math.max(
@@ -155,6 +196,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     );
   }
 
+  getDocumentWidth() {
+    return Math.max(
+      document.body.scrollWidth,
+      document.documentElement.scrollWidth,
+      document.body.offsetWidth,
+      document.documentElement.offsetWidth,
+      document.body.clientWidth,
+      document.documentElement.clientWidth
+    );
+  }
+
   /**
    * @description Checks the cache interface if this page is cached.
    * @param pageNum Page number to check against
@@ -162,7 +214,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   checkCache(pageNum: number): MangaImage | undefined {
     const key = this.getPageKey(pageNum);
-    console.log('checking cache for key: ', key);
+    //console.log('checking cache for key: ', key);
     const image = localStorage.getItem(key);
     if (image !== null) {
       return JSON.parse(image);
@@ -197,9 +249,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    //this.ctx.clearRect(0, 0, this.getDocumentWidth(), this.getDocumentHeight()); //this.canvas.nativeElement.width, this.canvas.nativeElement.height
     this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height); //this.canvas.nativeElement.height
   }
 
   getPageKey(pageNum: number) {
@@ -229,7 +281,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     img.src = 'data:image/jpeg;base64,' + image.content;
   }
 
-  nextPage() {
+  nextPage(event?: any) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     if (this.pageNum + 1 >= this.maxPages) {
       return;
     }
@@ -237,7 +293,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
-  prevPage() {
+  prevPage(event?: any) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     if (this.pageNum - 1 < 0) {
       return;
     }

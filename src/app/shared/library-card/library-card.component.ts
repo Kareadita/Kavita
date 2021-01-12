@@ -70,7 +70,7 @@ export class LibraryCardComponent implements OnInit, OnChanges {
     this.preventClick(event);
 
     if (typeof action.callback === 'function') {
-      action.callback(this.libraryService);
+      action.callback(this.data);
     }
   }
 

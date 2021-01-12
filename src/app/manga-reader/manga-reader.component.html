@@ -1,6 +1,6 @@
 <div class="reader">
 
-    <div class="{{isLoading ? 'overlay' : ''}}">
+    <div class="{{isLoading ? 'overlay' : ''}}" (click)="toggleMenu()">
         <ng-container *ngIf="isLoading">
             Loading indicator here
         </ng-container>
@@ -8,12 +8,46 @@
 
     <div class="{{menuOpen ? 'overlay' : ''}}">
         <ng-container *ngIf="menuOpen">
-            Menu code here
+
+            <div class="center-menu">
+                <div>
+                    <p>
+                        Page {{pageNum + 1}} / {{maxPages}}
+                        <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages"></ngb-progressbar>
+                    </p>
+                </div>
+
+                <ng-container *ngIf="fittingForm">
+                    <form [formGroup]="fittingForm">
+                        <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="fittingOption">
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-height"> Fit to Height
+                          </label>
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-width"> Fit to Width
+                          </label>
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="original"> Original
+                          </label>
+                        </div>
+                    </form>
+                </ng-container>
+            </div>
+            <div class="bottom-menu" (click)="toggleMenu()"></div>
+            
+            <div class="right" (click)="toggleMenu()">
+                <i class="fa fa-arrow-right"></i>
+            </div>
+            <div class="left" (click)="toggleMenu()">
+                <i class="fa fa-arrow-left"></i>
+            </div>
         </ng-container>
     </div>
 
-    <div (click)="nextPage()">
-        <canvas #content class="full-height"></canvas>
+    <div (click)="toggleMenu()">
+        <canvas #content class="{{getFittingOptionClass()}}"></canvas>
+        <div class="right" (click)="nextPage($event)"></div>
+        <div class="left" (click)="prevPage($event)"></div>
     </div>
     
     
