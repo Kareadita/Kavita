@@ -84,7 +84,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   cachedImages = new Queue<MangaImage>();
   cachedPages = new Queue<number>();
 
-  menuOpen = false;
+  menuOpen = true;
   isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
 
   @ViewChild('content') canvas: ElementRef | undefined;

@@ -6,19 +6,24 @@
         </ng-container>
     </div>
 
-    <div class="{{menuOpen ? 'overlay' : ''}}">
-        <ng-container *ngIf="menuOpen">
+    <div *ngIf="menuOpen" class="overlay">
+        <ng-container >
 
             <div class="center-menu">
-                <div>
-                    <button class="btn btn-primary" (click)="setReadingDirection()">Reading {{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
-                    <p>
+                <div class="container-fluid row">
+                    <div class="col" style="max-width: 200px">
+                        <h4>Page Navigation</h4>
                         Page {{pageNum + 1}} / {{maxPages}}
                         <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages"></ngb-progressbar>
-                    </p>
+                    </div>
+                    <div class="col">
+                        <h4>Reading Direction</h4>
+                        <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
+                    </div>
                 </div>
 
                 <ng-container *ngIf="fittingForm">
+                    <h4>Scaling Options</h4>
                     <form [formGroup]="fittingForm">
                         <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="fittingOption">
                           <label ngbButtonLabel class="btn-primary">
