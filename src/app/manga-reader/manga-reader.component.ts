@@ -10,6 +10,7 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
+import { resolveProjectReferencePath } from 'typescript';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -17,7 +18,7 @@ enum KEY_CODES {
   ESC_KEY = 'Escape'
 }
 
-enum READING_DIRECTION {
+export enum READING_DIRECTION {
   LEFT_TO_RIGHT = 1,
   RIGHT_TO_LEFT = 2
 }
@@ -70,10 +71,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
 
-  width = 600;
-  height = 1000;
+  minWidth = 99999; // Min width we see, so that we can tell if a page needs splitting
+  currentImage: any;
   pageNum = 0;
-  documentHeight = 0;
   maxPages = 1;
   user!: User;
   fittingForm: FormGroup | undefined;
@@ -145,13 +145,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
 
-    this.documentHeight = this.getDocumentHeight();
-
-    console.log('Document Height: ', this.documentHeight);
   }
 
   ngOnDestroy() {
-    console.log('onDestroy')
     for (let i = 0; i < this.maxPages; i++) {
       localStorage.removeItem(this.getPageKey(i));
     }
@@ -233,6 +229,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return undefined;
   }
 
+  // I might want to debounce this and move to the nextPage code so it doesn't execute if we are spamming next page (although i don't see any issues)
+  prefetch() {
+    if (this.pageNum + 1 <= this.maxPages) {
+      console.log('Prefetching next page: ', this.pageNum + 1);
+      this.readerService.getPage(this.volumeId, this.pageNum + 1).subscribe(image => {
+        this.cache(image, this.pageNum + 1);
+      });
+    }
+  }
+
   cache(image: MangaImage, pageNum: number) {
     this.cachedPages.enqueue(pageNum);
     this.cachedImages.enqueue(image);
@@ -250,6 +256,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const key = this.getPageKey(pageToRemove);
       if (localStorage.getItem(key) !== null) {
         localStorage.removeItem(key);
+        this.cache(image, pageNum); // We re-call cache so that the current page does get cached
       }
     }
 
@@ -260,9 +267,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    //this.ctx.clearRect(0, 0, this.getDocumentWidth(), this.getDocumentHeight()); //this.canvas.nativeElement.width, this.canvas.nativeElement.height
     this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height); //this.canvas.nativeElement.height
+    this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
   getPageKey(pageNum: number) {
@@ -276,10 +282,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
     this.clearCanvas();
 
+    if (image.width < this.minWidth) {
+      this.minWidth = image.width;
+    }
+    this.currentImage = image;
+
     this.canvas.nativeElement.width = image.width;
     this.canvas.nativeElement.height = image.height;
 
     this.cache(image, this.pageNum);
+    this.prefetch();
 
     const that = this;
     const img = new Image();
@@ -292,6 +304,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     img.src = 'data:image/jpeg;base64,' + image.content;
   }
 
+  handlePageChange(event: any, direction: string) {
+    if (direction === 'right') {
+      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.nextPage(event) : this.prevPage(event);
+    } else if (direction === 'left') {
+      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage(event) : this.nextPage(event);
+    }
+  }
+
   nextPage(event?: any) {
     if (event) {
       event.stopPropagation();
@@ -300,6 +320,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum + 1 >= this.maxPages) {
       return;
     }
+
+    // TODO: Check if this is a split page
+
     this.pageNum++;
     this.loadPage();
   }
@@ -328,6 +351,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
         this.renderPage(image);
       });
+    }
+  }
+
+  setReadingDirection() {
+    if (this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT) {
+      this.readingDirection = READING_DIRECTION.RIGHT_TO_LEFT;
+    } else {
+      this.readingDirection = READING_DIRECTION.LEFT_TO_RIGHT;
     }
   }
 

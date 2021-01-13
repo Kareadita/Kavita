@@ -30,6 +30,16 @@ canvas {
     border-left: 3px solid #CCC;
     cursor: pointer;
 
+    p {
+        font-size: 24px;
+        position: absolute;
+        height: 100%;
+        z-index: 1;
+        top: 65%;
+        right: 10%;
+        color: #CCC;
+    }
+
     i {
         font-size: 70px;
         position: absolute;
@@ -45,6 +55,16 @@ canvas {
   .left {
     border-right: 3px solid #CCC;
     cursor: pointer;
+
+    p {
+        font-size: 24px;
+        position: absolute;
+        height: 100%;
+        z-index: 1;
+        top: 65%;
+        left: 10%;
+        color: #CCC;
+    }
 
     i {
         font-size: 70px;
@@ -101,7 +121,7 @@ canvas {
 
 .bottom-menu {
     position: fixed;
-    top: 227px;
+    top: 265px;
     left: 20%;
     width: 60%;
     height: 100%;

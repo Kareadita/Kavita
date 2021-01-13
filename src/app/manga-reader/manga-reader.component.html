@@ -11,6 +11,7 @@
 
             <div class="center-menu">
                 <div>
+                    <button class="btn btn-primary" (click)="setReadingDirection()">Reading {{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
                     <p>
                         Page {{pageNum + 1}} / {{maxPages}}
                         <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages"></ngb-progressbar>
@@ -36,9 +37,11 @@
             <div class="bottom-menu" (click)="toggleMenu()"></div>
             
             <div class="right" (click)="toggleMenu()">
+                <p>{{readingDirection === 1 ? 'Next' : 'Previous'}} Page</p>
                 <i class="fa fa-arrow-right"></i>
             </div>
             <div class="left" (click)="toggleMenu()">
+                <p>{{readingDirection === 1 ? 'Previous' : 'Next'}} Page</p>
                 <i class="fa fa-arrow-left"></i>
             </div>
         </ng-container>
@@ -46,8 +49,8 @@
 
     <div (click)="toggleMenu()">
         <canvas #content class="{{getFittingOptionClass()}}"></canvas>
-        <div class="right" (click)="nextPage($event)"></div>
-        <div class="left" (click)="prevPage($event)"></div>
+        <div class="right" (click)="handlePageChange($event, 'right')"></div>
+        <div class="left" (click)="handlePageChange($event, 'left')"></div>
     </div>
     
     
