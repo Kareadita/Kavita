@@ -1,0 +1,153 @@
+
+
+canvas {
+    position: absolute;
+}
+
+.reader {
+    background-color: black;
+
+    img {
+        align-items: center;
+    }
+}
+
+
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1;
+  cursor: pointer;
+  color: white;
+
+  .right {
+    border-left: 3px dashed #CCC;
+    cursor: pointer;
+
+    p {
+        font-size: 24px;
+        position: absolute;
+        height: 100%;
+        z-index: 1;
+        top: 65%;
+        right: 10%;
+        color: #CCC;
+    }
+
+    i {
+        font-size: 70px;
+        position: absolute;
+        width: 20%;
+        height: 100%;
+        z-index: 1;
+        top: 50%;
+        right: 10%;
+        color: #CCC;
+        cursor: pointer;
+      }
+  }
+  .left {
+    border-right: 3px dashed #CCC;
+    cursor: pointer;
+
+    p {
+        font-size: 24px;
+        position: absolute;
+        height: 100%;
+        z-index: 1;
+        top: 65%;
+        left: 10%;
+        color: #CCC;
+    }
+
+    i {
+        font-size: 70px;
+        position: absolute;
+        width: 20%;
+        height: 100%;
+        z-index: 1;
+        top: 50%;
+        left: 10%;
+        color: #CCC;
+      }
+  }
+
+
+
+  
+}
+
+// Fitting Options
+.full-height {
+    position: absolute;
+    margin: auto;
+    top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    height: 100%;
+}
+
+.original {
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    top: 0px;
+    bottom: 0px;
+    left: 0;
+    right: 0;    
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+.center-menu {
+    position: fixed;
+    top: 10px;
+    left: 20%;
+    width: 60%;
+    border-bottom: 3px dashed #CCC;
+    text-align: center;
+    z-index: 2;
+}
+
+.bottom-menu {
+    position: fixed;
+    top: 265px;
+    left: 20%;
+    width: 60%;
+    height: 100%;
+    border: 1px dashed #CCC;
+    text-align: center;
+    z-index: 2;
+}
+
+.right {
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    width: 20%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.left {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 20%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}

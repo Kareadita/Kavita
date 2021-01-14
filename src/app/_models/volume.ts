@@ -4,4 +4,7 @@ export interface Volume {
     name: string;
     files: Array<string>;
     coverImage: string;
+    created: string;
+    lastModified: string;
+    pages: number;
 }

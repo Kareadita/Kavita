@@ -1,0 +1,63 @@
+<div class="reader">
+
+    <div class="{{isLoading ? 'overlay' : ''}}" (click)="toggleMenu()">
+        <ng-container *ngIf="isLoading">
+            Loading indicator here
+        </ng-container>
+    </div>
+
+    <div *ngIf="menuOpen" class="overlay">
+        <ng-container >
+
+            <div class="center-menu">
+                <div class="container-fluid row">
+                    <div class="col" style="max-width: 200px">
+                        <h4>Page Navigation</h4>
+                        Page {{pageNum + 1}} / {{maxPages}}
+                        <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages"></ngb-progressbar>
+                    </div>
+                    <div class="col">
+                        <h4>Reading Direction</h4>
+                        <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="fittingForm">
+                    <h4>Scaling Options</h4>
+                    <form [formGroup]="fittingForm">
+                        <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="fittingOption">
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-height"> Fit to Height
+                          </label>
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-width"> Fit to Width
+                          </label>
+                          <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="original"> Original
+                          </label>
+                        </div>
+                    </form>
+                </ng-container>
+            </div>
+            <div class="bottom-menu" (click)="toggleMenu()"></div>
+            
+            <div class="right" (click)="toggleMenu()">
+                <p>{{readingDirection === 1 ? 'Next' : 'Previous'}} Page</p>
+                <i class="fa fa-arrow-right"></i>
+            </div>
+            <div class="left" (click)="toggleMenu()">
+                <p>{{readingDirection === 1 ? 'Previous' : 'Next'}} Page</p>
+                <i class="fa fa-arrow-left"></i>
+            </div>
+        </ng-container>
+    </div>
+
+    <div (click)="toggleMenu()">
+        <canvas #content class="{{getFittingOptionClass()}}"></canvas>
+        <div class="right" (click)="handlePageChange($event, 'right')"></div>
+        <div class="left" (click)="handlePageChange($event, 'left')"></div>
+    </div>
+    
+    
+    
+</div>

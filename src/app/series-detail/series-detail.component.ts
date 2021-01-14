@@ -14,20 +14,24 @@ export class SeriesDetailComponent implements OnInit {
 
   series: Series | undefined;
   volumes: Volume[] = [];
+  libraryId = 0;
 
-  constructor(private route: ActivatedRoute, private seriesService: SeriesService, private ratingConfig: NgbRatingConfig) {
+  constructor(private route: ActivatedRoute, private seriesService: SeriesService,
+              private ratingConfig: NgbRatingConfig, private router: Router) {
     ratingConfig.max = 5;
   }
 
   ngOnInit(): void {
 
-    const routeId = this.route.snapshot.paramMap.get('id');
-    if (routeId === null) {
-      console.error('No library id was passed. Redirecting to home');
-      //this.router.navigateByUrl('/home');
+    console.log('Params: ', this.route.snapshot.paramMap);
+    const routeId = this.route.snapshot.paramMap.get('seriesId');
+    const libraryId = this.route.snapshot.paramMap.get('libraryId');
+    if (routeId === null || libraryId == null) {
+      this.router.navigateByUrl('/home');
       return;
     }
     const seriesId = parseInt(routeId, 10);
+    this.libraryId = parseInt(libraryId, 10);
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
@@ -37,7 +41,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openVolume(volume: Volume) {
-    alert('TODO: Let user read Manga');
+    this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', volume.id]);
   }
 
 }

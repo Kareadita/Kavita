@@ -1,10 +1,10 @@
-<div class="container" *ngIf="series !== undefined">
+<div class="container-fluid" *ngIf="series !== undefined">
     <div class="row">
-        <div class="col-md-4 col-mr-auto">
+        <div class="col-md-2 col-mr-auto">
             <app-card-item [imageUrl]="series.coverImage === null ? 'assets/images/image-placeholder.jpg' : series.coverImage"></app-card-item>
             <button class="btn btn-primary">Read</button>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
             <h2>{{series.name | titlecase}}</h2>
             <div class="row">
                 <ngb-rating></ngb-rating>

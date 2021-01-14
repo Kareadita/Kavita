@@ -23,12 +23,16 @@ export class LibraryDetailComponent implements OnInit {
       return;
     }
     this.libraryId = parseInt(routeId, 10);
-    this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
-      this.series = series;
-    });
+    this.loadPage();
   }
 
   ngOnInit(): void {
+  }
+
+  loadPage() {
+    this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
+      this.series = series;
+    });
   }
 
   seriesClicked(series: Series) {

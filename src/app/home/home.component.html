@@ -6,6 +6,7 @@
     </ng-container>
 
     <ng-container *ngIf="!firstTimeFlow && (this.accountService.currentUser$ | async) == null">
+        <!-- TODO: Refactor to use a redirect to user login -->
         <app-user-login></app-user-login>
     </ng-container>
 </div>

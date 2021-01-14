@@ -23,12 +23,12 @@
         </div>
         
     
-        <h4>Folders <button type="button" class="btn pull-right" (click)="openDirectoryPicker()"><i class="fa fa-plus"></i></button></h4>
+        <h4>Folders <button type="button" class="btn float-right" (click)="openDirectoryPicker()"><i class="fa fa-plus"></i></button></h4>
         
         <div class="list-group">
             <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
                 {{folder}}
-                <button class="btn pull-right mr-2 btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle"></i></button>
+                <button class="btn float-right mr-2 btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle"></i></button>
             </li>
         </div>
     </div>

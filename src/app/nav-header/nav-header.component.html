@@ -1,5 +1,5 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <div class="container">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" *ngIf="navService?.navbarVisible$ | async">
+    <div class="container-fluid">
       <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home"></i> Kavita</a>
       <ul class="navbar-nav mr-auto">
 

@@ -20,6 +20,7 @@ export class LibraryCardComponent implements OnInit, OnChanges {
 
   isAdmin = false;
   actions: CardItemAction[] = [];
+  icon = 'fa-book-open';
 
   constructor(private accountService: AccountService, private router: Router,
               private libraryService: LibraryService, private toastr: ToastrService) {
@@ -35,6 +36,11 @@ export class LibraryCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.data) {
+      if (this.data.type === 0) {
+        this.icon = 'fa-book-open';
+      } else {
+        this.icon = 'fa-book';
+      }
       this.generateActions();
     }
   }
@@ -60,6 +66,14 @@ export class LibraryCardComponent implements OnInit, OnChanges {
     }
   }
 
+  handleAction(event: any, action: CardItemAction) {
+    this.preventClick(event);
+
+    if (typeof action.callback === 'function') {
+      action.callback(this.data);
+    }
+  }
+
   markAsUnread(library: any) {
 
   }
@@ -71,6 +85,11 @@ export class LibraryCardComponent implements OnInit, OnChanges {
   handleClick() {
     this.clicked.emit(this.data);
     this.router.navigate(['library', this.data?.id]);
+  }
+
+  preventClick(event: any) {
+    event.stopPropagation();
+    event.preventDefault();
   }
 
 }

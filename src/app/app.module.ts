@@ -5,7 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
@@ -17,6 +17,9 @@ import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { MangaReaderComponent } from './manga-reader/manga-reader.component';
+import { NotConnectedComponent } from './not-connected/not-connected.component';
+
 
 
 
@@ -29,12 +32,15 @@ import { SeriesDetailComponent } from './series-detail/series-detail.component';
     LibraryComponent,
     LibraryDetailComponent,
     SeriesDetailComponent,
+    MangaReaderComponent,
+    NotConnectedComponent,
   ],
   imports: [
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule, // Just used for gotopage; TODO: Remove this and use ReactiveForms
     ReactiveFormsModule,
     NgbModule,
     SharedModule,

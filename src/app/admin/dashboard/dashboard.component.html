@@ -4,7 +4,9 @@
     <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
       <a ngbNavLink>{{ tab | titlecase }}</a>
       <ng-template ngbNavContent>
-
+        <ng-container *ngIf="tab === 'general'">
+            General settings here
+        </ng-container>
         <ng-container *ngIf="tab === 'users'">
             <app-manage-users></app-manage-users>
         </ng-container>
