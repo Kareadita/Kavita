@@ -1,4 +1,3 @@
-using System;
 using API.Extensions;
 using API.Middleware;
 using Hangfire;
@@ -47,7 +46,6 @@ namespace API
             
             
             app.UseHangfireDashboard();
-            //backgroundJobs.Enqueue(() => Console.WriteLine("Hello world from Hangfire!"));
 
             app.UseHttpsRedirection();
 

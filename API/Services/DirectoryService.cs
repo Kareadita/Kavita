@@ -4,16 +4,19 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using API.IO;
 using API.Parser;
-using Hangfire;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Services
 {
@@ -41,21 +44,16 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4)</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       public static IEnumerable<string> GetFiles(string path, 
+       private static IEnumerable<string> GetFiles(string path, 
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
-          Regex reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+          var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
           return Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
        
-       /// <summary>
-        /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
-        /// </summary>
-        /// <param name="rootPath">Absolute path </param>
-        /// <returns>List of folder names</returns>
         public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
@@ -68,6 +66,12 @@ namespace API.Services
             
             return dirs;
         }
+
+       public IList<string> ListFiles(string rootPath)
+       {
+          if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+          return Directory.GetFiles(rootPath);
+       }
 
 
        /// <summary>
@@ -86,9 +90,8 @@ namespace API.Services
              return;
           }
 
-          ConcurrentBag<ParserInfo> tempBag;
           ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-          if (_scannedSeries.TryGetValue(info.Series, out tempBag))
+          if (_scannedSeries.TryGetValue(info.Series, out var tempBag))
           {
              var existingInfos = tempBag.ToArray();
              foreach (var existingInfo in existingInfos)
@@ -111,24 +114,32 @@ namespace API.Services
        
        private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
        {
-          var series = _seriesRepository.GetSeriesByName(seriesName);
-
-          if (series == null)
+          var series = _seriesRepository.GetSeriesByName(seriesName) ?? new Series
           {
-             series = new Series()
-             {
-                Name = seriesName,
-                OriginalName = seriesName,
-                SortName = seriesName,
-                Summary = ""
-             };
-          }
-          
+             Name = seriesName,
+             OriginalName = seriesName,
+             SortName = seriesName,
+             Summary = "" // TODO: Check if comicInfo.xml in file and parse metadata out.
+          };
+
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
-          // TODO: Instead of taking first entry, re-calculate without compression 
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
           return series;
+       }
+
+       private MangaFile CreateMangaFile(ParserInfo info)
+       {
+          _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
+          int.TryParse(info.Chapters, out var chapter);
+          _logger.LogDebug($"Found Chapter: {chapter}");
+          return new MangaFile()
+          {
+             FilePath = info.FullFilePath,
+             Chapter = chapter,
+             Format = info.Format,
+             NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath)
+          };
        }
 
        /// <summary>
@@ -142,46 +153,60 @@ namespace API.Services
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
-          
+
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
              if (existingVolume != null)
              {
-                // Temp let's overwrite all files (we need to enhance to update files)
-                existingVolume.Files = new List<MangaFile>()
+                var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+                if (existingFile != null)
                 {
-                   new MangaFile()
-                   {
-                      FilePath = info.File
-                   }
-                };
-
-                if (forceUpdate || existingVolume.CoverImage == null || existingVolumes.Count == 0)
-                {
-                   existingVolume.CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true);
+                   existingFile.Chapter = Int32.Parse(info.Chapters);
+                   existingFile.Format = info.Format;
+                   existingFile.NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath);
                 }
+                else
+                {
+                   existingVolume.Files.Add(CreateMangaFile(info));
+                }
+                
                 volumes.Add(existingVolume);
              }
              else
              {
-                var vol = new Volume()
+                existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
+                if (existingVolume != null)
                 {
-                   Name = info.Volumes,
-                   Number = Int32.Parse(info.Volumes),
-                   CoverImage = ImageProvider.GetCoverImage(info.FullFilePath, true),
-                   Files = new List<MangaFile>()
+                   existingVolume.Files.Add(CreateMangaFile(info));
+                }
+                else
+                {
+                   var vol = new Volume()
                    {
-                      new MangaFile()
+                      Name = info.Volumes,
+                      Number = Int32.Parse(info.Volumes),
+                      Files = new List<MangaFile>()
                       {
-                         FilePath = info.File
+                         CreateMangaFile(info)
                       }
-                   }
-                };
-                volumes.Add(vol);
+                   };
+                   volumes.Add(vol);
+                }
              }
              
-             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.File}");
+             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
+          }
+
+          foreach (var volume in volumes)
+          {
+             if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
+             {
+                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault()?.FilePath;
+                volume.CoverImage = ImageProvider.GetCoverImage(firstFile, true);
+             }
+
+             volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
           }
 
           return volumes;
@@ -189,14 +214,27 @@ namespace API.Services
 
         public void ScanLibrary(int libraryId, bool forceUpdate)
         {
-           var library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+           var sw = Stopwatch.StartNew();
+           Library library;
+           try
+           {
+              library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+           }
+           catch (Exception ex)
+           {
+              // This usually only fails if user is not authenticated.
+              _logger.LogError($"There was an issue fetching Library {libraryId}.", ex);
+              return;
+           }
+           
            _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
            _logger.LogInformation($"Beginning scan on {library.Name}");
-           
+
+           var totalFiles = 0;
            foreach (var folderPath in library.Folders)
            {
               try {
-                 TraverseTreeParallelForEach(folderPath.Path, (f) =>
+                 totalFiles = TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
                     try
                     {
@@ -220,9 +258,9 @@ namespace API.Services
            library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
-              var s = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
-              _logger.LogInformation($"Created/Updated series {s.Name}");
-              library.Series.Add(s);
+              var mangaSeries = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
+              _logger.LogInformation($"Created/Updated series {mangaSeries.Name}");
+              library.Series.Add(mangaSeries);
            }
            
            
@@ -239,13 +277,123 @@ namespace API.Services
            }
 
            _scannedSeries = null;
+           _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
         }
 
-        private static void TraverseTreeParallelForEach(string root, Action<string> action)
+        public string GetExtractPath(int volumeId)
+        {
+           return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
+        }
+
+        /// <summary>
+        /// TODO: Delete this method
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
+        private string ExtractArchive(string archivePath, int volumeId)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return "";
+           }
+           
+           var extractPath = GetExtractPath(volumeId);
+
+           if (Directory.Exists(extractPath))
+           {
+              _logger.LogInformation($"Archive {archivePath} has already been extracted. Returning existing folder.");
+              return extractPath;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           
+           // TODO: Throw error if we couldn't extract
+           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
+           if (!archive.HasFiles() && !needsFlattening) return "";
+
+           archive.ExtractToDirectory(extractPath);
+           _logger.LogInformation($"Extracting archive to {extractPath}");
+           
+           if (needsFlattening)
+           {
+              _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
+              new DirectoryInfo(extractPath).Flatten();
+           }
+
+           return extractPath;
+        }
+        
+        public string ExtractArchive(string archivePath, string extractPath)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return "";
+           }
+
+           if (Directory.Exists(extractPath))
+           {
+              _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
+              return extractPath;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           // TODO: Throw error if we couldn't extract
+           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
+           if (!archive.HasFiles() && !needsFlattening) return "";
+            
+           archive.ExtractToDirectory(extractPath);
+           _logger.LogDebug($"Extracting archive to {extractPath}");
+
+           if (!needsFlattening) return extractPath;
+           
+           _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
+           new DirectoryInfo(extractPath).Flatten();
+
+           return extractPath;
+        }
+
+        private int GetNumberOfPagesFromArchive(string archivePath)
+        {
+           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+           {
+              _logger.LogError($"Archive {archivePath} could not be found.");
+              return 0;
+           }
+           
+           using ZipArchive archive = ZipFile.OpenRead(archivePath);
+           return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+        }
+        
+
+        public async Task<ImageDto> ReadImageAsync(string imagePath)
+        {
+           using var image = Image.NewFromFile(imagePath);
+
+           return new ImageDto
+           {
+              Content = await File.ReadAllBytesAsync(imagePath),
+              Filename = Path.GetFileNameWithoutExtension(imagePath),
+              FullPath = Path.GetFullPath(imagePath),
+              Width = image.Width,
+              Height = image.Height,
+              Format = image.Format
+           };
+        }
+
+        /// <summary>
+        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
+        /// up processing.
+        /// </summary>
+        /// <param name="root">Directory to scan</param>
+        /// <param name="action">Action to apply on file path</param>
+        /// <exception cref="ArgumentException"></exception>
+        private static int TraverseTreeParallelForEach(string root, Action<string> action)
         {
             //Count of files traversed and timer for diagnostic output
             int fileCount = 0;
-            var sw = Stopwatch.StartNew();
 
             // Determine whether to parallelize file processing on each folder based on processor count.
             int procCount = Environment.ProcessorCount;
@@ -333,8 +481,7 @@ namespace API.Services
                   dirs.Push(str);
             }
 
-            // For diagnostic purposes.
-            Console.WriteLine("Processed {0} files in {1} milliseconds", fileCount, sw.ElapsedMilliseconds);
+            return fileCount;
         }
         
     }

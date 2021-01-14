@@ -15,11 +15,11 @@ namespace API.Tests
         //[InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "16-17")]
         [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
+        [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
-            var result = ParseVolume(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseVolume(filename));
         }
         
         [Theory]
@@ -31,27 +31,27 @@ namespace API.Tests
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "Gokukoku no Brynhildr")]
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "Dance in the Vampire Bund")]
         [InlineData("v001", "")]
+        [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "U12 (Under 12)")]
         [InlineData("Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)", "Akame ga KILL! ZERO")]
         public void ParseSeriesTest(string filename, string expected)
         {
-            var result = ParseSeries(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseSeries(filename));
         }
         
         [Theory]
         [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
         [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "9")]
         [InlineData("Historys Strongest Disciple Kenichi_v11_c90-98.zip", "90-98")]
-        [InlineData("B_Gata_H_Kei_v01[SlowManga&OverloadScans]", "")]
-        [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", "")]
+        [InlineData("B_Gata_H_Kei_v01[SlowManga&OverloadScans]", "0")]
+        [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", "0")]
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1-8")]
-        [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "")]
+        [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "0")]
         [InlineData("c001", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "12")]
+        [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
         public void ParseChaptersTest(string filename, string expected)
         {
-            var result = ParseChapter(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseChapter(filename));
         }
  
 
@@ -88,6 +88,7 @@ namespace API.Tests
         [InlineData("test.cbr", true)]
         [InlineData("test.zip", true)]
         [InlineData("test.rar", true)]
+        [InlineData("test.rar.!qb", false)]
         public void IsArchiveTest(string input, bool expected)
         {
             Assert.Equal(expected, IsArchive(input));

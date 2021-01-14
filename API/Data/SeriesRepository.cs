@@ -76,5 +76,41 @@ namespace API.Data
             return await _context.Series.Where(x => x.Id == seriesId)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).SingleAsync();
         }
+
+        public async Task<Volume> GetVolumeAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Include(vol => vol.Files)
+                .SingleOrDefaultAsync(vol => vol.Id == volumeId);
+        }
+
+        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Where(vol => vol.Id == volumeId)
+                .Include(vol => vol.Files)
+                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+                .SingleAsync(vol => vol.Id == volumeId);
+        }
+
+        /// <summary>
+        /// Returns all volumes that contain a seriesId in passed array.
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds)
+        {
+            return await _context.Volume
+                .Where(v => seriesIds.Contains(v.SeriesId))
+                .ToListAsync();
+        }
+
+        public async Task<bool> DeleteSeriesAsync(int seriesId)
+        {
+            var series = await _context.Series.Where(s => s.Id == seriesId).SingleOrDefaultAsync();
+            _context.Series.Remove(series);
+            
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

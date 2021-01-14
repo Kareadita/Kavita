@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using API.Extensions;
 using NetVips;
 
 namespace API.IO
@@ -18,24 +19,19 @@ namespace API.IO
         /// <returns></returns>
         public static byte[] GetCoverImage(string filepath, bool createThumbnail = false)
         {
-            if (!File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
+            if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
             using ZipArchive archive = ZipFile.OpenRead(filepath);
-            if (archive.Entries.Count <= 0) return Array.Empty<byte>();
+            if (!archive.HasFiles()) return Array.Empty<byte>();
             
             
 
             var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-            var entry = archive.Entries.OrderBy(x => x.FullName).ToList()[0];
+            var entry = archive.Entries.Where(x => Path.HasExtension(x.FullName)).OrderBy(x => x.FullName).ToList()[0];
 
             if (folder != null)
             {
                 entry = folder;
-            }
-
-            if (entry.FullName.EndsWith(Path.PathSeparator))
-            {
-                // TODO: Implement nested directory support
             }
 
             if (createThumbnail)
@@ -50,10 +46,11 @@ namespace API.IO
                 catch (Exception ex)
                 {
                     Console.WriteLine("There was a critical error and prevented thumbnail generation.");
+                    Console.WriteLine(ex.Message);
                 }
             }
             
-            return  ExtractEntryToImage(entry);
+            return ExtractEntryToImage(entry);
         }
         
         private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)

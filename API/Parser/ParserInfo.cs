@@ -1,4 +1,6 @@
 ﻿
+using API.Entities;
+
 namespace API.Parser
 {
     /// <summary>
@@ -11,7 +13,11 @@ namespace API.Parser
         public string Series { get; set; }
         // This can be multiple
         public string Volumes { get; set; }
-        public string File { get; init; }
+        public string Filename { get; init; }
         public string FullFilePath { get; set; }
+        /// <summary>
+        /// Raw (image), Archive
+        /// </summary>
+        public MangaFormat Format { get; set; }
     }
 }

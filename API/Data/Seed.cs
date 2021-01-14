@@ -18,7 +18,11 @@ namespace API.Data
 
             foreach (var role in roles)
             {
-                await roleManager.CreateAsync(role);
+                var exists = await roleManager.RoleExistsAsync(role.Name);
+                if (!exists)
+                {
+                    await roleManager.CreateAsync(role);      
+                }
             }
         }
     }

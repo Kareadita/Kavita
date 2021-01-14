@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
 using Hangfire;
@@ -23,10 +24,11 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly ISeriesRepository _seriesRepository;
+        private readonly ICacheService _cacheService;
 
         public LibraryController(IDirectoryService directoryService, 
             ILibraryRepository libraryRepository, ILogger<LibraryController> logger, IUserRepository userRepository,
-            IMapper mapper, ITaskScheduler taskScheduler, ISeriesRepository seriesRepository)
+            IMapper mapper, ITaskScheduler taskScheduler, ISeriesRepository seriesRepository, ICacheService cacheService)
         {
             _directoryService = directoryService;
             _libraryRepository = libraryRepository;
@@ -35,6 +37,7 @@ namespace API.Controllers
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _seriesRepository = seriesRepository;
+            _cacheService = cacheService;
         }
         
         /// <summary>
@@ -71,6 +74,7 @@ namespace API.Controllers
 
             if (await _userRepository.SaveAllAsync())
             {
+                _logger.LogInformation($"Created a new library: {library.Name}");
                 var createdLibrary = await _libraryRepository.GetLibraryForNameAsync(library.Name);
                 BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id, false));
                 return Ok();
@@ -121,6 +125,7 @@ namespace API.Controllers
             
             if (await _userRepository.SaveAllAsync())
             {
+                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
                 return Ok(user);
             }
 
@@ -151,7 +156,19 @@ namespace API.Controllers
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
         {
-            return Ok(await _libraryRepository.DeleteLibrary(libraryId));
+            var username = User.GetUsername();
+            _logger.LogInformation($"Library {libraryId} is being deleted by {username}.");
+            var series = await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId);
+            var volumes = (await _seriesRepository.GetVolumesForSeriesAsync(series.Select(x => x.Id).ToArray()))
+                                .Select(x => x.Id).ToArray();
+            var result = await _libraryRepository.DeleteLibrary(libraryId);
+            
+            if (result && volumes.Any())
+            {
+                BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumes));
+            }
+            
+            return Ok(result);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -174,7 +191,7 @@ namespace API.Controllers
             {
                 if (differenceBetweenFolders.Any())
                 {
-                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id));    
+                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id, true));    
                 }
                 
                 return Ok();

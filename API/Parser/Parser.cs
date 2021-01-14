@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using API.Entities;
 
 namespace API.Parser
 {
     public static class Parser
     {
         public static readonly string MangaFileExtensions = @"\.cbz|\.cbr|\.png|\.jpeg|\.jpg|\.zip|\.rar";
+        public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -100,8 +102,16 @@ namespace API.Parser
                 Chapters = ParseChapter(filePath),
                 Series = ParseSeries(filePath),
                 Volumes = ParseVolume(filePath),
-                File = filePath
+                Filename = filePath,
+                Format = ParseFormat(filePath)
             };
+        }
+
+        public static MangaFormat ParseFormat(string filePath)
+        {
+            if (IsArchive(filePath)) return MangaFormat.Archive;
+            if (IsImage(filePath)) return MangaFormat.Image;
+            return MangaFormat.Unknown;
         }
         
         public static string ParseSeries(string filename)
@@ -168,7 +178,7 @@ namespace API.Parser
                 }
             }
 
-            return "";
+            return "0";
         }
         
         /// <summary>
@@ -231,8 +241,13 @@ namespace API.Parser
         public static bool IsArchive(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-
             return MangaFileExtensions.Contains(fileInfo.Extension);
+        }
+
+        public static bool IsImage(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+            return ImageFileExtensions.Contains(fileInfo.Extension);
         }
     }
 }
