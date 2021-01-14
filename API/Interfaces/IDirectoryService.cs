@@ -4,7 +4,6 @@ using API.DTOs;
 
 namespace API.Interfaces
 {
-    // TODO: Refactor this into IDiskService to encapsulate all disk based IO
     public interface IDirectoryService
     {
         /// <summary>

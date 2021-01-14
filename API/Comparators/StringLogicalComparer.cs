@@ -30,7 +30,7 @@ namespace API.Comparators
 			{
 				bool c1 = Char.IsDigit(s1, i1);
 				bool c2 = Char.IsDigit(s2, i2);
-				var r = 0; // temp result
+				int r; // temp result
 				if(!c1 && !c2)
 				{
 					bool letter1 = Char.IsLetter(s1, i1);

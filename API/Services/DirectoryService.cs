@@ -137,6 +137,7 @@ namespace API.Services
           {
              FilePath = info.FullFilePath,
              Chapter = chapter,
+             Format = info.Format,
              NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath)
           };
        }
@@ -284,7 +285,13 @@ namespace API.Services
            return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
         }
 
-        public string ExtractArchive(string archivePath, int volumeId)
+        /// <summary>
+        /// TODO: Delete this method
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
+        private string ExtractArchive(string archivePath, int volumeId)
         {
            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
            {
@@ -302,10 +309,18 @@ namespace API.Services
            
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
            
-           if (!archive.HasFiles()) return "";
-            
+           // TODO: Throw error if we couldn't extract
+           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
+           if (!archive.HasFiles() && !needsFlattening) return "";
+
            archive.ExtractToDirectory(extractPath);
            _logger.LogInformation($"Extracting archive to {extractPath}");
+           
+           if (needsFlattening)
+           {
+              _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
+              new DirectoryInfo(extractPath).Flatten();
+           }
 
            return extractPath;
         }
@@ -325,11 +340,17 @@ namespace API.Services
            }
            
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
-           
-           if (!archive.HasFiles()) return "";
+           // TODO: Throw error if we couldn't extract
+           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
+           if (!archive.HasFiles() && !needsFlattening) return "";
             
            archive.ExtractToDirectory(extractPath);
            _logger.LogDebug($"Extracting archive to {extractPath}");
+
+           if (!needsFlattening) return extractPath;
+           
+           _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
+           new DirectoryInfo(extractPath).Flatten();
 
            return extractPath;
         }
@@ -343,7 +364,6 @@ namespace API.Services
            }
            
            using ZipArchive archive = ZipFile.OpenRead(archivePath);
-           Console.WriteLine();
            return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
         }
         

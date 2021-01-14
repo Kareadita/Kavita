@@ -19,8 +19,7 @@ namespace API.Tests
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
-            var result = ParseVolume(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseVolume(filename));
         }
         
         [Theory]
@@ -36,8 +35,7 @@ namespace API.Tests
         [InlineData("Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)", "Akame ga KILL! ZERO")]
         public void ParseSeriesTest(string filename, string expected)
         {
-            var result = ParseSeries(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseSeries(filename));
         }
         
         [Theory]
@@ -53,8 +51,7 @@ namespace API.Tests
         [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
         public void ParseChaptersTest(string filename, string expected)
         {
-            var result = ParseChapter(filename);
-            Assert.Equal(expected, result);
+            Assert.Equal(expected, ParseChapter(filename));
         }
  
 
@@ -91,6 +88,7 @@ namespace API.Tests
         [InlineData("test.cbr", true)]
         [InlineData("test.zip", true)]
         [InlineData("test.rar", true)]
+        [InlineData("test.rar.!qb", false)]
         public void IsArchiveTest(string input, bool expected)
         {
             Assert.Equal(expected, IsArchive(input));

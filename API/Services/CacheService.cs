@@ -42,7 +42,7 @@ namespace API.Services
             foreach (var file in volume.Files)
             {
                 var extractPath = GetVolumeCachePath(volumeId, file);
-
+                
                 _directoryService.ExtractArchive(file.FilePath, extractPath);
             }
 
