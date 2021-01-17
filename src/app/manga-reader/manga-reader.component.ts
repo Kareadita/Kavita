@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { take, zip } from 'rxjs/operators';
 import { MangaImage } from '../_models/manga-image';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
@@ -10,7 +10,7 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
-import { resolveProjectReferencePath } from 'typescript';
+import { Observable } from 'rxjs';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -126,11 +126,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       fittingOption: FITTING_OPTION.HEIGHT
     });
 
-
+    // TODO: Use Observable.all([])
     this.seriesService.getVolume(this.volumeId).subscribe(volume => {
       console.log('volume.pages', volume.pages);
       this.maxPages = volume.pages;
-      this.loadPage();
+      this.readerService.getBookmark(this.volumeId).subscribe(pageNum => {
+        this.pageNum = pageNum;
+        this.loadPage();
+      });
     }, err => {
       setTimeout(() => {
         this.location.back();
@@ -281,6 +284,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.isLoading = false;
     this.clearCanvas();
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.pageNum).subscribe(() => {}, err => {
+      console.error('Could not save bookmark status. Current page is: ', this.pageNum);
+    });
 
     if (image.width < this.minWidth) {
       this.minWidth = image.width;

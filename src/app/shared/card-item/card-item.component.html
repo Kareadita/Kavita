@@ -1,6 +1,9 @@
 <div class="card" style="width: 18rem;">
     <div class="overlay" (click)="handleClick()">
       <img class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}">
+      <div class="progress-banner" *ngIf="read < total && total > 0">
+        <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+      </div>
       <div class="overlay-item card-actions">
         <ng-container *ngIf="actions.length > 0">
               <div ngbDropdown container="body" class="d-inline-block">

@@ -8,4 +8,6 @@ export interface Series {
     summary: string;
     coverImage: string;
     volumes: Volume[];
+    pages: number; // Total pages in series
+    pagesRead: number; // Total pages the logged in user has read
 }

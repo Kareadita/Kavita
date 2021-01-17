@@ -26,6 +26,17 @@ $primary-color: #cc7b19;
     height: 230px;
 }
 
+.progress-banner {
+    width: 160px;
+    position: absolute;
+    top: 230px;
+
+    .progress {
+        color: $primary-color;
+        background-color: transparent;
+    }
+}
+
 .overlay {
     height: 230px;
     &:hover {

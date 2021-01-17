@@ -33,8 +33,6 @@ export class HomeComponent implements OnInit {
             this.router.navigateByUrl('/library');
           }
         });
-
-        
       }
     });
   }
@@ -45,5 +43,4 @@ export class HomeComponent implements OnInit {
       this.router.navigateByUrl('/library');
     }
   }
-
 }

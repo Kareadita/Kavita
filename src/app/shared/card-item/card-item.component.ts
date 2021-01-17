@@ -17,6 +17,8 @@ export class CardItemComponent implements OnInit {
   @Input() imageUrl = '';
   @Input() title = '';
   @Input() actions: CardItemAction[] = [];
+  @Input() read = 0; // Pages read
+  @Input() total = 0; // Total Pages
   @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed.
   @Output() clicked = new EventEmitter<string>();
 

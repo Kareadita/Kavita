@@ -1,3 +1,3 @@
 <ng-container *ngIf="data !== undefined">
-    <app-card-item [title]="data.name" [actions]="actions" [imageUrl]="data.coverImage" [entity]="data" (clicked)="handleClick()"></app-card-item>
+    <app-card-item [title]="data.name" [actions]="actions" [imageUrl]="data.coverImage" [entity]="data" [total]="data.pages" [read]="data.pagesRead"  (clicked)="handleClick()"></app-card-item>
 </ng-container>
