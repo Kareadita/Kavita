@@ -19,16 +19,18 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly ISeriesRepository _seriesRepository;
         private readonly ICacheService _cacheService;
+        private readonly IUserRepository _userRepository;
 
         public SeriesController(ILogger<SeriesController> logger, IMapper mapper, 
             ITaskScheduler taskScheduler, ISeriesRepository seriesRepository,
-            ICacheService cacheService)
+            ICacheService cacheService, IUserRepository userRepository)
         {
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _seriesRepository = seriesRepository;
             _cacheService = cacheService;
+            _userRepository = userRepository;
         }
         
         [HttpGet("{seriesId}")]

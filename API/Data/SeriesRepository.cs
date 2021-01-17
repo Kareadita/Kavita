@@ -46,12 +46,26 @@ namespace API.Data
             return _context.Series.SingleOrDefault(x => x.Name == name);
         }
         
-        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId)
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId = 0)
         {
-            return await _context.Series
-                .Where(series => series.LibraryId == libraryId)
+            var series = await _context.Series
+                .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            if (userId > 0)
+            {
+                var userProgress = await _context.AppUserProgresses
+                    .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
+                    .ToListAsync();
+
+                foreach (var s in series)
+                {
+                    s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+                }
+            }
+
+            return series;
         }
 
         public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId)
@@ -111,6 +125,11 @@ namespace API.Data
             _context.Series.Remove(series);
             
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Volume> GetVolumeByIdAsync(int volumeId)
+        {
+            return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
         }
     }
 }

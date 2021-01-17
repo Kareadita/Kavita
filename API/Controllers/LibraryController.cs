@@ -147,8 +147,13 @@ namespace API.Controllers
         }
 
         [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, bool forUser = false)
         {
+            if (forUser)
+            {
+                var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+                return Ok(await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id));
+            }
             return Ok(await _seriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId));
         }
 

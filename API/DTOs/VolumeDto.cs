@@ -8,5 +8,6 @@ namespace API.DTOs
         public string Name { get; set; }
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
+        public int PagesRead { get; set; }
     }
 }

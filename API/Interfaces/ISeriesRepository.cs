@@ -12,7 +12,7 @@ namespace API.Interfaces
         Task<Series> GetSeriesByNameAsync(string name);
         Series GetSeriesByName(string name);
         bool SaveAll();
-        Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId);
+        Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId = 0);
         Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId);
         IEnumerable<Volume> GetVolumes(int seriesId);
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId);
@@ -22,5 +22,6 @@ namespace API.Interfaces
 
         Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
         Task<bool> DeleteSeriesAsync(int seriesId);
+        Task<Volume> GetVolumeByIdAsync(int volumeId);
     }
 }

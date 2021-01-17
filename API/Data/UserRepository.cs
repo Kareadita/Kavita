@@ -32,7 +32,8 @@ namespace API.Data
 
         public void Delete(AppUser user)
         {
-            _context.Users.Remove(user);
+            // TODO: Check how to implement for _userMangaer
+            _context.AppUser.Remove(user);
         }
 
         public async Task<bool> SaveAllAsync()
@@ -42,17 +43,25 @@ namespace API.Data
 
         public async Task<IEnumerable<AppUser>> GetUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            return await _userManager.Users.ToListAsync();
+            //return await _context.Users.ToListAsync();
         }
 
         public async Task<AppUser> GetUserByIdAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
+            // TODO: How to use userManager
+            return await _context.AppUser.FindAsync(id);
         }
 
+        /// <summary>
+        /// Gets an AppUser by username. Returns back Progress information.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users
+            return await _userManager.Users
+                .Include(u => u.Progresses)
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
@@ -88,10 +97,15 @@ namespace API.Data
 
         public async Task<MemberDto> GetMemberAsync(string username)
         {
-            return await _context.Users.Where(x => x.UserName == username)
+            return await _userManager.Users.Where(x => x.UserName == username)
                 .Include(x => x.Libraries)
                 .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
+        }
+
+        public void UpdateReadingProgressAsync(int volumeId, int pageNum)
+        {
+            
         }
         
     }

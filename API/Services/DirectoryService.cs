@@ -125,6 +125,8 @@ namespace API.Services
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
+          series.Pages = volumes.Sum(v => v.Pages);
+          //series.TotalVolumes = volumes.Count;
           return series;
        }
 

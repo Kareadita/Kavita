@@ -46,6 +46,8 @@ namespace API.Controllers
         [HttpGet("has-library-access")]
         public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
         {
+            // TODO: refactor this to use either userexists or usermanager
+            
             var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not validate user");
