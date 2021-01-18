@@ -68,12 +68,26 @@ namespace API.Data
             return series;
         }
 
-        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId)
+        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId = 0)
         {
-            return await _context.Volume
+            var volumes =  await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
                 .OrderBy(volume => volume.Number)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToListAsync();
+            if (userId > 0)
+            {
+                var userProgress = await _context.AppUserProgresses
+                    .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
+                    .ToListAsync();
+
+                foreach (var v in volumes)
+                {
+                    v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
+                }
+            }
+
+            return volumes;
+
         }
 
         public IEnumerable<Volume> GetVolumes(int seriesId)

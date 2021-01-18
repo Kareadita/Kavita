@@ -13,12 +13,12 @@ namespace API.Interfaces
         Series GetSeriesByName(string name);
         bool SaveAll();
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId = 0);
-        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId);
+        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId = 0);
         IEnumerable<Volume> GetVolumes(int seriesId);
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId);
 
         Task<Volume> GetVolumeAsync(int volumeId);
-        Task<VolumeDto> GetVolumeDtoAsync(int volumeId);
+        Task<VolumeDto> GetVolumeDtoAsync(int volumeId); // TODO: Likely need to update here
 
         Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
         Task<bool> DeleteSeriesAsync(int seriesId);

@@ -56,9 +56,14 @@ namespace API.Controllers
         }
 
         [HttpGet("volumes")]
-        public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
+        public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId, bool forUser = true)
         {
-            return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId));
+            if (forUser)
+            {
+                var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+                return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
+            }
+            return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId)); // TODO: Refactor out forUser = false since everything is user based
         }
         
         [HttpGet("volume")]

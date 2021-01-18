@@ -11,7 +11,6 @@
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }
         public int VolumeId { get; set; }
-        public int SeriesId { get; set; } // shortcut
-        //public bool VolumeCompleted { get; set; } // This will be set true if PagesRead == Sum of MangaFiles on volume
+        public int SeriesId { get; set; }
     }
 }
