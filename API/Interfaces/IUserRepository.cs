@@ -8,9 +8,9 @@ namespace API.Interfaces
     public interface IUserRepository
     {
         void Update(AppUser user);
+        public void Delete(AppUser user);
         Task<AppUser> GetUserByUsernameAsync(string username);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
-        public void Delete(AppUser user);
         Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     }
 }

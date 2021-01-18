@@ -32,25 +32,7 @@ namespace API.Data
 
         public void Delete(AppUser user)
         {
-            // TODO: Check how to implement for _userMangaer
             _context.AppUser.Remove(user);
-        }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<AppUser>> GetUsersAsync()
-        {
-            return await _userManager.Users.ToListAsync();
-            //return await _context.Users.ToListAsync();
-        }
-
-        public async Task<AppUser> GetUserByIdAsync(int id)
-        {
-            // TODO: How to use userManager
-            return await _context.AppUser.FindAsync(id);
         }
 
         /// <summary>
@@ -60,7 +42,7 @@ namespace API.Data
         /// <returns></returns>
         public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
-            return await _userManager.Users
+            return await _context.Users
                 .Include(u => u.Progresses)
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
@@ -72,7 +54,7 @@ namespace API.Data
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
-            return await _userManager.Users
+            return await _context.Users
                 .Include(x => x.Libraries)
                 .Include(r => r.UserRoles)
                 .ThenInclude(r => r.Role)
@@ -92,21 +74,16 @@ namespace API.Data
                         Folders = l.Folders.Select(x => x.Path).ToList()
                     }).ToList()
                 })
+                .AsNoTracking()
                 .ToListAsync();
         }
 
-        public async Task<MemberDto> GetMemberAsync(string username)
-        {
-            return await _userManager.Users.Where(x => x.UserName == username)
-                .Include(x => x.Libraries)
-                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
-        }
-
-        public void UpdateReadingProgressAsync(int volumeId, int pageNum)
-        {
-            
-        }
-        
+        // public async Task<MemberDto> GetMemberAsync(string username)
+        // {
+        //     return await _context.Users.Where(x => x.UserName == username)
+        //         .Include(x => x.Libraries)
+        //         .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
+        //         .SingleOrDefaultAsync();
+        // }
     }
 }

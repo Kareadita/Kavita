@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,14 +61,7 @@ namespace API.Controllers
                 Folders = createLibraryDto.Folders.Select(x => new FolderPath {Path = x}).ToList()
             };
 
-            foreach (var admin in admins)
-            {
-                // If user is null, then set it
-                admin.Libraries ??= new List<Library>();
-                admin.Libraries.Add(library);
-            }
-
-
+            _unitOfWork.LibraryRepository.Update(library);
             if (!await _unitOfWork.Complete())
             {
                 return BadRequest("There was a critical issue. Please try again.");
@@ -87,7 +81,6 @@ namespace API.Controllers
         [HttpGet("list")]
         public ActionResult<IEnumerable<string>> GetDirectories(string path)
         {
-            // TODO: Move this to another controller. 
             if (string.IsNullOrEmpty(path))
             {
                 return Ok(Directory.GetLogicalDrives());
@@ -105,26 +98,46 @@ namespace API.Controllers
         }
 
         [Authorize(Policy = "RequireAdminRole")]
-        [HttpPut("grant-access")]
-        public async Task<ActionResult<MemberDto>> AddLibraryToUser(UpdateLibraryForUserDto updateLibraryForUserDto)
+        [HttpPost("grant-access")]
+        public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
-
             if (user == null) return BadRequest("Could not validate user");
-
-            user.Libraries = new List<Library>();
-
-            foreach (var selectedLibrary in updateLibraryForUserDto.SelectedLibraries)
+            
+            var libraryString = String.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
+            _logger.LogInformation($"Granting user {updateLibraryForUserDto.Username} access to: {libraryString}");
+            
+            var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+            foreach (var library in allLibraries)
             {
-                user.Libraries.Add(_mapper.Map<Library>(selectedLibrary));
+                library.AppUsers ??= new List<AppUser>();
+                var libraryContainsUser = library.AppUsers.Any(u => u.UserName == user.UserName);
+                var libraryIsSelected = updateLibraryForUserDto.SelectedLibraries.Any(l => l.Id == library.Id);
+                if (libraryContainsUser && !libraryIsSelected)
+                {
+                    // Remove 
+                    library.AppUsers.Remove(user);
+                }
+                else if (!libraryContainsUser && libraryIsSelected)
+                {
+                    library.AppUsers.Add(user);
+                } 
+                
             }
             
+            if (!_unitOfWork.HasChanges())
+            {
+                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
+                return Ok(_mapper.Map<MemberDto>(user));
+            }
+
             if (await _unitOfWork.Complete())
             {
                 _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
-                return Ok(user);
+                return Ok(_mapper.Map<MemberDto>(user));
             }
-
+            
+            
             return BadRequest("There was a critical issue. Please try again.");
         }
 
@@ -132,15 +145,14 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
-            //BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId, true));
             _taskScheduler.ScanLibrary(libraryId, true);
             return Ok();
         }
 
-        [HttpGet("libraries-for")]
-        public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
+        [HttpGet("libraries")]
+        public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser()
         {
-            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username));
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
         }
 
         [HttpGet("series")]

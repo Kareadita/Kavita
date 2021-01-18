@@ -36,6 +36,13 @@ namespace API.Data
                 .AsNoTracking()
                 .ToListAsync();
         }
+        
+        public async Task<IEnumerable<Library>> GetLibrariesAsync()
+        {
+            return await _context.Library
+                .Include(l => l.AppUsers)
+                .ToListAsync();
+        }
 
         public async Task<Library> GetLibraryForNameAsync(string libraryName)
         {

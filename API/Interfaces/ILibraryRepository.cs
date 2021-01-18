@@ -12,6 +12,7 @@ namespace API.Interfaces
         Task<bool> LibraryExists(string libraryName);
         Task<Library> GetLibraryForIdAsync(int libraryId);
         Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
+        Task<IEnumerable<Library>> GetLibrariesAsync();
         Task<Library> GetLibraryForNameAsync(string libraryName);
         Task<bool> DeleteLibrary(int libraryId);
     }

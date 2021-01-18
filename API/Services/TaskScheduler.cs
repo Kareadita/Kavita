@@ -10,7 +10,7 @@ namespace API.Services
         private readonly ILogger<TaskScheduler> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDirectoryService _directoryService;
-        private readonly BackgroundJobServer _client;
+        public BackgroundJobServer Client => new BackgroundJobServer();
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, 
             IUnitOfWork unitOfWork, IDirectoryService directoryService)
@@ -19,8 +19,7 @@ namespace API.Services
             _logger = logger;
             _unitOfWork = unitOfWork;
             _directoryService = directoryService;
-            _client = new BackgroundJobServer();
-            
+
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
             RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
             //RecurringJob.AddOrUpdate(() => scanService.ScanLibraries(), Cron.Daily);
