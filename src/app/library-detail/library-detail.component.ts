@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
+import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -12,6 +13,7 @@ import { SeriesService } from '../_services/series.service';
 export class LibraryDetailComponent implements OnInit {
 
   libraryId!: number;
+  title = '';
   series: Series[] = [];
 
 
@@ -30,7 +32,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   loadPage() {
-    this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId, true).subscribe(series => {
       this.series = series;
     });
   }

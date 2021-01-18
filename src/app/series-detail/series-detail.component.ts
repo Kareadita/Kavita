@@ -16,14 +16,14 @@ export class SeriesDetailComponent implements OnInit {
   volumes: Volume[] = [];
   libraryId = 0;
 
+  currentlyReadingVolume!: Volume;
+
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private ratingConfig: NgbRatingConfig, private router: Router) {
     ratingConfig.max = 5;
   }
 
   ngOnInit(): void {
-
-    console.log('Params: ', this.route.snapshot.paramMap);
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null || libraryId == null) {
@@ -34,10 +34,30 @@ export class SeriesDetailComponent implements OnInit {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
+      // TODO: Remove debug code
+      //console.error('Debug code present, overriding summary');
+      //this.series.summary = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`;
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.volumes = volumes;
+        volumes.forEach(v => {
+          if (v.pagesRead >= v.pages) {
+            return;
+          } else if (v.pagesRead === 0) {
+            return;
+          } else {
+            this.currentlyReadingVolume = v;
+          }
+        });
       });
     });
+  }
+
+  read() {
+    if (this.currentlyReadingVolume !== undefined) {
+      this.openVolume(this.currentlyReadingVolume);
+    } else {
+      this.openVolume(this.volumes[0]);
+    }
   }
 
   openVolume(volume: Volume) {

@@ -12,7 +12,7 @@
       
 
       <!-- TODO: Put SignalR notification button dropdown here. -->
-      <div ngbDropdown class="nav-item dropdown" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+      <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
           <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>

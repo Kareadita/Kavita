@@ -7,4 +7,5 @@ export interface Volume {
     created: string;
     lastModified: string;
     pages: number;
+    pagesRead: number;
 }
