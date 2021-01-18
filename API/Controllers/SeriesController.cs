@@ -15,28 +15,23 @@ namespace API.Controllers
     public class SeriesController : BaseApiController
     {
         private readonly ILogger<SeriesController> _logger;
-        private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
-        private readonly ISeriesRepository _seriesRepository;
         private readonly ICacheService _cacheService;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SeriesController(ILogger<SeriesController> logger, IMapper mapper, 
-            ITaskScheduler taskScheduler, ISeriesRepository seriesRepository,
-            ICacheService cacheService, IUserRepository userRepository)
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, 
+            ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             _logger = logger;
-            _mapper = mapper;
             _taskScheduler = taskScheduler;
-            _seriesRepository = seriesRepository;
             _cacheService = cacheService;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
         }
         
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
-            return Ok(await _seriesRepository.GetSeriesDtoByIdAsync(seriesId));
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -44,9 +39,9 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
         {
             var username = User.GetUsername();
-            var volumes = (await _seriesRepository.GetVolumesForSeriesAsync(new []{seriesId})).Select(x => x.Id).ToArray();
+            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(new []{seriesId})).Select(x => x.Id).ToArray();
             _logger.LogInformation($"Series {seriesId} is being deleted by {username}.");
-            var result = await _seriesRepository.DeleteSeriesAsync(seriesId);
+            var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
             if (result)
             {
@@ -60,16 +55,16 @@ namespace API.Controllers
         {
             if (forUser)
             {
-                var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
-                return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
+                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+                return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
             }
-            return Ok(await _seriesRepository.GetVolumesDtoAsync(seriesId)); // TODO: Refactor out forUser = false since everything is user based
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId)); // TODO: Refactor out forUser = false since everything is user based
         }
         
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
-            return Ok(await _seriesRepository.GetVolumeDtoAsync(volumeId));
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId));
         }
     }
 }

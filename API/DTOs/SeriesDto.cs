@@ -2,17 +2,16 @@
 {
     public class SeriesDto
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string OriginalName { get; set; }
-        public string SortName { get; set; }
-        public string Summary { get; set; }
-        public byte[] CoverImage { get; set; }
-        
-        // Read Progress 
-        public int Pages { get; set; }
+        public int Id { get; init; }
+        public string Name { get; init; }
+        public string OriginalName { get; init; }
+        public string SortName { get; init; }
+        public string Summary { get; init; }
+        public byte[] CoverImage { get; init; }
+        public int Pages { get; init; }
+        /// <summary>
+        /// Sum of pages read from linked Volumes. Calculated at API-time.
+        /// </summary>
         public int PagesRead { get; set; }
-        //public int VolumesComplete { get; set; }
-        //public int TotalVolumes { get; set; }
     }
 }

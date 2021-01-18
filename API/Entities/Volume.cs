@@ -17,7 +17,7 @@ namespace API.Entities
         
         
 
-        // Many-to-One relationships
+        // Relationships
         public Series Series { get; set; }
         public int SeriesId { get; set; }
     }

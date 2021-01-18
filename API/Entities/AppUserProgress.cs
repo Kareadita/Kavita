@@ -7,10 +7,11 @@
     {
         public int Id { get; set; }
         public int PagesRead { get; set; }
-        
-        public AppUser AppUser { get; set; }
-        public int AppUserId { get; set; }
         public int VolumeId { get; set; }
         public int SeriesId { get; set; }
+        
+        // Relationships
+        public AppUser AppUser { get; set; }
+        public int AppUserId { get; set; }
     }
 }

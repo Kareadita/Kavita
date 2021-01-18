@@ -12,23 +12,21 @@ namespace API.Controllers
     [Authorize]
     public class UsersController : BaseApiController
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ILibraryRepository _libraryRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UsersController(IUserRepository userRepository, ILibraryRepository libraryRepository)
+        public UsersController(IUnitOfWork unitOfWork)
         {
-            _userRepository = userRepository;
-            _libraryRepository = libraryRepository;
+            _unitOfWork = unitOfWork;
         }
         
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete-user")]
         public async Task<ActionResult> DeleteUser(string username)
         {
-            var user = await _userRepository.GetUserByUsernameAsync(username);
-            _userRepository.Delete(user);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            _unitOfWork.UserRepository.Delete(user);
 
-            if (await _userRepository.SaveAllAsync())
+            if (await _unitOfWork.Complete())
             {
                 return Ok();
             }
@@ -40,7 +38,7 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
         {
-            return Ok(await _userRepository.GetMembersAsync());
+            return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
         }
 
         [HttpGet("has-library-access")]
@@ -48,11 +46,11 @@ namespace API.Controllers
         {
             // TODO: refactor this to use either userexists or usermanager
             
-            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             if (user == null) return BadRequest("Could not validate user");
 
-            var libs = await _libraryRepository.GetLibrariesDtoForUsernameAsync(user.UserName);
+            var libs = await _unitOfWork.LibraryRepository.GetLibrariesDtoForUsernameAsync(user.UserName);
 
             return Ok(libs.Any(x => x.Id == libraryId));
         }

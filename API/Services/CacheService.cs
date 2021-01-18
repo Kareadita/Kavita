@@ -13,16 +13,16 @@ namespace API.Services
     public class CacheService : ICacheService
     {
         private readonly IDirectoryService _directoryService;
-        private readonly ISeriesRepository _seriesRepository;
         private readonly ILogger<CacheService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly NumericComparer _numericComparer;
         private readonly string _cacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
-        public CacheService(IDirectoryService directoryService, ISeriesRepository seriesRepository, ILogger<CacheService> logger)
+        public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
-            _seriesRepository = seriesRepository;
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _numericComparer = new NumericComparer();
         }
 
@@ -38,7 +38,7 @@ namespace API.Services
             {
                 return null;
             }
-            Volume volume = await _seriesRepository.GetVolumeAsync(volumeId);
+            Volume volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             foreach (var file in volume.Files)
             {
                 var extractPath = GetVolumeCachePath(volumeId, file);
@@ -109,8 +109,7 @@ namespace API.Services
                 if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
                 {
                     var path = GetVolumeCachePath(volume.Id, mangaFile);
-                    
-                    var files = _directoryService.ListFiles(path);
+                    var files = DirectoryService.GetFiles(path);
                     var array = files.ToArray();
                     Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
                     

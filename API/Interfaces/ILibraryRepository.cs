@@ -8,7 +8,6 @@ namespace API.Interfaces
     public interface ILibraryRepository
     {
         void Update(Library library);
-        Task<bool> SaveAllAsync();
         Task<IEnumerable<LibraryDto>> GetLibrariesAsync();
         Task<bool> LibraryExists(string libraryName);
         Task<Library> GetLibraryForIdAsync(int libraryId);

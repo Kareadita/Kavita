@@ -6,9 +6,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -18,22 +16,15 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly DataContext _dataContext; // TODO: Refactor code into repo
-        private readonly IUserRepository _userRepository;
-        private readonly ISeriesRepository _seriesRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, UserManager<AppUser> userManager, DataContext dataContext,
-            IUserRepository userRepository, ISeriesRepository seriesRepository)
+            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _logger = logger;
-            _userManager = userManager;
-            _dataContext = dataContext;
-            _userRepository = userRepository;
-            _seriesRepository = seriesRepository;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet("image")]
@@ -52,7 +43,7 @@ namespace API.Controllers
         [HttpGet("get-bookmark")]
         public async Task<ActionResult<int>> GetBookmark(int volumeId)
         {
-            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user.Progresses == null) return Ok(0);
             var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.VolumeId == volumeId);
 
@@ -64,7 +55,7 @@ namespace API.Controllers
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {
-            var user = await _userRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             _logger.LogInformation($"Saving {user.UserName} progress for {bookmarkDto.VolumeId} to page {bookmarkDto.PageNum}");
 
             user.Progresses ??= new List<AppUserProgress>();
@@ -87,9 +78,9 @@ namespace API.Controllers
                 
             }
 
-            _userRepository.Update(user);
+            _unitOfWork.UserRepository.Update(user);
 
-            if (await _userRepository.SaveAllAsync())
+            if (await _unitOfWork.Complete())
             {
                 return Ok();
             }

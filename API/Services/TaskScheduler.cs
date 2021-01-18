@@ -16,6 +16,7 @@ namespace API.Services
             
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
             RecurringJob.AddOrUpdate(() => cacheService.Cleanup(), Cron.Daily);
+            //RecurringJob.AddOrUpdate(() => scanService.ScanLibraries(), Cron.Daily);
         }
         
         

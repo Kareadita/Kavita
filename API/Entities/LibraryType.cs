@@ -9,8 +9,6 @@ namespace API.Entities
         [Description("Comic")]
         Comic = 1,
         [Description("Book")]
-        Book = 2,
-        [Description("Raw")]
-        Raw = 3
+        Book = 2
     }
 }

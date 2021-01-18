@@ -23,31 +23,28 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
-       private readonly ISeriesRepository _seriesRepository;
-       private readonly ILibraryRepository _libraryRepository;
+       private readonly IUnitOfWork _unitOfWork;
 
        private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
 
-       public DirectoryService(ILogger<DirectoryService> logger, 
-          ISeriesRepository seriesRepository, 
-          ILibraryRepository libraryRepository)
+       public DirectoryService(ILogger<DirectoryService> logger, IUnitOfWork unitOfWork)
        {
           _logger = logger;
-          _seriesRepository = seriesRepository;
-          _libraryRepository = libraryRepository;
+          _unitOfWork = unitOfWork;
        }
        
        /// <summary>
        /// Given a set of regex search criteria, get files in the given path. 
        /// </summary>
        /// <param name="path">Directory to search</param>
-       /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4)</param>
+       /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private static IEnumerable<string> GetFiles(string path, 
-          string searchPatternExpression = "",
+       public static IEnumerable<string> GetFiles(string path, 
+          string searchPatternExpression = "*",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
+          if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
           var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
           return Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
@@ -67,11 +64,11 @@ namespace API.Services
             return dirs;
         }
 
-       public IList<string> ListFiles(string rootPath)
-       {
-          if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
-          return Directory.GetFiles(rootPath);
-       }
+       // public IList<string> ListFiles(string rootPath)
+       // {
+       //    if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+       //    return Directory.GetFiles(rootPath);
+       // }
 
 
        /// <summary>
@@ -114,7 +111,7 @@ namespace API.Services
        
        private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
        {
-          var series = _seriesRepository.GetSeriesByName(seriesName) ?? new Series
+          var series = _unitOfWork.SeriesRepository.GetSeriesByName(seriesName) ?? new Series
           {
              Name = seriesName,
              OriginalName = seriesName,
@@ -126,7 +123,7 @@ namespace API.Services
           series.Volumes = volumes;
           series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
           series.Pages = volumes.Sum(v => v.Pages);
-          //series.TotalVolumes = volumes.Count;
+
           return series;
        }
 
@@ -154,7 +151,7 @@ namespace API.Services
        private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos, bool forceUpdate)
        {
           ICollection<Volume> volumes = new List<Volume>();
-          IList<Volume> existingVolumes = _seriesRepository.GetVolumes(series.Id).ToList();
+          IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
 
           foreach (var info in infos)
           {
@@ -220,7 +217,7 @@ namespace API.Services
            Library library;
            try
            {
-              library = Task.Run(() => _libraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+              library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            }
            catch (Exception ex)
            {
@@ -264,12 +261,10 @@ namespace API.Services
               _logger.LogInformation($"Created/Updated series {mangaSeries.Name}");
               library.Series.Add(mangaSeries);
            }
+
+           _unitOfWork.LibraryRepository.Update(library);
            
-           
-           
-           _libraryRepository.Update(library);
-           
-           if (_libraryRepository.SaveAll())
+           if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
               _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
            }
@@ -287,46 +282,6 @@ namespace API.Services
            return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
         }
 
-        /// <summary>
-        /// TODO: Delete this method
-        /// </summary>
-        /// <param name="archivePath"></param>
-        /// <param name="volumeId"></param>
-        /// <returns></returns>
-        private string ExtractArchive(string archivePath, int volumeId)
-        {
-           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-           {
-              _logger.LogError($"Archive {archivePath} could not be found.");
-              return "";
-           }
-           
-           var extractPath = GetExtractPath(volumeId);
-
-           if (Directory.Exists(extractPath))
-           {
-              _logger.LogInformation($"Archive {archivePath} has already been extracted. Returning existing folder.");
-              return extractPath;
-           }
-           
-           using ZipArchive archive = ZipFile.OpenRead(archivePath);
-           
-           // TODO: Throw error if we couldn't extract
-           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
-           if (!archive.HasFiles() && !needsFlattening) return "";
-
-           archive.ExtractToDirectory(extractPath);
-           _logger.LogInformation($"Extracting archive to {extractPath}");
-           
-           if (needsFlattening)
-           {
-              _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
-              new DirectoryInfo(extractPath).Flatten();
-           }
-
-           return extractPath;
-        }
-        
         public string ExtractArchive(string archivePath, string extractPath)
         {
            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))

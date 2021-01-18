@@ -17,20 +17,20 @@ namespace API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
 
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager, 
-            ITokenService tokenService, IUserRepository userRepository, 
+            ITokenService tokenService, IUnitOfWork unitOfWork, 
             ILogger<AccountController> logger,
             IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
         }
@@ -38,7 +38,6 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            
             if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
             {
                 return BadRequest("Username is taken.");
@@ -77,8 +76,8 @@ namespace API.Controllers
             
             // Update LastActive on account
             user.LastActive = DateTime.Now;
-            _userRepository.Update(user);
-            await _userRepository.SaveAllAsync();
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.Complete();
             
             _logger.LogInformation($"{user.UserName} logged in at {user.LastActive}");
 
@@ -88,10 +87,5 @@ namespace API.Controllers
                 Token = await _tokenService.CreateToken(user)
             };
         }
-        
-        // private async Task<bool> UserExists(string username)
-        // {
-        //     return await _userManager.Users.AnyAsync(user => user.UserName == username.ToLower());
-        // }
     }
 }

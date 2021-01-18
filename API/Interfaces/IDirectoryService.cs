@@ -13,13 +13,8 @@ namespace API.Interfaces
         /// <returns>List of folder names</returns>
         IEnumerable<string> ListDirectory(string rootPath);
 
-        /// <summary>
-        /// Lists out top-level files for a given directory.
-        /// TODO: Implement ability to provide a filter for file types (done in another implementation on DirectoryService)
-        /// </summary>
-        /// <param name="rootPath">Absolute path </param>
-        /// <returns>List of folder names</returns>
-        IList<string> ListFiles(string rootPath);
+        
+        //IList<string> ListFiles(string rootPath);
 
         /// <summary>
         /// Given a library id, scans folders for said library. Parses files and generates DB updates. Will overwrite
