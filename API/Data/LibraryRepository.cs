@@ -26,23 +26,14 @@ namespace API.Data
             _context.Entry(library).State = EntityState.Modified;
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
-        
-        public bool SaveAll()
-        {
-            return _context.SaveChanges() > 0;
-        }
-
-        public async Task<IEnumerable<LibraryDto>> GetLibrariesDtoForUsernameAsync(string userName)
+        public async Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
         {
             // TODO: Speed this query up
             return await _context.Library
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(x => x.UserName == userName))
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -62,7 +53,7 @@ namespace API.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<LibraryDto>> GetLibrariesAsync()
+        public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
         {
             return await _context.Library
                 .Include(f => f.Folders)

@@ -50,7 +50,7 @@ namespace API.Controllers
 
             if (user == null) return BadRequest("Could not validate user");
 
-            var libs = await _unitOfWork.LibraryRepository.GetLibrariesDtoForUsernameAsync(user.UserName);
+            var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(user.UserName);
 
             return Ok(libs.Any(x => x.Id == libraryId));
         }

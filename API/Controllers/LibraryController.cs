@@ -74,10 +74,8 @@ namespace API.Controllers
             }
             
             _logger.LogInformation($"Created a new library: {library.Name}");
-            var createdLibrary = await _unitOfWork.LibraryRepository.GetLibraryForNameAsync(library.Name);
-            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(createdLibrary.Id, false));
+            _taskScheduler.ScanLibrary(library.Id);
             return Ok();
-
         }
 
         /// <summary>
@@ -89,6 +87,7 @@ namespace API.Controllers
         [HttpGet("list")]
         public ActionResult<IEnumerable<string>> GetDirectories(string path)
         {
+            // TODO: Move this to another controller. 
             if (string.IsNullOrEmpty(path))
             {
                 return Ok(Directory.GetLogicalDrives());
@@ -102,11 +101,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
         {
-            return Ok(await _unitOfWork.LibraryRepository.GetLibrariesAsync());
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosAsync());
         }
 
         [Authorize(Policy = "RequireAdminRole")]
-        [HttpPut("update-for")]
+        [HttpPut("grant-access")]
         public async Task<ActionResult<MemberDto>> AddLibraryToUser(UpdateLibraryForUserDto updateLibraryForUserDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
@@ -133,19 +132,21 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
-            BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId, true));
+            //BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(libraryId, true));
+            _taskScheduler.ScanLibrary(libraryId, true);
             return Ok();
         }
 
         [HttpGet("libraries-for")]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser(string username)
         {
-            return Ok(await _unitOfWork.LibraryRepository.GetLibrariesDtoForUsernameAsync(username));
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username));
         }
 
         [HttpGet("series")]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, bool forUser = false)
         {
+            // TODO: Move to series? 
             if (forUser)
             {
                 var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
@@ -167,7 +168,7 @@ namespace API.Controllers
             
             if (result && volumes.Any())
             {
-                BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumes));
+                _taskScheduler.CleanupVolumes(volumes);
             }
             
             return Ok(result);
@@ -184,22 +185,17 @@ namespace API.Controllers
 
             library.Name = libraryForUserDto.Name;
             library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
-            
-            
-            
+
             _unitOfWork.LibraryRepository.Update(library);
 
-            if (await _unitOfWork.Complete())
+            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue updating the library.");
+            if (differenceBetweenFolders.Any())
             {
-                if (differenceBetweenFolders.Any())
-                {
-                    BackgroundJob.Enqueue(() => _directoryService.ScanLibrary(library.Id, true));    
-                }
-                
-                return Ok();
+                _taskScheduler.ScanLibrary(library.Id, true);
             }
-            
-            return BadRequest("There was a critical issue updating the library.");
+                
+            return Ok();
+
         }
     }
 }

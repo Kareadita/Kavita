@@ -45,7 +45,7 @@ namespace API.Controllers
 
             if (result)
             {
-                BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumes));
+                _taskScheduler.CleanupVolumes(volumes);
             }
             return Ok(result);
         }
