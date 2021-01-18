@@ -45,7 +45,7 @@ export class LibraryAccessModalComponent implements OnInit {
       return;
     }
 
-    this.libraryService.updateLibrariesForMember(this.member?.username, this.selectedLibraries.map(item => item.data)).subscribe(() => {
+    this.libraryService.updateLibrariesForMember(this.member?.username, this.selectedLibraries.filter(item => item.selected).map(item => item.data)).subscribe(() => {
       this.modal.close();
     });
   }

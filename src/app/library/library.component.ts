@@ -18,12 +18,12 @@ export class LibraryComponent implements OnInit {
   user: User | undefined;
   libraries: Library[] = [];
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService, private router: Router) { }
+  constructor(public accountService: AccountService, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
-      this.libraryService.getLibrariesForMember(this.user.username).subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().subscribe(libraries => {
         this.libraries = libraries;
         if (this.libraries.length > 0) {
           // TODO: Remove this debug code
