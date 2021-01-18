@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
@@ -54,6 +55,20 @@ namespace API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
             
+            // When we register an admin, we need to grant them access to all Libraries.
+            if (registerDto.IsAdmin)
+            {
+                _logger.LogInformation($"{user.UserName} is being registered as admin. Granting access to all libraries.");
+                var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+                foreach (var lib in libraries)
+                {
+                    lib.AppUsers ??= new List<AppUser>();
+                    lib.AppUsers.Add(user);
+                }
+            }
+            
+            if (!await _unitOfWork.Complete()) _logger.LogInformation("There was an issue granting library access. Please do this manually.");
+
             return new UserDto
             {
                 Username = user.UserName,
