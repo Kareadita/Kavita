@@ -257,6 +257,7 @@ namespace API.Services
            library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
            foreach (var seriesKey in series.Keys)
            {
+              // TODO: Critical bug: Code is not taking libraryId into account and series are being linked across libraries.
               var mangaSeries = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
               _logger.LogInformation($"Created/Updated series {mangaSeries.Name}");
               library.Series.Add(mangaSeries);

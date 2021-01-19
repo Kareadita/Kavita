@@ -20,6 +20,11 @@ namespace API.Data
             _context = context;
             _mapper = mapper;
         }
+        
+        public void Add(Library library)
+        {
+            _context.Library.Add(library);
+        }
 
         public void Update(Library library)
         {

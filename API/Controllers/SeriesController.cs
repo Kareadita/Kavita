@@ -51,14 +51,10 @@ namespace API.Controllers
         }
 
         [HttpGet("volumes")]
-        public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId, bool forUser = true)
+        public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
-            if (forUser)
-            {
-                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-                return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
-            }
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId)); // TODO: Refactor out forUser = false since everything is user based
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
         }
         
         [HttpGet("volume")]

@@ -7,6 +7,7 @@ namespace API.Interfaces
 {
     public interface ILibraryRepository
     {
+        void Add(Library library);
         void Update(Library library);
         Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
         Task<bool> LibraryExists(string libraryName);

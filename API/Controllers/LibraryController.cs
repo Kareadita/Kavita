@@ -8,7 +8,6 @@ using API.Entities;
 using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
-using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -50,23 +49,26 @@ namespace API.Controllers
             {
                 return BadRequest("Library name already exists. Please choose a unique name to the server.");
             }
-
-            var admins = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).ToList();
             
             var library = new Library
             {
                 Name = createLibraryDto.Name,
                 Type = createLibraryDto.Type,
-                AppUsers = admins,
                 Folders = createLibraryDto.Folders.Select(x => new FolderPath {Path = x}).ToList()
             };
 
-            _unitOfWork.LibraryRepository.Update(library);
-            if (!await _unitOfWork.Complete())
+            _unitOfWork.LibraryRepository.Add(library);
+            
+            var admins = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).ToList();
+            foreach (var admin in admins)
             {
-                return BadRequest("There was a critical issue. Please try again.");
+                admin.Libraries ??= new List<Library>();
+                admin.Libraries.Add(library);
             }
             
+
+            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue. Please try again.");
+
             _logger.LogInformation($"Created a new library: {library.Name}");
             _taskScheduler.ScanLibrary(library.Id);
             return Ok();
@@ -158,13 +160,13 @@ namespace API.Controllers
         [HttpGet("series")]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, bool forUser = false)
         {
-            // TODO: Move to series? 
+            int userId = 0;
             if (forUser)
             {
                 var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-                return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id));
+                userId = user.Id;
             }
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId));
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId));
         }
 
         [Authorize(Policy = "RequireAdminRole")]

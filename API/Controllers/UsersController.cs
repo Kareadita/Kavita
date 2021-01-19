@@ -26,11 +26,8 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             _unitOfWork.UserRepository.Delete(user);
 
-            if (await _unitOfWork.Complete())
-            {
-                return Ok();
-            }
-            
+            if (await _unitOfWork.Complete()) return Ok();
+
             return BadRequest("Could not delete the user.");
         }
         
@@ -44,14 +41,7 @@ namespace API.Controllers
         [HttpGet("has-library-access")]
         public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
         {
-            // TODO: refactor this to use either userexists or usermanager
-            
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
-            if (user == null) return BadRequest("Could not validate user");
-
-            var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(user.UserName);
-
+            var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
             return Ok(libs.Any(x => x.Id == libraryId));
         }
     }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -48,11 +50,24 @@ namespace API.Data
         
         public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId = 0)
         {
+            // if (userId > 0)
+            // {
+            //     return await _context.AppUserProgresses
+            //         .Include(p => p.Series)
+            //         .Where(p => p.AppUserId == userId && p.Series.LibraryId == libraryId)
+            //         .Select(p => p.Series)
+            //         .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            //         //.Select(s => s.PagesRead = )
+            //         .ToListAsync();
+            // }
+            
+            var sw = Stopwatch.StartNew();
             var series = await _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+            
             if (userId > 0)
             {
                 var userProgress = await _context.AppUserProgresses
@@ -65,25 +80,26 @@ namespace API.Data
                 }
             }
 
+            Console.WriteLine("Processed GetSeriesDtoForLibraryIdAsync in {0} milliseconds", sw.ElapsedMilliseconds);
             return series;
         }
 
-        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId = 0)
+        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
         {
             var volumes =  await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
                 .OrderBy(volume => volume.Number)
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToListAsync();
-            if (userId > 0)
-            {
-                var userProgress = await _context.AppUserProgresses
-                    .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
-                    .ToListAsync();
+                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+            var userProgress = await _context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
+                .AsNoTracking()
+                .ToListAsync();
 
-                foreach (var v in volumes)
-                {
-                    v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
-                }
+            foreach (var v in volumes)
+            {
+                v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
             }
 
             return volumes;
