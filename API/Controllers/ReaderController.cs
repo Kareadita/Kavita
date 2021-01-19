@@ -66,7 +66,7 @@ namespace API.Controllers
                 
                 user.Progresses.Add(new AppUserProgress
                 {
-                    PagesRead = bookmarkDto.PageNum, // TODO: PagesRead is misleading. Should it be PageNumber or PagesRead (+1)?
+                    PagesRead = bookmarkDto.PageNum,
                     VolumeId = bookmarkDto.VolumeId,
                     SeriesId = bookmarkDto.SeriesId,
                 });

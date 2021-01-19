@@ -51,9 +51,9 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
-       public static IList<string> GetFiles(string path)
+       public static string[] GetFiles(string path)
        {
-          if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
+          if (!Directory.Exists(path)) return Array.Empty<string>();
           return Directory.GetFiles(path);
        }
        

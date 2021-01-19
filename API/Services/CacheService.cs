@@ -110,10 +110,9 @@ namespace API.Services
                 {
                     var path = GetVolumeCachePath(volume.Id, mangaFile);
                     var files = DirectoryService.GetFiles(path);
-                    var array = files.ToArray();
-                    Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
+                    Array.Sort(files, _numericComparer);
                     
-                    return array.ElementAt(page - pagesSoFar);
+                    return files.ElementAt(page - pagesSoFar);
                 }
 
                 pagesSoFar += mangaFile.NumberOfPages;
