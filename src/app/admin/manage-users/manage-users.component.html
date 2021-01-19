@@ -24,7 +24,7 @@
                 <span class="invisible">Loading...</span>
             </div>
         </li>
-        <li class="list-group-item" *ngIf="members.length === 0">
+        <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
             There are no other users.
         </li>
     </ul>
