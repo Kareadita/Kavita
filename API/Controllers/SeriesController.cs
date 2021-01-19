@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
-using AutoMapper;
-using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,15 +14,12 @@ namespace API.Controllers
     {
         private readonly ILogger<SeriesController> _logger;
         private readonly ITaskScheduler _taskScheduler;
-        private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, 
-            ICacheService cacheService, IUnitOfWork unitOfWork)
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
-            _cacheService = cacheService;
             _unitOfWork = unitOfWork;
         }
         

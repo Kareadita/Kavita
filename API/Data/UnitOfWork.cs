@@ -20,7 +20,7 @@ namespace API.Data
         }
 
         public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper);
-        public IUserRepository UserRepository => new UserRepository(_context, _mapper, _userManager);
+        public IUserRepository UserRepository => new UserRepository(_context, _userManager);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
         
         public async Task<bool> Complete()

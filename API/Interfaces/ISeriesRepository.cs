@@ -13,7 +13,7 @@ namespace API.Interfaces
         Series GetSeriesByName(string name);
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId);
         Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
-        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId = 0);
+        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
         IEnumerable<Volume> GetVolumes(int seriesId);
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId);
 

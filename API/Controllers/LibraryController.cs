@@ -22,18 +22,16 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICacheService _cacheService;
 
         public LibraryController(IDirectoryService directoryService, 
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler, 
-            IUnitOfWork unitOfWork, ICacheService cacheService)
+            IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
-            _cacheService = cacheService;
         }
         
         /// <summary>

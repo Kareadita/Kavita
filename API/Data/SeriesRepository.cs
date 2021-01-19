@@ -63,17 +63,6 @@ namespace API.Data
         
         public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId)
         {
-            // if (userId > 0)
-            // {
-            //     return await _context.AppUserProgresses
-            //         .Include(p => p.Series)
-            //         .Where(p => p.AppUserId == userId && p.Series.LibraryId == libraryId)
-            //         .Select(p => p.Series)
-            //         .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //         //.Select(s => s.PagesRead = )
-            //         .ToListAsync();
-            // }
-            
             var sw = Stopwatch.StartNew();
             var series = await _context.Series
                 .Where(s => s.LibraryId == libraryId)

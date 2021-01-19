@@ -13,9 +13,6 @@ namespace API.Interfaces
         /// <returns>List of folder names</returns>
         IEnumerable<string> ListDirectory(string rootPath);
 
-        
-        //IList<string> ListFiles(string rootPath);
-
         /// <summary>
         /// Given a library id, scans folders for said library. Parses files and generates DB updates. Will overwrite
         /// cover images if forceUpdate is true.
@@ -23,6 +20,8 @@ namespace API.Interfaces
         /// <param name="libraryId">Library to scan against</param>
         /// <param name="forceUpdate">Force overwriting for cover images</param>
         void ScanLibrary(int libraryId, bool forceUpdate);
+
+        void ScanLibraries();
 
         /// <summary>
         /// Returns the path a volume would be extracted to.

@@ -39,11 +39,6 @@ namespace API.Data
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
-            // AppUsers have Libraries, not other way around
-            // builder.Entity<Library>()
-            //     .HasMany(p => p.AppUsers)
-            //     .WithMany(p => p.Libraries)
-            //     .UsingEntity(j => j.ToTable("AppUserLibrary"));
         }
         
         void OnEntityTracked(object sender, EntityTrackedEventArgs e)

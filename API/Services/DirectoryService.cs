@@ -210,7 +210,16 @@ namespace API.Services
           return volumes;
        }
 
-        public void ScanLibrary(int libraryId, bool forceUpdate)
+       public void ScanLibraries()
+       {
+          var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
+          foreach (var lib in libraries)
+          {
+             ScanLibrary(lib.Id, false);
+          }
+       }
+
+       public void ScanLibrary(int libraryId, bool forceUpdate)
         {
            var sw = Stopwatch.StartNew();
            Library library;
