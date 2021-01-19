@@ -4,9 +4,11 @@
         <div class="col-sm-auto" *ngFor="let manga of series">
             <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
         </div>
+        <div class="spinner-border text-secondary" role="status" *ngIf="loadingSeries">
+            <span class="invisible">Loading...</span>
+        </div>
     </div>
     <ng-container *ngIf="series.length === 0">
-        <!-- TODO: Put a loader here -->
-        Nothing here....
+        There are no Series.
     </ng-container>
 </div>

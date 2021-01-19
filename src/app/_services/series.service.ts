@@ -13,8 +13,8 @@ export class SeriesService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getSeriesForLibrary(libraryId: number, forUser: boolean = true) {
-    return this.httpClient.get<Series[]>(this.baseUrl + 'library/series?libraryId=' + libraryId + '&forUser=' + forUser);
+  getSeriesForLibrary(libraryId: number) {
+    return this.httpClient.get<Series[]>(this.baseUrl + 'library/series?libraryId=' + libraryId);
   }
 
   getSeries(seriesId: number) {

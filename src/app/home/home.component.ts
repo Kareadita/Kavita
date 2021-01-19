@@ -26,14 +26,19 @@ export class HomeComponent implements OnInit {
 
     this.memberService.adminExists().subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
-      if (!this.firstTimeFlow) {
-        this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-          if (user) {
-            // User is logged in, redirect to libraries
-            this.router.navigateByUrl('/library');
-          }
-        });
+
+      if (this.firstTimeFlow) {
+        return;
       }
+
+      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+        if (user) {
+          // User is logged in, redirect to libraries
+          this.router.navigateByUrl('/library');
+        } else {
+          this.router.navigateByUrl('/login');
+        }
+      });
     });
   }
 

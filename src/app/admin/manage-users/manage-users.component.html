@@ -7,7 +7,6 @@
     </div>
     <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
         <li *ngFor="let member of members" class="list-group-item">
-            <!-- We can move this into a view-member component -->
             <div>
                 <h4>
                     {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
@@ -19,8 +18,14 @@
                 <div>Last Active: {{member.lastActive | date: 'dd/MM/yyyy'}}</div>
                 <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
             </div>
-
-            
+        </li>
+        <li *ngIf="loadingMembers" class="list-group-item">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="invisible">Loading...</span>
+            </div>
+        </li>
+        <li class="list-group-item" *ngIf="members.length === 0">
+            There are no other users.
         </li>
     </ul>
     <ng-template #createUser>

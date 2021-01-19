@@ -1,4 +1,23 @@
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+
 .read-btn {
-    width: 160px;
-    margin-left: 10px;
+    width: 100%;
 }
+
+// * {
+//     border: 1px solid red;
+// }
+
+.poster {
+    width: 100%;
+    display: inline;
+}
+
+
+// Including breakpoint has issue with resovling variable, so copying gridpoints here
+@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+    .poster {
+      display: none;
+    }
+  }

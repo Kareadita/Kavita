@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { SeriesService } from '../_services/series.service';
+
 
 @Component({
   selector: 'app-series-detail',
@@ -17,9 +19,12 @@ export class SeriesDetailComponent implements OnInit {
   libraryId = 0;
 
   currentlyReadingVolume!: Volume;
+  safeImage!: SafeUrl;
+  placeholderImage = 'assets/images/image-placeholder.jpg';
+
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router) {
+              private ratingConfig: NgbRatingConfig, private router: Router, private sanitizer: DomSanitizer) {
     ratingConfig.max = 5;
   }
 
@@ -34,9 +39,9 @@ export class SeriesDetailComponent implements OnInit {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
-      // TODO: Remove debug code
-      //console.error('Debug code present, overriding summary');
-      //this.series.summary = `Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.`;
+
+      this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
+
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.volumes = volumes;
         volumes.forEach(v => {
@@ -62,6 +67,10 @@ export class SeriesDetailComponent implements OnInit {
 
   openVolume(volume: Volume) {
     this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', volume.id]);
+  }
+
+  isNullOrEmpty(val: string) {
+    return val === null || val === undefined || val === '';
   }
 
 }

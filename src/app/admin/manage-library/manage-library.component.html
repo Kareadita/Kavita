@@ -16,6 +16,14 @@
                 </h4>
             </div>
         </li>
+        <li *ngIf="loading" class="list-group-item">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="invisible">Loading...</span>
+              </div>
+        </li>
+        <li class="list-group-item" *ngIf="libraries.length === 0">
+            There are no libraries. Try creating one.
+        </li>
     </ul>
     <ng-template #createLibrary>
         <app-library-editor-modal></app-library-editor-modal>
