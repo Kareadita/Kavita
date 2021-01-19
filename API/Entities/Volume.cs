@@ -15,10 +15,9 @@ namespace API.Entities
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
         
-        // public string CachePath {get; set;} // Path where cache is located. Default null, resets to null on deletion.
-        //public ICollection<AppUserProgress> AppUserProgress { get; set; }
+        
 
-        // Many-to-One relationships
+        // Relationships
         public Series Series { get; set; }
         public int SeriesId { get; set; }
     }

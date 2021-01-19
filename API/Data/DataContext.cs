@@ -21,7 +21,8 @@ namespace API.Data
         public DbSet<Library> Library { get; set; }
         public DbSet<Series> Series { get; set; }
         public DbSet<Volume> Volume { get; set; }
-        
+        public DbSet<AppUser> AppUser { get; set; }
+        public DbSet<AppUserProgress> AppUserProgresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

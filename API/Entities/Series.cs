@@ -26,6 +26,12 @@ namespace API.Entities
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
+        /// <summary>
+        /// Sum of all Volume pages
+        /// </summary>
+        public int Pages { get; set; }
+        
+        // Relationships
         public ICollection<Volume> Volumes { get; set; }
         public Library Library { get; set; }
         public int LibraryId { get; set; }

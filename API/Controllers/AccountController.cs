@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
@@ -17,20 +18,20 @@ namespace API.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ITokenService _tokenService;
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
 
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager, 
-            ITokenService tokenService, IUserRepository userRepository, 
+            ITokenService tokenService, IUnitOfWork unitOfWork, 
             ILogger<AccountController> logger,
             IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
         }
@@ -38,7 +39,7 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            if (await UserExists(registerDto.Username))
+            if (await _userManager.Users.AnyAsync(x => x.UserName == registerDto.Username))
             {
                 return BadRequest("Username is taken.");
             }
@@ -54,6 +55,20 @@ namespace API.Controllers
 
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
             
+            // When we register an admin, we need to grant them access to all Libraries.
+            if (registerDto.IsAdmin)
+            {
+                _logger.LogInformation($"{user.UserName} is being registered as admin. Granting access to all libraries.");
+                var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+                foreach (var lib in libraries)
+                {
+                    lib.AppUsers ??= new List<AppUser>();
+                    lib.AppUsers.Add(user);
+                }
+            }
+            
+            if (!await _unitOfWork.Complete()) _logger.LogInformation("There was an issue granting library access. Please do this manually.");
+
             return new UserDto
             {
                 Username = user.UserName,
@@ -76,8 +91,8 @@ namespace API.Controllers
             
             // Update LastActive on account
             user.LastActive = DateTime.Now;
-            _userRepository.Update(user);
-            await _userRepository.SaveAllAsync();
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.Complete();
             
             _logger.LogInformation($"{user.UserName} logged in at {user.LastActive}");
 
@@ -86,11 +101,6 @@ namespace API.Controllers
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user)
             };
-        }
-        
-        private async Task<bool> UserExists(string username)
-        {
-            return await _userManager.Users.AnyAsync(user => user.UserName == username.ToLower());
         }
     }
 }

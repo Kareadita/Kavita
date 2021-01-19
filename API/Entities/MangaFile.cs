@@ -4,9 +4,12 @@ namespace API.Entities
     public class MangaFile
     {
         public int Id { get; set; }
+        /// <summary>
+        /// Absolute path to the archive file
+        /// </summary>
         public string FilePath { get; set; }
         /// <summary>
-        /// Do not expect this to be set. If this MangaFile represents a volume file, this will be null.
+        /// Used to track if multiple MangaFiles (archives) represent a single Volume. If only one volume file, this will be 0.
         /// </summary>
         public int Chapter { get; set; } 
         /// <summary>

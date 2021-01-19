@@ -3,14 +3,16 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210114214506_UserProgress")]
+    partial class UserProgress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,17 +132,16 @@ namespace API.Data.Migrations
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeriesId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("VolumeId")
+                    b.Property<int?>("VolumeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("AppUserProgresses");
+                    b.HasIndex("VolumeId");
+
+                    b.ToTable("AppUserProgress");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
@@ -255,9 +256,6 @@ namespace API.Data.Migrations
                     b.Property<string>("OriginalName")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Pages")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("SortName")
                         .HasColumnType("TEXT");
 
@@ -295,10 +293,15 @@ namespace API.Data.Migrations
                     b.Property<int>("Pages")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ProgressId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProgressId");
 
                     b.HasIndex("SeriesId");
 
@@ -407,10 +410,14 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.AppUserProgress", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
-                        .WithMany("Progresses")
+                        .WithMany()
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("API.Entities.Volume", null)
+                        .WithMany("Progresses")
+                        .HasForeignKey("VolumeId");
 
                     b.Navigation("AppUser");
                 });
@@ -469,11 +476,17 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
+                    b.HasOne("API.Entities.AppUserProgress", "Progress")
+                        .WithMany()
+                        .HasForeignKey("ProgressId");
+
                     b.HasOne("API.Entities.Series", "Series")
                         .WithMany("Volumes")
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Progress");
 
                     b.Navigation("Series");
                 });
@@ -536,8 +549,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
-                    b.Navigation("Progresses");
-
                     b.Navigation("UserRoles");
                 });
 
@@ -556,6 +567,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.Navigation("Files");
+
+                    b.Navigation("Progresses");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,8 +5,6 @@ using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,13 +13,11 @@ namespace API.Data
     public class UserRepository : IUserRepository
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
 
-        public UserRepository(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
+        public UserRepository(DataContext context, UserManager<AppUser> userManager)
         {
             _context = context;
-            _mapper = mapper;
             _userManager = userManager;
         }
 
@@ -32,27 +28,18 @@ namespace API.Data
 
         public void Delete(AppUser user)
         {
-            _context.Users.Remove(user);
+            _context.AppUser.Remove(user);
         }
 
-        public async Task<bool> SaveAllAsync()
-        {
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public async Task<IEnumerable<AppUser>> GetUsersAsync()
-        {
-            return await _context.Users.ToListAsync();
-        }
-
-        public async Task<AppUser> GetUserByIdAsync(int id)
-        {
-            return await _context.Users.FindAsync(id);
-        }
-
+        /// <summary>
+        /// Gets an AppUser by username. Returns back Progress information.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         public async Task<AppUser> GetUserByUsernameAsync(string username)
         {
             return await _context.Users
+                .Include(u => u.Progresses)
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
@@ -63,7 +50,7 @@ namespace API.Data
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
-            return await _userManager.Users
+            return await _context.Users
                 .Include(x => x.Libraries)
                 .Include(r => r.UserRoles)
                 .ThenInclude(r => r.Role)
@@ -83,16 +70,8 @@ namespace API.Data
                         Folders = l.Folders.Select(x => x.Path).ToList()
                     }).ToList()
                 })
+                .AsNoTracking()
                 .ToListAsync();
         }
-
-        public async Task<MemberDto> GetMemberAsync(string username)
-        {
-            return await _context.Users.Where(x => x.UserName == username)
-                .Include(x => x.Libraries)
-                .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-                .SingleOrDefaultAsync();
-        }
-        
     }
 }

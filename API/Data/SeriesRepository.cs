@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -19,6 +21,11 @@ namespace API.Data
         {
             _context = context;
             _mapper = mapper;
+        }
+
+        public void Add(Series series)
+        {
+            _context.Series.Add(series);
         }
 
         public void Update(Series series)
@@ -46,20 +53,59 @@ namespace API.Data
             return _context.Series.SingleOrDefault(x => x.Name == name);
         }
         
-        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId)
+        public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
         {
             return await _context.Series
-                .Where(series => series.LibraryId == libraryId)
+                .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId)
+        {
+            var sw = Stopwatch.StartNew();
+            var series = await _context.Series
+                .Where(s => s.LibraryId == libraryId)
+                .OrderBy(s => s.SortName)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            
+            if (userId > 0)
+            {
+                var userProgress = await _context.AppUserProgresses
+                    .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
+                    .ToListAsync();
+
+                foreach (var s in series)
+                {
+                    s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+                }
+            }
+
+            Console.WriteLine("Processed GetSeriesDtoForLibraryIdAsync in {0} milliseconds", sw.ElapsedMilliseconds);
+            return series;
         }
 
-        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId)
+        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
         {
-            return await _context.Volume
+            var volumes =  await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
                 .OrderBy(volume => volume.Number)
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+            var userProgress = await _context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach (var v in volumes)
+            {
+                v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
+            }
+
+            return volumes;
+
         }
 
         public IEnumerable<Volume> GetVolumes(int seriesId)
@@ -111,6 +157,11 @@ namespace API.Data
             _context.Series.Remove(series);
             
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Volume> GetVolumeByIdAsync(int volumeId)
+        {
+            return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
         }
     }
 }

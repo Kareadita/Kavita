@@ -17,14 +17,13 @@ namespace API.Extensions
         {
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<ITaskScheduler, TaskScheduler>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ICacheService, CacheService>();
-            services.AddScoped<ISeriesRepository, SeriesRepository>();
-            services.AddScoped<IDirectoryService, DirectoryService>();
-            services.AddScoped<ILibraryRepository, LibraryRepository>();
-            
-            
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
