@@ -40,8 +40,8 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       public static IEnumerable<string> GetFiles(string path, 
-          string searchPatternExpression = "*",
+       public static IEnumerable<string> GetFilesWithCertainExtensions(string path, 
+          string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
@@ -50,6 +50,14 @@ namespace API.Services
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
+
+       public static IList<string> GetFiles(string path)
+       {
+          if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
+          return Directory.GetFiles(path);
+       }
+       
+       
        
         public IEnumerable<string> ListDirectory(string rootPath)
         {
@@ -384,7 +392,7 @@ namespace API.Services
                }
 
                try {
-                  files = DirectoryService.GetFiles(currentDir, Parser.Parser.MangaFileExtensions)
+                  files = DirectoryService.GetFilesWithCertainExtensions(currentDir, Parser.Parser.MangaFileExtensions)
                      .ToArray();
                }
                catch (UnauthorizedAccessException e) {

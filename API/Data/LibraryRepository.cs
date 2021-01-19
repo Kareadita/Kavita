@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -33,13 +35,15 @@ namespace API.Data
 
         public async Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
         {
-            // TODO: Speed this query up
-            return await _context.Library
+            Stopwatch sw = Stopwatch.StartNew();
+            var libs = await _context.Library
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(x => x.UserName == userName))
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+            Console.WriteLine("Processed GetLibraryDtosForUsernameAsync in {0} milliseconds", sw.ElapsedMilliseconds);
+            return libs;
         }
         
         public async Task<IEnumerable<Library>> GetLibrariesAsync()

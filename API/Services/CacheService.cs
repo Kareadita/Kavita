@@ -113,7 +113,7 @@ namespace API.Services
                     var array = files.ToArray();
                     Array.Sort(array, _numericComparer); // TODO: Find a way to apply numericComparer to IList.
                     
-                    return array.ElementAt((page + 1) - pagesSoFar);
+                    return array.ElementAt(page - pagesSoFar);
                 }
 
                 pagesSoFar += mangaFile.NumberOfPages;

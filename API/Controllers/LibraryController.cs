@@ -158,15 +158,10 @@ namespace API.Controllers
         }
 
         [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, bool forUser = false)
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
         {
-            int userId = 0;
-            if (forUser)
-            {
-                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-                userId = user.Id;
-            }
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId));
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
