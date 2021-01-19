@@ -2,7 +2,9 @@
 
     <div class="{{isLoading ? 'overlay' : ''}}" (click)="toggleMenu()">
         <ng-container *ngIf="isLoading">
-            Loading indicator here
+            <div class="spinner-border text-secondary" role="status">
+                <span class="invisible">Loading...</span>
+            </div>
         </ng-container>
     </div>
 
