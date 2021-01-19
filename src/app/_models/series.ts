@@ -10,4 +10,6 @@ export interface Series {
     volumes: Volume[];
     pages: number; // Total pages in series
     pagesRead: number; // Total pages the logged in user has read
+    userRating: number; // User rating
+    userReview: string; // User review
 }

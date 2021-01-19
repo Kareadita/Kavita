@@ -1,16 +1,14 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import {Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, zip } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { MangaImage } from '../_models/manga-image';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
-import { MemberService } from '../_services/member.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
-import { Observable } from 'rxjs';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -128,7 +126,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // TODO: Use Observable.all([])
     this.seriesService.getVolume(this.volumeId).subscribe(volume => {
-      console.log('volume.pages', volume.pages);
       this.maxPages = volume.pages;
       this.readerService.getBookmark(this.volumeId).subscribe(pageNum => {
         this.pageNum = pageNum;

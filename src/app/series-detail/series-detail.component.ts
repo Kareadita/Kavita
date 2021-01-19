@@ -65,6 +65,15 @@ export class SeriesDetailComponent implements OnInit {
     }
   }
 
+  updateRating(rating: any) {
+    if (this.series === undefined) {
+      return;
+    }
+
+    console.log('Rating is: ', this.series?.userRating);
+    this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {});
+  }
+
   openVolume(volume: Volume) {
     this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', volume.id]);
   }
