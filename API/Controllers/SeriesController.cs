@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Entities;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,8 @@ namespace API.Controllers
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId));
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -55,7 +57,29 @@ namespace API.Controllers
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId));
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
+        }
+
+        [HttpPost("update-rating")]
+        public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userRating = await _unitOfWork.UserRepository.GetUserRating(updateSeriesRatingDto.SeriesId, user.Id) ??
+                             new AppUserRating();
+
+            userRating.Rating = updateSeriesRatingDto.UserRating;
+            userRating.Review = updateSeriesRatingDto.UserReview;
+            userRating.SeriesId = updateSeriesRatingDto.SeriesId;
+
+            _unitOfWork.UserRepository.AddRatingTracking(userRating);
+            user.Ratings ??= new List<AppUserRating>();
+            user.Ratings.Add(userRating);
+
+
+            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical error.");
+
+            return Ok();
         }
     }
 }

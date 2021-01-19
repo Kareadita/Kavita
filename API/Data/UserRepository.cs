@@ -48,6 +48,17 @@ namespace API.Data
             return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         }
 
+        public async Task<AppUserRating> GetUserRating(int seriesId, int userId)
+        {
+            return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
+                .SingleOrDefaultAsync();
+        }
+
+        public void AddRatingTracking(AppUserRating userRating)
+        {
+            _context.AppUserRating.Add(userRating);
+        }
+
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
             return await _context.Users
