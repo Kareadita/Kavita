@@ -1,14 +1,12 @@
 $primary-color: #cc7b19;
+$triangle-size: 40px;
+$image-height: 230px;
+$image-width: 160px;
 
 .card {
     margin: 10px;
-    // max-width: 130px;
-    // max-height: 195px;
-    max-width: 160px;
+    max-width: $image-width;
     cursor: pointer;
-    //max-height: 320px;
-
-    // 370 x 210 roughly
 }
 
 .card-title {
@@ -23,11 +21,33 @@ $primary-color: #cc7b19;
 }
 
 .card-img-top {
-    height: 230px;
+    height: $image-height;
+}
+
+.progress-banner {
+    width: 160px;
+    position: absolute;
+    top: $image-height;
+
+    .progress {
+        color: $primary-color;
+        background-color: transparent;
+    }
+}
+
+.not-read-badge {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 $triangle-size $triangle-size 0;
+    border-color: transparent $primary-color transparent transparent;
 }
 
 .overlay {
-    height: 230px;
+    height: $image-height;
     &:hover {
         background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;

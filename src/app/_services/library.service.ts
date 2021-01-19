@@ -25,12 +25,12 @@ export class LibraryService {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library');
   }
 
-  getLibrariesForMember(username: string) {
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries-for?username=' + username);
+  getLibrariesForMember() {
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries');
   }
 
   updateLibrariesForMember(username: string, selectedLibraries: Library[]) {
-    return this.httpClient.post(this.baseUrl + 'library/update-for', {username, selectedLibraries});
+    return this.httpClient.post(this.baseUrl + 'library/grant-access', {username, selectedLibraries});
   }
 
   scan(libraryId: number) {

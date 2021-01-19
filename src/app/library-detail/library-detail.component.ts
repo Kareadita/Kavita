@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Library } from '../_models/library';
 import { Series } from '../_models/series';
 import { SeriesService } from '../_services/series.service';
 
@@ -12,7 +11,9 @@ import { SeriesService } from '../_services/series.service';
 export class LibraryDetailComponent implements OnInit {
 
   libraryId!: number;
+  title = '';
   series: Series[] = [];
+  loadingSeries = false;
 
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService) {
@@ -30,8 +31,10 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   loadPage() {
+    this.loadingSeries = true;
     this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
       this.series = series;
+      this.loadingSeries = false;
     });
   }
 

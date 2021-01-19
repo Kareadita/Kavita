@@ -20,6 +20,7 @@ export class ManageUsersComponent implements OnInit {
 
   // Create User functionality
   createMemberToggle = false;
+  loadingMembers = false;
 
   constructor(private memberService: MemberService,
               private accountService: AccountService,
@@ -35,8 +36,10 @@ export class ManageUsersComponent implements OnInit {
   }
 
   loadMembers() {
+    this.loadingMembers = true;
     this.memberService.getMembers().subscribe(members => {
       this.members = members.filter(member => member.username !== this.loggedInUsername);
+      this.loadingMembers = false;
     });
   }
 

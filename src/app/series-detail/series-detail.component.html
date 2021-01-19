@@ -1,15 +1,15 @@
 <div class="container-fluid" *ngIf="series !== undefined">
     <div class="row">
-        <div class="col-md-2 col-mr-auto">
-            <app-card-item [imageUrl]="series.coverImage === null ? 'assets/images/image-placeholder.jpg' : series.coverImage"></app-card-item>
-            <button class="btn btn-primary">Read</button>
+        <div class="col-md-2 col-xs-4 col-sm-6">
+            <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
+            <button class="btn btn-primary read-btn" (click)="read()">{{currentlyReadingVolume === undefined ? 'Read' : 'Continue'}}</button>
         </div>
-        <div class="col-md-10">
-            <h2>{{series.name | titlecase}}</h2>
+        <div class="col-md-10 col-xs-8 col-sm-6">
+            <div class="row"><h2>{{series.name | titlecase}}</h2></div>
             <div class="row">
                 <ngb-rating></ngb-rating>
             </div>
-            <div class="row">
+            <div class="row ">
                 
             </div>
             <div class="row">
@@ -23,7 +23,8 @@
     <div class="row mt-3">
         <div class="col-sm-auto" *ngFor="let volume of volumes">
             <app-card-item [entity]="volume" [title]="'Volume ' + volume.number" (click)="openVolume(volume)"
-            [imageUrl]="volume.coverImage === null ? 'assets/images/image-placeholder.jpg' : volume.coverImage"></app-card-item>
+            [imageUrl]="volume.coverImage === null ? 'assets/images/image-placeholder.jpg' : volume.coverImage"
+            [read]="volume.pagesRead" [total]="volume.pages"></app-card-item>
         </div>
     </div>
 

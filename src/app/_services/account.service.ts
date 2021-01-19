@@ -54,8 +54,8 @@ export class AccountService {
     this.currentUser = undefined;
   }
 
-  register(model: {username: string, password: string, isAdmin?: boolean}, login = false) {
-    if (model?.isAdmin) {
+  register(model: {username: string, password: string, isAdmin?: boolean}) {
+    if (!model.hasOwnProperty('isAdmin')) {
       model.isAdmin = false;
     }
 
