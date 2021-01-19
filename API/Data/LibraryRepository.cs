@@ -81,6 +81,7 @@ namespace API.Data
             return await _context.Library
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)
+                .Include(l => l.Series)
                 .SingleAsync();
         }
         

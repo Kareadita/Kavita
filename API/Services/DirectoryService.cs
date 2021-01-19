@@ -40,7 +40,7 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       public static IEnumerable<string> GetFilesWithCertainExtensions(string path, 
+       private static IEnumerable<string> GetFilesWithCertainExtensions(string path, 
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
@@ -57,9 +57,7 @@ namespace API.Services
           return Directory.GetFiles(path);
        }
        
-       
-       
-        public IEnumerable<string> ListDirectory(string rootPath)
+       public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
             
@@ -71,13 +69,6 @@ namespace API.Services
             
             return dirs;
         }
-
-       // public IList<string> ListFiles(string rootPath)
-       // {
-       //    if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
-       //    return Directory.GetFiles(rootPath);
-       // }
-
 
        /// <summary>
        /// Processes files found during a library scan. Generates a collection of series->volume->files for DB processing later.
@@ -117,20 +108,20 @@ namespace API.Services
           }
        }
        
-       private Series UpdateSeries(string seriesName, ParserInfo[] infos, bool forceUpdate)
+       private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
        {
-          var series = _unitOfWork.SeriesRepository.GetSeriesByName(seriesName) ?? new Series
-          {
-             Name = seriesName,
-             OriginalName = seriesName,
-             SortName = seriesName,
-             Summary = "" // TODO: Check if comicInfo.xml in file and parse metadata out.
-          };
-
           var volumes = UpdateVolumes(series, infos, forceUpdate);
           series.Volumes = volumes;
-          series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
           series.Pages = volumes.Sum(v => v.Pages);
+          if (series.CoverImage == null || forceUpdate)
+          {
+             series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
+          }
+          if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
+          {
+             series.Summary = ""; // TODO: Check if comicInfo.xml in file and parse metadata out.   
+          }
+          
 
           return series;
        }
@@ -262,17 +253,34 @@ namespace API.Services
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
 
            // Perform DB activities
-           library.Series = new List<Series>(); // Temp delete everything until we can mark items Unavailable
+           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
            foreach (var seriesKey in series.Keys)
            {
-              // TODO: Critical bug: Code is not taking libraryId into account and series are being linked across libraries.
-              var mangaSeries = UpdateSeries(seriesKey, series[seriesKey].ToArray(), forceUpdate);
-              _logger.LogInformation($"Created/Updated series {mangaSeries.Name}");
+              var mangaSeries = allSeries.SingleOrDefault(s => s.Name == seriesKey) ?? new Series
+              {
+                 Name = seriesKey,
+                 OriginalName = seriesKey,
+                 SortName = seriesKey,
+                 Summary = "" 
+              };
+              mangaSeries = UpdateSeries(mangaSeries, series[seriesKey].ToArray(), forceUpdate);
+              _logger.LogInformation($"Created/Updated series {mangaSeries.Name} for {library.Name} library");
+              library.Series ??= new List<Series>();
               library.Series.Add(mangaSeries);
+           }
+           
+           // Remove series that are no longer on disk
+           foreach (var existingSeries in allSeries)
+           {
+              if (!series.ContainsKey(existingSeries.Name) || !series.ContainsKey(existingSeries.OriginalName))
+              {
+                 // Delete series, there is no file to backup any longer. 
+                 library.Series.Remove(existingSeries);
+              }
            }
 
            _unitOfWork.LibraryRepository.Update(library);
-           
+
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
               _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");

@@ -23,6 +23,11 @@ namespace API.Data
             _mapper = mapper;
         }
 
+        public void Add(Series series)
+        {
+            _context.Series.Add(series);
+        }
+
         public void Update(Series series)
         {
             _context.Entry(series).State = EntityState.Modified;
@@ -48,7 +53,15 @@ namespace API.Data
             return _context.Series.SingleOrDefault(x => x.Name == name);
         }
         
-        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId = 0)
+        public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
+        {
+            return await _context.Series
+                .Where(s => s.LibraryId == libraryId)
+                .OrderBy(s => s.SortName)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId)
         {
             // if (userId > 0)
             // {
