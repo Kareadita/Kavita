@@ -70,17 +70,9 @@ namespace API.Data
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
             
-            if (userId > 0)
-            {
-                var userProgress = await _context.AppUserProgresses
-                    .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
-                    .ToListAsync();
+            
+            await AddSeriesModifiers(userId, series);
 
-                foreach (var s in series)
-                {
-                    s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
-                }
-            }
 
             Console.WriteLine("Processed GetSeriesDtoForLibraryIdAsync in {0} milliseconds", sw.ElapsedMilliseconds);
             return series;
@@ -94,19 +86,13 @@ namespace API.Data
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-            var userProgress = await _context.AppUserProgresses
-                .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
-                .AsNoTracking()
-                .ToListAsync();
-
-            foreach (var v in volumes)
-            {
-                v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
-            }
+            
+            await AddVolumeModifiers(userId, volumes);
 
             return volumes;
 
         }
+
 
         public IEnumerable<Volume> GetVolumes(int seriesId)
         {
@@ -117,10 +103,16 @@ namespace API.Data
                 .ToList();
         }
 
-        public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId)
+        public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId)
         {
-            return await _context.Series.Where(x => x.Id == seriesId)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider).SingleAsync();
+            var series = await _context.Series.Where(x => x.Id == seriesId)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .SingleAsync();
+
+            var seriesList = new List<SeriesDto>() {series};
+            await AddSeriesModifiers(userId, seriesList);
+            
+            return seriesList[0];
         }
 
         public async Task<Volume> GetVolumeAsync(int volumeId)
@@ -130,13 +122,18 @@ namespace API.Data
                 .SingleOrDefaultAsync(vol => vol.Id == volumeId);
         }
 
-        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId)
+        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
         {
-            return await _context.Volume
+            var volume = await _context.Volume
                 .Where(vol => vol.Id == volumeId)
                 .Include(vol => vol.Files)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .SingleAsync(vol => vol.Id == volumeId);
+
+            var volumeList = new List<VolumeDto>() {volume};
+            await AddVolumeModifiers(userId, volumeList);
+
+            return volumeList[0];
         }
 
         /// <summary>
@@ -162,6 +159,38 @@ namespace API.Data
         public async Task<Volume> GetVolumeByIdAsync(int volumeId)
         {
             return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
+        }
+        
+        private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
+        {
+            var userProgress = await _context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
+                .ToListAsync();
+
+            var userRatings = await _context.AppUserRating
+                .Where(r => r.AppUserId == userId && series.Select(s => s.Id).Contains(r.SeriesId))
+                .ToListAsync();
+
+            foreach (var s in series)
+            {
+                s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+                var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
+                if (rating == null) continue;
+                s.UserRating = rating.Rating;
+                s.UserReview = rating.Review;
+            }
+        }
+        private async Task AddVolumeModifiers(int userId, List<VolumeDto> volumes)
+        {
+            var userProgress = await _context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
+                .AsNoTracking()
+                .ToListAsync();
+
+            foreach (var v in volumes)
+            {
+                v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
+            }
         }
     }
 }

@@ -12,5 +12,7 @@ namespace API.Interfaces
         Task<AppUser> GetUserByUsernameAsync(string username);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
         Task<IEnumerable<AppUser>> GetAdminUsersAsync();
+        Task<AppUserRating> GetUserRating(int seriesId, int userId);
+        void AddRatingTracking(AppUserRating userRating);
     }
 }

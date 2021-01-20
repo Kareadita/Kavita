@@ -13,5 +13,13 @@
         /// Sum of pages read from linked Volumes. Calculated at API-time.
         /// </summary>
         public int PagesRead { get; set; }
+        /// <summary>
+        /// Rating from logged in user. Calculated at API-time.
+        /// </summary>
+        public int UserRating { get; set; }
+        /// <summary>
+        /// Review from logged in user. Calculated at API-time.
+        /// </summary>
+        public string UserReview { get; set; }
     }
 }

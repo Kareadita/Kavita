@@ -23,6 +23,7 @@ namespace API.Data
         public DbSet<Volume> Volume { get; set; }
         public DbSet<AppUser> AppUser { get; set; }
         public DbSet<AppUserProgress> AppUserProgresses { get; set; }
+        public DbSet<AppUserRating> AppUserRating { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
