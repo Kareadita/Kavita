@@ -11,3 +11,8 @@ open source variant that is flexible and packs more punch, without sacrificing e
 * Expose an OPDS API/Stream for external readers to use
 * Allow downloading files directly from WebApp
 * WebApp/Server is Translated via Weblate (free for Open Source)
+
+
+## How to Deploy
+* Build kavita-webui via ng build --prod. The dest should be placed in the API/wwwroot directory
+* Run publish command
