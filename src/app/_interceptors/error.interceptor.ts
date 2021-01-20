@@ -48,7 +48,8 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.router.navigateByUrl('/login');
               break;
             case 404:
-              this.router.navigateByUrl('/not-found');
+              //this.router.navigateByUrl('/not-found');
+              this.toastr.error('That url does not exist.');
               break;
             case 500:
               const navigationExtras: NavigationExtras = {state: {error: error.error}};

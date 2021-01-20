@@ -32,4 +32,8 @@ export class SeriesService {
   delete(seriesId: number) {
     return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
   }
+
+  updateRating(seriesId: number, userRating: number, userReview: string) {
+    return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
+  }
 }
