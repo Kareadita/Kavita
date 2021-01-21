@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +36,21 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("reset-password")]
+        public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
+        {
+            _logger.LogInformation($"{User.GetUsername()} is changing {resetPasswordDto.UserName}'s password.");
+            var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
+            var result = await _userManager.RemovePasswordAsync(user);
+            if (!result.Succeeded) return BadRequest("Unable to update password");
+            
+            result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
+            if (!result.Succeeded) return BadRequest("Unable to update password");
+
+            return Ok($"{resetPasswordDto.UserName}'s Password has been reset.");
         }
 
         [HttpPost("register")]
