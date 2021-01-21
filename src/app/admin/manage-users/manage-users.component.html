@@ -12,6 +12,7 @@
                     {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
                     <div class="float-right" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)"><i class="fa fa-trash" title="Delete {{member.username | titlecase}}"></i></button>
+                        <button class="btn btn-secondary mr-2" (click)="updatePassword(member)"><i class="fa fa-key" title="Change Password for {{member.username | titlecase}}"></i></button>
                         <button class="btn btn-primary" (click)="openEditLibraryAccess(member)"><i class="fa fa-pen" title="Edit {{member.username | titlecase}}"></i></button>
                     </div>
                 </h4>

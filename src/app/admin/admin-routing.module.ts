@@ -2,8 +2,6 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AdminGuard } from '../_guards/admin.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { ManageLibraryComponent } from './manage-library/manage-library.component';
-import { ManageUsersComponent } from './manage-users/manage-users.component';
 
 const routes: Routes = [
   {path: '**', component: DashboardComponent, pathMatch: 'full'},

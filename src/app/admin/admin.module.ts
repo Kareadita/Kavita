@@ -10,6 +10,8 @@ import { SharedModule } from '../shared/shared.module';
 import { LibraryAccessModalComponent } from './_modals/library-access-modal/library-access-modal.component';
 import { DirectoryPickerComponent } from './_modals/directory-picker/directory-picker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
+
 
 
 
@@ -20,7 +22,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ManageLibraryComponent,
     LibraryEditorModalComponent,
     LibraryAccessModalComponent,
-    DirectoryPickerComponent
+    DirectoryPickerComponent,
+    ResetPasswordModalComponent
   ],
   imports: [
     CommonModule,
