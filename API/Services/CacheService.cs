@@ -16,7 +16,7 @@ namespace API.Services
         private readonly ILogger<CacheService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly NumericComparer _numericComparer;
-        private readonly string _cacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
+        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
         public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork)
         {
@@ -28,7 +28,7 @@ namespace API.Services
 
         private bool CacheDirectoryIsAccessible()
         {
-            var di = new DirectoryInfo(_cacheDirectory);
+            var di = new DirectoryInfo(CacheDirectory);
             return di.Exists;
         }
 
@@ -55,11 +55,11 @@ namespace API.Services
             
             if (!CacheDirectoryIsAccessible())
             {
-                _logger.LogError($"Cache directory {_cacheDirectory} is not accessible or does not exist.");
+                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist.");
                 return;
             }
             
-            DirectoryInfo di = new DirectoryInfo(_cacheDirectory);
+            DirectoryInfo di = new DirectoryInfo(CacheDirectory);
 
             try
             {
@@ -79,7 +79,7 @@ namespace API.Services
             
             foreach (var volume in volumeIds)
             {
-                var di = new DirectoryInfo(Path.Join(_cacheDirectory, volume + ""));
+                var di = new DirectoryInfo(Path.Join(CacheDirectory, volume + ""));
                 if (di.Exists)
                 {
                     di.Delete(true);    

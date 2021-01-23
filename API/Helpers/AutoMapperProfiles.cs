@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using API.DTOs;
 using API.Entities;
+using API.Helpers.Converters;
 using AutoMapper;
 
 namespace API.Helpers
@@ -24,6 +26,9 @@ namespace API.Helpers
                 .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
 
             CreateMap<RegisterDto, AppUser>();
+
+            CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
+                .ConvertUsing<ServerSettingConverter>();
         }
     }
 }

@@ -34,5 +34,10 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumeIds));
             
         }
+
+        public void ClearCache()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
