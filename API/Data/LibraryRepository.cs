@@ -53,15 +53,6 @@ namespace API.Data
                 .ToListAsync();
         }
 
-        public async Task<Library> GetLibraryForNameAsync(string libraryName)
-        {
-            return await _context.Library
-                .Where(x => x.Name == libraryName)
-                .Include(f => f.Folders)
-                .Include(s => s.Series)
-                .SingleAsync();
-        }
-
         public async Task<bool> DeleteLibrary(int libraryId)
         {
             var library = await GetLibraryForIdAsync(libraryId);

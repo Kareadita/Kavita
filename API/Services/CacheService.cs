@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -28,6 +29,7 @@ namespace API.Services
 
         private bool CacheDirectoryIsAccessible()
         {
+            _logger.LogDebug($"Checking if valid Cache directory: {CacheDirectory}");
             var di = new DirectoryInfo(CacheDirectory);
             return di.Exists;
         }
@@ -43,7 +45,7 @@ namespace API.Services
             {
                 var extractPath = GetVolumeCachePath(volumeId, file);
                 
-                _directoryService.ExtractArchive(file.FilePath, extractPath);
+                ExtractArchive(file.FilePath, extractPath);
             }
 
             return volume;
@@ -87,6 +89,45 @@ namespace API.Services
                 
             }
             _logger.LogInformation("Cache directory purged");
+        }
+        
+        /// <summary>
+        /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
+        /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
+        /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
+        /// </summary>
+        /// <param name="archivePath">A valid file to an archive file.</param>
+        /// <param name="extractPath">Path to extract to</param>
+        /// <returns></returns>
+        private string ExtractArchive(string archivePath, string extractPath)
+        {
+            // NOTE: This is used by Cache Service
+            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
+            {
+                _logger.LogError($"Archive {archivePath} could not be found.");
+                return "";
+            }
+
+            if (Directory.Exists(extractPath))
+            {
+                _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
+                return extractPath;
+            }
+           
+            using ZipArchive archive = ZipFile.OpenRead(archivePath);
+            // TODO: Throw error if we couldn't extract
+            var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
+            if (!archive.HasFiles() && !needsFlattening) return "";
+            
+            archive.ExtractToDirectory(extractPath);
+            _logger.LogDebug($"Extracting archive to {extractPath}");
+
+            if (!needsFlattening) return extractPath;
+           
+            _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
+            new DirectoryInfo(extractPath).Flatten();
+
+            return extractPath;
         }
 
 

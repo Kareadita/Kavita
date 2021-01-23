@@ -57,8 +57,7 @@ namespace API.Controllers
             // TODO: Figure out how to handle a change. This means that on clean, we need to clean up old cache 
             // directory and new one, but what if someone is reading? 
             // I can just clean both always, /cache/ is an owned folder, so users shouldn't use it. 
-
-            _taskScheduler.ClearCache();
+            
             
             //_dataContext.ServerSetting.Update
             return BadRequest("Not Implemented");

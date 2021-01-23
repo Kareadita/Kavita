@@ -23,6 +23,7 @@ namespace API.Interfaces
         Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
         Task<bool> DeleteSeriesAsync(int seriesId);
         Task<Volume> GetVolumeByIdAsync(int volumeId);
-        
+        Task<Series> GetSeriesByIdAsync(int seriesId);
+
     }
 }

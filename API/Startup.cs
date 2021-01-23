@@ -51,7 +51,7 @@ namespace API
             
             // Ordering is important. Cors, authentication, authorization
             app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
-            
+
             app.UseAuthentication();
 
             app.UseAuthorization();

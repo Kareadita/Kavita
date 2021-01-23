@@ -31,13 +31,14 @@ namespace API.Data
 
         public static async Task SeedSettings(DataContext context)
         {
-            IList<ServerSetting> defaultSettings = new List<ServerSetting>()
-            {
-                new ServerSetting() {Key = "CacheDirectory", Value = CacheService.CacheDirectory}
-            };
-
-            await context.ServerSetting.AddRangeAsync(defaultSettings);
-            await context.SaveChangesAsync();
+            // NOTE: This needs to check if settings already exists before inserting. 
+            // IList<ServerSetting> defaultSettings = new List<ServerSetting>()
+            // {
+            //     new ServerSetting() {Key = "CacheDirectory", Value = CacheService.CacheDirectory}
+            // };
+            //
+            // await context.ServerSetting.AddRangeAsync(defaultSettings);
+            // await context.SaveChangesAsync();
             // await context.ServerSetting.AddAsync(new ServerSetting
             // {
             //     CacheDirectory = CacheService.CacheDirectory

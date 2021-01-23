@@ -160,7 +160,15 @@ namespace API.Data
         {
             return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
         }
-        
+
+        public async Task<Series> GetSeriesByIdAsync(int seriesId)
+        {
+            return await _context.Series
+                .Include(s => s.Volumes)
+                .Where(s => s.Id == seriesId)
+                .SingleOrDefaultAsync();
+        }
+
         private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
         {
             var userProgress = await _context.AppUserProgresses

@@ -8,6 +8,7 @@ using Hangfire.LiteDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace API.Extensions
 {
@@ -21,12 +22,19 @@ namespace API.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IScannerService, ScannerService>();
 
 
 
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddLogging(loggingBuilder =>
+            {
+                var loggingSection = config.GetSection("Logging");
+                loggingBuilder.AddFile(loggingSection);
             });
 
             services.AddHangfire(configuration => configuration

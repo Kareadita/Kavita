@@ -1,38 +1,20 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Entities;
-using API.Extensions;
 using API.Interfaces;
-using API.IO;
-using API.Parser;
-using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services
 {
     public class DirectoryService : IDirectoryService
     {
-       private readonly ILogger<DirectoryService> _logger;
-       private readonly IUnitOfWork _unitOfWork;
 
-       private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
-
-       public DirectoryService(ILogger<DirectoryService> logger, IUnitOfWork unitOfWork)
-       {
-          _logger = logger;
-          _unitOfWork = unitOfWork;
-       }
-       
        /// <summary>
        /// Given a set of regex search criteria, get files in the given path. 
        /// </summary>
@@ -69,302 +51,23 @@ namespace API.Services
             
             return dirs;
         }
-
-       /// <summary>
-       /// Processes files found during a library scan. Generates a collection of series->volume->files for DB processing later.
-       /// </summary>
-       /// <param name="path">Path of a file</param>
-       private void Process(string path)
-       {
-          var fileName = Path.GetFileName(path);
-          _logger.LogDebug($"Parsing file {fileName}");
-
-          var info = Parser.Parser.Parse(fileName);
-          info.FullFilePath = path;
-          if (info.Volumes == string.Empty)
-          {
-             return;
-          }
-
-          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-          if (_scannedSeries.TryGetValue(info.Series, out var tempBag))
-          {
-             var existingInfos = tempBag.ToArray();
-             foreach (var existingInfo in existingInfos)
-             {
-                newBag.Add(existingInfo);
-             }
-          }
-          else
-          {
-             tempBag = new ConcurrentBag<ParserInfo>();
-          }
-
-          newBag.Add(info);
-
-          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
-          {
-             _scannedSeries.TryAdd(info.Series, newBag);
-          }
-       }
        
-       private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
+       public async Task<ImageDto> ReadImageAsync(string imagePath)
        {
-          var volumes = UpdateVolumes(series, infos, forceUpdate);
-          series.Volumes = volumes;
-          series.Pages = volumes.Sum(v => v.Pages);
-          if (series.CoverImage == null || forceUpdate)
-          {
-             series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault()?.CoverImage;
-          }
-          if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
-          {
-             series.Summary = ""; // TODO: Check if comicInfo.xml in file and parse metadata out.   
-          }
-          
+          using var image = Image.NewFromFile(imagePath);
 
-          return series;
-       }
-
-       private MangaFile CreateMangaFile(ParserInfo info)
-       {
-          _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
-          int.TryParse(info.Chapters, out var chapter);
-          _logger.LogDebug($"Found Chapter: {chapter}");
-          return new MangaFile()
+          return new ImageDto
           {
-             FilePath = info.FullFilePath,
-             Chapter = chapter,
-             Format = info.Format,
-             NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath)
+             Content = await File.ReadAllBytesAsync(imagePath),
+             Filename = Path.GetFileNameWithoutExtension(imagePath),
+             FullPath = Path.GetFullPath(imagePath),
+             Width = image.Width,
+             Height = image.Height,
+             Format = image.Format
           };
        }
 
-       /// <summary>
-       /// Creates or Updates volumes for a given series
-       /// </summary>
-       /// <param name="series">Series wanting to be updated</param>
-       /// <param name="infos">Parser info</param>
-       /// <param name="forceUpdate">Forces metadata update (cover image) even if it's already been set.</param>
-       /// <returns>Updated Volumes for given series</returns>
-       private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos, bool forceUpdate)
-       {
-          ICollection<Volume> volumes = new List<Volume>();
-          IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
-
-          foreach (var info in infos)
-          {
-             var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
-             if (existingVolume != null)
-             {
-                var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-                if (existingFile != null)
-                {
-                   existingFile.Chapter = Int32.Parse(info.Chapters);
-                   existingFile.Format = info.Format;
-                   existingFile.NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath);
-                }
-                else
-                {
-                   existingVolume.Files.Add(CreateMangaFile(info));
-                }
-                
-                volumes.Add(existingVolume);
-             }
-             else
-             {
-                existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
-                if (existingVolume != null)
-                {
-                   existingVolume.Files.Add(CreateMangaFile(info));
-                }
-                else
-                {
-                   var vol = new Volume()
-                   {
-                      Name = info.Volumes,
-                      Number = Int32.Parse(info.Volumes),
-                      Files = new List<MangaFile>()
-                      {
-                         CreateMangaFile(info)
-                      }
-                   };
-                   volumes.Add(vol);
-                }
-             }
-             
-             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
-          }
-
-          foreach (var volume in volumes)
-          {
-             if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
-             {
-                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault()?.FilePath;
-                volume.CoverImage = ImageProvider.GetCoverImage(firstFile, true);
-             }
-
-             volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
-          }
-
-          return volumes;
-       }
-
-       public void ScanLibraries()
-       {
-          var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
-          foreach (var lib in libraries)
-          {
-             ScanLibrary(lib.Id, false);
-          }
-       }
-
-       public void ScanLibrary(int libraryId, bool forceUpdate)
-        {
-           var sw = Stopwatch.StartNew();
-           Library library;
-           try
-           {
-              library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
-           }
-           catch (Exception ex)
-           {
-              // This usually only fails if user is not authenticated.
-              _logger.LogError($"There was an issue fetching Library {libraryId}.", ex);
-              return;
-           }
-           
-           _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
-           _logger.LogInformation($"Beginning scan on {library.Name}");
-
-           var totalFiles = 0;
-           foreach (var folderPath in library.Folders)
-           {
-              try {
-                 totalFiles = TraverseTreeParallelForEach(folderPath.Path, (f) =>
-                 {
-                    try
-                    {
-                       Process(f);
-                    }
-                    catch (FileNotFoundException exception)
-                    {
-                       _logger.LogError(exception, "The file could not be found");
-                    }
-                 });
-              }
-              catch (ArgumentException ex) {
-                 _logger.LogError(ex, $"The directory '{folderPath}' does not exist");
-              }
-           }
-           
-           var filtered = _scannedSeries.Where(kvp => !kvp.Value.IsEmpty);
-           var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
-
-           // Perform DB activities
-           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
-           foreach (var seriesKey in series.Keys)
-           {
-              var mangaSeries = allSeries.SingleOrDefault(s => s.Name == seriesKey) ?? new Series
-              {
-                 Name = seriesKey,
-                 OriginalName = seriesKey,
-                 SortName = seriesKey,
-                 Summary = "" 
-              };
-              mangaSeries = UpdateSeries(mangaSeries, series[seriesKey].ToArray(), forceUpdate);
-              _logger.LogInformation($"Created/Updated series {mangaSeries.Name} for {library.Name} library");
-              library.Series ??= new List<Series>();
-              library.Series.Add(mangaSeries);
-           }
-           
-           // Remove series that are no longer on disk
-           foreach (var existingSeries in allSeries)
-           {
-              if (!series.ContainsKey(existingSeries.Name) || !series.ContainsKey(existingSeries.OriginalName))
-              {
-                 // Delete series, there is no file to backup any longer. 
-                 library.Series.Remove(existingSeries);
-              }
-           }
-
-           _unitOfWork.LibraryRepository.Update(library);
-
-           if (Task.Run(() => _unitOfWork.Complete()).Result)
-           {
-              _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
-           }
-           else
-           {
-              _logger.LogError("There was a critical error that resulted in a failed scan. Please rescan.");
-           }
-
-           _scannedSeries = null;
-           _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
-        }
-
-        public string GetExtractPath(int volumeId)
-        {
-           return Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/");
-        }
-
-        public string ExtractArchive(string archivePath, string extractPath)
-        {
-           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-           {
-              _logger.LogError($"Archive {archivePath} could not be found.");
-              return "";
-           }
-
-           if (Directory.Exists(extractPath))
-           {
-              _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
-              return extractPath;
-           }
-           
-           using ZipArchive archive = ZipFile.OpenRead(archivePath);
-           // TODO: Throw error if we couldn't extract
-           var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
-           if (!archive.HasFiles() && !needsFlattening) return "";
-            
-           archive.ExtractToDirectory(extractPath);
-           _logger.LogDebug($"Extracting archive to {extractPath}");
-
-           if (!needsFlattening) return extractPath;
-           
-           _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
-           new DirectoryInfo(extractPath).Flatten();
-
-           return extractPath;
-        }
-
-        private int GetNumberOfPagesFromArchive(string archivePath)
-        {
-           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-           {
-              _logger.LogError($"Archive {archivePath} could not be found.");
-              return 0;
-           }
-           
-           using ZipArchive archive = ZipFile.OpenRead(archivePath);
-           return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
-        }
-        
-
-        public async Task<ImageDto> ReadImageAsync(string imagePath)
-        {
-           using var image = Image.NewFromFile(imagePath);
-
-           return new ImageDto
-           {
-              Content = await File.ReadAllBytesAsync(imagePath),
-              Filename = Path.GetFileNameWithoutExtension(imagePath),
-              FullPath = Path.GetFullPath(imagePath),
-              Width = image.Width,
-              Height = image.Height,
-              Format = image.Format
-           };
-        }
+       
 
         /// <summary>
         /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
@@ -373,16 +76,16 @@ namespace API.Services
         /// <param name="root">Directory to scan</param>
         /// <param name="action">Action to apply on file path</param>
         /// <exception cref="ArgumentException"></exception>
-        private static int TraverseTreeParallelForEach(string root, Action<string> action)
+        public static int TraverseTreeParallelForEach(string root, Action<string> action)
         {
-            //Count of files traversed and timer for diagnostic output
-            int fileCount = 0;
+           //Count of files traversed and timer for diagnostic output
+            var fileCount = 0;
 
             // Determine whether to parallelize file processing on each folder based on processor count.
-            int procCount = Environment.ProcessorCount;
+            var procCount = Environment.ProcessorCount;
 
             // Data structure to hold names of subfolders to be examined for files.
-            Stack<string> dirs = new Stack<string>();
+            var dirs = new Stack<string>();
 
             if (!Directory.Exists(root)) {
                    throw new ArgumentException("The directory doesn't exist");
@@ -390,7 +93,7 @@ namespace API.Services
             dirs.Push(root);
 
             while (dirs.Count > 0) {
-               string currentDir = dirs.Pop();
+               var currentDir = dirs.Pop();
                string[] subDirs;
                string[] files;
 
@@ -409,7 +112,9 @@ namespace API.Services
                }
 
                try {
-                  files = DirectoryService.GetFilesWithCertainExtensions(currentDir, Parser.Parser.MangaFileExtensions)
+                  // TODO: In future, we need to take LibraryType into consideration for what extensions to allow (RAW should allow images)
+                  // or we need to move this filtering to another area (Process)
+                  files = GetFilesWithCertainExtensions(currentDir, Parser.Parser.MangaFileExtensions)
                      .ToArray();
                }
                catch (UnauthorizedAccessException e) {

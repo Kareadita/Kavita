@@ -7,7 +7,7 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string MangaFileExtensions = @"\.cbz|\.cbr|\.png|\.jpeg|\.jpg|\.zip|\.rar";
+        public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
         public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
 
         //?: is a non-capturing group in C#, else anything in () will be a group
@@ -21,6 +21,10 @@ namespace API.Parser
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
                 @"(vol. ?)(?<Volume>0*[1-9]+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Tonikaku Cawaii [Volume 11].cbz
+            new Regex(
+                @"(volume )(?<Volume>0?[1-9]+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Dance in the Vampire Bund v16-17
             new Regex(
@@ -49,7 +53,7 @@ namespace API.Parser
             // Black Bullet
             new Regex(
                 
-                @"(?<Series>.*)(\b|_)(v|vo|c)",
+                @"(?<Series>.*)(\b|_)(v|vo|c|volume)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
@@ -58,16 +62,18 @@ namespace API.Parser
                 @"(?<Series>.*)\(\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
-            // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's always last)
+            // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
                 @"(?<Series>.*)(\b|_)(c)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Akiiro Bousou Biyori - 01.jpg
+            new Regex(
+                @"(?<Series>.*)(\b|_)(\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Darker Than Black (This takes anything, we have to account for perfectly named folders)
             new Regex(
                 @"(?<Series>.*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
-            
         };
 
         private static readonly Regex[] ReleaseGroupRegex = new[]
@@ -121,16 +127,21 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Volume"] != Match.Empty)
+                    // if (match.Groups["Volume"] != Match.Empty)
+                    // {
+                    //         
+                    // }
+                    if (match.Success && match.Groups["Series"].Value != string.Empty)
                     {
-                        return CleanTitle(match.Groups["Series"].Value);    
+                        return CleanTitle(match.Groups["Series"].Value);
                     }
+                    
                     
                 }
             }
 
-            Console.WriteLine("Unable to parse {0}", filename);
-            return "";
+            Console.WriteLine("Unable to parse Series of {0}", filename);
+            return string.Empty;
         }
 
         public static string ParseVolume(string filename)
@@ -148,8 +159,8 @@ namespace API.Parser
                 }
             }
 
-            Console.WriteLine("Unable to parse {0}", filename);
-            return "";
+            Console.WriteLine("Unable to parse Volume of {0}", filename);
+            return "0";
         }
 
         public static string ParseChapter(string filename)
@@ -200,7 +211,12 @@ namespace API.Parser
                 }
             }
 
-            title = title.Replace("_", " ");
+            title = title.Replace("_", " ").Trim();
+            if (title.EndsWith("-"))
+            {
+                title = title.Substring(0, title.Length - 1);
+            }
+            
             return title.Trim();
         }
 
@@ -235,7 +251,8 @@ namespace API.Parser
         
         public static string RemoveLeadingZeroes(string title)
         {
-            return title.TrimStart(new[] { '0' });
+            var ret = title.TrimStart(new[] { '0' });
+            return ret == string.Empty ? "0" : ret;
         }
         
         public static bool IsArchive(string filePath)
