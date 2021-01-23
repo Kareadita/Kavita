@@ -48,12 +48,10 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.router.navigateByUrl('/login');
               break;
             case 404:
-              //this.router.navigateByUrl('/not-found');
               this.toastr.error('That url does not exist.');
               break;
             case 500:
-              const navigationExtras: NavigationExtras = {state: {error: error.error}};
-              this.router.navigateByUrl('/server-error', navigationExtras);
+              this.toastr.error('There was an unknown critical error.');
               break;
             default:
               this.toastr.error('Something unexpected went wrong.');

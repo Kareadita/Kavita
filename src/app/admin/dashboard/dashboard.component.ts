@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SettingsService } from '../settings.service';
+import { ServerSettings } from '../_models/server-settings';
 
 
 
@@ -18,8 +21,12 @@ export class DashboardComponent implements OnInit {
   counter = this.tabs.length + 1;
   active = this.tabs[0];
 
+  serverSettings!: ServerSettings;
+  settingsForm: FormGroup = new FormGroup({
+  });
 
-  constructor(private router: Router, public route: ActivatedRoute) {
+
+  constructor(private router: Router, public route: ActivatedRoute, private settingsService: SettingsService, private fb: FormBuilder) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -32,6 +39,24 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
+      this.serverSettings = settings;
+      this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
+    });
+  }
+
+  resetForm() {
+    this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
+  }
+
+  saveSettings() {
+    const modelSettings = this.settingsForm.value;
+    // TODO: User should be told if directory is valid
+    this.settingsService.updateServerSettings(modelSettings).subscribe((settings: ServerSettings) => {
+      this.serverSettings = settings;
+    }, (err: any) => {
+      console.log('err: ', err);
+    });
   }
 
 }

@@ -5,7 +5,19 @@
       <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
       <ng-template ngbNavContent>
         <ng-container *ngIf="tab.fragment === ''">
-            General settings here
+          <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
+            <div class="form-group">
+              <label for="settings-cachedir">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
+              <ng-template #cacheDirectoryTooltip>Where should the server place temporary files when reading? This will be cleaned up on a regular basis.</ng-template>
+              <span class="sr-only" id="settings-cachedir-help">Where should the server place temporary files when reading? This will be cleaned up on a regular basis.</span>
+              <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
+            </div>
+            
+            <div class="float-right">
+              <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
+              <button type="submit" class="btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+            </div>
+          </form>
         </ng-container>
         <ng-container *ngIf="tab.fragment === 'users'">
             <app-manage-users></app-manage-users>
