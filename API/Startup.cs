@@ -45,12 +45,12 @@ namespace API
                 app.UseHangfireDashboard();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
             
             // Ordering is important. Cors, authentication, authorization
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             
             app.UseAuthentication();
 
