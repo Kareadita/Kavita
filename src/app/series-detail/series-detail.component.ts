@@ -43,8 +43,17 @@ export class SeriesDetailComponent implements OnInit {
       this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.volumes = volumes;
-        volumes.forEach(v => {
+        this.volumes = volumes.sort((a, b) => {
+          if (a === b) { return 0; }
+          else if (a.number === 0) { return 1; }
+          else if (b.number === 0) { return -1; }
+          else {
+            return a.number < b.number ? -1 : 1;
+          }
+        });
+
+        this.volumes.forEach(v => {
+          v.name = v.number === 0 ? 'Latest Chapters' : 'Volume ' + v.number;
           if (v.pagesRead >= v.pages) {
             return;
           } else if (v.pagesRead === 0) {
