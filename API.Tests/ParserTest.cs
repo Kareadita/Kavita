@@ -13,7 +13,7 @@ namespace API.Tests
         [InlineData("B_Gata_H_Kei_v01[SlowManga&OverloadScans]", "1")]
         [InlineData("BTOOOM! v01 (2013) (Digital) (Shadowcat-Empire)", "1")]
         [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1")]
-        //[InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "16-17")]
+        [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "16-17")]
         [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
         [InlineData("No Volume", "0")]

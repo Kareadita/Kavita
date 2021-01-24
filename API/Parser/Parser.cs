@@ -49,19 +49,23 @@ namespace API.Parser
                 
                 @"(?<Series>.*)(\b|_)v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
-            // Black Bullet
+            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
+            new Regex(
+                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
+            new Regex(
+                @"(?<Series>.*)\(\d",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
+            new Regex(
+                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
                 
                 @"(?<Series>.*)(\b|_)(v|vo|c|volume)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
-            // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
-            new Regex(
-                
-                @"(?<Series>.*)\(\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
                 @"(?<Series>.*)(\b|_)(c)",
@@ -70,10 +74,11 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(\b|_)(\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            
             // Darker Than Black (This takes anything, we have to account for perfectly named folders)
-            new Regex(
-                @"(?<Series>.*)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // new Regex(
+            //     @"(?<Series>.*)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
         private static readonly Regex[] ReleaseGroupRegex = new[]
@@ -96,6 +101,10 @@ namespace API.Parser
             new Regex(
 
                 @"v\d+\.(?<Chapter>\d+-?\d*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
+            new Regex(
+                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
@@ -127,15 +136,15 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    // if (match.Groups["Volume"] != Match.Empty)
+                    // if (match.Groups["Series"] != Match.Empty)
                     // {
-                    //         
+                    //     return CleanTitle(match.Groups["Series"].Value);
                     // }
-                    if (match.Success && match.Groups["Series"].Value != string.Empty)
+                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
                     {
                         return CleanTitle(match.Groups["Series"].Value);
                     }
-                    
+                    //
                     
                 }
             }
@@ -151,11 +160,15 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Volume"] != Match.Empty)
-                    {
-                        return RemoveLeadingZeroes(match.Groups["Volume"].Value);    
-                    }
+                    if (match.Groups["Volume"] == Match.Empty) continue;
                     
+                    var value = match.Groups["Volume"].Value;
+                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
+                    var tokens = value.Split("-");
+                    var from = RemoveLeadingZeroes(tokens[0]);
+                    var to = RemoveLeadingZeroes(tokens[1]);
+                    return $"{@from}-{to}";
+
                 }
             }
 
@@ -174,7 +187,6 @@ namespace API.Parser
                     {
                         var value = match.Groups["Chapter"].Value;
 
-                        
                         if (value.Contains("-"))
                         {
                             var tokens = value.Split("-");
