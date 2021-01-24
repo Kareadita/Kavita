@@ -137,6 +137,7 @@ namespace API.Services
        {
           var fileName = Path.GetFileName(path);
           //var directoryName = (new FileInfo(path)).Directory?.Name;
+          //TODO: Implement fallback for no series information here
           
           _logger.LogDebug($"Parsing file {fileName}");
 
@@ -207,7 +208,8 @@ namespace API.Services
           };
        }
 
-       private int MinimumNumberFromRange(string range)
+       // TODO: Implement Test
+       public int MinimumNumberFromRange(string range)
        {
           var tokens = range.Split("-");
           return Int32.Parse(tokens.Length >= 1 ? tokens[0] : range);
@@ -274,7 +276,7 @@ namespace API.Services
                 }
              }
              
-             Console.WriteLine($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
+             _logger.LogInformation($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
           }
 
           foreach (var volume in volumes)
@@ -321,13 +323,13 @@ namespace API.Services
         /// <param name="filepath"></param>
         /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
         /// <returns></returns>
-        public static byte[] GetCoverImage(string filepath, bool createThumbnail = false)
+        public byte[] GetCoverImage(string filepath, bool createThumbnail = false)
         {
             try
             {
                 if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
-                Console.WriteLine($"Extracting Cover image from {filepath}");
+                _logger.LogDebug($"Extracting Cover image from {filepath}");
                 using ZipArchive archive = ZipFile.OpenRead(filepath);
                 if (!archive.HasFiles()) return Array.Empty<byte>();
 
@@ -358,16 +360,15 @@ namespace API.Services
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("There was a critical error and prevented thumbnail generation.");
-                        Console.WriteLine(ex.Message);
+                        _logger.LogError(ex, "There was a critical error and prevented thumbnail generation.");
                     }
                 }
                 
                 return ExtractEntryToImage(entry);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e);
+                _logger.LogError(ex, "There was an exception when reading archive stream.");
                 return Array.Empty<byte>();
             }
         }

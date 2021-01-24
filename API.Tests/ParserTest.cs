@@ -1,4 +1,3 @@
-using API.Parser;
 using Xunit;
 using static API.Parser.Parser;
 
@@ -20,6 +19,13 @@ namespace API.Tests
         [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
         [InlineData("Tonikaku Cawaii [Volume 11].cbz", "11")]
+        [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "2")]
+        [InlineData("[xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]", "1")]
+        [InlineData("Tower Of God S01 014 (CBT) (digital).cbz", "1")]
+        [InlineData("Tenjou_Tenge_v17_c100[MT].zip", "17")]
+        [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1")]
+        [InlineData("Future Diary v02 (2009) (Digital) (Viz).cbz", "2")]
+        [InlineData("Mujaki no Rakuen Vol12 ch76", "12")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -45,6 +51,17 @@ namespace API.Tests
         [InlineData("Darwin's Game - Volume 14 (F).cbz", "Darwin's Game")]
         [InlineData("[BAA]_Darker_than_Black_c7.zip", "Darker than Black")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "Ichiban Ushiro no Daimaou")]
+        [InlineData("[xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]", "Kyochuu Rettou")]
+        [InlineData("Loose_Relation_Between_Wizard_and_Apprentice_c07[AN].zip", "Loose Relation Between Wizard and Apprentice")]
+        [InlineData("Tower Of God S01 014 (CBT) (digital).cbz", "Tower Of God")]
+        [InlineData("Tenjou_Tenge_c106[MT].zip", "Tenjou Tenge")]
+        [InlineData("Tenjou_Tenge_v17_c100[MT].zip", "Tenjou Tenge")]
+        [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "Shimoneta - Manmaru Hen")]
+        [InlineData("Future Diary v02 (2009) (Digital) (Viz).cbz", "Future Diary")]
+        [InlineData("Tonikaku Cawaii [Volume 11].cbz", "Tonikaku Cawaii")]
+        [InlineData("Mujaki no Rakuen Vol12 ch76", "Mujaki no Rakuen")]
+        [InlineData("Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]", "Knights of Sidonia")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -63,6 +80,13 @@ namespace API.Tests
         [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
         [InlineData("Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz", "18")]
         [InlineData("Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", "0-6")]
+        [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "10")]
+        [InlineData("Loose_Relation_Between_Wizard_and_Apprentice_c07[AN].zip", "7")]
+        [InlineData("Tower Of God S01 014 (CBT) (digital).cbz", "14")]
+        [InlineData("Tenjou_Tenge_c106[MT].zip", "106")]
+        [InlineData("Tenjou_Tenge_v17_c100[MT].zip", "100")]
+        [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1-6")]
+        [InlineData("Mujaki no Rakuen Vol12 ch76", "76")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -92,6 +116,7 @@ namespace API.Tests
         [InlineData("Hello_I_am_here   ", "Hello I am here")]
         [InlineData("[ReleaseGroup] The Title", "The Title")]
         [InlineData("[ReleaseGroup]_The_Title", "The Title")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", "Kasumi Otoko no Ko v1.1")]
         public void CleanTitleTest(string input, string expected)
         {
             Assert.Equal(expected, CleanTitle(input));
@@ -107,6 +132,15 @@ namespace API.Tests
         public void IsArchiveTest(string input, bool expected)
         {
             Assert.Equal(expected, IsArchive(input));
+        }
+
+        [Theory]
+        [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
+        [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
+        [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        public void ParseEditionTest(string input, string expected)
+        {
+            Assert.Equal(expected, ParseEdition(input));
         }
     }
 }

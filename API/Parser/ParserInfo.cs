@@ -16,8 +16,13 @@ namespace API.Parser
         public string Filename { get; init; }
         public string FullFilePath { get; set; }
         /// <summary>
-        /// Raw (image), Archive
+        /// <see cref="MangaFormat"/> that represents the type of the file (so caching service knows how to cache for reading)
         /// </summary>
         public MangaFormat Format { get; set; }
+        
+        /// <summary>
+        /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
+        /// </summary>
+        public string Edition { get; set; }
     }
 }

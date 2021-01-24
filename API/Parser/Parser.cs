@@ -13,14 +13,13 @@ namespace API.Parser
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
-            // Historys Strongest Disciple Kenichi_v11_c90-98.zip
+            // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
-                
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+)",
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(vol. ?)(?<Volume>0*[1-9]+)",
+                @"(vol\.? ?)(?<Volume>0*[1-9]+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
@@ -28,11 +27,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Dance in the Vampire Bund v16-17
             new Regex(
-                
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(   
-                @"(?:v)(?<Volume>0*[1-9]+)",
+                @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
@@ -46,21 +45,33 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                
-                @"(?<Series>.*)(\b|_)v",
+                @"(?<Series>.*) (\b|_|-)v",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
+            new Regex(
+                @"(?<Series>.*)(?: _|-|\[|\() ?v",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
+            new Regex(
+                @"(?<Series>.*)(\bc\d+\b)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            new Regex(
+                @"(?<Series>.*)(v|s)\d+(-\d+)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
-            new Regex(
-                @"(?<Series>.*)\(\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
+            new Regex(
+                @"(?<Series>.*)\(\d",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
                 
@@ -104,15 +115,30 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
+                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\))", 
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Tower Of God S01 014 (CBT) (digital).cbz
+            new Regex(
+                @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
+        };
+        private static readonly Regex[] MangaEditionRegex = new[]
+        {
+            //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+            new Regex(
+                @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))", 
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+            new Regex(
+                @"(\b|_)(?<Edition>Omnibus)(\b|_)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
 
         public static ParserInfo Parse(string filePath)
         {
-            return new ParserInfo()
+            var ret = new ParserInfo()
             {
                 Chapters = ParseChapter(filePath),
                 Series = ParseSeries(filePath),
@@ -120,6 +146,12 @@ namespace API.Parser
                 Filename = filePath,
                 Format = ParseFormat(filePath)
             };
+            
+            var edition = ParseEdition(filePath);
+            if (edition != string.Empty) ret.Series = ret.Series.Replace(edition, "");
+            ret.Edition = edition;
+
+            return ret;
         }
 
         public static MangaFormat ParseFormat(string filePath)
@@ -127,6 +159,27 @@ namespace API.Parser
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;
             return MangaFormat.Unknown;
+        }
+
+        public static string ParseEdition(string filePath)
+        {
+            foreach (var regex in MangaEditionRegex)
+            {
+                var matches = regex.Matches(filePath);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Edition"].Success && match.Groups["Edition"].Value != string.Empty)
+                    {
+                        var edition = match.Groups["Edition"].Value.Replace("{", "").Replace("}", "")
+                            .Replace("[", "").Replace("]", "").Replace("(", "").Replace(")", "");
+                        
+                        return CleanTitle(edition);
+                    }
+                }
+            }
+
+            Console.WriteLine("Unable to parse Edition of {0}", filePath);
+            return string.Empty;
         }
         
         public static string ParseSeries(string filename)
@@ -136,16 +189,10 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    // if (match.Groups["Series"] != Match.Empty)
-                    // {
-                    //     return CleanTitle(match.Groups["Series"].Value);
-                    // }
                     if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
                     {
                         return CleanTitle(match.Groups["Series"].Value);
                     }
-                    //
-                    
                 }
             }
 
@@ -228,7 +275,7 @@ namespace API.Parser
             {
                 title = title.Substring(0, title.Length - 1);
             }
-            
+
             return title.Trim();
         }
 
