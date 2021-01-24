@@ -121,8 +121,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
-        private static readonly Regex[] MangaEditionRegex = new[]
-        {
+        private static readonly Regex[] MangaEditionRegex = {
             //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
                 @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))", 
@@ -130,6 +129,13 @@ namespace API.Parser
             //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
                 @"(\b|_)(?<Edition>Omnibus)(\b|_)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] CleanupRegex =
+        {
+            new Regex(
+                @"(?<Cleanup>(\{\}|\[\]|\(\)))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -161,14 +167,18 @@ namespace API.Parser
                 if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
             }
             
-            var edition = ParseEdition(filePath);
-            if (edition != string.Empty) ret.Series = ret.Series.Replace(edition, "");
-            ret.Edition = edition;
+            var edition = ParseEdition(fileName);
+            if (edition != string.Empty)
+            {
+                ret.Series = CleanTitle(ret.Series.Replace(edition, ""));
+                ret.Edition = edition;
+            }
+            
 
             return ret.Series == string.Empty ? null : ret;
         }
 
-        public static MangaFormat ParseFormat(string filePath)
+        private static MangaFormat ParseFormat(string filePath)
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;
@@ -187,7 +197,7 @@ namespace API.Parser
                         var edition = match.Groups["Edition"].Value.Replace("{", "").Replace("}", "")
                             .Replace("[", "").Replace("]", "").Replace("(", "").Replace(")", "");
                         
-                        return CleanTitle(edition);
+                        return edition;
                     }
                 }
             }
@@ -264,6 +274,23 @@ namespace API.Parser
 
             return "0";
         }
+
+        private static string RemoveEditionTagHolders(string title)
+        {
+            foreach (var regex in CleanupRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, "");
+                    }
+                }
+            }
+
+            return title;
+        }
         
         /// <summary>
         /// Translates _ -> spaces, trims front and back of string, removes release groups
@@ -271,6 +298,21 @@ namespace API.Parser
         /// <param name="title"></param>
         /// <returns></returns>
         public static string CleanTitle(string title)
+        {
+            title = RemoveReleaseGroup(title);
+
+            title = RemoveEditionTagHolders(title);
+
+            title = title.Replace("_", " ").Trim();
+            if (title.EndsWith("-"))
+            {
+                title = title.Substring(0, title.Length - 1);
+            }
+
+            return title.Trim();
+        }
+
+        private static string RemoveReleaseGroup(string title)
         {
             foreach (var regex in ReleaseGroupRegex)
             {
@@ -284,13 +326,7 @@ namespace API.Parser
                 }
             }
 
-            title = title.Replace("_", " ").Trim();
-            if (title.EndsWith("-"))
-            {
-                title = title.Substring(0, title.Length - 1);
-            }
-
-            return title.Trim();
+            return title;
         }
 
 
