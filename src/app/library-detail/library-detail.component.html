@@ -8,7 +8,7 @@
             <span class="invisible">Loading...</span>
         </div>
     </div>
-    <ng-container *ngIf="series.length === 0">
+    <ng-container *ngIf="series.length === 0 && !loadingSeries">
         There are no Series.
     </ng-container>
 </div>

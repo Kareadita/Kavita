@@ -63,6 +63,11 @@ export class LibraryCardComponent implements OnInit, OnChanges {
           this.toastr.success('Scan started for ' + data.name);
         });
       }});
+      this.actions.push({title: 'Refresh Metadata', callback: (data: Library) => {
+        this.libraryService.refreshMetadata(data?.id).subscribe((res: any) => {
+          this.toastr.success('Scan started for ' + data.name);
+        });
+      }});
     }
   }
 
