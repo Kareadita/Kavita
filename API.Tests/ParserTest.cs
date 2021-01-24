@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using API.Entities;
+using API.Parser;
 using Xunit;
 using static API.Parser.Parser;
 
@@ -62,6 +65,7 @@ namespace API.Tests
         [InlineData("Tonikaku Cawaii [Volume 11].cbz", "Tonikaku Cawaii")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "Mujaki no Rakuen")]
         [InlineData("Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]", "Knights of Sidonia")]
+        [InlineData("Vol 1.cbz", "")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -141,6 +145,47 @@ namespace API.Tests
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, ParseEdition(input));
+        }
+
+        [Fact]
+        public void ParseInfoTest()
+        {
+            var expected = new Dictionary<string, ParserInfo>();
+            var filepath = @"E:/Manga/Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Mujaki no Rakuen", Volumes = "12",
+                Chapters = "76", Filename = "Mujaki no Rakuen Vol12 ch76.cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:/Manga/Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen", Volumes = "1",
+                Chapters = "0", Filename = "Vol 1.cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            
+            
+            
+
+            foreach (var file in expected.Keys)
+            {
+                var expectedInfo = expected[file];
+                var actual = Parse(file);
+                Assert.Equal(expectedInfo.Format, actual.Format);
+                Assert.Equal(expectedInfo.Series, actual.Series);
+                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
+                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
+                Assert.Equal(expectedInfo.Edition, actual.Edition);
+                Assert.Equal(expectedInfo.Filename, actual.Filename);
+                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
+            }
+
+
+            
         }
     }
 }

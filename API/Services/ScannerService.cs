@@ -60,7 +60,7 @@ namespace API.Services
            foreach (var folderPath in library.Folders)
            {
               try {
-                 totalFiles = DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
+                 totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
                     try
                     {
@@ -81,38 +81,10 @@ namespace API.Services
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
 
            // Perform DB activities
-           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
-           foreach (var seriesKey in series.Keys)
-           {
-              var mangaSeries = allSeries.SingleOrDefault(s => s.Name == seriesKey) ?? new Series
-              {
-                 Name = seriesKey,
-                 OriginalName = seriesKey,
-                 SortName = seriesKey,
-                 Summary = "" 
-              };
-              try
-              {
-                 mangaSeries = UpdateSeries(mangaSeries, series[seriesKey].ToArray(), forceUpdate);
-                 _logger.LogInformation($"Created/Updated series {mangaSeries.Name} for {library.Name} library");
-                 library.Series ??= new List<Series>();
-                 library.Series.Add(mangaSeries);
-              }
-              catch (Exception ex)
-              {
-                 _logger.LogError(ex, $"There was an error during scanning of library. {seriesKey} will be skipped.");
-              }
-           }
-           
+           var allSeries = UpsertSeries(libraryId, forceUpdate, series, library);
+
            // Remove series that are no longer on disk
-           foreach (var existingSeries in allSeries)
-           {
-              if (!series.ContainsKey(existingSeries.Name) || !series.ContainsKey(existingSeries.OriginalName))
-              {
-                 // Delete series, there is no file to backup any longer. 
-                 library.Series?.Remove(existingSeries);
-              }
-           }
+           RemoveSeriesNotOnDisk(allSeries, series, library);
 
            _unitOfWork.LibraryRepository.Update(library);
 
@@ -128,28 +100,56 @@ namespace API.Services
            _scannedSeries = null;
            _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
         }
-       
-       /// <summary>
-       /// Processes files found during a library scan. Generates a collection of <see cref="ParserInfo"/> for DB updates later.
-       /// </summary>
-       /// <param name="path">Path of a file</param>
-       private void ProcessFile(string path)
-       {
-          var fileName = Path.GetFileName(path);
-          //var directoryName = (new FileInfo(path)).Directory?.Name;
-          //TODO: Implement fallback for no series information here
-          
-          _logger.LogDebug($"Parsing file {fileName}");
 
-          
-          var info = Parser.Parser.Parse(fileName);
-          info.FullFilePath = path;
-          if (info.Series == string.Empty)
+       private List<Series> UpsertSeries(int libraryId, bool forceUpdate, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
+       {
+          var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
+          foreach (var seriesKey in series.Keys)
           {
-             _logger.LogInformation($"Could not parse series or volume from {fileName}");
-             return;
+             var mangaSeries = allSeries.SingleOrDefault(s => s.Name == seriesKey) ?? new Series
+             {
+                Name = seriesKey,
+                OriginalName = seriesKey,
+                SortName = seriesKey,
+                Summary = ""
+             };
+             try
+             {
+                mangaSeries = UpdateSeries(mangaSeries, series[seriesKey].ToArray(), forceUpdate);
+                _logger.LogInformation($"Created/Updated series {mangaSeries.Name} for {library.Name} library");
+                library.Series ??= new List<Series>();
+                library.Series.Add(mangaSeries);
+             }
+             catch (Exception ex)
+             {
+                _logger.LogError(ex, $"There was an error during scanning of library. {seriesKey} will be skipped.");
+             }
           }
 
+          return allSeries;
+       }
+
+       private static void RemoveSeriesNotOnDisk(List<Series> allSeries, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
+       {
+          foreach (var existingSeries in allSeries)
+          {
+             if (!series.ContainsKey(existingSeries.Name) || !series.ContainsKey(existingSeries.OriginalName))
+             {
+                // Delete series, there is no file to backup any longer. 
+                library.Series?.Remove(existingSeries);
+             }
+          }
+       }
+       
+
+       /// <summary>
+       /// Attempts to either add a new instance of a show mapping to the scannedSeries bag or adds to an existing.
+       /// </summary>
+       /// <param name="info"></param>
+       public void TrackSeries(ParserInfo info)
+       {
+          if (info.Series == string.Empty) return;
+          
           ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
           // Use normalization for key lookup due to parsing disparities
           var existingKey = _scannedSeries.Keys.SingleOrDefault(k => k.ToLower() == info.Series.ToLower());
@@ -173,6 +173,23 @@ namespace API.Services
           {
              _scannedSeries.TryAdd(info.Series, newBag);
           }
+       }
+       
+       /// <summary>
+       /// Processes files found during a library scan.
+       /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
+       /// </summary>
+       /// <param name="path">Path of a file</param>
+       private void ProcessFile(string path)
+       {
+          var info = Parser.Parser.Parse(path);
+          if (info == null)
+          {
+             _logger.LogInformation($"Could not parse series from {path}");
+             return;
+          }
+
+          TrackSeries(info);
        }
        
        private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)

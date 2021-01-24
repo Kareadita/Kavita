@@ -74,22 +74,16 @@ namespace API.Parser
 
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
-                
-                @"(?<Series>.*)(\b|_)(v|vo|c|volume)",
+                @"(?<Series>.*)(_)(v|vo|c|volume)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            new Regex(
+                @"^(?!Vol)(?<Series>.*)( |_)(\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)(\b|_)(c)",
+                @"(?<Series>.*)( |_)(c)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Akiiro Bousou Biyori - 01.jpg
-            new Regex(
-                @"(?<Series>.*)(\b|_)(\d+)", 
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
-            // Darker Than Black (This takes anything, we have to account for perfectly named folders)
-            // new Regex(
-            //     @"(?<Series>.*)",
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
         private static readonly Regex[] ReleaseGroupRegex = new[]
@@ -136,22 +130,38 @@ namespace API.Parser
         };
 
 
+        /// <summary>
+        /// Parses information out of a file path. Will fallback to using directory name if Series couldn't be parsed
+        /// from filename.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
         public static ParserInfo Parse(string filePath)
         {
+            var fileName = Path.GetFileName(filePath);
+            var directoryName = (new FileInfo(filePath)).Directory?.Name;
+            
             var ret = new ParserInfo()
             {
-                Chapters = ParseChapter(filePath),
-                Series = ParseSeries(filePath),
-                Volumes = ParseVolume(filePath),
-                Filename = filePath,
-                Format = ParseFormat(filePath)
+                Chapters = ParseChapter(fileName),
+                Series = ParseSeries(fileName),
+                Volumes = ParseVolume(fileName),
+                Filename = fileName,
+                Format = ParseFormat(filePath),
+                FullFilePath = filePath
             };
+
+            if (ret.Series == string.Empty)
+            {
+                ret.Series = ParseSeries(directoryName);
+                if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
+            }
             
             var edition = ParseEdition(filePath);
             if (edition != string.Empty) ret.Series = ret.Series.Replace(edition, "");
             ret.Edition = edition;
 
-            return ret;
+            return ret.Series == string.Empty ? null : ret;
         }
 
         public static MangaFormat ParseFormat(string filePath)
