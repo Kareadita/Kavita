@@ -91,6 +91,7 @@ namespace API.Tests
         [InlineData("Tenjou_Tenge_v17_c100[MT].zip", "100")]
         [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1-6")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "76")]
+        [InlineData("Beelzebub_01_[Noodles].zip", "1")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -164,6 +165,14 @@ namespace API.Tests
             {
                 Series = "Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen", Volumes = "1",
                 Chapters = "0", Filename = "Vol 1.cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Beelzebub\Beelzebub_01_[Noodles].zip";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Beelzebub", Volumes = "0",
+                Chapters = "1", Filename = "Beelzebub_01_[Noodles].zip", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
             

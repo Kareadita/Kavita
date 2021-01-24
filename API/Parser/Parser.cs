@@ -115,6 +115,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Beelzebub_01_[Noodles].zip
+            new Regex(
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_)", 
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
         private static readonly Regex[] MangaEditionRegex = new[]
