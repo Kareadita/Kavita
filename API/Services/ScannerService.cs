@@ -129,16 +129,19 @@ namespace API.Services
           return allSeries;
        }
 
-       private static void RemoveSeriesNotOnDisk(List<Series> allSeries, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
+       private void RemoveSeriesNotOnDisk(List<Series> allSeries, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
        {
+          var count = 0;
           foreach (var existingSeries in allSeries)
           {
              if (!series.ContainsKey(existingSeries.Name) || !series.ContainsKey(existingSeries.OriginalName))
              {
                 // Delete series, there is no file to backup any longer. 
                 library.Series?.Remove(existingSeries);
+                count++;
              }
           }
+          _logger.LogInformation($"Removed {count} series that are no longer on disk");
        }
        
 
@@ -174,7 +177,67 @@ namespace API.Services
              _scannedSeries.TryAdd(info.Series, newBag);
           }
        }
-       
+
+       private void Match(ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> scannedSeries, string filePath)
+       {
+          var info = Parser.Parser.Parse(filePath);
+          // I want to cross corelate with other series. So if I have 
+          // Darker than Black and Darker than Black - Side Stories,
+          // we end up with Darker than Black with a Volume of "Specials" and Side - Stories belongs in there.
+          
+          if (info == null)
+          {
+             _logger.LogInformation($"Could not parse series from {filePath}");
+             return;
+          }
+
+          // NOTE: This was pointless due to changes in how we Parse
+          var existingKey = scannedSeries.Keys.SingleOrDefault(k => info.Series.ToLower().Contains(k.ToLower()));
+          if (existingKey != null && existingKey.ToLower() == info.Series.ToLower())
+          {
+             // Perform an add to existing infos
+             _logger.LogDebug($"Adding {info.Series} to existing {existingKey}");
+             AddToScannedSeries(existingKey, info);
+             
+          }
+          else if (existingKey != null)
+          {
+             _logger.LogDebug($"Found that {info.Series} might be a special for {existingKey}. Adding as special.");
+             info.IsSpecial = true;
+             AddToScannedSeries(existingKey, info);
+          }
+          else
+          {
+             _logger.LogDebug($"Adding {info.Series} as new entry.");
+             AddToScannedSeries(info.Series, info);
+          }
+
+       }
+
+       private void AddToScannedSeries(string key, ParserInfo info)
+       {
+          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
+          if (_scannedSeries.TryGetValue(key, out var tempBag))
+          {
+             var existingInfos = tempBag.ToArray();
+             foreach (var existingInfo in existingInfos)
+             {
+                newBag.Add(existingInfo);
+             }
+          }
+          else
+          {
+             tempBag = new ConcurrentBag<ParserInfo>();
+          }
+
+          newBag.Add(info);
+          
+          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
+          {
+             _scannedSeries.TryAdd(info.Series, newBag);
+          }
+       }
+
        /// <summary>
        /// Processes files found during a library scan.
        /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
@@ -183,13 +246,16 @@ namespace API.Services
        private void ProcessFile(string path)
        {
           var info = Parser.Parser.Parse(path);
+          
           if (info == null)
           {
              _logger.LogInformation($"Could not parse series from {path}");
              return;
           }
-
+          
           TrackSeries(info);
+
+          //Match(_scannedSeries, path);
        }
        
        private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
@@ -199,7 +265,12 @@ namespace API.Services
           series.Pages = volumes.Sum(v => v.Pages);
           if (series.CoverImage == null || forceUpdate)
           {
-             series.CoverImage = volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0)?.CoverImage;
+             var firstCover = volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+             if (firstCover == null && volumes.Any())
+             {
+                firstCover = volumes.FirstOrDefault(x => x.Number == 0);
+             }
+             series.CoverImage = firstCover?.CoverImage;
           }
           if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
           {
@@ -273,6 +344,7 @@ namespace API.Services
              }
              else
              {
+                // Create New Volume
                 existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
                 if (existingVolume != null)
                 {

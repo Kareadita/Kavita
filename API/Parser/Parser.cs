@@ -13,6 +13,10 @@ namespace API.Parser
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
+            // Dance in the Vampire Bund v16-17
+            new Regex(
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)",
@@ -25,10 +29,7 @@ namespace API.Parser
             new Regex(
                 @"(volume )(?<Volume>0?[1-9]+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Dance in the Vampire Bund v16-17
-            new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(   
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
@@ -38,9 +39,12 @@ namespace API.Parser
 
         private static readonly Regex[] MangaSeriesRegex = new[]
         {
+            // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip
+            new Regex(
+            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
-                
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
@@ -54,6 +58,11 @@ namespace API.Parser
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
             new Regex(
                 @"(?<Series>.*)(\bc\d+\b)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            // due to duplicate version identifiers in file.
+            new Regex(
+                @"(?<Series>.*)(v|s)\d+(-\d+)?(_| )",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -72,9 +81,9 @@ namespace API.Parser
                 @"(?<Series>.*)\(\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
-            // Black Bullet (This is very loose, keep towards bottom)
+            // Black Bullet (This is very loose, keep towards bottom) (?<Series>.*)(_)(v|vo|c|volume)
             new Regex(
-                @"(?<Series>.*)(_)(v|vo|c|volume)",
+                @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
@@ -82,7 +91,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)( |_)(c)",
+                @"(?<Series>.*)( |_)(c)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -134,8 +143,13 @@ namespace API.Parser
 
         private static readonly Regex[] CleanupRegex =
         {
+            // (), {}, []
             new Regex(
                 @"(?<Cleanup>(\{\}|\[\]|\(\)))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // (Complete)
+            new Regex(
+                @"(?<Cleanup>(\{Complete\}|\[Complete\]|\(Complete\)))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -165,6 +179,9 @@ namespace API.Parser
             {
                 ret.Series = ParseSeries(directoryName);
                 if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
+            } else if (directoryName != null && directoryName.Contains(ret.Series))
+            {
+                ret.Series = directoryName; // TODO: Validate if this works better overall for grouping.
             }
             
             var edition = ParseEdition(fileName);
@@ -201,8 +218,7 @@ namespace API.Parser
                     }
                 }
             }
-
-            Console.WriteLine("Unable to parse Edition of {0}", filePath);
+            
             return string.Empty;
         }
         
@@ -219,8 +235,7 @@ namespace API.Parser
                     }
                 }
             }
-
-            Console.WriteLine("Unable to parse Series of {0}", filename);
+            
             return string.Empty;
         }
 
@@ -242,8 +257,7 @@ namespace API.Parser
 
                 }
             }
-
-            Console.WriteLine("Unable to parse Volume of {0}", filename);
+            
             return "0";
         }
 

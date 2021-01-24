@@ -25,5 +25,9 @@ namespace API.Parser
         /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
         /// </summary>
         public string Edition { get; set; } = "";
+        /// <summary>
+        /// If this file is some sort of side story that links back to some master series. 
+        /// </summary>
+        public bool IsSpecial { get; set; } = false;
     }
 }

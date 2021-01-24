@@ -29,6 +29,7 @@ namespace API.Tests
         [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1")]
         [InlineData("Future Diary v02 (2009) (Digital) (Viz).cbz", "2")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "12")]
+        [InlineData("Ichinensei_ni_Nacchattara_v02_ch11_[Taruby]_v1.3.zip", "2")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -66,6 +67,10 @@ namespace API.Tests
         [InlineData("Mujaki no Rakuen Vol12 ch76", "Mujaki no Rakuen")]
         [InlineData("Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]", "Knights of Sidonia")]
         [InlineData("Vol 1.cbz", "")]
+        [InlineData("Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", "Ichinensei ni Nacchattara")]
+        [InlineData("Chrno_Crusade_Dragon_Age_All_Stars[AS].zip", "")]
+        [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip", "Ichiban Ushiro no Daimaou")]
+        [InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "Epigraph of the Closed Curve")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -92,6 +97,7 @@ namespace API.Tests
         [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1-6")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "76")]
         [InlineData("Beelzebub_01_[Noodles].zip", "1")]
+        [InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -176,13 +182,37 @@ namespace API.Tests
                 FullFilePath = filepath
             });
             
+            filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Ichinensei ni Nacchattara", Volumes = "1",
+                Chapters = "1", Filename = "Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            // filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
+            // expected.Add(filepath, new ParserInfo
+            // {
+            //     Series = "Ichinensei ni Nacchattara", Volumes = "1",
+            //     Chapters = "1", Filename = "Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", Format = MangaFormat.Archive,
+            //     FullFilePath = filepath
+            // });
+            
             filepath = @"E:\Manga\Tenjo Tenge (Color)\Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz";
             expected.Add(filepath, new ParserInfo
             {
                 Series = "Tenjo Tenge", Volumes = "1", Edition = "Full Contact Edition",
                 Chapters = "0", Filename = "Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
-            });
+            }); 
+            
+            // filepath = @"E:\Manga\Steins Gate - Epigraph of the Closed Curve\[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip";
+            // expected.Add(filepath, new ParserInfo
+            // {
+            //     Series = "Steins Gate - Epigraph of the Closed Curve", Volumes = "0", Edition = "",
+            //     Chapters = "6", Filename = "[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", Format = MangaFormat.Archive,
+            //     FullFilePath = filepath
+            // });
             
             
             
