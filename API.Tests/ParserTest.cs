@@ -30,6 +30,9 @@ namespace API.Tests
         [InlineData("Future Diary v02 (2009) (Digital) (Viz).cbz", "2")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "12")]
         [InlineData("Ichinensei_ni_Nacchattara_v02_ch11_[Taruby]_v1.3.zip", "2")]
+        [InlineData("Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", "1")]
+        [InlineData("Dorohedoro v11 (2013) (Digital) (LostNerevarine-Empire).cbz", "11")]
+        [InlineData("Dorohedoro v12 (2013) (Digital) (LostNerevarine-Empire).cbz", "12")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -55,6 +58,7 @@ namespace API.Tests
         [InlineData("Darwin's Game - Volume 14 (F).cbz", "Darwin's Game")]
         [InlineData("[BAA]_Darker_than_Black_c7.zip", "Darker than Black")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "Kedouin Makoto - Corpse Party Musume")]
         [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "Ichiban Ushiro no Daimaou")]
         [InlineData("[xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]", "Kyochuu Rettou")]
         [InlineData("Loose_Relation_Between_Wizard_and_Apprentice_c07[AN].zip", "Loose Relation Between Wizard and Apprentice")]
@@ -97,6 +101,7 @@ namespace API.Tests
         [InlineData("Shimoneta - Manmaru Hen - c001-006 (v01) [Various].zip", "1-6")]
         [InlineData("Mujaki no Rakuen Vol12 ch76", "76")]
         [InlineData("Beelzebub_01_[Noodles].zip", "1")]
+        [InlineData("Yumekui-Merry_DKThias_Chapter21.zip", "21")]
         [InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
@@ -157,6 +162,7 @@ namespace API.Tests
         [Fact]
         public void ParseInfoTest()
         {
+            const string rootPath = @"E:/Manga/";
             var expected = new Dictionary<string, ParserInfo>();
             var filepath = @"E:/Manga/Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz";
             expected.Add(filepath, new ParserInfo
@@ -189,15 +195,7 @@ namespace API.Tests
                 Chapters = "1", Filename = "Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
-            // filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
-            // expected.Add(filepath, new ParserInfo
-            // {
-            //     Series = "Ichinensei ni Nacchattara", Volumes = "1",
-            //     Chapters = "1", Filename = "Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", Format = MangaFormat.Archive,
-            //     FullFilePath = filepath
-            // });
-            
+
             filepath = @"E:\Manga\Tenjo Tenge (Color)\Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -206,13 +204,21 @@ namespace API.Tests
                 FullFilePath = filepath
             }); 
             
-            // filepath = @"E:\Manga\Steins Gate - Epigraph of the Closed Curve\[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip";
-            // expected.Add(filepath, new ParserInfo
-            // {
-            //     Series = "Steins Gate - Epigraph of the Closed Curve", Volumes = "0", Edition = "",
-            //     Chapters = "6", Filename = "[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", Format = MangaFormat.Archive,
-            //     FullFilePath = filepath
-            // });
+            filepath = @"E:\Manga\Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)\Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Akame ga KILL! ZERO", Volumes = "1", Edition = "",
+                Chapters = "0", Filename = "Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Dorohedoro\Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Dorohedoro", Volumes = "1", Edition = "",
+                Chapters = "0", Filename = "Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
             
             
             
@@ -221,7 +227,13 @@ namespace API.Tests
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = Parse(file);
+                var actual = Parse(file, rootPath);
+                if (expectedInfo == null)
+                {
+                    Assert.Null(actual);
+                    return;
+                }
+                Assert.NotNull(actual);
                 Assert.Equal(expectedInfo.Format, actual.Format);
                 Assert.Equal(expectedInfo.Series, actual.Series);
                 Assert.Equal(expectedInfo.Chapters, actual.Chapters);
@@ -230,9 +242,6 @@ namespace API.Tests
                 Assert.Equal(expectedInfo.Filename, actual.Filename);
                 Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
             }
-
-
-            
         }
     }
 }

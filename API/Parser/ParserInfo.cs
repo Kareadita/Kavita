@@ -9,12 +9,12 @@ namespace API.Parser
     public class ParserInfo
     {
         // This can be multiple
-        public string Chapters { get; set; }
-        public string Series { get; set; }
+        public string Chapters { get; set; } = "";
+        public string Series { get; set; } = "";
         // This can be multiple
-        public string Volumes { get; set; }
-        public string Filename { get; init; }
-        public string FullFilePath { get; set; }
+        public string Volumes { get; set; } = "";
+        public string Filename { get; init; } = "";
+        public string FullFilePath { get; set; } = "";
 
         /// <summary>
         /// <see cref="MangaFormat"/> that represents the type of the file (so caching service knows how to cache for reading)
@@ -25,9 +25,5 @@ namespace API.Parser
         /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
         /// </summary>
         public string Edition { get; set; } = "";
-        /// <summary>
-        /// If this file is some sort of side story that links back to some master series. 
-        /// </summary>
-        public bool IsSpecial { get; set; } = false;
     }
 }

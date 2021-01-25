@@ -151,6 +151,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Cleanup>(\{Complete\}|\[Complete\]|\(Complete\)))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Anything in parenthesis
+            new Regex(
+                @"\(.*\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
 
@@ -159,11 +163,13 @@ namespace API.Parser
         /// from filename.
         /// </summary>
         /// <param name="filePath"></param>
+        /// <param name="rootPath">Root folder</param>
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo Parse(string filePath)
+        public static ParserInfo? Parse(string filePath, string rootPath)
         {
             var fileName = Path.GetFileName(filePath);
             var directoryName = (new FileInfo(filePath)).Directory?.Name;
+            var rootName = (new DirectoryInfo(rootPath)).Name;
             
             var ret = new ParserInfo()
             {
@@ -175,17 +181,14 @@ namespace API.Parser
                 FullFilePath = filePath
             };
 
-            if (ret.Series == string.Empty)
+            if (ret.Series == string.Empty && directoryName != null && directoryName != rootName)
             {
                 ret.Series = ParseSeries(directoryName);
                 if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
-            } else if (directoryName != null && directoryName.Contains(ret.Series))
-            {
-                ret.Series = directoryName; // TODO: Validate if this works better overall for grouping.
             }
-            
+
             var edition = ParseEdition(fileName);
-            if (edition != string.Empty)
+            if (!string.IsNullOrEmpty(edition))
             {
                 ret.Series = CleanTitle(ret.Series.Replace(edition, ""));
                 ret.Edition = edition;
