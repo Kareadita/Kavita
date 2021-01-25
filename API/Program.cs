@@ -31,6 +31,7 @@ namespace API
                 // Apply all migrations on startup
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
+                await Seed.SeedSettings(context);
             }
             catch (Exception ex)
             {
@@ -43,6 +44,11 @@ namespace API
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                // .ConfigureLogging(logging =>
+                // {
+                //     logging.ClearProviders();
+                //     logging.AddConsole();
+                // })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

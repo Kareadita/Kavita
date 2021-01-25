@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +39,21 @@ namespace API.Controllers
             _mapper = mapper;
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("reset-password")]
+        public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
+        {
+            _logger.LogInformation($"{User.GetUsername()} is changing {resetPasswordDto.UserName}'s password.");
+            var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
+            var result = await _userManager.RemovePasswordAsync(user);
+            if (!result.Succeeded) return BadRequest("Unable to update password");
+            
+            result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
+            if (!result.Succeeded) return BadRequest("Unable to update password");
+
+            return Ok($"{resetPasswordDto.UserName}'s Password has been reset.");
+        }
+
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
@@ -59,15 +77,14 @@ namespace API.Controllers
             if (registerDto.IsAdmin)
             {
                 _logger.LogInformation($"{user.UserName} is being registered as admin. Granting access to all libraries.");
-                var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+                var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
                 foreach (var lib in libraries)
                 {
                     lib.AppUsers ??= new List<AppUser>();
                     lib.AppUsers.Add(user);
                 }
+                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogInformation("There was an issue granting library access. Please do this manually.");
             }
-            
-            if (!await _unitOfWork.Complete()) _logger.LogInformation("There was an issue granting library access. Please do this manually.");
 
             return new UserDto
             {
@@ -80,7 +97,11 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.Users
-                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username.ToLower());
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
+
+            var debugUsers = await _userManager.Users.Select(x => x.NormalizedUserName).ToListAsync();
+            
+            _logger.LogInformation($"All Users: {String.Join(",", debugUsers)}");
 
             if (user == null) return Unauthorized("Invalid username");
 

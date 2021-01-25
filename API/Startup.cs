@@ -42,18 +42,16 @@ namespace API
             {
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+                app.UseHangfireDashboard();
             }
-            
-            
-            app.UseHangfireDashboard();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseRouting();
             
             // Ordering is important. Cors, authentication, authorization
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
-            
+            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+
             app.UseAuthentication();
 
             app.UseAuthorization();

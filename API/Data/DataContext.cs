@@ -24,10 +24,15 @@ namespace API.Data
         public DbSet<AppUser> AppUser { get; set; }
         public DbSet<AppUserProgress> AppUserProgresses { get; set; }
         public DbSet<AppUserRating> AppUserRating { get; set; }
+        public DbSet<ServerSetting> ServerSetting { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // builder.Entity<ServerSetting>()
+            //     .HasAlternateKey(s => s.Key)
+            //     .HasName("AlternateKey_Key");
 
             builder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)

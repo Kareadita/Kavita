@@ -145,6 +145,14 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
+            _taskScheduler.ScanLibrary(libraryId, false);
+            return Ok();
+        }
+        
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("refresh-metadata")]
+        public ActionResult RefreshMetadata(int libraryId)
+        {
             _taskScheduler.ScanLibrary(libraryId, true);
             return Ok();
         }

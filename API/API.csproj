@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="NetVips" Version="1.2.4" />
     <PackageReference Include="NetVips.Native" Version="8.10.5.1" />
+    <PackageReference Include="NReco.Logging.File" Version="1.1.1" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.16.0.25740">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

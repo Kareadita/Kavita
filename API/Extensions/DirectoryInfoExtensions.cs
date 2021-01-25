@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace API.Extensions
@@ -50,7 +51,6 @@ namespace API.Extensions
                     if (file.Directory == null) continue;
                     var newName = $"{file.Directory.Name}_{file.Name}";
                     var newPath = Path.Join(root.FullName, newName);
-                    Console.WriteLine($"Renaming/Moving file to: {newPath}");
                     file.MoveTo(newPath);
 
                 }

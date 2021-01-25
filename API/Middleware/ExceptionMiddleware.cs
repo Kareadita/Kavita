@@ -25,7 +25,6 @@ namespace API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            _logger.LogError("The middleware called");
             try
             {
                 await _next(context); // downstream middlewares or http call

@@ -2,8 +2,8 @@
 {
     public interface ITaskScheduler
     {
-        public void ScanLibrary(int libraryId, bool forceUpdate = false);
-
-        public void CleanupVolumes(int[] volumeIds);
+        void ScanLibrary(int libraryId, bool forceUpdate = false);
+        void CleanupVolumes(int[] volumeIds);
+        void ScanSeries(int libraryId, int seriesId);
     }
 }

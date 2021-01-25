@@ -60,6 +60,14 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
         }
+        
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("scan")]
+        public ActionResult Scan(int libraryId, int seriesId)
+        {
+            _taskScheduler.ScanSeries(libraryId, seriesId);
+            return Ok();
+        }
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)

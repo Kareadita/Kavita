@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities;
+using API.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace API.Data
@@ -24,6 +27,24 @@ namespace API.Data
                     await roleManager.CreateAsync(role);      
                 }
             }
+        }
+
+        public static async Task SeedSettings(DataContext context)
+        {
+            // NOTE: This needs to check if settings already exists before inserting. 
+            // IList<ServerSetting> defaultSettings = new List<ServerSetting>()
+            // {
+            //     new ServerSetting() {Key = "CacheDirectory", Value = CacheService.CacheDirectory}
+            // };
+            //
+            // await context.ServerSetting.AddRangeAsync(defaultSettings);
+            // await context.SaveChangesAsync();
+            // await context.ServerSetting.AddAsync(new ServerSetting
+            // {
+            //     CacheDirectory = CacheService.CacheDirectory
+            // });
+            //
+            // await context.SaveChangesAsync();
         }
     }
 }
