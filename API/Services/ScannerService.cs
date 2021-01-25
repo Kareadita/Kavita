@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Extensions;
@@ -20,7 +21,7 @@ namespace API.Services
     {
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<ScannerService> _logger;
-       private ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> _scannedSeries;
+       private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger)
        {
@@ -53,7 +54,7 @@ namespace API.Services
               return;
            }
            
-           _scannedSeries = new ConcurrentDictionary<string, ConcurrentBag<ParserInfo>>();
+           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
            _logger.LogInformation($"Beginning scan on {library.Name}. Forcing metadata update: {forceUpdate}");
 
            var totalFiles = 0;
@@ -76,8 +77,8 @@ namespace API.Services
                  _logger.LogError(ex, $"The directory '{folderPath}' does not exist");
               }
            }
-           
-           var filtered = _scannedSeries.Where(kvp => !kvp.Value.IsEmpty);
+
+           var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
            var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
 
            // Perform DB activities
@@ -101,7 +102,7 @@ namespace API.Services
            _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
         }
 
-       private List<Series> UpsertSeries(int libraryId, bool forceUpdate, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
+       private List<Series> UpsertSeries(int libraryId, bool forceUpdate, ImmutableDictionary<string, List<ParserInfo>> series, Library library)
        {
           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
           foreach (var seriesKey in series.Keys)
@@ -129,7 +130,7 @@ namespace API.Services
           return allSeries;
        }
 
-       private void RemoveSeriesNotOnDisk(List<Series> allSeries, ImmutableDictionary<string, ConcurrentBag<ParserInfo>> series, Library library)
+       private void RemoveSeriesNotOnDisk(List<Series> allSeries, ImmutableDictionary<string, List<ParserInfo>> series, Library library)
        {
           var count = 0;
           foreach (var existingSeries in allSeries)
@@ -149,33 +150,20 @@ namespace API.Services
        /// Attempts to either add a new instance of a show mapping to the scannedSeries bag or adds to an existing.
        /// </summary>
        /// <param name="info"></param>
-       public void TrackSeries(ParserInfo info)
+       private void TrackSeries(ParserInfo info)
        {
           if (info.Series == string.Empty) return;
           
-          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-          // Use normalization for key lookup due to parsing disparities
-          var existingKey = _scannedSeries.Keys.SingleOrDefault(k => k.ToLower() == info.Series.ToLower());
-          if (existingKey != null) info.Series = existingKey;
-          if (_scannedSeries.TryGetValue(info.Series, out var tempBag))
+          _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (key, oldValue) =>
           {
-             var existingInfos = tempBag.ToArray();
-             foreach (var existingInfo in existingInfos)
+             oldValue ??= new List<ParserInfo>();
+             if (!oldValue.Contains(info))
              {
-                newBag.Add(existingInfo);
+                oldValue.Add(info);
              }
-          }
-          else
-          {
-             tempBag = new ConcurrentBag<ParserInfo>();
-          }
 
-          newBag.Add(info);
-
-          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
-          {
-             _scannedSeries.TryAdd(info.Series, newBag);
-          }
+             return oldValue;
+          });
        }
 
        /// <summary>
@@ -213,7 +201,7 @@ namespace API.Services
           }
           if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
           {
-             series.Summary = ""; // TODO: Check if comicInfo.xml in file and parse metadata out.   
+             series.Summary = "";
           }
           
 
@@ -234,9 +222,8 @@ namespace API.Services
              NumberOfPages = info.Format == MangaFormat.Archive ? GetNumberOfPagesFromArchive(info.FullFilePath): 1
           };
        }
-
-       // TODO: Implement Test
-       public int MinimumNumberFromRange(string range)
+       
+       private int MinimumNumberFromRange(string range)
        {
           var tokens = range.Split("-");
           return Int32.Parse(tokens.Length >= 1 ? tokens[0] : range);
