@@ -108,7 +108,6 @@ namespace API.Parser
         private static readonly Regex[] MangaChapterRegex = new[]
         {
             new Regex(
-
                 @"(c|ch)(\.? ?)(?<Chapter>\d+-?\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
@@ -127,6 +126,10 @@ namespace API.Parser
             // Beelzebub_01_[Noodles].zip
             new Regex(
                 @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_)", 
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Yumekui-Merry_DKThias_Chapter21.zip
+            new Regex(
+                @"Chapter(?<Chapter>\d+(-\d+)?)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
