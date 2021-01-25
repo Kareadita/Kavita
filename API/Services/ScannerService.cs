@@ -64,7 +64,7 @@ namespace API.Services
                  {
                     try
                     {
-                       ProcessFile(f);
+                       ProcessFile(f, folderPath.Path);
                     }
                     catch (FileNotFoundException exception)
                     {
@@ -178,74 +178,15 @@ namespace API.Services
           }
        }
 
-       private void Match(ConcurrentDictionary<string, ConcurrentBag<ParserInfo>> scannedSeries, string filePath)
-       {
-          var info = Parser.Parser.Parse(filePath);
-          // I want to cross corelate with other series. So if I have 
-          // Darker than Black and Darker than Black - Side Stories,
-          // we end up with Darker than Black with a Volume of "Specials" and Side - Stories belongs in there.
-          
-          if (info == null)
-          {
-             _logger.LogInformation($"Could not parse series from {filePath}");
-             return;
-          }
-
-          // NOTE: This was pointless due to changes in how we Parse
-          var existingKey = scannedSeries.Keys.SingleOrDefault(k => info.Series.ToLower().Contains(k.ToLower()));
-          if (existingKey != null && existingKey.ToLower() == info.Series.ToLower())
-          {
-             // Perform an add to existing infos
-             _logger.LogDebug($"Adding {info.Series} to existing {existingKey}");
-             AddToScannedSeries(existingKey, info);
-             
-          }
-          else if (existingKey != null)
-          {
-             _logger.LogDebug($"Found that {info.Series} might be a special for {existingKey}. Adding as special.");
-             info.IsSpecial = true;
-             AddToScannedSeries(existingKey, info);
-          }
-          else
-          {
-             _logger.LogDebug($"Adding {info.Series} as new entry.");
-             AddToScannedSeries(info.Series, info);
-          }
-
-       }
-
-       private void AddToScannedSeries(string key, ParserInfo info)
-       {
-          ConcurrentBag<ParserInfo> newBag = new ConcurrentBag<ParserInfo>();
-          if (_scannedSeries.TryGetValue(key, out var tempBag))
-          {
-             var existingInfos = tempBag.ToArray();
-             foreach (var existingInfo in existingInfos)
-             {
-                newBag.Add(existingInfo);
-             }
-          }
-          else
-          {
-             tempBag = new ConcurrentBag<ParserInfo>();
-          }
-
-          newBag.Add(info);
-          
-          if (!_scannedSeries.TryUpdate(info.Series, newBag, tempBag))
-          {
-             _scannedSeries.TryAdd(info.Series, newBag);
-          }
-       }
-
        /// <summary>
        /// Processes files found during a library scan.
        /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
        /// </summary>
        /// <param name="path">Path of a file</param>
-       private void ProcessFile(string path)
+       /// <param name="rootPath"></param>
+       private void ProcessFile(string path, string rootPath)
        {
-          var info = Parser.Parser.Parse(path);
+          var info = Parser.Parser.Parse(path, rootPath);
           
           if (info == null)
           {
@@ -254,8 +195,6 @@ namespace API.Services
           }
           
           TrackSeries(info);
-
-          //Match(_scannedSeries, path);
        }
        
        private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
@@ -372,8 +311,8 @@ namespace API.Services
           {
              if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
              {
-                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault()?.FilePath;
-                volume.CoverImage = GetCoverImage(firstFile, true); // ZIPFILE
+                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null) volume.CoverImage = GetCoverImage(firstFile.FilePath, true); // ZIPFILE
              }
 
              volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
