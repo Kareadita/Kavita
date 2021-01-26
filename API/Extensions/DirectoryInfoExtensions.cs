@@ -52,7 +52,6 @@ namespace API.Extensions
                     var newName = $"{file.Directory.Name}_{file.Name}";
                     var newPath = Path.Join(root.FullName, newName);
                     file.MoveTo(newPath);
-
                 }
             }
             

@@ -74,6 +74,7 @@ namespace API.Tests
         [InlineData("Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", "Ichinensei ni Nacchattara")]
         [InlineData("Chrno_Crusade_Dragon_Age_All_Stars[AS].zip", "")]
         [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip", "Ichiban Ushiro no Daimaou")]
+        [InlineData("Rent a Girlfriend v01.cbr", "Rent a Girlfriend")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "Epigraph of the Closed Curve")]
         public void ParseSeriesTest(string filename, string expected)
         {
