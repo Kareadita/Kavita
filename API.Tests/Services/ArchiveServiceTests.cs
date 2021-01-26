@@ -32,7 +32,7 @@ namespace API.Tests.Services
         }
 
         [Theory]
-        [InlineData("non existant file.zip", false)]
+        [InlineData("non existent file.zip", false)]
         [InlineData("wrong extension.rar", false)]
         [InlineData("empty.zip", false)]
         [InlineData("flat file.zip", true)]
@@ -43,6 +43,20 @@ namespace API.Tests.Services
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
+        }
+        
+        [Theory]
+        [InlineData("non existent file.zip", 0)]
+        [InlineData("wrong extension.rar", 0)]
+        [InlineData("empty.zip", 0)]
+        [InlineData("flat file.zip", 1)]
+        [InlineData("file in folder in folder.zip", 1)]
+        [InlineData("file in folder.zip", 1)]
+        [InlineData("file in folder_alt.zip", 1)]
+        public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            Assert.Equal(expected, _archiveService.GetNumberOfPagesFromArchive(Path.Join(testDirectory, archivePath)));
         }
         
         [Theory]

@@ -11,11 +11,12 @@ using NetVips;
 namespace API.Services
 {
     /// <summary>
-    /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> almost exclusively.
+    /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> and <see cref="ScannerService"/>
     /// </summary>
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
+        private const int ThumbnailWidth = 320;
 
         public ArchiveService(ILogger<ArchiveService> logger)
         {
@@ -25,7 +26,6 @@ namespace API.Services
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
             if (!IsValidArchive(archivePath)) return 0;
-
             _logger.LogDebug($"Getting Page numbers from  {archivePath}");
 
             try
@@ -53,53 +53,43 @@ namespace API.Services
             try
             {
                 if (!IsValidArchive(filepath)) return Array.Empty<byte>();
-                //if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
-
                 _logger.LogDebug($"Extracting Cover image from {filepath}");
+                
                 using ZipArchive archive = ZipFile.OpenRead(filepath);
                 if (!archive.HasFiles()) return Array.Empty<byte>();
 
                 var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
                 var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
-                ZipArchiveEntry entry;
-                
-                if (folder != null)
-                {
-                    entry = folder;
-                } else if (!entries.Any())
-                {
-                    return Array.Empty<byte>();
-                }
-                else
-                {
-                    entry = entries[0];
-                }
+                var entry = folder ?? entries[0];
 
-
-                if (createThumbnail)
-                {
-                    try
-                    {
-                        using var stream = entry.Open();
-                        var thumbnail = Image.ThumbnailStream(stream, 320);
-                        return thumbnail.WriteToBuffer(".jpg");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "There was a critical error and prevented thumbnail generation.");
-                    }
-                }
-                
-                return ExtractEntryToImage(entry);
+                return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "There was an exception when reading archive stream.");
-                return Array.Empty<byte>();
             }
+            
+            return Array.Empty<byte>();
         }
-        
-        private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)
+
+        private byte[] CreateThumbnail(ZipArchiveEntry entry)
+        {
+            var coverImage = Array.Empty<byte>();
+            try
+            {
+                using var stream = entry.Open();
+                using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+                coverImage = thumbnail.WriteToBuffer(".jpg");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation. Defaulting to no cover image.");
+            }
+
+            return coverImage;
+        }
+
+        private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
             using var ms = new MemoryStream();
