@@ -20,12 +20,14 @@ namespace API.Services
     {
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<ScannerService> _logger;
+       private readonly IArchiveService _archiveService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
 
-       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger)
+       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
+          _archiveService = archiveService;
        }
 
        public void ScanLibraries()
@@ -218,7 +220,7 @@ namespace API.Services
              FilePath = info.FullFilePath,
              Chapter = chapter,
              Format = info.Format,
-             NumberOfPages = info.Format == MangaFormat.Archive ? GetNumberOfPagesFromArchive(info.FullFilePath): 1
+             NumberOfPages = info.Format == MangaFormat.Archive ? _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath): 1
           };
        }
        
@@ -250,7 +252,7 @@ namespace API.Services
                 {
                    existingFile.Chapter = MinimumNumberFromRange(info.Chapters);
                    existingFile.Format = info.Format;
-                   existingFile.NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath);
+                   existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                 }
                 else
                 {
@@ -298,7 +300,7 @@ namespace API.Services
              if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
              {
                 var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null) volume.CoverImage = GetCoverImage(firstFile.FilePath, true); // ZIPFILE
+                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
              }
 
              volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
@@ -307,105 +309,17 @@ namespace API.Services
           return volumes;
        }
 
-      
+
 
 
        public void ScanSeries(int libraryId, int seriesId)
-        {
-           throw new NotImplementedException();
-        }
-
-        private int GetNumberOfPagesFromArchive(string archivePath)
-        {
-           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-           {
-              _logger.LogError($"Archive {archivePath} could not be found.");
-              return 0;
-           }
-           
-           _logger.LogDebug($"Getting Page numbers from  {archivePath}");
-
-           try
-           {
-              using ZipArchive archive = ZipFile.OpenRead(archivePath); // ZIPFILE
-              return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
-           }
-           catch (Exception ex)
-           {
-              _logger.LogError(ex, "There was an exception when reading archive stream.");
-              return 0;
-           }
-           
-           
-        }
-
-        /// <summary>
-        /// Generates byte array of cover image.
-        /// Given a path to a compressed file (zip, rar, cbz, cbr, etc), will ensure the first image is returned unless
-        /// a folder.extension exists in the root directory of the compressed file.
-        /// </summary>
-        /// <param name="filepath"></param>
-        /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
-        /// <returns></returns>
-        public byte[] GetCoverImage(string filepath, bool createThumbnail = false)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
-
-                _logger.LogDebug($"Extracting Cover image from {filepath}");
-                using ZipArchive archive = ZipFile.OpenRead(filepath);
-                if (!archive.HasFiles()) return Array.Empty<byte>();
-
-                var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-                var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
-                ZipArchiveEntry entry;
-                
-                if (folder != null)
-                {
-                    entry = folder;
-                } else if (!entries.Any())
-                {
-                    return Array.Empty<byte>();
-                }
-                else
-                {
-                    entry = entries[0];
-                }
+       {
+          throw new NotImplementedException();
+       }
 
 
-                if (createThumbnail)
-                {
-                    try
-                    {
-                        using var stream = entry.Open();
-                        var thumbnail = Image.ThumbnailStream(stream, 320);
-                        return thumbnail.WriteToBuffer(".jpg");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "There was a critical error and prevented thumbnail generation.");
-                    }
-                }
-                
-                return ExtractEntryToImage(entry);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception when reading archive stream.");
-                return Array.Empty<byte>();
-            }
-        }
-        
-        private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)
-        {
-            using var stream = entry.Open();
-            using var ms = new MemoryStream();
-            stream.CopyTo(ms);
-            var data = ms.ToArray();
 
-            return data;
-        }
+       
 
     }
 }
