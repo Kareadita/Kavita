@@ -324,9 +324,19 @@ namespace API.Services
            }
            
            _logger.LogDebug($"Getting Page numbers from  {archivePath}");
+
+           try
+           {
+              using ZipArchive archive = ZipFile.OpenRead(archivePath); // ZIPFILE
+              return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+           }
+           catch (Exception ex)
+           {
+              _logger.LogError(ex, "There was an exception when reading archive stream.");
+              return 0;
+           }
            
-           using ZipArchive archive = ZipFile.OpenRead(archivePath); // ZIPFILE
-           return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+           
         }
 
         /// <summary>

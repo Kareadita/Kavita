@@ -61,6 +61,13 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
         }
         
+        // [HttpGet("volume-files")]
+        // public async Task<ActionResult<IEnumerable<MangaFileDto>>> GetMangaFiles(int volumeId)
+        // {
+        //     var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        //     return Ok(await _unitOfWork.SeriesRepository.GetVolumeMangaFileDtos(volumeId));
+        // }
+        
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId, int seriesId)

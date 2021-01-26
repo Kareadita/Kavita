@@ -25,5 +25,6 @@ namespace API.Interfaces
         Task<Volume> GetVolumeByIdAsync(int volumeId);
         Task<Series> GetSeriesByIdAsync(int seriesId);
 
+        //Task<MangaFileDto> GetVolumeMangaFileDtos(int volumeId);
     }
 }

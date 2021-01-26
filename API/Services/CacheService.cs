@@ -105,28 +105,29 @@ namespace API.Services
             if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
             {
                 _logger.LogError($"Archive {archivePath} could not be found.");
+                return;
             }
 
             if (Directory.Exists(extractPath))
             {
                 _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
+                return;
             }
            
             Stopwatch sw = Stopwatch.StartNew();
             using ZipArchive archive = ZipFile.OpenRead(archivePath);
-            // TODO: Throw error if we couldn't extract
             var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
             if (!archive.HasFiles() && !needsFlattening) return;
             
             archive.ExtractToDirectory(extractPath);
-            _logger.LogDebug($"[OLD] Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
+            _logger.LogDebug($"Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
 
             if (needsFlattening)
             {
                 sw = Stopwatch.StartNew();
                 _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
                 new DirectoryInfo(extractPath).Flatten();
-                _logger.LogInformation($"[OLD] Flattened in {sw.ElapsedMilliseconds} milliseconds");
+                _logger.LogInformation($"Flattened in {sw.ElapsedMilliseconds} milliseconds");
             }
         }
 

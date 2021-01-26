@@ -15,6 +15,8 @@ namespace API.Helpers
 
             CreateMap<Volume, VolumeDto>();
 
+            CreateMap<MangaFile, MangaFileDto>();
+
             CreateMap<Series, SeriesDto>();
             
             CreateMap<Library, LibraryDto>()

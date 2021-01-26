@@ -33,6 +33,9 @@ namespace API.Tests
         [InlineData("Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", "1")]
         [InlineData("Dorohedoro v11 (2013) (Digital) (LostNerevarine-Empire).cbz", "11")]
         [InlineData("Dorohedoro v12 (2013) (Digital) (LostNerevarine-Empire).cbz", "12")]
+        [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
+        [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "0")]
+        
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -75,6 +78,7 @@ namespace API.Tests
         [InlineData("Chrno_Crusade_Dragon_Age_All_Stars[AS].zip", "")]
         [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip", "Ichiban Ushiro no Daimaou")]
         [InlineData("Rent a Girlfriend v01.cbr", "Rent a Girlfriend")]
+        [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "Yumekui Merry")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "Epigraph of the Closed Curve")]
         public void ParseSeriesTest(string filename, string expected)
         {
@@ -103,6 +107,8 @@ namespace API.Tests
         [InlineData("Mujaki no Rakuen Vol12 ch76", "76")]
         [InlineData("Beelzebub_01_[Noodles].zip", "1")]
         [InlineData("Yumekui-Merry_DKThias_Chapter21.zip", "21")]
+        [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
+        [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "11")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
