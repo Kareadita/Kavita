@@ -8,5 +8,6 @@ namespace API.Interfaces
         void ExtractArchive(string archivePath, string extractPath);
         int GetNumberOfPagesFromArchive(string archivePath);
         byte[] GetCoverImage(string filepath, bool createThumbnail = false);
+        bool IsValidArchive(string archivePath);
     }
 }

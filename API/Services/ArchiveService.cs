@@ -24,17 +24,13 @@ namespace API.Services
         
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
-            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-            {
-                _logger.LogError($"Archive {archivePath} could not be found.");
-                return 0;
-            }
-           
+            if (!IsValidArchive(archivePath)) return 0;
+
             _logger.LogDebug($"Getting Page numbers from  {archivePath}");
 
             try
             {
-                using ZipArchive archive = ZipFile.OpenRead(archivePath); // ZIPFILE
+                using ZipArchive archive = ZipFile.OpenRead(archivePath);
                 return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
             }
             catch (Exception ex)
@@ -42,8 +38,6 @@ namespace API.Services
                 _logger.LogError(ex, "There was an exception when reading archive stream.");
                 return 0;
             }
-           
-           
         }
         
         /// <summary>
@@ -58,7 +52,8 @@ namespace API.Services
         {
             try
             {
-                if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
+                if (!IsValidArchive(filepath)) return Array.Empty<byte>();
+                //if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
 
                 _logger.LogDebug($"Extracting Cover image from {filepath}");
                 using ZipArchive archive = ZipFile.OpenRead(filepath);
@@ -129,6 +124,31 @@ namespace API.Services
         }
 
         /// <summary>
+        /// Test if the archive path exists and there are images inside it. This will log as an error. 
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <returns></returns>
+        public bool IsValidArchive(string archivePath)
+        {
+            if (!File.Exists(archivePath))
+            {
+                _logger.LogError($"Archive {archivePath} could not be found.");
+                return false;
+            }
+            if (!Parser.Parser.IsArchive(archivePath))
+            {
+                _logger.LogError($"Archive {archivePath} is not a valid archive.");
+                return false;
+            }
+
+            using var archive = ZipFile.OpenRead(archivePath);
+            if (archive.Entries.Any(e => Parser.Parser.IsImage(e.FullName))) return true;
+            _logger.LogError($"Archive {archivePath} contains no images.");
+            return false;
+
+        }
+
+        /// <summary>
         /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
         /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
         /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
@@ -138,11 +158,7 @@ namespace API.Services
         /// <returns></returns>
         public void ExtractArchive(string archivePath, string extractPath)
         {
-            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-            {
-                _logger.LogError($"Archive {archivePath} could not be found.");
-                return;
-            }
+            if (!IsValidArchive(archivePath)) return;
 
             if (Directory.Exists(extractPath))
             {

@@ -25,10 +25,24 @@ namespace API.Tests.Services
         [InlineData("file in folder_alt.zip", true)]
         public void ArchiveNeedsFlatteningTest(string archivePath, bool expected)
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService");
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var file = Path.Join(testDirectory, archivePath);
             using ZipArchive archive = ZipFile.OpenRead(file);
             Assert.Equal(expected, _archiveService.ArchiveNeedsFlattening(archive));
+        }
+
+        [Theory]
+        [InlineData("non existant file.zip", false)]
+        [InlineData("wrong extension.rar", false)]
+        [InlineData("empty.zip", false)]
+        [InlineData("flat file.zip", true)]
+        [InlineData("file in folder in folder.zip", true)]
+        [InlineData("file in folder.zip", true)]
+        [InlineData("file in folder_alt.zip", true)]
+        public void IsValidArchiveTest(string archivePath, bool expected)
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
         }
         
         [Theory]
@@ -37,7 +51,7 @@ namespace API.Tests.Services
         [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
         public void GetCoverImageTest(string inputFile, string expectedOutputFile)
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/CoverImageTests");
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             Assert.Equal(expectedBytes, _archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
         }
