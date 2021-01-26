@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -17,14 +16,16 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private readonly ILogger<CacheService> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IArchiveService _archiveService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
-        public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork)
+        public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService)
         {
             _directoryService = directoryService;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _archiveService = archiveService;
             _numericComparer = new NumericComparer();
         }
 
@@ -46,7 +47,7 @@ namespace API.Services
             foreach (var file in volume.Files)
             {
                 var extractPath = GetVolumeCachePath(volumeId, file);
-                ExtractArchive(file.FilePath, extractPath);
+                _archiveService.ExtractArchive(file.FilePath, extractPath);
             }
 
             return volume;
@@ -92,44 +93,7 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged");
         }
 
-        /// <summary>
-        /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
-        /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
-        /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
-        /// </summary>
-        /// <param name="archivePath">A valid file to an archive file.</param>
-        /// <param name="extractPath">Path to extract to</param>
-        /// <returns></returns>
-        private void ExtractArchive(string archivePath, string extractPath)
-        {
-            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-            {
-                _logger.LogError($"Archive {archivePath} could not be found.");
-                return;
-            }
-
-            if (Directory.Exists(extractPath))
-            {
-                _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
-                return;
-            }
-           
-            Stopwatch sw = Stopwatch.StartNew();
-            using ZipArchive archive = ZipFile.OpenRead(archivePath);
-            var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
-            if (!archive.HasFiles() && !needsFlattening) return;
-            
-            archive.ExtractToDirectory(extractPath);
-            _logger.LogDebug($"Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
-
-            if (needsFlattening)
-            {
-                sw = Stopwatch.StartNew();
-                _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
-                new DirectoryInfo(extractPath).Flatten();
-                _logger.LogInformation($"Flattened in {sw.ElapsedMilliseconds} milliseconds");
-            }
-        }
+        
 
 
         private string GetVolumeCachePath(int volumeId, MangaFile file)
@@ -142,11 +106,18 @@ namespace API.Services
             return extractPath;
         }
 
+        private IEnumerable<MangaFile> GetOrderedChapters(ICollection<MangaFile> files)
+        {
+            return files.OrderBy(f => f.Chapter).Where(f => f.Chapter != 0);
+        }
+
         public string GetCachedPagePath(Volume volume, int page)
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            foreach (var mangaFile in volume.Files.OrderBy(f => f.Chapter))
+            // Do not allow chapters with 0, as those are specials and break ordering for reading. 
+            var orderedChapters = GetOrderedChapters(volume.Files);
+            foreach (var mangaFile in orderedChapters)
             {
                 if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
                 {

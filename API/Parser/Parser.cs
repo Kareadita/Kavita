@@ -125,7 +125,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Beelzebub_01_[Noodles].zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_)", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(

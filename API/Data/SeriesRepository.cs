@@ -129,9 +129,11 @@ namespace API.Data
                 .Include(vol => vol.Files)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .SingleAsync(vol => vol.Id == volumeId);
-
+            
             var volumeList = new List<VolumeDto>() {volume};
             await AddVolumeModifiers(userId, volumeList);
+
+            volumeList[0].Files = volumeList[0].Files.OrderBy(f => f.Chapter).ToList();
 
             return volumeList[0];
         }

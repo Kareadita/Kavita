@@ -109,6 +109,7 @@ namespace API.Tests
         [InlineData("Yumekui-Merry_DKThias_Chapter21.zip", "21")]
         [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
         [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "11")]
+        [InlineData("Beelzebub_53[KSH].zip", "53")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {

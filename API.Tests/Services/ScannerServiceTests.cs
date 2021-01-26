@@ -12,6 +12,7 @@ namespace API.Tests.Services
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+        private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService");
         public ScannerServiceTests()
         {
             _scannerService = new ScannerService(_unitOfWork, _logger);
@@ -23,9 +24,8 @@ namespace API.Tests.Services
         [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
         public void GetCoverImageTest(string inputFile, string expectedOutputFile)
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ImageProvider");
-            var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
-            Assert.Equal(expectedBytes, _scannerService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            var expectedBytes = File.ReadAllBytes(Path.Join(_testDirectory, expectedOutputFile));
+            Assert.Equal(expectedBytes, _scannerService.GetCoverImage(Path.Join(_testDirectory, inputFile)));
         }
     }
 }
