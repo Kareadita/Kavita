@@ -91,75 +91,7 @@ namespace API.Services
             }
             _logger.LogInformation("Cache directory purged");
         }
-        
-        
-        // private void ExtractArchive(string archivePath, string extractPath, int expectedPages)
-        // {
-        //     if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-        //     {
-        //         _logger.LogError($"Archive {archivePath} could not be found.");
-        //     }
-        //
-        //     var extractDirectoryInfo = new DirectoryInfo(extractPath);
-        //
-        //     // If the extraction and flattening aren't perfect, adding extra cases adds a serious amount of extra time.
-        //     if (Directory.Exists(extractPath)) // && extractDirectoryInfo.EnumerateFiles().Count() >= expectedPages
-        //     {
-        //         _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
-        //         return;
-        //     }
-        //
-        //     Stopwatch sw = Stopwatch.StartNew();
-        //     var needsFlattening = false;
-        //     var options = new ExtractionOptions
-        //     {
-        //         ExtractFullPath = true,
-        //         Overwrite = true
-        //     };
-        //
-        //     using Stream stream = File.OpenRead(archivePath);
-        //     using var reader = ReaderFactory.Open(stream);
-        //     while (reader.MoveToNextEntry())
-        //     {
-        //         if (!reader.Entry.IsDirectory)
-        //         {
-        //             try
-        //             {
-        //                 reader.WriteEntryToDirectory(extractPath, options);
-        //             }
-        //             catch (Exception e)
-        //             {
-        //                 _logger.LogError(e, "There was an issue with extracting image.");
-        //             }
-        //         }
-        //
-        //         if (!needsFlattening)
-        //         {
-        //             needsFlattening = reader.Entry.IsDirectory;    
-        //         }
-        //     }
-        //
-        //
-        //     _logger.LogDebug($"Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
-        //
-        //     
-        //     if (needsFlattening)
-        //     {
-        //         sw = Stopwatch.StartNew();
-        //         _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
-        //         try
-        //         {
-        //             extractDirectoryInfo.Flatten();
-        //         }
-        //         catch (Exception ex)
-        //         {
-        //             _logger.LogError(ex, "There was an issue extracting archive.");
-        //             return;
-        //         }
-        //         _logger.LogInformation($"Flattened in {sw.ElapsedMilliseconds} milliseconds");
-        //     }
-        // }
-        
+
         /// <summary>
         /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
         /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
