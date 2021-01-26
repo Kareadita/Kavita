@@ -33,10 +33,9 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
-       public static string[] GetFiles(string path)
+       public string[] GetFiles(string path)
        {
-          if (!Directory.Exists(path)) return Array.Empty<string>();
-          return Directory.GetFiles(path);
+          return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
        
        public IEnumerable<string> ListDirectory(string rootPath)
@@ -47,7 +46,6 @@ namespace API.Services
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
                 .Select(d => d.Name).ToImmutableList();
-            
             
             return dirs;
         }

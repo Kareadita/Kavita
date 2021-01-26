@@ -14,5 +14,6 @@ namespace API.Interfaces
         IEnumerable<string> ListDirectory(string rootPath);
 
         Task<ImageDto> ReadImageAsync(string imagePath);
+        string[] GetFiles(string path); // TODO: Refactor. This is currently for CacheServiceTest mocking
     }
 }

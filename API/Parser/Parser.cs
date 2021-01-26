@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities;
 
@@ -394,6 +395,12 @@ namespace API.Parser
         {
             var fileInfo = new FileInfo(filePath);
             return ImageFileExtensions.Contains(fileInfo.Extension);
+        }
+        
+        public static int MinimumNumberFromRange(string range)
+        {
+            var tokens = range.Split("-");
+            return tokens.Min(Int32.Parse);
         }
     }
 }

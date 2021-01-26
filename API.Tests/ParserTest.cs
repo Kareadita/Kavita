@@ -166,6 +166,16 @@ namespace API.Tests
         {
             Assert.Equal(expected, ParseEdition(input));
         }
+        
+        [Theory]
+        [InlineData("12-14", 12)]
+        [InlineData("24", 24)]
+        [InlineData("18-04", 4)]
+        public void MinimumNumberFromRangeTest(string input, int expected)
+        {
+            Assert.Equal(expected, MinimumNumberFromRange(input));
+        }
+        
 
         [Fact]
         public void ParseInfoTest()

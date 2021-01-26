@@ -13,23 +13,23 @@ namespace API.Services
 {
     public class CacheService : ICacheService
     {
-        private readonly IDirectoryService _directoryService;
         private readonly ILogger<CacheService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
+        private readonly IDirectoryService _directoryService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
 
-        public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService)
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
         {
-            _directoryService = directoryService;
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
+            _directoryService = directoryService;
             _numericComparer = new NumericComparer();
         }
 
-        private bool CacheDirectoryIsAccessible()
+        public bool CacheDirectoryIsAccessible()
         {
             _logger.LogDebug($"Checking if valid Cache directory: {CacheDirectory}");
             var di = new DirectoryInfo(CacheDirectory);
@@ -96,7 +96,7 @@ namespace API.Services
         
 
 
-        private string GetVolumeCachePath(int volumeId, MangaFile file)
+        public string GetVolumeCachePath(int volumeId, MangaFile file)
         {
             var extractPath = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
             if (file.Chapter > 0)
@@ -106,9 +106,9 @@ namespace API.Services
             return extractPath;
         }
 
-        private IEnumerable<MangaFile> GetOrderedChapters(ICollection<MangaFile> files)
+        public IEnumerable<MangaFile> GetOrderedChapters(ICollection<MangaFile> files)
         {
-            return files.OrderBy(f => f.Chapter).Where(f => f.Chapter != 0);
+            return files.OrderBy(f => f.Chapter).Where(f => f.Chapter > 0 || f.Volume.Number != 0);
         }
 
         public string GetCachedPagePath(Volume volume, int page)
@@ -122,7 +122,7 @@ namespace API.Services
                 if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
                 {
                     var path = GetVolumeCachePath(volume.Id, mangaFile);
-                    var files = DirectoryService.GetFiles(path);
+                    var files = _directoryService.GetFiles(path);
                     Array.Sort(files, _numericComparer);
                     
                     return files.ElementAt(page - pagesSoFar);

@@ -224,11 +224,7 @@ namespace API.Services
           };
        }
        
-       private int MinimumNumberFromRange(string range)
-       {
-          var tokens = range.Split("-");
-          return Int32.Parse(tokens.Length >= 1 ? tokens[0] : range);
-       }
+       
 
        /// <summary>
        /// Creates or Updates volumes for a given series
@@ -250,7 +246,7 @@ namespace API.Services
                 var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
                 if (existingFile != null)
                 {
-                   existingFile.Chapter = MinimumNumberFromRange(info.Chapters);
+                   existingFile.Chapter = Parser.Parser.MinimumNumberFromRange(info.Chapters);
                    existingFile.Format = info.Format;
                    existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                 }
@@ -282,7 +278,7 @@ namespace API.Services
                    var vol = new Volume()
                    {
                       Name = info.Volumes,
-                      Number = MinimumNumberFromRange(info.Volumes),
+                      Number = Parser.Parser.MinimumNumberFromRange(info.Volumes),
                       Files = new List<MangaFile>()
                       {
                          CreateMangaFile(info)
@@ -316,9 +312,6 @@ namespace API.Services
        {
           throw new NotImplementedException();
        }
-
-
-
        
 
     }

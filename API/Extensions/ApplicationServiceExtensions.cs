@@ -23,6 +23,7 @@ namespace API.Extensions
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IScannerService, ScannerService>();
+            services.AddScoped<IArchiveService, ArchiveService>();
 
 
 
