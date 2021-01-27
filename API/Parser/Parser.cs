@@ -169,7 +169,7 @@ namespace API.Parser
         /// <param name="filePath"></param>
         /// <param name="rootPath">Root folder</param>
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo? Parse(string filePath, string rootPath)
+        public static ParserInfo Parse(string filePath, string rootPath)
         {
             var fileName = Path.GetFileName(filePath);
             var directoryName = (new FileInfo(filePath)).Directory?.Name;

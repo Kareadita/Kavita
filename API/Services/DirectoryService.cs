@@ -61,7 +61,7 @@ namespace API.Services
              FullPath = Path.GetFullPath(imagePath),
              Width = image.Width,
              Height = image.Height,
-             Format = image.Format
+             Format = image.Format,
           };
        }
 

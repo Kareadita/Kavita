@@ -27,7 +27,7 @@ namespace API.Entities
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
         /// <summary>
-        /// Sum of all Volume pages
+        /// Sum of all Volume page counts
         /// </summary>
         public int Pages { get; set; }
         

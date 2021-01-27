@@ -6,6 +6,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -17,14 +18,16 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
+            ILogger<ReaderController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         [HttpGet("image")]
@@ -33,9 +36,12 @@ namespace API.Controllers
             // Temp let's iterate the directory each call to get next image
             var volume = await _cacheService.Ensure(volumeId);
 
-            var path = _cacheService.GetCachedPagePath(volume, page);
+            var (path, mangaFile) = _cacheService.GetCachedPagePath(volume, page);
+            if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
             var file = await _directoryService.ReadImageAsync(path);
             file.Page = page;
+            file.Chapter = mangaFile.Chapter;
+            file.MangaFileName = mangaFile.FilePath;
 
             return Ok(file);
         }
@@ -57,6 +63,8 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             _logger.LogInformation($"Saving {user.UserName} progress for {bookmarkDto.VolumeId} to page {bookmarkDto.PageNum}");
+            
+            // TODO: Don't let user bookmark past total pages.
 
             user.Progresses ??= new List<AppUserProgress>();
             var userProgress = user.Progresses.SingleOrDefault(x => x.VolumeId == bookmarkDto.VolumeId && x.AppUserId == user.Id);

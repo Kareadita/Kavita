@@ -108,10 +108,12 @@ namespace API.Services
 
         public IEnumerable<MangaFile> GetOrderedChapters(ICollection<MangaFile> files)
         {
-            return files.OrderBy(f => f.Chapter).Where(f => f.Chapter > 0 || f.Volume.Number != 0);
+            // BUG: This causes a problem because total pages on a volume assumes "specials" to be there
+            //return files.OrderBy(f => f.Chapter).Where(f => f.Chapter > 0 || f.Volume.Number != 0);
+            return files.OrderBy(f => f.Chapter, new ChapterSortComparer());
         }
 
-        public string GetCachedPagePath(Volume volume, int page)
+        public (string path, MangaFile file) GetCachedPagePath(Volume volume, int page)
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
@@ -125,12 +127,12 @@ namespace API.Services
                     var files = _directoryService.GetFiles(path);
                     Array.Sort(files, _numericComparer);
                     
-                    return files.ElementAt(page - pagesSoFar);
+                    return (files.ElementAt(page - pagesSoFar), mangaFile);
                 }
 
                 pagesSoFar += mangaFile.NumberOfPages;
             }
-            return "";
+            return ("", null);
         }
     }
 }

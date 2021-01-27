@@ -31,7 +31,7 @@ namespace API.Interfaces
         /// <param name="volume"></param>
         /// <param name="page">Page number to look for</param>
         /// <returns></returns>
-        string GetCachedPagePath(Volume volume, int page);
+        (string path, MangaFile file) GetCachedPagePath(Volume volume, int page);
 
         bool CacheDirectoryIsAccessible();
     }

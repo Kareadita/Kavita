@@ -1,4 +1,6 @@
-﻿using API.Interfaces;
+﻿using System.Collections.Generic;
+using API.Entities;
+using API.Interfaces;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -8,7 +10,7 @@ namespace API.Tests.Services
 {
     public class CacheServiceTests
     {
-        private readonly ICacheService _cacheService;
+        private readonly CacheService _cacheService;
         private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
@@ -55,6 +57,42 @@ namespace API.Tests.Services
             // _directoryService.Configure().GetFiles("cache/1/").Returns(new string[] {"pexels-photo-6551949.jpg"});
             // Assert.Equal(expected, _cacheService.GetCachedPagePath(volume, pageNum));
             Assert.True(true);
+        }
+
+        [Fact]
+        public void GetOrderedChaptersTest()
+        {
+            var files = new List<MangaFile>()
+            {
+                new()
+                {
+                    Chapter = 1
+                },
+                new()
+                {
+                    Chapter = 2
+                },
+                new()
+                {
+                    Chapter = 0
+                },
+            };
+            var expected = new List<MangaFile>()
+            {
+                new()
+                {
+                    Chapter = 1
+                },
+                new()
+                {
+                    Chapter = 2
+                },
+                new()
+                {
+                    Chapter = 0
+                },
+            };
+            Assert.NotStrictEqual(expected, _cacheService.GetOrderedChapters(files));
         }
         
         
