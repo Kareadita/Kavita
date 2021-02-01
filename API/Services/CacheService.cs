@@ -18,7 +18,7 @@ namespace API.Services
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
         private readonly NumericComparer _numericComparer;
-        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
+        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
         {
@@ -29,40 +29,36 @@ namespace API.Services
             _numericComparer = new NumericComparer();
         }
 
-        public bool CacheDirectoryIsAccessible()
+        public void EnsureCacheDirectory()
         {
             _logger.LogDebug($"Checking if valid Cache directory: {CacheDirectory}");
             var di = new DirectoryInfo(CacheDirectory);
-            return di.Exists;
+            if (!di.Exists)
+            {
+                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist. Creating...");
+                Directory.CreateDirectory(CacheDirectory);
+            }
         }
 
-        public async Task<Volume> Ensure(int volumeId)
+        public async Task<Chapter> Ensure(int chapterId)
         {
-            if (!CacheDirectoryIsAccessible())
-            {
-                return null;
-            }
-            Volume volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            EnsureCacheDirectory();
+            Chapter chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
             
-            foreach (var file in volume.Files)
+            foreach (var file in chapter.Files)
             {
-                var extractPath = GetVolumeCachePath(volumeId, file);
+                var extractPath = GetCachePath(chapterId, file);
                 _archiveService.ExtractArchive(file.FilePath, extractPath);
             }
 
-            return volume;
+            return chapter;
         }
 
         public void Cleanup()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
-            
-            if (!CacheDirectoryIsAccessible())
-            {
-                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist.");
-                return;
-            }
-            
+            EnsureCacheDirectory();
+
             DirectoryInfo di = new DirectoryInfo(CacheDirectory);
 
             try
@@ -79,6 +75,7 @@ namespace API.Services
         
         public void CleanupVolumes(int[] volumeIds)
         {
+            // TODO: Fix this code to work with chapters
             _logger.LogInformation($"Running Cache cleanup on Volumes");
             
             foreach (var volume in volumeIds)
@@ -96,13 +93,19 @@ namespace API.Services
         
 
 
-        public string GetVolumeCachePath(int volumeId, MangaFile file)
+        /// <summary>
+        /// Returns the cache path for a given Chapter. Should be cacheDirectory/{chapterId}/
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public string GetCachePath(int chapterId, MangaFile file)
         {
-            var extractPath = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
-            if (file.Chapter > 0)
-            {
-                extractPath = Path.Join(extractPath, file.Chapter + "");
-            }
+            var extractPath = Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
+            // if (file.Chapter != null)
+            // {
+            //     extractPath = Path.Join(extractPath, chapterId + "");
+            // }
             return extractPath;
         }
 
@@ -110,28 +113,29 @@ namespace API.Services
         {
             // BUG: This causes a problem because total pages on a volume assumes "specials" to be there
             //return files.OrderBy(f => f.Chapter).Where(f => f.Chapter > 0 || f.Volume.Number != 0);
-            return files.OrderBy(f => f.Chapter, new ChapterSortComparer());
+            return files;
+            //return files.OrderBy(f => f.Chapter, new ChapterSortComparer());
         }
 
-        public (string path, MangaFile file) GetCachedPagePath(Volume volume, int page)
+        public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            // Do not allow chapters with 0, as those are specials and break ordering for reading. 
-            var orderedChapters = GetOrderedChapters(volume.Files);
-            foreach (var mangaFile in orderedChapters)
+            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapter(chapter.Id);
+            foreach (var mangaFile in chapterFiles)
             {
                 if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
                 {
-                    var path = GetVolumeCachePath(volume.Id, mangaFile);
+                    var path = GetCachePath(chapter.Id, mangaFile);
                     var files = _directoryService.GetFiles(path);
                     Array.Sort(files, _numericComparer);
                     
                     return (files.ElementAt(page - pagesSoFar), mangaFile);
                 }
-
+            
                 pagesSoFar += mangaFile.NumberOfPages;
             }
+
             return ("", null);
         }
     }

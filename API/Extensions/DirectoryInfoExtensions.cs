@@ -51,7 +51,8 @@ namespace API.Extensions
                     if (file.Directory == null) continue;
                     var newName = $"{file.Directory.Name}_{file.Name}";
                     var newPath = Path.Join(root.FullName, newName);
-                    file.MoveTo(newPath);
+                    if (!File.Exists(newPath)) file.MoveTo(newPath);
+                    
                 }
             }
             

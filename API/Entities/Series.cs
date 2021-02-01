@@ -12,13 +12,13 @@ namespace API.Entities
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Original Japanese Name
-        /// </summary>
-        public string OriginalName { get; set; }
-        /// <summary>
         /// The name used to sort the Series. By default, will be the same as Name.
         /// </summary>
         public string SortName { get; set; }
+        /// <summary>
+        /// Original Name on disk. Not exposed to UI.
+        /// </summary>
+        public string OriginalName { get; set; }
         /// <summary>
         /// Summary information related to the Series
         /// </summary>
@@ -30,7 +30,7 @@ namespace API.Entities
         /// Sum of all Volume page counts
         /// </summary>
         public int Pages { get; set; }
-        
+
         // Relationships
         public ICollection<Volume> Volumes { get; set; }
         public Library Library { get; set; }

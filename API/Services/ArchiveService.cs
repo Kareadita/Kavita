@@ -161,7 +161,7 @@ namespace API.Services
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
             
-            archive.ExtractToDirectory(extractPath);
+            archive.ExtractToDirectory(extractPath, true);
             _logger.LogDebug($"Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
 
             if (needsFlattening)

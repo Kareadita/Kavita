@@ -6,12 +6,12 @@ namespace API.Interfaces
     public interface ICacheService
     {
         /// <summary>
-        /// Ensures the cache is created for the given volume and if not, will create it. Should be called before any other
+        /// Ensures the cache is created for the given chapter and if not, will create it. Should be called before any other
         /// cache operations (except cleanup).
         /// </summary>
-        /// <param name="volumeId"></param>
-        /// <returns>Volume for the passed volumeId. Side-effect from ensuring cache.</returns>
-        Task<Volume> Ensure(int volumeId);
+        /// <param name="chapterId"></param>
+        /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
+        Task<Chapter> Ensure(int chapterId);
 
         /// <summary>
         /// Clears cache directory of all folders and files.
@@ -28,11 +28,11 @@ namespace API.Interfaces
         /// <summary>
         /// Returns the absolute path of a cached page. 
         /// </summary>
-        /// <param name="volume"></param>
+        /// <param name="chapter">Chapter entity with Files populated.</param>
         /// <param name="page">Page number to look for</param>
         /// <returns></returns>
-        (string path, MangaFile file) GetCachedPagePath(Volume volume, int page);
+        Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page);
 
-        bool CacheDirectoryIsAccessible();
+        void EnsureCacheDirectory();
     }
 }

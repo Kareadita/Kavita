@@ -11,6 +11,6 @@ namespace API.DTOs
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
         public int PagesRead { get; set; }
-        public ICollection<MangaFileDto> Files { get; set; }
+        public ICollection<ChapterDto> Chapters { get; set; }
     }
 }

@@ -20,8 +20,11 @@ namespace API.Data
         }
         public DbSet<Library> Library { get; set; }
         public DbSet<Series> Series { get; set; }
+        
+        public DbSet<Chapter> Chapter { get; set; }
         public DbSet<Volume> Volume { get; set; }
         public DbSet<AppUser> AppUser { get; set; }
+        public DbSet<MangaFile> MangaFile { get; set; }
         public DbSet<AppUserProgress> AppUserProgresses { get; set; }
         public DbSet<AppUserRating> AppUserRating { get; set; }
         public DbSet<ServerSetting> ServerSetting { get; set; }

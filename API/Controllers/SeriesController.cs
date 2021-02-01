@@ -47,6 +47,11 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Returns All volumes for a series with progress information and Chapters
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("volumes")]
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
@@ -61,13 +66,12 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
         }
         
-        // [HttpGet("volume-files")]
-        // public async Task<ActionResult<IEnumerable<MangaFileDto>>> GetMangaFiles(int volumeId)
-        // {
-        //     var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        //     return Ok(await _unitOfWork.SeriesRepository.GetVolumeMangaFileDtos(volumeId));
-        // }
-        
+        [HttpGet("chapter")]
+        public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
+        {
+            return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
+        }
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId, int seriesId)

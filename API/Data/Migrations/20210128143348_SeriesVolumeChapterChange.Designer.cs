@@ -3,14 +3,16 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210128143348_SeriesVolumeChapterChange")]
+    partial class SeriesVolumeChapterChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -274,7 +276,10 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ChapterId")
+                    b.Property<int>("Chapter")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ChapterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FilePath")
@@ -286,9 +291,14 @@ namespace API.Data.Migrations
                     b.Property<int>("NumberOfPages")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChapterId");
+
+                    b.HasIndex("VolumeId");
 
                     b.ToTable("MangaFile");
                 });
@@ -551,13 +561,17 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.MangaFile", b =>
                 {
-                    b.HasOne("API.Entities.Chapter", "Chapter")
+                    b.HasOne("API.Entities.Chapter", null)
                         .WithMany("Files")
-                        .HasForeignKey("ChapterId")
+                        .HasForeignKey("ChapterId");
+
+                    b.HasOne("API.Entities.Volume", "Volume")
+                        .WithMany()
+                        .HasForeignKey("VolumeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Chapter");
+                    b.Navigation("Volume");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>

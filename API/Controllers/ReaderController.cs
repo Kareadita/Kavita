@@ -31,27 +31,29 @@ namespace API.Controllers
         }
 
         [HttpGet("image")]
-        public async Task<ActionResult<ImageDto>> GetImage(int volumeId, int page)
+        public async Task<ActionResult<ImageDto>> GetImage(int chapterId, int page)
         {
             // Temp let's iterate the directory each call to get next image
-            var volume = await _cacheService.Ensure(volumeId);
+            var chapter = await _cacheService.Ensure(chapterId);
 
-            var (path, mangaFile) = _cacheService.GetCachedPagePath(volume, page);
+            if (chapter == null) return BadRequest("There was an issue finding image file for reading.");
+
+            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
             if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
             var file = await _directoryService.ReadImageAsync(path);
             file.Page = page;
-            file.Chapter = mangaFile.Chapter;
+            //file.Chapter = chapter.Number;
             file.MangaFileName = mangaFile.FilePath;
 
             return Ok(file);
         }
 
         [HttpGet("get-bookmark")]
-        public async Task<ActionResult<int>> GetBookmark(int volumeId)
+        public async Task<ActionResult<int>> GetBookmark(int chapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user.Progresses == null) return Ok(0);
-            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.VolumeId == volumeId);
+            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
             if (progress != null) return Ok(progress.PagesRead);
             
@@ -62,12 +64,12 @@ namespace API.Controllers
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogInformation($"Saving {user.UserName} progress for {bookmarkDto.VolumeId} to page {bookmarkDto.PageNum}");
+            _logger.LogInformation($"Saving {user.UserName} progress for Chapter {bookmarkDto.ChapterId} to page {bookmarkDto.PageNum}");
             
             // TODO: Don't let user bookmark past total pages.
 
             user.Progresses ??= new List<AppUserProgress>();
-            var userProgress = user.Progresses.SingleOrDefault(x => x.VolumeId == bookmarkDto.VolumeId && x.AppUserId == user.Id);
+            var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
 
             if (userProgress == null)
             {
@@ -77,13 +79,14 @@ namespace API.Controllers
                     PagesRead = bookmarkDto.PageNum,
                     VolumeId = bookmarkDto.VolumeId,
                     SeriesId = bookmarkDto.SeriesId,
+                    ChapterId = bookmarkDto.ChapterId
                 });
             }
             else
             {
                 userProgress.PagesRead = bookmarkDto.PageNum;
                 userProgress.SeriesId = bookmarkDto.SeriesId;
-                
+                userProgress.VolumeId = bookmarkDto.VolumeId;
             }
 
             _unitOfWork.UserRepository.Update(user);
@@ -92,8 +95,7 @@ namespace API.Controllers
             {
                 return Ok();
             }
-                
-            
+
             return BadRequest("Could not save progress");
         }
     }

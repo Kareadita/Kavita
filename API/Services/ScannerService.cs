@@ -61,6 +61,12 @@ namespace API.Services
            var totalFiles = 0;
            foreach (var folderPath in library.Folders)
            {
+              // if (!forceUpdate && Directory.GetLastWriteTime(folderPath.Path) <= folderPath.LastScanned)
+              // {
+              //    _logger.LogDebug($"{folderPath.Path} hasn't been updated since last scan. Skipping.");
+              //    continue;
+              // }
+              
               try {
                  totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
@@ -88,10 +94,12 @@ namespace API.Services
            // Remove series that are no longer on disk
            RemoveSeriesNotOnDisk(allSeries, series, library);
 
+           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
+              
               _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
            }
            else
@@ -188,10 +196,10 @@ namespace API.Services
        
        private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
        {
-          var volumes = UpdateVolumes(series, infos, forceUpdate);
+          var volumes = UpdateVolumesWithChapters(series, infos, forceUpdate);
           series.Volumes = volumes;
           series.Pages = volumes.Sum(v => v.Pages);
-          if (series.CoverImage == null || forceUpdate)
+          if (ShouldFindCoverImage(forceUpdate, series.CoverImage))
           {
              var firstCover = volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
              if (firstCover == null && volumes.Any())
@@ -213,16 +221,20 @@ namespace API.Services
        {
           _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
           
-          int.TryParse(info.Chapters, out var chapter);
-          _logger.LogDebug($"Found Chapter: {chapter}");
           return new MangaFile()
           {
              FilePath = info.FullFilePath,
-             Chapter = chapter,
              Format = info.Format,
              NumberOfPages = info.Format == MangaFormat.Archive ? _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath): 1
           };
        }
+
+       private bool ShouldFindCoverImage(bool forceUpdate, byte[] coverImage)
+       {
+          return forceUpdate || coverImage == null || !coverImage.Any();
+       }
+
+       
        
        
 
@@ -237,16 +249,20 @@ namespace API.Services
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
-
+       
+          //var justVolumes = infos.Select(pi => pi.Chapters == "0");
+          
+       
           foreach (var info in infos)
           {
              var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
              if (existingVolume != null)
              {
-                var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+                //var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+                var existingFile = new MangaFile();
                 if (existingFile != null)
                 {
-                   existingFile.Chapter = Parser.Parser.MinimumNumberFromRange(info.Chapters);
+                   //existingFile.Chapter = Parser.Parser.MinimumNumberFromRange(info.Chapters);
                    existingFile.Format = info.Format;
                    existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                 }
@@ -254,7 +270,7 @@ namespace API.Services
                 {
                    if (info.Format == MangaFormat.Archive)
                    {
-                      existingVolume.Files.Add(CreateMangaFile(info));   
+                      // existingVolume.Files.Add(CreateMangaFile(info));   
                    }
                    else
                    {
@@ -271,7 +287,7 @@ namespace API.Services
                 existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
                 if (existingVolume != null)
                 {
-                   existingVolume.Files.Add(CreateMangaFile(info));
+                   //existingVolume.Files.Add(CreateMangaFile(info));
                 }
                 else
                 {
@@ -279,10 +295,10 @@ namespace API.Services
                    {
                       Name = info.Volumes,
                       Number = Parser.Parser.MinimumNumberFromRange(info.Volumes),
-                      Files = new List<MangaFile>()
-                      {
-                         CreateMangaFile(info)
-                      }
+                      // Files = new List<MangaFile>()
+                      // {
+                      //    CreateMangaFile(info)
+                      // }
                    };
                    volumes.Add(vol);
                 }
@@ -290,23 +306,121 @@ namespace API.Services
              
              _logger.LogInformation($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
           }
-
+       
           foreach (var volume in volumes)
           {
-             if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
-             {
-                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
-             }
-
-             volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
+             // if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
+             // {
+             //    var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+             //    if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             // }
+       
+             //volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
           }
-
+       
           return volumes;
        }
 
 
+       /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="volume"></param>
+       /// <param name="infos"></param>
+       /// <param name="forceUpdate"></param>
+       /// <returns></returns>
+       private ICollection<Chapter> UpdateChapters(Volume volume, IEnumerable<ParserInfo> infos, bool forceUpdate)
+       {
+          var chapters = new List<Chapter>();
 
+          foreach (var info in infos)
+          {
+             volume.Chapters ??= new List<Chapter>();
+             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters) ??
+                                   chapters.SingleOrDefault(v => v.Range == info.Chapters) ?? 
+                                   new Chapter()
+                                   {
+                                      Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
+                                      Range = info.Chapters,
+                                   };
+             
+             chapter.Files ??= new List<MangaFile>();
+             var existingFile = chapter?.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+             if (existingFile != null)
+             {
+                existingFile.Format = info.Format;
+                existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             }
+             else
+             {
+                if (info.Format == MangaFormat.Archive)
+                {
+                   chapter.Files.Add(CreateMangaFile(info));   
+                }
+                else
+                {
+                   _logger.LogDebug($"Ignoring {info.Filename} as it is not an archive.");
+                }
+                   
+             }
+
+             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
+             chapter.Range = info.Chapters;
+
+             chapters.Add(chapter);
+          }
+
+          foreach (var chapter in chapters)
+          {
+             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
+             
+             if (ShouldFindCoverImage(forceUpdate, chapter.CoverImage))
+             {
+                var firstFile = chapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             }
+          }
+          
+          return chapters;
+       }
+
+
+       private ICollection<Volume> UpdateVolumesWithChapters(Series series, ParserInfo[] infos, bool forceUpdate)
+       {
+          ICollection<Volume> volumes = new List<Volume>();
+          IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
+
+          foreach (var info in infos)
+          {
+             var volume = (existingVolumes.SingleOrDefault(v => v.Name == info.Volumes) ??
+                           volumes.SingleOrDefault(v => v.Name == info.Volumes)) ?? new Volume
+             {
+                Name = info.Volumes,
+                Number = Parser.Parser.MinimumNumberFromRange(info.Volumes),
+             };
+
+
+             var chapters = UpdateChapters(volume, infos.Where(pi => pi.Volumes == volume.Name).ToArray(), forceUpdate);
+             volume.Chapters = chapters;
+             volume.Pages = chapters.Sum(c => c.Pages);
+             volumes.Add(volume);
+          }
+
+          foreach (var volume in volumes)
+          {
+             if (ShouldFindCoverImage(forceUpdate, volume.CoverImage))
+             {
+                // TODO: Create a custom sorter for Chapters so it's consistent across the application
+                var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
+                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             }
+          }
+          
+          return volumes;
+       }
+
+       
 
        public void ScanSeries(int libraryId, int seriesId)
        {

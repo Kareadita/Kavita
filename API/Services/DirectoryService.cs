@@ -8,12 +8,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Interfaces;
+using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services
 {
     public class DirectoryService : IDirectoryService
     {
+       private readonly ILogger<DirectoryService> _logger;
+
+       public DirectoryService(ILogger<DirectoryService> logger)
+       {
+          _logger = logger;
+       }
 
        /// <summary>
        /// Given a set of regex search criteria, get files in the given path. 
@@ -52,6 +59,11 @@ namespace API.Services
        
        public async Task<ImageDto> ReadImageAsync(string imagePath)
        {
+          if (!File.Exists(imagePath))
+          {
+             _logger.LogError("Image does not exist on disk.");
+             return null;
+          }
           using var image = Image.NewFromFile(imagePath);
 
           return new ImageDto
