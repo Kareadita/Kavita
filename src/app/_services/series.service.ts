@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { Chatper } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 
@@ -27,6 +29,14 @@ export class SeriesService {
 
   getVolume(volumeId: number) {
     return this.httpClient.get<Volume>(this.baseUrl + 'series/volume?volumeId=' + volumeId);
+  }
+
+  getChapter(chapterId: number) {
+    return this.httpClient.get<Chatper>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
+  }
+
+  getData(id: number) {
+    return of(id);
   }
 
   delete(seriesId: number) {

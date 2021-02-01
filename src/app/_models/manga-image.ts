@@ -6,6 +6,7 @@ export interface MangaImage {
     height: number;
     format: string;
     content: any;
-
-
+    
+    chapter: number;
+    mangaFileName: string;
 }

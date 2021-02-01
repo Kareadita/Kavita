@@ -16,12 +16,17 @@
                     <div class="col" style="max-width: 200px">
                         <h4>Page Navigation</h4>
                         Page {{pageNum + 1}} / {{maxPages}}
-                        <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages"></ngb-progressbar>
+                        <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()"></ngb-progressbar>
                     </div>
                     <div class="col">
                         <h4>Reading Direction</h4>
                         <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
                     </div>
+                    <!-- <div class="col" *ngIf="volume.number === 0 && image !== undefined">
+                        Chapter {{image.chapter}}
+                        
+                        FileName: {{ image.mangaFileName }}
+                    </div> -->
                 </div>
 
                 <ng-container *ngIf="fittingForm">

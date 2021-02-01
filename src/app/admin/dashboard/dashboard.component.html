@@ -1,5 +1,7 @@
 <h1>Admin Dashboard</h1>
 
+<!--TODO: Restart Buttons -->
+
 <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
     <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
       <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>

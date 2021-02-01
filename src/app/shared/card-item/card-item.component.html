@@ -1,8 +1,8 @@
 <div class="card" style="width: 18rem;">
     <div class="overlay" (click)="handleClick()">
       <img class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}">
-      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== total">
-        <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
+        <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total - 1"></ngb-progressbar></p>
       </div>
       <div class="not-read-badge" *ngIf="read === 0"></div>
       <div class="overlay-item card-actions">
