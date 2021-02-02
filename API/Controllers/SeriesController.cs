@@ -36,13 +36,14 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
         {
             var username = User.GetUsername();
-            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(new []{seriesId})).Select(x => x.Id).ToArray();
+            //var volumes = (await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(new []{seriesId})).Select(x => x.Id).ToArray();
+            var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation($"Series {seriesId} is being deleted by {username}.");
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
             if (result)
             {
-                _taskScheduler.CleanupVolumes(volumes);
+                _taskScheduler.CleanupChapters(chapterIds);
             }
             return Ok(result);
         }

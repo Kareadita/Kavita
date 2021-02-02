@@ -34,9 +34,9 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
         }
 
-        public void CleanupVolumes(int[] volumeIds)
+        public void CleanupChapters(int[] chapterIds)
         {
-            BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumeIds));
+            BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             
         }
         

@@ -47,7 +47,7 @@ namespace API.Services
             
             foreach (var file in chapter.Files)
             {
-                var extractPath = GetCachePath(chapterId, file);
+                var extractPath = GetCachePath(chapterId);
                 _archiveService.ExtractArchive(file.FilePath, extractPath);
             }
 
@@ -73,14 +73,14 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged.");
         }
         
-        public void CleanupVolumes(int[] volumeIds)
+        public void CleanupChapters(int[] chapterIds)
         {
             // TODO: Fix this code to work with chapters
             _logger.LogInformation($"Running Cache cleanup on Volumes");
             
-            foreach (var volume in volumeIds)
+            foreach (var chapter in chapterIds)
             {
-                var di = new DirectoryInfo(Path.Join(CacheDirectory, volume + ""));
+                var di = new DirectoryInfo(GetCachePath(chapter));
                 if (di.Exists)
                 {
                     di.Delete(true);    
@@ -90,31 +90,15 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged");
         }
 
-        
-
 
         /// <summary>
         /// Returns the cache path for a given Chapter. Should be cacheDirectory/{chapterId}/
         /// </summary>
         /// <param name="chapterId"></param>
-        /// <param name="file"></param>
         /// <returns></returns>
-        public string GetCachePath(int chapterId, MangaFile file)
+        private string GetCachePath(int chapterId)
         {
-            var extractPath = Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
-            // if (file.Chapter != null)
-            // {
-            //     extractPath = Path.Join(extractPath, chapterId + "");
-            // }
-            return extractPath;
-        }
-
-        public IEnumerable<MangaFile> GetOrderedChapters(ICollection<MangaFile> files)
-        {
-            // BUG: This causes a problem because total pages on a volume assumes "specials" to be there
-            //return files.OrderBy(f => f.Chapter).Where(f => f.Chapter > 0 || f.Volume.Number != 0);
-            return files;
-            //return files.OrderBy(f => f.Chapter, new ChapterSortComparer());
+            return Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
         }
 
         public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)
@@ -124,9 +108,10 @@ namespace API.Services
             var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapter(chapter.Id);
             foreach (var mangaFile in chapterFiles)
             {
-                if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
+                if (page < (mangaFile.NumberOfPages + pagesSoFar))
                 {
-                    var path = GetCachePath(chapter.Id, mangaFile);
+                    var path = GetCachePath(chapter.Id);
+                    // TODO: GetFiles should only get image files.
                     var files = _directoryService.GetFiles(path);
                     Array.Sort(files, _numericComparer);
                     

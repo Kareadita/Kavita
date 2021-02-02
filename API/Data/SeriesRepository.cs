@@ -175,6 +175,32 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
+        public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
+        {
+            var series = await _context.Series
+                .Where(s => seriesIds.Contains(s.Id))
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ToListAsync();
+
+            // TODO: refactor this
+            IList<int> chapterIds = new List<int>();
+            foreach (var s in series)
+            {
+                foreach (var v in s.Volumes)
+                {
+                    foreach (var c in v.Chapters)
+                    {
+                        chapterIds.Add(c.Id);
+                    }
+                }
+            }
+
+            return chapterIds.ToArray();
+
+            //return series.Select(s => s.Volumes).Select(v => v.Select(v => v.Chapters)).Select(c => c.Id);
+        }
+
         private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
         {
             var userProgress = await _context.AppUserProgresses

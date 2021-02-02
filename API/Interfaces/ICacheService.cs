@@ -21,8 +21,8 @@ namespace API.Interfaces
         /// <summary>
         /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
         /// </summary>
-        /// <param name="volumeIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
-        void CleanupVolumes(int[] volumeIds);
+        /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
+        void CleanupChapters(int[] chapterIds);
         
 
         /// <summary>
