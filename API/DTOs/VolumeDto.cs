@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace API.DTOs
 {
     public class VolumeDto
@@ -9,5 +11,6 @@ namespace API.DTOs
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
         public int PagesRead { get; set; }
+        public ICollection<ChapterDto> Chapters { get; set; }
     }
 }

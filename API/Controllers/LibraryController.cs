@@ -145,7 +145,7 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
-            _taskScheduler.ScanLibrary(libraryId, false);
+            _taskScheduler.ScanLibrary(libraryId);
             return Ok();
         }
         
@@ -177,13 +177,13 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation($"Library {libraryId} is being deleted by {username}.");
             var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
-            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(series.Select(x => x.Id).ToArray()))
-                                .Select(x => x.Id).ToArray();
+            var chapterIds =
+                await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(series.Select(x => x.Id).ToArray());
             var result = await _unitOfWork.LibraryRepository.DeleteLibrary(libraryId);
             
-            if (result && volumes.Any())
+            if (result && chapterIds.Any())
             {
-                _taskScheduler.CleanupVolumes(volumes);
+                _taskScheduler.CleanupChapters(chapterIds);
             }
             
             return Ok(result);

@@ -14,5 +14,12 @@ namespace API.Interfaces
         IEnumerable<string> ListDirectory(string rootPath);
 
         Task<ImageDto> ReadImageAsync(string imagePath);
+        /// <summary>
+        /// Gets files in a directory. If searchPatternExpression is passed, will match the regex against for filtering.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="searchPatternExpression"></param>
+        /// <returns></returns>
+        string[] GetFiles(string path, string searchPatternExpression = "");
     }
 }

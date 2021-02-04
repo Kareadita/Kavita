@@ -20,16 +20,16 @@ namespace API.Comparators
 			if (string.IsNullOrEmpty(s2)) return -1;
 
 			//WE style, special case
-			bool sp1 = Char.IsLetterOrDigit(s1, 0);
-			bool sp2 = Char.IsLetterOrDigit(s2, 0);
+			var sp1 = Char.IsLetterOrDigit(s1, 0);
+			var sp2 = Char.IsLetterOrDigit(s2, 0);
 			if(sp1 && !sp2) return 1;
 			if(!sp1 && sp2) return -1;
 
 			int i1 = 0, i2 = 0; //current index
 			while(true)
 			{
-				bool c1 = Char.IsDigit(s1, i1);
-				bool c2 = Char.IsDigit(s2, i2);
+				var c1 = Char.IsDigit(s1, i1);
+				var c2 = Char.IsDigit(s2, i2);
 				int r; // temp result
 				if(!c1 && !c2)
 				{

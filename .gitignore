@@ -450,3 +450,4 @@ appsettings.json
 /API/Hangfire-log.db
 cache/
 /API/wwwroot/
+/API/cache/

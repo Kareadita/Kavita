@@ -3,6 +3,7 @@
     public class BookmarkDto
     {
         public int VolumeId { get; init; }
+        public int ChapterId { get; init; }
         public int PageNum { get; init; }
         public int SeriesId { get; init; }
     }

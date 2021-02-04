@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using API.Entities.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
     public class ServerSetting : IHasConcurrencyToken
     {
         [Key]
-        public string Key { get; set; }
+        public ServerSettingKey Key { get; set; }
         public string Value { get; set; }
 
         [ConcurrencyCheck]

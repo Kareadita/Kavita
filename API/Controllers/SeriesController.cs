@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
@@ -36,17 +35,22 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
         {
             var username = User.GetUsername();
-            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(new []{seriesId})).Select(x => x.Id).ToArray();
+            var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation($"Series {seriesId} is being deleted by {username}.");
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
             if (result)
             {
-                _taskScheduler.CleanupVolumes(volumes);
+                _taskScheduler.CleanupChapters(chapterIds);
             }
             return Ok(result);
         }
 
+        /// <summary>
+        /// Returns All volumes for a series with progress information and Chapters
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("volumes")]
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
@@ -61,6 +65,12 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
         }
         
+        [HttpGet("chapter")]
+        public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
+        {
+            return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
+        }
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId, int seriesId)

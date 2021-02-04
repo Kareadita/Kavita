@@ -4,16 +4,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
-using API.Extensions;
 using API.Interfaces;
 using API.Parser;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Services
 {
@@ -21,12 +17,14 @@ namespace API.Services
     {
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<ScannerService> _logger;
+       private readonly IArchiveService _archiveService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
 
-       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger)
+       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
+          _archiveService = archiveService;
        }
 
        public void ScanLibraries()
@@ -60,6 +58,12 @@ namespace API.Services
            var totalFiles = 0;
            foreach (var folderPath in library.Folders)
            {
+              if (!forceUpdate && Directory.GetLastWriteTime(folderPath.Path) <= folderPath.LastScanned)
+              {
+                 _logger.LogDebug($"{folderPath.Path} hasn't been updated since last scan. Skipping.");
+                 continue;
+              }
+              
               try {
                  totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
@@ -87,10 +91,12 @@ namespace API.Services
            // Remove series that are no longer on disk
            RemoveSeriesNotOnDisk(allSeries, series, library);
 
+           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
+              
               _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series.");
            }
            else
@@ -154,7 +160,7 @@ namespace API.Services
        {
           if (info.Series == string.Empty) return;
           
-          _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (key, oldValue) =>
+          _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
              if (!oldValue.Contains(info))
@@ -187,10 +193,10 @@ namespace API.Services
        
        private Series UpdateSeries(Series series, ParserInfo[] infos, bool forceUpdate)
        {
-          var volumes = UpdateVolumes(series, infos, forceUpdate);
+          var volumes = UpdateVolumesWithChapters(series, infos, forceUpdate);
           series.Volumes = volumes;
           series.Pages = volumes.Sum(v => v.Pages);
-          if (series.CoverImage == null || forceUpdate)
+          if (ShouldFindCoverImage(forceUpdate, series.CoverImage))
           {
              var firstCover = volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
              if (firstCover == null && volumes.Any())
@@ -212,191 +218,125 @@ namespace API.Services
        {
           _logger.LogDebug($"Creating File Entry for {info.FullFilePath}");
           
-          int.TryParse(info.Chapters, out var chapter);
-          _logger.LogDebug($"Found Chapter: {chapter}");
           return new MangaFile()
           {
              FilePath = info.FullFilePath,
-             Chapter = chapter,
              Format = info.Format,
-             NumberOfPages = info.Format == MangaFormat.Archive ? GetNumberOfPagesFromArchive(info.FullFilePath): 1
+             NumberOfPages = info.Format == MangaFormat.Archive ? _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath): 1
           };
        }
-       
-       private int MinimumNumberFromRange(string range)
+
+       private bool ShouldFindCoverImage(bool forceUpdate, byte[] coverImage)
        {
-          var tokens = range.Split("-");
-          return Int32.Parse(tokens.Length >= 1 ? tokens[0] : range);
+          return forceUpdate || coverImage == null || !coverImage.Any();
        }
 
        /// <summary>
-       /// Creates or Updates volumes for a given series
+       /// 
        /// </summary>
-       /// <param name="series">Series wanting to be updated</param>
-       /// <param name="infos">Parser info</param>
-       /// <param name="forceUpdate">Forces metadata update (cover image) even if it's already been set.</param>
-       /// <returns>Updated Volumes for given series</returns>
-       private ICollection<Volume> UpdateVolumes(Series series, ParserInfo[] infos, bool forceUpdate)
+       /// <param name="volume"></param>
+       /// <param name="infos"></param>
+       /// <param name="forceUpdate"></param>
+       /// <returns></returns>
+       private ICollection<Chapter> UpdateChapters(Volume volume, IEnumerable<ParserInfo> infos, bool forceUpdate)
+       {
+          var chapters = new List<Chapter>();
+
+          foreach (var info in infos)
+          {
+             volume.Chapters ??= new List<Chapter>();
+             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters) ??
+                                   chapters.SingleOrDefault(v => v.Range == info.Chapters) ?? 
+                                   new Chapter()
+                                   {
+                                      Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
+                                      Range = info.Chapters,
+                                   };
+             
+             chapter.Files ??= new List<MangaFile>();
+             var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+             if (existingFile != null)
+             {
+                existingFile.Format = info.Format;
+                existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             }
+             else
+             {
+                if (info.Format == MangaFormat.Archive)
+                {
+                   chapter.Files.Add(CreateMangaFile(info));   
+                }
+                else
+                {
+                   _logger.LogDebug($"Ignoring {info.Filename} as it is not an archive.");
+                }
+                   
+             }
+
+             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
+             chapter.Range = info.Chapters;
+
+             chapters.Add(chapter);
+          }
+
+          foreach (var chapter in chapters)
+          {
+             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
+             
+             if (ShouldFindCoverImage(forceUpdate, chapter.CoverImage))
+             {
+                chapter.Files ??= new List<MangaFile>();
+                var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             }
+          }
+          
+          return chapters;
+       }
+
+
+       private ICollection<Volume> UpdateVolumesWithChapters(Series series, ParserInfo[] infos, bool forceUpdate)
        {
           ICollection<Volume> volumes = new List<Volume>();
           IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
 
           foreach (var info in infos)
           {
-             var existingVolume = existingVolumes.SingleOrDefault(v => v.Name == info.Volumes);
-             if (existingVolume != null)
+             var volume = (existingVolumes.SingleOrDefault(v => v.Name == info.Volumes) ??
+                           volumes.SingleOrDefault(v => v.Name == info.Volumes)) ?? new Volume
              {
-                var existingFile = existingVolume.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-                if (existingFile != null)
-                {
-                   existingFile.Chapter = MinimumNumberFromRange(info.Chapters);
-                   existingFile.Format = info.Format;
-                   existingFile.NumberOfPages = GetNumberOfPagesFromArchive(info.FullFilePath);
-                }
-                else
-                {
-                   if (info.Format == MangaFormat.Archive)
-                   {
-                      existingVolume.Files.Add(CreateMangaFile(info));   
-                   }
-                   else
-                   {
-                      _logger.LogDebug($"Ignoring {info.Filename} as it is not an archive.");
-                   }
-                   
-                }
-                
-                volumes.Add(existingVolume);
-             }
-             else
-             {
-                // Create New Volume
-                existingVolume = volumes.SingleOrDefault(v => v.Name == info.Volumes);
-                if (existingVolume != null)
-                {
-                   existingVolume.Files.Add(CreateMangaFile(info));
-                }
-                else
-                {
-                   var vol = new Volume()
-                   {
-                      Name = info.Volumes,
-                      Number = MinimumNumberFromRange(info.Volumes),
-                      Files = new List<MangaFile>()
-                      {
-                         CreateMangaFile(info)
-                      }
-                   };
-                   volumes.Add(vol);
-                }
-             }
-             
-             _logger.LogInformation($"Adding volume {volumes.Last().Number} with File: {info.Filename}");
+                Name = info.Volumes,
+                Number = Parser.Parser.MinimumNumberFromRange(info.Volumes),
+             };
+
+
+             var chapters = UpdateChapters(volume, infos.Where(pi => pi.Volumes == volume.Name).ToArray(), forceUpdate);
+             volume.Chapters = chapters;
+             volume.Pages = chapters.Sum(c => c.Pages);
+             volumes.Add(volume);
           }
 
           foreach (var volume in volumes)
           {
-             if (forceUpdate || volume.CoverImage == null || !volume.Files.Any())
+             if (ShouldFindCoverImage(forceUpdate, volume.CoverImage))
              {
-                var firstFile = volume.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null) volume.CoverImage = GetCoverImage(firstFile.FilePath, true); // ZIPFILE
+                // TODO: Create a custom sorter for Chapters so it's consistent across the application
+                var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
+                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
              }
-
-             volume.Pages = volume.Files.Sum(x => x.NumberOfPages);
           }
-
+          
           return volumes;
        }
 
-      
-
+       
 
        public void ScanSeries(int libraryId, int seriesId)
-        {
-           throw new NotImplementedException();
-        }
-
-        private int GetNumberOfPagesFromArchive(string archivePath)
-        {
-           if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-           {
-              _logger.LogError($"Archive {archivePath} could not be found.");
-              return 0;
-           }
-           
-           _logger.LogDebug($"Getting Page numbers from  {archivePath}");
-           
-           using ZipArchive archive = ZipFile.OpenRead(archivePath); // ZIPFILE
-           return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
-        }
-
-        /// <summary>
-        /// Generates byte array of cover image.
-        /// Given a path to a compressed file (zip, rar, cbz, cbr, etc), will ensure the first image is returned unless
-        /// a folder.extension exists in the root directory of the compressed file.
-        /// </summary>
-        /// <param name="filepath"></param>
-        /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
-        /// <returns></returns>
-        public byte[] GetCoverImage(string filepath, bool createThumbnail = false)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(filepath) || !File.Exists(filepath) || !Parser.Parser.IsArchive(filepath)) return Array.Empty<byte>();
-
-                _logger.LogDebug($"Extracting Cover image from {filepath}");
-                using ZipArchive archive = ZipFile.OpenRead(filepath);
-                if (!archive.HasFiles()) return Array.Empty<byte>();
-
-                var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-                var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
-                ZipArchiveEntry entry;
-                
-                if (folder != null)
-                {
-                    entry = folder;
-                } else if (!entries.Any())
-                {
-                    return Array.Empty<byte>();
-                }
-                else
-                {
-                    entry = entries[0];
-                }
-
-
-                if (createThumbnail)
-                {
-                    try
-                    {
-                        using var stream = entry.Open();
-                        var thumbnail = Image.ThumbnailStream(stream, 320);
-                        return thumbnail.WriteToBuffer(".jpg");
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "There was a critical error and prevented thumbnail generation.");
-                    }
-                }
-                
-                return ExtractEntryToImage(entry);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception when reading archive stream.");
-                return Array.Empty<byte>();
-            }
-        }
-        
-        private static byte[] ExtractEntryToImage(ZipArchiveEntry entry)
-        {
-            using var stream = entry.Open();
-            using var ms = new MemoryStream();
-            stream.CopyTo(ms);
-            var data = ms.ToArray();
-
-            return data;
-        }
+       {
+          throw new NotImplementedException();
+       }
+       
 
     }
 }

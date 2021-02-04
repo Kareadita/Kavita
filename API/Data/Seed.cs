@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -31,20 +30,24 @@ namespace API.Data
 
         public static async Task SeedSettings(DataContext context)
         {
-            // NOTE: This needs to check if settings already exists before inserting. 
-            // IList<ServerSetting> defaultSettings = new List<ServerSetting>()
-            // {
-            //     new ServerSetting() {Key = "CacheDirectory", Value = CacheService.CacheDirectory}
-            // };
-            //
-            // await context.ServerSetting.AddRangeAsync(defaultSettings);
-            // await context.SaveChangesAsync();
-            // await context.ServerSetting.AddAsync(new ServerSetting
-            // {
-            //     CacheDirectory = CacheService.CacheDirectory
-            // });
-            //
-            // await context.SaveChangesAsync();
+            context.Database.EnsureCreated();
+            
+            IList<ServerSetting> defaultSettings = new List<ServerSetting>()
+            {
+                new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
+                new () {Key = ServerSettingKey.TaskScan, Value = "daily"}
+            };
+            
+            foreach (var defaultSetting in defaultSettings)
+            {
+                var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
+                if (existing == null)
+                {
+                    context.ServerSetting.Add(defaultSetting);
+                }
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }

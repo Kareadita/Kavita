@@ -9,5 +9,7 @@
         public int Height { get; init; }
         public string Format { get; init; }
         public byte[] Content { get; init; }
+        public int Chapter { get; set; }
+        public string MangaFileName { get; set; }
     }
 }

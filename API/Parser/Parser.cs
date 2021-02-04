@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using API.Entities;
 
@@ -9,6 +11,8 @@ namespace API.Parser
     {
         public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
         public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
+        private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -125,7 +129,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Beelzebub_01_[Noodles].zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_)", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
@@ -168,7 +172,7 @@ namespace API.Parser
         /// <param name="filePath"></param>
         /// <param name="rootPath">Root folder</param>
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo? Parse(string filePath, string rootPath)
+        public static ParserInfo Parse(string filePath, string rootPath)
         {
             var fileName = Path.GetFileName(filePath);
             var directoryName = (new FileInfo(filePath)).Directory?.Name;
@@ -387,13 +391,19 @@ namespace API.Parser
         public static bool IsArchive(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            return MangaFileExtensions.Contains(fileInfo.Extension);
+            return MangaFileRegex.IsMatch(fileInfo.Extension);
         }
 
         public static bool IsImage(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            return ImageFileExtensions.Contains(fileInfo.Extension);
+            return ImageRegex.IsMatch(fileInfo.Extension);
+        }
+        
+        public static int MinimumNumberFromRange(string range)
+        {
+            var tokens = range.Split("-");
+            return tokens.Min(Int32.Parse);
         }
     }
 }

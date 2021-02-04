@@ -9,11 +9,16 @@ namespace API.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public int Number { get; set; }
-        public ICollection<MangaFile> Files { get; set; }
+        public ICollection<Chapter> Chapters { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
+
+        /// <summary>
+        /// Represents a Side story that is linked to the original Series. Omake, One Shot, etc.
+        /// </summary>
+        public bool IsSpecial { get; set; } = false;
         
         
 

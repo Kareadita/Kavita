@@ -1,7 +1,4 @@
-﻿using System.Threading.Tasks;
-using API.DTOs;
-
-namespace API.Interfaces
+﻿namespace API.Interfaces
 {
     public interface IScannerService
     {

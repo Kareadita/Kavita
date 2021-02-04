@@ -127,6 +127,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
 
@@ -183,11 +186,48 @@ namespace API.Data.Migrations
                     b.ToTable("AspNetUserRoles");
                 });
 
+            modelBuilder.Entity("API.Entities.Chapter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("CoverImage")
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Number")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Pages")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Range")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VolumeId");
+
+                    b.ToTable("Chapter");
+                });
+
             modelBuilder.Entity("API.Entities.FolderPath", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastScanned")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
@@ -234,7 +274,7 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Chapter")
+                    b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("FilePath")
@@ -246,12 +286,9 @@ namespace API.Data.Migrations
                     b.Property<int>("NumberOfPages")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("VolumeId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("VolumeId");
+                    b.HasIndex("ChapterId");
 
                     b.ToTable("MangaFile");
                 });
@@ -298,8 +335,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.ServerSetting", b =>
                 {
-                    b.Property<string>("Key")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Key")
+                        .HasColumnType("INTEGER");
 
                     b.Property<uint>("RowVersion")
                         .IsConcurrencyToken()
@@ -324,6 +361,9 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSpecial")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
@@ -487,6 +527,17 @@ namespace API.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("API.Entities.Chapter", b =>
+                {
+                    b.HasOne("API.Entities.Volume", "Volume")
+                        .WithMany("Chapters")
+                        .HasForeignKey("VolumeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Volume");
+                });
+
             modelBuilder.Entity("API.Entities.FolderPath", b =>
                 {
                     b.HasOne("API.Entities.Library", "Library")
@@ -500,13 +551,13 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.MangaFile", b =>
                 {
-                    b.HasOne("API.Entities.Volume", "Volume")
+                    b.HasOne("API.Entities.Chapter", "Chapter")
                         .WithMany("Files")
-                        .HasForeignKey("VolumeId")
+                        .HasForeignKey("ChapterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Volume");
+                    b.Navigation("Chapter");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>
@@ -596,6 +647,11 @@ namespace API.Data.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("API.Entities.Chapter", b =>
+                {
+                    b.Navigation("Files");
+                });
+
             modelBuilder.Entity("API.Entities.Library", b =>
                 {
                     b.Navigation("Folders");
@@ -610,7 +666,7 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
-                    b.Navigation("Files");
+                    b.Navigation("Chapters");
                 });
 #pragma warning restore 612, 618
         }

@@ -82,6 +82,7 @@ namespace API.Data
         {
             var volumes =  await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
+                .Include(vol => vol.Chapters)
                 .OrderBy(volume => volume.Number)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
@@ -98,7 +99,8 @@ namespace API.Data
         {
             return _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
-                .Include(vol => vol.Files)
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.Files)
                 .OrderBy(vol => vol.Number)
                 .ToList();
         }
@@ -118,7 +120,8 @@ namespace API.Data
         public async Task<Volume> GetVolumeAsync(int volumeId)
         {
             return await _context.Volume
-                .Include(vol => vol.Files)
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.Files)
                 .SingleOrDefaultAsync(vol => vol.Id == volumeId);
         }
 
@@ -126,10 +129,11 @@ namespace API.Data
         {
             var volume = await _context.Volume
                 .Where(vol => vol.Id == volumeId)
-                .Include(vol => vol.Files)
+                .Include(vol => vol.Chapters)
+                .ThenInclude(c => c.Files)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .SingleAsync(vol => vol.Id == volumeId);
-
+            
             var volumeList = new List<VolumeDto>() {volume};
             await AddVolumeModifiers(userId, volumeList);
 
@@ -169,6 +173,30 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
+        public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
+        {
+            var series = await _context.Series
+                .Where(s => seriesIds.Contains(s.Id))
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ToListAsync();
+
+            // TODO: refactor this
+            IList<int> chapterIds = new List<int>();
+            foreach (var s in series)
+            {
+                foreach (var v in s.Volumes)
+                {
+                    foreach (var c in v.Chapters)
+                    {
+                        chapterIds.Add(c.Id);
+                    }
+                }
+            }
+
+            return chapterIds.ToArray();
+        }
+
         private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
         {
             var userProgress = await _context.AppUserProgresses
@@ -197,6 +225,11 @@ namespace API.Data
 
             foreach (var v in volumes)
             {
+                foreach (var c in v.Chapters)
+                {
+                    c.PagesRead = userProgress.Where(p => p.ChapterId == c.Id).Sum(p => p.PagesRead);
+                }
+                
                 v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
             }
         }

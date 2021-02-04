@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -13,54 +12,52 @@ namespace API.Services
 {
     public class CacheService : ICacheService
     {
-        private readonly IDirectoryService _directoryService;
         private readonly ILogger<CacheService> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IArchiveService _archiveService;
+        private readonly IDirectoryService _directoryService;
         private readonly NumericComparer _numericComparer;
-        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../cache/"));
+        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
-        public CacheService(IDirectoryService directoryService, ILogger<CacheService> logger, IUnitOfWork unitOfWork)
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
         {
-            _directoryService = directoryService;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _archiveService = archiveService;
+            _directoryService = directoryService;
             _numericComparer = new NumericComparer();
         }
 
-        private bool CacheDirectoryIsAccessible()
+        public void EnsureCacheDirectory()
         {
             _logger.LogDebug($"Checking if valid Cache directory: {CacheDirectory}");
             var di = new DirectoryInfo(CacheDirectory);
-            return di.Exists;
+            if (!di.Exists)
+            {
+                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist. Creating...");
+                Directory.CreateDirectory(CacheDirectory);
+            }
         }
 
-        public async Task<Volume> Ensure(int volumeId)
+        public async Task<Chapter> Ensure(int chapterId)
         {
-            if (!CacheDirectoryIsAccessible())
+            EnsureCacheDirectory();
+            Chapter chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            
+            foreach (var file in chapter.Files)
             {
-                return null;
-            }
-            Volume volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            foreach (var file in volume.Files)
-            {
-                var extractPath = GetVolumeCachePath(volumeId, file);
-                
-                ExtractArchive(file.FilePath, extractPath);
+                var extractPath = GetCachePath(chapterId);
+                _archiveService.ExtractArchive(file.FilePath, extractPath);
             }
 
-            return volume;
+            return chapter;
         }
 
         public void Cleanup()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
-            
-            if (!CacheDirectoryIsAccessible())
-            {
-                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist.");
-                return;
-            }
-            
+            EnsureCacheDirectory();
+
             DirectoryInfo di = new DirectoryInfo(CacheDirectory);
 
             try
@@ -75,13 +72,13 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged.");
         }
         
-        public void CleanupVolumes(int[] volumeIds)
+        public void CleanupChapters(int[] chapterIds)
         {
             _logger.LogInformation($"Running Cache cleanup on Volumes");
             
-            foreach (var volume in volumeIds)
+            foreach (var chapter in chapterIds)
             {
-                var di = new DirectoryInfo(Path.Join(CacheDirectory, volume + ""));
+                var di = new DirectoryInfo(GetCachePath(chapter));
                 if (di.Exists)
                 {
                     di.Delete(true);    
@@ -90,75 +87,38 @@ namespace API.Services
             }
             _logger.LogInformation("Cache directory purged");
         }
-        
+
+
         /// <summary>
-        /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
-        /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
-        /// prevent operations to perform correctly (missing archivePath file, empty archive, etc).
+        /// Returns the cache path for a given Chapter. Should be cacheDirectory/{chapterId}/
         /// </summary>
-        /// <param name="archivePath">A valid file to an archive file.</param>
-        /// <param name="extractPath">Path to extract to</param>
+        /// <param name="chapterId"></param>
         /// <returns></returns>
-        private string ExtractArchive(string archivePath, string extractPath)
+        private string GetCachePath(int chapterId)
         {
-            // NOTE: This is used by Cache Service
-            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath))
-            {
-                _logger.LogError($"Archive {archivePath} could not be found.");
-                return "";
-            }
-
-            if (Directory.Exists(extractPath))
-            {
-                _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
-                return extractPath;
-            }
-           
-            using ZipArchive archive = ZipFile.OpenRead(archivePath);
-            // TODO: Throw error if we couldn't extract
-            var needsFlattening = archive.Entries.Count > 0 && !Path.HasExtension(archive.Entries.ElementAt(0).FullName);
-            if (!archive.HasFiles() && !needsFlattening) return "";
-            
-            archive.ExtractToDirectory(extractPath);
-            _logger.LogDebug($"Extracting archive to {extractPath}");
-
-            if (!needsFlattening) return extractPath;
-           
-            _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
-            new DirectoryInfo(extractPath).Flatten();
-
-            return extractPath;
+            return Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
         }
 
-
-        private string GetVolumeCachePath(int volumeId, MangaFile file)
-        {
-            var extractPath = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), $"../cache/{volumeId}/"));
-            if (file.Chapter > 0)
-            {
-                extractPath = Path.Join(extractPath, file.Chapter + "");
-            }
-            return extractPath;
-        }
-
-        public string GetCachedPagePath(Volume volume, int page)
+        public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            foreach (var mangaFile in volume.Files.OrderBy(f => f.Chapter))
+            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapter(chapter.Id);
+            foreach (var mangaFile in chapterFiles)
             {
-                if (page + 1 < (mangaFile.NumberOfPages + pagesSoFar))
+                if (page < (mangaFile.NumberOfPages + pagesSoFar))
                 {
-                    var path = GetVolumeCachePath(volume.Id, mangaFile);
-                    var files = DirectoryService.GetFiles(path);
+                    var path = GetCachePath(chapter.Id);
+                    var files = _directoryService.GetFiles(path, Parser.Parser.ImageFileExtensions); 
                     Array.Sort(files, _numericComparer);
                     
-                    return files.ElementAt(page - pagesSoFar);
+                    return (files.ElementAt(page - pagesSoFar), mangaFile);
                 }
-
+            
                 pagesSoFar += mangaFile.NumberOfPages;
             }
-            return "";
+
+            return ("", null);
         }
     }
 }

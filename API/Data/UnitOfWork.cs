@@ -22,6 +22,10 @@ namespace API.Data
         public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper);
         public IUserRepository UserRepository => new UserRepository(_context, _userManager);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
+
+        public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
+
+        public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
         
         public async Task<bool> Complete()
         {

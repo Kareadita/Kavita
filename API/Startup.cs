@@ -3,6 +3,7 @@ using API.Middleware;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -45,8 +46,6 @@ namespace API
                 app.UseHangfireDashboard();
             }
 
-            //app.UseHttpsRedirection();
-
             app.UseRouting();
             
             // Ordering is important. Cors, authentication, authorization
@@ -57,7 +56,11 @@ namespace API
             app.UseAuthorization();
 
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ContentTypeProvider = new FileExtensionContentTypeProvider() // this is not set by default
+            });
 
             app.UseEndpoints(endpoints =>
             {

@@ -8,12 +8,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Interfaces;
+using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services
 {
     public class DirectoryService : IDirectoryService
     {
+       private readonly ILogger<DirectoryService> _logger;
+
+       public DirectoryService(ILogger<DirectoryService> logger)
+       {
+          _logger = logger;
+       }
 
        /// <summary>
        /// Given a set of regex search criteria, get files in the given path. 
@@ -33,10 +40,14 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
-       public static string[] GetFiles(string path)
+       public string[] GetFiles(string path, string searchPatternExpression = "")
        {
-          if (!Directory.Exists(path)) return Array.Empty<string>();
-          return Directory.GetFiles(path);
+          if (searchPatternExpression != string.Empty)
+          {
+             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
+          }
+          
+          return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
        
        public IEnumerable<string> ListDirectory(string rootPath)
@@ -48,12 +59,16 @@ namespace API.Services
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
                 .Select(d => d.Name).ToImmutableList();
             
-            
             return dirs;
         }
        
        public async Task<ImageDto> ReadImageAsync(string imagePath)
        {
+          if (!File.Exists(imagePath))
+          {
+             _logger.LogError("Image does not exist on disk.");
+             return null;
+          }
           using var image = Image.NewFromFile(imagePath);
 
           return new ImageDto
@@ -63,7 +78,7 @@ namespace API.Services
              FullPath = Path.GetFullPath(imagePath),
              Width = image.Width,
              Height = image.Height,
-             Format = image.Format
+             Format = image.Format,
           };
        }
 

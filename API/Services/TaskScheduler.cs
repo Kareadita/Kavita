@@ -1,4 +1,7 @@
-﻿using API.Interfaces;
+﻿using System.Threading.Tasks;
+using API.Entities;
+using API.Helpers.Converters;
+using API.Interfaces;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -11,15 +14,26 @@ namespace API.Services
         private readonly IScannerService _scannerService;
         public BackgroundJobServer Client => new BackgroundJobServer();
 
-        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService)
+        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, IUnitOfWork unitOfWork)
         {
             _cacheService = cacheService;
             _logger = logger;
             _scannerService = scannerService;
 
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
-            RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
-            RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), Cron.Daily);
+            var setting = Task.Run(() => unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result;
+            if (setting != null)
+            {
+                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting.Value));
+            }
+            else
+            {
+                RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
+                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), Cron.Daily);
+            }
+            
+            //JobStorage.Current.GetMonitoringApi().
+            
         }
 
         public void ScanSeries(int libraryId, int seriesId)
@@ -34,9 +48,9 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
         }
 
-        public void CleanupVolumes(int[] volumeIds)
+        public void CleanupChapters(int[] chapterIds)
         {
-            BackgroundJob.Enqueue(() => _cacheService.CleanupVolumes(volumeIds));
+            BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             
         }
         

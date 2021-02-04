@@ -20,9 +20,5 @@ namespace API.Controllers
             var users = await _userManager.GetUsersInRoleAsync("Admin");
             return users.Count > 0;
         }
-
-        
-        
-        
     }
 }
