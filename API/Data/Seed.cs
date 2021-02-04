@@ -31,20 +31,23 @@ namespace API.Data
 
         public static async Task SeedSettings(DataContext context)
         {
+            context.Database.EnsureCreated();
+            
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
-                new() {Key = "CacheDirectory", Value = CacheService.CacheDirectory}
+                new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
+                new () {Key = ServerSettingKey.TaskScan, Value = "daily"}
             };
-            var settings = await context.ServerSetting.Select(s => s).ToListAsync();
+            
             foreach (var defaultSetting in defaultSettings)
             {
-                var existing = settings.SingleOrDefault(s => s.Key == defaultSetting.Key);
+                var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
                 if (existing == null)
                 {
-                    settings.Add(defaultSetting);
+                    context.ServerSetting.Add(defaultSetting);
                 }
             }
-            
+
             await context.SaveChangesAsync();
         }
     }

@@ -46,8 +46,6 @@ namespace API
                 app.UseHangfireDashboard();
             }
 
-            //app.UseHttpsRedirection();
-
             app.UseRouting();
             
             // Ordering is important. Cors, authentication, authorization

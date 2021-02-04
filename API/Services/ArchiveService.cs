@@ -74,19 +74,18 @@ namespace API.Services
 
         private byte[] CreateThumbnail(ZipArchiveEntry entry)
         {
-            var coverImage = Array.Empty<byte>();
             try
             {
                 using var stream = entry.Open();
                 using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
-                coverImage = thumbnail.WriteToBuffer(".jpg");
+                return thumbnail.WriteToBuffer(".jpg");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "There was a critical error and prevented thumbnail generation. Defaulting to no cover image.");
             }
 
-            return coverImage;
+            return Array.Empty<byte>();
         }
 
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)

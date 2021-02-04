@@ -1,4 +1,8 @@
-﻿using API.Interfaces;
+﻿using System;
+using System.Threading.Tasks;
+using API.Entities;
+using API.Helpers.Converters;
+using API.Interfaces;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -9,17 +13,30 @@ namespace API.Services
         private readonly ICacheService _cacheService;
         private readonly ILogger<TaskScheduler> _logger;
         private readonly IScannerService _scannerService;
+        private readonly IUnitOfWork _unitOfWork;
         public BackgroundJobServer Client => new BackgroundJobServer();
 
-        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService)
+        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, IUnitOfWork unitOfWork)
         {
             _cacheService = cacheService;
             _logger = logger;
             _scannerService = scannerService;
+            _unitOfWork = unitOfWork;
 
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
-            RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
-            RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), Cron.Daily);
+            var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result;
+            if (setting != null)
+            {
+                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting.Value));
+            }
+            else
+            {
+                RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
+                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), Cron.Daily);
+            }
+            
+            //JobStorage.Current.GetMonitoringApi().
+            
         }
 
         public void ScanSeries(int libraryId, int seriesId)

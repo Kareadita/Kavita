@@ -24,6 +24,8 @@ namespace API.Data
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
         public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
+
+        public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
         
         public async Task<bool> Complete()
         {

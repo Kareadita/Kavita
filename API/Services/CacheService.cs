@@ -75,7 +75,6 @@ namespace API.Services
         
         public void CleanupChapters(int[] chapterIds)
         {
-            // TODO: Fix this code to work with chapters
             _logger.LogInformation($"Running Cache cleanup on Volumes");
             
             foreach (var chapter in chapterIds)
@@ -112,7 +111,7 @@ namespace API.Services
                 {
                     var path = GetCachePath(chapter.Id);
                     // TODO: GetFiles should only get image files.
-                    var files = _directoryService.GetFiles(path);
+                    var files = _directoryService.GetFiles(path); 
                     Array.Sort(files, _numericComparer);
                     
                     return (files.ElementAt(page - pagesSoFar), mangaFile);
