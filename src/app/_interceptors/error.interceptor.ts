@@ -9,11 +9,12 @@ import { Observable, throwError } from 'rxjs';
 import { NavigationExtras, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
+import { AccountService } from '../_services/account.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router, private toastr: ToastrService) {}
+  constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
@@ -45,6 +46,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             case 401:
               // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
               this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
+              this.accountService.logout();
               this.router.navigateByUrl('/login');
               break;
             case 404:
