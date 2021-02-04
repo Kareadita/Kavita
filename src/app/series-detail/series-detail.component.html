@@ -2,7 +2,14 @@
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
             <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
-            <button class="btn btn-primary read-btn" (click)="read()">{{currentlyReadingVolume === undefined ? 'Read' : 'Continue'}}</button>
+            <button class="btn btn-primary read-btn" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;">
+                <span>
+                    <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
+                    
+                </span>
+                &nbsp;
+                {{currentlyReadingVolume === undefined ? 'Start Reading' : 'Continue Reading'}}
+            </button>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row"><h2>{{series.name | titlecase}}</h2></div>
@@ -11,7 +18,7 @@
                 <p>{{series.userReview}}</p>
             </div>
             <div class="row">
-                
+                <!-- TODO: Future metadata here -->
             </div>
             <div class="row">
                 <p>{{series?.summary}}</p>

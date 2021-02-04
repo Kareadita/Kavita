@@ -11,6 +11,7 @@ import { LibraryAccessModalComponent } from './_modals/library-access-modal/libr
 import { DirectoryPickerComponent } from './_modals/directory-picker/directory-picker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
+import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 
 
 
@@ -23,7 +24,8 @@ import { ResetPasswordModalComponent } from './_modals/reset-password-modal/rese
     LibraryEditorModalComponent,
     LibraryAccessModalComponent,
     DirectoryPickerComponent,
-    ResetPasswordModalComponent
+    ResetPasswordModalComponent,
+    ManageSettingsComponent
   ],
   imports: [
     CommonModule,

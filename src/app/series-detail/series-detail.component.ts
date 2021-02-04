@@ -26,6 +26,7 @@ export class SeriesDetailComponent implements OnInit {
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
   testMap: any;
+  showBook = false;
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
