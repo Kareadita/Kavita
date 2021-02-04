@@ -56,8 +56,11 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.toastr.error('There was an unknown critical error.');
               break;
             default:
-              this.toastr.error('Something unexpected went wrong.');
-              this.router.navigateByUrl('/no-connection');
+              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
+              {
+                this.toastr.error('Something unexpected went wrong.');
+                this.router.navigateByUrl('/no-connection');
+              }
               console.error(error);
               break;
           }
