@@ -8,15 +8,15 @@ namespace API.Tests.Services
 {
     public class CacheServiceTests
     {
-        private readonly CacheService _cacheService;
-        private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
-        private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-        private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
-        private readonly IDirectoryService _directoryService = Substitute.For<DirectoryService>();
+        // private readonly CacheService _cacheService;
+        // private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
+        // private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+        // private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
+        // private readonly IDirectoryService _directoryService = Substitute.For<DirectoryService>();
 
         public CacheServiceTests()
         {
-            _cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
+            //_cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
         }
         
         //string GetCachedPagePath(Volume volume, int page)

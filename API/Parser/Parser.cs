@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using API.Entities;
 
@@ -10,6 +11,8 @@ namespace API.Parser
     {
         public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
         public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
+        private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -388,13 +391,13 @@ namespace API.Parser
         public static bool IsArchive(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            return MangaFileExtensions.Contains(fileInfo.Extension);
+            return MangaFileRegex.IsMatch(fileInfo.Extension);
         }
 
         public static bool IsImage(string filePath)
         {
             var fileInfo = new FileInfo(filePath);
-            return ImageFileExtensions.Contains(fileInfo.Extension);
+            return ImageRegex.IsMatch(fileInfo.Extension);
         }
         
         public static int MinimumNumberFromRange(string range)
