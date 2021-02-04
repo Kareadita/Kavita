@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using API.Entities;
-using API.Interfaces;
+﻿using API.Interfaces;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

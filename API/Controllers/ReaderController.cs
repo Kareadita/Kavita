@@ -6,7 +6,6 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -18,16 +17,14 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         [HttpGet("image")]
@@ -42,7 +39,6 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
             var file = await _directoryService.ReadImageAsync(path);
             file.Page = page;
-            //file.Chapter = chapter.Number;
             file.MangaFileName = mangaFile.FilePath;
 
             return Ok(file);

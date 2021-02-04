@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using API.Entities.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {

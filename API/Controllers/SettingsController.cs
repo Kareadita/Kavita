@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -16,18 +15,13 @@ namespace API.Controllers
     [Authorize]
     public class SettingsController : BaseApiController
     {
-        private readonly DataContext _dataContext;
         private readonly ILogger<SettingsController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ITaskScheduler _taskScheduler;
 
-        public SettingsController(DataContext dataContext, ILogger<SettingsController> logger, IUnitOfWork unitOfWork,
-            ITaskScheduler taskScheduler)
+        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork)
         {
-            _dataContext = dataContext;
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _taskScheduler = taskScheduler;
         }
 
         [HttpGet("")]

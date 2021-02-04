@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Entities;
 using API.Helpers.Converters;
 using API.Interfaces;
@@ -13,7 +12,6 @@ namespace API.Services
         private readonly ICacheService _cacheService;
         private readonly ILogger<TaskScheduler> _logger;
         private readonly IScannerService _scannerService;
-        private readonly IUnitOfWork _unitOfWork;
         public BackgroundJobServer Client => new BackgroundJobServer();
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, IUnitOfWork unitOfWork)
@@ -21,10 +19,9 @@ namespace API.Services
             _cacheService = cacheService;
             _logger = logger;
             _scannerService = scannerService;
-            _unitOfWork = unitOfWork;
 
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
-            var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result;
+            var setting = Task.Run(() => unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result;
             if (setting != null)
             {
                 RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting.Value));

@@ -1,7 +1,4 @@
-﻿using System;
-using API.Helpers.Converters;
-using AutoMapper;
-using Hangfire;
+﻿using API.Helpers.Converters;
 using Xunit;
 using Xunit.Abstractions;
 

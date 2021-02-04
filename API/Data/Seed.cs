@@ -5,7 +5,6 @@ using API.Constants;
 using API.Entities;
 using API.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {

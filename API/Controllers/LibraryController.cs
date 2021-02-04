@@ -145,7 +145,7 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
-            _taskScheduler.ScanLibrary(libraryId, false);
+            _taskScheduler.ScanLibrary(libraryId);
             return Ok();
         }
         

@@ -40,8 +40,13 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
-       public string[] GetFiles(string path)
+       public string[] GetFiles(string path, string searchPatternExpression = "")
        {
+          if (searchPatternExpression != string.Empty)
+          {
+             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
+          }
+          
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
        

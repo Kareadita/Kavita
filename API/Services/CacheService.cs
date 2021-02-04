@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -110,8 +109,7 @@ namespace API.Services
                 if (page < (mangaFile.NumberOfPages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
-                    // TODO: GetFiles should only get image files.
-                    var files = _directoryService.GetFiles(path); 
+                    var files = _directoryService.GetFiles(path, Parser.Parser.ImageFileExtensions); 
                     Array.Sort(files, _numericComparer);
                     
                     return (files.ElementAt(page - pagesSoFar), mangaFile);

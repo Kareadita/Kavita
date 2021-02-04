@@ -137,8 +137,6 @@ namespace API.Data
             var volumeList = new List<VolumeDto>() {volume};
             await AddVolumeModifiers(userId, volumeList);
 
-            //TODO: volumeList[0].Files = volumeList[0].Files.OrderBy(f => f.Chapter).ToList();
-
             return volumeList[0];
         }
 
@@ -197,8 +195,6 @@ namespace API.Data
             }
 
             return chapterIds.ToArray();
-
-            //return series.Select(s => s.Volumes).Select(v => v.Select(v => v.Chapters)).Select(c => c.Id);
         }
 
         private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)

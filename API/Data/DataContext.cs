@@ -33,10 +33,6 @@ namespace API.Data
         {
             base.OnModelCreating(builder);
 
-            // builder.Entity<ServerSetting>()
-            //     .HasAlternateKey(s => s.Key)
-            //     .HasName("AlternateKey_Key");
-
             builder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.User)
