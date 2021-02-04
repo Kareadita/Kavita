@@ -7,6 +7,7 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { LibraryAccessModalComponent } from '../_modals/library-access-modal/library-access-modal.component';
 import { ToastrService } from 'ngx-toastr';
+import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 
 @Component({
   selector: 'app-manage-users',
@@ -72,6 +73,15 @@ export class ManageUsersComponent implements OnInit {
         this.toastr.success(member.username + ' has been deleted.');
       });
     }
+  }
+
+  updatePassword(member: Member) {
+    // TODO: Implement update Password
+    const modalRef = this.modalService.open(ResetPasswordModalComponent);
+    modalRef.componentInstance.member = member;
+    modalRef.closed.subscribe((closeResult: any) => {
+      console.log('Closed Result', closeResult);
+    });
   }
 
   formatLibraries(member: Member) {

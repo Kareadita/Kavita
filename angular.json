@@ -72,7 +72,7 @@
           "options": {
             "sslKey": "./ssl/server.key",
             "sslCert": "./ssl/server.crt",
-            "ssl": true,
+            "ssl": false,
             "browserTarget": "kavita-webui:build"
           },
           "configurations": {

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountService } from '../_services/account.service';
+import { MemberService } from '../_services/member.service';
 
 @Component({
   selector: 'app-user-login',
@@ -16,9 +17,15 @@ export class UserLoginComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(private accountService: AccountService, private router: Router) { }
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService) { }
 
   ngOnInit(): void {
+    // Validate that there are users so you can refresh to home. This is important for first installs
+    this.memberService.adminExists().subscribe(res => {
+      if (!res) {
+        this.router.navigateByUrl('/home');
+      }
+    });
   }
 
   login() {

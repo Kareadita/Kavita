@@ -37,6 +37,10 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
   }
 
+  refreshMetadata(libraryId: number) {
+    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId, {});
+  }
+
   create(model: {name: string, type: number, folders: string[]}) {
     return this.httpClient.post(this.baseUrl + 'library/create', model);
   }

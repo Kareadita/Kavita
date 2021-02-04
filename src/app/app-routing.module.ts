@@ -25,7 +25,7 @@ const routes: Routes = [
     children: [
       {path: 'library/:id', component: LibraryDetailComponent},
       {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
-      {path: 'library/:libraryId/series/:seriesId/manga/:volumeId', component: MangaReaderComponent},
+      {path: 'library/:libraryId/series/:seriesId/manga/:chapterId', component: MangaReaderComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},

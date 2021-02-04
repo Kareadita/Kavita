@@ -27,5 +27,4 @@ export class MemberService {
   hasLibraryAccess(libraryId: number) {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-library-access?libraryId=' + libraryId);
   }
-
 }

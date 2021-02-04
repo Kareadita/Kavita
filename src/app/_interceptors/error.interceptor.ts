@@ -9,16 +9,17 @@ import { Observable, throwError } from 'rxjs';
 import { NavigationExtras, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
+import { AccountService } from '../_services/account.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  constructor(private router: Router, private toastr: ToastrService) {}
+  constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError(error => {
-        if (error) {
+        if (error && error.status !== 200) {
           console.error('error:', error);
           switch (error.status) {
             case 400:
@@ -45,19 +46,21 @@ export class ErrorInterceptor implements HttpInterceptor {
             case 401:
               // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
               this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
+              this.accountService.logout();
               this.router.navigateByUrl('/login');
               break;
             case 404:
-              //this.router.navigateByUrl('/not-found');
               this.toastr.error('That url does not exist.');
               break;
             case 500:
-              const navigationExtras: NavigationExtras = {state: {error: error.error}};
-              this.router.navigateByUrl('/server-error', navigationExtras);
+              this.toastr.error('There was an unknown critical error.');
               break;
             default:
-              this.toastr.error('Something unexpected went wrong.');
-              this.router.navigateByUrl('/no-connection');
+              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
+              {
+                this.toastr.error('Something unexpected went wrong.');
+                this.router.navigateByUrl('/no-connection');
+              }
               console.error(error);
               break;
           }

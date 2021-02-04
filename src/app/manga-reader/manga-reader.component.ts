@@ -9,11 +9,13 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
+import { Chatper } from '../_models/chapter';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
   LEFT_ARROW = 'ArrowLeft',
-  ESC_KEY = 'Escape'
+  ESC_KEY = 'Escape',
+  SPACE = ' '
 }
 
 export enum READING_DIRECTION {
@@ -68,6 +70,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
+  chapterId!: number;
+  chapter!: Chatper;
 
   minWidth = 99999; // Min width we see, so that we can tell if a page needs splitting
   currentImage: any;
@@ -81,6 +85,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   images: MangaImage[] = [];
   cachedImages = new Queue<MangaImage>();
   cachedPages = new Queue<number>();
+  image: MangaImage | undefined; // Used soley to display information on UI. Not used for manipulation
 
   menuOpen = false;
   isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
@@ -101,9 +106,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
-    const volumeId = this.route.snapshot.paramMap.get('volumeId');
+    const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
-    if (libraryId === null || seriesId === null || volumeId === null) {
+    if (libraryId === null || seriesId === null || chapterId === null) {
       this.router.navigateByUrl('/home');
       return;
     }
@@ -118,16 +123,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
-    this.volumeId = parseInt(volumeId, 10);
+    this.chapterId = parseInt(chapterId, 10);
 
     this.fittingForm = this.formBuilder.group({
       fittingOption: FITTING_OPTION.HEIGHT
     });
 
-    // TODO: Use Observable.all([])
-    this.seriesService.getVolume(this.volumeId).subscribe(volume => {
-      this.maxPages = volume.pages;
-      this.readerService.getBookmark(this.volumeId).subscribe(pageNum => {
+    this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
+      this.chapter = chapter;
+      this.volumeId = chapter.volumeId;
+      this.maxPages = chapter.pages;
+      this.readerService.getBookmark(this.chapterId).subscribe(pageNum => {
+        if (this.pageNum > this.maxPages) {
+          this.pageNum = this.maxPages;
+        }
         this.pageNum = pageNum;
         this.loadPage();
       });
@@ -152,6 +161,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       localStorage.removeItem(this.getPageKey(i));
     }
 
+    // NOTE: Should I remove all other keys for page cache? What about using a timestamp on when to clear out old cache entries? 
+    //Object.entries(localStorage)
+
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
@@ -168,6 +180,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage() : this.nextPage();
     } else if (event.key === KEY_CODES.ESC_KEY) {
       this.location.back();
+    } else if (event.key === KEY_CODES.SPACE) {
+      this.toggleMenu();
     }
   }
 
@@ -191,29 +205,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.menuOpen = !this.menuOpen;
   }
 
-  getDocumentHeight() {
-    // Do I need this?
-    return Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight,
-      document.body.offsetHeight,
-      document.documentElement.offsetHeight,
-      document.body.clientHeight,
-      document.documentElement.clientHeight
-    );
-  }
-
-  getDocumentWidth() {
-    return Math.max(
-      document.body.scrollWidth,
-      document.documentElement.scrollWidth,
-      document.body.offsetWidth,
-      document.documentElement.offsetWidth,
-      document.body.clientWidth,
-      document.documentElement.clientWidth
-    );
-  }
-
   /**
    * @description Checks the cache interface if this page is cached.
    * @param pageNum Page number to check against
@@ -221,7 +212,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   checkCache(pageNum: number): MangaImage | undefined {
     const key = this.getPageKey(pageNum);
-    //console.log('checking cache for key: ', key);
     const image = localStorage.getItem(key);
     if (image !== null) {
       return JSON.parse(image);
@@ -231,12 +221,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // I might want to debounce this and move to the nextPage code so it doesn't execute if we are spamming next page (although i don't see any issues)
   prefetch() {
-    if (this.pageNum + 1 <= this.maxPages) {
-      console.log('Prefetching next page: ', this.pageNum + 1);
-      this.readerService.getPage(this.volumeId, this.pageNum + 1).subscribe(image => {
-        this.cache(image, this.pageNum + 1);
+    const nextPage = this.pageNum + 1;
+    if (this.isCached(nextPage)) {
+      console.log('Page ' + nextPage + ' is already cached.');
+      return;
+    }
+    if (nextPage < this.maxPages) {
+      console.log('Prefetching next page: ', nextPage);
+      this.readerService.getPage(this.chapterId, nextPage).subscribe(image => {
+        this.cache(image, nextPage);
       });
     }
+  }
+
+  isCached(pageNum: number) {
+    const key = this.getPageKey(pageNum);
+    return (localStorage.getItem(key) !== null);
   }
 
   cache(image: MangaImage, pageNum: number) {
@@ -245,7 +245,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       const key = this.getPageKey(pageNum);
-      if (localStorage.getItem(key) === null) {
+      if (!this.isCached(pageNum)) {
         localStorage.setItem(key, JSON.stringify(image));
       }
     } catch (error) {
@@ -272,7 +272,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getPageKey(pageNum: number) {
-    return `kavita-${this.user.username}-${this.volumeId}--${pageNum}`;
+    return `kavita-page-cache-${this.user.username}-${this.chapterId}--${pageNum}`;
   }
 
   renderPage(image: MangaImage) {
@@ -280,8 +280,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.isLoading = false;
+    this.image = image;
     this.clearCanvas();
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.pageNum).subscribe(() => {}, err => {
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
       console.error('Could not save bookmark status. Current page is: ', this.pageNum);
     });
 
@@ -321,6 +322,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
     if (this.pageNum + 1 >= this.maxPages) {
+      // TODO: Ask if they want to load next chapter/volume
       return;
     }
 
@@ -351,7 +353,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log('Using a cached image');
       this.renderPage(existingImage);
     } else {
-      this.readerService.getPage(this.volumeId, this.pageNum).subscribe(image => {
+      this.readerService.getPage(this.chapterId, this.pageNum).subscribe(image => {
         this.renderPage(image);
       });
     }
@@ -363,6 +365,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.readingDirection = READING_DIRECTION.LEFT_TO_RIGHT;
     }
+  }
+
+  goToPage() {
+    const goToPageNum = window.prompt('What page would you like to go to?', '');
+    if (goToPageNum === null) { return; }
+
+    let page = parseInt(goToPageNum, 10);
+
+    if (page >= this.maxPages) {
+      page = this.maxPages - 1;
+    } else if (page < 0) {
+      page = 0;
+    }
+
+    this.pageNum = page;
+    this.loadPage();
+
   }
 
 }

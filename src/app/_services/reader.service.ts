@@ -12,15 +12,15 @@ export class ReaderService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getBookmark(volumeId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'reader/get-bookmark?volumeId=' + volumeId);
+  getBookmark(chapterId: number) {
+    return this.httpClient.get<number>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
   }
 
-  getPage(volumeId: number, page: number) {
-    return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image?volumeId=' + volumeId + '&page=' + page);
+  getPage(chapterId: number, page: number) {
+    return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page);
   }
 
-  bookmark(seriesId: number, volumeId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, pageNum: page});
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page});
   }
 }

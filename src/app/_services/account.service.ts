@@ -70,5 +70,9 @@ export class AccountService {
     return JSON.parse(atob(token.split('.')[1]));
   }
 
+  resetPassword(username: string, password: string) {
+    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password});
+  }
+
 
 }
