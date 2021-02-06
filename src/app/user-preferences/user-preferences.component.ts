@@ -52,13 +52,6 @@ export class UserPreferencesComponent implements OnInit {
       }
       this.resetForm();
     });
-
-    // this.settingsService.updateServerSettings(modelSettings).subscribe((settings: ServerSettings) => {
-    //   this.serverSettings = settings;
-    //   this.resetForm();
-    // }, (err: any) => {
-    //   console.log('err: ', err);
-    // });
   }
 
 }

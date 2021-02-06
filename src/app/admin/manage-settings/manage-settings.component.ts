@@ -26,6 +26,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
     });
   }
 
@@ -33,6 +34,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.get('port')?.setValue(this.serverSettings.port);
   }
 
   saveSettings() {

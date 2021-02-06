@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 
@@ -21,7 +23,7 @@ export class DashboardComponent implements OnInit {
   counter = this.tabs.length + 1;
   active = this.tabs[0];
 
-  constructor(public route: ActivatedRoute) {
+  constructor(public route: ActivatedRoute, private serverService: ServerService, private toastr: ToastrService) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -34,5 +36,11 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {}
+
+  restartServer() {
+    this.serverService.restart().subscribe(() => {
+      setTimeout(() => this.toastr.success('Please reload.'), 1000);
+    });
+  }
 
 }

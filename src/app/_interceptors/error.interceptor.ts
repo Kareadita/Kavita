@@ -59,6 +59,7 @@ export class ErrorInterceptor implements HttpInterceptor {
               if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
               {
                 this.toastr.error('Something unexpected went wrong.');
+                // TODO:  We should store information about what URL we are on so that on refresh of no-connection, we can redirect back to original url
                 this.router.navigateByUrl('/no-connection');
               }
               console.error(error);
