@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { Chatper } from '../_models/chapter';
+import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 
@@ -32,7 +32,7 @@ export class SeriesService {
   }
 
   getChapter(chapterId: number) {
-    return this.httpClient.get<Chatper>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
+    return this.httpClient.get<Chapter>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
   }
 
   getData(id: number) {

@@ -1,4 +1,4 @@
-import { Chatper } from './chapter';
+import { Chapter } from './chapter';
 
 export interface Volume {
     id: number;
@@ -9,6 +9,6 @@ export interface Volume {
     lastModified: string;
     pages: number;
     pagesRead: number;
-    chapters?: Array<Chatper>;
+    chapters?: Array<Chapter>;
     isSpecial: boolean; // For side stories, etc.
 }

@@ -9,7 +9,7 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
-import { Chatper } from '../_models/chapter';
+import { Chapter } from '../_models/chapter';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -71,7 +71,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
-  chapter!: Chatper;
+  chapter!: Chapter;
 
   minWidth = 99999; // Min width we see, so that we can tell if a page needs splitting
   currentImage: any;

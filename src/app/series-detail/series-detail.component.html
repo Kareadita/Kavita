@@ -33,13 +33,13 @@
             <ng-container *ngIf="volume.number != 0">
                 <app-card-item class="col-sm-auto" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
                     [imageUrl]="volume.coverImage === null ? 'assets/images/image-placeholder.jpg' : volume.coverImage"
-                    [read]="volume.pagesRead" [total]="volume.pages"></app-card-item>
+                    [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
             </ng-container>
         </div>
         <div *ngFor="let chapter of chapters">
             <app-card-item class="col-sm-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="chapter.coverImage === null ? 'assets/images/image-placeholder.jpg' : chapter.coverImage"
-            [read]="chapter.pagesRead" [total]="chapter.pages"></app-card-item>
+            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="volumeActions"></app-card-item>
         </div>
     </div>
 

@@ -7,6 +7,7 @@ import { NgbDropdownModule, NgbProgressbarModule } from '@ng-bootstrap/ng-bootst
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
+import { ListTextComponent } from './list-text/list-text.component';
 
 
 
@@ -16,7 +17,8 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     CardItemComponent,
     LibraryCardComponent,
     SeriesCardComponent,
-    CardDetailsModalComponent
+    CardDetailsModalComponent,
+    ListTextComponent
   ],
   imports: [
     CommonModule,

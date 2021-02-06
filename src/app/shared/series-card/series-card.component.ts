@@ -85,7 +85,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   markAsRead(series: any) {
-
+    
   }
 
   handleClick() {
