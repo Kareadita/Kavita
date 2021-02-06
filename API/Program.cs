@@ -4,6 +4,7 @@ using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +17,8 @@ namespace API
         protected Program()
         {
         }
+
+        private static readonly int HttpPort = 5000; // TODO: Get from DB
 
         public static async Task Main(string[] args)
         {
@@ -46,7 +49,26 @@ namespace API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseKestrel((builderContext, opts) =>
+                    {
+                        opts.ListenAnyIP(HttpPort);
+                    });
                     webBuilder.UseStartup<Startup>();
                 });
+        
+        private static string BuildUrl(string scheme, string bindAddress, int port)
+        {
+            return $"{scheme}://{bindAddress}:{port}";
+        }
+        
+        private static void ConfigureKestrelForHttps(KestrelServerOptions options)
+        {
+            options.ListenAnyIP(HttpPort);
+            // options.ListenAnyIP(HttpsPort, listenOptions =>
+            // {
+            //     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+            //     //listenOptions.UseHttps(pfxFilePath, pfxPassword);
+            // });
+        }
     }
 }

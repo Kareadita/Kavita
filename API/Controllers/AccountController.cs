@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data.Migrations;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -63,6 +64,7 @@ namespace API.Controllers
             }
 
             var user = _mapper.Map<AppUser>(registerDto);
+            user.UserPreferences ??= new AppUserPreferences();
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -83,13 +85,14 @@ namespace API.Controllers
                     lib.AppUsers ??= new List<AppUser>();
                     lib.AppUsers.Add(user);
                 }
-                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogInformation("There was an issue granting library access. Please do this manually.");
+                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogError("There was an issue granting library access. Please do this manually.");
             }
 
             return new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
         }
 
@@ -97,11 +100,12 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.Users
+                .Include(u => u.UserPreferences)
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
             var debugUsers = await _userManager.Users.Select(x => x.NormalizedUserName).ToListAsync();
             
-            _logger.LogInformation($"All Users: {String.Join(",", debugUsers)}");
+            _logger.LogInformation($"All Users: {string.Join(",", debugUsers)}");
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -112,6 +116,8 @@ namespace API.Controllers
             
             // Update LastActive on account
             user.LastActive = DateTime.Now;
+            user.UserPreferences ??= new AppUserPreferences();
+            
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.Complete();
             
@@ -120,7 +126,8 @@ namespace API.Controllers
             return new UserDto
             {
                 Username = user.UserName,
-                Token = await _tokenService.CreateToken(user)
+                Token = await _tokenService.CreateToken(user),
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
         }
     }
