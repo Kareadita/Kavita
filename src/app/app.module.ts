@@ -19,6 +19,7 @@ import { LibraryDetailComponent } from './library-detail/library-detail.componen
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
+import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 
 
 
@@ -34,6 +35,7 @@ import { NotConnectedComponent } from './not-connected/not-connected.component';
     SeriesDetailComponent,
     MangaReaderComponent,
     NotConnectedComponent,
+    UserPreferencesComponent,
   ],
   imports: [
     HttpClientModule,

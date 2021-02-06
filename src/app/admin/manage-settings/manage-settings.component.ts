@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 
@@ -14,7 +15,7 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
 
-  constructor(private settingsService: SettingsService, private fb: FormBuilder) { }
+  constructor(private settingsService: SettingsService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().subscribe(frequencies => {
@@ -40,6 +41,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
+      this.toastr.success('Server settings updated');
     }, (err: any) => {
       console.log('err: ', err);
     });

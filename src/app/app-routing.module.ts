@@ -7,6 +7,7 @@ import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { UserLoginComponent } from './user-login/user-login.component';
+import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 
@@ -29,6 +30,7 @@ const routes: Routes = [
     ]
   },
   {path: 'login', component: UserLoginComponent},
+  {path: 'preferences', component: UserPreferencesComponent},
   {path: 'no-connection', component: NotConnectedComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];

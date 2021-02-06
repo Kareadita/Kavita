@@ -16,6 +16,7 @@
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary" ngbDropdownToggle>{{user.username | titlecase}}</button>
         <div ngbDropdownMenu >
+          <button ngbDropdownItem routerLink="/preferences">User Settings</button>
           <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>
           <button ngbDropdownItem (click)="logout()">Logout</button>
         </div>
