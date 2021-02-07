@@ -16,11 +16,10 @@ export class AccountService {
   currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
-  private currentUserSource = new ReplaySubject<User>(1); // TODO: Move away from ReplaySubject. It's overly complex for what it provides
+  private currentUserSource = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserSource.asObservable(); // $ at end is because this is observable
 
-  constructor(private httpClient: HttpClient) { 
-  }
+  constructor(private httpClient: HttpClient) {}
 
   hasAdminRole(user: User) {
     return user && user.roles.includes('Admin');

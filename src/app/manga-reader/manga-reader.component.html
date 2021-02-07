@@ -20,7 +20,7 @@
                     </div>
                     <div class="col">
                         <h4>Reading Direction</h4>
-                        <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 1 ? 'Left to Right' : 'Right to Left'}}</button>
+                        <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</button>
                     </div>
                     <!-- <div class="col" *ngIf="volume.number === 0 && image !== undefined">
                         Chapter {{image.chapter}}
@@ -49,11 +49,11 @@
             <div class="bottom-menu" (click)="toggleMenu()"></div>
             
             <div class="right" (click)="toggleMenu()">
-                <p>{{readingDirection === 1 ? 'Next' : 'Previous'}} Page</p>
+                <p>{{readingDirection === 0 ? 'Next' : 'Previous'}} Page</p>
                 <i class="fa fa-arrow-right"></i>
             </div>
             <div class="left" (click)="toggleMenu()">
-                <p>{{readingDirection === 1 ? 'Previous' : 'Next'}} Page</p>
+                <p>{{readingDirection === 0 ? 'Previous' : 'Next'}} Page</p>
                 <i class="fa fa-arrow-left"></i>
             </div>
         </ng-container>

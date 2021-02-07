@@ -10,6 +10,8 @@ import { SeriesService } from '../_services/series.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
 import { Chapter } from '../_models/chapter';
+import { ReadingDirection } from '../_models/preferences/reading-direction';
+import { ScalingOption } from '../_models/preferences/scaling-option';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -18,10 +20,10 @@ enum KEY_CODES {
   SPACE = ' '
 }
 
-export enum READING_DIRECTION {
-  LEFT_TO_RIGHT = 1,
-  RIGHT_TO_LEFT = 2
-}
+// export enum READING_DIRECTION {
+//   LEFT_TO_RIGHT = 1,
+//   RIGHT_TO_LEFT = 2
+// }
 
 enum FITTING_OPTION {
   HEIGHT = 'full-height',
@@ -80,7 +82,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   user!: User;
   fittingForm: FormGroup | undefined;
 
-  readingDirection = READING_DIRECTION.LEFT_TO_RIGHT; // TODO: Refactor to user settings
+  readingDirection = ReadingDirection.LeftToRight;
+  scalingOption = ScalingOption.FitToHeight;
 
   images: MangaImage[] = [];
   cachedImages = new Queue<MangaImage>();
@@ -118,6 +121,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
+        this.readingDirection = this.user.preferences.readingDirection;
+        this.scalingOption = this.user.preferences.scalingOption;
+        this.fittingForm = this.formBuilder.group({
+          fittingOption: this.translateScalingOption(this.scalingOption)
+        });
       }
     });
 
@@ -125,9 +133,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
-    this.fittingForm = this.formBuilder.group({
-      fittingOption: FITTING_OPTION.HEIGHT
-    });
 
     this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
       this.chapter = chapter;
@@ -175,9 +180,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:keyup', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.RIGHT_ARROW) {
-      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.nextPage() : this.prevPage();
+      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
-      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage() : this.nextPage();
+      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
     } else if (event.key === KEY_CODES.ESC_KEY) {
       this.location.back();
     } else if (event.key === KEY_CODES.SPACE) {
@@ -191,6 +196,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.originalBodyColor = bodyNode.style.background;
       bodyNode.style.background = 'black';
       bodyNode.style.height = '0%';
+    }
+  }
+
+  translateScalingOption(option: ScalingOption) {
+    switch (option) {
+      case (ScalingOption.FitToHeight):
+        return FITTING_OPTION.HEIGHT;
+      case (ScalingOption.FitToWidth):
+        return FITTING_OPTION.WIDTH;
+      default:
+        return FITTING_OPTION.ORIGINAL;
     }
   }
 
@@ -310,9 +326,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handlePageChange(event: any, direction: string) {
     if (direction === 'right') {
-      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.nextPage(event) : this.prevPage(event);
+      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage(event) : this.prevPage(event);
     } else if (direction === 'left') {
-      this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT ? this.prevPage(event) : this.nextPage(event);
+      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage(event) : this.nextPage(event);
     }
   }
 
@@ -360,10 +376,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setReadingDirection() {
-    if (this.readingDirection === READING_DIRECTION.LEFT_TO_RIGHT) {
-      this.readingDirection = READING_DIRECTION.RIGHT_TO_LEFT;
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.readingDirection = ReadingDirection.RightToLeft;
     } else {
-      this.readingDirection = READING_DIRECTION.LEFT_TO_RIGHT;
+      this.readingDirection = ReadingDirection.LeftToRight;
     }
   }
 

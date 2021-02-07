@@ -5,6 +5,7 @@ import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
+import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -35,9 +36,9 @@ export class SeriesDetailComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router, 
+              private ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService) {
+              private readerService: ReaderService, private utilityService: UtilityService) {
     ratingConfig.max = 5;
   }
 
@@ -67,17 +68,8 @@ export class SeriesDetailComponent implements OnInit {
       this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        // TODO: Extract sorter to separate file.
-
         this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat();
-        this.volumes = volumes.sort((a, b) => {
-          if (a === b) { return 0; }
-          else if (a.number === 0) { return 1; }
-          else if (b.number === 0) { return -1; }
-          else {
-            return a.number < b.number ? -1 : 1;
-          }
-        });
+        this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.volumes.forEach(v => {
           v.name = v.number === 0 ? 'Latest Chapters' : 'Volume ' + v.number;
