@@ -1,8 +1,4 @@
-﻿using API.Interfaces;
-using API.Services;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
+﻿using Xunit;
 
 namespace API.Tests.Services
 {

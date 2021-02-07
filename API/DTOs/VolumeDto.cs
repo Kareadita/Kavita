@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 
 namespace API.DTOs
@@ -11,6 +12,9 @@ namespace API.DTOs
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
         public int PagesRead { get; set; }
+        public DateTime LastModified { get; set; }
+        public DateTime Created { get; set; }
+        public bool IsSpecial { get; set; }
         public ICollection<ChapterDto> Chapters { get; set; }
     }
 }

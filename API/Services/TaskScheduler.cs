@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using API.Entities;
+using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Interfaces;
 using Hangfire;

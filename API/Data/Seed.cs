@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities;
+using API.Entities.Enums;
 using API.Services;
 using Microsoft.AspNetCore.Identity;
 
@@ -30,12 +31,15 @@ namespace API.Data
 
         public static async Task SeedSettings(DataContext context)
         {
-            context.Database.EnsureCreated();
+            await context.Database.EnsureCreatedAsync();
             
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
                 new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
-                new () {Key = ServerSettingKey.TaskScan, Value = "daily"}
+                new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
+                //new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"},
+                //new () {Key = ServerSettingKey.TaskBackup, Value = "daily"},
+                new () {Key = ServerSettingKey.Port, Value = "5000"},
             };
             
             foreach (var defaultSetting in defaultSettings)
@@ -43,7 +47,7 @@ namespace API.Data
                 var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
                 if (existing == null)
                 {
-                    context.ServerSetting.Add(defaultSetting);
+                    await context.ServerSetting.AddAsync(defaultSetting);
                 }
             }
 

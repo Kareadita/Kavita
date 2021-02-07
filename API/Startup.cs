@@ -3,6 +3,7 @@ using API.Middleware;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,11 @@ namespace API
 
             services.AddApplicationServices(_config);
             services.AddControllers();
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
             services.AddCors();
             services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
@@ -45,11 +51,16 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
+            
+            app.UseForwardedHeaders();
 
             app.UseRouting();
             
             // Ordering is important. Cors, authentication, authorization
-            app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+            if (env.IsDevelopment())
+            {
+                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+            }
 
             app.UseAuthentication();
 
@@ -61,6 +72,7 @@ namespace API
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider() // this is not set by default
             });
+            
 
             app.UseEndpoints(endpoints =>
             {

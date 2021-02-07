@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using API.Entities;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {

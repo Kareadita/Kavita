@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums;
 using API.Interfaces;
 using API.Parser;
 using Microsoft.Extensions.Logging;

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

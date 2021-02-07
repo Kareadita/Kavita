@@ -21,6 +21,8 @@ namespace API.Helpers
 
             CreateMap<Series, SeriesDto>();
             
+            CreateMap<AppUserPreferences, UserPreferencesDto>();
+            
             CreateMap<Library, LibraryDto>()
                 .ForMember(dest => dest.Folders,
                     opt => 

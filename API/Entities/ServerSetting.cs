@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.Entities

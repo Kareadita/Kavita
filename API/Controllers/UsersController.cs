@@ -44,5 +44,25 @@ namespace API.Controllers
             var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
             return Ok(libs.Any(x => x.Id == libraryId));
         }
+
+        [HttpPost("update-preferences")]
+        public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
+        {
+            var existingPreferences = await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername());
+
+            existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
+            existingPreferences.ScalingOption = preferencesDto.ScalingOption;
+            existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
+            existingPreferences.HideReadOnDetails = preferencesDto.HideReadOnDetails;
+
+            _unitOfWork.UserRepository.Update(existingPreferences);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok(preferencesDto);
+            }
+            
+            return BadRequest("There was an issue saving preferences.");
+        }
     }
 }

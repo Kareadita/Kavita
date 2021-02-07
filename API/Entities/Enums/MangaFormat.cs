@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace API.Entities
+namespace API.Entities.Enums
 {
     public enum MangaFormat
     {

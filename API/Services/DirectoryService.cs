@@ -129,6 +129,7 @@ namespace API.Services
                try {
                   // TODO: In future, we need to take LibraryType into consideration for what extensions to allow (RAW should allow images)
                   // or we need to move this filtering to another area (Process)
+                  // or we can get all files and put a check in place during Process to abandon files
                   files = GetFilesWithCertainExtensions(currentDir, Parser.Parser.MangaFileExtensions)
                      .ToArray();
                }

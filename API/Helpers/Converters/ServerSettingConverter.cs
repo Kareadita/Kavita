@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using AutoMapper;
 
 namespace API.Helpers.Converters
@@ -26,7 +27,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.TaskBackup:
                         destination.TaskBackup = row.Value;
                         break;
-
+                    case ServerSettingKey.Port:
+                        destination.Port = int.Parse(row.Value);
+                        break;
                 }
             }
 

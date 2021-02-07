@@ -1,4 +1,6 @@
 ﻿
+using API.Entities.Enums;
+
 namespace API.Entities
 {
     public class MangaFile

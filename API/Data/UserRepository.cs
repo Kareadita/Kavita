@@ -25,6 +25,11 @@ namespace API.Data
         {
             _context.Entry(user).State = EntityState.Modified;
         }
+        
+        public void Update(AppUserPreferences preferences)
+        {
+            _context.Entry(preferences).State = EntityState.Modified;
+        }
 
         public void Delete(AppUser user)
         {
@@ -57,6 +62,13 @@ namespace API.Data
         public void AddRatingTracking(AppUserRating userRating)
         {
             _context.AppUserRating.Add(userRating);
+        }
+
+        public async Task<AppUserPreferences> GetPreferencesAsync(string username)
+        {
+            return await _context.AppUserPreferences
+                .Include(p => p.AppUser)
+                .SingleOrDefaultAsync(p => p.AppUser.UserName == username);
         }
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
