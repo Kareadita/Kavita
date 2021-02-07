@@ -9,14 +9,13 @@ import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
 
 
-
 @NgModule({
   declarations: [
     RegisterMemberComponent,
     CardItemComponent,
     LibraryCardComponent,
     SeriesCardComponent,
-    CardDetailsModalComponent
+    CardDetailsModalComponent,
   ],
   imports: [
     CommonModule,

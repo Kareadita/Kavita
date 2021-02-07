@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
@@ -60,9 +60,6 @@ export class ManageUsersComponent implements OnInit {
   openEditLibraryAccess(member: Member) {
     const modalRef = this.modalService.open(LibraryAccessModalComponent);
     modalRef.componentInstance.member = member;
-    modalRef.closed.subscribe((closeResult: any) => {
-      console.log('Closed Result', closeResult);
-    });
   }
 
   deleteUser(member: Member) {
@@ -76,12 +73,8 @@ export class ManageUsersComponent implements OnInit {
   }
 
   updatePassword(member: Member) {
-    // TODO: Implement update Password
     const modalRef = this.modalService.open(ResetPasswordModalComponent);
     modalRef.componentInstance.member = member;
-    modalRef.closed.subscribe((closeResult: any) => {
-      console.log('Closed Result', closeResult);
-    });
   }
 
   formatLibraries(member: Member) {
@@ -89,6 +82,6 @@ export class ManageUsersComponent implements OnInit {
       return 'None';
     }
 
-    return member.libraries.map(item => item.name + ', ');
+    return member.libraries.map(item => item.name).join(', ');
   }
 }

@@ -1,5 +1,5 @@
 export interface MangaFile {
-    filename: string;
+    filePath: string;
     chapter: number;
     numberOfPages: number;
     format: number;

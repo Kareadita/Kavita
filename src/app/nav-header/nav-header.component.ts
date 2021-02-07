@@ -20,4 +20,8 @@ export class NavHeaderComponent implements OnInit {
     this.router.navigateByUrl('/home');
   }
 
+  moveFocus() {
+    document.getElementById('content')?.focus();
+  }
+
 }

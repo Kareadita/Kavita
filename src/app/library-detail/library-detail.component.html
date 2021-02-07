@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <h2>{{title}}</h2>
-    <div class="row">
+    <div class="row no-gutters">
         <div class="col-sm-auto" *ngFor="let manga of series">
             <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
         </div>

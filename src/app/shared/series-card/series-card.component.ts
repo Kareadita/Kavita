@@ -22,6 +22,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   isAdmin = false;
   actions: CardItemAction[] = [];
 
+  // TODO: Think about making this a stateless component
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
               private libraryService: LibraryService) {
@@ -62,13 +63,19 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       }});
 
       this.actions.push({title: 'Delete', callback: (data: Series) => {
-        console.log('data: ', data);
+        if (!confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+          return;
+        }
         this.seriesService.delete(data.id).subscribe((res: boolean) => {
           if (res) {
             this.toastr.success('Series deleted');
             this.reload.emit(true);
           }
-        })
+        });
+      }});
+
+      this.actions.push({title: 'Get Info', callback: (data: Series) => {
+        // TODO: Open Info modal
       }});
     }
   }
@@ -78,7 +85,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   markAsRead(series: any) {
-
+    
   }
 
   handleClick() {

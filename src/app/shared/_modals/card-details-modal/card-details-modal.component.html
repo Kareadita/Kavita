@@ -1,1 +1,55 @@
-<p>card-details-modal works!</p>
+<ng-container *ngIf="data !== undefined">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{this.parentName}} - {{this.isChapter ? 'Chapter' : 'Volume'}} {{this.data.number}} Details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <h4>Information</h4>
+        <ng-container *ngIf="this.isObjectVolume(this.data)">
+            <!-- Created: {{this.data.created | date}}
+            Last Modified: {{this.data.lastModified | date}}
+            Is Special: {{this.data.isSpecial}}
+            Pages: {{this.data.pages}} -->
+            <div class="row no-gutters">
+                <div class="col">
+                    Created: {{this.data.created | date: 'dd/MM/yyyy'}}
+                </div>
+                <div class="col">
+                    Last Modified: {{this.data.lastModified | date: 'dd/MM/yyyy'}}
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <div class="col">
+                    Is Special: {{this.data.isSpecial}}
+                </div>
+                <div class="col">
+                    Pages: {{this.data.pages}}
+                </div>
+            </div>
+        </ng-container>
+        <h4>Chapters</h4>
+        <div *ngFor="let chapter of chapters" class="row breadcrumb">
+            Chapter {{chapter.number + 1}}
+            <ul class="list-group">
+                <li *ngFor="let file of chapter.files" class="list-group-item">
+                    <span>{{file.filePath}}</span>
+                    <div class="row no-gutters">
+                        <div class="col">
+                            Pages: {{file.numberOfPages}}
+                        </div>
+                        <div class="col">
+                            Format: {{file.format}}
+                        </div>
+                    </div>
+                    
+                    
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
+    </div>
+</ng-container>

@@ -1,0 +1,40 @@
+<div class="container">
+    <h2>User Preferences</h2>
+    <p>
+        These are global settings that are bound to your account. 
+    </p>
+    <form [formGroup]="settingsForm" *ngIf="user !== undefined">
+        <h4>Reading</h4>
+        <div class="form-group">
+            <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
+            <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
+            <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+            <select class="form-control" aria-describedby="settings-reading-direction-help" formControlName="readingDirection">
+                <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="settings-scaling-option">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
+            <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
+            <span class="sr-only" id="settings-scaling-option-help">How to scale the image to your screen.</span>
+            <select class="form-control" aria-describedby="settings-scaling-option-help" formControlName="scalingOption">
+                <option *ngFor="let opt of scalingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
+            <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
+            <span class="sr-only" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
+            <select class="form-control" aria-describedby="settings-pagesplit-option-help" formControlName="pageSplitOption">
+                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+            </select>
+        </div>
+    
+        <div class="float-right">
+            <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
+            <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+        </div>
+    </form>
+</div>

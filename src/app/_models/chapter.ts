@@ -1,6 +1,6 @@
-import { MangaFile } from "./manga-file";
+import { MangaFile } from './manga-file';
 
-export interface Chatper {
+export interface Chapter {
     id: number;
     range: string;
     number: string;
