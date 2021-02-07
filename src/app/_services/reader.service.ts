@@ -23,4 +23,8 @@ export class ReaderService {
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
     return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page});
   }
+
+  markVolumeRead(volumeId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-volume-read', {});
+  }
 }

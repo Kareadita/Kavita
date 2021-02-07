@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
+import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
 
@@ -33,7 +35,9 @@ export class SeriesDetailComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router, private sanitizer: DomSanitizer, private modalService: NgbModal) {
+              private ratingConfig: NgbRatingConfig, private router: Router, 
+              private sanitizer: DomSanitizer, private modalService: NgbModal,
+              private readerService: ReaderService) {
     ratingConfig.max = 5;
   }
 
@@ -90,11 +94,25 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   markAsRead(vol: Volume) {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
 
+    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages))).subscribe(results => {
+      vol.pagesRead = vol.pages;
+    });
   }
 
   markAsUnread(vol: Volume) {
-    
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+
+    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
+      vol.pagesRead = 0;
+    });
   }
 
   read() {
