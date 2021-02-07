@@ -102,10 +102,6 @@ namespace API.Controllers
                 .Include(u => u.UserPreferences)
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
-            var debugUsers = await _userManager.Users.Select(x => x.NormalizedUserName).ToListAsync();
-            
-            _logger.LogInformation($"All Users: {string.Join(",", debugUsers)}");
-
             if (user == null) return Unauthorized("Invalid username");
 
             var result = await _signInManager

@@ -57,13 +57,16 @@ namespace API.Services
            _logger.LogInformation($"Beginning scan on {library.Name}. Forcing metadata update: {forceUpdate}");
 
            var totalFiles = 0;
+           var skippedFolders = 0;
            foreach (var folderPath in library.Folders)
            {
-              if (!forceUpdate && Directory.GetLastWriteTime(folderPath.Path) <= folderPath.LastScanned)
-              {
-                 _logger.LogDebug($"{folderPath.Path} hasn't been updated since last scan. Skipping.");
-                 continue;
-              }
+              // if (!forceUpdate && Directory.GetLastWriteTime(folderPath.Path) <= folderPath.LastScanned)
+              // {
+              //    // NOTE: This solution isn't the best, but it has potential. We need to handle a few other cases so it works great. 
+              //    _logger.LogDebug($"{folderPath.Path} hasn't been updated since last scan. Skipping.");
+              //    skippedFolders += 1;
+              //    continue;
+              // }
               
               try {
                  totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
@@ -81,6 +84,17 @@ namespace API.Services
               catch (ArgumentException ex) {
                  _logger.LogError(ex, $"The directory '{folderPath}' does not exist");
               }
+              
+              folderPath.LastScanned = DateTime.Now;
+           }
+
+           if (skippedFolders == library.Folders.Count)
+           {
+              _logger.LogInformation("All Folders were skipped due to no modifications to the directories.");
+              _unitOfWork.LibraryRepository.Update(library);
+              _scannedSeries = null;
+              _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
+              return;
            }
 
            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
@@ -92,7 +106,7 @@ namespace API.Services
            // Remove series that are no longer on disk
            RemoveSeriesNotOnDisk(allSeries, series, library);
 
-           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
+           //foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
@@ -185,7 +199,7 @@ namespace API.Services
           
           if (info == null)
           {
-             _logger.LogInformation($"Could not parse series from {path}");
+             _logger.LogWarning($"Could not parse from {path}");
              return;
           }
           

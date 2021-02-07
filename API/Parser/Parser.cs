@@ -111,28 +111,28 @@ namespace API.Parser
         private static readonly Regex[] MangaChapterRegex = new[]
         {
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>\d+-?\d*)",
+                @"(c|ch)(\.? ?)(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
 
-                @"v\d+\.(?<Chapter>\d+-?\d*)",
+                @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
+            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz,Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\))", 
+                @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
-                @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+)", 
+                @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+(?:.\d+|-\d+)?)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Beelzebub_01_[Noodles].zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_|\[|\()", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
-                @"Chapter(?<Chapter>\d+(-\d+)?)", 
+                @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
