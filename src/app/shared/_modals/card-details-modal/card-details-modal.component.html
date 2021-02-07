@@ -31,7 +31,7 @@
         </ng-container>
         <h4>Chapters</h4>
         <div *ngFor="let chapter of chapters" class="row breadcrumb">
-            Chapter {{chapter.number}}
+            Chapter {{chapter.number + 1}}
             <ul class="list-group">
                 <li *ngFor="let file of chapter.files" class="list-group-item">
                     <span>{{file.filePath}}</span>
