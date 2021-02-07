@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using API.Entities;
+using API.Entities.Enums;
 using API.Parser;
 using Xunit;
 using static API.Parser.Parser;

@@ -18,7 +18,7 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [HttpPost]
+        [HttpPost("restart")]
         public ActionResult RestartServer()
         {
             _logger.LogInformation($"{User.GetUsername()} is restarting server from admin dashboard.");

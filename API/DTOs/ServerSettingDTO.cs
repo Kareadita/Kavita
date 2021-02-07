@@ -6,5 +6,6 @@
         public string TaskScan { get; set; }
         public string LoggingLevel { get; set; }
         public string TaskBackup { get; set; }
+        public int Port { get; set; }
     }
 }

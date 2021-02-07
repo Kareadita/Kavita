@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Interfaces;
@@ -60,6 +61,13 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
                 {
                     setting.Value = updateSettingsDto.TaskScan;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+                
+                if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + "" != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.Port + "";
+                    Environment.SetEnvironmentVariable("KAVITA_PORT", setting.Value);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
             }

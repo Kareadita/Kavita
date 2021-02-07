@@ -4,7 +4,6 @@ using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -14,11 +13,10 @@ namespace API
 {
     public class Program
     {
+        private static readonly int HttpPort = 5000;
         protected Program()
         {
         }
-
-        private static readonly int HttpPort = 5000; // TODO: Get from DB
 
         public static async Task Main(string[] args)
         {
@@ -41,7 +39,7 @@ namespace API
                 var logger = services.GetRequiredService < ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
-            
+
             await host.RunAsync();
         }
 
@@ -49,26 +47,40 @@ namespace API
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseKestrel((builderContext, opts) =>
+                    webBuilder.UseKestrel((opts) =>
                     {
                         opts.ListenAnyIP(HttpPort);
                     });
                     webBuilder.UseStartup<Startup>();
                 });
-        
-        private static string BuildUrl(string scheme, string bindAddress, int port)
-        {
-            return $"{scheme}://{bindAddress}:{port}";
-        }
-        
-        private static void ConfigureKestrelForHttps(KestrelServerOptions options)
-        {
-            options.ListenAnyIP(HttpPort);
-            // options.ListenAnyIP(HttpsPort, listenOptions =>
-            // {
-            //     listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
-            //     //listenOptions.UseHttps(pfxFilePath, pfxPassword);
-            // });
-        }
+
+        // private static void StartNewInstance()
+        // {
+        //     //_logger.LogInformation("Starting new instance");
+        //
+        //     var module = options.RestartPath;
+        //
+        //     if (string.IsNullOrWhiteSpace(module))
+        //     {
+        //         module = Environment.GetCommandLineArgs()[0];
+        //     }
+        //
+        //     // string commandLineArgsString;
+        //     // if (options.RestartArgs != null)
+        //     // {
+        //     //     commandLineArgsString = options.RestartArgs ?? string.Empty;
+        //     // }
+        //     // else
+        //     // {
+        //     //     commandLineArgsString = string.Join(
+        //     //         ' ',
+        //     //         Environment.GetCommandLineArgs().Skip(1).Select(NormalizeCommandLineArgument));
+        //     // }
+        //
+        //     //_logger.LogInformation("Executable: {0}", module);
+        //     //_logger.LogInformation("Arguments: {0}", commandLineArgsString);
+        //
+        //     Process.Start(module, Array.Empty<string>);
+        // }
     }
 }
