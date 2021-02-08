@@ -83,7 +83,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)\(\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
+            // Tonikaku Kawaii (Ch 59-67) (Ongoing)
+            new Regex(
+                @"(?<Series>.*)( |_)\((c |ch |chapter )",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Black Bullet (This is very loose, keep towards bottom) (?<Series>.*)(_)(v|vo|c|volume)
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
@@ -118,9 +121,9 @@ namespace API.Parser
 
                 @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz,Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
+            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
+                @"^(?!Vol)(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
@@ -399,10 +402,15 @@ namespace API.Parser
             return ImageRegex.IsMatch(fileInfo.Extension);
         }
         
-        public static int MinimumNumberFromRange(string range)
+        public static float MinimumNumberFromRange(string range)
         {
             var tokens = range.Split("-");
-            return tokens.Min(Int32.Parse);
+            return tokens.Min(float.Parse);
+        }
+
+        public static string Normalize(string name)
+        {
+            return name.ToLower().Replace("-", "").Replace(" ", "");
         }
     }
 }
