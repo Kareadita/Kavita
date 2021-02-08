@@ -12,7 +12,10 @@ namespace API.Services
         private readonly ICacheService _cacheService;
         private readonly ILogger<TaskScheduler> _logger;
         private readonly IScannerService _scannerService;
-        public BackgroundJobServer Client => new BackgroundJobServer();
+        public BackgroundJobServer Client => new BackgroundJobServer(new BackgroundJobServerOptions()
+        {
+            WorkerCount = 1
+        });
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, IUnitOfWork unitOfWork)
         {
@@ -34,12 +37,6 @@ namespace API.Services
             
             //JobStorage.Current.GetMonitoringApi().
             
-        }
-
-        public void ScanSeries(int libraryId, int seriesId)
-        {
-            _logger.LogInformation($"Enqueuing series scan for series: {seriesId}");
-            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId));
         }
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)

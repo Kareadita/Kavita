@@ -4,6 +4,5 @@
     {
         void ScanLibrary(int libraryId, bool forceUpdate = false);
         void CleanupChapters(int[] chapterIds);
-        void ScanSeries(int libraryId, int seriesId);
     }
 }

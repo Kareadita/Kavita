@@ -26,7 +26,7 @@ namespace API.Services
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
             if (!IsValidArchive(archivePath)) return 0;
-            _logger.LogDebug($"Getting Page numbers from  {archivePath}");
+            //_logger.LogDebug($"Getting Page numbers from  {archivePath}");
 
             try
             {
@@ -53,7 +53,7 @@ namespace API.Services
             try
             {
                 if (!IsValidArchive(filepath)) return Array.Empty<byte>();
-                _logger.LogDebug($"Extracting Cover image from {filepath}");
+                //_logger.LogDebug($"Extracting Cover image from {filepath}");
                 
                 using ZipArchive archive = ZipFile.OpenRead(filepath);
                 if (!archive.HasFiles()) return Array.Empty<byte>();

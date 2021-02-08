@@ -145,6 +145,7 @@ namespace API.Controllers
         [HttpPost("scan")]
         public ActionResult Scan(int libraryId)
         {
+            // TODO: We shouldn't queue up a job if one is already in progress
             _taskScheduler.ScanLibrary(libraryId);
             return Ok();
         }

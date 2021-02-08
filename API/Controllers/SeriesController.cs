@@ -70,14 +70,7 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
         }
-
-        [Authorize(Policy = "RequireAdminRole")]
-        [HttpPost("scan")]
-        public ActionResult Scan(int libraryId, int seriesId)
-        {
-            _taskScheduler.ScanSeries(libraryId, seriesId);
-            return Ok();
-        }
+        
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)

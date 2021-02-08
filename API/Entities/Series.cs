@@ -12,6 +12,10 @@ namespace API.Entities
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// Used internally for name matching. <see cref="Parser.Parser.Normalize"/>
+        /// </summary>
+        public string NormalizedName { get; set; }
+        /// <summary>
         /// The name used to sort the Series. By default, will be the same as Name.
         /// </summary>
         public string SortName { get; set; }
