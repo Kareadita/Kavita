@@ -1,6 +1,7 @@
 ﻿using API.Data;
 using API.Helpers;
 using API.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using AutoMapper;
 using Hangfire;
@@ -24,6 +25,7 @@ namespace API.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IScannerService, ScannerService>();
             services.AddScoped<IArchiveService, ArchiveService>();
+            services.AddScoped<IMetadataService, MetadataService>();
 
 
 

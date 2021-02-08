@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces;
+using API.Interfaces.Services;
 using API.Parser;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
+[assembly: InternalsVisibleTo("API.Tests")]
 namespace API.Services
 {
     public class ScannerService : IScannerService
@@ -20,14 +23,18 @@ namespace API.Services
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<ScannerService> _logger;
        private readonly IArchiveService _archiveService;
+       private readonly IMetadataService _metadataService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
        private bool _forceUpdate;
+       private readonly TextInfo _textInfo = new CultureInfo("en-US", false).TextInfo;
 
-       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService)
+       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
+          IMetadataService metadataService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
+          _metadataService = metadataService;
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 120)] 
@@ -58,14 +65,14 @@ namespace API.Services
        private void Cleanup()
        {
           _scannedSeries = null;
-          _forceUpdate = false;
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 120)] 
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
-           var sw = Stopwatch.StartNew();
+          var sw = Stopwatch.StartNew();
+          Cleanup();
            Library library;
            try
            {
@@ -121,7 +128,7 @@ namespace API.Services
 
            // Remove any series where there were no parsed infos
            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
-           var series = filtered.ToImmutableDictionary(v => v.Key, v => v.Value);
+           var series = filtered.ToDictionary(v => v.Key, v => v.Value);
 
            UpdateLibrary(libraryId, series, library);
            _unitOfWork.LibraryRepository.Update(library);
@@ -129,7 +136,7 @@ namespace API.Services
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
               
-              _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count()} series in {sw.ElapsedMilliseconds} ms.");
+              _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count} series in {sw.ElapsedMilliseconds} ms.");
            }
            else
            {
@@ -137,10 +144,9 @@ namespace API.Services
            }
            
            _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
-           Cleanup();
-        }
+       }
 
-       private void UpdateLibrary(int libraryId, ImmutableDictionary<string, List<ParserInfo>> parsedSeries, Library library)
+       private void UpdateLibrary(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries, Library library)
        {
           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
           
@@ -154,31 +160,32 @@ namespace API.Services
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
 
-       private void UpsertSeries(Library library, ImmutableDictionary<string, List<ParserInfo>> parsedSeries,
-          IList<Series> allSeries)
+       protected internal void UpsertSeries(Library library, Dictionary<string, List<ParserInfo>> parsedSeries,
+          List<Series> allSeries)
        {
           // NOTE: This is a great point to break the parsing into threads and join back. Each thread can take X series.
+          var foundSeries = parsedSeries.Keys.ToList();
+          _logger.LogDebug($"Found {foundSeries} series.");
           foreach (var seriesKey in parsedSeries.Keys)
           {
-             var mangaSeries = ExistingOrDefault(library, allSeries, seriesKey) ?? new Series
-             {
-                Name = seriesKey,
-                OriginalName = seriesKey,
-                NormalizedName = Parser.Parser.Normalize(seriesKey),
-                SortName = seriesKey,
-                Summary = ""
-             };
-             mangaSeries.NormalizedName = Parser.Parser.Normalize(seriesKey);
-             
              try
              {
-                UpdateSeries(ref mangaSeries, parsedSeries[seriesKey].ToArray());
-                if (!library.Series.Any(s => s.NormalizedName == mangaSeries.NormalizedName))
+                var mangaSeries = ExistingOrDefault(library, allSeries, seriesKey) ?? new Series
                 {
-                   _logger.LogInformation($"Added series {mangaSeries.Name}");
-                   library.Series.Add(mangaSeries);   
-                }
-                
+                   Name = seriesKey, // NOTE: Should I apply Title casing here 
+                   OriginalName = seriesKey,
+                   NormalizedName = Parser.Parser.Normalize(seriesKey),
+                   SortName = seriesKey,
+                   Summary = ""
+                };
+                mangaSeries.NormalizedName = Parser.Parser.Normalize(mangaSeries.Name);
+             
+             
+                UpdateSeries(ref mangaSeries, parsedSeries[seriesKey].ToArray());
+                if (library.Series.Any(s => Parser.Parser.Normalize(s.Name) == mangaSeries.NormalizedName)) continue;
+                _logger.LogInformation($"Added series {mangaSeries.Name}");
+                library.Series.Add(mangaSeries);
+
              }
              catch (Exception ex)
              {
@@ -187,7 +194,12 @@ namespace API.Services
           }
        }
 
-       private void RemoveSeriesNotOnDisk(IEnumerable<Series> allSeries, ImmutableDictionary<string, List<ParserInfo>> series, Library library)
+       private string ToTitleCase(string str)
+       {
+          return _textInfo.ToTitleCase(str);
+       }
+
+       private void RemoveSeriesNotOnDisk(IEnumerable<Series> allSeries, Dictionary<string, List<ParserInfo>> series, Library library)
        {
           _logger.LogInformation("Removing any series that are no longer on disk.");
           var count = 0;
@@ -250,22 +262,8 @@ namespace API.Services
           
           UpdateVolumes(series, infos);
           series.Pages = series.Volumes.Sum(v => v.Pages);
-
-          if (ShouldFindCoverImage(series.CoverImage))
-          {
-             var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
-             if (firstCover == null && series.Volumes.Any())
-             {
-                firstCover = series.Volumes.FirstOrDefault(x => x.Number == 0);
-             }
-             series.CoverImage = firstCover?.CoverImage;
-          }
           
-          if (string.IsNullOrEmpty(series.Summary) || _forceUpdate)
-          {
-             series.Summary = "";
-          }
-          
+          _metadataService.UpdateMetadata(series, _forceUpdate);
           _logger.LogDebug($"Created {series.Volumes.Count} volumes on {series.Name}");
        }
 
@@ -278,21 +276,17 @@ namespace API.Services
              NumberOfPages = info.Format == MangaFormat.Archive ? _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath): 1
           };
        }
+       
 
-       private bool ShouldFindCoverImage(byte[] coverImage)
+       private void UpdateChapters(Volume volume, IList<Chapter> existingChapters, IEnumerable<ParserInfo> infos)
        {
-          return _forceUpdate || coverImage == null || !coverImage.Any();
-       }
-
-
-       private void UpdateChapters(Volume volume, IEnumerable<ParserInfo> infos) // ICollection<Chapter>
-       {
-          volume.Chapters ??= new List<Chapter>();
-          foreach (var info in infos)
+          volume.Chapters = new List<Chapter>();
+          var justVolumeInfos = infos.Where(pi => pi.Volumes == volume.Name).ToArray();
+          foreach (var info in justVolumeInfos)
           {
              try
              {
-                var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters) ??
+                var chapter = existingChapters.SingleOrDefault(c => c.Range == info.Chapters) ??
                               new Chapter()
                               {
                                  Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
@@ -318,12 +312,7 @@ namespace API.Services
           {
              chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
              
-             if (ShouldFindCoverImage(chapter.CoverImage))
-             {
-                chapter.Files ??= new List<MangaFile>();
-                var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
-             }
+             _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
        }
 
@@ -367,7 +356,7 @@ namespace API.Services
        {
           series.Volumes ??= new List<Volume>();
           _logger.LogDebug($"Updating Volumes for {series.Name}. {infos.Length} related files.");
-          IList<Volume> existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
+          var existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
 
           foreach (var info in infos)
           {
@@ -390,33 +379,26 @@ namespace API.Services
                 _logger.LogError(ex, $"There was an exception when creating volume {info.Volumes}. Skipping volume.");
              }
           }
-          
 
           foreach (var volume in series.Volumes)
           {
+             _logger.LogInformation($"Processing {series.Name} - Volume {volume.Name}");
              try
              {
-                var justVolumeInfos = infos.Where(pi => pi.Volumes == volume.Name).ToArray();
-                UpdateChapters(volume, justVolumeInfos);
+                UpdateChapters(volume, volume.Chapters, infos);
                 volume.Pages = volume.Chapters.Sum(c => c.Pages);
+                // BUG: This code does not remove chapters that no longer exist! This means leftover chapters exist when not on disk.
                 
-                _logger.LogDebug($"Created {volume.Chapters.Count} chapters on {series.Name} - Volume {volume.Name}");
+                _logger.LogDebug($"Created {volume.Chapters.Count} chapters");
              } catch (Exception ex)
              {
                 _logger.LogError(ex, $"There was an exception when creating volume {volume.Name}. Skipping volume.");
              } 
           }
 
-
           foreach (var volume in series.Volumes)
           {
-             if (ShouldFindCoverImage(volume.CoverImage))
-             {
-                // TODO: Create a custom sorter for Chapters so it's consistent across the application
-                var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
-                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
-             }
+             _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
        }
     }

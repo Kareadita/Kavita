@@ -26,7 +26,6 @@ namespace API.Services
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
             if (!IsValidArchive(archivePath)) return 0;
-            //_logger.LogDebug($"Getting Page numbers from  {archivePath}");
 
             try
             {
@@ -35,7 +34,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when reading archive stream.");
+                _logger.LogError(ex, $"There was an exception when reading archive stream: {archivePath}. Defaulting to 0 pages.");
                 return 0;
             }
         }
@@ -53,8 +52,7 @@ namespace API.Services
             try
             {
                 if (!IsValidArchive(filepath)) return Array.Empty<byte>();
-                //_logger.LogDebug($"Extracting Cover image from {filepath}");
-                
+
                 using ZipArchive archive = ZipFile.OpenRead(filepath);
                 if (!archive.HasFiles()) return Array.Empty<byte>();
 
@@ -66,7 +64,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when reading archive stream.");
+                _logger.LogError(ex, $"There was an exception when reading archive stream: {filepath}. Defaulting to no cover image.");
             }
             
             return Array.Empty<byte>();
@@ -82,7 +80,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation. Defaulting to no cover image.");
+                _logger.LogError(ex, $"There was a critical error and prevented thumbnail generation on {entry.FullName}. Defaulting to no cover image.");
             }
 
             return Array.Empty<byte>();
