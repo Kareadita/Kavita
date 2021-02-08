@@ -36,7 +36,7 @@ export class SeriesDetailComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router,
+              ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
               private readerService: ReaderService, private utilityService: UtilityService) {
     ratingConfig.max = 5;
@@ -68,7 +68,7 @@ export class SeriesDetailComponent implements OnInit {
       this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat();
+        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.volumes.forEach(v => {
