@@ -288,7 +288,7 @@ namespace API.Tests
             filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
             expected.Add(filepath, new ParserInfo
             {
-                Series = "Corpse Party Musume - Coprse Party", Volumes = "0", Edition = "",
+                Series = "Kedouin Makoto - Corpse Party Musume", Volumes = "0", Edition = "",
                 Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });

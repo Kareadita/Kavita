@@ -130,7 +130,8 @@ namespace API.Services
            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
            var series = filtered.ToDictionary(v => v.Key, v => v.Value);
 
-           UpdateLibrary(libraryId, series, library);
+           //UpdateLibrary(libraryId, series, library);
+           UpdateLibrary2(libraryId, series);
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
@@ -157,21 +158,180 @@ namespace API.Services
           // Remove series that are no longer on disk
           RemoveSeriesNotOnDisk(allSeries, parsedSeries, library);
 
+          var updatedSeries = library.Series.ToList();
+          foreach (var librarySeries in updatedSeries)
+          {
+             if (!librarySeries.Volumes.Any())
+             {
+                library.Series.Remove(librarySeries);
+             }
+          }
+
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
+
+       private void UpdateLibrary2(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries)
+       {
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+          
+          // First, remove any series that are not in parsedSeries list
+          var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
+          var missingSeries = library.Series.Where(existingSeries =>
+             !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name) ||
+             !parsedSeries.ContainsKey(existingSeries.OriginalName));
+          var removeCount = 0;
+          foreach (var existingSeries in missingSeries)
+          {
+             library.Series?.Remove(existingSeries);
+             removeCount += 1;
+          }
+          _logger.LogInformation("Removed {RemoveCount} series that are no longer on disk", removeCount);
+          
+          // Add new series that have parsedInfos
+          foreach (var info in parsedSeries)
+          {
+             var existingSeries =
+                library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(info.Key)) ??
+                new Series()
+                {
+                   Name = info.Key,
+                   OriginalName = info.Key,
+                   NormalizedName = Parser.Parser.Normalize(info.Key),
+                   SortName = info.Key,
+                   Summary = "",
+                   Volumes = new List<Volume>()
+                };
+             existingSeries.NormalizedName = Parser.Parser.Normalize(info.Key);
+
+             if (existingSeries.Id == 0)
+             {
+                library.Series.Add(existingSeries);
+             }
+
+          }
+          
+          // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
+          foreach (var existingSeries in library.Series)
+          {
+             _logger.LogInformation("Processing series {SeriesName}", existingSeries.Name);
+             UpdateVolumes2(existingSeries, parsedSeries[existingSeries.Name].ToArray());
+             existingSeries.Pages = existingSeries.Volumes.Sum(v => v.Pages);
+             _metadataService.UpdateMetadata(existingSeries, _forceUpdate);
+          }
+          
+          foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
+       }
+
+       private void UpdateVolumes2(Series series, ParserInfo[] parsedInfos)
+       {
+          var startingVolumeCount = series.Volumes.Count;
+          // Add new volumes
+          foreach (var info in parsedInfos)
+          {
+             var volume = series.Volumes.SingleOrDefault(s => s.Name == info.Volumes) ?? new Volume()
+             {
+                Name = info.Volumes,
+                Number = (int) Parser.Parser.MinimumNumberFromRange(info.Volumes),
+                IsSpecial = false,
+                Chapters = new List<Chapter>()
+             };
+             volume.IsSpecial = volume.Number == 0;
+             
+             UpdateChapters2(volume, parsedInfos.Where(p => p.Volumes == volume.Name).ToArray());
+             volume.Pages = volume.Chapters.Sum(c => c.Pages);
+             _metadataService.UpdateMetadata(volume, _forceUpdate);
+
+             if (volume.Id == 0)
+             {
+                series.Volumes.Add(volume);
+             }
+          }
+          
+          // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
+          var existingVolumes = series.Volumes.ToList();
+          foreach (var volume in existingVolumes)
+          {
+             // I can't remove based on chapter count as I haven't updated Chapters  || volume.Chapters.Count == 0
+             var hasInfo = parsedInfos.Any(v => v.Volumes == volume.Name);
+             if (!hasInfo)
+             {
+                series.Volumes.Remove(volume);
+             }
+          }
+          
+          // Update each volume with Chapters
+          // foreach (var volume in series.Volumes)
+          // {
+          //    UpdateChapters2(volume, parsedInfos.Where(p => p.Volumes == volume.Name).ToArray());
+          //    volume.Pages = volume.Chapters.Sum(c => c.Pages);
+          //    _metadataService
+          // }
+
+          _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
+             series.Name, startingVolumeCount, series.Volumes.Count);
+       }
+
+       private void UpdateChapters2(Volume volume, ParserInfo[] parsedInfos)
+       {
+          var startingChapters = volume.Chapters.Count;
+          // Add new chapters
+          foreach (var info in parsedInfos)
+          {
+             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters) ?? new Chapter()
+             {
+                Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
+                Range = info.Chapters,
+                Files = new List<MangaFile>()
+             };
+
+             chapter.Files = new List<MangaFile>();
+
+             if (chapter.Id == 0)
+             {
+                volume.Chapters.Add(chapter);
+             }
+          }
+          
+          // Add files
+          foreach (var info in parsedInfos)
+          {
+             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             if (chapter == null) continue;
+             // I need to reset Files for the first time, hence this work should be done in a spearate loop
+             AddOrUpdateFileForChapter(chapter, info);
+             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
+             chapter.Range = info.Chapters;
+             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
+             _metadataService.UpdateMetadata(chapter, _forceUpdate);
+          }
+          
+          
+          
+          // Remove chapters that aren't in parsedInfos or have no files linked
+          var existingChapters = volume.Chapters.ToList();
+          foreach (var existingChapter in existingChapters)
+          {
+             var hasInfo = parsedInfos.Any(v => v.Chapters == existingChapter.Range);
+             if (!hasInfo || !existingChapter.Files.Any())
+             {
+                volume.Chapters.Remove(existingChapter);
+             }
+          }
+          
+          _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
+             startingChapters, volume.Chapters.Count);
+       }
+       
 
        protected internal void UpsertSeries(Library library, Dictionary<string, List<ParserInfo>> parsedSeries,
           List<Series> allSeries)
        {
           // NOTE: This is a great point to break the parsing into threads and join back. Each thread can take X series.
-          var foundSeries = parsedSeries.Keys.ToList();
-          _logger.LogDebug($"Found {foundSeries} series.");
           foreach (var seriesKey in parsedSeries.Keys)
           {
              try
              {
-                // TODO: I don't need library here. It will always pull from allSeries
-                var mangaSeries = ExistingOrDefault(library, allSeries, seriesKey) ?? new Series
+                var mangaSeries = allSeries.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == Parser.Parser.Normalize(seriesKey)) ?? new Series
                 {
                    Name = seriesKey,
                    OriginalName = seriesKey,
@@ -184,13 +344,13 @@ namespace API.Services
 
                 UpdateSeries(ref mangaSeries, parsedSeries[seriesKey].ToArray());
                 if (library.Series.Any(s => Parser.Parser.Normalize(s.Name) == mangaSeries.NormalizedName)) continue;
-                _logger.LogInformation($"Added series {mangaSeries.Name}");
+                _logger.LogInformation("Added series {SeriesName}", mangaSeries.Name);
                 library.Series.Add(mangaSeries);
 
              }
              catch (Exception ex)
              {
-                _logger.LogError(ex, $"There was an error during scanning of library. {seriesKey} will be skipped.");
+                _logger.LogError(ex, "There was an error during scanning of library. {SeriesName} will be skipped", seriesKey);
              }
           }
        }
@@ -202,19 +362,22 @@ namespace API.Services
 
        private void RemoveSeriesNotOnDisk(IEnumerable<Series> allSeries, Dictionary<string, List<ParserInfo>> series, Library library)
        {
-          _logger.LogInformation("Removing any series that are no longer on disk.");
+          // TODO: Need to also remove any series that no longer have Volumes.
+          _logger.LogInformation("Removing any series that are no longer on disk");
           var count = 0;
           var foundSeries = series.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
           var missingSeries = allSeries.Where(existingSeries =>
              !foundSeries.Contains(existingSeries.NormalizedName) || !series.ContainsKey(existingSeries.Name) ||
              !series.ContainsKey(existingSeries.OriginalName));
+          
           foreach (var existingSeries in missingSeries)
           {
              // Delete series, there is no file to backup any longer. 
              library.Series?.Remove(existingSeries);
              count++;
           }
-          _logger.LogInformation($"Removed {count} series that are no longer on disk");
+          
+          _logger.LogInformation("Removed {Count} series that are no longer on disk", count);
        }
 
        private void RemoveVolumesNotOnDisk(Series series)
@@ -226,7 +389,6 @@ namespace API.Services
              if (!chapters.Any())
              {
                 series.Volumes.Remove(volume);
-                //chapters.Select(c => c.Files).Any()
              }
           }
        }
@@ -264,7 +426,7 @@ namespace API.Services
           
           if (info == null)
           {
-             _logger.LogWarning($"Could not parse from {path}");
+             _logger.LogWarning("Could not parse from {Path}", path);
              return;
           }
           
@@ -273,15 +435,15 @@ namespace API.Services
        
        private void UpdateSeries(ref Series series, ParserInfo[] infos)
        {
-          _logger.LogInformation($"Updating entries for {series.Name}. {infos.Length} related files.");
+          _logger.LogInformation("Updating entries for {series.Name}. {infos.Length} related files", series.Name, infos.Length);
           
           
           UpdateVolumes(series, infos);
-          RemoveVolumesNotOnDisk(series);
-          series.Pages = series.Volumes.Sum(v => v.Pages);
+          //RemoveVolumesNotOnDisk(series);
+          //series.Pages = series.Volumes.Sum(v => v.Pages);
 
           _metadataService.UpdateMetadata(series, _forceUpdate);
-          _logger.LogDebug($"Created {series.Volumes.Count} volumes on {series.Name}");
+          _logger.LogDebug("Created {series.Volumes.Count} volumes on {series.Name}", series.Volumes.Count, series.Name);
        }
 
        private MangaFile CreateMangaFile(ParserInfo info)

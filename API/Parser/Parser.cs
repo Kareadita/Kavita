@@ -22,7 +22,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)",
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(

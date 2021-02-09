@@ -75,6 +75,22 @@ namespace API.Data
                 .Include(l => l.Series)
                 .SingleAsync();
         }
+        /// <summary>
+        /// This returns a Library with all it's Series -> Volumes -> Chapters. This is expensive. Should only be called when needed.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <returns></returns>
+        public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
+        {
+            return await _context.Library
+                .Where(x => x.Id == libraryId)
+                .Include(f => f.Folders)
+                .Include(l => l.Series)
+                .ThenInclude(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .SingleAsync();
+        }
         
         public async Task<bool> LibraryExists(string libraryName)
         {
