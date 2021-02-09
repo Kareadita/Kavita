@@ -67,7 +67,7 @@ namespace API.Services
           _scannedSeries = null;
        }
 
-       [DisableConcurrentExecution(timeoutInSeconds: 120)] 
+       [DisableConcurrentExecution(timeoutInSeconds: 360)] 
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
@@ -105,7 +105,7 @@ namespace API.Services
                     {
                        _logger.LogError(exception, $"The file {f} could not be found");
                     }
-                 });
+                 }, Parser.Parser.MangaFileExtensions);
               }
               catch (ArgumentException ex) {
                  _logger.LogError(ex, $"The directory '{folderPath.Path}' does not exist");
@@ -170,17 +170,18 @@ namespace API.Services
           {
              try
              {
+                // TODO: I don't need library here. It will always pull from allSeries
                 var mangaSeries = ExistingOrDefault(library, allSeries, seriesKey) ?? new Series
                 {
-                   Name = seriesKey, // NOTE: Should I apply Title casing here 
+                   Name = seriesKey,
                    OriginalName = seriesKey,
                    NormalizedName = Parser.Parser.Normalize(seriesKey),
                    SortName = seriesKey,
                    Summary = ""
                 };
                 mangaSeries.NormalizedName = Parser.Parser.Normalize(mangaSeries.Name);
-             
-             
+
+
                 UpdateSeries(ref mangaSeries, parsedSeries[seriesKey].ToArray());
                 if (library.Series.Any(s => Parser.Parser.Normalize(s.Name) == mangaSeries.NormalizedName)) continue;
                 _logger.LogInformation($"Added series {mangaSeries.Name}");
@@ -214,6 +215,20 @@ namespace API.Services
              count++;
           }
           _logger.LogInformation($"Removed {count} series that are no longer on disk");
+       }
+
+       private void RemoveVolumesNotOnDisk(Series series)
+       {
+          var volumes = series.Volumes.ToList();
+          foreach (var volume in volumes)
+          {
+             var chapters = volume.Chapters;
+             if (!chapters.Any())
+             {
+                series.Volumes.Remove(volume);
+                //chapters.Select(c => c.Files).Any()
+             }
+          }
        }
        
 
@@ -260,9 +275,11 @@ namespace API.Services
        {
           _logger.LogInformation($"Updating entries for {series.Name}. {infos.Length} related files.");
           
-          UpdateVolumes(series, infos);
-          series.Pages = series.Volumes.Sum(v => v.Pages);
           
+          UpdateVolumes(series, infos);
+          RemoveVolumesNotOnDisk(series);
+          series.Pages = series.Volumes.Sum(v => v.Pages);
+
           _metadataService.UpdateMetadata(series, _forceUpdate);
           _logger.LogDebug($"Created {series.Volumes.Count} volumes on {series.Name}");
        }
@@ -352,10 +369,11 @@ namespace API.Services
        }
 
 
-       private void UpdateVolumes(Series series, ParserInfo[] infos)
+       private void UpdateVolumes(Series series, IReadOnlyCollection<ParserInfo> infos)
        {
+          // BUG: If a volume no longer exists, it is not getting deleted. 
           series.Volumes ??= new List<Volume>();
-          _logger.LogDebug($"Updating Volumes for {series.Name}. {infos.Length} related files.");
+          _logger.LogDebug($"Updating Volumes for {series.Name}. {infos.Count} related files.");
           var existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
 
           foreach (var info in infos)

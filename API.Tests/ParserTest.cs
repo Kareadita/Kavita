@@ -47,7 +47,8 @@ namespace API.Tests
         [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
         [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "0")]
         [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
-        
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "0")]
+        [InlineData("VanDread-v01-c001[MD].zip", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -95,6 +96,9 @@ namespace API.Tests
         [InlineData("Tonikaku Kawaii Vol-1 (Ch 01-08)", "Tonikaku Kawaii")]
         [InlineData("Tonikaku Kawaii (Ch 59-67) (Ongoing)", "Tonikaku Kawaii")]
         [InlineData("7thGARDEN v01 (2016) (Digital) (danke).cbz", "7thGARDEN")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -130,7 +134,10 @@ namespace API.Tests
         [InlineData("Black Bullet - v4 c20.5 [batoto]", "20.5")]
         [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1-6")]
         [InlineData("APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", "40")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "12")]
         [InlineData("Vol 1", "0")]
+        [InlineData("VanDread-v01-c001[MD].zip", "1")]
+        [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
@@ -275,6 +282,14 @@ namespace API.Tests
             {
                 Series = "APOSIMZ", Volumes = "0", Edition = "",
                 Chapters = "40", Filename = "APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Corpse Party Musume - Coprse Party", Volumes = "0", Edition = "",
+                Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
             

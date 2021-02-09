@@ -1,27 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using API.Entities;
+using API.Entities.Enums;
 using API.Interfaces;
+using API.Interfaces.Services;
+using API.Parser;
 using API.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {
     public class ScannerServiceTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
-        //private readonly IDirectoryService _directoryService = Substitute.For<DirectoryService>();
+        private readonly IMetadataService _metadataService;
+        private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
         private Library _libraryMock;
 
-        public ScannerServiceTests()
+        public ScannerServiceTests(ITestOutputHelper testOutputHelper)
         {
-            _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService);
+            _testOutputHelper = testOutputHelper;
+            _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
+            _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService);
             _libraryMock = new Library()
             {
                 Id = 1,
@@ -59,6 +69,7 @@ namespace API.Tests.Services
                 new Series() {Id = 4, Name = "Akame Ga Kill"},
             };
             Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black").Id);
+            Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker than Black").Id);
         }
         
         [Fact]
@@ -85,31 +96,23 @@ namespace API.Tests.Services
             Assert.Null(ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Non existing series"));
         }
 
-        // [Fact]
-        // public void ScanLibrary_Should_Skip()
-        // {
-        //
-        Library lib = new Library()
+        [Fact]
+        public void Should_CreateSeries_Test()
         {
-            Id = 1,
-            Name = "Darker Than Black",
-            Folders = new List<FolderPath>()
+            var allSeries = new List<Series>();
+            var parsedSeries = new Dictionary<string, List<ParserInfo>>();
+
+            parsedSeries.Add("Darker Than Black", new List<ParserInfo>()
             {
-                new FolderPath()
-                {
-                    Id = 1,
-                    LastScanned = DateTime.Now,
-                    LibraryId = 1,
-                    Path = "E:/Manga"
-                }
-            },
-            LastModified = DateTime.Now
-        };
-        //
-        //     _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Returns(lib);
-        //     
-        //     _scannerService.ScanLibrary(1, false);
-        // }
-        
+                new ParserInfo() {Chapters = "0", Filename = "Something.cbz", Format = MangaFormat.Archive, FullFilePath = "E:/Manga/Something.cbz", Series = "Darker Than Black", Volumes = "1"},
+                new ParserInfo() {Chapters = "0", Filename = "Something.cbz", Format = MangaFormat.Archive, FullFilePath = "E:/Manga/Something.cbz", Series = "Darker than Black", Volumes = "2"}
+            });
+            
+            _scannerService.UpsertSeries(_libraryMock, parsedSeries, allSeries);
+            
+            Assert.Equal(1, _libraryMock.Series.Count);
+            Assert.Equal(2, _libraryMock.Series.ElementAt(0).Volumes.Count);
+            _testOutputHelper.WriteLine(_libraryMock.ToString());
+        }
     }
 }

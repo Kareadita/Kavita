@@ -36,7 +36,7 @@ namespace API.Entities
         public int Pages { get; set; }
 
         // Relationships
-        public ICollection<Volume> Volumes { get; set; }
+        public List<Volume> Volumes { get; set; }
         public Library Library { get; set; }
         public int LibraryId { get; set; }
     }
