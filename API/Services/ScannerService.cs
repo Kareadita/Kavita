@@ -74,9 +74,8 @@ namespace API.Services
           Cleanup();
            Library library;
            try
-           { 
-              // TODO: Use expensive library lookup here and pass to UpdateLibrary so we aren't querying twice
-              library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
+           {
+              library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
            }
            catch (Exception ex)
            {
@@ -130,7 +129,7 @@ namespace API.Services
            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
            var series = filtered.ToDictionary(v => v.Key, v => v.Value);
            
-           UpdateLibrary(libraryId, series);
+           UpdateLibrary(library, series);
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
@@ -146,10 +145,9 @@ namespace API.Services
            _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
        }
 
-       private void UpdateLibrary(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries)
+       private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
-          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
-          
+          // TODO: Split this into multiple threads
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
           var missingSeries = library.Series.Where(existingSeries =>
