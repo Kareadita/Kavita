@@ -34,7 +34,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"There was an exception when reading archive stream: {archivePath}. Defaulting to 0 pages.");
+                _logger.LogError(ex, "There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                 return 0;
             }
         }
@@ -53,7 +53,7 @@ namespace API.Services
             {
                 if (!IsValidArchive(filepath)) return Array.Empty<byte>();
 
-                using ZipArchive archive = ZipFile.OpenRead(filepath);
+                using var archive = ZipFile.OpenRead(filepath);
                 if (!archive.HasFiles()) return Array.Empty<byte>();
 
                 var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
@@ -64,7 +64,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"There was an exception when reading archive stream: {filepath}. Defaulting to no cover image.");
+                _logger.LogError(ex, "There was an exception when reading archive stream: {Filepath}. Defaulting to no cover image", filepath);
             }
             
             return Array.Empty<byte>();
@@ -80,7 +80,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"There was a critical error and prevented thumbnail generation on {entry.FullName}. Defaulting to no cover image.");
+                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entry.FullName);
             }
 
             return Array.Empty<byte>();
@@ -117,20 +117,28 @@ namespace API.Services
         /// <returns></returns>
         public bool IsValidArchive(string archivePath)
         {
-            if (!File.Exists(archivePath))
+            try
             {
-                _logger.LogError($"Archive {archivePath} could not be found.");
-                return false;
-            }
-            if (!Parser.Parser.IsArchive(archivePath))
-            {
-                _logger.LogError($"Archive {archivePath} is not a valid archive.");
-                return false;
-            }
+                if (!File.Exists(archivePath))
+                {
+                    _logger.LogError("Archive {ArchivePath} could not be found", archivePath);
+                    return false;
+                }
 
-            using var archive = ZipFile.OpenRead(archivePath);
-            if (archive.Entries.Any(e => Parser.Parser.IsImage(e.FullName))) return true;
-            _logger.LogError($"Archive {archivePath} contains no images.");
+                if (!Parser.Parser.IsArchive(archivePath))
+                {
+                    _logger.LogError("Archive {ArchivePath} is not a valid archive", archivePath);
+                    return false;
+                }
+
+                using var archive = ZipFile.OpenRead(archivePath);
+                if (archive.Entries.Any(e => Parser.Parser.IsImage(e.FullName))) return true;
+                _logger.LogError("Archive {ArchivePath} contains no images", archivePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unable to validate archive ({ArchivePath}) due to problem opening archive", archivePath);
+            }
             return false;
 
         }
@@ -149,7 +157,7 @@ namespace API.Services
 
             if (Directory.Exists(extractPath))
             {
-                _logger.LogDebug($"Archive {archivePath} has already been extracted. Returning existing folder.");
+                _logger.LogDebug("Archive {ArchivePath} has already been extracted. Returning existing folder", archivePath);
                 return;
             }
            
@@ -159,14 +167,14 @@ namespace API.Services
             if (!archive.HasFiles() && !needsFlattening) return;
             
             archive.ExtractToDirectory(extractPath, true);
-            _logger.LogDebug($"Extracted archive to {extractPath} in {sw.ElapsedMilliseconds} milliseconds.");
+            _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
 
             if (needsFlattening)
             {
                 sw = Stopwatch.StartNew();
                 _logger.LogInformation("Extracted archive is nested in root folder, flattening...");
                 new DirectoryInfo(extractPath).Flatten();
-                _logger.LogInformation($"Flattened in {sw.ElapsedMilliseconds} milliseconds");
+                _logger.LogInformation("Flattened in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
             }
         }
     }

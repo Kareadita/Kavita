@@ -26,7 +26,6 @@ namespace API.Services
        private readonly IMetadataService _metadataService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
        private bool _forceUpdate;
-       private readonly TextInfo _textInfo = new CultureInfo("en-US", false).TextInfo;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
           IMetadataService metadataService)
@@ -75,18 +74,19 @@ namespace API.Services
           Cleanup();
            Library library;
            try
-           {
+           { 
+              // TODO: Use expensive library lookup here and pass to UpdateLibrary so we aren't querying twice
               library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
            }
            catch (Exception ex)
            {
               // This usually only fails if user is not authenticated.
-              _logger.LogError($"There was an issue fetching Library {libraryId}.", ex);
+              _logger.LogError(ex, "There was an issue fetching Library {LibraryId}", libraryId);
               return;
            }
            
            _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
-           _logger.LogInformation($"Beginning scan on {library.Name}. Forcing metadata update: {forceUpdate}");
+           _logger.LogInformation("Beginning scan on {LibraryName}. Forcing metadata update: {ForceUpdate}", library.Name, forceUpdate);
 
            var totalFiles = 0;
            var skippedFolders = 0;
@@ -103,25 +103,25 @@ namespace API.Services
                     }
                     catch (FileNotFoundException exception)
                     {
-                       _logger.LogError(exception, $"The file {f} could not be found");
+                       _logger.LogError(exception, "The file {Filename} could not be found", f);
                     }
                  }, Parser.Parser.MangaFileExtensions);
               }
               catch (ArgumentException ex) {
-                 _logger.LogError(ex, $"The directory '{folderPath.Path}' does not exist");
+                 _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath.Path);
               }
               
               folderPath.LastScanned = DateTime.Now;
            }
 
            var scanElapsedTime = sw.ElapsedMilliseconds;
-           _logger.LogInformation("Folders Scanned {0} files in {1} milliseconds", totalFiles, scanElapsedTime);
+           _logger.LogInformation("Folders Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles, scanElapsedTime);
            sw.Restart();
            if (skippedFolders == library.Folders.Count)
            {
-              _logger.LogInformation("All Folders were skipped due to no modifications to the directories.");
+              _logger.LogInformation("All Folders were skipped due to no modifications to the directories");
               _unitOfWork.LibraryRepository.Update(library);
-              _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds, library.Name);
+              _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, sw.ElapsedMilliseconds, library.Name);
               Cleanup();
               return;
            }
@@ -129,48 +129,24 @@ namespace API.Services
            // Remove any series where there were no parsed infos
            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
            var series = filtered.ToDictionary(v => v.Key, v => v.Value);
-
-           //UpdateLibrary(libraryId, series, library);
-           UpdateLibrary2(libraryId, series);
+           
+           UpdateLibrary(libraryId, series);
            _unitOfWork.LibraryRepository.Update(library);
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
               
-              _logger.LogInformation($"Scan completed on {library.Name}. Parsed {series.Keys.Count} series in {sw.ElapsedMilliseconds} ms.");
+              _logger.LogInformation("Scan completed on {LibraryName}. Parsed {ParsedSeriesCount} series in {ElapsedScanTime} ms", library.Name, series.Keys.Count, sw.ElapsedMilliseconds);
            }
            else
            {
-              _logger.LogError("There was a critical error that resulted in a failed scan. Please check logs and rescan.");
+              _logger.LogError("There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
            
-           _logger.LogInformation("Processed {0} files in {1} milliseconds for {2}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+           _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
        }
 
-       private void UpdateLibrary(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries, Library library)
-       {
-          var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
-          
-          _logger.LogInformation($"Updating Library {library.Name}");
-          // Perform DB activities
-          UpsertSeries(library, parsedSeries, allSeries);
-
-          // Remove series that are no longer on disk
-          RemoveSeriesNotOnDisk(allSeries, parsedSeries, library);
-
-          var updatedSeries = library.Series.ToList();
-          foreach (var librarySeries in updatedSeries)
-          {
-             if (!librarySeries.Volumes.Any())
-             {
-                library.Series.Remove(librarySeries);
-             }
-          }
-
-          foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
-       }
-
-       private void UpdateLibrary2(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries)
+       private void UpdateLibrary(int libraryId, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
           
@@ -190,9 +166,10 @@ namespace API.Services
           // Add new series that have parsedInfos
           foreach (var info in parsedSeries)
           {
-             var existingSeries =
-                library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(info.Key)) ??
-                new Series()
+             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(info.Key));
+             if (existingSeries == null)
+             {
+                existingSeries = new Series()
                 {
                    Name = info.Key,
                    OriginalName = info.Key,
@@ -201,20 +178,16 @@ namespace API.Services
                    Summary = "",
                    Volumes = new List<Volume>()
                 };
-             existingSeries.NormalizedName = Parser.Parser.Normalize(info.Key);
-
-             if (existingSeries.Id == 0)
-             {
                 library.Series.Add(existingSeries);
-             }
-
+             } 
+             existingSeries.NormalizedName = Parser.Parser.Normalize(info.Key);
           }
           
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           foreach (var existingSeries in library.Series)
           {
              _logger.LogInformation("Processing series {SeriesName}", existingSeries.Name);
-             UpdateVolumes2(existingSeries, parsedSeries[existingSeries.Name].ToArray());
+             UpdateVolumes(existingSeries, parsedSeries[existingSeries.Name].ToArray());
              existingSeries.Pages = existingSeries.Volumes.Sum(v => v.Pages);
              _metadataService.UpdateMetadata(existingSeries, _forceUpdate);
           }
@@ -222,31 +195,38 @@ namespace API.Services
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
 
-       private void UpdateVolumes2(Series series, ParserInfo[] parsedInfos)
+       private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
        {
           var startingVolumeCount = series.Volumes.Count;
-          // Add new volumes
-          foreach (var info in parsedInfos)
+          // Add new volumes and update chapters per volume
+          var distinctVolumes = parsedInfos.Select(p => p.Volumes).Distinct().ToList();
+          _logger.LogDebug("Updating {DistinctVolumes} volumes", distinctVolumes.Count);
+          foreach (var volumeNumber in distinctVolumes)
           {
-             var volume = series.Volumes.SingleOrDefault(s => s.Name == info.Volumes) ?? new Volume()
-             {
-                Name = info.Volumes,
-                Number = (int) Parser.Parser.MinimumNumberFromRange(info.Volumes),
-                IsSpecial = false,
-                Chapters = new List<Chapter>()
-             };
-             volume.IsSpecial = volume.Number == 0;
+             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
              
-             UpdateChapters2(volume, parsedInfos.Where(p => p.Volumes == volume.Name).ToArray());
-             volume.Pages = volume.Chapters.Sum(c => c.Pages);
-             _metadataService.UpdateMetadata(volume, _forceUpdate);
-
-             if (volume.Id == 0)
+             var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+             if (volume == null)
              {
+                volume = new Volume()
+                {
+                   Name = volumeNumber,
+                   Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                   IsSpecial = false,
+                   Chapters = new List<Chapter>()
+                }; 
                 series.Volumes.Add(volume);
              }
+             
+             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0");
+             _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
+             UpdateChapters(volume, infos);
+             volume.Pages = volume.Chapters.Sum(c => c.Pages);
+             _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
           
+          
+
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
           var existingVolumes = series.Volumes.ToList();
           foreach (var volume in existingVolumes)
@@ -258,46 +238,47 @@ namespace API.Services
                 series.Volumes.Remove(volume);
              }
           }
-          
-          // Update each volume with Chapters
-          // foreach (var volume in series.Volumes)
-          // {
-          //    UpdateChapters2(volume, parsedInfos.Where(p => p.Volumes == volume.Name).ToArray());
-          //    volume.Pages = volume.Chapters.Sum(c => c.Pages);
-          //    _metadataService
-          // }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
              series.Name, startingVolumeCount, series.Volumes.Count);
        }
 
-       private void UpdateChapters2(Volume volume, ParserInfo[] parsedInfos)
+       private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
        {
           var startingChapters = volume.Chapters.Count;
           // Add new chapters
           foreach (var info in parsedInfos)
           {
-             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters) ?? new Chapter()
+             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             if (chapter == null)
              {
-                Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
-                Range = info.Chapters,
-                Files = new List<MangaFile>()
-             };
-
-             chapter.Files = new List<MangaFile>();
-
-             if (chapter.Id == 0)
-             {
+                chapter = new Chapter()
+                {
+                   Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
+                   Range = info.Chapters,
+                   Files = new List<MangaFile>()
+                };
                 volume.Chapters.Add(chapter);
              }
+
+             chapter.Files = new List<MangaFile>();
           }
           
           // Add files
+          
           foreach (var info in parsedInfos)
           {
-             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             Chapter chapter = null;
+             try
+             {
+                chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             }
+             catch (Exception ex)
+             {
+                _logger.LogError(ex, "There was an exception parsing chapter. Skipping Vol {VolumeNume} Chapter {ChapterNumber}", volume.Name, info.Chapters);
+             }
              if (chapter == null) continue;
-             // I need to reset Files for the first time, hence this work should be done in a spearate loop
+             // I need to reset Files for the first time, hence this work should be done in a separate loop
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
              chapter.Range = info.Chapters;
@@ -321,78 +302,6 @@ namespace API.Services
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
              startingChapters, volume.Chapters.Count);
        }
-       
-
-       protected internal void UpsertSeries(Library library, Dictionary<string, List<ParserInfo>> parsedSeries,
-          List<Series> allSeries)
-       {
-          // NOTE: This is a great point to break the parsing into threads and join back. Each thread can take X series.
-          foreach (var seriesKey in parsedSeries.Keys)
-          {
-             try
-             {
-                var mangaSeries = allSeries.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == Parser.Parser.Normalize(seriesKey)) ?? new Series
-                {
-                   Name = seriesKey,
-                   OriginalName = seriesKey,
-                   NormalizedName = Parser.Parser.Normalize(seriesKey),
-                   SortName = seriesKey,
-                   Summary = ""
-                };
-                mangaSeries.NormalizedName = Parser.Parser.Normalize(mangaSeries.Name);
-
-
-                UpdateSeries(ref mangaSeries, parsedSeries[seriesKey].ToArray());
-                if (library.Series.Any(s => Parser.Parser.Normalize(s.Name) == mangaSeries.NormalizedName)) continue;
-                _logger.LogInformation("Added series {SeriesName}", mangaSeries.Name);
-                library.Series.Add(mangaSeries);
-
-             }
-             catch (Exception ex)
-             {
-                _logger.LogError(ex, "There was an error during scanning of library. {SeriesName} will be skipped", seriesKey);
-             }
-          }
-       }
-
-       private string ToTitleCase(string str)
-       {
-          return _textInfo.ToTitleCase(str);
-       }
-
-       private void RemoveSeriesNotOnDisk(IEnumerable<Series> allSeries, Dictionary<string, List<ParserInfo>> series, Library library)
-       {
-          // TODO: Need to also remove any series that no longer have Volumes.
-          _logger.LogInformation("Removing any series that are no longer on disk");
-          var count = 0;
-          var foundSeries = series.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
-          var missingSeries = allSeries.Where(existingSeries =>
-             !foundSeries.Contains(existingSeries.NormalizedName) || !series.ContainsKey(existingSeries.Name) ||
-             !series.ContainsKey(existingSeries.OriginalName));
-          
-          foreach (var existingSeries in missingSeries)
-          {
-             // Delete series, there is no file to backup any longer. 
-             library.Series?.Remove(existingSeries);
-             count++;
-          }
-          
-          _logger.LogInformation("Removed {Count} series that are no longer on disk", count);
-       }
-
-       private void RemoveVolumesNotOnDisk(Series series)
-       {
-          var volumes = series.Volumes.ToList();
-          foreach (var volume in volumes)
-          {
-             var chapters = volume.Chapters;
-             if (!chapters.Any())
-             {
-                series.Volumes.Remove(volume);
-             }
-          }
-       }
-       
 
        /// <summary>
        /// Attempts to either add a new instance of a show mapping to the scannedSeries bag or adds to an existing.
@@ -432,19 +341,6 @@ namespace API.Services
           
           TrackSeries(info);
        }
-       
-       private void UpdateSeries(ref Series series, ParserInfo[] infos)
-       {
-          _logger.LogInformation("Updating entries for {series.Name}. {infos.Length} related files", series.Name, infos.Length);
-          
-          
-          UpdateVolumes(series, infos);
-          //RemoveVolumesNotOnDisk(series);
-          //series.Pages = series.Volumes.Sum(v => v.Pages);
-
-          _metadataService.UpdateMetadata(series, _forceUpdate);
-          _logger.LogDebug("Created {series.Volumes.Count} volumes on {series.Name}", series.Volumes.Count, series.Name);
-       }
 
        private MangaFile CreateMangaFile(ParserInfo info)
        {
@@ -452,49 +348,10 @@ namespace API.Services
           {
              FilePath = info.FullFilePath,
              Format = info.Format,
-             NumberOfPages = info.Format == MangaFormat.Archive ? _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath): 1
+             NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
           };
        }
-       
-
-       private void UpdateChapters(Volume volume, IList<Chapter> existingChapters, IEnumerable<ParserInfo> infos)
-       {
-          volume.Chapters = new List<Chapter>();
-          var justVolumeInfos = infos.Where(pi => pi.Volumes == volume.Name).ToArray();
-          foreach (var info in justVolumeInfos)
-          {
-             try
-             {
-                var chapter = existingChapters.SingleOrDefault(c => c.Range == info.Chapters) ??
-                              new Chapter()
-                              {
-                                 Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
-                                 Range = info.Chapters,
-                              };
-                
-                AddOrUpdateFileForChapter(chapter, info);
-                chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
-                chapter.Range = info.Chapters;
-                
-                if (volume.Chapters.All(c => c.Range != info.Chapters))
-                {
-                   volume.Chapters.Add(chapter);
-                }
-             }
-             catch (Exception ex)
-             {
-                _logger.LogWarning(ex, $"There was an exception parsing {info.Series} - Volume {volume.Number}'s chapters. Skipping Chapter.");
-             }
-          }
-
-          foreach (var chapter in volume.Chapters)
-          {
-             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
-             
-             _metadataService.UpdateMetadata(chapter, _forceUpdate);
-          }
-       }
-
+  
        private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
        {
           chapter.Files ??= new List<MangaFile>();
@@ -512,7 +369,7 @@ namespace API.Services
              }
              else
              {
-                _logger.LogDebug($"Ignoring {info.Filename}. Non-archives are not supported yet.");
+                _logger.LogDebug("Ignoring {Filename}. Non-archives are not supported", info.Filename);
              }
           }
        }
@@ -528,58 +385,6 @@ namespace API.Services
           library.Series ??= new List<Series>();
           return library.Series.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == name) ??
                  allSeries.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == name);
-       }
-
-
-       private void UpdateVolumes(Series series, IReadOnlyCollection<ParserInfo> infos)
-       {
-          // BUG: If a volume no longer exists, it is not getting deleted. 
-          series.Volumes ??= new List<Volume>();
-          _logger.LogDebug($"Updating Volumes for {series.Name}. {infos.Count} related files.");
-          var existingVolumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
-
-          foreach (var info in infos)
-          {
-             try
-             {
-                var volume = ExistingOrDefault(existingVolumes, series.Volumes, info.Volumes) ?? new Volume
-                {
-                   Name = info.Volumes,
-                   Number = (int) Parser.Parser.MinimumNumberFromRange(info.Volumes),
-                   IsSpecial = false,
-                   Chapters = new List<Chapter>()
-                };
-                
-                if (series.Volumes.Any(v => v.Name == volume.Name)) continue;
-                series.Volumes.Add(volume);
-                
-             }
-             catch (Exception ex)
-             {
-                _logger.LogError(ex, $"There was an exception when creating volume {info.Volumes}. Skipping volume.");
-             }
-          }
-
-          foreach (var volume in series.Volumes)
-          {
-             _logger.LogInformation($"Processing {series.Name} - Volume {volume.Name}");
-             try
-             {
-                UpdateChapters(volume, volume.Chapters, infos);
-                volume.Pages = volume.Chapters.Sum(c => c.Pages);
-                // BUG: This code does not remove chapters that no longer exist! This means leftover chapters exist when not on disk.
-                
-                _logger.LogDebug($"Created {volume.Chapters.Count} chapters");
-             } catch (Exception ex)
-             {
-                _logger.LogError(ex, $"There was an exception when creating volume {volume.Name}. Skipping volume.");
-             } 
-          }
-
-          foreach (var volume in series.Volumes)
-          {
-             _metadataService.UpdateMetadata(volume, _forceUpdate);
-          }
        }
     }
 }

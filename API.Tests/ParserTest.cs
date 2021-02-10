@@ -49,6 +49,7 @@ namespace API.Tests
         [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "0")]
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
+        [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch27_[VISCANS].zip", "4")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
