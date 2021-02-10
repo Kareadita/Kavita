@@ -335,7 +335,7 @@ namespace API.Services
           
           if (info == null)
           {
-             _logger.LogWarning("Could not parse from {Path}", path);
+             _logger.LogWarning("Could not parse series from {Path}", path);
              return;
           }
           
@@ -372,19 +372,6 @@ namespace API.Services
                 _logger.LogDebug("Ignoring {Filename}. Non-archives are not supported", info.Filename);
              }
           }
-       }
-
-       public static Volume ExistingOrDefault(IList<Volume> existingVolumes, ICollection<Volume> volumes, string volumeName)
-       {
-          return volumes.SingleOrDefault(v => v.Name == volumeName) ?? existingVolumes.SingleOrDefault(v => v.Name == volumeName);
-       }
-       
-       public static Series ExistingOrDefault(Library library, IEnumerable<Series> allSeries, string seriesName)
-       {
-          var name = Parser.Parser.Normalize(seriesName);
-          library.Series ??= new List<Series>();
-          return library.Series.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == name) ??
-                 allSeries.SingleOrDefault(s => Parser.Parser.Normalize(s.Name) == name);
        }
     }
 }

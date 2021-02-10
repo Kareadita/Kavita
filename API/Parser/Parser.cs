@@ -79,6 +79,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
+            new Regex(
+                @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
                 @"(?<Series>.*)\(\d",

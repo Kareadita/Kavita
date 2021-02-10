@@ -59,42 +59,42 @@ namespace API.Tests.Services
             
         }
 
-        [Fact]
-        public void ExistingOrDefault_Should_BeFromLibrary()
-        {
-            var allSeries = new List<Series>()
-            {
-                new Series() {Id = 2, Name = "Darker Than Black"},
-                new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-                new Series() {Id = 4, Name = "Akame Ga Kill"},
-            };
-            Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black").Id);
-            Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker than Black").Id);
-        }
-        
-        [Fact]
-        public void ExistingOrDefault_Should_BeFromAllSeries()
-        {
-            var allSeries = new List<Series>()
-            {
-                new Series() {Id = 2, Name = "Darker Than Black"},
-                new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-                new Series() {Id = 4, Name = "Akame Ga Kill"},
-            };
-            Assert.Equal(3, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black - Some Extension").Id);
-        }
-        
-        [Fact]
-        public void ExistingOrDefault_Should_BeNull()
-        {
-            var allSeries = new List<Series>()
-            {
-                new Series() {Id = 2, Name = "Darker Than Black"},
-                new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-                new Series() {Id = 4, Name = "Akame Ga Kill"},
-            };
-            Assert.Null(ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Non existing series"));
-        }
+        // [Fact]
+        // public void ExistingOrDefault_Should_BeFromLibrary()
+        // {
+        //     var allSeries = new List<Series>()
+        //     {
+        //         new Series() {Id = 2, Name = "Darker Than Black"},
+        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
+        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
+        //     };
+        //     Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black").Id);
+        //     Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker than Black").Id);
+        // }
+        //
+        // [Fact]
+        // public void ExistingOrDefault_Should_BeFromAllSeries()
+        // {
+        //     var allSeries = new List<Series>()
+        //     {
+        //         new Series() {Id = 2, Name = "Darker Than Black"},
+        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
+        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
+        //     };
+        //     Assert.Equal(3, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black - Some Extension").Id);
+        // }
+        //
+        // [Fact]
+        // public void ExistingOrDefault_Should_BeNull()
+        // {
+        //     var allSeries = new List<Series>()
+        //     {
+        //         new Series() {Id = 2, Name = "Darker Than Black"},
+        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
+        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
+        //     };
+        //     Assert.Null(ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Non existing series"));
+        // }
 
         [Fact]
         public void Should_CreateSeries_Test()
