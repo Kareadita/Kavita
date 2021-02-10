@@ -22,7 +22,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)",
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -79,11 +79,18 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
+            new Regex(
+                @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
                 @"(?<Series>.*)\(\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
+            // Tonikaku Kawaii (Ch 59-67) (Ongoing)
+            new Regex(
+                @"(?<Series>.*)( |_)\((c |ch |chapter )",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Black Bullet (This is very loose, keep towards bottom) (?<Series>.*)(_)(v|vo|c|volume)
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
@@ -111,28 +118,28 @@ namespace API.Parser
         private static readonly Regex[] MangaChapterRegex = new[]
         {
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>\d+-?\d*)",
+                @"(c|ch)(\.? ?)(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
 
-                @"v\d+\.(?<Chapter>\d+-?\d*)",
+                @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
+            // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\))", 
+                @"^(?!Vol)(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
-                @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+)", 
+                @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+(?:.\d+|-\d+)?)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Beelzebub_01_[Noodles].zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+)( |_|\[|\()", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
-                @"Chapter(?<Chapter>\d+(-\d+)?)", 
+                @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
@@ -399,10 +406,15 @@ namespace API.Parser
             return ImageRegex.IsMatch(fileInfo.Extension);
         }
         
-        public static int MinimumNumberFromRange(string range)
+        public static float MinimumNumberFromRange(string range)
         {
             var tokens = range.Split("-");
-            return tokens.Min(Int32.Parse);
+            return tokens.Min(float.Parse);
+        }
+
+        public static string Normalize(string name)
+        {
+            return name.ToLower().Replace("-", "").Replace(" ", "");
         }
     }
 }

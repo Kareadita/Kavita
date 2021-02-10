@@ -11,12 +11,5 @@
         void ScanLibrary(int libraryId, bool forceUpdate);
 
         void ScanLibraries();
-
-        /// <summary>
-        /// Performs a forced scan of just a series folder.
-        /// </summary>
-        /// <param name="libraryId"></param>
-        /// <param name="seriesId"></param>
-        void ScanSeries(int libraryId, int seriesId);
     }
 }

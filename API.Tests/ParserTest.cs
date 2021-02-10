@@ -1,13 +1,23 @@
+using System;
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Parser;
 using Xunit;
+using Xunit.Abstractions;
 using static API.Parser.Parser;
 
 namespace API.Tests
 {
     public class ParserTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+        
+
+        public ParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Theory]
         [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
         [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "1")]
@@ -18,6 +28,7 @@ namespace API.Tests
         [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "16-17")]
         [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
+        [InlineData("Vol 1", "1")]
         [InlineData("No Volume", "0")]
         [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
@@ -35,7 +46,10 @@ namespace API.Tests
         [InlineData("Dorohedoro v12 (2013) (Digital) (LostNerevarine-Empire).cbz", "12")]
         [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
         [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "0")]
-        
+        [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "0")]
+        [InlineData("VanDread-v01-c001[MD].zip", "1")]
+        [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch27_[VISCANS].zip", "4")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -79,7 +93,14 @@ namespace API.Tests
         [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip", "Ichiban Ushiro no Daimaou")]
         [InlineData("Rent a Girlfriend v01.cbr", "Rent a Girlfriend")]
         [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "Yumekui Merry")]
-        //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "Epigraph of the Closed Curve")]
+        [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "Itoshi no Karin")]
+        [InlineData("Tonikaku Kawaii Vol-1 (Ch 01-08)", "Tonikaku Kawaii")]
+        [InlineData("Tonikaku Kawaii (Ch 59-67) (Ongoing)", "Tonikaku Kawaii")]
+        [InlineData("7thGARDEN v01 (2016) (Digital) (danke).cbz", "7thGARDEN")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
+        [InlineData("Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)", "Goblin Slayer - Brand New Day")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -113,6 +134,12 @@ namespace API.Tests
         [InlineData("Goblin Slayer Side Story - Year One 017.5", "17.5")]
         [InlineData("Beelzebub_53[KSH].zip", "53")]
         [InlineData("Black Bullet - v4 c20.5 [batoto]", "20.5")]
+        [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1-6")]
+        [InlineData("APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", "40")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "12")]
+        [InlineData("Vol 1", "0")]
+        [InlineData("VanDread-v01-c001[MD].zip", "1")]
+        [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
         //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
@@ -174,11 +201,22 @@ namespace API.Tests
         [InlineData("12-14", 12)]
         [InlineData("24", 24)]
         [InlineData("18-04", 4)]
-        public void MinimumNumberFromRangeTest(string input, int expected)
+        [InlineData("18-04.5", 4.5)]
+        [InlineData("40", 40)]
+        public void MinimumNumberFromRangeTest(string input, float expected)
         {
             Assert.Equal(expected, MinimumNumberFromRange(input));
         }
-        
+
+        [Theory]
+        [InlineData("Darker Than Black", "darkerthanblack")]
+        [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
+        [InlineData("", "")]
+        public void NormalizeTest(string input, string expected)
+        {
+            Assert.Equal(expected, Normalize(input));
+        }
+
 
         [Fact]
         public void ParseInfoTest()
@@ -241,6 +279,30 @@ namespace API.Tests
                 FullFilePath = filepath
             });
             
+            filepath = @"E:\Manga\APOSIMZ\APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "APOSIMZ", Volumes = "0", Edition = "",
+                Chapters = "40", Filename = "APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Kedouin Makoto - Corpse Party Musume", Volumes = "0", Edition = "",
+                Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Goblin Slayer\Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Goblin Slayer - Brand New Day", Volumes = "0", Edition = "",
+                Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath
+            });
+            
             
             
             
@@ -255,12 +317,20 @@ namespace API.Tests
                     return;
                 }
                 Assert.NotNull(actual);
+                _testOutputHelper.WriteLine($"Validating {file}");
+                _testOutputHelper.WriteLine("Format");
                 Assert.Equal(expectedInfo.Format, actual.Format);
+                _testOutputHelper.WriteLine("Series");
                 Assert.Equal(expectedInfo.Series, actual.Series);
+                _testOutputHelper.WriteLine("Chapters");
                 Assert.Equal(expectedInfo.Chapters, actual.Chapters);
+                _testOutputHelper.WriteLine("Volumes");
                 Assert.Equal(expectedInfo.Volumes, actual.Volumes);
+                _testOutputHelper.WriteLine("Edition");
                 Assert.Equal(expectedInfo.Edition, actual.Edition);
+                _testOutputHelper.WriteLine("Filename");
                 Assert.Equal(expectedInfo.Filename, actual.Filename);
+                _testOutputHelper.WriteLine("FullFilePath");
                 Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
             }
         }

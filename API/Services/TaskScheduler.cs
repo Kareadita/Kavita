@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Interfaces;
+using API.Interfaces.Services;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -12,13 +13,20 @@ namespace API.Services
         private readonly ICacheService _cacheService;
         private readonly ILogger<TaskScheduler> _logger;
         private readonly IScannerService _scannerService;
-        public BackgroundJobServer Client => new BackgroundJobServer();
+        private readonly IMetadataService _metadataService;
 
-        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, IUnitOfWork unitOfWork)
+        public BackgroundJobServer Client => new BackgroundJobServer(new BackgroundJobServerOptions()
+        {
+            WorkerCount = 1
+        });
+
+        public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
+            IUnitOfWork unitOfWork, IMetadataService metadataService)
         {
             _cacheService = cacheService;
             _logger = logger;
             _scannerService = scannerService;
+            _metadataService = metadataService;
 
             _logger.LogInformation("Scheduling/Updating cache cleanup on a daily basis.");
             var setting = Task.Run(() => unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result;
@@ -36,12 +44,6 @@ namespace API.Services
             
         }
 
-        public void ScanSeries(int libraryId, int seriesId)
-        {
-            _logger.LogInformation($"Enqueuing series scan for series: {seriesId}");
-            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId));
-        }
-
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation($"Enqueuing library scan for: {libraryId}");
@@ -53,6 +55,18 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             
         }
+
+        public void RefreshMetadata(int libraryId, bool forceUpdate = true)
+        {
+            _logger.LogInformation($"Enqueuing library metadata refresh for: {libraryId}");
+            BackgroundJob.Enqueue((() => _metadataService.RefreshMetadata(libraryId, forceUpdate)));
+        }
+
+        public void ScanLibraryInternal(int libraryId, bool forceUpdate)
+        {
+            _scannerService.ScanLibrary(libraryId, forceUpdate);
+            _metadataService.RefreshMetadata(libraryId, forceUpdate);
+        } 
         
     }
 }

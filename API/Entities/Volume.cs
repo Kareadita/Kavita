@@ -9,7 +9,7 @@ namespace API.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public int Number { get; set; }
-        public ICollection<Chapter> Chapters { get; set; }
+        public IList<Chapter> Chapters { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }

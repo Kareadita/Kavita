@@ -4,6 +4,6 @@
     {
         void ScanLibrary(int libraryId, bool forceUpdate = false);
         void CleanupChapters(int[] chapterIds);
-        void ScanSeries(int libraryId, int seriesId);
+        void RefreshMetadata(int libraryId, bool forceUpdate = true);
     }
 }

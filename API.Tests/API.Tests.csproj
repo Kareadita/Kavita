@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\Test Data\ArchiveService" />
+      <Folder Include="Services\Test Data\ArchiveService\ComicInfos" />
     </ItemGroup>
 
 </Project>
