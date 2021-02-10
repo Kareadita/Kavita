@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
@@ -147,7 +148,6 @@ namespace API.Services
 
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
-          // TODO: Split this into multiple threads
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
           var missingSeries = library.Series.Where(existingSeries =>
@@ -180,16 +180,19 @@ namespace API.Services
              } 
              existingSeries.NormalizedName = Parser.Parser.Normalize(info.Key);
           }
-          
+
+          int total = 0;
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
-          foreach (var existingSeries in library.Series)
+          var librarySeries = library.Series.ToList();
+          Parallel.ForEach<Series, int>(librarySeries, () => 0, (series, state, subtotal) =>
           {
-             _logger.LogInformation("Processing series {SeriesName}", existingSeries.Name);
-             UpdateVolumes(existingSeries, parsedSeries[existingSeries.Name].ToArray());
-             existingSeries.Pages = existingSeries.Volumes.Sum(v => v.Pages);
-             _metadataService.UpdateMetadata(existingSeries, _forceUpdate);
-          }
-          
+             _logger.LogInformation("Processing series {SeriesName}", series.Name);
+             UpdateVolumes(series, parsedSeries[series.Name].ToArray());
+             series.Pages = series.Volumes.Sum(v => v.Pages);
+             _metadataService.UpdateMetadata(series, _forceUpdate);
+             return 0;
+          }, finalResult => Interlocked.Add(ref total, finalResult));
+
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
 
