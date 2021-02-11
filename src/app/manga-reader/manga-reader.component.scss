@@ -2,6 +2,20 @@ $center-width: 50%;
 $side-width: 25%;
 
 $dash-width: 3px;
+$pointer-offset: 5px;
+
+$secondary-color: #CCC;
+
+
+@media(min-width: 600px) {
+    .overlay .left .i {
+        left: 20px;
+    }
+    .overlay .right .i {
+        right: 20px;
+    }
+  } 
+
 
 canvas {
     position: absolute;
@@ -30,7 +44,7 @@ canvas {
   color: white;
 
   .right {
-    border-left: $dash-width dashed #CCC;
+    border-left: $dash-width dashed $secondary-color;
     cursor: pointer;
 
     p {
@@ -39,24 +53,22 @@ canvas {
         height: 100%;
         z-index: 1;
         top: 65%;
-        right: 10%;
-        color: #CCC;
+        right: $pointer-offset;
+        color: $secondary-color;
     }
 
     i {
         font-size: 70px;
         position: absolute;
-        width: 20%;
         height: 100%;
         z-index: 1;
         top: 50%;
-        right: 10%;
-        color: #CCC;
-        cursor: pointer;
+        right: $pointer-offset;
+        color: $secondary-color;
       }
   }
   .left {
-    border-right: $dash-width dashed #CCC;
+    border-right: $dash-width dashed $secondary-color;
     cursor: pointer;
 
     p {
@@ -65,20 +77,20 @@ canvas {
         height: 100%;
         z-index: 1;
         top: 65%;
-        left: 10%;
-        color: #CCC;
+        left: $pointer-offset;
+        color: $secondary-color;
     }
 
     i {
         font-size: 70px;
         position: absolute;
-        width: 20%;
         height: 100%;
         z-index: 1;
         top: 50%;
-        left: 10%;
-        color: #CCC;
+        left: $pointer-offset;
+        color: $secondary-color;
       }
+
   }
 
 
@@ -117,20 +129,12 @@ canvas {
     top: 10px;
     left: $side-width;
     width: $center-width;
-    border-bottom: $dash-width dashed #CCC;
+    border-bottom: $dash-width dashed $secondary-color;
     text-align: center;
     z-index: 2;
-}
-
-.bottom-menu {
-    position: fixed;
-    top: 265px;
-    left: $side-width;
-    width: $center-width;
-    height: 100%;
-    border: $dash-width dashed #CCC;
-    text-align: center;
-    z-index: 2;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .right {
@@ -142,11 +146,6 @@ canvas {
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
-    // top: 50%;
-    // margin-top: -50px;
-    // width: 20%;
-    // height: 100%;
-    // position: absolute;
 }
 
 .left {

@@ -17,12 +17,12 @@
                     </div>
 
                 <div class="row no-gutters">
-                    <div class="col">
+                    <div class="col-sm-12 col-md-6">
                         <h4>Page Navigation</h4>
                         Page {{pageNum + 1}} / {{maxPages}}
                         <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()"></ngb-progressbar>
                     </div>
-                    <div class="col">
+                    <div class="col-sm-12 col-md-6">
                         <h4>Reading Direction</h4>
                         <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</button>
                     </div>
