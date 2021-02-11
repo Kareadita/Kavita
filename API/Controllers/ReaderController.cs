@@ -33,7 +33,7 @@ namespace API.Controllers
             // Temp let's iterate the directory each call to get next image
             var chapter = await _cacheService.Ensure(chapterId);
 
-            if (chapter == null) return BadRequest("There was an issue finding image file for reading.");
+            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
             var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
             if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
@@ -51,25 +51,33 @@ namespace API.Controllers
             if (user.Progresses == null) return Ok(0);
             var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
-            if (progress != null) return Ok(progress.PagesRead);
-            
-            return Ok(0);
+            return Ok(progress?.PagesRead ?? 0);
         }
 
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogInformation($"Saving {user.UserName} progress for Chapter {bookmarkDto.ChapterId} to page {bookmarkDto.PageNum}");
+            _logger.LogInformation("Saving {UserName} progress for Chapter {ChapterId} to page {PageNum}", user.UserName, bookmarkDto.ChapterId, bookmarkDto.PageNum);
             
-            // TODO: Don't let user bookmark past total pages.
+            // Don't let user bookmark past total pages.
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
+            if (bookmarkDto.PageNum > chapter.Pages)
+            {
+                return BadRequest("Can't bookmark past max pages");
+            }
 
+            if (bookmarkDto.PageNum < 0)
+            {
+                return BadRequest("Can't bookmark less than 0");
+            }
+            
+            
             user.Progresses ??= new List<AppUserProgress>();
             var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
 
             if (userProgress == null)
             {
-                
                 user.Progresses.Add(new AppUserProgress
                 {
                     PagesRead = bookmarkDto.PageNum,
