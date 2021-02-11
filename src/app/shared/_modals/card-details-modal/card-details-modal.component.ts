@@ -11,7 +11,7 @@ import { Volume } from 'src/app/_models/volume';
 })
 export class CardDetailsModalComponent implements OnInit {
 
-  @Input() parentName: string = '';
+  @Input() parentName = '';
   @Input() data!: any; // Volume | Chapter
   isChapter = false;
   chapters: Chapter[] = [];
@@ -27,6 +27,7 @@ export class CardDetailsModalComponent implements OnInit {
     } else {
       this.chapters.push(...this.data?.chapters);
     }
+
     console.log('Is Chapter: ', this.isChapter);
     console.log(this.data);
 
@@ -42,5 +43,12 @@ export class CardDetailsModalComponent implements OnInit {
 
   close() {
     this.modal.close();
+  }
+
+  formatChapterNumber(chapter: Chapter) {
+    if (chapter.number === '0') {
+      return '1';
+    }
+    return chapter.number;
   }
 }

@@ -29,8 +29,7 @@ $image-width: 160px;
 
 .progress-banner {
     width: 160px;
-    position: absolute;
-    top: $image-height;
+    height: 5px;
 
     .progress {
         color: $primary-color;

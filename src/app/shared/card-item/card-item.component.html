@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
-        <span class="card-title" (click)="handleClick()" tabindex="0">
+        <span class="card-title" placement="top" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
           {{title}}
         </span>
     </div>

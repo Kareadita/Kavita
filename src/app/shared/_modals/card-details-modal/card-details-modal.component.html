@@ -1,4 +1,4 @@
-<ng-container *ngIf="data !== undefined">
+<div *ngIf="data !== undefined">
     <div class="modal-header">
         <h4 class="modal-title" id="modal-basic-title">{{this.parentName}} - {{this.isChapter ? 'Chapter' : 'Volume'}} {{this.data.number}} Details</h4>
         <button type="button" class="close" aria-label="Close" (click)="close()">
@@ -31,9 +31,9 @@
         </ng-container>
         <h4>Chapters</h4>
         <div *ngFor="let chapter of chapters" class="row breadcrumb">
-            Chapter {{chapter.number + 1}}
+            Chapter {{formatChapterNumber(chapter)}}
             <ul class="list-group">
-                <li *ngFor="let file of chapter.files" class="list-group-item">
+                <li *ngFor="let file of chapter.files.sort()" class="list-group-item">
                     <span>{{file.filePath}}</span>
                     <div class="row no-gutters">
                         <div class="col">
@@ -52,4 +52,4 @@
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
     </div>
-</ng-container>
+</div>

@@ -141,7 +141,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent);
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
   }

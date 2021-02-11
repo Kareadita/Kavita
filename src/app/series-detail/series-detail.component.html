@@ -1,4 +1,4 @@
-<div class="container-fluid" *ngIf="series !== undefined">
+<div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
             <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
