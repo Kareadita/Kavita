@@ -12,6 +12,7 @@ import { NavService } from '../_services/nav.service';
 import { Chapter } from '../_models/chapter';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
+import { PageSplitOption } from '../_models/preferences/page-split-option';
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -81,9 +82,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   maxPages = 1;
   user!: User;
   fittingForm: FormGroup | undefined;
+  splitForm: FormGroup | undefined;
 
   readingDirection = ReadingDirection.LeftToRight;
   scalingOption = ScalingOption.FitToHeight;
+  pageSplitOption = PageSplitOption.SplitRightToLeft;
+
 
   images: MangaImage[] = [];
   cachedImages = new Queue<MangaImage>();
@@ -123,8 +127,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.user = user;
         this.readingDirection = this.user.preferences.readingDirection;
         this.scalingOption = this.user.preferences.scalingOption;
+        this.pageSplitOption = this.user.preferences.pageSplitOption;
         this.fittingForm = this.formBuilder.group({
           fittingOption: this.translateScalingOption(this.scalingOption)
+        });
+        this.splitForm = this.formBuilder.group({
+          pageSplitOption: this.pageSplitOption + ''
         });
       }
     });
