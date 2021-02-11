@@ -72,8 +72,7 @@ export class SeriesDetailComponent implements OnInit {
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.volumes.forEach(v => {
-          v.name = v.number === 0 ? 'Latest Chapters' : 'Volume ' + v.number;
-          if (v.pagesRead >= v.pages) {
+          if (v.pagesRead >= v.pages - 1) { // this needs a -1
             return;
           } else if (v.pagesRead === 0) {
             return;
