@@ -29,6 +29,13 @@ canvas {
     }
 }
 
+.loading {
+    position: absolute;
+    left: 48%;
+    top: 20%;
+    z-index: 1;
+}
+
 
 .overlay {
   position: fixed;

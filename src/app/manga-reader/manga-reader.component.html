@@ -1,78 +1,73 @@
 <div class="reader">
-
-    <div class="{{isLoading ? 'overlay' : ''}}" (click)="toggleMenu()">
-        <ng-container *ngIf="isLoading">
-            <div class="spinner-border text-secondary" role="status">
-                <span class="invisible">Loading...</span>
-            </div>
-        </ng-container>
-    </div>
+    <ng-container *ngIf="isLoading">
+        <div class="spinner-border text-secondary loading" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </ng-container>
 
     <div *ngIf="menuOpen" class="overlay" (click)="toggleMenu()">
-        <ng-container >
-
-            <div class="center-menu" (click)="$event.stopPropagation()">
-                    <div class="col" *ngIf="image !== undefined">
-                        {{ image.mangaFileName }}
-                    </div>
-
-                <div class="row no-gutters">
-                    <div class="col-sm-12 col-md-6">
-                        <h4>Page Navigation</h4>
-                        Page {{pageNum + 1}} / {{maxPages}}
-                        <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()"></ngb-progressbar>
-                    </div>
-                    <div class="col-sm-12 col-md-6">
-                        <h4>Reading Direction</h4>
-                        <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</button>
-                    </div>
+        <div class="center-menu" (click)="$event.stopPropagation()">
+                <div class="col" *ngIf="image !== undefined">
+                    <!-- TODO: Think about putting behind ? icon toggle -->
+                    {{ image.mangaFileName }}
                 </div>
 
-                <div class="row no-gutters mt-4">
-                    <div *ngIf="fittingForm" class="col">
-                        <h4>Scaling Options</h4>
-                        <form [formGroup]="fittingForm">
-                            <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="fittingOption">
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="full-height"> Fit to Height
-                              </label>
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="full-width"> Fit to Width
-                              </label>
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="original"> Original
-                              </label>
-                            </div>
-                        </form>
-                    </div>
-    
-                    <div *ngIf="splitForm" class="col">
-                        <h4>Page Split Options</h4>
-                        <form [formGroup]="splitForm">
-                            <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="pageSplitOption">
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="1"> Right to Left
-                              </label>
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="0"> Left to Right
-                              </label>
-                              <label ngbButtonLabel class="btn-primary">
-                                <input ngbButton type="radio" value="2"> No Split
-                              </label>
-                            </div>
-                        </form>
-                    </div>
+            <div class="row no-gutters">
+                <div class="col-sm-12 col-md-6 mt-4">
+                    <h4>Page Navigation</h4>
+                    Page {{pageNum + 1}} / {{maxPages}}
+                    <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()"></ngb-progressbar>
+                </div>
+                <div class="col-sm-12 col-md-6 mt-4">
+                    <h4>Reading Direction</h4>
+                    <button class="btn btn-primary" (click)="setReadingDirection()">{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</button>
                 </div>
             </div>
-            <div class="right" (click)="toggleMenu()">
-                <p>{{readingDirection === 0 ? 'Next' : 'Previous'}} Page</p>
-                <i class="fa fa-arrow-right"></i>
+
+            <div class="row no-gutters">
+                <div *ngIf="fittingForm" class="col mt-4">
+                    <h4>Scaling Options</h4>
+                    <form [formGroup]="fittingForm">
+                        <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="fittingOption">
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-height"> Fit to Height
+                            </label>
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="full-width"> Fit to Width
+                            </label>
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="original"> Original
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                <div *ngIf="splitForm" class="col mt-4">
+                    <h4>Page Split Options</h4>
+                    <form [formGroup]="splitForm">
+                        <div class="btn-group btn-group-toggle" ngbRadioGroup name="radioBasic" formControlName="pageSplitOption">
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="1"> Right to Left
+                            </label>
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="0"> Left to Right
+                            </label>
+                            <label ngbButtonLabel class="btn-primary">
+                            <input ngbButton type="radio" value="2"> No Split
+                            </label>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="left" (click)="toggleMenu()">
-                <p>{{readingDirection === 0 ? 'Previous' : 'Next'}} Page</p>
-                <i class="fa fa-arrow-left"></i>
-            </div>
-        </ng-container>
+        </div>
+        <div class="right" (click)="toggleMenu()">
+            <p>{{readingDirection === 0 ? 'Next' : 'Previous'}} Page</p>
+            <i class="fa fa-arrow-right"></i>
+        </div>
+        <div class="left" (click)="toggleMenu()">
+            <p>{{readingDirection === 0 ? 'Previous' : 'Next'}} Page</p>
+            <i class="fa fa-arrow-left"></i>
+        </div>
     </div>
 
     <div (click)="toggleMenu()">

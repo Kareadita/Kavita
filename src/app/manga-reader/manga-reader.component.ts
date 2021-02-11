@@ -151,6 +151,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.pageNum = this.maxPages;
         }
         this.pageNum = pageNum;
+
+        // Clear out cache entries that are less than currentPage - 1
+        const cuttoff = this.pageNum - 1;
+        Object.entries(localStorage).filter(entry => entry[0].startsWith('kavita-page-cache-' + this.user.username + '-' + this.chapterId))
+          .filter(entry => parseInt(entry[0].replace('kavita-page-cache-' + this.user.username + '-' + this.chapterId + '--', ''), 10) < cuttoff)
+          .forEach(entry => {
+            localStorage.removeItem(entry[0]);
+        });
+
         this.loadPage();
       });
     }, err => {
@@ -166,16 +175,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-
   }
 
   ngOnDestroy() {
     for (let i = 0; i < this.maxPages; i++) {
       localStorage.removeItem(this.getPageKey(i));
     }
-
-    // NOTE: Should I remove all other keys for page cache? What about using a timestamp on when to clear out old cache entries? 
-    //Object.entries(localStorage)
 
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
@@ -286,15 +291,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  clearCanvas() {
-    if (!this.canvas || !this.ctx) {
-      return;
-    }
-
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-  }
-
   getPageKey(pageNum: number) {
     return `kavita-page-cache-${this.user.username}-${this.chapterId}--${pageNum}`;
   }
@@ -305,7 +301,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.isLoading = false;
     this.image = image;
-    this.clearCanvas();
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
       console.error('Could not save bookmark status. Current page is: ', this.pageNum);
     });
