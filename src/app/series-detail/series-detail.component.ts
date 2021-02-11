@@ -25,7 +25,8 @@ export class SeriesDetailComponent implements OnInit {
   chapters: Chapter[] = [];
   libraryId = 0;
 
-  currentlyReadingVolume!: Volume;
+  currentlyReadingVolume: Volume | undefined = undefined;
+  currentlyReadingChapter: Chapter | undefined = undefined;
   safeImage!: SafeUrl;
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
@@ -71,17 +72,38 @@ export class SeriesDetailComponent implements OnInit {
         this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
-        this.volumes.forEach(v => {
-          if (v.pagesRead >= v.pages - 1) { // this needs a -1
-            return;
-          } else if (v.pagesRead === 0) {
-            return;
-          } else {
-            this.currentlyReadingVolume = v;
-          }
-        });
+        this.setContinuePoint();
       });
     });
+  }
+
+  setContinuePoint() {
+    this.volumes.forEach(v => {
+      if (v.pagesRead >= v.pages - 1) {
+        return;
+      } else if (v.pagesRead === 0) {
+        return;
+      } else {
+        this.currentlyReadingVolume = v;
+      }
+    });
+
+    if (this.currentlyReadingVolume === undefined) {
+      // We need to check against chapters
+      this.chapters.forEach(c => {
+        if (c.pagesRead >= c.pages - 1) {
+          return;
+        } else if (c.pagesRead === 0) {
+          return;
+        } else {
+          this.currentlyReadingChapter = c;
+        }
+      });
+      if (this.currentlyReadingChapter === undefined) {
+        // Default to first chapter
+        this.currentlyReadingChapter = this.chapters[0];
+      }
+    }
   }
 
   markAsRead(vol: Volume) {
@@ -107,11 +129,9 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   read() {
-    if (this.currentlyReadingVolume !== undefined) {
-      this.openVolume(this.currentlyReadingVolume);
-    } else {
-      this.openVolume(this.volumes[0]);
-    }
+    if (this.currentlyReadingVolume !== undefined) { this.openVolume(this.currentlyReadingVolume); }
+    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
+    else { this.openVolume(this.volumes[0]); }
   }
 
   updateRating(rating: any) {
