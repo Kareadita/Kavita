@@ -32,6 +32,7 @@ export class SeriesDetailComponent implements OnInit {
 
   testMap: any;
   showBook = false;
+  isLoading = true;
 
   volumeActions: CardItemAction[] = [];
 
@@ -73,6 +74,7 @@ export class SeriesDetailComponent implements OnInit {
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.setContinuePoint();
+        this.isLoading = false;
       });
     });
   }

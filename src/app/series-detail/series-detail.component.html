@@ -2,10 +2,9 @@
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
             <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
-            <button class="btn btn-primary read-btn" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;">
+            <button class="btn btn-primary read-btn" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;" [disabled]="isLoading">
                 <span>
                     <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
-                    
                 </span>
                 &nbsp;
                 {{currentlyReadingVolume === undefined ? 'Start Reading' : 'Continue Reading'}}
