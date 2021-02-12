@@ -113,7 +113,7 @@ namespace API.Services
                     Array.Sort(files, _numericComparer);
                     
                     // Since array is 0 based, we need to keep that in account (only affects last image)
-                    if (page - 1 == files.Length)
+                    if (page == files.Length)
                     {
                         return (files.ElementAt(page - 1 - pagesSoFar), mangaFile);
                     }
