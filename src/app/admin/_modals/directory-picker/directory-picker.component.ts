@@ -61,7 +61,6 @@ export class DirectoryPickerComponent implements OnInit {
     this.routeStack.push(folderName);
     const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
     this.loadChildren(fullPath);
-    console.log('RouteStack: ', this.routeStack.items);
   }
 
   goBack() {
