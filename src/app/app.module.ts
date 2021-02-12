@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbButtonsModule, NgbDropdownModule, NgbModalModule, NgbModule, NgbProgressbarModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -30,21 +30,26 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     HomeComponent,
     NavHeaderComponent,
     UserLoginComponent,
-    LibraryComponent,
-    LibraryDetailComponent,
-    SeriesDetailComponent,
-    MangaReaderComponent,
-    NotConnectedComponent,
-    UserPreferencesComponent,
+    LibraryComponent, // Move into MangaModule
+    LibraryDetailComponent, // Move into MangaModule
+    SeriesDetailComponent, // Move into MangaModule
+    MangaReaderComponent, // Move into ReadersModule
+    NotConnectedComponent, // Move into ExtrasModule
+    UserPreferencesComponent, // Move into SettingsModule
   ],
   imports: [
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    FormsModule, // Just used for gotopage; TODO: Remove this and use ReactiveForms
+    FormsModule, // Just used for gotopage; TODO: Remove this and use ReactiveForms (this module is large)
     ReactiveFormsModule,
-    NgbModule,
+    NgbModalModule,
+    NgbButtonsModule,
+    NgbDropdownModule,
+    NgbTooltipModule,
+    NgbRatingModule,
+    NgbProgressbarModule,
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'

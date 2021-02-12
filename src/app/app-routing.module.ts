@@ -11,6 +11,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 
+// TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
 const routes: Routes = [
   {path: '', component: HomeComponent},

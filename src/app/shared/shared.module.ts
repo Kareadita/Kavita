@@ -7,6 +7,7 @@ import { NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-b
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
+import { AutocompleteComponent } from './autocomplete/autocomplete.component';
 
 
 @NgModule({
@@ -16,6 +17,7 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     LibraryCardComponent,
     SeriesCardComponent,
     CardDetailsModalComponent,
+    AutocompleteComponent,
   ],
   imports: [
     CommonModule,
