@@ -6,21 +6,31 @@
     </button>
 </div>
 <div class="modal-body">
-    <!-- <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item {{'active' ? route === routeStack.peek() : ''}}" *ngFor="let route of routeStack.items">{{getStem(route)}}</li>
+    <nav aria-label="directory breadcrumb">
+        <ol class="breadcrumb" *ngIf="routeStack.peek() !== undefined; else noBreadcrumb">
+          <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}" *ngFor="let route of routeStack.items; let index = index">
+                <ng-container *ngIf="route === routeStack.peek(); else nonActive">
+                    {{route}}
+                </ng-container>  
+                <ng-template #nonActive>
+                    <a href="javascript:void(0);" (click)="navigateTo(index)">{{route}}</a>
+                </ng-template>
+          </li>
         </ol>
-      </nav> -->
-    <div class="list-group">
+        <ng-template #noBreadcrumb>
+            <div class="breadcrumb">Select a folder to view breadcrumb</div>
+        </ng-template>
+    </nav>
+    <ul class="list-group">
         <button *ngIf="routeStack.peek() !== undefined" (click)="goBack()" class="list-group-item list-group-item-action"><i class="fa fa-arrow-left mr-2"></i>Back</button>
         <button *ngFor="let folder of folders" class="list-group-item list-group-item-action" (click)="selectNode(folder)">
             <span>{{getStem(folder)}}</span>
             <button type="button" class="btn btn-primary float-right" (click)="shareFolder(folder, $event)">Share</button>
         </button>
-        <div class="text-center" *ngIf="folders.length === 0">
+        <div class="list-group-item text-center" *ngIf="folders.length === 0">
             There are no folders here
         </div>
-    </div>
+    </ul>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>

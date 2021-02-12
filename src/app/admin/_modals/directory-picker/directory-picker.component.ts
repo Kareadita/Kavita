@@ -61,6 +61,7 @@ export class DirectoryPickerComponent implements OnInit {
     this.routeStack.push(folderName);
     const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
     this.loadChildren(fullPath);
+    console.log('RouteStack: ', this.routeStack.items);
   }
 
   goBack() {
@@ -104,5 +105,17 @@ export class DirectoryPickerComponent implements OnInit {
     }
 
     return path;
+  }
+
+  navigateTo(index: number) {
+    const numberOfPops = this.routeStack.items.length - index;
+    if (this.routeStack.items.length - numberOfPops > this.routeStack.items.length) {
+      this.routeStack.items = [];
+    }
+    for (let i = 0; i < numberOfPops; i++) {
+      this.routeStack.pop();
+    }
+
+    this.loadChildren(this.routeStack.peek() || '');
   }
 }
