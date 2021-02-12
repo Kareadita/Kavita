@@ -43,7 +43,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     BrowserAnimationsModule,
     ReactiveFormsModule,
     NgbDropdownModule, // Nav
-    NgbTooltipModule, // Shared
+    NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail
     SharedModule,
     ToastrModule.forRoot({
