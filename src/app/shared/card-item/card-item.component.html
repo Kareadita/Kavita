@@ -1,4 +1,4 @@
-<div class="card" style="width: 18rem;">
+<div class="card">
     <div class="overlay" (click)="handleClick()">
       <img class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">

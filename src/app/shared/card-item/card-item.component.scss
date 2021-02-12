@@ -4,7 +4,7 @@ $image-height: 230px;
 $image-width: 160px;
 
 .card {
-    margin: 10px;
+    margin: 5px;
     max-width: $image-width;
     cursor: pointer;
     padding-left: 0px;
@@ -13,7 +13,6 @@ $image-width: 160px;
 
 .card-title {
     font-size: 13px;
-
     width: 150px;
     text-overflow: ellipsis;
     white-space: nowrap;
