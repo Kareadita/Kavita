@@ -33,7 +33,6 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     LibraryComponent, // Move into MangaModule
     LibraryDetailComponent, // Move into MangaModule
     SeriesDetailComponent, // Move into MangaModule
-    MangaReaderComponent, // Move into ReadersModule
     NotConnectedComponent, // Move into ExtrasModule
     UserPreferencesComponent, // Move into SettingsModule
   ],
@@ -42,14 +41,10 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    FormsModule, // Just used for gotopage; TODO: Remove this and use ReactiveForms (this module is large)
     ReactiveFormsModule,
-    NgbModalModule,
-    NgbButtonsModule,
-    NgbDropdownModule,
-    NgbTooltipModule,
-    NgbRatingModule,
-    NgbProgressbarModule,
+    NgbDropdownModule, // Nav
+    NgbTooltipModule, // Shared
+    NgbRatingModule, // Series Detail
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'

@@ -27,7 +27,10 @@ const routes: Routes = [
     children: [
       {path: 'library/:id', component: LibraryDetailComponent},
       {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
-      {path: 'library/:libraryId/series/:seriesId/manga/:chapterId', component: MangaReaderComponent},
+      {
+        path: 'library/:libraryId/series/:seriesId/manga',
+        loadChildren: () => import('./manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+      }
     ]
   },
   {path: 'login', component: UserLoginComponent},
