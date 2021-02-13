@@ -16,7 +16,7 @@
                 <div class="col-sm-12 col-md-6 mt-4">
                     <h4>Page Navigation</h4>
                     Page {{pageNum + 1}} / {{maxPages}}
-                    <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()"></ngb-progressbar>
+                    <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()" style="width: 80%; margin: 0 auto;"></ngb-progressbar>
                 </div>
                 <div class="col-sm-12 col-md-6 mt-4">
                     <h4>Reading Direction</h4>

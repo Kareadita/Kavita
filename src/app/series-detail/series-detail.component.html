@@ -68,7 +68,7 @@
         <div *ngFor="let chapter of chapters">
             <app-card-item class="col-sm-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="chapter.coverImage === null ? 'assets/images/image-placeholder.jpg' : chapter.coverImage"
-            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="volumeActions"></app-card-item>
+            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
         </div>
     </div>
 

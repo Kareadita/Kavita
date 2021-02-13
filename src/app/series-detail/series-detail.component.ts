@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { Toast, ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
@@ -35,12 +36,13 @@ export class SeriesDetailComponent implements OnInit {
   isLoading = true;
 
   volumeActions: CardItemAction[] = [];
+  chapterActions: CardItemAction[] = [];
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService, private utilityService: UtilityService) {
+              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService) {
     ratingConfig.max = 5;
   }
 
@@ -55,6 +57,16 @@ export class SeriesDetailComponent implements OnInit {
     this.volumeActions = [
       {title: 'Mark Read', callback: (data: Volume) => this.markAsRead(data)},
       {title: 'Mark Unread', callback: (data: Volume) => this.markAsUnread(data)},
+      {
+      title: 'Info',
+      callback: (data: Volume) => {
+        this.openViewInfo(data);
+      }
+    }];
+
+    this.chapterActions = [
+      {title: 'Mark Read', callback: (data: Chapter) => this.markChapterAsRead(data)},
+      {title: 'Mark Unread', callback: (data: Chapter) => this.markChapterAsUnread(data)},
       {
       title: 'Info',
       callback: (data: Volume) => {
@@ -80,12 +92,15 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   setContinuePoint() {
+    this.currentlyReadingVolume = undefined;
+    this.currentlyReadingChapter = undefined;
+
     this.volumes.forEach(v => {
-      if (v.pagesRead >= v.pages - 1) {
+      if (v.number === 0) {
         return;
-      } else if (v.pagesRead === 0) {
+      } else if (v.pagesRead >= v.pages) {
         return;
-      } else {
+      } else if (this.currentlyReadingVolume === undefined) {
         this.currentlyReadingVolume = v;
       }
     });
@@ -93,11 +108,9 @@ export class SeriesDetailComponent implements OnInit {
     if (this.currentlyReadingVolume === undefined) {
       // We need to check against chapters
       this.chapters.forEach(c => {
-        if (c.pagesRead >= c.pages - 1) {
+        if (c.pagesRead >= c.pages) {
           return;
-        } else if (c.pagesRead === 0) {
-          return;
-        } else {
+        } else if (this.currentlyReadingChapter === undefined) {
           this.currentlyReadingChapter = c;
         }
       });
@@ -114,8 +127,10 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages))).subscribe(results => {
+    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages - 1))).subscribe(results => {
       vol.pagesRead = vol.pages;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Read');
     });
   }
 
@@ -127,6 +142,34 @@ export class SeriesDetailComponent implements OnInit {
 
     forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
       vol.pagesRead = 0;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Unread');
+    });
+  }
+
+  markChapterAsRead(chapter: Chapter) {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+
+    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(results => {
+      this.toastr.success('Marked as Read');
+      this.setContinuePoint();
+      chapter.pagesRead = chapter.pages;
+    });
+  }
+
+  markChapterAsUnread(chapter: Chapter) {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+
+    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, 0).subscribe(results => {
+      chapter.pagesRead = 0;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Unread');
     });
   }
 

@@ -21,18 +21,22 @@ enum KEY_CODES {
   SPACE = ' '
 }
 
-// export enum READING_DIRECTION {
-//   LEFT_TO_RIGHT = 1,
-//   RIGHT_TO_LEFT = 2
-// }
-
 enum FITTING_OPTION {
   HEIGHT = 'full-height',
   WIDTH = 'full-width',
   ORIGINAL = 'original'
 }
 
-const MAX_CACHED_PAGES = 5;
+enum SPLIT_PAGE_PART {
+  NO_SPLIT = 'none',
+  FIRST_PAGE = 'first',
+  SECOND_PAGE = 'second'
+}
+
+enum PAGING_DIRECTION {
+  FORWARD = 1,
+  BACKWARDS = -1,
+}
 
 export class Queue<T> {
   elements: T[];
@@ -68,16 +72,12 @@ export class Queue<T> {
   styleUrls: ['./manga-reader.component.scss']
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
-
-  // Is there a way to turn off the nav bar? Perhaps a service?
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
 
-  minWidth = 99999; // Min width we see, so that we can tell if a page needs splitting
-  currentImage: any;
   pageNum = 0;
   maxPages = 1;
   user!: User;
@@ -88,11 +88,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scalingOption = ScalingOption.FitToHeight;
   pageSplitOption = PageSplitOption.SplitRightToLeft;
 
-
-  images: MangaImage[] = [];
-  cachedImages = new Queue<MangaImage>();
   cachedPages = new Queue<number>();
   image: MangaImage | undefined; // Used soley to display information on UI. Not used for manipulation
+  currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
+  pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
   menuOpen = false;
   isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
@@ -270,7 +269,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   cache(image: MangaImage, pageNum: number) {
     this.cachedPages.enqueue(pageNum);
-    this.cachedImages.enqueue(image);
 
     try {
       const key = this.getPageKey(pageNum);
@@ -305,26 +303,63 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       console.error('Could not save bookmark status. Current page is: ', this.pageNum);
     });
 
-    if (image.width < this.minWidth) {
-      this.minWidth = image.width;
-    }
-    this.currentImage = image;
 
+    this.image = image;
     this.canvas.nativeElement.width = image.width;
     this.canvas.nativeElement.height = image.height;
 
     this.cache(image, this.pageNum);
     this.prefetch();
 
-    const that = this;
-    const img = new Image();
+    this.updateSplitPage(this.image);
+
+
+    const img = new Image(this.image.width, this.image.height);
     img.onload = () => {
-      if (that.ctx) {
-        that.ctx.drawImage(img, 0, 0);
+      console.log('RENDERING PAGE ', this.pageNum);
+      console.log('Needs splitting: ', this.image?.needsSplitting);
+      if (this.ctx && this.canvas) {
+        if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
+          console.log('Rendering left half of image');
+          this.canvas.nativeElement.width = this.image.width / 2;
+          this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, 0, 0, this.image.width, this.image.height);
+        } else if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
+          console.log('Rendering right half of image');
+          this.canvas.nativeElement.width = this.image.width / 2;
+          this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, -this.image.width / 2, 0, this.image.width, this.image.height);
+        } else {
+          this.ctx.drawImage(img, 0, 0);
+        }
       }
     };
 
     img.src = 'data:image/jpeg;base64,' + image.content;
+  }
+
+  updateSplitPage(image: MangaImage) {
+    if (!image.needsSplitting) {
+      this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
+      return;
+    }
+
+    // TODO: Hook in readingDirection
+    if (this.pagingDirection === PAGING_DIRECTION.FORWARD) {
+      if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.FIRST_PAGE;
+      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.SECOND_PAGE;
+      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
+      }
+    } else if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+      if (this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
+      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.FIRST_PAGE;
+      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) {
+        this.currentImageSplitPart = SPLIT_PAGE_PART.SECOND_PAGE;
+      }
+    }
   }
 
   handlePageChange(event: any, direction: string) {
@@ -345,9 +380,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // TODO: Check if this is a split page
+    this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    if (this.currentImageSplitPart !== SPLIT_PAGE_PART.FIRST_PAGE) {
+      this.pageNum++;
+    }
 
-    this.pageNum++;
     this.loadPage();
   }
 
@@ -359,7 +396,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum - 1 < 0) {
       return;
     }
-    this.pageNum--;
+    this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
+    if (this.currentImageSplitPart !== SPLIT_PAGE_PART.SECOND_PAGE) {
+      this.pageNum--;
+    }
+
     this.loadPage();
   }
 

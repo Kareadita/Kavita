@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "prod":  "ng build --prod",
+    "prod": "ng build --prod",
     "explore": "ng build --stats-json && webpack-bundle-analyzer ../Kavita/API/wwwroot/stats.json",
     "test": "ng test",
     "lint": "ng lint",
@@ -48,7 +48,7 @@
     "karma-jasmine-html-reporter": "^1.5.0",
     "protractor": "~7.0.0",
     "ts-node": "~8.3.0",
-    "tslint": "~6.1.0",
+    "tslint": "^6.1.3",
     "typescript": "~4.0.2"
   }
 }

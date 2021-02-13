@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbButtonsModule, NgbDropdownModule, NgbModalModule, NgbModule, NgbProgressbarModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbRatingModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -17,7 +17,6 @@ import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 
@@ -42,6 +41,8 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     AppRoutingModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
+    FormsModule, // Nav typeahead
+    NgbTypeaheadModule, // Nav typeahead
     NgbDropdownModule, // Nav
     NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail

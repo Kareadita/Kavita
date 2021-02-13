@@ -3,12 +3,31 @@
       <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
       <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home"></i> Kavita</a>
       <ul class="navbar-nav mr-auto">
-
+        
         <div class="nav-item">
-          <div class="col-xs-4">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <div class="col-xs-4 col-md-6">
+            <fieldset class="form-inline">
+              <div class="form-group">
+                <label for="nav-search" class="sr-only">Search series</label>
+                <input id="nav-search" type="text" class="form-control me-2" [class.is-invalid]="searchFailed" [(ngModel)]="model" 
+                    [ngbTypeahead]="search" placeholder="Search Series" [resultTemplate]="rt" (selectItem)="openSearchResult($event)"/>
+                <div class="invalid-feedback" *ngIf="searchFailed">There was an issue fetching search results</div>
+              </div>
+            </fieldset>
           </div>
         </div>
+
+        <ng-template #rt let-r="result" let-t="term">
+          <div style="display: flex;">
+            <div style="width: 24px" class="mr-1">
+              <img [src]="'data:image/jpeg;base64,' + r.coverImage" style="width: 24px; margin-top:5px;">
+            </div>
+            <div class="ml-1">
+              <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
+              <span class="form-text" style="font-size: 0.8rem;">in {{r.libraryName}}</span>
+            </div>
+          </div>
+        </ng-template>
       </ul>
       
 
