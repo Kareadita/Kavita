@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-base64-image',
   templateUrl: './base64-image.component.html',
-  styleUrls: ['./base64-image.component.scss']
+  styleUrls: ['./base64-image.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class Base64ImageComponent implements OnInit {
 
