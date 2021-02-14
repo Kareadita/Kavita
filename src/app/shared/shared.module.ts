@@ -7,6 +7,7 @@ import { NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-b
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
+import { Base64ImageComponent } from './base64-image/base64-image.component';
 
 
 @NgModule({
@@ -16,6 +17,7 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     LibraryCardComponent,
     SeriesCardComponent,
     CardDetailsModalComponent,
+    Base64ImageComponent,
   ],
   imports: [
     CommonModule,
@@ -29,6 +31,7 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     CardItemComponent,
     LibraryCardComponent,
     SeriesCardComponent,
+    Base64ImageComponent
   ]
 })
 export class SharedModule { }

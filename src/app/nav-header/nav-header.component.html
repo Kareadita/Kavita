@@ -20,7 +20,8 @@
         <ng-template #rt let-r="result" let-t="term">
           <div style="display: flex;">
             <div style="width: 24px" class="mr-1">
-              <img [src]="'data:image/jpeg;base64,' + r.coverImage" style="width: 24px; margin-top:5px;">
+              <app-base64-image [style]="imageStyles" [src]="r.coverImage" alt="cover image"></app-base64-image> 
+              <!-- <img [src]="'data:image/jpeg;base64,' + r.coverImage" style="width: 24px; margin-top:5px;"> -->
             </div>
             <div class="ml-1">
               <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>

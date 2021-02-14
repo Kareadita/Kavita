@@ -17,6 +17,7 @@ export class NavHeaderComponent implements OnInit {
   model: any;
   searching = false;
   searchFailed = false;
+  imageStyles = {width: '24px', 'margin-top': '5px'};
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService) { }
 
