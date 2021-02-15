@@ -44,6 +44,7 @@ export class SeriesDetailComponent implements OnInit {
               private sanitizer: DomSanitizer, private modalService: NgbModal,
               private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService) {
     ratingConfig.max = 5;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   ngOnInit(): void {
