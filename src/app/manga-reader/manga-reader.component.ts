@@ -29,8 +29,8 @@ enum FITTING_OPTION {
 
 enum SPLIT_PAGE_PART {
   NO_SPLIT = 'none',
-  FIRST_PAGE = 'first',
-  SECOND_PAGE = 'second'
+  LEFT_PART = 'left',
+  RIGHT_PART = 'right'
 }
 
 enum PAGING_DIRECTION {
@@ -251,11 +251,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     const nextPage = this.pageNum + 1;
     if (this.isCached(nextPage)) {
-      console.log('Page ' + nextPage + ' is already cached.');
       return;
     }
     if (nextPage < this.maxPages) {
-      console.log('Prefetching next page: ', nextPage);
       this.readerService.getPage(this.chapterId, nextPage).subscribe(image => {
         this.cache(image, nextPage);
       });
@@ -316,15 +314,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const img = new Image(this.image.width, this.image.height);
     img.onload = () => {
-      console.log('RENDERING PAGE ', this.pageNum);
-      console.log('Needs splitting: ', this.image?.needsSplitting);
       if (this.ctx && this.canvas) {
-        if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
-          console.log('Rendering left half of image');
+        if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
           this.canvas.nativeElement.width = this.image.width / 2;
           this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, 0, 0, this.image.width, this.image.height);
-        } else if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
-          console.log('Rendering right half of image');
+        } else if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
           this.canvas.nativeElement.width = this.image.width / 2;
           this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, -this.image.width / 2, 0, this.image.width, this.image.height);
         } else {
@@ -336,28 +330,43 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     img.src = 'data:image/jpeg;base64,' + image.content;
   }
 
+  isSplitLeftToRight() {
+    return (this.splitForm?.get('pageSplitOption')?.value + '') === (PageSplitOption.SplitLeftToRight + '');
+  }
+
+  isNoSplit() {
+    return (this.splitForm?.get('pageSplitOption')?.value + '') === (PageSplitOption.NoSplit + '');
+  }
+
   updateSplitPage(image: MangaImage) {
-    if (!image.needsSplitting) {
+    if (!image.needsSplitting || this.isNoSplit()) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
     }
 
-    // TODO: Hook in readingDirection
     if (this.pagingDirection === PAGING_DIRECTION.FORWARD) {
-      if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.FIRST_PAGE;
-      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.SECOND_PAGE;
-      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
+      switch (this.currentImageSplitPart) {
+        case SPLIT_PAGE_PART.NO_SPLIT:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART;
+          break;
+        case SPLIT_PAGE_PART.LEFT_PART:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          break;
+        case SPLIT_PAGE_PART.RIGHT_PART:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.LEFT_PART;
+          break;
       }
     } else if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-      if (this.currentImageSplitPart === SPLIT_PAGE_PART.FIRST_PAGE) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
-      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.SECOND_PAGE) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.FIRST_PAGE;
-      } else if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) {
-        this.currentImageSplitPart = SPLIT_PAGE_PART.SECOND_PAGE;
+      switch (this.currentImageSplitPart) {
+        case SPLIT_PAGE_PART.NO_SPLIT:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART;
+          break;
+        case SPLIT_PAGE_PART.LEFT_PART:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.RIGHT_PART;
+          break;
+        case SPLIT_PAGE_PART.RIGHT_PART:
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          break;
       }
     }
   }
@@ -375,13 +384,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+
     if (this.pageNum + 1 >= this.maxPages) {
       // TODO: Ask if they want to load next chapter/volume
+      if (confirm('Do you want to load the next Volume/Chapter?')) {
+
+      }
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
-    if (this.currentImageSplitPart !== SPLIT_PAGE_PART.FIRST_PAGE) {
+    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART)) {
       this.pageNum++;
     }
 
@@ -396,8 +409,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum - 1 < 0) {
       return;
     }
+
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
-    if (this.currentImageSplitPart !== SPLIT_PAGE_PART.SECOND_PAGE) {
+    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART)) {
       this.pageNum--;
     }
 
@@ -410,7 +424,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Check cache if we already have this page
     const existingImage = this.checkCache(this.pageNum);
     if (existingImage) {
-      console.log('Using a cached image');
       this.renderPage(existingImage);
     } else {
       this.readerService.getPage(this.chapterId, this.pageNum).subscribe(image => {
