@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -22,16 +26,18 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly DataContext _dataContext; // TODO: Remove, only for FTS prototyping
 
         public LibraryController(IDirectoryService directoryService, 
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler, 
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, DataContext dataContext)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+            _dataContext = dataContext;
         }
         
         /// <summary>
@@ -212,6 +218,25 @@ namespace API.Controllers
                 
             return Ok();
 
+        }
+        
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
+        {
+            //NOTE: What about normalizing search query and only searching against normalizedname in Series? 
+            // So One Punch would match One-Punch
+            // This also means less indexes we need.
+            queryString = queryString.Replace(@"%", "");
+            
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            // Get libraries user has access to
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
+            
+            if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+
+            var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), queryString);
+
+            return Ok(series);
         }
     }
 }

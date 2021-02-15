@@ -30,6 +30,7 @@ namespace API.Entities
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
+        // NOTE: Do I want to store a thumbImage for search results? 
         /// <summary>
         /// Sum of all Volume page counts
         /// </summary>

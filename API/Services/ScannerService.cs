@@ -162,36 +162,34 @@ namespace API.Services
           _logger.LogInformation("Removed {RemoveCount} series that are no longer on disk", removeCount);
           
           // Add new series that have parsedInfos
-          foreach (var info in parsedSeries)
+          foreach (var (key, _) in parsedSeries)
           {
-             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(info.Key));
+             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(key));
              if (existingSeries == null)
              {
                 existingSeries = new Series()
                 {
-                   Name = info.Key,
-                   OriginalName = info.Key,
-                   NormalizedName = Parser.Parser.Normalize(info.Key),
-                   SortName = info.Key,
+                   Name = key,
+                   OriginalName = key,
+                   NormalizedName = Parser.Parser.Normalize(key),
+                   SortName = key,
                    Summary = "",
                    Volumes = new List<Volume>()
                 };
                 library.Series.Add(existingSeries);
              } 
-             existingSeries.NormalizedName = Parser.Parser.Normalize(info.Key);
+             existingSeries.NormalizedName = Parser.Parser.Normalize(key);
           }
-
-          int total = 0;
+          
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           var librarySeries = library.Series.ToList();
-          Parallel.ForEach<Series, int>(librarySeries, () => 0, (series, state, subtotal) =>
+          Parallel.ForEach(librarySeries, (series) =>
           {
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
              UpdateVolumes(series, parsedSeries[series.Name].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
              _metadataService.UpdateMetadata(series, _forceUpdate);
-             return 0;
-          }, finalResult => Interlocked.Add(ref total, finalResult));
+          });
 
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }

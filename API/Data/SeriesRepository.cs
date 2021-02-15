@@ -9,6 +9,7 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -16,11 +17,13 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public SeriesRepository(DataContext context, IMapper mapper)
+        public SeriesRepository(DataContext context, IMapper mapper, ILogger logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public void Add(Series series)
@@ -74,7 +77,25 @@ namespace API.Data
             await AddSeriesModifiers(userId, series);
 
 
-            Console.WriteLine("Processed GetSeriesDtoForLibraryIdAsync in {0} milliseconds", sw.ElapsedMilliseconds);
+            _logger.LogDebug("Processed GetSeriesDtoForLibraryIdAsync in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
+            return series;
+        }
+        
+        public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
+        {
+            var sw = Stopwatch.StartNew();
+            var series = await _context.Series
+                .Where(s => libraryIds.Contains(s.LibraryId))
+                .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%") 
+                            || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
+                .Include(s => s.Library) // NOTE: Is there a way to do this faster? 
+                .OrderBy(s => s.SortName)
+                .AsNoTracking()
+                .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+
+            _logger.LogDebug("Processed SearchSeries in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
             return series;
         }
 
