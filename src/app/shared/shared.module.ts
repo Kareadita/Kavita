@@ -8,6 +8,7 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
 import { Base64ImageComponent } from './base64-image/base64-image.component';
+import { AutocompleteComponent } from './autocomplete/autocomplete.component';
 
 
 @NgModule({
@@ -31,7 +32,7 @@ import { Base64ImageComponent } from './base64-image/base64-image.component';
     CardItemComponent,
     LibraryCardComponent,
     SeriesCardComponent,
-    Base64ImageComponent
+    Base64ImageComponent,
   ]
 })
 export class SharedModule { }

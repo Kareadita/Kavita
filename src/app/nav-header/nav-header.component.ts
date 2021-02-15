@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { NgbTypeaheadSelectItemEvent } from '@ng-bootstrap/ng-bootstrap';
-import { Observable, of } from 'rxjs';
-import { debounceTime, distinctUntilChanged, tap, switchMap, catchError } from 'rxjs/operators';
+import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
 import { LibraryService } from '../_services/library.service';
 import { NavService } from '../_services/nav.service';
@@ -14,10 +13,14 @@ import { NavService } from '../_services/nav.service';
 })
 export class NavHeaderComponent implements OnInit {
 
-  model: any;
-  searching = false;
+  @ViewChild('search') searchViewRef!: any;
+
+  isLoading = false;
+  debounceTime = 300;
   searchFailed = false;
   imageStyles = {width: '24px', 'margin-top': '5px'};
+  searchResults: SearchResult[] = [];
+  searchForm = new FormControl('', []);
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService) { }
 
@@ -33,30 +36,21 @@ export class NavHeaderComponent implements OnInit {
     document.getElementById('content')?.focus();
   }
 
-
-  search = (text$: Observable<string>) =>
-    text$.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      tap(() => this.searching = true),
-      switchMap(term =>
-        this.libraryService.search(term).pipe(
-          tap(() => this.searchFailed = false),
-          catchError(() => {
-            this.searchFailed = true;
-            return of([]);
-          }))
-      ),
-      tap(() => this.searching = false)
-    )
-
-  openSearchResult(event: NgbTypeaheadSelectItemEvent) {
-    const libraryId = event.item.libraryId;
-    const seriesId = event.item.seriesId;
-    event.preventDefault();
-
-    this.router.navigate(['library', libraryId, 'series', seriesId]);
+  onChangeSearch(val: string) {
+      this.isLoading = true;
+      this.libraryService.search(val).subscribe(results => {
+        this.searchResults = results;
+        this.isLoading = false;
+      }, err => {
+        this.searchResults = [];
+      });
   }
 
-  // TODO: Implement a base64Image component that has fallbacks.
+  clickSearchResult(item: SearchResult) {
+    const libraryId = item.libraryId;
+    const seriesId = item.seriesId;
+    this.searchViewRef.clear();
+    this.searchResults = [];
+    this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
 }

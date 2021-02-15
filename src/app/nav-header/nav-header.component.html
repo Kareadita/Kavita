@@ -9,26 +9,62 @@
             <fieldset class="form-inline">
               <div class="form-group">
                 <label for="nav-search" class="sr-only">Search series</label>
-                <input id="nav-search" type="text" class="form-control me-2" [class.is-invalid]="searchFailed" [(ngModel)]="model" 
-                    [ngbTypeahead]="search" placeholder="Search Series" [resultTemplate]="rt" (selectItem)="openSearchResult($event)"/>
-                <div class="invalid-feedback" *ngIf="searchFailed">There was an issue fetching search results</div>
+                <div class="ng-autocomplete">
+                  <ng-autocomplete
+                    #search 
+                    id="nav-search"
+                    [data]="searchResults"
+                    searchKeyword="name"
+                    placeholder="Search Series"
+                    [initialValue]=""
+                    (selected)='clickSearchResult($event)'
+                    (inputChanged)='onChangeSearch($event)'
+                    [isLoading]="isLoading"
+                    [debounceTime]="debounceTime"
+                    [itemTemplate]="itemTemplate"
+                    [notFoundTemplate]="notFoundTemplate">                                 
+                  </ng-autocomplete>
+                  
+                  <ng-template #itemTemplate let-item>
+                    <div style="display: flex;">
+                      <div style="width: 24px" class="mr-1">
+                        <app-base64-image [style]="imageStyles" [src]="item.coverImage" alt="cover image"></app-base64-image> 
+                      </div>
+                      <div class="ml-1">
+                        <span [innerHTML]="item.name"></span>
+                        <span class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                  
+                  <ng-template #notFoundTemplate let-notFound>
+                    No results found
+                  </ng-template>
+                </div>
               </div>
             </fieldset>
           </div>
         </div>
 
-        <ng-template #rt let-r="result" let-t="term">
+        <!-- <div class="nav-item">
+          <app-autocomplete></app-autocomplete>
+        </div>
+
+        <div class="nav-item">
+          
+        </div> -->
+
+        <!-- <ng-template #rt let-r="result" let-t="term">
           <div style="display: flex;">
             <div style="width: 24px" class="mr-1">
               <app-base64-image [style]="imageStyles" [src]="r.coverImage" alt="cover image"></app-base64-image> 
-              <!-- <img [src]="'data:image/jpeg;base64,' + r.coverImage" style="width: 24px; margin-top:5px;"> -->
             </div>
             <div class="ml-1">
               <ngb-highlight [result]="r.name" [term]="t"></ngb-highlight>
               <span class="form-text" style="font-size: 0.8rem;">in {{r.libraryName}}</span>
             </div>
           </div>
-        </ng-template>
+        </ng-template> -->
       </ul>
       
 

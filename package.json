@@ -25,6 +25,7 @@
     "@angular/router": "~11.0.0",
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@ng-bootstrap/ng-bootstrap": "^8.0.0",
+    "angular-ng-autocomplete": "^2.0.5",
     "bootstrap": "^4.5.0",
     "ngx-bootstrap": "^6.2.0",
     "ngx-toastr": "^13.2.0",
