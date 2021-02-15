@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
@@ -7,6 +8,8 @@ import { AccountService } from 'src/app/_services/account.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { CardItemAction } from '../card-item/card-item.component';
+import { CardDetailsModalComponent } from '../_modals/card-details-modal/card-details-modal.component';
+import { SeriesCardDetailsComponent } from '../_modals/series-card-details/series-card-details.component';
 
 @Component({
   selector: 'app-series-card',
@@ -22,10 +25,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   isAdmin = false;
   actions: CardItemAction[] = [];
 
-  // TODO: Think about making this a stateless component
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
-              private libraryService: LibraryService) {
+              private libraryService: LibraryService, private modalService: NgbModal) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -75,7 +77,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       }});
 
       this.actions.push({title: 'Get Info', callback: (data: Series) => {
-        // TODO: Open Info modal
+        const modalRef = this.modalService.open(SeriesCardDetailsComponent, { size: 'lg'});
+        modalRef.componentInstance.data = data;
       }});
     }
   }

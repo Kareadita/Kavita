@@ -1,17 +1,14 @@
 <div *ngIf="data !== undefined">
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">{{this.parentName}} - {{this.isChapter ? 'Chapter' : 'Volume'}} {{this.data.number}} Details</h4>
+        <h4 class="modal-title" id="modal-basic-title">
+            {{this.parentName}} - {{this.isChapter ? 'Chapter' : 'Volume'}} {{this.data.number}} Details</h4>
         <button type="button" class="close" aria-label="Close" (click)="close()">
         <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
         <h4>Information</h4>
-        <ng-container *ngIf="this.isObjectVolume(this.data)">
-            <!-- Created: {{this.data.created | date}}
-            Last Modified: {{this.data.lastModified | date}}
-            Is Special: {{this.data.isSpecial}}
-            Pages: {{this.data.pages}} -->
+        <ng-container *ngIf="isObjectVolume(this.data)">
             <div class="row no-gutters">
                 <div class="col">
                     Created: {{this.data.created | date: 'dd/MM/yyyy'}}
@@ -29,27 +26,34 @@
                 </div>
             </div>
         </ng-container>
+
         <h4>Chapters</h4>
-        <div *ngFor="let chapter of chapters" class="row breadcrumb">
-            Chapter {{formatChapterNumber(chapter)}}
-            <ul class="list-group">
-                <li *ngFor="let file of chapter.files.sort()" class="list-group-item">
-                    <span>{{file.filePath}}</span>
-                    <div class="row no-gutters">
-                        <div class="col">
-                            Pages: {{file.numberOfPages}}
-                        </div>
-                        <div class="col">
-                            Format: {{file.format}}
-                        </div>
-                    </div>
-                    
-                    
-                </li>
-            </ul>
-        </div>
+        <ul class="list-unstyled">
+            <li class="media my-4" *ngFor="let chapter of chapters">
+                <app-base64-image class="mr-3" [style]="imageStyles" [src]="chapter.coverImage"></app-base64-image>
+                <div class="media-body">
+                    <h5 class="mt-0 mb-1">Chapter {{formatChapterNumber(chapter)}}</h5>
+                    <ul class="list-group">
+                        <li *ngFor="let file of chapter.files.sort()" class="list-group-item">
+                            <span>{{file.filePath}}</span>
+                            <div class="row no-gutters">
+                                <div class="col">
+                                    Pages: {{file.numberOfPages}}
+                                </div>
+                                <div class="col">
+                                    Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        
     </div>
     <div class="modal-footer">
         <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
     </div>
 </div>
+
+

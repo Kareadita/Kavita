@@ -1,6 +1,8 @@
+import { MangaFormat } from './manga-format';
+
 export interface MangaFile {
     filePath: string;
-    chapter: number;
+    //chapter: number;
     numberOfPages: number;
-    format: number;
+    format: MangaFormat;
 }

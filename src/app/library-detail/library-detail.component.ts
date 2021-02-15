@@ -19,7 +19,6 @@ export class LibraryDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
-      console.error('No library id was passed. Redirecting to home');
       this.router.navigateByUrl('/home');
       return;
     }
