@@ -60,6 +60,15 @@ namespace API.Data
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId)
+        {
+            return await _context.Library
+                .Include(l => l.AppUsers)
+                .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
         {
             return await _context.Library

@@ -22,6 +22,13 @@ namespace API.Helpers
             CreateMap<Series, SeriesDto>();
             
             CreateMap<AppUserPreferences, UserPreferencesDto>();
+
+            CreateMap<Series, SearchResultDto>()
+                .ForMember(dest => dest.SeriesId,
+                    opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.LibraryName,
+                    opt => opt.MapFrom(src => src.Library.Name));
+            
             
             CreateMap<Library, LibraryDto>()
                 .ForMember(dest => dest.Folders,
