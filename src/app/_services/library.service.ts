@@ -1,7 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library } from '../_models/library';
+import { SearchResult } from '../_models/search-result';
+import { Series } from '../_models/series';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +55,15 @@ export class LibraryService {
 
   update(model: {name: string, folders: string[], id: number}) {
     return this.httpClient.post(this.baseUrl + 'library/update', model);
+  }
+
+  search(term: string) {
+    // TODO: MOve to search service
+    if (term === '') {
+      return of([]);
+    }
+     // TODO: Url encode this
+    return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + term);
   }
 
 }

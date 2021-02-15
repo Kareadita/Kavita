@@ -32,7 +32,6 @@ export class ManageLibraryComponent implements OnInit {
 
   editLibrary(library: Library) {
     const modalRef = this.modalService.open(LibraryEditorModalComponent);
-    console.log('component instance: ', modalRef.componentInstance);
     modalRef.componentInstance.library = library;
     modalRef.closed.subscribe(refresh => {
       if (refresh) {

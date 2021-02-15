@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
+import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
+import { LibraryService } from '../_services/library.service';
 import { NavService } from '../_services/nav.service';
 
 @Component({
@@ -10,7 +12,14 @@ import { NavService } from '../_services/nav.service';
 })
 export class NavHeaderComponent implements OnInit {
 
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService) { }
+  @ViewChild('search') searchViewRef!: any;
+
+  isLoading = false;
+  debounceTime = 300;
+  imageStyles = {width: '24px', 'margin-top': '5px'};
+  searchResults: SearchResult[] = [];
+
+  constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
   }
@@ -24,4 +33,21 @@ export class NavHeaderComponent implements OnInit {
     document.getElementById('content')?.focus();
   }
 
+  onChangeSearch(val: string) {
+      this.isLoading = true;
+      this.libraryService.search(val).subscribe(results => {
+        this.searchResults = results;
+        this.isLoading = false;
+      }, err => {
+        this.searchResults = [];
+      });
+  }
+
+  clickSearchResult(item: SearchResult) {
+    const libraryId = item.libraryId;
+    const seriesId = item.seriesId;
+    this.searchViewRef.clear();
+    this.searchResults = [];
+    this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
 }

@@ -1,0 +1,6 @@
+
+$breadcrumb-divider: quote(">");
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: $breadcrumb-divider;
+}

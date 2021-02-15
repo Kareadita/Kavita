@@ -75,7 +75,7 @@ export class LibraryEditorModalComponent implements OnInit {
   }
 
   openDirectoryPicker() {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
         this.selectedFolders.push(closeResult.folderPath);

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { Toast, ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
@@ -25,21 +26,25 @@ export class SeriesDetailComponent implements OnInit {
   chapters: Chapter[] = [];
   libraryId = 0;
 
-  currentlyReadingVolume!: Volume;
+  currentlyReadingVolume: Volume | undefined = undefined;
+  currentlyReadingChapter: Chapter | undefined = undefined;
   safeImage!: SafeUrl;
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
   testMap: any;
   showBook = false;
+  isLoading = true;
 
   volumeActions: CardItemAction[] = [];
+  chapterActions: CardItemAction[] = [];
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router,
+              ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService, private utilityService: UtilityService) {
+              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService) {
     ratingConfig.max = 5;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   ngOnInit(): void {
@@ -60,6 +65,16 @@ export class SeriesDetailComponent implements OnInit {
       }
     }];
 
+    this.chapterActions = [
+      {title: 'Mark Read', callback: (data: Chapter) => this.markChapterAsRead(data)},
+      {title: 'Mark Unread', callback: (data: Chapter) => this.markChapterAsUnread(data)},
+      {
+      title: 'Info',
+      callback: (data: Volume) => {
+        this.openViewInfo(data);
+      }
+    }];
+
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
@@ -68,21 +83,43 @@ export class SeriesDetailComponent implements OnInit {
       this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat();
+        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
-        this.volumes.forEach(v => {
-          v.name = v.number === 0 ? 'Latest Chapters' : 'Volume ' + v.number;
-          if (v.pagesRead >= v.pages) {
-            return;
-          } else if (v.pagesRead === 0) {
-            return;
-          } else {
-            this.currentlyReadingVolume = v;
-          }
-        });
+        this.setContinuePoint();
+        this.isLoading = false;
       });
     });
+  }
+
+  setContinuePoint() {
+    this.currentlyReadingVolume = undefined;
+    this.currentlyReadingChapter = undefined;
+
+    this.volumes.forEach(v => {
+      if (v.number === 0) {
+        return;
+      } else if (v.pagesRead >= v.pages) {
+        return;
+      } else if (this.currentlyReadingVolume === undefined) {
+        this.currentlyReadingVolume = v;
+      }
+    });
+
+    if (this.currentlyReadingVolume === undefined) {
+      // We need to check against chapters
+      this.chapters.forEach(c => {
+        if (c.pagesRead >= c.pages) {
+          return;
+        } else if (this.currentlyReadingChapter === undefined) {
+          this.currentlyReadingChapter = c;
+        }
+      });
+      if (this.currentlyReadingChapter === undefined) {
+        // Default to first chapter
+        this.currentlyReadingChapter = this.chapters[0];
+      }
+    }
   }
 
   markAsRead(vol: Volume) {
@@ -91,8 +128,10 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages))).subscribe(results => {
+    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages - 1))).subscribe(results => {
       vol.pagesRead = vol.pages;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Read');
     });
   }
 
@@ -104,15 +143,41 @@ export class SeriesDetailComponent implements OnInit {
 
     forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
       vol.pagesRead = 0;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Unread');
+    });
+  }
+
+  markChapterAsRead(chapter: Chapter) {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+
+    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(results => {
+      this.toastr.success('Marked as Read');
+      this.setContinuePoint();
+      chapter.pagesRead = chapter.pages;
+    });
+  }
+
+  markChapterAsUnread(chapter: Chapter) {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+
+    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, 0).subscribe(results => {
+      chapter.pagesRead = 0;
+      this.setContinuePoint();
+      this.toastr.success('Marked as Unread');
     });
   }
 
   read() {
-    if (this.currentlyReadingVolume !== undefined) {
-      this.openVolume(this.currentlyReadingVolume);
-    } else {
-      this.openVolume(this.volumes[0]);
-    }
+    if (this.currentlyReadingVolume !== undefined) { this.openVolume(this.currentlyReadingVolume); }
+    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
+    else { this.openVolume(this.volumes[0]); }
   }
 
   updateRating(rating: any) {
@@ -141,7 +206,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent);
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
   }

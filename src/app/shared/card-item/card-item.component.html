@@ -1,4 +1,4 @@
-<div class="card" style="width: 18rem;">
+<div class="card">
     <div class="overlay" (click)="handleClick()">
       <img class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
-        <span class="card-title" (click)="handleClick()" tabindex="0">
+        <span class="card-title" placement="top" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
           {{title}}
         </span>
     </div>

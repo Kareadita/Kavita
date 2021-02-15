@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 
 @Injectable({
@@ -16,4 +17,12 @@ export class UtilityService {
       return a.number < b.number ? -1 : 1;
     }
   }
+
+  sortChapters = (a: Chapter, b: Chapter) => {
+    if (a === b) { return 0; }
+    else {
+      return parseFloat(a.number) < parseFloat(b.number) ? -1 : 1;
+    }
+  }
+
 }

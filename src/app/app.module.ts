@@ -5,9 +5,9 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -17,9 +17,9 @@ import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
+import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 
 
 
@@ -30,21 +30,22 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
     HomeComponent,
     NavHeaderComponent,
     UserLoginComponent,
-    LibraryComponent,
-    LibraryDetailComponent,
-    SeriesDetailComponent,
-    MangaReaderComponent,
-    NotConnectedComponent,
-    UserPreferencesComponent,
+    LibraryComponent, // Move into MangaModule
+    LibraryDetailComponent, // Move into MangaModule
+    SeriesDetailComponent, // Move into MangaModule
+    NotConnectedComponent, // Move into ExtrasModule
+    UserPreferencesComponent, // Move into SettingsModule
   ],
   imports: [
     HttpClientModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    FormsModule, // Just used for gotopage; TODO: Remove this and use ReactiveForms
     ReactiveFormsModule,
-    NgbModule,
+    NgbDropdownModule, // Nav
+    AutocompleteLibModule, // Nav
+    NgbTooltipModule, // Shared & SettingsModule
+    NgbRatingModule, // Series Detail
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
