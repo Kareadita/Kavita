@@ -440,11 +440,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  goToPage() {
+  promptForPage() {
     const goToPageNum = window.prompt('What page would you like to go to?', '');
-    if (goToPageNum === null) { return; }
+    if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
+    return goToPageNum;
+  }
 
-    let page = parseInt(goToPageNum, 10);
+  goToPage(pageNum?: number) {
+    let page = pageNum;
+    if (pageNum === null || pageNum === undefined) {
+      const goToPageNum = this.promptForPage();
+      if (goToPageNum === null) { return; }
+      page = parseInt(goToPageNum.trim(), 10);
+    }
+
+    if (page === undefined) { return; }
 
     if (page >= this.maxPages) {
       page = this.maxPages - 1;
