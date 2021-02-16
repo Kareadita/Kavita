@@ -116,14 +116,14 @@ namespace API.Data
         }
 
 
-        public IEnumerable<Volume> GetVolumes(int seriesId)
+        public async Task<IEnumerable<Volume>> GetVolumes(int seriesId)
         {
-            return _context.Volume
+            return await _context.Volume
                 .Where(vol => vol.SeriesId == seriesId)
                 .Include(vol => vol.Chapters)
                 .ThenInclude(c => c.Files)
                 .OrderBy(vol => vol.Number)
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId)

@@ -73,7 +73,7 @@ namespace API.Controllers
 
             if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue. Please try again.");
 
-            _logger.LogInformation($"Created a new library: {library.Name}");
+            _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
             _taskScheduler.ScanLibrary(library.Id);
             return Ok();
         }
@@ -111,7 +111,7 @@ namespace API.Controllers
             if (user == null) return BadRequest("Could not validate user");
             
             var libraryString = String.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
-            _logger.LogInformation($"Granting user {updateLibraryForUserDto.Username} access to: {libraryString}");
+            _logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
             
             var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
             foreach (var library in allLibraries)
@@ -133,13 +133,13 @@ namespace API.Controllers
             
             if (!_unitOfWork.HasChanges())
             {
-                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
+                _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
                 return Ok(_mapper.Map<MemberDto>(user));
             }
 
             if (await _unitOfWork.Complete())
             {
-                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
+                _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
                 return Ok(_mapper.Map<MemberDto>(user));
             }
             

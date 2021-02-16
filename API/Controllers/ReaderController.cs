@@ -64,6 +64,88 @@ namespace API.Controllers
             return Ok(progress?.PagesRead ?? 0);
         }
 
+        [HttpPost("mark-read")]
+        public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId); // TODO: Make this async
+            user.Progresses ??= new List<AppUserProgress>();
+            foreach (var volume in volumes)
+            {
+                foreach (var chapter in volume.Chapters)
+                {
+                    var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                    if (userProgress == null) // I need to get all chapters and generate new user progresses for them? 
+                    {
+                        user.Progresses.Add(new AppUserProgress
+                        {
+                            PagesRead = chapter.Pages,
+                            VolumeId = volume.Id,
+                            SeriesId = markReadDto.SeriesId,
+                            ChapterId = chapter.Id
+                        });
+                    }
+                    else
+                    {
+                        userProgress.PagesRead = chapter.Pages;
+                        userProgress.SeriesId = markReadDto.SeriesId;
+                        userProgress.VolumeId = volume.Id;
+                    }
+                }
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+            
+            
+            return BadRequest("There was an issue saving progress");
+        }
+        
+        [HttpPost("mark-unread")]
+        public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
+            user.Progresses ??= new List<AppUserProgress>();
+            foreach (var volume in volumes)
+            {
+                foreach (var chapter in volume.Chapters)
+                {
+                    var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                    if (userProgress == null)
+                    {
+                        user.Progresses.Add(new AppUserProgress
+                        {
+                            PagesRead = 0,
+                            VolumeId = volume.Id,
+                            SeriesId = markReadDto.SeriesId,
+                            ChapterId = chapter.Id
+                        });
+                    }
+                    else
+                    {
+                        userProgress.PagesRead = 0;
+                        userProgress.SeriesId = markReadDto.SeriesId;
+                        userProgress.VolumeId = volume.Id;
+                    }
+                }
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+            
+            
+            return BadRequest("There was an issue saving progress");
+        }
+
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {

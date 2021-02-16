@@ -26,7 +26,7 @@ namespace API.Interfaces
         Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
         Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
         Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
-        IEnumerable<Volume> GetVolumes(int seriesId);
+        Task<IEnumerable<Volume>> GetVolumes(int seriesId);
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
         Task<Volume> GetVolumeAsync(int volumeId);
         Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
