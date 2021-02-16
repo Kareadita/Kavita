@@ -46,4 +46,12 @@ export class SeriesService {
   updateRating(seriesId: number, userRating: number, userReview: string) {
     return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
   }
+
+  markRead(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-read', {seriesId});
+  }
+
+  markUnread(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-unread', {seriesId});
+  }
 }

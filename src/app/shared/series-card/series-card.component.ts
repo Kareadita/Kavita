@@ -8,7 +8,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { CardItemAction } from '../card-item/card-item.component';
-import { CardDetailsModalComponent } from '../_modals/card-details-modal/card-details-modal.component';
 import { SeriesCardDetailsComponent } from '../_modals/series-card-details/series-card-details.component';
 
 @Component({
@@ -49,11 +48,11 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     this.actions = [
       {
         title: 'Mark as Read',
-        callback: () => this.markAsRead
+        callback: (data: any) => this.markAsRead(data)
       },
       {
         title: 'Mark as Unread',
-        callback: () => this.markAsUnread
+        callback: (data: any) => this.markAsUnread(data)
       }
     ];
 
@@ -83,12 +82,18 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     }
   }
 
-  markAsUnread(series: any) {
-
+  markAsUnread(series: Series) {
+    this.seriesService.markUnread(series.id).subscribe(res => {
+      this.toastr.success(series.name + ' is now unread');
+      series.pagesRead = 0;
+    });
   }
 
-  markAsRead(series: any) {
-    
+  markAsRead(series: Series) {
+    this.seriesService.markRead(series.id).subscribe(res => {
+      this.toastr.success(series.name + ' is now read');
+      series.pagesRead = series.pages;
+    });
   }
 
   handleClick() {
