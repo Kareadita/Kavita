@@ -10,8 +10,10 @@ namespace API.Parser
     {
         public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
         public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
+        private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -406,6 +408,12 @@ namespace API.Parser
             return ImageRegex.IsMatch(fileInfo.Extension);
         }
         
+        public static bool IsXml(string filePath)
+        {
+            var fileInfo = new FileInfo(filePath);
+            return XmlRegex.IsMatch(fileInfo.Extension);
+        }
+        
         public static float MinimumNumberFromRange(string range)
         {
             var tokens = range.Split("-");
@@ -416,5 +424,7 @@ namespace API.Parser
         {
             return name.ToLower().Replace("-", "").Replace(" ", "");
         }
+
+        
     }
 }
