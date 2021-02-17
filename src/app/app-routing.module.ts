@@ -29,7 +29,7 @@ const routes: Routes = [
       {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
       {
         path: 'library/:libraryId/series/:seriesId/manga',
-        loadChildren: () => import('./manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+        loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
       }
     ]
   },
