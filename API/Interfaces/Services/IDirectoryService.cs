@@ -27,5 +27,7 @@ namespace API.Interfaces.Services
         /// <param name="directoryPath"></param>
         /// <returns></returns>
         bool ExistOrCreate(string directoryPath);
+
+        void ClearAndDeleteDirectory(string directoryPath);
     }
 }

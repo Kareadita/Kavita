@@ -66,6 +66,22 @@ namespace API.Services
           return true;
        }
 
+       public void ClearAndDeleteDirectory(string directoryPath)
+       {
+          DirectoryInfo di = new DirectoryInfo(directoryPath);
+
+          foreach (var file in di.EnumerateFiles())
+          {
+             file.Delete(); 
+          }
+          foreach (var dir in di.EnumerateDirectories())
+          {
+             dir.Delete(true); 
+          }
+          
+          di.Delete(true);
+       }
+
        public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;

@@ -16,6 +16,7 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
 
         private readonly IList<string> _backupFiles = new List<string>()
         {
@@ -39,6 +40,7 @@ namespace API.Services
         {
             _logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
+            
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
             if (!_directoryService.ExistOrCreate(backupDirectory))
             {
@@ -46,19 +48,36 @@ namespace API.Services
                 return;
             }
             
-            var fileInfos = _backupFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file))).ToList();
-
-            var zipPath = Path.Join(backupDirectory, $"kavita_backup_{DateTime.Now}.zip");
-            using (var zipArchive = ZipFile.Open(zipPath, ZipArchiveMode.Create))
-            {
-                foreach (var fileInfo in fileInfos)
-                {
-                    zipArchive.CreateEntryFromFile(fileInfo.FullName,  fileInfo.Name);
-                }
-            }
+            var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
+            var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
             
+            if (File.Exists(zipPath))
+            {
+                _logger.LogInformation("{ZipFile} already exists, aborting", zipPath);
+                return;
+            }
+
+            var tempDirectory = Path.Join(_tempDirectory, dateString);
+            _directoryService.ExistOrCreate(tempDirectory);
+
+
+            foreach (var file in _backupFiles)
+            {
+                var originalFile = new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file));
+                originalFile.CopyTo(Path.Join(tempDirectory, originalFile.Name));
+            }
+
+            try
+            {
+                ZipFile.CreateFromDirectory(tempDirectory, zipPath);
+            }
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex, "There was an issue when archiving library backup");
+            }
+
+            _directoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
-            throw new System.NotImplementedException();
         }
     }
 }
