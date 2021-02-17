@@ -58,7 +58,7 @@ namespace API.Services
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Backup Task for {Cron}", setting);
-                RecurringJob.AddOrUpdate(() => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting2));
+                RecurringJob.AddOrUpdate(() => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
             }
             else
             {
