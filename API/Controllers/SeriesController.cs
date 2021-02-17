@@ -82,11 +82,14 @@ namespace API.Controllers
             userRating.Rating = updateSeriesRatingDto.UserRating;
             userRating.Review = updateSeriesRatingDto.UserReview;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-            _unitOfWork.UserRepository.AddRatingTracking(userRating);
-            user.Ratings ??= new List<AppUserRating>();
-            user.Ratings.Add(userRating);
-
+            
+            if (userRating.Id == 0)
+            {
+                user.Ratings ??= new List<AppUserRating>();
+                user.Ratings.Add(userRating);
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
 
             if (!await _unitOfWork.Complete()) return BadRequest("There was a critical error.");
 
