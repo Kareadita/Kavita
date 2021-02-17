@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using AutoMapper;
@@ -166,10 +167,16 @@ namespace API.Controllers
         }
 
         [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
         {
+            // TODO: Move this to SeriesController
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id));
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
+            
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+            
+            return Ok(series);
         }
 
         [Authorize(Policy = "RequireAdminRole")]

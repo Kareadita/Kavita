@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -63,21 +64,25 @@ namespace API.Data
                 .ToListAsync();
         }
         
-        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId)
+        public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
         {
             var sw = Stopwatch.StartNew();
-            var series = await _context.Series
+
+
+
+            var query =  _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-            
-            
-            await AddSeriesModifiers(userId, series);
+                .AsNoTracking();
+
+
+            // TODO: Refactor this into JOINs
+            //await AddSeriesModifiers(userId, series);
 
 
             _logger.LogDebug("Processed GetSeriesDtoForLibraryIdAsync in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
-            return series;
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
         
         public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)

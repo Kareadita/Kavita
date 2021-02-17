@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 
 namespace API.Interfaces
 {
@@ -11,13 +12,14 @@ namespace API.Interfaces
         void Update(Series series);
         Task<Series> GetSeriesByNameAsync(string name);
         Series GetSeriesByName(string name);
+
         /// <summary>
         /// Adds user information like progress, ratings, etc
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId);
+        Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams);
 
         /// <summary>
         /// Does not add user information like progress, ratings, etc.
