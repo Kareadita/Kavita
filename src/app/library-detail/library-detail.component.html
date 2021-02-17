@@ -1,13 +1,32 @@
-<div class="container-fluid">
-    <h2>{{title}}</h2>
+<div class="container-fluid" style="padding-top: 10px">
+    <div class="d-flex justify-content-center" *ngIf="pagination">
+        <ngb-pagination
+            [(page)]="pageNumber"
+            [pageSize]="pagination.itemsPerPage"
+            (pageChange)="onPageChange($event)"
+            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+            [collectionSize]="pagination.totalItems"></ngb-pagination>
+    </div>
+
     <div class="row no-gutters">
         <div class="col-sm-auto" *ngFor="let manga of series">
             <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
         </div>
+
         <div class="spinner-border text-secondary" role="status" *ngIf="loadingSeries">
             <span class="invisible">Loading...</span>
         </div>
     </div>
+
+    <div class="d-flex justify-content-center" *ngIf="pagination">
+        <ngb-pagination
+            [(page)]="pageNumber"
+            [pageSize]="pagination.itemsPerPage"
+            (pageChange)="onPageChange($event)"
+            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+            [collectionSize]="pagination.totalItems"></ngb-pagination>
+    </div>
+
     <ng-container *ngIf="series.length === 0 && !loadingSeries">
         There are no Series.
     </ng-container>

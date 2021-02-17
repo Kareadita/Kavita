@@ -1,8 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
+import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 
@@ -12,11 +14,33 @@ import { Volume } from '../_models/volume';
 export class SeriesService {
 
   baseUrl = environment.apiUrl;
+  paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
   constructor(private httpClient: HttpClient) { }
 
-  getSeriesForLibrary(libraryId: number) {
-    return this.httpClient.get<Series[]>(this.baseUrl + 'library/series?libraryId=' + libraryId);
+  getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+
+    if (pageNum !== null && itemsPerPage !== null) {
+      params = params.append('pageNumber', pageNum + '');
+      params = params.append('pageSize', itemsPerPage + '');
+    }
+    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'library/series?libraryId=' + libraryId, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        if (response.body === null) {
+          this.paginatedResults.result = [];
+        } else {
+          this.paginatedResults.result = response.body;
+        }
+
+        const pageHeader = response.headers.get('Pagination');
+        if (pageHeader !== null) {
+          this.paginatedResults.pagination = JSON.parse(pageHeader);
+        }
+
+        return this.paginatedResults;
+      })
+    );
   }
 
   getSeries(seriesId: number) {

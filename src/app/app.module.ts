@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbDropdownModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -46,6 +46,7 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
     AutocompleteLibModule, // Nav
     NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail
+    NgbPaginationModule,
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
