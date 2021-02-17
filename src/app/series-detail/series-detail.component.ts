@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
@@ -120,6 +120,11 @@ export class SeriesDetailComponent implements OnInit {
         this.currentlyReadingChapter = this.chapters[0];
       }
     }
+  }
+
+  hasReadingProgress() {
+    return ((this.currentlyReadingVolume !== undefined && this.currentlyReadingVolume.pagesRead > 0) || (this.currentlyReadingChapter !== this.chapters[0] && this.currentlyReadingChapter !== undefined));
+    //return false;
   }
 
   markAsRead(vol: Volume) {

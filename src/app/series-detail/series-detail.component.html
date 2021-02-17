@@ -12,7 +12,7 @@
                             <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
                         </span>
                         &nbsp;
-                        <span class="read-btn--text">{{currentlyReadingVolume === undefined ? 'Read' : 'Continue'}}</span>
+                        <span class="read-btn--text">{{(hasReadingProgress()) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
                 <div class="ml-2">
