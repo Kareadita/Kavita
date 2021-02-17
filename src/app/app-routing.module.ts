@@ -3,7 +3,6 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from './home/home.component';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { LibraryComponent } from './library/library.component';
-import { MangaReaderComponent } from './manga-reader/manga-reader.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { UserLoginComponent } from './user-login/user-login.component';
