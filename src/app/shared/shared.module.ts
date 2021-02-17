@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RegisterMemberComponent } from './register-member/register-member.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
-import { NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
 import { Base64ImageComponent } from './base64-image/base64-image.component';
+import { SeriesCardDetailsComponent } from './_modals/series-card-details/series-card-details.component';
 
 
 @NgModule({
@@ -18,6 +19,7 @@ import { Base64ImageComponent } from './base64-image/base64-image.component';
     SeriesCardComponent,
     CardDetailsModalComponent,
     Base64ImageComponent,
+    SeriesCardDetailsComponent,
   ],
   imports: [
     CommonModule,
@@ -25,6 +27,7 @@ import { Base64ImageComponent } from './base64-image/base64-image.component';
     NgbDropdownModule,
     NgbProgressbarModule,
     NgbTooltipModule,
+    NgbCollapseModule
   ],
   exports: [
     RegisterMemberComponent,
@@ -32,6 +35,7 @@ import { Base64ImageComponent } from './base64-image/base64-image.component';
     LibraryCardComponent,
     SeriesCardComponent,
     Base64ImageComponent,
+    SeriesCardDetailsComponent
   ]
 })
 export class SharedModule { }

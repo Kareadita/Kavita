@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { IDatasource } from 'ngx-ui-scroll';
+import { of } from 'rxjs';
+import { map, skip, take } from 'rxjs/operators';
+import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { SeriesService } from '../_services/series.service';
 
@@ -15,11 +19,13 @@ export class LibraryDetailComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
 
+  pagination!: Pagination;
+  pageNumber = 1;
+  pageSize = 30; // TODO: Refactor this into UserPreference or ServerSetting
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
-      console.error('No library id was passed. Redirecting to home');
       this.router.navigateByUrl('/home');
       return;
     }
@@ -32,14 +38,24 @@ export class LibraryDetailComponent implements OnInit {
 
   loadPage() {
     this.loadingSeries = true;
-    this.seriesService.getSeriesForLibrary(this.libraryId).subscribe(series => {
-      this.series = series;
+    this.seriesService.getSeriesForLibrary(this.libraryId, this.pageNumber, this.pageSize).subscribe(series => {
+      this.series = series.result;
+      this.pagination = series.pagination;
       this.loadingSeries = false;
+      window.scrollTo(0, 0);
     });
+  }
+
+  onPageChange(page: number) {
+    this.loadPage();
   }
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
+  }
+
+  mangaTrackBy(index: number, manga: Series) {
+    return manga.name;
   }
 
 }

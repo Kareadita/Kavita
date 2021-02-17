@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Chapter } from 'src/app/_models/chapter';
+import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UtilityService {
+
+  mangaFormatKeys: string[] = [];
 
   constructor() { }
 
@@ -23,6 +26,14 @@ export class UtilityService {
     else {
       return parseFloat(a.number) < parseFloat(b.number) ? -1 : 1;
     }
+  }
+
+  mangaFormatToText(format: MangaFormat): string {
+    if (this.mangaFormatKeys === undefined || this.mangaFormatKeys.length === 0) {
+      this.mangaFormatKeys = Object.keys(MangaFormat);
+    }
+
+    return this.mangaFormatKeys.filter(item => MangaFormat[format] === item)[0];
   }
 
 }

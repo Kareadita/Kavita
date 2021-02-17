@@ -1,53 +1,49 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Chapter } from 'src/app/_models/chapter';
-import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UtilityService } from '../../_services/utility.service';
 
-
-
 @Component({
-  selector: 'app-card-details-modal',
-  templateUrl: './card-details-modal.component.html',
-  styleUrls: ['./card-details-modal.component.scss']
+  selector: 'app-series-card-details',
+  templateUrl: './series-card-details.component.html',
+  styleUrls: ['./series-card-details.component.scss']
 })
-export class CardDetailsModalComponent implements OnInit {
+export class SeriesCardDetailsComponent implements OnInit {
 
   @Input() parentName = '';
-  @Input() data!: any; // Volume | Chapter
-  isChapter = false;
-  chapters: Chapter[] = [];
+  @Input() data!: Series;
   seriesVolumes: any[] = [];
   imageStyles = {width: '74px'};
   isLoadingVolumes = false;
 
-  formatKeys = Object.keys(MangaFormat);
+  isCollapsed = true;
+  volumeCollapsed: any = {};
 
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, private seriesService: SeriesService, public utilityService: UtilityService) { }
 
   ngOnInit(): void {
-    this.isChapter = this.isObjectChapter(this.data);
+    this.isLoadingVolumes = true;
+    this.seriesService.getVolumes(this.data.id).subscribe(volumes => {
+      this.seriesVolumes = volumes;
+      this.isLoadingVolumes = false;
 
-    if (this.isChapter) {
-      this.chapters.push(this.data);
-    } else if (!this.isChapter) {
-      this.chapters.push(...this.data?.chapters);
-    }
+      volumes.forEach(v => {
+        this.volumeCollapsed[v.name] = true;
+      });
+      this.seriesVolumes.forEach(vol => {
+        vol.volumeFiles = vol.chapters?.sort(this.utilityService.sortChapters).map((c: Chapter) => c.files.map((f: any) => {
+          f.chapter = c.number;
+          return f;
+        })).flat();
+      });
+      console.log('volumes:', this.seriesVolumes);
+    });
     console.log('data: ', this.data);
-
-  }
-
-  isObjectChapter(object: any): object is Chapter {
-    return ('files' in object);
-  }
-
-  isObjectVolume(object: any): object is Volume {
-    return !('originalName' in object);
   }
 
   close() {
