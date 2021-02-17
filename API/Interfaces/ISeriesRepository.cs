@@ -18,10 +18,12 @@ namespace API.Interfaces
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId);
+
         /// <summary>
         /// Does not add user information like progress, ratings, etc.
         /// </summary>
         /// <param name="libraryIds"></param>
+        /// <param name="searchQuery">Series name to search for</param>
         /// <returns></returns>
         Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
         Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);

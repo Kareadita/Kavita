@@ -7,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +44,7 @@ namespace API.Controllers
         [HttpPost("reset-password")]
         public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
         {
-            _logger.LogInformation($"{User.GetUsername()} is changing {resetPasswordDto.UserName}'s password.");
+            _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
             var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
             var result = await _userManager.RemovePasswordAsync(user);
             if (!result.Succeeded) return BadRequest("Unable to update password");
@@ -77,14 +78,14 @@ namespace API.Controllers
             // When we register an admin, we need to grant them access to all Libraries.
             if (registerDto.IsAdmin)
             {
-                _logger.LogInformation($"{user.UserName} is being registered as admin. Granting access to all libraries.");
+                _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries", user.UserName);
                 var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
                 foreach (var lib in libraries)
                 {
                     lib.AppUsers ??= new List<AppUser>();
                     lib.AppUsers.Add(user);
                 }
-                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogError("There was an issue granting library access. Please do this manually.");
+                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogError("There was an issue granting library access. Please do this manually");
             }
 
             return new UserDto
@@ -116,7 +117,7 @@ namespace API.Controllers
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.Complete();
             
-            _logger.LogInformation($"{user.UserName} logged in at {user.LastActive}");
+            _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
             return new UserDto
             {

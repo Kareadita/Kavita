@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using NetVips;
 

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Interfaces;
+using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
@@ -49,7 +49,23 @@ namespace API.Services
           
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
-       
+
+       public bool ExistOrCreate(string directoryPath)
+       {
+          var di = new DirectoryInfo(directoryPath);
+          if (di.Exists) return true;
+          try
+          {
+             Directory.CreateDirectory(directoryPath);
+          }
+          catch (Exception ex)
+          {
+             _logger.LogError(ex, "There was an issue creating directory: {Directory}", directoryPath);
+             return false;
+          }
+          return true;
+       }
+
        public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
@@ -66,7 +82,7 @@ namespace API.Services
        {
           if (!File.Exists(imagePath))
           {
-             _logger.LogError("Image does not exist on disk.");
+             _logger.LogError("Image does not exist on disk");
              return null;
           }
           using var image = Image.NewFromFile(imagePath);
@@ -82,16 +98,16 @@ namespace API.Services
           };
        }
 
-       
 
-        /// <summary>
-        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
-        /// up processing.
-        /// </summary>
-        /// <param name="root">Directory to scan</param>
-        /// <param name="action">Action to apply on file path</param>
-        /// <exception cref="ArgumentException"></exception>
-        public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern)
+       /// <summary>
+       /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
+       /// up processing.
+       /// </summary>
+       /// <param name="root">Directory to scan</param>
+       /// <param name="action">Action to apply on file path</param>
+       /// <param name="searchPattern">Regex pattern to search against</param>
+       /// <exception cref="ArgumentException"></exception>
+       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern)
         {
            //Count of files traversed and timer for diagnostic output
             var fileCount = 0;
@@ -127,9 +143,6 @@ namespace API.Services
                }
 
                try {
-                  // TODO: In future, we need to take LibraryType into consideration for what extensions to allow (RAW should allow images)
-                  // or we need to move this filtering to another area (Process)
-                  // or we can get all files and put a check in place during Process to abandon files
                   files = GetFilesWithCertainExtensions(currentDir, searchPattern)
                      .ToArray();
                }

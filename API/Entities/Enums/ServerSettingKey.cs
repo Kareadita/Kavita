@@ -1,11 +1,20 @@
-﻿namespace API.Entities.Enums
+﻿using System.ComponentModel;
+
+namespace API.Entities.Enums
 {
     public enum ServerSettingKey
     {
+        [Description("TaskScan")]
         TaskScan = 0,
+        [Description("CacheDirectory")]
         CacheDirectory = 1,
+        [Description("TaskBackup")]
         TaskBackup = 2,
+        [Description("LoggingLevel")]
         LoggingLevel = 3,
-        Port = 4
+        [Description("Port")]
+        Port = 4,
+        [Description("BackupDirectory")]
+        BackupDirectory = 5
     }
 }

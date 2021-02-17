@@ -6,6 +6,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -34,15 +35,6 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
 
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-            
-            // TODO: This code works, but might need bounds checking. UI can send bad data
-            // if (page >= chapter.Pages)
-            // {
-            //     page = chapter.Pages - 1;
-            // } else if (page < 0)
-            // {
-            //     page = 0;
-            // }
 
             var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
             if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
@@ -68,7 +60,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId); // TODO: Make this async
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {

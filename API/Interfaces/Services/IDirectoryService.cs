@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using API.DTOs;
 
-namespace API.Interfaces
+namespace API.Interfaces.Services
 {
     public interface IDirectoryService
     {
@@ -21,5 +21,11 @@ namespace API.Interfaces
         /// <param name="searchPatternExpression"></param>
         /// <returns></returns>
         string[] GetFiles(string path, string searchPatternExpression = "");
+        /// <summary>
+        /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        /// <returns></returns>
+        bool ExistOrCreate(string directoryPath);
     }
 }

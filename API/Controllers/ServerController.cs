@@ -21,7 +21,7 @@ namespace API.Controllers
         [HttpPost("restart")]
         public ActionResult RestartServer()
         {
-            _logger.LogInformation($"{User.GetUsername()} is restarting server from admin dashboard.");
+            _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
             
             _applicationLifetime.StopApplication();
             return Ok();
