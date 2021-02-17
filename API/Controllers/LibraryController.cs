@@ -2,18 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using API.Interfaces.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -26,18 +24,16 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly DataContext _dataContext; // TODO: Remove, only for FTS prototyping
 
         public LibraryController(IDirectoryService directoryService, 
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler, 
-            IUnitOfWork unitOfWork, DataContext dataContext)
+            IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
-            _dataContext = dataContext;
         }
         
         /// <summary>
@@ -73,7 +69,7 @@ namespace API.Controllers
 
             if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue. Please try again.");
 
-            _logger.LogInformation($"Created a new library: {library.Name}");
+            _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
             _taskScheduler.ScanLibrary(library.Id);
             return Ok();
         }
@@ -111,7 +107,7 @@ namespace API.Controllers
             if (user == null) return BadRequest("Could not validate user");
             
             var libraryString = String.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
-            _logger.LogInformation($"Granting user {updateLibraryForUserDto.Username} access to: {libraryString}");
+            _logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
             
             var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
             foreach (var library in allLibraries)
@@ -133,13 +129,13 @@ namespace API.Controllers
             
             if (!_unitOfWork.HasChanges())
             {
-                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
+                _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
                 return Ok(_mapper.Map<MemberDto>(user));
             }
 
             if (await _unitOfWork.Complete())
             {
-                _logger.LogInformation($"Added: {updateLibraryForUserDto.SelectedLibraries} to {updateLibraryForUserDto.Username}");
+                _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
                 return Ok(_mapper.Map<MemberDto>(user));
             }
             
@@ -171,10 +167,16 @@ namespace API.Controllers
         }
 
         [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId)
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
         {
+            // TODO: Move this to SeriesController
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id));
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
+            
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+            
+            return Ok(series);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -182,7 +184,7 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
         {
             var username = User.GetUsername();
-            _logger.LogInformation($"Library {libraryId} is being deleted by {username}.");
+            _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, username);
             var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
             var chapterIds =
                 await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(series.Select(x => x.Id).ToArray());
@@ -226,6 +228,7 @@ namespace API.Controllers
             //NOTE: What about normalizing search query and only searching against normalizedname in Series? 
             // So One Punch would match One-Punch
             // This also means less indexes we need.
+            // TODO: Add indexes of what we are searching on
             queryString = queryString.Replace(@"%", "");
             
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());

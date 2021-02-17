@@ -10,10 +10,10 @@ namespace API.Tests.Services
         // private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         // private readonly IDirectoryService _directoryService = Substitute.For<DirectoryService>();
 
-        public CacheServiceTests()
-        {
-            //_cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
-        }
+        // public CacheServiceTests()
+        // {
+        //     //_cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
+        // }
         
         //string GetCachedPagePath(Volume volume, int page)
         [Fact]

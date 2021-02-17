@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using System.IO.Compression;
-using API.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

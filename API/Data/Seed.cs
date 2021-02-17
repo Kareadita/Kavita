@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -38,7 +39,8 @@ namespace API.Data
                 new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 //new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"},
-                //new () {Key = ServerSettingKey.TaskBackup, Value = "daily"},
+                new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
+                new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
                 new () {Key = ServerSettingKey.Port, Value = "5000"},
             };
             

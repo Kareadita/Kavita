@@ -26,6 +26,7 @@ namespace API.Extensions
             services.AddScoped<IScannerService, ScannerService>();
             services.AddScoped<IArchiveService, ArchiveService>();
             services.AddScoped<IMetadataService, MetadataService>();
+            services.AddScoped<IBackupService, BackupService>();
 
 
 

@@ -78,12 +78,12 @@ namespace API.Services
           var library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
           var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
           
-          _logger.LogInformation($"Beginning metadata refresh of {library.Name}");
+          _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
           foreach (var series in allSeries)
           {
              series.NormalizedName = Parser.Parser.Normalize(series.Name);
              
-             var volumes = _unitOfWork.SeriesRepository.GetVolumes(series.Id).ToList();
+             var volumes = Task.Run(() => _unitOfWork.SeriesRepository.GetVolumes(series.Id)).Result.ToList();
              foreach (var volume in volumes)
              {
                 foreach (var chapter in volume.Chapters)
@@ -101,7 +101,7 @@ namespace API.Services
 
           if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.Complete()).Result)
           {
-             _logger.LogInformation($"Updated metadata for {library.Name} in {sw.ElapsedMilliseconds} ms.");
+             _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
           }
        }
     }

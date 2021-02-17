@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,7 @@ namespace API
                 var logger = services.GetRequiredService < ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
+
 
             await host.RunAsync();
         }

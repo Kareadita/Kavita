@@ -36,7 +36,7 @@ namespace API.Controllers
         {
             var username = User.GetUsername();
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
-            _logger.LogInformation($"Series {seriesId} is being deleted by {username}.");
+            _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
             if (result)

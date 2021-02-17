@@ -6,6 +6,7 @@ using API.Comparators;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -30,11 +31,12 @@ namespace API.Services
 
         public void EnsureCacheDirectory()
         {
-            _logger.LogDebug($"Checking if valid Cache directory: {CacheDirectory}");
+            // TODO: Replace with DirectoryService.ExistOrCreate()
+            _logger.LogDebug("Checking if valid Cache directory: {CacheDirectory}", CacheDirectory);
             var di = new DirectoryInfo(CacheDirectory);
             if (!di.Exists)
             {
-                _logger.LogError($"Cache directory {CacheDirectory} is not accessible or does not exist. Creating...");
+                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
                 Directory.CreateDirectory(CacheDirectory);
             }
         }
@@ -66,15 +68,15 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError("There was an issue deleting one or more folders/files during cleanup.", ex);
+                _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
             }
             
-            _logger.LogInformation("Cache directory purged.");
+            _logger.LogInformation("Cache directory purged");
         }
         
         public void CleanupChapters(int[] chapterIds)
         {
-            _logger.LogInformation($"Running Cache cleanup on Volumes");
+            _logger.LogInformation("Running Cache cleanup on Volumes");
             
             foreach (var chapter in chapterIds)
             {

@@ -35,7 +35,7 @@ namespace API.Controllers
         [HttpPost("")]
         public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
         {
-            _logger.LogInformation($"{User.GetUsername()}  is updating Server Settings");
+            _logger.LogInformation("{UserName}  is updating Server Settings", User.GetUsername());
 
             if (updateSettingsDto.CacheDirectory.Equals(string.Empty))
             {
@@ -72,9 +72,11 @@ namespace API.Controllers
                 }
             }
 
+            if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
+
             if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
             {
-                _logger.LogInformation("Server Settings updated.");
+                _logger.LogInformation("Server Settings updated");
                 return Ok(updateSettingsDto);
             }
 

@@ -1,6 +1,6 @@
 ﻿using System.IO.Compression;
 
-namespace API.Interfaces
+namespace API.Interfaces.Services
 {
     public interface IArchiveService
     {
