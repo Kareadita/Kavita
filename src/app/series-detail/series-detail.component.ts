@@ -7,6 +7,8 @@ import { forkJoin } from 'rxjs';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
+import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
+import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -123,8 +125,8 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   hasReadingProgress() {
-    return ((this.currentlyReadingVolume !== undefined && this.currentlyReadingVolume.pagesRead > 0) || (this.currentlyReadingChapter !== this.chapters[0] && this.currentlyReadingChapter !== undefined));
-    //return false;
+    return ((this.currentlyReadingVolume !== undefined && this.currentlyReadingVolume.pagesRead > 0)
+    || (this.currentlyReadingChapter !== this.chapters[0] && this.currentlyReadingChapter !== undefined));
   }
 
   markAsRead(vol: Volume) {
@@ -190,7 +192,6 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    console.log('Rating is: ', this.series?.userRating);
     this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {});
   }
 
@@ -214,6 +215,32 @@ export class SeriesDetailComponent implements OnInit {
     const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
+  }
+
+  openEditSeriesModal() {
+    const modalRef = this.modalService.open(EditSeriesModalComponent, { scrollable: true, size: 'lg' });
+    modalRef.componentInstance.series = this.series;
+    modalRef.closed.subscribe((closeResult: {success: boolean}) => {
+      if (closeResult.success) {
+        // TODO: Refresh Series information
+      }
+    });
+  }
+
+  openReviewModal() {
+    if (this.series !== undefined && !this.isNullOrEmpty(this.series.userReview)) {
+      return;
+    }
+
+    if (confirm('Do you want to write a review?')) {
+      const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+      modalRef.componentInstance.series = this.series;
+      modalRef.closed.subscribe((closeResult: {success: boolean, review: string}) => {
+        if (closeResult.success && this.series !== undefined) {
+          this.series.userReview = closeResult.review;
+        }
+      });
+    }
   }
 
 }

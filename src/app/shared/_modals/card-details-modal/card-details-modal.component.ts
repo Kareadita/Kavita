@@ -38,8 +38,6 @@ export class CardDetailsModalComponent implements OnInit {
     } else if (!this.isChapter) {
       this.chapters.push(...this.data?.chapters);
     }
-    console.log('data: ', this.data);
-
   }
 
   isObjectChapter(object: any): object is Chapter {

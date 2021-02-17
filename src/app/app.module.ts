@@ -20,6 +20,8 @@ import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
+import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
+import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 
 
 
@@ -34,7 +36,7 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
     LibraryDetailComponent, // Move into MangaModule
     SeriesDetailComponent, // Move into MangaModule
     NotConnectedComponent, // Move into ExtrasModule
-    UserPreferencesComponent, // Move into SettingsModule
+    UserPreferencesComponent, EditSeriesModalComponent, ReviewSeriesModalComponent, // Move into SettingsModule
   ],
   imports: [
     HttpClientModule,
