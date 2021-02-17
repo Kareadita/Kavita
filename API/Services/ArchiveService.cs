@@ -144,6 +144,11 @@ namespace API.Services
 
         }
 
+        public string GetSummaryInfo(string archivePath)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
         /// will return that without performing an extraction. Returns empty string if there are any invalidations which would

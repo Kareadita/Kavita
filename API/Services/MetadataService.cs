@@ -68,7 +68,7 @@ namespace API.Services
           
           if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
           {
-             series.Summary = "";
+             series.Summary = _archiveService.GetSummaryInfo(series.Volumes.First().Chapters.First().Files.First().FilePath);
           }
        }
        

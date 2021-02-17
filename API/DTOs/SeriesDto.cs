@@ -21,5 +21,14 @@
         /// Review from logged in user. Calculated at API-time.
         /// </summary>
         public string UserReview { get; set; }
+        
+        /// <summary>
+        /// DO NOT Use. Used as a hack for <see cref="SeriesRepository.GetSeriesDtoForLibraryIdAsync()"/>
+        /// </summary>
+        public int LibraryId { get; set; }
+        /// <summary>
+        /// DO NOT Use. Used as a hack for <see cref="SeriesRepository.GetSeriesDtoForLibraryIdAsync()"/>
+        /// </summary>
+        public int AppUserId { get; set; }
     }
 }

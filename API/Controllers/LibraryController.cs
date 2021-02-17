@@ -174,6 +174,9 @@ namespace API.Controllers
             var series =
                 await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
             
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
             
             return Ok(series);
