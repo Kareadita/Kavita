@@ -80,7 +80,7 @@ namespace API.Services
             {
                 using var stream = entry.Open();
                 using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
-                return thumbnail.WriteToBuffer(".jpg");
+                return thumbnail.WriteToBuffer(".jpg"); // TODO: Validate this code works with .png files
             }
             catch (Exception ex)
             {
