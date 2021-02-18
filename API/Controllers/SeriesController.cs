@@ -82,15 +82,44 @@ namespace API.Controllers
             userRating.Rating = updateSeriesRatingDto.UserRating;
             userRating.Review = updateSeriesRatingDto.UserReview;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-            _unitOfWork.UserRepository.AddRatingTracking(userRating);
-            user.Ratings ??= new List<AppUserRating>();
-            user.Ratings.Add(userRating);
-
+            
+            if (userRating.Id == 0)
+            {
+                user.Ratings ??= new List<AppUserRating>();
+                user.Ratings.Add(userRating);
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
 
             if (!await _unitOfWork.Complete()) return BadRequest("There was a critical error.");
 
             return Ok();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
+        {
+            _logger.LogInformation("{UserName} is updating Series {SeriesName}", User.GetUsername(), updateSeries.Name);
+
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
+
+            if (series == null) return BadRequest("Series does not exist");
+
+            // TODO: Support changing series properties once "locking" is implemented.
+            // series.Name = updateSeries.Name;
+            // series.OriginalName = updateSeries.OriginalName;
+            // series.SortName = updateSeries.SortName;
+            series.Summary = updateSeries.Summary;
+            //series.CoverImage = updateSeries.CoverImage;
+            
+            _unitOfWork.SeriesRepository.Update(series);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+            
+            return BadRequest("There was an error with updating the series");
         }
     }
 }

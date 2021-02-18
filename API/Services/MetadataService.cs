@@ -65,10 +65,14 @@ namespace API.Services
              }
              series.CoverImage = firstCover?.CoverImage;
           }
+
+          if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
           
-          if (string.IsNullOrEmpty(series.Summary) || forceUpdate)
+          var firstVolume = series.Volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number == 1);
+          var firstChapter = firstVolume?.Chapters.FirstOrDefault(c => c.Files.Any());
+          if (firstChapter != null)
           {
-             series.Summary = "";
+             series.Summary = _archiveService.GetSummaryInfo(firstChapter.Files.FirstOrDefault()?.FilePath);
           }
        }
        

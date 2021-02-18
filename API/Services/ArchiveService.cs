@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
+using System.Xml.Serialization;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -77,7 +80,7 @@ namespace API.Services
             {
                 using var stream = entry.Open();
                 using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
-                return thumbnail.WriteToBuffer(".jpg");
+                return thumbnail.WriteToBuffer(".jpg"); // TODO: Validate this code works with .png files
             }
             catch (Exception ex)
             {
@@ -142,6 +145,38 @@ namespace API.Services
             }
             return false;
 
+        }
+
+        public string GetSummaryInfo(string archivePath)
+        {
+            var summary = "";
+            if (!IsValidArchive(archivePath)) return summary;
+            
+            using var archive = ZipFile.OpenRead(archivePath);
+            if (!archive.HasFiles()) return summary;
+            
+            var info = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
+            if (info == null) return summary;
+            
+            // Parse XML file
+            try
+            {
+                using var stream = info.Open();
+                var serializer = new XmlSerializer(typeof(ComicInfo));
+                ComicInfo comicInfo = 
+                    (ComicInfo)serializer.Deserialize(stream);
+                
+                if (comicInfo != null)
+                {
+                    return comicInfo.Summary;
+                }
+            }
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex, "There was an issue parsing ComicInfo.xml from {ArchivePath}", archivePath);
+            }
+
+            return summary;
         }
 
         /// <summary>

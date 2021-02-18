@@ -39,5 +39,12 @@ namespace API.Interfaces
         Task<Volume> GetVolumeByIdAsync(int volumeId);
         Task<Series> GetSeriesByIdAsync(int seriesId);
         Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
+        /// <summary>
+        /// Used to add Progress/Rating information to series list.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="series"></param>
+        /// <returns></returns>
+        Task AddSeriesModifiers(int userId, List<SeriesDto> series);
     }
 }

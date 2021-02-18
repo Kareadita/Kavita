@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -9,5 +10,6 @@ namespace API.Interfaces.Services
         int GetNumberOfPagesFromArchive(string archivePath);
         byte[] GetCoverImage(string filepath, bool createThumbnail = false);
         bool IsValidArchive(string archivePath);
+        string GetSummaryInfo(string archivePath);
     }
 }

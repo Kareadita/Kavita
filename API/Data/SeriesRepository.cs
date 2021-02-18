@@ -67,18 +67,11 @@ namespace API.Data
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
         {
             var sw = Stopwatch.StartNew();
-
-
-
             var query =  _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
-
-
-            // TODO: Refactor this into JOINs
-            //await AddSeriesModifiers(userId, series);
 
 
             _logger.LogDebug("Processed GetSeriesDtoForLibraryIdAsync in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
@@ -222,7 +215,7 @@ namespace API.Data
             return chapterIds.ToArray();
         }
 
-        private async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
+        public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
         {
             var userProgress = await _context.AppUserProgresses
                 .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
