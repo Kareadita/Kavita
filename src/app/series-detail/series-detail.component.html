@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
-            <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
+            <app-base64-image [style]="{width: '100%'}" [src]="series.coverImage"></app-base64-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters"><h2>{{series?.name | titlecase}}</h2></div>
@@ -28,7 +28,7 @@
             </div>
             <div class="row no-gutters">
                 <p class="user-review {{series?.userReview ? 'mt-1' : ''}}">{{series?.userReview}} 
-                    <button class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
+                    <button *ngIf="series?.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
             </div>
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
                 <!-- TODO: Read more component -->

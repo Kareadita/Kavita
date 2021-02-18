@@ -64,7 +64,7 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close();
+    this.modal.close({success: true, series: undefined});
   }
 
   formatChapterNumber(chapter: Chapter) {
@@ -75,7 +75,9 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   save() {
-
+    this.seriesService.updateSeries(this.editSeriesForm.value).subscribe(() => {
+      this.modal.close({success: true, series: this.editSeriesForm.value});
+    });
   }
 
 }

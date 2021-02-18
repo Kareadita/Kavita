@@ -34,8 +34,6 @@ export class SeriesDetailComponent implements OnInit {
 
   currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
-  safeImage!: SafeUrl;
-  placeholderImage = 'assets/images/image-placeholder.jpg';
 
   testMap: any;
   showBook = false;
@@ -66,7 +64,6 @@ export class SeriesDetailComponent implements OnInit {
       this.router.navigateByUrl('/home');
       return;
     }
-    
 
     this.volumeActions = [
       {title: 'Mark Read', callback: (data: Volume) => this.markAsRead(data)},
@@ -91,9 +88,12 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.loadSeries(seriesId);
+  }
+
+  loadSeries(seriesId: number) {
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
-      this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
@@ -233,10 +233,10 @@ export class SeriesDetailComponent implements OnInit {
     //scrollable: true,
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
-        // TODO: Refresh Series information
+        this.loadSeries(this.series.id);
       }
     });
   }
