@@ -23,7 +23,7 @@ import { SeriesService } from '../_services/series.service';
 })
 export class SeriesDetailComponent implements OnInit {
 
-  series: Series | undefined;
+  series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
   libraryId = 0;
@@ -227,20 +227,21 @@ export class SeriesDetailComponent implements OnInit {
     });
   }
 
-  openReviewModal() {
-    if (this.series !== undefined && !this.isNullOrEmpty(this.series.userReview)) {
-      return;
+  promptToReview() {
+    const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
+    if (shouldPrompt && confirm('Do you want to write a review?')) {
+      this.openReviewModal();
     }
+  }
 
-    if (confirm('Do you want to write a review?')) {
-      const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
-      modalRef.componentInstance.series = this.series;
-      modalRef.closed.subscribe((closeResult: {success: boolean, review: string}) => {
-        if (closeResult.success && this.series !== undefined) {
-          this.series.userReview = closeResult.review;
-        }
-      });
-    }
+  openReviewModal(force = false) {
+    const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+    modalRef.componentInstance.series = this.series;
+    modalRef.closed.subscribe((closeResult: {success: boolean, review: string}) => {
+      if (closeResult.success && this.series !== undefined) {
+        this.series.userReview = closeResult.review;
+      }
+    });
   }
 
 }
