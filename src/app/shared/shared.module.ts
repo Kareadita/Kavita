@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RegisterMemberComponent } from './register-member/register-member.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
-import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
@@ -27,7 +27,7 @@ import { SeriesCardDetailsComponent } from './_modals/series-card-details/series
     NgbDropdownModule,
     NgbProgressbarModule,
     NgbTooltipModule,
-    NgbCollapseModule
+    NgbCollapseModule,
   ],
   exports: [
     RegisterMemberComponent,

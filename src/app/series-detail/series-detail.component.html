@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
-            <img class="poster" [src]="isNullOrEmpty(series.coverImage) ? placeholderImage : safeImage" alt="{{series.name}}">
+            <app-base64-image [style]="{width: '100%'}" [src]="series.coverImage"></app-base64-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters"><h2>{{series?.name | titlecase}}</h2></div>
@@ -12,30 +12,30 @@
                             <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
                         </span>
                         &nbsp;
-                        <span class="read-btn--text">{{currentlyReadingVolume === undefined ? 'Read' : 'Continue'}}</span>
+                        <span class="read-btn--text">{{(hasReadingProgress()) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
                 <div class="ml-2">
-                    <button class="btn btn-secondary" [disabled]="true" title="Edit Series information">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" *ngIf="isAdmin" title="Edit Series information">
                         <span>
                             <i class="fa fa-pen"></i>
                         </span>
                     </button>
                 </div>
                 <div class="ml-2">
-                    <ngb-rating style="margin-top: 2px;" [(rate)]="series.userRating" (rateChange)="updateRating($event)"></ngb-rating>
+                    <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
                 </div>
             </div>
             <div class="row no-gutters">
-                <p class="user-review {{series?.userReview ? 'mt-1' : ''}}">{{series?.userReview}}</p>
+                <p class="user-review {{series?.userReview ? 'mt-1' : ''}}">{{series?.userReview}} 
+                    <button *ngIf="series?.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
             </div>
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
-                <!-- Read more component -->
+                <!-- TODO: Read more component -->
                 <p>{{series?.summary}}</p>
             </div>
             <div>
-                <!-- Future metadata here
-                <div class="row no-gutters">
+                <div class="row no-gutters" *ngIf="false">
                     <div class="col-md-6">
                         <h5>Genres</h5>
                     </div>
@@ -43,7 +43,7 @@
                         <p>Action, Fantasy, Gore, Romance</p>
                     </div>
                 </div>
-                <div class="row no-gutters">
+                <div class="row no-gutters" *ngIf="false">
                     <div class="col-md-6">
                         <h5>Collections</h5>
                     </div>
@@ -51,7 +51,6 @@
                         <p>Action, Favorites</p>
                     </div>
                 </div>
-                -->
             </div>
         </div>
     </div>

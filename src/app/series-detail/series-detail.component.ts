@@ -2,14 +2,19 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
-import { Toast, ToastrService } from 'ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
+import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
+import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
+import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
+import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -21,15 +26,14 @@ import { SeriesService } from '../_services/series.service';
 })
 export class SeriesDetailComponent implements OnInit {
 
-  series: Series | undefined;
+  series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
   libraryId = 0;
+  isAdmin = false;
 
   currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
-  safeImage!: SafeUrl;
-  placeholderImage = 'assets/images/image-placeholder.jpg';
 
   testMap: any;
   showBook = false;
@@ -42,9 +46,15 @@ export class SeriesDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService) {
+              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
+              private accountService: AccountService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.isAdmin = this.accountService.hasAdminRole(user);
+      }
+    })
   }
 
   ngOnInit(): void {
@@ -78,9 +88,12 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.loadSeries(seriesId);
+  }
+
+  loadSeries(seriesId: number) {
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
-      this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + series.coverImage);
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
@@ -120,6 +133,11 @@ export class SeriesDetailComponent implements OnInit {
         this.currentlyReadingChapter = this.chapters[0];
       }
     }
+  }
+
+  hasReadingProgress() {
+    return ((this.currentlyReadingVolume !== undefined && this.currentlyReadingVolume.pagesRead > 0)
+    || (this.currentlyReadingChapter !== this.chapters[0] && this.currentlyReadingChapter !== undefined));
   }
 
   markAsRead(vol: Volume) {
@@ -185,7 +203,6 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    console.log('Rating is: ', this.series?.userRating);
     this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {});
   }
 
@@ -209,6 +226,36 @@ export class SeriesDetailComponent implements OnInit {
     const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
+  }
+
+  openEditSeriesModal() {
+    // TODO: Some bug with modal where scorllable isn't working. Leave off to use underlying page scroll
+    //scrollable: true,
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    modalRef.componentInstance.series = this.series;
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+      window.scrollTo(0, 0);
+      if (closeResult.success) {
+        this.loadSeries(this.series.id);
+      }
+    });
+  }
+
+  promptToReview() {
+    const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
+    if (shouldPrompt && confirm('Do you want to write a review?')) {
+      this.openReviewModal();
+    }
+  }
+
+  openReviewModal(force = false) {
+    const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+    modalRef.componentInstance.series = this.series;
+    modalRef.closed.subscribe((closeResult: {success: boolean, review: string}) => {
+      if (closeResult.success && this.series !== undefined) {
+        this.series.userReview = closeResult.review;
+      }
+    });
   }
 
 }

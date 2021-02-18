@@ -3,12 +3,12 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { EditSeriesModalComponent } from 'src/app/_modals/edit-series-modal/edit-series-modal.component';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { CardItemAction } from '../card-item/card-item.component';
-import { SeriesCardDetailsComponent } from '../_modals/series-card-details/series-card-details.component';
 
 @Component({
   selector: 'app-series-card',
@@ -76,8 +76,16 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       }});
 
       this.actions.push({title: 'Get Info', callback: (data: Series) => {
-        const modalRef = this.modalService.open(SeriesCardDetailsComponent, { size: 'lg'});
-        modalRef.componentInstance.data = data;
+        const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+        modalRef.componentInstance.series = data;
+        modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+          window.scrollTo(0, 0);
+          if (closeResult.success) {
+            this.seriesService.getSeries(data.id).subscribe(series => {
+              this.data = series;
+            });
+          }
+        });
       }});
     }
   }
