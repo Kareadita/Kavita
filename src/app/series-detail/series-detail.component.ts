@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { CardItemAction } from '../shared/card-item/card-item.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -11,7 +12,9 @@ import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-seri
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
+import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
+import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -27,6 +30,7 @@ export class SeriesDetailComponent implements OnInit {
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
   libraryId = 0;
+  isAdmin = false;
 
   currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
@@ -44,9 +48,15 @@ export class SeriesDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService) {
+              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
+              private accountService: AccountService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.isAdmin = this.accountService.hasAdminRole(user);
+      }
+    })
   }
 
   ngOnInit(): void {
@@ -56,6 +66,7 @@ export class SeriesDetailComponent implements OnInit {
       this.router.navigateByUrl('/home');
       return;
     }
+    
 
     this.volumeActions = [
       {title: 'Mark Read', callback: (data: Volume) => this.markAsRead(data)},

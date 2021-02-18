@@ -16,8 +16,7 @@
                     </button>
                 </div>
                 <div class="ml-2">
-                    <!-- TODO: Only for Admins -->
-                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" title="Edit Series information">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" *ngIf="isAdmin" title="Edit Series information">
                         <span>
                             <i class="fa fa-pen"></i>
                         </span>
@@ -32,7 +31,7 @@
                     <button class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
             </div>
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
-                <!-- Read more component -->
+                <!-- TODO: Read more component -->
                 <p>{{series?.summary}}</p>
             </div>
             <div>
