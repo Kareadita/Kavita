@@ -30,6 +30,7 @@ export class EditSeriesModalComponent implements OnInit {
   ngOnInit(): void {
 
     this.editSeriesForm = this.fb.group({
+      id: new FormControl(this.series.id, []),
       summary: new FormControl(this.series.summary, []),
       name: new FormControl(this.series.name, []),
       originalName: new FormControl(this.series.originalName, []),
@@ -59,10 +60,6 @@ export class EditSeriesModalComponent implements OnInit {
     });
   }
 
-  get author() {
-    return this.editSeriesForm.get('general')?.get('author') as FormArray;
-  }
-
   close() {
     this.modal.close({success: true, series: undefined});
   }
@@ -75,6 +72,7 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   save() {
+    // TODO: In future (once locking or metadata implemented), do a converstion to updateSeriesDto
     this.seriesService.updateSeries(this.editSeriesForm.value).subscribe(() => {
       this.modal.close({success: true, series: this.editSeriesForm.value});
     });
