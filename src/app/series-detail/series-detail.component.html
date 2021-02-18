@@ -23,7 +23,7 @@
                     </button>
                 </div>
                 <div class="ml-2">
-                    <ngb-rating style="margin-top: 2px;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
+                    <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
                 </div>
             </div>
             <div class="row no-gutters">
@@ -35,8 +35,7 @@
                 <p>{{series?.summary}}</p>
             </div>
             <div>
-                <!-- Future metadata here
-                <div class="row no-gutters">
+                <div class="row no-gutters" *ngIf="false">
                     <div class="col-md-6">
                         <h5>Genres</h5>
                     </div>
@@ -44,7 +43,7 @@
                         <p>Action, Fantasy, Gore, Romance</p>
                     </div>
                 </div>
-                <div class="row no-gutters">
+                <div class="row no-gutters" *ngIf="false">
                     <div class="col-md-6">
                         <h5>Collections</h5>
                     </div>
@@ -52,7 +51,6 @@
                         <p>Action, Favorites</p>
                     </div>
                 </div>
-                -->
             </div>
         </div>
     </div>

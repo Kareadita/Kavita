@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbDropdownModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -48,6 +48,8 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
     AutocompleteLibModule, // Nav
     NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail
+    NgbCollapseModule, // Series Edit Modal
+    NgbNavModule, // Series Edit Modal
     NgbPaginationModule,
     SharedModule,
     ToastrModule.forRoot({

@@ -229,9 +229,12 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, { scrollable: true, size: 'lg' });
+    // TODO: Some bug with modal where scorllable isn't working. Leave off to use underlying page scroll
+    //scrollable: true,
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean}) => {
+      window.scrollTo(0, 0);
       if (closeResult.success) {
         // TODO: Refresh Series information
       }
