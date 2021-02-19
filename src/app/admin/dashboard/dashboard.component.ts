@@ -43,4 +43,8 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  fetchLogs() {
+    
+  }
+
 }

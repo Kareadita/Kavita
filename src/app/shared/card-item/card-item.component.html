@@ -5,7 +5,7 @@
         <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total - 1"></ngb-progressbar></p>
       </div>
       <div class="not-read-badge" *ngIf="read === 0"></div>
-      <div class="overlay-item card-actions">
+      <div class="card-actions"> <!-- overlay-item  -->
         <ng-container *ngIf="actions.length > 0">
               <div ngbDropdown container="body" class="d-inline-block">
                 <button class="btn" id="actions-{{title}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>

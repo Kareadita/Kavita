@@ -1,3 +1,4 @@
+import { getLocaleDateFormat } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
@@ -13,5 +14,9 @@ export class ServerService {
 
   restart() {
     return this.httpClient.post(this.baseUrl + 'server/restart', {});
+  }
+
+  fetchLogs() {
+    return this.httpClient.get(this.baseUrl + 'server/fetch-logs', {});
   }
 }

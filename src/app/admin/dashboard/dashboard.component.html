@@ -1,6 +1,7 @@
 <h1>Admin Dashboard</h1>
 
 <!-- <button class="btn btn-primary" (click)="restartServer()">Restart Server</button> -->
+<button class="btn btn-secondary" (click)="fetchLogs()">Download Logs</button>
 
 <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
     <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
