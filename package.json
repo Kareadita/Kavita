@@ -27,8 +27,10 @@
     "@angular/router": "~11.0.0",
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@ng-bootstrap/ng-bootstrap": "^8.0.0",
+    "@types/file-saver": "^2.0.1",
     "angular-ng-autocomplete": "^2.0.5",
     "bootstrap": "^4.5.0",
+    "file-saver": "^2.0.5",
     "ngx-toastr": "^13.2.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
@@ -64,5 +66,5 @@
         "stringifyContentPathRegex": "\\.html$"
       }
     }
-}
+  }
 }

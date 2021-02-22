@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
-import { SettingsService } from '../settings.service';
-import { ServerSettings } from '../_models/server-settings';
+import * as FileSaver from 'file-saver';
 
 
 
@@ -44,7 +42,11 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLogs() {
-    
+    this.serverService.fetchLogs().subscribe(res => {
+      const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
+      FileSaver.saveAs(blob, 'kavita.log');
+      console.log(res);
+    });
   }
 
 }

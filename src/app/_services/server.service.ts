@@ -17,6 +17,6 @@ export class ServerService {
   }
 
   fetchLogs() {
-    return this.httpClient.get(this.baseUrl + 'server/fetch-logs', {});
+    return this.httpClient.get(this.baseUrl + 'server/logs', {responseType: 'blob' as 'text'});
   }
 }
