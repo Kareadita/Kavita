@@ -19,6 +19,14 @@
 
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+    .phone-hidden {
+      display: none;
+    }
+}
+
 
 
 // TODO: Move the Plex theme into a separate file and copy how  https://bootswatch.com/darkly/ did it

@@ -1,7 +1,7 @@
 
 <div class="container-fluid">
     <div class="row no-gutters">
-        <div class="col-sm-auto" *ngFor="let library of libraries">
+        <div class="col-auto" *ngFor="let library of libraries">
             <app-library-card [data]="library"></app-library-card>
         </div>
         <div *ngIf="libraries.length === 0 && !isLoading && isAdmin">

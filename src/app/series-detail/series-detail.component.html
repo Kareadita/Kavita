@@ -59,13 +59,13 @@
     <div class="row">
         <div *ngFor="let volume of volumes">
             <ng-container *ngIf="volume.number != 0">
-                <app-card-item class="col-sm-auto" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                <app-card-item class="col-auto" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                     [imageUrl]="volume.coverImage === null ? 'assets/images/image-placeholder.jpg' : volume.coverImage"
                     [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
             </ng-container>
         </div>
         <div *ngFor="let chapter of chapters">
-            <app-card-item class="col-sm-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+            <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="chapter.coverImage === null ? 'assets/images/image-placeholder.jpg' : chapter.coverImage"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
         </div>
