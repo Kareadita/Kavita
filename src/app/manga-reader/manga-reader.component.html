@@ -8,7 +8,6 @@
     <div *ngIf="menuOpen" class="overlay" (click)="toggleMenu()">
         <div class="center-menu" (click)="$event.stopPropagation()">
                 <div class="col" *ngIf="image !== undefined">
-                    <!-- TODO: Think about putting behind ? icon toggle -->
                     {{ image.mangaFileName }}
                 </div>
 
