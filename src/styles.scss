@@ -21,6 +21,7 @@
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
 
+
 @include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
     .phone-hidden {
       display: none;

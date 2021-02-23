@@ -6,12 +6,22 @@
 
 .ng-autocomplete {
     width: 400px;
+    margin-bottom: 0px;
 }
 
 
 
-@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
     .ng-autocomplete {
         width: 240px;
     }
 }
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 410px) { //370
+    .ng-autocomplete {
+        display: none !important;
+    }
+}
+
+
