@@ -1,13 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { CardItemAction } from '../shared/card-item/card-item.component';
 import { Library } from '../_models/library';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { LibraryService } from '../_services/library.service';
-import { MemberService } from '../_services/member.service';
-
 @Component({
   selector: 'app-library',
   templateUrl: './library.component.html',

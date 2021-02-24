@@ -39,6 +39,7 @@ export class NavHeaderComponent implements OnInit {
         this.isLoading = false;
       }, err => {
         this.searchResults = [];
+        this.isLoading = false;
       });
   }
 

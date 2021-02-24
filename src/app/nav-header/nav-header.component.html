@@ -4,7 +4,7 @@
       <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home"></i><span class="phone-hidden"> Kavita</span></a>
       <ul class="navbar-nav mr-auto">
         
-        <div class="nav-item">
+        <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
           <div class="col-xs-4 col-md-6">
             <fieldset class="form-inline">
               <div class="form-group" style="margin-bottom: 0px;">
