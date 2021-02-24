@@ -11,5 +11,6 @@ namespace API.Interfaces.Services
         byte[] GetCoverImage(string filepath, bool createThumbnail = false);
         bool IsValidArchive(string archivePath);
         string GetSummaryInfo(string archivePath);
+        
     }
 }

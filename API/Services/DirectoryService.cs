@@ -39,8 +39,23 @@ namespace API.Services
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
+       
+       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "", 
+          SearchOption searchOption = SearchOption.TopDirectoryOnly)
+       {
+          if (searchPatternExpression != string.Empty)
+          {
+             if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
+             var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+             return Directory.EnumerateFiles(path, "*", searchOption)
+                .Where(file =>
+                   reSearchPattern.IsMatch(file));
+          }
+          
+          return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
+       }
 
-       public string[] GetFiles(string path, string searchPatternExpression = "")
+       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
@@ -70,6 +85,16 @@ namespace API.Services
        {
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
+          ClearDirectory(directoryPath);
+          
+          di.Delete(true);
+       }
+
+       public void ClearDirectory(string directoryPath)
+       {
+          var di = new DirectoryInfo(directoryPath);
+          if (!di.Exists) return;
+
           foreach (var file in di.EnumerateFiles())
           {
              file.Delete(); 
@@ -78,8 +103,35 @@ namespace API.Services
           {
              dir.Delete(true); 
           }
-          
-          di.Delete(true);
+       }
+
+       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath)
+       {
+          string currentFile = null;
+          try
+          {
+             foreach (var file in filePaths)
+             {
+                currentFile = file;
+                var fileInfo = new FileInfo(file);
+                if (fileInfo.Exists)
+                {
+                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));   
+                }
+                else
+                {
+                   _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
+                }
+                
+             }
+          }
+          catch (Exception ex)
+          {
+             _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+             return false;
+          }
+
+          return true;
        }
 
        public IEnumerable<string> ListDirectory(string rootPath)
@@ -105,13 +157,19 @@ namespace API.Services
 
           return new ImageDto
           {
-             Content = await File.ReadAllBytesAsync(imagePath),
+             Content = await ReadFileAsync(imagePath),
              Filename = Path.GetFileNameWithoutExtension(imagePath),
              FullPath = Path.GetFullPath(imagePath),
              Width = image.Width,
              Height = image.Height,
              Format = image.Format,
           };
+       }
+
+       public async Task<byte[]> ReadFileAsync(string path)
+       {
+          if (!File.Exists(path)) return Array.Empty<byte>();
+          return await File.ReadAllBytesAsync(path);
        }
 
 

@@ -48,7 +48,7 @@ namespace API.Tests.Services
             // var cacheService = Substitute.ForPartsOf<CacheService>();
             // cacheService.Configure().CacheDirectoryIsAccessible().Returns(true);
             // cacheService.Configure().GetVolumeCachePath(1, volume.Files.ElementAt(0)).Returns("cache/1/");
-            // _directoryService.Configure().GetFiles("cache/1/").Returns(new string[] {"pexels-photo-6551949.jpg"});
+            // _directoryService.Configure().GetFilesWithExtension("cache/1/").Returns(new string[] {"pexels-photo-6551949.jpg"});
             // Assert.Equal(expected, _cacheService.GetCachedPagePath(volume, pageNum));
             Assert.True(true);
         }

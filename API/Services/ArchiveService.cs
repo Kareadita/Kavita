@@ -3,12 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 using API.Extensions;
-using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
@@ -20,7 +18,7 @@ namespace API.Services
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
-        private const int ThumbnailWidth = 320;
+        private const int ThumbnailWidth = 320; // 153w x 230h TODO: Look into optimizing the images to be smaller
 
         public ArchiveService(ILogger<ArchiveService> logger)
         {
@@ -94,7 +92,7 @@ namespace API.Services
         {
             using var stream = entry.Open();
             using var ms = new MemoryStream();
-            stream.CopyTo(ms);
+            stream.CopyTo(ms); // TODO: Check if we can use CopyToAsync here
             var data = ms.ToArray();
 
             return data;
