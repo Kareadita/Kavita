@@ -16,8 +16,8 @@ namespace API.Data
         {
             ChangeTracker.Tracked += OnEntityTracked;
             ChangeTracker.StateChanged += OnEntityStateChanged;
-            
         }
+        
         public DbSet<Library> Library { get; set; }
         public DbSet<Series> Series { get; set; }
         
@@ -33,6 +33,7 @@ namespace API.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+            
 
             builder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)

@@ -24,7 +24,6 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddApplicationServices(_config);
             services.AddControllers();
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -72,7 +71,7 @@ namespace API
             
             app.UseStaticFiles(new StaticFileOptions
             {
-                ContentTypeProvider = new FileExtensionContentTypeProvider() // this is not set by default
+                ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
             
 

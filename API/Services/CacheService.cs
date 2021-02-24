@@ -111,7 +111,7 @@ namespace API.Services
                 if (page <= (mangaFile.NumberOfPages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
-                    var files = _directoryService.GetFiles(path, Parser.Parser.ImageFileExtensions); 
+                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions); 
                     Array.Sort(files, _numericComparer);
                     
                     // Since array is 0 based, we need to keep that in account (only affects last image)

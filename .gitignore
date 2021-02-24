@@ -451,3 +451,4 @@ appsettings.json
 cache/
 /API/wwwroot/
 /API/cache/
+/API/temp/

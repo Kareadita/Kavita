@@ -5,8 +5,10 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -18,22 +20,36 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
 
-        private readonly IList<string> _backupFiles = new List<string>()
-        {
-            "appsettings.json",
-            "Hangfire.db",
-            "Hangfire-log.db",
-            "kavita.db",
-            "kavita.db-shm",
-            "kavita.db-wal",
-            "kavita.log",
-        };
+        private readonly IList<string> _backupFiles;
 
-        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger, IDirectoryService directoryService)
+        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger, IDirectoryService directoryService, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _directoryService = directoryService;
+            var maxRollingFiles = config.GetMaxRollingFiles();
+            var loggingSection = config.GetLoggingFileName();
+
+            var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
+            var fi = new FileInfo(loggingSection);
+            
+
+            var files = maxRollingFiles > 0
+                ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
+                : new string[] {"kavita.log"};
+            _backupFiles = new List<string>()
+            {
+                "appsettings.json",
+                "Hangfire.db",
+                "Hangfire-log.db",
+                "kavita.db",
+                "kavita.db-shm", // This wont always be there
+                "kavita.db-wal", // This wont always be there
+            };
+            foreach (var file in files.Select(f => (new FileInfo(f)).Name).ToList())
+            {
+                _backupFiles.Add(file);
+            }
         }
 
         public void BackupDatabase()
@@ -59,14 +75,10 @@ namespace API.Services
 
             var tempDirectory = Path.Join(_tempDirectory, dateString);
             _directoryService.ExistOrCreate(tempDirectory);
-
-
-            foreach (var file in _backupFiles)
-            {
-                var originalFile = new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file));
-                originalFile.CopyTo(Path.Join(tempDirectory, originalFile.Name));
-            }
-
+            _directoryService.ClearDirectory(tempDirectory);
+            
+            _directoryService.CopyFilesToDirectory(
+                _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
             try
             {
                 ZipFile.CreateFromDirectory(tempDirectory, zipPath);
@@ -79,5 +91,6 @@ namespace API.Services
             _directoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
         }
+        
     }
 }
