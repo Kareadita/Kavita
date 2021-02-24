@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IDatasource } from 'ngx-ui-scroll';
-import { of } from 'rxjs';
-import { map, skip, take } from 'rxjs/operators';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { SeriesService } from '../_services/series.service';

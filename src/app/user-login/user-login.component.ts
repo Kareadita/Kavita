@@ -21,6 +21,10 @@ export class UserLoginComponent implements OnInit {
 
   ngOnInit(): void {
     // Validate that there are users so you can refresh to home. This is important for first installs
+    this.validateAdmin();
+  }
+
+  validateAdmin() {
     this.memberService.adminExists().subscribe(res => {
       if (!res) {
         this.router.navigateByUrl('/home');
@@ -29,6 +33,7 @@ export class UserLoginComponent implements OnInit {
   }
 
   login() {
+    if (!this.loginForm.dirty || !this.loginForm.valid) { return; }
     this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
