@@ -92,7 +92,8 @@ namespace API.Services
 
        public void ClearDirectory(string directoryPath)
        {
-          DirectoryInfo di = new DirectoryInfo(directoryPath);
+          var di = new DirectoryInfo(directoryPath);
+          if (!di.Exists) return;
 
           foreach (var file in di.EnumerateFiles())
           {
@@ -156,13 +157,19 @@ namespace API.Services
 
           return new ImageDto
           {
-             Content = await File.ReadAllBytesAsync(imagePath),
+             Content = await ReadFileAsync(imagePath),
              Filename = Path.GetFileNameWithoutExtension(imagePath),
              FullPath = Path.GetFullPath(imagePath),
              Width = image.Width,
              Height = image.Height,
              Format = image.Format,
           };
+       }
+
+       public async Task<byte[]> ReadFileAsync(string path)
+       {
+          if (!File.Exists(path)) return Array.Empty<byte>();
+          return await File.ReadAllBytesAsync(path);
        }
 
 

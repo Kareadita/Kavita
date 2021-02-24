@@ -6,6 +6,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using API.Extensions;
 using API.Interfaces.Services;
+using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using NetVips;
 

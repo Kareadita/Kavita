@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Interfaces;
@@ -16,6 +17,8 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMetadataService _metadataService;
         private readonly IBackupService _backupService;
+        private readonly ICleanupService _cleanupService;
+        private readonly IDirectoryService _directoryService;
 
         public BackgroundJobServer Client => new BackgroundJobServer();
         // new BackgroundJobServerOptions()
@@ -24,7 +27,8 @@ namespace API.Services
         // }
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
+            IDirectoryService directoryService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -32,6 +36,8 @@ namespace API.Services
             _unitOfWork = unitOfWork;
             _metadataService = metadataService;
             _backupService = backupService;
+            _cleanupService = cleanupService;
+            _directoryService = directoryService;
 
 
             ScheduleTasks();
@@ -65,7 +71,7 @@ namespace API.Services
                 RecurringJob.AddOrUpdate(() => _backupService.BackupDatabase(), Cron.Weekly);
             }
             
-            RecurringJob.AddOrUpdate(() => _cacheService.Cleanup(), Cron.Daily);
+            RecurringJob.AddOrUpdate(() => _cleanupService.Cleanup(), Cron.Daily);
         }
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
@@ -83,6 +89,12 @@ namespace API.Services
         {
             _logger.LogInformation("Enqueuing library metadata refresh for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue((() => _metadataService.RefreshMetadata(libraryId, forceUpdate)));
+        }
+
+        public void CleanupTemp()
+        {
+            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+            BackgroundJob.Enqueue((() => _directoryService.ClearDirectory(tempDirectory)));
         }
 
         public void BackupDatabase()

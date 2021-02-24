@@ -4,6 +4,7 @@ using API.Entities;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;

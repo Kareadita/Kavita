@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
@@ -14,8 +13,7 @@ using API.Parser;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
-[assembly: InternalsVisibleTo("API.Tests")]
-namespace API.Services
+namespace API.Services.Tasks
 {
     public class ScannerService : IScannerService
     {

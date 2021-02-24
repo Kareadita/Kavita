@@ -29,6 +29,8 @@ namespace API.Interfaces.Services
         /// <returns></returns>
         bool ExistOrCreate(string directoryPath);
 
+        Task<byte[]> ReadFileAsync(string path);
+
         /// <summary>
         /// Deletes all files within the directory, then the directory itself.
         /// </summary>

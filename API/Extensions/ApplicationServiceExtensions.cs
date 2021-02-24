@@ -3,6 +3,7 @@ using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
+using API.Services.Tasks;
 using AutoMapper;
 using Hangfire;
 using Hangfire.LiteDB;
@@ -27,6 +28,7 @@ namespace API.Extensions
             services.AddScoped<IArchiveService, ArchiveService>();
             services.AddScoped<IMetadataService, MetadataService>();
             services.AddScoped<IBackupService, BackupService>();
+            services.AddScoped<ICleanupService, CleanupService>();
 
 
 

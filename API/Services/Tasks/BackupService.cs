@@ -11,7 +11,7 @@ using API.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace API.Services
+namespace API.Services.Tasks
 {
     public class BackupService : IBackupService
     {
@@ -27,16 +27,10 @@ namespace API.Services
             _unitOfWork = unitOfWork;
             _logger = logger;
             _directoryService = directoryService;
+            
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
-
-            var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
-            var fi = new FileInfo(loggingSection);
-            
-
-            var files = maxRollingFiles > 0
-                ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
-                : new string[] {"kavita.log"};
+            var files = LogFiles(maxRollingFiles, loggingSection);
             _backupFiles = new List<string>()
             {
                 "appsettings.json",
@@ -50,6 +44,17 @@ namespace API.Services
             {
                 _backupFiles.Add(file);
             }
+        }
+
+        public IEnumerable<string> LogFiles(int maxRollingFiles, string logFileName)
+        {
+            var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
+            var fi = new FileInfo(logFileName);
+
+            var files = maxRollingFiles > 0
+                ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
+                : new string[] {"kavita.log"};
+            return files;
         }
 
         public void BackupDatabase()

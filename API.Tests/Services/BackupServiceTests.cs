@@ -1,5 +1,6 @@
 ﻿using API.Interfaces;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

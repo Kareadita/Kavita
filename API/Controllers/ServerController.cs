@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using API.Extensions;
+using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,14 +20,18 @@ namespace API.Controllers
         private readonly ILogger<ServerController> _logger;
         private readonly IConfiguration _config;
         private readonly IDirectoryService _directoryService;
+        private readonly IBackupService _backupService;
+        private readonly ITaskScheduler _taskScheduler;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IDirectoryService directoryService)
+            IDirectoryService directoryService, IBackupService backupService, ITaskScheduler taskScheduler)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
             _directoryService = directoryService;
+            _backupService = backupService;
+            _taskScheduler = taskScheduler;
         }
 
         [HttpPost("restart")]
@@ -40,40 +46,34 @@ namespace API.Controllers
         [HttpGet("logs")]
         public async Task<ActionResult> GetLogs()
         {
-            // TODO: Zip up the log files
-            var maxRollingFiles = int.Parse(_config.GetSection("Logging").GetSection("File").GetSection("MaxRollingFiles").Value);
-            var loggingSection = _config.GetSection("Logging").GetSection("File").GetSection("Path").Value;
-
-            var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
-            FileInfo fi = new FileInfo(loggingSection);
-
-            var files = _directoryService.GetFilesWithExtension(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log");
-            Console.WriteLine(files);
+            var files = _backupService.LogFiles(_config.GetMaxRollingFiles(), _config.GetLoggingFileName());
             
-            var logFile = Path.Join(Directory.GetCurrentDirectory(), loggingSection);
-            _logger.LogInformation("Fetching download of logs: {LogFile}", logFile);
-            
-            // First, copy the file to temp
-            
-            var originalFile = new FileInfo(logFile);
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-            _directoryService.ExistOrCreate(tempDirectory);
-            var tempLocation = Path.Join(tempDirectory, originalFile.Name);
-            originalFile.CopyTo(tempLocation); // TODO: Make this unique based on date
+            var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
             
-            // Read into memory
-            await using var memory = new MemoryStream();
-            // We need to copy it else it will throw an exception
-            await using (var stream = new FileStream(tempLocation, FileMode.Open, FileAccess.Read))  
-            {  
-                await stream.CopyToAsync(memory);  
+            var tempLocation = Path.Join(tempDirectory, "logs_" + dateString);
+            _directoryService.ExistOrCreate(tempLocation);
+            if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
+            {
+                return BadRequest("Unable to copy files to temp directory for log download.");
             }
-            memory.Position = 0;
             
-            // Delete temp
-            (new FileInfo(tempLocation)).Delete();
+            var zipPath = Path.Join(tempDirectory, $"kavita_logs_{dateString}.zip");
+            try
+            {
+                ZipFile.CreateFromDirectory(tempLocation, zipPath);
+            }
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex, "There was an issue when archiving library backup");
+                return BadRequest("There was an issue when archiving library backup");
+            }
+            var fileBytes = await _directoryService.ReadFileAsync(zipPath);
             
-            return File(memory, "text/plain", Path.GetFileName(logFile));  
+            _directoryService.ClearAndDeleteDirectory(tempLocation);
+            (new FileInfo(zipPath)).Delete(); 
+            
+            return File(fileBytes, "application/zip", Path.GetFileName(zipPath));  
         }
     }
 }
