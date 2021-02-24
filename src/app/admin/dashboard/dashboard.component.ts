@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
   fetchLogs() {
     this.serverService.fetchLogs().subscribe(res => {
       const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
-      FileSaver.saveAs(blob, 'kavita.log');
+      FileSaver.saveAs(blob, 'kavita.zip');
     });
   }
 
