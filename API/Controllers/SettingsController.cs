@@ -18,11 +18,13 @@ namespace API.Controllers
     {
         private readonly ILogger<SettingsController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ITaskScheduler _taskScheduler;
 
-        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork)
+        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _taskScheduler = taskScheduler;
         }
 
         [HttpGet("")]
@@ -77,6 +79,7 @@ namespace API.Controllers
             if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
             {
                 _logger.LogInformation("Server Settings updated");
+                _taskScheduler.ScheduleTasks();
                 return Ok(updateSettingsDto);
             }
 
