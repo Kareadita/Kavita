@@ -3,7 +3,8 @@ import { Volume } from './volume';
 export interface Series {
     id: number;
     name: string;
-    originalName: string;
+    originalName: string; // This is not shown to user
+    localizedName: string;
     sortName: string;
     summary: string;
     coverImage: string;

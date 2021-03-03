@@ -8,7 +8,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { NavigationExtras, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { catchError } from 'rxjs/operators';
+import { catchError, take } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
 
 @Injectable()
@@ -49,9 +49,13 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
             case 401:
               // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
-              this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
-              this.accountService.logout();
-              this.router.navigateByUrl('/login');
+              this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+                if (user) {
+                  this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
+                }
+                this.accountService.logout();
+                this.router.navigateByUrl('/login');
+              });
               break;
             case 404:
               this.toastr.error('That url does not exist.');

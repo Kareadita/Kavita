@@ -20,7 +20,7 @@ export class EditSeriesModalComponent implements OnInit {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Fix Match' , 'Cover Image', 'Info'];
+  tabs = ['General', 'Fix Match', 'Cover Image', 'Info'];
   active = this.tabs[0];
   editSeriesForm!: FormGroup;
 
@@ -33,7 +33,7 @@ export class EditSeriesModalComponent implements OnInit {
       id: new FormControl(this.series.id, []),
       summary: new FormControl(this.series.summary, []),
       name: new FormControl(this.series.name, []),
-      originalName: new FormControl(this.series.originalName, []),
+      localizedName: new FormControl(this.series.localizedName, []),
       sortName: new FormControl(this.series.sortName, []),
       rating: new FormControl(this.series.userRating, []),
       genres: new FormControl([''], []),

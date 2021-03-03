@@ -249,6 +249,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // I might want to debounce this and move to the nextPage code so it doesn't execute if we are spamming next page (although i don't see any issues)
   prefetch() {
+    // BUG: This does not work. 
     const nextPage = this.pageNum + 1;
     if (this.isCached(nextPage)) {
       return;
@@ -305,6 +306,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.image = image;
     this.canvas.nativeElement.width = image.width;
     this.canvas.nativeElement.height = image.height;
+
+    // TODO: Render page as black
+    // sometimes when going to next page, it looks as if you've gone too far, but you haven't. likely due to images flashing.
 
     this.cache(image, this.pageNum);
     this.prefetch();

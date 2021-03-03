@@ -75,7 +75,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         });
       }});
 
-      this.actions.push({title: 'Get Info', callback: (data: Series) => {
+      this.actions.push({title: 'Edit', callback: (data: Series) => {
         const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
         modalRef.componentInstance.series = data;
         modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {

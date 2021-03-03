@@ -14,12 +14,21 @@
             <input readonly id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number">
         </div>
 
+        <div class="form-group">
+            <label for="logging-level-port">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
+            <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
+            <span class="sr-only" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>
+            <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="taskScan">
+                <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+            </select>
+        </div>
+
         <h4>Tasks</h4>
         <div class="form-group">
             <label for="settings-tasks-scan">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
             <ng-template #taskScanTooltip>How often Kavita will scan and refresh metatdata around manga files.</ng-template>
             <span class="sr-only" id="settings-tasks-scan-help">How often Kavita will scan and refresh metatdata around manga files.</span>
-            <select class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="taskScan">
+            <select class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
                 <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
             </select>
         </div>
@@ -28,7 +37,7 @@
             <label for="settings-tasks-backup">Library Backup</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
             <ng-template #taskBackupTooltip>How often Kavita will backup the database.</ng-template>
             <span class="sr-only" id="settings-tasks-backup-help">How often Kavita will backup the database.</span>
-            <select class="form-control" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup">
+            <select class="form-control" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
                 <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
             </select>
         </div>

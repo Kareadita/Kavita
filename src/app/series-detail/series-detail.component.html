@@ -4,7 +4,7 @@
             <app-base64-image [style]="{width: '100%'}" [src]="series.coverImage"></app-base64-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <div class="row no-gutters"><h2>{{series?.name | titlecase}}</h2></div>
+            <div class="row no-gutters"><h2>{{series?.name}}</h2></div>
             <div class="row no-gutters">
                 <div>
                     <button class="btn btn-primary" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;" [disabled]="isLoading">
