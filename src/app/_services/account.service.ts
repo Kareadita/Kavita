@@ -71,7 +71,7 @@ export class AccountService {
   }
 
   resetPassword(username: string, password: string) {
-    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password});
+    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password}, {responseType: 'json' as 'text'});
   }
 
   updatePreferences(userPreferences: Preferences) {
