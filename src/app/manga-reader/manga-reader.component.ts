@@ -331,6 +331,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     };
 
+    // TODO: image/jpeg isn't needed. Browsers will check base64 "magic number" to decode
     img.src = 'data:image/jpeg;base64,' + image.content;
   }
 
@@ -431,6 +432,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.renderPage(existingImage);
     } else {
       this.readerService.getPage(this.chapterId, this.pageNum).subscribe(image => {
+        console.log('Response: ', image);
         this.renderPage(image);
       });
     }
