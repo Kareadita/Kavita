@@ -147,6 +147,9 @@
       "element",
       "app",
       "kebab-case"
+    ],
+    "comment-format": [
+      false
     ]
   }
 }
