@@ -239,6 +239,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @return The MangaImage or undefined if it doesn't exist
    */
   checkCache(pageNum: number): MangaImage | undefined {
+    // NOTE: Chaching with localstorage will no longer work with new url loading. Must use memory cache
     const key = this.getPageKey(pageNum);
     const image = localStorage.getItem(key);
     if (image !== null) {
@@ -249,25 +250,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // I might want to debounce this and move to the nextPage code so it doesn't execute if we are spamming next page (although i don't see any issues)
   prefetch() {
-    // BUG: This does not work.
-    const nextPage = this.pageNum + 1;
-    if (this.isCached(nextPage)) {
-      return;
-    }
-    if (nextPage < this.maxPages) {
-      this.readerService.getPage(this.chapterId, nextPage).subscribe(image => {
-        this.cache(image, nextPage);
-      });
+    for (let i = 1; i < 5; i++) {
+      const nextPage = this.pageNum + i;
+      if (this.isCached(nextPage)) {
+        continue;
+      }
+      if (nextPage < this.maxPages) {
+        this.readerService.getPageInfo(this.chapterId, nextPage).subscribe(image => {
+          this.cache(image, nextPage);
+        });
+
+        const img = new Image();
+        img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
+      }
     }
   }
 
   isCached(pageNum: number) {
-    const key = this.getPageKey(pageNum);
-    return (localStorage.getItem(key) !== null);
+    return this.cachedPages.elements.filter(page => page === pageNum).length > 0;
   }
 
   cache(image: MangaImage, pageNum: number) {
     this.cachedPages.enqueue(pageNum);
+
+    if (!image.contentUrl) {
+      image.contentUrl = this.readerService.getPageUrl(this.chapterId, pageNum);
+    }
 
     try {
       const key = this.getPageKey(pageNum);
@@ -306,16 +314,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.image = image;
     this.canvas.nativeElement.width = image.width;
     this.canvas.nativeElement.height = image.height;
-
-    // TODO: Render page as black
-    // sometimes when going to next page, it looks as if you've gone too far, but you haven't. likely due to images flashing.
+    this.canvas.nativeElement.fillStyle = 'black';
 
     this.cache(image, this.pageNum);
     this.prefetch();
 
     this.updateSplitPage(this.image);
 
-
+    // TODO: Bug: Page splitting doesn't render correctly on tablets
     const img = new Image(this.image.width, this.image.height);
     img.onload = () => {
       if (this.ctx && this.canvas) {
@@ -331,8 +337,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     };
 
-    // TODO: image/jpeg isn't needed. Browsers will check base64 "magic number" to decode
-    img.src = 'data:image/jpeg;base64,' + image.content;
+    img.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
   }
 
   isSplitLeftToRight() {
@@ -429,10 +434,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Check cache if we already have this page
     const existingImage = this.checkCache(this.pageNum);
     if (existingImage) {
+      console.log('Rendering from cache: ', existingImage);
       this.renderPage(existingImage);
     } else {
-      this.readerService.getPage(this.chapterId, this.pageNum).subscribe(image => {
-        console.log('Response: ', image);
+      this.readerService.getPageInfo(this.chapterId, this.pageNum).subscribe(image => {
+        console.log('Page Response: ', image);
         this.renderPage(image);
       });
     }

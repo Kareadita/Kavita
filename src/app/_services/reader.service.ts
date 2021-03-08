@@ -1,6 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { MangaFile } from '../_models/manga-file';
 import { MangaImage } from '../_models/manga-image';
 
 @Injectable({
@@ -16,8 +19,12 @@ export class ReaderService {
     return this.httpClient.get<number>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
   }
 
-  getPage(chapterId: number, page: number) {
-    return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page);
+  getPageUrl(chapterId: number, page: number) {
+    return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
+  }
+
+  getPageInfo(chapterId: number, page: number): Observable<MangaImage> {
+    return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image-info?chapterId=' + chapterId + '&page=' + page);
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
