@@ -104,11 +104,16 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
 
             if (series == null) return BadRequest("Series does not exist");
-
-            // TODO: Support changing series properties once "locking" is implemented.
-            // series.Name = updateSeries.Name;
-            // series.OriginalName = updateSeries.OriginalName;
-            // series.SortName = updateSeries.SortName;
+            
+            // TODO: check if new name isn't an existing series
+            var existingSeries = await _unitOfWork.SeriesRepository.GetSeriesByNameAsync(updateSeries.Name); // NOTE: This isnt checking library
+            if (existingSeries != null && existingSeries.Id != series.Id)
+            {
+                return BadRequest("A series already exists with this name. Name must be unique.");
+            }
+            series.Name = updateSeries.Name;
+            series.LocalizedName = updateSeries.LocalizedName;
+            series.SortName = updateSeries.SortName;
             series.Summary = updateSeries.Summary;
             //series.CoverImage = updateSeries.CoverImage;
             

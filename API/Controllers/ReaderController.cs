@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -42,8 +43,31 @@ namespace API.Controllers
             file.Page = page;
             file.MangaFileName = mangaFile.FilePath;
             file.NeedsSplitting = file.Width > file.Height;
+            
+            // TODO: Validate if sending page whole (not base64 encoded) fixes Tablet issue
+            //Response.Headers.Add("Transfer-Encoding", "gzip");
 
             return Ok(file);
+        }
+        
+        [HttpGet("image2")]
+        public async Task<ActionResult> GetImage2(int chapterId, int page)
+        {
+            // Temp let's iterate the directory each call to get next image
+            var chapter = await _cacheService.Ensure(chapterId);
+
+            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+
+            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
+            if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
+            var file = await _directoryService.ReadImageAsync(path);
+            file.Page = page;
+            file.MangaFileName = mangaFile.FilePath;
+            file.NeedsSplitting = file.Width > file.Height;
+            
+            // TODO: Validate if sending page whole (not base64 encoded) fixes Tablet issue
+
+            return File(file.Content, "image/jpeg", mangaFile.FilePath); 
         }
 
         [HttpGet("get-bookmark")]

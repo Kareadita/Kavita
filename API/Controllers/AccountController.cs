@@ -51,8 +51,9 @@ namespace API.Controllers
             
             result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
             if (!result.Succeeded) return BadRequest("Unable to update password");
-
-            return Ok($"{resetPasswordDto.UserName}'s Password has been reset.");
+            
+            _logger.LogInformation("{User}'s Password has been reset", resetPasswordDto.UserName);
+            return Ok();
         }
 
         [HttpPost("register")]

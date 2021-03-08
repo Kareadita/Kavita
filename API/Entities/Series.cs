@@ -20,6 +20,10 @@ namespace API.Entities
         /// </summary>
         public string SortName { get; set; }
         /// <summary>
+        /// Name in Japanese. By default, will be same as Name. 
+        /// </summary>
+        public string LocalizedName { get; set; }
+        /// <summary>
         /// Original Name on disk. Not exposed to UI.
         /// </summary>
         public string OriginalName { get; set; }
