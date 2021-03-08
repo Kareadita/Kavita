@@ -76,14 +76,12 @@ namespace API.Controllers
 
             if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
 
-            if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
-            {
-                _logger.LogInformation("Server Settings updated");
-                _taskScheduler.ScheduleTasks();
-                return Ok(updateSettingsDto);
-            }
-
-            return BadRequest("There was a critical issue. Please try again.");
+            if (!_unitOfWork.HasChanges() || !await _unitOfWork.Complete())
+                return BadRequest("There was a critical issue. Please try again.");
+            
+            _logger.LogInformation("Server Settings updated");
+            _taskScheduler.ScheduleTasks();
+            return Ok(updateSettingsDto);
         }
 
         [Authorize(Policy = "RequireAdminRole")]

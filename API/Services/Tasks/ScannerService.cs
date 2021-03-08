@@ -144,11 +144,14 @@ namespace API.Services.Tasks
 
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
+          if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
+          
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
           var missingSeries = library.Series.Where(existingSeries =>
-             !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name) ||
-             !parsedSeries.ContainsKey(existingSeries.OriginalName));
+             !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
+              || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
+              || !parsedSeries.ContainsKey(existingSeries.OriginalName));
           var removeCount = 0;
           foreach (var existingSeries in missingSeries)
           {
@@ -167,6 +170,7 @@ namespace API.Services.Tasks
                 {
                    Name = key,
                    OriginalName = key,
+                   LocalizedName = key,
                    NormalizedName = Parser.Parser.Normalize(key),
                    SortName = key,
                    Summary = "",
@@ -175,6 +179,7 @@ namespace API.Services.Tasks
                 library.Series.Add(existingSeries);
              } 
              existingSeries.NormalizedName = Parser.Parser.Normalize(key);
+             existingSeries.LocalizedName ??= key;
           }
           
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series

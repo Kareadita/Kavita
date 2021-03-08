@@ -5,6 +5,7 @@
         public int Id { get; init; }
         public string Name { get; init; }
         public string OriginalName { get; init; }
+        public string LocalizedName { get; init; }
         public string SortName { get; init; }
         public string Summary { get; init; }
         public byte[] CoverImage { get; init; }
