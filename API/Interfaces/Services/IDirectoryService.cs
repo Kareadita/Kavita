@@ -13,8 +13,6 @@ namespace API.Interfaces.Services
         /// <param name="rootPath">Absolute path of directory to scan.</param>
         /// <returns>List of folder names</returns>
         IEnumerable<string> ListDirectory(string rootPath);
-
-        Task<ImageDto> ReadImageAsync(string imagePath);
         /// <summary>
         /// Gets files in a directory. If searchPatternExpression is passed, will match the regex against for filtering.
         /// </summary>

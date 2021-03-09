@@ -1,9 +1,12 @@
+using System.IO.Compression;
+using System.Linq;
 using API.Extensions;
 using API.Middleware;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,8 +40,20 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-
-
+            // This doesn't seem to work.
+            // services.AddResponseCompression(options =>
+            // {
+            //     options.Providers.Add<BrotliCompressionProvider>();
+            //     options.MimeTypes = 
+            //         ResponseCompressionDefaults.MimeTypes.Concat(
+            //             new[] { "image/jpeg", "image/jpg" });
+            // });
+            // services.Configure<BrotliCompressionProviderOptions>(options => 
+            // {
+            //     options.Level = CompressionLevel.Fastest;
+            // });
+            
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -62,6 +77,8 @@ namespace API
             {
                 app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             }
+            
+            //app.UseResponseCaching();
 
             app.UseAuthentication();
 

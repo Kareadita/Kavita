@@ -145,26 +145,6 @@ namespace API.Services
             
             return dirs;
         }
-       
-       public async Task<ImageDto> ReadImageAsync(string imagePath)
-       {
-          if (!File.Exists(imagePath))
-          {
-             _logger.LogError("Image does not exist on disk");
-             return null;
-          }
-          using var image = Image.NewFromFile(imagePath);
-
-          return new ImageDto
-          {
-             Content = await ReadFileAsync(imagePath),
-             Filename = Path.GetFileNameWithoutExtension(imagePath),
-             FullPath = Path.GetFullPath(imagePath),
-             Width = image.Width,
-             Height = image.Height,
-             Format = image.Format,
-          };
-       }
 
        public async Task<byte[]> ReadFileAsync(string path)
        {
