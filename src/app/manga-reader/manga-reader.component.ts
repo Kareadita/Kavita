@@ -2,7 +2,6 @@ import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, 
 import {Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { MangaImage } from '../_models/manga-image';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
@@ -13,6 +12,7 @@ import { Chapter } from '../_models/chapter';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
+import { forkJoin } from 'rxjs';
 
 const PREFETCH_PAGES = 5;
 
@@ -90,8 +90,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scalingOption = ScalingOption.FitToHeight;
   pageSplitOption = PageSplitOption.SplitRightToLeft;
 
-  cachedPages = new Queue<number>();
-  image: MangaImage | undefined; // Used soley to display information on UI. Not used for manipulation
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
@@ -144,33 +142,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
+    forkJoin({
+      chapter: this.seriesService.getChapter(this.chapterId),
+      pageNum: this.readerService.getBookmark(this.chapterId),
+      chapterPath: this.readerService.getChapterPath(this.chapterId)
+    }).subscribe(results => {
+      this.chapter = results.chapter;
+      this.volumeId = results.chapter.volumeId;
+      this.maxPages = results.chapter.pages;
 
-    this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
-      this.chapter = chapter;
-      this.volumeId = chapter.volumeId;
-      this.maxPages = chapter.pages;
-      this.readerService.getBookmark(this.chapterId).subscribe(pageNum => {
-        if (this.pageNum > this.maxPages) {
-          this.pageNum = this.maxPages;
-        }
-        this.pageNum = pageNum;
+      if (this.pageNum > this.maxPages) {
+        this.pageNum = this.maxPages;
+      }
+      this.pageNum = results.pageNum;
 
-        // Clear out cache entries that are less than currentPage - 1
-        const cuttoff = this.pageNum - 1;
-        Object.entries(localStorage).filter(entry => entry[0].startsWith('kavita-page-cache-' + this.user.username + '-' + this.chapterId))
-          .filter(entry => parseInt(entry[0].replace('kavita-page-cache-' + this.user.username + '-' + this.chapterId + '--', ''), 10) < cuttoff)
-          .forEach(entry => {
-            localStorage.removeItem(entry[0]);
-        });
+      this.mangaFileName = results.chapterPath;
 
-        this.readerService.getChapterPath(this.chapterId).subscribe((path: string) => {
-          this.mangaFileName = path;
-          console.log('manga File Name: ', path);
-        });
+      this.loadPage();
 
-        this.loadPage();
-      });
-    }, err => {
+    }, () => {
       setTimeout(() => {
         this.location.back();
       }, 200);
@@ -182,32 +172,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => {
-      if (this.ctx && this.canvas) {
-        this.canvas.nativeElement.width = this.canvasImage.width;
-        this.canvas.nativeElement.height = this.canvasImage.height;
-        const needsSplitting = this.canvasImage.width > this.canvasImage.height;
-        this.updateSplitPage(); // TODO: This is broken
-
-        if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
-          this.canvas.nativeElement.width = this.canvasImage.width / 2;
-          this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
-        } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
-          this.canvas.nativeElement.width = this.canvasImage.width / 2;
-          this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
-        } else {
-          this.ctx.drawImage(this.canvasImage, 0, 0);
-        }
-      }
-      this.isLoading = false;
-    };
+    this.canvasImage.onload = () => this.renderPage();
   }
 
   ngOnDestroy() {
-    for (let i = 0; i < this.maxPages; i++) {
-      localStorage.removeItem(this.getPageKey(i));
-    }
-
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
@@ -260,96 +228,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.menuOpen = !this.menuOpen;
   }
 
-  /**
-   * @description Checks the cache interface if this page is cached.
-   * @param pageNum Page number to check against
-   * @return The MangaImage or undefined if it doesn't exist
-   */
-  checkCache(pageNum: number): MangaImage | undefined {
-    const key = this.getPageKey(pageNum);
-    const image = localStorage.getItem(key);
-    if (image !== null) {
-      return JSON.parse(image);
-    }
-    return undefined;
-  }
-
-
   prefetch() {
-    // this code works, but not consistently and without as much control as I'd like.
-    const cachedPages: any = {};
-    this.cachedPages.elements.forEach((num: number) => {
-      cachedPages[num] = num;
-    });
     for (let i = 1; i < PREFETCH_PAGES; i++) {
       const nextPage = this.pageNum + i;
-      if (cachedPages.hasOwnProperty(nextPage)) {
-        continue;
-      }
       if (nextPage < this.maxPages) {
-        // this.readerService.getPageInfo(this.chapterId, nextPage).subscribe(image => {
-        //   this.cache(image, nextPage);
-        // });
-
         const img = new Image();
         img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
       }
     }
   }
 
-  isCached(pageNum: number) {
-    return this.cachedPages.elements.filter(page => page === pageNum).length > 0;
-  }
-
-  cache(image: MangaImage, pageNum: number) {
-    this.cachedPages.enqueue(pageNum);
-
-    if (!image.contentUrl) {
-      image.contentUrl = this.readerService.getPageUrl(this.chapterId, pageNum);
-    }
-
-    try {
-      const key = this.getPageKey(pageNum);
-      if (!this.isCached(pageNum)) {
-        localStorage.setItem(key, JSON.stringify(image));
-      }
-    } catch (error) {
-      const pageToRemove = this.cachedPages.dequeue();
-      if (pageToRemove === undefined) {
-        return;
-      }
-      const key = this.getPageKey(pageToRemove);
-      if (localStorage.getItem(key) !== null) {
-        localStorage.removeItem(key);
-        this.cache(image, pageNum); // We re-call cache so that the current page does get cached
-      }
-    }
-
-  }
-
   getPageKey(pageNum: number) {
     return `kavita-page-cache-${this.user.username}-${this.chapterId}--${pageNum}`;
-  }
-
-  renderPage(image: MangaImage) {
-    if (!this.canvas || !this.ctx) {
-      return;
-    }
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
-      console.error('Could not save bookmark status. Current page is: ', this.pageNum);
-    });
-
-
-    this.image = image;
-    // this.canvas.nativeElement.width = image.width;
-    // this.canvas.nativeElement.height = image.height;
-    //this.canvas.nativeElement.fillStyle = 'black';
-
-    //this.cache(image, this.pageNum);
-    //this.updateSplitPage(); 
-
-    this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-    this.prefetch();
   }
 
   isSplitLeftToRight() {
@@ -441,24 +331,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
-  loadPage() {
-    this.isLoading = true;
+  renderPage() {
+    if (this.ctx && this.canvas) {
+      this.canvas.nativeElement.width = this.canvasImage.width;
+      this.canvas.nativeElement.height = this.canvasImage.height;
+      const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+      this.updateSplitPage();
 
-    if (!this.canvas || !this.ctx) {
-      return;
+      if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
+        this.canvas.nativeElement.width = this.canvasImage.width / 2;
+        this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+      } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
+        this.canvas.nativeElement.width = this.canvasImage.width / 2;
+        this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+      } else {
+        this.ctx.drawImage(this.canvasImage, 0, 0);
+      }
     }
+    this.isLoading = false;
+  }
+
+  loadPage() {
+    if (!this.canvas || !this.ctx) { return; }
+
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
       console.error('Could not save bookmark status. Current page is: ', this.pageNum);
     });
 
-
-    //this.canvas.nativeElement.width = this.canvasImage.width;
-    //this.canvas.nativeElement.height = this.canvasImage.height;
-    //this.canvas.nativeElement.fillStyle = 'black';
-
-    //this.cache(image, this.pageNum);
-    //this.updateSplitPage();
-
+    this.isLoading = true;
     this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
     this.prefetch();
   }

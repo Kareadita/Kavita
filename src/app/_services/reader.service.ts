@@ -1,10 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { MangaFile } from '../_models/manga-file';
-import { MangaImage } from '../_models/manga-image';
 
 @Injectable({
   providedIn: 'root'
@@ -22,11 +18,6 @@ export class ReaderService {
   getPageUrl(chapterId: number, page: number) {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
-
-  // getPageInfo(chapterId: number, page: number) {
-  //   // TODO: Deprecated
-  //   return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image-info?chapterId=' + chapterId + '&page=' + page);
-  // }
 
   getChapterPath(chapterId: number) {
     return this.httpClient.get(this.baseUrl + 'reader/chapter-path?chapterId=' + chapterId, {responseType: 'text'});
