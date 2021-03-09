@@ -14,6 +14,8 @@ import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 
+const PREFETCH_PAGES = 5;
+
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
   LEFT_ARROW = 'ArrowLeft',
@@ -95,9 +97,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   menuOpen = false;
   isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
+  mangaFileName = '';
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
+  private canvasImage = new Image();
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -159,6 +163,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             localStorage.removeItem(entry[0]);
         });
 
+        this.readerService.getChapterPath(this.chapterId).subscribe((path: string) => {
+          this.mangaFileName = path;
+          console.log('manga File Name: ', path);
+        });
+
         this.loadPage();
       });
     }, err => {
@@ -166,7 +175,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.location.back();
       }, 200);
     });
-
   }
 
   ngAfterViewInit() {
@@ -174,6 +182,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
+    this.canvasImage.onload = () => {
+      if (this.ctx && this.canvas) {
+        this.canvas.nativeElement.width = this.canvasImage.width;
+        this.canvas.nativeElement.height = this.canvasImage.height;
+        const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+        this.updateSplitPage(); // TODO: This is broken
+
+        if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
+          this.canvas.nativeElement.width = this.canvasImage.width / 2;
+          this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+        } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
+          this.canvas.nativeElement.width = this.canvasImage.width / 2;
+          this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+        } else {
+          this.ctx.drawImage(this.canvasImage, 0, 0);
+        }
+      }
+      this.isLoading = false;
+    };
   }
 
   ngOnDestroy() {
@@ -239,7 +266,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @return The MangaImage or undefined if it doesn't exist
    */
   checkCache(pageNum: number): MangaImage | undefined {
-    // NOTE: Chaching with localstorage will no longer work with new url loading. Must use memory cache
     const key = this.getPageKey(pageNum);
     const image = localStorage.getItem(key);
     if (image !== null) {
@@ -248,17 +274,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return undefined;
   }
 
-  // I might want to debounce this and move to the nextPage code so it doesn't execute if we are spamming next page (although i don't see any issues)
+
   prefetch() {
-    for (let i = 1; i < 5; i++) {
+    // this code works, but not consistently and without as much control as I'd like.
+    const cachedPages: any = {};
+    this.cachedPages.elements.forEach((num: number) => {
+      cachedPages[num] = num;
+    });
+    for (let i = 1; i < PREFETCH_PAGES; i++) {
       const nextPage = this.pageNum + i;
-      if (this.isCached(nextPage)) {
+      if (cachedPages.hasOwnProperty(nextPage)) {
         continue;
       }
       if (nextPage < this.maxPages) {
-        this.readerService.getPageInfo(this.chapterId, nextPage).subscribe(image => {
-          this.cache(image, nextPage);
-        });
+        // this.readerService.getPageInfo(this.chapterId, nextPage).subscribe(image => {
+        //   this.cache(image, nextPage);
+        // });
 
         const img = new Image();
         img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
@@ -304,40 +335,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canvas || !this.ctx) {
       return;
     }
-    this.isLoading = false;
-    this.image = image;
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
       console.error('Could not save bookmark status. Current page is: ', this.pageNum);
     });
 
 
     this.image = image;
-    this.canvas.nativeElement.width = image.width;
-    this.canvas.nativeElement.height = image.height;
-    this.canvas.nativeElement.fillStyle = 'black';
+    // this.canvas.nativeElement.width = image.width;
+    // this.canvas.nativeElement.height = image.height;
+    //this.canvas.nativeElement.fillStyle = 'black';
 
-    this.cache(image, this.pageNum);
+    //this.cache(image, this.pageNum);
+    //this.updateSplitPage(); 
+
+    this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
     this.prefetch();
-
-    this.updateSplitPage(this.image);
-
-    // TODO: Bug: Page splitting doesn't render correctly on tablets
-    const img = new Image(this.image.width, this.image.height);
-    img.onload = () => {
-      if (this.ctx && this.canvas) {
-        if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
-          this.canvas.nativeElement.width = this.image.width / 2;
-          this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, 0, 0, this.image.width, this.image.height);
-        } else if (this.image?.needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
-          this.canvas.nativeElement.width = this.image.width / 2;
-          this.ctx.drawImage(img, 0, 0, this.image.width, this.image.height, -this.image.width / 2, 0, this.image.width, this.image.height);
-        } else {
-          this.ctx.drawImage(img, 0, 0);
-        }
-      }
-    };
-
-    img.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
   }
 
   isSplitLeftToRight() {
@@ -348,8 +360,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (this.splitForm?.get('pageSplitOption')?.value + '') === (PageSplitOption.NoSplit + '');
   }
 
-  updateSplitPage(image: MangaImage) {
-    if (!image.needsSplitting || this.isNoSplit()) {
+  updateSplitPage() {
+    const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+    if (!needsSplitting || this.isNoSplit()) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
     }
@@ -431,17 +444,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     this.isLoading = true;
 
-    // Check cache if we already have this page
-    const existingImage = this.checkCache(this.pageNum);
-    if (existingImage) {
-      console.log('Rendering from cache: ', existingImage);
-      this.renderPage(existingImage);
-    } else {
-      this.readerService.getPageInfo(this.chapterId, this.pageNum).subscribe(image => {
-        console.log('Page Response: ', image);
-        this.renderPage(image);
-      });
+    if (!this.canvas || !this.ctx) {
+      return;
     }
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
+      console.error('Could not save bookmark status. Current page is: ', this.pageNum);
+    });
+
+
+    //this.canvas.nativeElement.width = this.canvasImage.width;
+    //this.canvas.nativeElement.height = this.canvasImage.height;
+    //this.canvas.nativeElement.fillStyle = 'black';
+
+    //this.cache(image, this.pageNum);
+    //this.updateSplitPage();
+
+    this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+    this.prefetch();
   }
 
   setReadingDirection() {

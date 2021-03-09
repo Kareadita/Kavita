@@ -23,8 +23,13 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
-  getPageInfo(chapterId: number, page: number): Observable<MangaImage> {
-    return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image-info?chapterId=' + chapterId + '&page=' + page);
+  // getPageInfo(chapterId: number, page: number) {
+  //   // TODO: Deprecated
+  //   return this.httpClient.get<MangaImage>(this.baseUrl + 'reader/image-info?chapterId=' + chapterId + '&page=' + page);
+  // }
+
+  getChapterPath(chapterId: number) {
+    return this.httpClient.get(this.baseUrl + 'reader/chapter-path?chapterId=' + chapterId, {responseType: 'text'});
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
