@@ -14,7 +14,7 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin } from 'rxjs';
 
-const PREFETCH_PAGES = 5;
+const PREFETCH_PAGES = 3;
 
 enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -38,6 +38,76 @@ enum SPLIT_PAGE_PART {
 enum PAGING_DIRECTION {
   FORWARD = 1,
   BACKWARDS = -1,
+}
+
+export class CircularArray<T> {
+  arr: T[];
+  currentIndex: number;
+
+  constructor(arr: T[], startIndex: number) {
+    this.arr = arr;
+    this.currentIndex = startIndex || 0;
+  }
+
+  next() {
+    const i = this.currentIndex;
+    const arr = this.arr;
+    this.currentIndex = i < arr.length - 1 ? i + 1 : 0;
+    return this.current();
+  }
+
+  prev() {
+    const i = this.currentIndex;
+    const arr = this.arr;
+    this.currentIndex = i > 0 ? i - 1 : arr.length - 1;
+    return this.current();
+  }
+
+  current() {
+    return this.arr[this.currentIndex];
+  }
+
+  // Need a method that can access the array back to the currentIndex but doesn't modify the currentIndex
+  peek(offset: number = 0) {
+    const i = this.currentIndex + 1 + offset;
+    const arr = this.arr;
+    const peekIndex = i < arr.length - 1 ? i + 1 : 0;
+    return this.arr[peekIndex];
+  }
+
+  size() {
+    return this.arr.length;
+  }
+
+  applyUntil(func: (item: T, index: number) => void, index?: number) {
+    index = index || this.currentIndex;
+    /// Applies a func against elements up until index. If index is 1 and size is 3, will apply on [2, 3, 0]
+    for (let offset = 1; offset < this.size(); offset++) {
+      const i = this.currentIndex + offset;
+      const arr = this.arr;
+      const peekIndex = i < arr.length ? i : 0;
+
+      if (peekIndex === index) {
+        break;
+      }
+
+      func(this.arr[peekIndex], peekIndex);
+    }
+
+  }
+
+  /// Applies a func against elements for X times. If limit is 1, size is 3, and index is 2. It will apply on [3]
+  applyFor(func: (item: T, index: number) => void, limit: number) {
+    for (let offset = 1; offset < limit; offset++) {
+      const i = this.currentIndex + offset;
+      const peekIndex = i < this.arr.length ? i : 0;
+
+      func(this.arr[peekIndex], peekIndex);
+    }
+
+  }
+
+
 }
 
 export class Queue<T> {
@@ -101,6 +171,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private ctx!: CanvasRenderingContext2D;
   private canvasImage = new Image();
 
+  cachedImages!: CircularArray<HTMLImageElement>; // This is a circular array of size PREFETCH_PAGES + 2
+
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
 
@@ -156,6 +228,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.pageNum = results.pageNum;
 
+
+      const images = [];
+      for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
+        images.push(new Image());
+      }
+
+      this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
+
       this.mangaFileName = results.chapterPath;
 
       this.loadPage();
@@ -172,7 +252,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => this.renderPage();
+    this.canvasImage.onload = () => this.renderPage(); // TODO: With circular array, this will have to change
   }
 
   ngOnDestroy() {
@@ -226,16 +306,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
-  }
-
-  prefetch() {
-    for (let i = 1; i < PREFETCH_PAGES; i++) {
-      const nextPage = this.pageNum + i;
-      if (nextPage < this.maxPages) {
-        const img = new Image();
-        img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
-      }
-    }
   }
 
   getPageKey(pageNum: number) {
@@ -300,15 +370,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.pageNum + 1 >= this.maxPages) {
       // TODO: Ask if they want to load next chapter/volume
-      if (confirm('Do you want to load the next Volume/Chapter?')) {
+      // if (confirm('Do you want to load the next Volume/Chapter?')) {
 
-      }
+      // }
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART)) {
       this.pageNum++;
+      this.canvasImage = this.cachedImages.next();
     }
 
     this.loadPage();
@@ -326,6 +397,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART)) {
       this.pageNum--;
+      this.canvasImage = this.cachedImages.prev();
     }
 
     this.loadPage();
@@ -351,6 +423,33 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
   }
 
+  prefetch() {
+    let index = 1;
+    console.log('============================');
+    console.log('Current Index: ', this.cachedImages.currentIndex);
+    this.cachedImages.applyFor((item, i) => {
+      const offsetIndex = this.pageNum + index;
+      console.log('Internal index: ', i);
+      const urlPageNum = item.src.split('&page=')[1];
+      if (urlPageNum === (offsetIndex + '')) {
+        console.log('Page ' + offsetIndex + ' already prefetched/inprogress, skipping');
+        index += 1;
+        return;
+      }
+      console.log('Prefetching image, page: ', offsetIndex);
+      item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+      index += 1;
+    }, this.cachedImages.size() - 1);
+    // for (let i = 1; i < PREFETCH_PAGES; i++) {
+    //   const nextPage = this.pageNum + i;
+    //   if (nextPage < this.maxPages) {
+    //     const img = new Image();
+    //     img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
+    //   }
+    // }
+    
+  }
+
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
@@ -359,7 +458,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.isLoading = true;
-    this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+    this.canvasImage = this.cachedImages.current();
+    if (this.canvasImage.src === '' || !this.canvasImage.complete) {
+      this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+      this.canvasImage.onload = () => this.renderPage();
+    } else {
+      this.renderPage();
+    }
     this.prefetch();
   }
 
