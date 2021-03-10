@@ -423,31 +423,35 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
   }
 
+  imageUrlToPageNum(imageSrc: string) {
+    if (imageSrc === undefined || imageSrc === '') { return -1; }
+    return parseInt(imageSrc.split('&page=')[1], 10);
+  }
+
   prefetch() {
+    // BUG: This doesn't work well with split pages. 
     let index = 1;
+    const mappedPages: any = {};
     console.log('============================');
     console.log('Current Index: ', this.cachedImages.currentIndex);
     this.cachedImages.applyFor((item, i) => {
       const offsetIndex = this.pageNum + index;
       console.log('Internal index: ', i);
-      const urlPageNum = item.src.split('&page=')[1];
-      if (urlPageNum === (offsetIndex + '')) {
+      const urlPageNum = this.imageUrlToPageNum(item.src);
+      mappedPages[index] = offsetIndex;
+      if (urlPageNum === offsetIndex) {
         console.log('Page ' + offsetIndex + ' already prefetched/inprogress, skipping');
         index += 1;
         return;
       }
-      console.log('Prefetching image, page: ', offsetIndex);
-      item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
-      index += 1;
-    }, this.cachedImages.size() - 1);
-    // for (let i = 1; i < PREFETCH_PAGES; i++) {
-    //   const nextPage = this.pageNum + i;
-    //   if (nextPage < this.maxPages) {
-    //     const img = new Image();
-    //     img.src = this.readerService.getPageUrl(this.chapterId, nextPage);
-    //   }
-    // }
-    
+      if (offsetIndex < this.maxPages) {
+        console.log('Prefetching image, page: ', offsetIndex);
+        item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+        index += 1;
+      }
+    }, this.cachedImages.size() - 2);
+
+    console.log('Cached Pages: ', this.cachedImages.arr.map(item => item.src.split('&page=')[1]));
   }
 
   loadPage() {
@@ -459,7 +463,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
-    if (this.canvasImage.src === '' || !this.canvasImage.complete) {
+    if (this.canvasImage.src === '' || !this.canvasImage.complete || this.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
       this.canvasImage.onload = () => this.renderPage();
     } else {
