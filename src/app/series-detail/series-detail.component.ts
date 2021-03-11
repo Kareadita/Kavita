@@ -146,7 +146,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages - 1))).subscribe(results => {
+    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages))).subscribe(results => {
       vol.pagesRead = vol.pages;
       this.setContinuePoint();
       this.toastr.success('Marked as Read');
