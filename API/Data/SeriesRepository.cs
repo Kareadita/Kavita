@@ -80,20 +80,16 @@ namespace API.Data
         
         public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
         {
-            var sw = Stopwatch.StartNew();
-            var series = await _context.Series
+            return await _context.Series
                 .Where(s => libraryIds.Contains(s.LibraryId))
                 .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%") 
-                            || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
+                            || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
+                            || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
                 .Include(s => s.Library) // NOTE: Is there a way to do this faster? 
                 .OrderBy(s => s.SortName)
                 .AsNoTracking()
                 .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-
-
-            _logger.LogDebug("Processed SearchSeries in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
-            return series;
         }
 
         public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
@@ -109,7 +105,6 @@ namespace API.Data
             await AddVolumeModifiers(userId, volumes);
 
             return volumes;
-
         }
 
 

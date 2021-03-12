@@ -228,6 +228,7 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
         {
+            // TODO: Add indecies to DB for the searched fields
             //NOTE: What about normalizing search query and only searching against normalizedname in Series? 
             // So One Punch would match One-Punch
             // This also means less indexes we need.
