@@ -67,7 +67,6 @@ export class CircularArray<T> {
     return this.arr[this.currentIndex];
   }
 
-  // Need a method that can access the array back to the currentIndex but doesn't modify the currentIndex
   peek(offset: number = 0) {
     const i = this.currentIndex + 1 + offset;
     const arr = this.arr;
@@ -252,7 +251,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => this.renderPage(); // TODO: With circular array, this will have to change
+    this.canvasImage.onload = () => this.renderPage();
   }
 
   ngOnDestroy() {
@@ -413,9 +412,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+        console.log('Rendering Left half');
       } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+        console.log('Rendering Right half');
       } else {
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
@@ -429,28 +430,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   prefetch() {
-    // BUG: This doesn't work well with split pages. 
     let index = 1;
-    const mappedPages: any = {};
-    console.log('============================');
-    console.log('Current Index: ', this.cachedImages.currentIndex);
+
     this.cachedImages.applyFor((item, i) => {
       const offsetIndex = this.pageNum + index;
-      console.log('Internal index: ', i);
       const urlPageNum = this.imageUrlToPageNum(item.src);
-      mappedPages[index] = offsetIndex;
       if (urlPageNum === offsetIndex) {
-        console.log('Page ' + offsetIndex + ' already prefetched/inprogress, skipping');
         index += 1;
         return;
       }
-      if (offsetIndex < this.maxPages) {
-        console.log('Prefetching image, page: ', offsetIndex);
+      if (offsetIndex < this.maxPages - 1) {
         item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
         index += 1;
       }
-    }, this.cachedImages.size() - 2);
-
+    }, this.cachedImages.size() - 3);
+    // Circular array looks to be working fine. Need to debug on real manga
+    console.log('Current Page: ' + this.pageNum + ' Current Index: ', this.cachedImages.currentIndex);
     console.log('Cached Pages: ', this.cachedImages.arr.map(item => item.src.split('&page=')[1]));
   }
 
@@ -463,7 +458,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
-    if (this.canvasImage.src === '' || !this.canvasImage.complete || this.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum) {
+    if (this.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
       this.canvasImage.onload = () => this.renderPage();
     } else {

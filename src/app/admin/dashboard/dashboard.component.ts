@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
-import * as FileSaver from 'file-saver';
+import { saveAs } from 'file-saver';
 
 
 
@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit {
   fetchLogs() {
     this.serverService.fetchLogs().subscribe(res => {
       const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
-      FileSaver.saveAs(blob, 'kavita.zip');
+      saveAs(blob, 'kavita.zip');
     });
   }
 
