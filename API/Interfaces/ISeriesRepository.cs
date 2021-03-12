@@ -34,6 +34,12 @@ namespace API.Interfaces
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
         Task<Volume> GetVolumeAsync(int volumeId);
         Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
+        /// <summary>
+        /// A fast lookup of just the volume information with no tracking.
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
+        Task<VolumeDto> GetVolumeDtoAsync(int volumeId);
         Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
         Task<bool> DeleteSeriesAsync(int seriesId);
         Task<Volume> GetVolumeByIdAsync(int volumeId);

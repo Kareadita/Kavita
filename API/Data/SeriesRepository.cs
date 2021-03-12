@@ -143,6 +143,16 @@ namespace API.Data
                 .SingleOrDefaultAsync(vol => vol.Id == volumeId);
         }
 
+        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Where(vol => vol.Id == volumeId)
+                .AsNoTracking()
+                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
+                .SingleAsync();
+            
+        }
+
         public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
         {
             var volume = await _context.Volume

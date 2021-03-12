@@ -13,7 +13,7 @@ namespace API.DTOs
         /// Smallest number of the Range. 
         /// </summary>
         public string Number { get; set; }
-        public byte[] CoverImage { get; set; }
+        //public byte[] CoverImage { get; set; }
         /// <summary>
         /// Total number of pages in all MangaFiles
         /// </summary>
