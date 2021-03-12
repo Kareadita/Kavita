@@ -30,44 +30,34 @@ namespace API.Controllers
         }
 
         [HttpGet("image")]
-        public async Task<ActionResult<ImageDto>> GetImage(int chapterId, int page)
+        public async Task<ActionResult> GetImage(int chapterId, int page)
         {
-            // Temp let's iterate the directory each call to get next image
             var chapter = await _cacheService.Ensure(chapterId);
-
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
             var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
-            if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
-            var file = await _directoryService.ReadImageAsync(path);
-            file.Page = page;
-            file.MangaFileName = mangaFile.FilePath;
-            file.NeedsSplitting = file.Width > file.Height;
-            
-            // TODO: Validate if sending page whole (not base64 encoded) fixes Tablet issue
-            //Response.Headers.Add("Transfer-Encoding", "gzip");
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
 
-            return Ok(file);
+            var content = await _directoryService.ReadFileAsync(path);
+            var format = Path.GetExtension(path).Replace(".", "");
+
+            // Look into HttpContext.Cache so we can utilize a memorystream for Zip entries (want to limit response time by 300ms)
+            // Calculates SHA1 Hash for byte[]
+            using var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
+            Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
+            Response.Headers.Add("Cache-Control", "private");
+
+            return File(content, "image/" + format);
         }
-        
-        [HttpGet("image2")]
-        public async Task<ActionResult> GetImage2(int chapterId, int page)
-        {
-            // Temp let's iterate the directory each call to get next image
-            var chapter = await _cacheService.Ensure(chapterId);
 
+        [HttpGet("chapter-path")]
+        public async Task<ActionResult<string>> GetImagePath(int chapterId)
+        {
+            var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
-            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
-            if (string.IsNullOrEmpty(path)) return BadRequest($"No such image for page {page}");
-            var file = await _directoryService.ReadImageAsync(path);
-            file.Page = page;
-            file.MangaFileName = mangaFile.FilePath;
-            file.NeedsSplitting = file.Width > file.Height;
-            
-            // TODO: Validate if sending page whole (not base64 encoded) fixes Tablet issue
-
-            return File(file.Content, "image/jpeg", mangaFile.FilePath); 
+            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
+            return Ok(mangaFile.FilePath);
         }
 
         [HttpGet("get-bookmark")]
@@ -161,6 +151,46 @@ namespace API.Controllers
             
             return BadRequest("There was an issue saving progress");
         }
+
+        [HttpPost("mark-volume-read")]
+        public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            _logger.LogDebug("Saving {UserName} progress for Volume {VolumeID} to read", user.UserName, markVolumeReadDto.VolumeId);
+            
+            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            foreach (var chapter in chapters)
+            {
+                user.Progresses ??= new List<AppUserProgress>();
+                var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = chapter.Pages,
+                        VolumeId = markVolumeReadDto.VolumeId,
+                        SeriesId = markVolumeReadDto.SeriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = chapter.Pages;
+                    userProgress.SeriesId = markVolumeReadDto.SeriesId;
+                    userProgress.VolumeId = markVolumeReadDto.VolumeId;
+                }
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }    
 
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
