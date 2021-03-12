@@ -222,10 +222,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
 
+      this.pageNum = results.pageNum;
+
       if (this.pageNum > this.maxPages) {
         this.pageNum = this.maxPages;
       }
-      this.pageNum = results.pageNum;
 
 
       const images = [];
