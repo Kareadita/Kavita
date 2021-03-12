@@ -19,6 +19,21 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
+  getVolumeCoverImage(volumeId: number) {
+    // TODO: If this works, refactor getPageUrl to same controller
+    return this.baseUrl + 'image/volume-cover?volumeId=' + volumeId;
+  }
+
+  getSeriesCoverImage(seriesId: number) {
+    // TODO: If this works, refactor getPageUrl to same controller
+    return this.baseUrl + 'image/series-cover?seriesId=' + seriesId;
+  }
+
+  getChapterCoverImage(chapterId: number) {
+    // TODO: If this works, refactor getPageUrl to same controller
+    return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId;
+  }
+
   getChapterPath(chapterId: number) {
     return this.httpClient.get(this.baseUrl + 'reader/chapter-path?chapterId=' + chapterId, {responseType: 'text'});
   }

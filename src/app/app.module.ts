@@ -22,6 +22,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 
@@ -51,6 +52,7 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
     NgbPaginationModule,
+    LazyLoadImageModule,
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'

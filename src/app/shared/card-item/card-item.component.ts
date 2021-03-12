@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { ReaderService } from 'src/app/_services/reader.service';
 
 
 export interface CardItemAction {
@@ -25,7 +26,7 @@ export class CardItemComponent implements OnInit {
   safeImage: any;
   placeholderImage = 'assets/images/image-placeholder.jpg';
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(private sanitizer: DomSanitizer, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.createSafeImage(this.imageUrl);
@@ -53,7 +54,11 @@ export class CardItemComponent implements OnInit {
   }
 
   createSafeImage(coverImage: string) {
-    this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + coverImage);
+    if (coverImage.startsWith('/')) {
+      this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + coverImage);
+    } else {
+      this.safeImage = coverImage;
+    }
   }
 
 }

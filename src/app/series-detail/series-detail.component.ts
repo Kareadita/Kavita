@@ -42,12 +42,13 @@ export class SeriesDetailComponent implements OnInit {
 
   volumeActions: CardItemAction[] = [];
   chapterActions: CardItemAction[] = [];
+  seriesImage = '';
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
-              private readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
+              public readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
@@ -90,6 +91,7 @@ export class SeriesDetailComponent implements OnInit {
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.loadSeries(seriesId);
+    this.seriesImage = this.readerService.getSeriesCoverImage(seriesId);
   }
 
   loadSeries(seriesId: number) {

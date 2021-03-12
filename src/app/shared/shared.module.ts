@@ -10,6 +10,7 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
 import { Base64ImageComponent } from './base64-image/base64-image.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
+import { LazyLoadImageModule } from 'ng-lazyload-image';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { SafeHtmlPipe } from './safe-html.pipe';
     NgbProgressbarModule,
     NgbTooltipModule,
     NgbCollapseModule,
+    LazyLoadImageModule
   ],
   exports: [
     RegisterMemberComponent,
