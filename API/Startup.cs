@@ -41,17 +41,19 @@ namespace API
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
             // This doesn't seem to work.
-            // services.AddResponseCompression(options =>
-            // {
-            //     options.Providers.Add<BrotliCompressionProvider>();
-            //     options.MimeTypes = 
-            //         ResponseCompressionDefaults.MimeTypes.Concat(
-            //             new[] { "image/jpeg", "image/jpg" });
-            // });
-            // services.Configure<BrotliCompressionProviderOptions>(options => 
-            // {
-            //     options.Level = CompressionLevel.Fastest;
-            // });
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.Providers.Add<GzipCompressionProvider>();
+                options.MimeTypes = 
+                    ResponseCompressionDefaults.MimeTypes.Concat(
+                        new[] { "image/jpeg", "image/jpg" });
+                options.EnableForHttps = true;
+            });
+            services.Configure<BrotliCompressionProviderOptions>(options => 
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
             
             
         }
@@ -67,6 +69,7 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
+            app.UseResponseCompression();
             
             app.UseForwardedHeaders();
 
@@ -85,7 +88,7 @@ namespace API
             app.UseAuthorization();
 
             app.UseDefaultFiles();
-            
+
             app.UseStaticFiles(new StaticFileOptions
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()

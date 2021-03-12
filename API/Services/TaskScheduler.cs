@@ -78,6 +78,8 @@ namespace API.Services
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
+            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
+            
         }
 
         public void CleanupChapters(int[] chapterIds)

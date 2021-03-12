@@ -152,6 +152,46 @@ namespace API.Controllers
             return BadRequest("There was an issue saving progress");
         }
 
+        [HttpPost("mark-volume-read")]
+        public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            _logger.LogDebug("Saving {UserName} progress for Volume {VolumeID} to read", user.UserName, markVolumeReadDto.VolumeId);
+            
+            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            foreach (var chapter in chapters)
+            {
+                user.Progresses ??= new List<AppUserProgress>();
+                var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = chapter.Pages,
+                        VolumeId = markVolumeReadDto.VolumeId,
+                        SeriesId = markVolumeReadDto.SeriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = chapter.Pages;
+                    userProgress.SeriesId = markVolumeReadDto.SeriesId;
+                    userProgress.VolumeId = markVolumeReadDto.VolumeId;
+                }
+            }
+            
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }    
+
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {

@@ -35,9 +35,22 @@ namespace API.Data
         {
             return await _context.Chapter
                 .Include(c => c.Files)
-                .AsNoTracking()
                 .SingleOrDefaultAsync(c => c.Id == chapterId);
         }
+        
+        
+        /// <summary>
+        /// Returns Chapters for a volume id.
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
+        public async Task<IList<Chapter>> GetChaptersAsync(int volumeId)
+        {
+            return await _context.Chapter
+                .Where(c => c.VolumeId == volumeId)
+                .ToListAsync();
+        }
+        
 
         public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
         {
