@@ -8,7 +8,6 @@
         public string LocalizedName { get; init; }
         public string SortName { get; init; }
         public string Summary { get; init; }
-        public byte[] CoverImage { get; init; }
         public int Pages { get; init; }
         /// <summary>
         /// Sum of pages read from linked Volumes. Calculated at API-time.

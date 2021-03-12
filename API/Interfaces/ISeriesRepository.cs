@@ -52,5 +52,8 @@ namespace API.Interfaces
         /// <param name="series"></param>
         /// <returns></returns>
         Task AddSeriesModifiers(int userId, List<SeriesDto> series);
+
+        Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
+        Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
     }
 }

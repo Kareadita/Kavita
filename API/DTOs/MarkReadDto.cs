@@ -2,6 +2,6 @@
 {
     public class MarkReadDto
     {
-        public int SeriesId { get; set; }
+        public int SeriesId { get; init; }
     }
 }

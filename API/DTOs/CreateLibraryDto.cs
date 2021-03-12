@@ -7,11 +7,11 @@ namespace API.DTOs
     public class CreateLibraryDto
     {
         [Required]
-        public string Name { get; set; }
+        public string Name { get; init; }
         [Required]
-        public LibraryType Type { get; set; }
+        public LibraryType Type { get; init; }
         [Required]
         [MinLength(1)]
-        public IEnumerable<string> Folders { get; set; }
+        public IEnumerable<string> Folders { get; init; }
     }
 }

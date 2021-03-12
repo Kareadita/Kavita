@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -28,51 +29,33 @@ namespace API.Controllers
         [HttpGet("chapter-cover")]
         public async Task<ActionResult> GetChapterCoverImage(int chapterId)
         {
-            // TODO: Write custom methods to just get the byte[] as fast as possible
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            var content = chapter.CoverImage;
-            var format = "jpeg"; //Path.GetExtension("jpeg").Replace(".", "");
-            
-            // Calculates SHA1 Hash for byte[]
-            using var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
-            Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
-            Response.Headers.Add("Cache-Control", "private");
+            var content = await _unitOfWork.VolumeRepository.GetChapterCoverImageAsync(chapterId);
+            if (content == null) return BadRequest("No cover image");
+            const string format = "jpeg";
 
+            Response.AddCacheHeader(content);
             return File(content, "image/" + format);
         }
 
         [HttpGet("volume-cover")]
         public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
         {
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var content = volume.CoverImage;
-            var format = "jpeg"; //Path.GetExtension("jpeg").Replace(".", "");
-            
-            // Calculates SHA1 Hash for byte[]
-            using var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
-            Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
-            Response.Headers.Add("Cache-Control", "private");
+            var content = await _unitOfWork.SeriesRepository.GetVolumeCoverImageAsync(volumeId);
+            if (content == null) return BadRequest("No cover image");
+            const string format = "jpeg";
 
+            Response.AddCacheHeader(content);
             return File(content, "image/" + format);
         }
         
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-            var content = series.CoverImage;
-            var format = "jpeg"; //Path.GetExtension("jpeg").Replace(".", "");
+            var content = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
+            if (content == null) return BadRequest("No cover image");
+            const string format = "jpeg";
 
-            if (content.Length == 0)
-            {
-                // How do I handle? 
-            }
-            
-            // Calculates SHA1 Hash for byte[]
-            using var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
-            Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
-            Response.Headers.Add("Cache-Control", "private");
-
+            Response.AddCacheHeader(content);
             return File(content, "image/" + format);
         }
     }

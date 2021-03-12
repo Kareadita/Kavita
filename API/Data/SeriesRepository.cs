@@ -244,6 +244,25 @@ namespace API.Data
                 s.UserReview = rating.Review;
             }
         }
+
+        public async Task<byte[]> GetVolumeCoverImageAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Where(v => v.Id == volumeId)
+                .Select(v => v.CoverImage)
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task<byte[]> GetSeriesCoverImageAsync(int seriesId)
+        {
+            return await _context.Series
+                .Where(s => s.Id == seriesId)
+                .Select(s => s.CoverImage)
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
+        }
+
         private async Task AddVolumeModifiers(int userId, List<VolumeDto> volumes)
         {
             var userProgress = await _context.AppUserProgresses
