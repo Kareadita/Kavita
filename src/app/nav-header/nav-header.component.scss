@@ -1,4 +1,7 @@
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+$primary-color: white;
+
 .focus-visible:focus {
     visibility: visible;
     color: white;
@@ -7,6 +10,11 @@
 .ng-autocomplete {
     width: 400px;
     margin-bottom: 0px;
+}
+
+.primary-text {
+    color: $primary-color;
+    border: none;
 }
 
 

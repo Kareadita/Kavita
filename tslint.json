@@ -53,7 +53,7 @@
     ],
     "no-empty": false,
     "no-inferrable-types": [
-      true,
+      false,
       "ignore-params"
     ],
     "no-non-null-assertion": true,
@@ -147,6 +147,9 @@
       "element",
       "app",
       "kebab-case"
+    ],
+    "comment-format": [
+      false
     ]
   }
 }

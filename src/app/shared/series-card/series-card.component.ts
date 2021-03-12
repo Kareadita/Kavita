@@ -9,6 +9,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { CardItemAction } from '../card-item/card-item.component';
+import { ConfirmService } from '../confirm.service';
 
 @Component({
   selector: 'app-series-card',
@@ -26,7 +27,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
-              private libraryService: LibraryService, private modalService: NgbModal) {
+              private libraryService: LibraryService, private modalService: NgbModal,
+              private confirmService: ConfirmService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -45,6 +47,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   generateActions() {
+    // TODO: Move this into a Factory with an observable/callback so we can handle after it's done
     this.actions = [
       {
         title: 'Mark as Read',
@@ -63,10 +66,11 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         });
       }});
 
-      this.actions.push({title: 'Delete', callback: (data: Series) => {
-        if (!confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      this.actions.push({title: 'Delete', callback: async (data: Series) => {
+        if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
           return;
         }
+
         this.seriesService.delete(data.id).subscribe((res: boolean) => {
           if (res) {
             this.toastr.success('Series deleted');

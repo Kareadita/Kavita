@@ -34,6 +34,7 @@ export class SeriesDetailComponent implements OnInit {
 
   currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
+  hasReadingProgress = false;
 
   testMap: any;
   showBook = false;
@@ -109,15 +110,17 @@ export class SeriesDetailComponent implements OnInit {
     this.currentlyReadingVolume = undefined;
     this.currentlyReadingChapter = undefined;
 
-    this.volumes.forEach(v => {
+    for (let v of this.volumes) {
       if (v.number === 0) {
-        return;
+        continue;
       } else if (v.pagesRead >= v.pages) {
-        return;
-      } else if (this.currentlyReadingVolume === undefined) {
+        continue;
+      } else if (v.pagesRead < v.pages) { // Issue is off by 1 again...
         this.currentlyReadingVolume = v;
+        this.hasReadingProgress = true;
+        break;
       }
-    });
+    }
 
     if (this.currentlyReadingVolume === undefined) {
       // We need to check against chapters
@@ -126,6 +129,7 @@ export class SeriesDetailComponent implements OnInit {
           return;
         } else if (this.currentlyReadingChapter === undefined) {
           this.currentlyReadingChapter = c;
+          this.hasReadingProgress = true;
         }
       });
       if (this.currentlyReadingChapter === undefined) {
@@ -135,10 +139,6 @@ export class SeriesDetailComponent implements OnInit {
     }
   }
 
-  hasReadingProgress() {
-    return ((this.currentlyReadingVolume !== undefined && this.currentlyReadingVolume.pagesRead > 0)
-    || (this.currentlyReadingChapter !== this.chapters[0] && this.currentlyReadingChapter !== undefined));
-  }
 
   markAsRead(vol: Volume) {
     if (this.series === undefined) {
@@ -146,7 +146,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, chapter.pages - 1))).subscribe(results => {
+    this.readerService.markVolumeRead(seriesId, vol.id).subscribe(() => {
       vol.pagesRead = vol.pages;
       this.setContinuePoint();
       this.toastr.success('Marked as Read');
@@ -194,7 +194,7 @@ export class SeriesDetailComponent implements OnInit {
 
   read() {
     if (this.currentlyReadingVolume !== undefined) { this.openVolume(this.currentlyReadingVolume); }
-    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
+    else if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
     else { this.openVolume(this.volumes[0]); }
   }
 
