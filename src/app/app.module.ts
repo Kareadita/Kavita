@@ -22,7 +22,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
-import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { LazyLoadImageModule, LAZYLOAD_IMAGE_HOOKS, ScrollHooks } from 'ng-lazyload-image';
 
 
 
@@ -60,7 +60,8 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
+    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
+    { provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks }
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
