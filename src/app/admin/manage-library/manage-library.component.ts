@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
@@ -16,7 +17,7 @@ export class ManageLibraryComponent implements OnInit {
   createLibraryToggle = false;
   loading = false;
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, private toastr: ToastrService) { }
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, private toastr: ToastrService, private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.getLibraries();
@@ -49,8 +50,8 @@ export class ManageLibraryComponent implements OnInit {
     });
   }
 
-  deleteLibrary(library: Library) {
-    if (confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
+  async deleteLibrary(library: Library) {
+    if (await this.confirmService.confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
       this.libraryService.delete(library.id).subscribe(() => {
         this.getLibraries();
         this.toastr.success('Library has been removed');

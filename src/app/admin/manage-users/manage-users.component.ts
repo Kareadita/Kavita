@@ -8,6 +8,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { LibraryAccessModalComponent } from '../_modals/library-access-modal/library-access-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
+import { ConfirmService } from 'src/app/shared/confirm.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -26,7 +27,8 @@ export class ManageUsersComponent implements OnInit {
   constructor(private memberService: MemberService,
               private accountService: AccountService,
               private modalService: NgbModal,
-              private toastr: ToastrService) {
+              private toastr: ToastrService,
+              private confirmService: ConfirmService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
@@ -62,9 +64,8 @@ export class ManageUsersComponent implements OnInit {
     modalRef.componentInstance.member = member;
   }
 
-  deleteUser(member: Member) {
-    // TODO: Use a modal for this confirm
-    if (confirm('Are you sure you want to delete this user?')) {
+  async deleteUser(member: Member) {
+    if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
       this.memberService.deleteMember(member.username).subscribe(() => {
         this.loadMembers();
         this.toastr.success(member.username + ' has been deleted.');

@@ -369,7 +369,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.pageNum + 1 >= this.maxPages) {
       // TODO: Ask if they want to load next chapter/volume
-      // if (confirm('Do you want to load the next Volume/Chapter?')) {
+      // if (this.confirmService.confirm('Do you want to load the next Volume/Chapter?')) {
 
       // }
       return;
