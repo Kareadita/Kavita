@@ -105,11 +105,11 @@ namespace API
                 context.Response.GetTypedHeaders().CacheControl = 
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
-                        Public = true,
+                        Public = false,
                         MaxAge = TimeSpan.FromSeconds(10)
                     };
-                // context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
-                //     new string[] { "Accept-Encoding" };
+                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
+                    new string[] { "Accept-Encoding" };
             
                 await next();
             });
