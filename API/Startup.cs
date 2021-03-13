@@ -1,3 +1,4 @@
+using System;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
@@ -5,6 +6,7 @@ using API.Middleware;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
@@ -55,6 +57,10 @@ namespace API
                 options.Level = CompressionLevel.Fastest;
             });
             
+            services.AddResponseCaching();
+            
+
+            
             
         }
 
@@ -81,7 +87,7 @@ namespace API
                 app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             }
             
-            //app.UseResponseCaching();
+            app.UseResponseCaching();
 
             app.UseAuthentication();
 
@@ -92,6 +98,20 @@ namespace API
             app.UseStaticFiles(new StaticFileOptions
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
+            });
+            
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl = 
+                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                    {
+                        Public = true,
+                        MaxAge = TimeSpan.FromSeconds(10)
+                    };
+                // context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
+                //     new string[] { "Accept-Encoding" };
+            
+                await next();
             });
             
 

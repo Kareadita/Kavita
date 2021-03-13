@@ -85,7 +85,7 @@ namespace API.Data
                 .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%") 
                             || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
                             || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
-                .Include(s => s.Library) // NOTE: Is there a way to do this faster? 
+                .Include(s => s.Library)
                 .OrderBy(s => s.SortName)
                 .AsNoTracking()
                 .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
