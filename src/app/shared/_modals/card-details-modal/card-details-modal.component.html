@@ -7,19 +7,19 @@
         </button>
     </div>
     <div class="modal-body">
-        <h4>Information</h4>
+        <h4 *ngIf="isObjectVolume(this.data)">Information</h4>
         <ng-container *ngIf="isObjectVolume(this.data)">
             <div class="row no-gutters">
                 <div class="col">
-                    Created: {{this.data.created | date: 'dd/MM/yyyy'}}
+                    Created: {{(this.data.created | date: 'dd/MM/yyyy') || '-'}}
                 </div>
                 <div class="col">
-                    Last Modified: {{this.data.lastModified | date: 'dd/MM/yyyy'}}
+                    Last Modified: {{(this.data.lastModified | date: 'dd/MM/yyyy') || '-'}}
                 </div>
             </div>
             <div class="row no-gutters">
                 <div class="col">
-                    Is Special: {{this.data.isSpecial}}
+                    Is Special: {{this.data.isSpecial || 'N/A'}}
                 </div>
                 <div class="col">
                     Pages: {{this.data.pages}}
@@ -27,10 +27,10 @@
             </div>
         </ng-container>
 
-        <h4>Chapters</h4>
+        <h4 *ngIf="!isObjectChapter(this.data)">Chapters</h4>
         <ul class="list-unstyled">
             <li class="media my-4" *ngFor="let chapter of chapters">
-                <app-base64-image class="mr-3" [style]="imageStyles" [src]="chapter.coverImage"></app-base64-image>
+                <img class="mr-3" style="width: 74px" src="{{imageService.getChapterCoverImage(chapter.id)}}">
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">Chapter {{formatChapterNumber(chapter)}}</h5>
                     <ul class="list-group">

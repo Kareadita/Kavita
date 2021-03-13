@@ -5,6 +5,7 @@ import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
+import { ImageService } from 'src/app/_services/image.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UtilityService } from '../../_services/utility.service';
 
@@ -22,13 +23,13 @@ export class CardDetailsModalComponent implements OnInit {
   isChapter = false;
   chapters: Chapter[] = [];
   seriesVolumes: any[] = [];
-  imageStyles = {width: '74px'};
+  //imageStyles = {width: '74px'};
   isLoadingVolumes = false;
 
   formatKeys = Object.keys(MangaFormat);
 
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, private seriesService: SeriesService, public utilityService: UtilityService) { }
+  constructor(private modalService: NgbModal, public modal: NgbActiveModal, private seriesService: SeriesService, public utilityService: UtilityService, public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.isChapter = this.isObjectChapter(this.data);
@@ -45,7 +46,7 @@ export class CardDetailsModalComponent implements OnInit {
   }
 
   isObjectVolume(object: any): object is Volume {
-    return !('originalName' in object);
+    return !('originalName' in object) && !('files' in object);
   }
 
   close() {

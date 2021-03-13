@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
+import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { NavService } from '../_services/nav.service';
 
@@ -18,7 +19,7 @@ export class NavHeaderComponent implements OnInit {
   debounceTime = 300;
   imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResult[] = [];
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService) { }
+  constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService, public imageService: ImageService) { }
 
   ngOnInit(): void {
   }
