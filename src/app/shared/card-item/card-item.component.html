@@ -6,15 +6,7 @@
       </div>
       <div class="not-read-badge" *ngIf="read === 0"></div>
       <div class="card-actions">
-        <!-- TODO: Move this into it's own component so I can use the dropdown in multiple areas -->
-        <ng-container *ngIf="actions.length > 0">
-              <div ngbDropdown container="body" class="d-inline-block">
-                <button class="btn" id="actions-{{title}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
-                <div ngbDropdownMenu attr.aria-labelledby="actions-{{title}}">
-                  <button ngbDropdownItem *ngFor="let action of actions" (click)="performAction($event, action)">{{action.title}}</button>
-                </div>
-              </div>
-        </ng-container>
+        <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
       </div>
     </div>
     <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">

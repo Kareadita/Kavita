@@ -1,16 +1,11 @@
 import { Injectable } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { CardItemAction } from '../shared/card-item/card-item.component';
-import { ConfirmService } from '../shared/confirm.service';
-import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { Library } from '../_models/library';
 import { Series } from '../_models/series';
-import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
-import { LibraryService } from './library.service';
 import { SeriesService } from './series.service';
 
 export enum Action {
@@ -19,7 +14,8 @@ export enum Action {
   ScanLibrary = 2,
   Delete = 3,
   Edit = 4,
-  Info = 5
+  Info = 5,
+  RefreshMetadata = 6
 }
 
 export interface ActionItem<T> {
@@ -33,6 +29,8 @@ export interface ActionItem<T> {
   providedIn: 'root'
 })
 export class ActionFactoryService {
+
+  libraryActions: Array<ActionItem<Library>> = [];
 
   seriesActions: Array<ActionItem<Series>> = [
     {
@@ -75,7 +73,7 @@ export class ActionFactoryService {
 
   isAdmin = false;
 
-  constructor(private accountService: AccountService, private seriesService: SeriesService, private toastr: ToastrService) {
+  constructor(private accountService: AccountService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -111,10 +109,26 @@ export class ActionFactoryService {
           title: 'Info',
           callback: this.dummyCallback
         });
+
+        this.libraryActions.push({
+          action: Action.ScanLibrary,
+          title: 'Scan Library',
+          callback: this.dummyCallback
+        });
+
+        this.libraryActions.push({
+          action: Action.RefreshMetadata,
+          title: 'Refresh Metadata',
+          callback: this.dummyCallback
+        });
       }
     });
   }
 
+  getLibraryActions(callback: (action: Action, library: Library) => void) {
+    this.libraryActions.forEach(action => action.callback = callback);
+    return this.libraryActions;
+  }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
     this.seriesActions.forEach(action => action.callback = callback);

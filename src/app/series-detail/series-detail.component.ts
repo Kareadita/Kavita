@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CardItemAction } from '../shared/card-item/card-item.component';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -13,7 +11,6 @@ import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-seri
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
-import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
@@ -73,9 +70,9 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback).filter(action => action.action !== Action.Edit);
-    this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback);
-    this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback);
+    this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this)).filter(action => action.action !== Action.Edit);
+    this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
+    this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
 
     const seriesId = parseInt(routeId, 10);
@@ -338,9 +335,7 @@ export class SeriesDetailComponent implements OnInit {
     event.preventDefault();
   }
 
-  performAction(event: any, action: ActionItem<any>) {
-    this.preventClick(event);
-
+  performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.series);
     }

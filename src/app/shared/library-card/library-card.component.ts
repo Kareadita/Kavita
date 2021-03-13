@@ -3,10 +3,9 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { Library } from 'src/app/_models/library';
-import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { LibraryService } from 'src/app/_services/library.service';
-import { CardItemAction } from '../card-item/card-item.component';
 
 // Represents a library type card. Uses a app-card-item internally
 @Component({
@@ -15,15 +14,16 @@ import { CardItemAction } from '../card-item/card-item.component';
   styleUrls: ['./library-card.component.scss']
 })
 export class LibraryCardComponent implements OnInit, OnChanges {
-  @Input() data: Library | undefined;
+  @Input() data!: Library;
   @Output() clicked = new EventEmitter<Library>();
 
   isAdmin = false;
-  actions: CardItemAction[] = [];
+  actions: ActionItem<Library>[] = [];
   icon = 'fa-book-open';
 
   constructor(private accountService: AccountService, private router: Router,
-              private libraryService: LibraryService, private toastr: ToastrService) {
+              private libraryService: LibraryService, private toastr: ToastrService,
+              private actionFactoryService: ActionFactoryService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -41,50 +41,40 @@ export class LibraryCardComponent implements OnInit, OnChanges {
       } else {
         this.icon = 'fa-book';
       }
-      this.generateActions();
+
+      this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     }
   }
 
-  generateActions() {
-    this.actions = [
-      {
-        title: 'Mark as Read',
-        callback: () => this.markAsRead
-      },
-      {
-        title: 'Mark as Unread',
-        callback: () => this.markAsUnread
-      }
-    ];
-
-    if (this.isAdmin) {
-      this.actions.push({title: 'Scan Library', callback: (data: Library) => {
-        this.libraryService.scan(data?.id).subscribe((res: any) => {
-          this.toastr.success('Scan started for ' + data.name);
-        });
-      }});
-      this.actions.push({title: 'Refresh Metadata', callback: (data: Library) => {
-        this.libraryService.refreshMetadata(data?.id).subscribe((res: any) => {
-          this.toastr.success('Scan started for ' + data.name);
-        });
-      }});
+  handleAction(action: Action, library: Library) {
+    switch (action) {
+      case(Action.ScanLibrary):
+        this.scanLibrary(library);
+        break;
+      case(Action.RefreshMetadata):
+        this.refreshMetadata(library);
+        break;
+      default:
+        break;
     }
   }
 
-  handleAction(event: any, action: CardItemAction) {
-    this.preventClick(event);
+  scanLibrary(library: Library) {
+    this.libraryService.scan(library?.id).subscribe((res: any) => {
+      this.toastr.success('Scan started for ' + library.name);
+    });
+  }
 
+  refreshMetadata(library: Library) {
+    this.libraryService.refreshMetadata(library?.id).subscribe((res: any) => {
+      this.toastr.success('Scan started for ' + library.name);
+    });
+  }
+
+  performAction(action: ActionItem<Library>) {
     if (typeof action.callback === 'function') {
-      action.callback(this.data);
+      action.callback(action.action, this.data);
     }
-  }
-
-  markAsUnread(library: any) {
-
-  }
-
-  markAsRead(library: any) {
-
   }
 
   handleClick() {

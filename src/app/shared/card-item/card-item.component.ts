@@ -1,14 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
-import { ReaderService } from 'src/app/_services/reader.service';
-
-
-export interface CardItemAction {
-  title: string;
-  callback: (data: any) => void;
-}
 
 @Component({
   selector: 'app-card-item',
@@ -43,9 +35,7 @@ export class CardItemComponent implements OnInit {
     event.preventDefault();
   }
 
-  performAction(event: any, action: ActionItem<any>) {
-    this.preventClick(event);
-
+  performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.entity);
     }

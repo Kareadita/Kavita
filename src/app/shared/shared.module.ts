@@ -11,6 +11,7 @@ import { Base64ImageComponent } from './base64-image/base64-image.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
+import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
     CardDetailsModalComponent,
     Base64ImageComponent,
     ConfirmDialogComponent,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    CardActionablesComponent
   ],
   imports: [
     CommonModule,
@@ -34,11 +36,13 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
     LazyLoadImageModule
   ],
   exports: [
-    RegisterMemberComponent,
+    RegisterMemberComponent, // TODO: Move this out and put in normal app
     CardItemComponent,
     LibraryCardComponent,
-    SeriesCardComponent,
-    Base64ImageComponent
+    SeriesCardComponent, // TODO: Remove this component and use just AppCardComponent
+    SafeHtmlPipe,
+    //Base64ImageComponent, // TODO: Delete this component
+    CardActionablesComponent
   ]
 })
 export class SharedModule { }
