@@ -1,8 +1,10 @@
 using System;
 using System.IO.Compression;
 using System.Linq;
+using API.Data;
 using API.Extensions;
 using API.Middleware;
+using API.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +14,9 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -42,7 +46,6 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            // This doesn't seem to work.
             services.AddResponseCompression(options =>
             {
                 options.Providers.Add<BrotliCompressionProvider>();
@@ -60,7 +63,9 @@ namespace API
             services.AddResponseCaching();
             
 
-            
+            services
+                .AddStartupTask<WarmupServicesStartupTask>()
+                .TryAddSingleton(services);
             
         }
 
@@ -113,7 +118,6 @@ namespace API
             
                 await next();
             });
-            
 
             app.UseEndpoints(endpoints =>
             {

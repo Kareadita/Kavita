@@ -56,5 +56,9 @@ namespace API.Extensions
 
             return services;
         }
+        
+        public static IServiceCollection AddStartupTask<T>(this IServiceCollection services)
+            where T : class, IStartupTask
+            => services.AddTransient<IStartupTask, T>();
     }
 }
