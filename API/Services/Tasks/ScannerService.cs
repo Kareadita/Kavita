@@ -63,7 +63,7 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       [DisableConcurrentExecution(timeoutInSeconds: 360)] 
+       //[DisableConcurrentExecution(timeoutInSeconds: 360)] 
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
