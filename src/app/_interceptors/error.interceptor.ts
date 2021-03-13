@@ -26,8 +26,8 @@ export class ErrorInterceptor implements HttpInterceptor {
               // IF type of array, this comes from signin handler
               if (Array.isArray(error.error)) {
                 const modalStateErrors: any[] = [];
-                error.error.forEach((issue: {code: string, description: string}) => {
-                  modalStateErrors.push(issue.description);
+                error.error.forEach((issue: {status: string, details: string, message: string}) => {
+                  modalStateErrors.push(issue.details);
                 });
                 throw modalStateErrors.flat();
               } else if (error.error.errors) {
