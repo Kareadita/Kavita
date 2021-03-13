@@ -23,13 +23,8 @@
                     </button>
                 </div>
                 <div class="ml-2">
-                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" *ngIf="isAdmin" title="Edit Series information">
-                        <span>
-                            <i class="fa fa-ellipsis-h"></i>
-                        </span>
-                    </button>
                     <div class="card-actions">
-                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name"></app-card-actionables>
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                       </div>
                 </div>
                 <div class="ml-2">

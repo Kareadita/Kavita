@@ -9,6 +9,7 @@ import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 export class CardActionablesComponent implements OnInit {
 
   @Input() iconClass = 'fa-ellipsis-v';
+  @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
   @Input() labelBy = 'card';
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
