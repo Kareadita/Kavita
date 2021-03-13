@@ -15,6 +15,7 @@ import { Series } from '../_models/series';
 import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
+import { ImageService } from '../_services/image.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -42,14 +43,13 @@ export class SeriesDetailComponent implements OnInit {
 
   volumeActions: CardItemAction[] = [];
   chapterActions: CardItemAction[] = [];
-  seriesImage = '';
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private sanitizer: DomSanitizer, private modalService: NgbModal,
               public readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
-              private accountService: AccountService) {
+              private accountService: AccountService, public imageService: ImageService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -91,7 +91,6 @@ export class SeriesDetailComponent implements OnInit {
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.loadSeries(seriesId);
-    this.seriesImage = this.readerService.getSeriesCoverImage(seriesId);
   }
 
   loadSeries(seriesId: number) {

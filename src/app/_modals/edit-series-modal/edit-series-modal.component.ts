@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Series } from 'src/app/_models/series';
+import { ImageService } from 'src/app/_services/image.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
@@ -15,7 +16,7 @@ export class EditSeriesModalComponent implements OnInit {
 
   @Input() series!: Series;
   seriesVolumes: any[] = [];
-  imageStyles = {width: '74px'};
+  //imageStyles = {width: '74px'};
   isLoadingVolumes = false;
 
   isCollapsed = true;
@@ -25,7 +26,12 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
 
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, private seriesService: SeriesService, public utilityService: UtilityService, private fb: FormBuilder) { }
+  constructor(private modalService: NgbModal,
+              public modal: NgbActiveModal,
+              private seriesService: SeriesService,
+              public utilityService: UtilityService,
+              private fb: FormBuilder,
+              public imageService: ImageService) { }
 
   ngOnInit(): void {
 
