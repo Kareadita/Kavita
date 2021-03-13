@@ -89,7 +89,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.resetPasswordErrors = [];
     this.obserableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
       this.toastr.success('Password has been updated');
-      this.resetForm();
+      this.resetPasswordForm();
     }, err => {
       this.resetPasswordErrors = err;
     }));
