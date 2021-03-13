@@ -1,12 +1,12 @@
 <div class="card">
     <div class="overlay" (click)="handleClick()">
-      <!-- <img class="card-img-top" [src]="isNullOrEmpty(imageUrl) ? placeholderImage : safeImage" alt="{{title}}"> -->
-      <img class="card-img-top" [lazyLoad]="imageUrl" [defaultImage]="placeholderImage" alt="title">
+      <img class="card-img-top" [lazyLoad]="imageUrl" [defaultImage]="imageSerivce.placeholderImage" alt="title">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
         <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total - 1"></ngb-progressbar></p>
       </div>
       <div class="not-read-badge" *ngIf="read === 0"></div>
-      <div class="card-actions"> <!-- overlay-item  -->
+      <div class="card-actions">
+        <!-- TODO: Move this into it's own component so I can use the dropdown in multiple areas -->
         <ng-container *ngIf="actions.length > 0">
               <div ngbDropdown container="body" class="d-inline-block">
                 <button class="btn" id="actions-{{title}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>

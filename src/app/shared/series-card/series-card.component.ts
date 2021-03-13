@@ -8,9 +8,8 @@ import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { CardItemAction } from '../card-item/card-item.component';
 import { ConfirmService } from '../confirm.service';
 
 @Component({
@@ -25,12 +24,13 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   @Output() reload = new EventEmitter<boolean>();
 
   isAdmin = false;
-  actions: CardItemAction[] = [];
+  actions: ActionItem<Series>[] = [];
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
               private libraryService: LibraryService, private modalService: NgbModal,
-              private confirmService: ConfirmService, public imageService: ImageService) {
+              private confirmService: ConfirmService, public imageService: ImageService,
+              private actionFactoryService: ActionFactoryService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -44,56 +44,62 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.generateActions();
+      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
     }
   }
 
-  generateActions() {
-    // TODO: Move this into a Factory with an observable/callback so we can handle after it's done
-    this.actions = [
-      {
-        title: 'Mark as Read',
-        callback: (data: any) => this.markAsRead(data)
-      },
-      {
-        title: 'Mark as Unread',
-        callback: (data: any) => this.markAsUnread(data)
-      }
-    ];
-
-    if (this.isAdmin) {
-      this.actions.push({title: 'Scan Library', callback: (data: Series) => {
-        this.libraryService.scan(this.libraryId).subscribe((res: any) => {
-          this.toastr.success('Scan started for ' + data.name);
-        });
-      }});
-
-      this.actions.push({title: 'Delete', callback: async (data: Series) => {
-        if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
-          return;
-        }
-
-        this.seriesService.delete(data.id).subscribe((res: boolean) => {
-          if (res) {
-            this.toastr.success('Series deleted');
-            this.reload.emit(true);
-          }
-        });
-      }});
-
-      this.actions.push({title: 'Edit', callback: (data: Series) => {
-        const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
-        modalRef.componentInstance.series = data;
-        modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
-          window.scrollTo(0, 0);
-          if (closeResult.success) {
-            this.seriesService.getSeries(data.id).subscribe(series => {
-              this.data = series;
-            });
-          }
-        });
-      }});
+  handleSeriesActionCallback(action: Action, series: Series) {
+    switch (action) {
+      case(Action.MarkAsRead):
+        this.markAsRead(series);
+        break;
+      case(Action.MarkAsUnread):
+        this.markAsUnread(series);
+        break;
+      case(Action.ScanLibrary):
+        this.scanLibrary(series);
+        break;
+      case(Action.Delete):
+        this.deleteSeries(series);
+        break;
+      case(Action.Edit):
+        this.openEditModal(series);
+        break;
+      default:
+        break;
     }
+  }
+
+  openEditModal(data: Series) {
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    modalRef.componentInstance.series = data;
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+      window.scrollTo(0, 0);
+      if (closeResult.success) {
+        this.seriesService.getSeries(data.id).subscribe(series => {
+          this.data = series;
+        });
+      }
+    });
+  }
+
+  scanLibrary(series: Series) {
+    this.libraryService.scan(this.libraryId).subscribe((res: any) => {
+      this.toastr.success('Scan started for ' + series.name);
+    });
+  }
+
+  async deleteSeries(series: Series) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      return;
+    }
+
+    this.seriesService.delete(series.id).subscribe((res: boolean) => {
+      if (res) {
+        this.toastr.success('Series deleted');
+        this.reload.emit(true);
+      }
+    });
   }
 
   markAsUnread(series: Series) {

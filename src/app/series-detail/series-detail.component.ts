@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CardItemAction } from '../shared/card-item/card-item.component';
+import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
@@ -15,7 +16,9 @@ import { Series } from '../_models/series';
 import { User } from '../_models/user';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ImageService } from '../_services/image.service';
+import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -41,15 +44,18 @@ export class SeriesDetailComponent implements OnInit {
   showBook = false;
   isLoading = true;
 
-  volumeActions: CardItemAction[] = [];
-  chapterActions: CardItemAction[] = [];
+  seriesActions: ActionItem<Series>[] = [];
+  volumeActions: ActionItem<Volume>[] = [];
+  chapterActions: ActionItem<Chapter>[] = [];
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
-              private sanitizer: DomSanitizer, private modalService: NgbModal,
-              public readerService: ReaderService, private utilityService: UtilityService, private toastr: ToastrService,
-              private accountService: AccountService, public imageService: ImageService) {
+              private modalService: NgbModal, public readerService: ReaderService,
+              private utilityService: UtilityService, private toastr: ToastrService,
+              private accountService: AccountService, public imageService: ImageService,
+              private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
+              private confirmService: ConfirmService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -67,30 +73,98 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    this.volumeActions = [
-      {title: 'Mark Read', callback: (data: Volume) => this.markAsRead(data)},
-      {title: 'Mark Unread', callback: (data: Volume) => this.markAsUnread(data)},
-      {
-      title: 'Info',
-      callback: (data: Volume) => {
-        this.openViewInfo(data);
-      }
-    }];
-
-    this.chapterActions = [
-      {title: 'Mark Read', callback: (data: Chapter) => this.markChapterAsRead(data)},
-      {title: 'Mark Unread', callback: (data: Chapter) => this.markChapterAsUnread(data)},
-      {
-      title: 'Info',
-      callback: (data: Volume) => {
-        this.openViewInfo(data);
-      }
-    }];
+    this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback).filter(action => action.action !== Action.Edit);
+    this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback);
+    this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback);
 
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.loadSeries(seriesId);
+  }
+
+  handleSeriesActionCallback(action: Action, series: Series) {
+    switch(action) {
+      case(Action.MarkAsRead):
+        this.markSeriesAsRead(series); // TODO: I can probably move this into a series completely self-contained
+        break;
+      case(Action.MarkAsUnread):
+        this.markSeriesAsUnread(series);
+        break;
+      case(Action.ScanLibrary):
+        this.scanLibrary(series);
+        break;
+      case(Action.Delete):
+        this.deleteSeries(series);
+        break;
+      default:
+        break;
+    }
+  }
+
+  handleVolumeActionCallback(action: Action, volume: Volume) {
+    switch(action) {
+      case(Action.MarkAsRead):
+        this.markAsRead(volume);
+        break;
+      case(Action.MarkAsUnread):
+        this.markAsUnread(volume);
+        break;
+      case(Action.Info):
+        this.openViewInfo(volume);
+        break;
+      default:
+        break;
+    }
+  }
+
+  handleChapterActionCallback(action: Action, chapter: Chapter) {
+    switch (action) {
+      case(Action.MarkAsRead):
+        this.markChapterAsRead(chapter);
+        break;
+      case(Action.MarkAsUnread):
+        this.markChapterAsUnread(chapter);
+        break;
+      case(Action.Info):
+        this.openViewInfo(chapter);
+        break;
+      default:
+        break;
+    }
+  }
+
+  scanLibrary(series: Series) {
+    this.libraryService.scan(this.libraryId).subscribe((res: any) => {
+      this.toastr.success('Scan started for ' + series.name);
+    });
+  }
+
+  async deleteSeries(series: Series) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      return;
+    }
+
+    this.seriesService.delete(series.id).subscribe((res: boolean) => {
+      if (res) {
+        this.toastr.success('Series deleted');
+        this.router.navigate(['library', this.libraryId]);
+      }
+    });
+  }
+
+  markSeriesAsUnread(series: Series) {
+    this.seriesService.markUnread(series.id).subscribe(res => {
+      this.toastr.success(series.name + ' is now unread');
+      series.pagesRead = 0;
+    });
+  }
+
+  markSeriesAsRead(series: Series) {
+    this.seriesService.markRead(series.id).subscribe(res => {
+      this.toastr.success(series.name + ' is now read');
+      series.pagesRead = series.pages;
+    });
   }
 
   loadSeries(seriesId: number) {
@@ -230,7 +304,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openEditSeriesModal() {
-    // TODO: Some bug with modal where scorllable isn't working. Leave off to use underlying page scroll
+    // TODO: Some library bug with modal where scorllable isn't working. Leave off to use underlying page scroll
     //scrollable: true,
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
     modalRef.componentInstance.series = this.series;
@@ -257,6 +331,19 @@ export class SeriesDetailComponent implements OnInit {
         this.series.userReview = closeResult.review;
       }
     });
+  }
+
+  preventClick(event: any) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+
+  performAction(event: any, action: ActionItem<any>) {
+    this.preventClick(event);
+
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, this.series);
+    }
   }
 
 }

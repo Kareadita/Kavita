@@ -23,6 +23,23 @@
                     </button>
                 </div>
                 <div class="ml-2">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" *ngIf="isAdmin" title="Edit Series information">
+                        <span>
+                            <i class="fa fa-ellipsis-h"></i>
+                        </span>
+                    </button>
+                    <div class="card-actions">
+                        <ng-container *ngIf="seriesActions.length > 0">
+                              <div ngbDropdown container="body" class="d-inline-block">
+                                <button class="btn" id="actions-{{series.name}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa fa-ellipsis-h" aria-hidden="true"></i></button>
+                                <div ngbDropdownMenu attr.aria-labelledby="actions-{{series.name}}">
+                                  <button ngbDropdownItem *ngFor="let action of seriesActions" (click)="performAction($event, action)">{{action.title}}</button>
+                                </div>
+                              </div>
+                        </ng-container>
+                      </div>
+                </div>
+                <div class="ml-2">
                     <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
                 </div>
             </div>

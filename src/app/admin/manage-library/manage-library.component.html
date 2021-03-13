@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-8"><h3>Libraries</h3></div>
-        <div class="col-4"><button class="btn btn-primary float-right" (click)="addLibrary()">New Library</button></div>
+        <div class="col-4"><button class="btn btn-primary float-right" (click)="addLibrary()"><i class="fa fa-plus"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
     </div>
     <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
         <li *ngFor="let library of libraries" class="list-group-item">
