@@ -63,7 +63,8 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       //[DisableConcurrentExecution(timeoutInSeconds: 360)] 
+       [DisableConcurrentExecution(5)]
+       [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
