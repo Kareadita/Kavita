@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Helpers.Converters;
@@ -53,33 +54,34 @@ namespace API.Services
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Scan Library Task for {Cron}", setting);
-                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting));
+                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting));
             }
             else
             {
-                RecurringJob.AddOrUpdate(() => _scannerService.ScanLibraries(), Cron.Daily);
+                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), Cron.Daily);
             }
             
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Result.Value;
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Backup Task for {Cron}", setting);
-                RecurringJob.AddOrUpdate(() => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
+                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
             }
             else
             {
-                RecurringJob.AddOrUpdate(() => _backupService.BackupDatabase(), Cron.Weekly);
+                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), Cron.Weekly);
             }
             
-            RecurringJob.AddOrUpdate(() => _cleanupService.Cleanup(), Cron.Daily);
+            RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
         }
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
+            
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
-            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
-            
+            //BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
+            RecurringJob.Trigger("cleanup"); // TODO: Alternate way to trigger jobs. Test this out and see if we should switch.
         }
 
         public void CleanupChapters(int[] chapterIds)

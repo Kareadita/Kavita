@@ -1,4 +1,13 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using System.IO;
+using API.Data;
+using API.Entities;
+using API.Interfaces;
+using API.Interfaces.Services;
+using API.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit;
 
 namespace API.Tests.Services
 {
@@ -9,10 +18,33 @@ namespace API.Tests.Services
         // private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         // private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         // private readonly IDirectoryService _directoryService = Substitute.For<DirectoryService>();
-
+        //
         // public CacheServiceTests()
         // {
-        //     //_cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
+        //     _cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
+        // }
+        
+        // [Fact]
+        // public async void Ensure_ShouldExtractArchive(int chapterId)
+        // {
+        //     
+        //     // CacheDirectory needs to be customized.
+        //     _unitOfWork.VolumeRepository.GetChapterAsync(chapterId).Returns(new Chapter
+        //     {
+        //         Id = 1,
+        //         Files = new List<MangaFile>()
+        //         {
+        //             new MangaFile()
+        //             {
+        //                 FilePath = ""
+        //             }
+        //         }
+        //     });
+        //     
+        //     await _cacheService.Ensure(1);
+        //     
+        //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/CacheService/Archives");
+        //
         // }
         
         //string GetCachedPagePath(Volume volume, int page)
@@ -50,7 +82,7 @@ namespace API.Tests.Services
             // cacheService.Configure().GetVolumeCachePath(1, volume.Files.ElementAt(0)).Returns("cache/1/");
             // _directoryService.Configure().GetFilesWithExtension("cache/1/").Returns(new string[] {"pexels-photo-6551949.jpg"});
             // Assert.Equal(expected, _cacheService.GetCachedPagePath(volume, pageNum));
-            Assert.True(true);
+            //Assert.True(true);
         }
 
         [Fact]
