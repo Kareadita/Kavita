@@ -10,9 +10,11 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+          fetch-depth: 0
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
@@ -52,7 +54,7 @@ jobs:
             shell: powershell
             run: |
               .\.sonar\scanner\dotnet-sonarscanner begin /k:"Kareadita_Kavita" /o:"kareadita" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-              dotnet build --configuration Release --no-restore
+              dotnet build --configuration Release
               .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
     - name: Test
       run: dotnet test --no-restore --verbosity normal
