@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
+    [Index(nameof(Name), nameof(NormalizedName), nameof(LocalizedName), IsUnique = true)]
     public class Series : IEntityDate
     {
         public int Id { get; set; }

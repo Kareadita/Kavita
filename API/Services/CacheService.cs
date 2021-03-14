@@ -31,13 +31,10 @@ namespace API.Services
 
         public void EnsureCacheDirectory()
         {
-            // TODO: Replace with DirectoryService.ExistOrCreate()
             _logger.LogDebug("Checking if valid Cache directory: {CacheDirectory}", CacheDirectory);
-            var di = new DirectoryInfo(CacheDirectory);
-            if (!di.Exists)
+            if (_directoryService.ExistOrCreate(CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
-                Directory.CreateDirectory(CacheDirectory);
             }
         }
 

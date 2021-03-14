@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.Entities;
+using API.Errors;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -39,18 +40,41 @@ namespace API.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-
-        [Authorize(Policy = "RequireAdminRole")]
+        
         [HttpPost("reset-password")]
         public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
         {
             _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
             var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
+            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+
+            if (resetPasswordDto.UserName != User.GetUsername() && !isAdmin) return Unauthorized("You are not permitted to this operation.");
+            
+            // Validate Password
+            foreach (var validator in _userManager.PasswordValidators)
+            {
+                var validationResult = await validator.ValidateAsync(_userManager, user, resetPasswordDto.Password);
+                if (!validationResult.Succeeded)
+                {
+                    return BadRequest(
+                        validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+                }
+            }
+            
             var result = await _userManager.RemovePasswordAsync(user);
-            if (!result.Succeeded) return BadRequest("Unable to update password");
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Could not update password");
+                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+            }
+            
             
             result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
-            if (!result.Succeeded) return BadRequest("Unable to update password");
+            if (!result.Succeeded)
+            {
+                _logger.LogError("Could not update password");
+                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+            }
             
             _logger.LogInformation("{User}'s Password has been reset", resetPasswordDto.UserName);
             return Ok();

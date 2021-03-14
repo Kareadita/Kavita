@@ -1,16 +1,22 @@
+using System;
 using System.IO.Compression;
 using System.Linq;
+using API.Data;
 using API.Extensions;
 using API.Middleware;
+using API.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -40,7 +46,6 @@ namespace API
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
             });
-            // This doesn't seem to work.
             services.AddResponseCompression(options =>
             {
                 options.Providers.Add<BrotliCompressionProvider>();
@@ -55,6 +60,12 @@ namespace API
                 options.Level = CompressionLevel.Fastest;
             });
             
+            services.AddResponseCaching();
+            
+
+            services
+                .AddStartupTask<WarmupServicesStartupTask>()
+                .TryAddSingleton(services);
             
         }
 
@@ -81,7 +92,7 @@ namespace API
                 app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             }
             
-            //app.UseResponseCaching();
+            app.UseResponseCaching();
 
             app.UseAuthentication();
 
@@ -94,6 +105,19 @@ namespace API
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
             
+            app.Use(async (context, next) =>
+            {
+                context.Response.GetTypedHeaders().CacheControl = 
+                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                    {
+                        Public = false,
+                        MaxAge = TimeSpan.FromSeconds(10)
+                    };
+                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
+                    new string[] { "Accept-Encoding" };
+            
+                await next();
+            });
 
             app.UseEndpoints(endpoints =>
             {

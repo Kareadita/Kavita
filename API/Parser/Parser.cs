@@ -422,7 +422,7 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return name.ToLower().Replace("-", "").Replace(" ", "");
+            return name.ToLower().Replace("-", "").Replace(" ", "").Replace(":", "");
         }
 
         

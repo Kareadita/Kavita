@@ -4,9 +4,9 @@ namespace API.DTOs
 {
     public class MangaFileDto
     {
-        public string FilePath { get; set; }
-        public int NumberOfPages { get; set; }
-        public MangaFormat Format { get; set; }
+        public string FilePath { get; init; }
+        public int NumberOfPages { get; init; }
+        public MangaFormat Format { get; init; }
         
     }
 }

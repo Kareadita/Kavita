@@ -50,7 +50,21 @@ namespace API.Data
                 .Where(c => c.VolumeId == volumeId)
                 .ToListAsync();
         }
-        
+
+        /// <summary>
+        /// Returns the cover image for a chapter id.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
+        public async Task<byte[]> GetChapterCoverImageAsync(int chapterId)
+        {
+            return await _context.Chapter
+                .Where(c => c.Id == chapterId)
+                .Select(c => c.CoverImage)
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
+        }
+
 
         public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
         {

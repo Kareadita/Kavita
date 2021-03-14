@@ -8,11 +8,11 @@ namespace API.DTOs
     /// </summary>
     public class MemberDto
     {
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public DateTime Created { get; set; }
-        public DateTime LastActive { get; set; }
-        public IEnumerable<LibraryDto> Libraries { get; set; }
-        public IEnumerable<string> Roles { get; set; }
+        public int Id { get; init; }
+        public string Username { get; init; }
+        public DateTime Created { get; init; }
+        public DateTime LastActive { get; init; }
+        public IEnumerable<LibraryDto> Libraries { get; init; }
+        public IEnumerable<string> Roles { get; init; }
     }
 }

@@ -39,9 +39,9 @@ namespace API.Services
             _cleanupService = cleanupService;
             _directoryService = directoryService;
 
-
+            //Hangfire.RecurringJob.RemoveIfExists();
             ScheduleTasks();
-            //JobStorage.Current.GetMonitoringApi().
+            //JobStorage.Current.GetMonitoringApi().EnqueuedJobs()
 
         }
 

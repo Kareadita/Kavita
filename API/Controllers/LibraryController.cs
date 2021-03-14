@@ -228,10 +228,6 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
         {
-            //NOTE: What about normalizing search query and only searching against normalizedname in Series? 
-            // So One Punch would match One-Punch
-            // This also means less indexes we need.
-            // TODO: Add indexes of what we are searching on
             queryString = queryString.Replace(@"%", "");
             
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());

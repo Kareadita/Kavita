@@ -40,12 +40,9 @@ namespace API.Controllers
 
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path).Replace(".", "");
-
-            // Look into HttpContext.Cache so we can utilize a memorystream for Zip entries (want to limit response time by 300ms)
+            
             // Calculates SHA1 Hash for byte[]
-            using var sha1 = new System.Security.Cryptography.SHA1CryptoServiceProvider();
-            Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
-            Response.Headers.Add("Cache-Control", "private");
+            Response.AddCacheHeader(content);
 
             return File(content, "image/" + format);
         }
