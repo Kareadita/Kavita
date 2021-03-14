@@ -23,4 +23,8 @@ export class SettingsService {
   getTaskFrequencies() {
     return this.http.get<string[]>(this.baseUrl + 'settings/task-frequencies');
   }
+
+  getLoggingLevels() {
+    return this.http.get<string[]>(this.baseUrl + 'settings/log-levels');
+  }
 }

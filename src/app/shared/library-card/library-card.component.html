@@ -2,15 +2,8 @@
     <div class="card" style="width: 18rem;">
         <div class="overlay" (click)="handleClick()">
           <i class="fa {{icon}} card-img-top text-center"></i>
-          <div class="overlay-item card-actions">
-            <ng-container *ngIf="actions.length > 0">
-                  <div ngbDropdown container="body" class="d-inline-block">
-                    <button class="btn" id="actions-{{data.name}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
-                    <div ngbDropdownMenu attr.aria-labelledby="actions-{{data.name}}">
-                      <button ngbDropdownItem *ngFor="let action of actions" (click)="handleAction($event, action)">{{action.title}}</button>
-                    </div>
-                  </div>
-            </ng-container>
+          <div class="card-actions">
+            <app-card-actionables [actions]="actions" [labelBy]="data.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event)"></app-card-actionables>
           </div>
         </div>
         <div class="card-body text-center" *ngIf="data.name.length > 0 || actions.length > 0">

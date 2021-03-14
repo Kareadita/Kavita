@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row">
         <div class="col-md-2 col-xs-4 col-sm-6">
-            <app-base64-image [style]="{width: '100%'}" [src]="series.coverImage"></app-base64-image>
+            <img [lazyLoad]="imageService.getSeriesCoverImage(series.id)" [defaultImage]="imageService.placeholderImage">
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters"><h2>{{series?.name}}</h2></div>
@@ -21,6 +21,11 @@
                             <i class="fa fa-pen"></i>
                         </span>
                     </button>
+                </div>
+                <div class="ml-2">
+                    <div class="card-actions">
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                      </div>
                 </div>
                 <div class="ml-2">
                     <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
@@ -60,13 +65,13 @@
         <div *ngFor="let volume of volumes">
             <ng-container *ngIf="volume.number != 0">
                 <app-card-item class="col-auto" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
-                    [imageUrl]="volume.coverImage === null ? 'assets/images/image-placeholder.jpg' : volume.coverImage"
+                    [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                     [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
             </ng-container>
         </div>
         <div *ngFor="let chapter of chapters">
             <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
-            [imageUrl]="chapter.coverImage === null ? 'assets/images/image-placeholder.jpg' : chapter.coverImage"
+            [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
         </div>
     </div>

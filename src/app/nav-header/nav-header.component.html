@@ -28,7 +28,7 @@
                   <ng-template #itemTemplate let-item>
                     <div style="display: flex;padding: 5px;">
                       <div style="width: 24px" class="mr-1">
-                        <app-base64-image [style]="imageStyles" [src]="item.coverImage" alt="cover image"></app-base64-image> 
+                        <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
                       </div>
                       <div class="ml-1">
                         <span [innerHTML]="item.name"></span>

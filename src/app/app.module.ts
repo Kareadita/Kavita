@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -22,6 +22,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
+import { LazyLoadImageModule, LAZYLOAD_IMAGE_HOOKS, ScrollHooks } from 'ng-lazyload-image';
 
 
 
@@ -50,7 +51,9 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
     NgbRatingModule, // Series Detail
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
+    NgbAccordionModule, // User Preferences 
     NgbPaginationModule,
+    LazyLoadImageModule,
     SharedModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
@@ -58,7 +61,8 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true}
+    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
+    //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
   ],
   entryComponents: [],
   bootstrap: [AppComponent]

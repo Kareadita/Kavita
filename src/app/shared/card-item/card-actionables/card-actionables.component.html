@@ -1,0 +1,8 @@
+<ng-container *ngIf="actions.length > 0">
+    <div ngbDropdown container="body" class="d-inline-block">
+      <button class="btn {{btnClass}}" id="actions-{{labelBy}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa {{iconClass}}" aria-hidden="true"></i></button>
+      <div ngbDropdownMenu attr.aria-labelledby="actions-{{labelBy}}">
+        <button ngbDropdownItem *ngFor="let action of actions" (click)="performAction($event, action)">{{action.title}}</button>
+      </div>
+    </div>
+</ng-container>

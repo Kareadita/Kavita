@@ -1,11 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-
-
-export interface CardItemAction {
-  title: string;
-  callback: (data: any) => void;
-}
+import { ActionItem } from 'src/app/_services/action-factory.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 @Component({
   selector: 'app-card-item',
@@ -16,19 +11,15 @@ export class CardItemComponent implements OnInit {
 
   @Input() imageUrl = '';
   @Input() title = '';
-  @Input() actions: CardItemAction[] = [];
+  @Input() actions: ActionItem<any>[] = [];
   @Input() read = 0; // Pages read
   @Input() total = 0; // Total Pages
   @Input() entity: any; // This is the entity we are representing. It will be returned if an action is executed.
   @Output() clicked = new EventEmitter<string>();
 
-  safeImage: any;
-  placeholderImage = 'assets/images/image-placeholder.jpg';
-
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(public imageSerivce: ImageService) { }
 
   ngOnInit(): void {
-    this.createSafeImage(this.imageUrl);
   }
 
   handleClick() {
@@ -44,16 +35,9 @@ export class CardItemComponent implements OnInit {
     event.preventDefault();
   }
 
-  performAction(event: any, action: CardItemAction) {
-    this.preventClick(event);
-
+  performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(this.entity);
+      action.callback(action.action, this.entity);
     }
   }
-
-  createSafeImage(coverImage: string) {
-    this.safeImage = this.sanitizer.bypassSecurityTrustUrl('data:image/jpeg;base64,' + coverImage);
-  }
-
 }

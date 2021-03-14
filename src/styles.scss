@@ -34,6 +34,14 @@
     }
 }
 
+// Custom animation for ng-lazyload-image
+img.ng-lazyloaded {
+  animation: fadein .5s;
+}
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
 
 
 // TODO: Move the Plex theme into a separate file and copy how  https://bootswatch.com/darkly/ did it

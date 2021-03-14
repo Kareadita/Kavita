@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
+import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({

@@ -76,10 +76,10 @@ export class SeriesService {
   }
 
   markRead(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/mark-read', {seriesId});
+    return this.httpClient.post<void>(this.baseUrl + 'reader/mark-read', {seriesId});
   }
 
   markUnread(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/mark-unread', {seriesId});
+    return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
 }

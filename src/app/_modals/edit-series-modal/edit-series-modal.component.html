@@ -85,7 +85,7 @@
                   <a ngbNavLink>{{tabs[2]}}</a>
                   <ng-template ngbNavContent>
                     <p>Not Yet implemented</p>
-                    <app-base64-image [src]="series.coverImage"></app-base64-image>
+                    <img src="{{imageService.getSeriesCoverImage(series.id)}}">
                   </ng-template>
                 </li>
                 <li [ngbNavItem]="tabs[3]">
@@ -97,7 +97,7 @@
                       </div>
                       <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
                           <li class="media my-4" *ngFor="let volume of seriesVolumes">
-                              <app-base64-image class="mr-3" [style]="imageStyles" [src]="volume.coverImage"></app-base64-image>
+                              <img class="mr-3" style="width: 74px;" src="{{imageService.getVolumeCoverImage(volume.id)}}" >
                               <div class="media-body">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>
