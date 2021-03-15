@@ -126,5 +126,11 @@ namespace API.Controllers
             
             return BadRequest("There was an error with updating the series");
         }
+
+        [HttpGet("recently-added")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(int libraryId = 0)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId));
+        }
     }
 }

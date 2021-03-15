@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -274,6 +276,55 @@ namespace API.Data
                 
                 v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
             }
+        }
+
+        /// <summary>
+        /// Returns a list of Series that were added within 2 weeks.
+        /// </summary>
+        /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId)
+        {
+            // && (libraryId <= 0 || s.LibraryId == libraryId)
+            var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14));
+            _logger.LogDebug("2 weeks from today is: {Date}", twoWeeksAgo);
+            return await _context.Series
+                .Where(s => s.Created > twoWeeksAgo)
+                .Take(20)
+                .AsNoTracking()
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+            
+        }
+        
+
+        public async Task<IEnumerable<SeriesDto>> GetSeriesStream(int userId)
+        {
+            // Testing out In Progress to figure out how to design generalized solution
+            var userProgress = await _context.AppUserProgresses
+                .Where(p => p.AppUserId == userId && p.PagesRead > 0)
+                .AsNoTracking()
+                .ToListAsync();
+            if (!userProgress.Any()) return new SeriesDto[] {};
+
+            var seriesIds = userProgress.Select(p => p.SeriesId).ToList();
+            /*
+             *select P.*, S.Name, S.Pages from AppUserProgresses AS P
+                   LEFT join Series as "S" on s.Id = P.SeriesId
+            where AppUserId = 1 AND P.PagesRead > 0 AND P.PagesRead < S.Pages
+             * 
+             */
+            
+            
+            
+            
+            // var series = await _context.Series
+            //     .Where(s => seriesIds.Contains(s.Id) && s.Pages) // I need a join
+                
+            
+            
+            
+            return new SeriesDto[] {};
         }
     }
 }

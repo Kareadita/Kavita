@@ -159,6 +159,12 @@ namespace API.Data.Migrations
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
 
@@ -365,7 +371,7 @@ namespace API.Data.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.HasIndex("Name", "NormalizedName", "LocalizedName")
+                    b.HasIndex("Name", "NormalizedName", "LocalizedName", "LibraryId")
                         .IsUnique();
 
                     b.ToTable("Series");

@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 
 namespace API
 {
@@ -66,11 +67,11 @@ namespace API
             services
                 .AddStartupTask<WarmupServicesStartupTask>()
                 .TryAddSingleton(services);
-            
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
             app.UseMiddleware<ExceptionMiddleware>();
             
@@ -125,6 +126,16 @@ namespace API
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });
+            
+            applicationLifetime.ApplicationStopping.Register(OnShutdown);
+        }
+        
+        private void OnShutdown()
+        {
+            Console.WriteLine("Server is shutting down. Going to dispose Hangfire");
+            //this code is called when the application stops
+            //TaskScheduler.Client.Dispose();
+            System.Threading.Thread.Sleep(1000);
         }
     }
 }

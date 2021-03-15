@@ -21,7 +21,7 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
         private readonly IDirectoryService _directoryService;
 
-        public BackgroundJobServer Client => new BackgroundJobServer();
+        public static BackgroundJobServer Client => new BackgroundJobServer();
         // new BackgroundJobServerOptions()
         // {
         //     WorkerCount = 1
@@ -39,16 +39,14 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
             _directoryService = directoryService;
-
-            //Hangfire.RecurringJob.RemoveIfExists();
+            
             ScheduleTasks();
-            //JobStorage.Current.GetMonitoringApi().EnqueuedJobs()
-
         }
 
         public void ScheduleTasks()
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
+
             string setting = null;
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
             if (setting != null)

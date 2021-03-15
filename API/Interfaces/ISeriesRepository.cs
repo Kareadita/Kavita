@@ -55,5 +55,6 @@ namespace API.Interfaces
 
         Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
         Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
+        Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId);
     }
 }
