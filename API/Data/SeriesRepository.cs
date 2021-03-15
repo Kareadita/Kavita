@@ -11,6 +11,7 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data
@@ -282,19 +283,54 @@ namespace API.Data
         /// Returns a list of Series that were added within 2 weeks.
         /// </summary>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
+        /// <param name="limit"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId)
+        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit)
         {
-            // && (libraryId <= 0 || s.LibraryId == libraryId)
+            // TODO: Remove 2 week condition
             var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14));
             _logger.LogDebug("2 weeks from today is: {Date}", twoWeeksAgo);
             return await _context.Series
-                .Where(s => s.Created > twoWeeksAgo)
-                .Take(20)
+                .Where(s => s.Created > twoWeeksAgo && (libraryId <= 0 || s.LibraryId == libraryId))
+                .Take(limit)
+                .OrderBy(s => s.Created)
                 .AsNoTracking()
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
             
+        }
+
+        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
+        {
+            //&& (libraryId <= 0 || s.Series.LibraryId == libraryId) 
+            var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14));
+            _logger.LogInformation("GetInProgress");
+            _logger.LogDebug("2 weeks from today is: {Date}", twoWeeksAgo);
+            // var series = await _context.Series
+            //      .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+            //      {
+            //          Series = s,
+            //          Progress = progress
+            //      })
+            //      .DefaultIfEmpty()
+            //      .Where(s => s.Series.Created > twoWeeksAgo 
+            //                  && s.Progress.AppUserId == userId 
+            //                  && s.Progress.PagesRead > s.Series.Pages)
+            //      .Take(limit)
+            //      .OrderBy(s => s.Series.Created)
+            //      .AsNoTracking()
+            //      .Select(s => s.Series)
+            //      .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            //      .ToListAsync();
+            var series = await _context.Series
+                .Where(s => s.Created > twoWeeksAgo) // && (libraryId <= 0 || s.LibraryId == libraryId)
+                .AsNoTracking()
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            await AddSeriesModifiers(userId, series);
+            
+            return series.Where(s => s.PagesRead > 0).Take(limit).ToList();
         }
         
 

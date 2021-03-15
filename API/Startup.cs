@@ -64,10 +64,9 @@ namespace API
             services.AddResponseCaching();
             
 
-            services
-                .AddStartupTask<WarmupServicesStartupTask>()
-                .TryAddSingleton(services);
-
+            // services
+            //     .AddStartupTask<WarmupServicesStartupTask>()
+            //     //.TryAddSingleton(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -134,7 +133,7 @@ namespace API
         {
             Console.WriteLine("Server is shutting down. Going to dispose Hangfire");
             //this code is called when the application stops
-            //TaskScheduler.Client.Dispose();
+            TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
         }
     }

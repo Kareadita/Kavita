@@ -21,11 +21,11 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
         private readonly IDirectoryService _directoryService;
 
-        public static BackgroundJobServer Client => new BackgroundJobServer();
-        // new BackgroundJobServerOptions()
-        // {
-        //     WorkerCount = 1
-        // }
+        public static BackgroundJobServer Client => new BackgroundJobServer(new BackgroundJobServerOptions()
+        {
+            WorkerCount = 1
+        });
+        
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
