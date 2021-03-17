@@ -43,9 +43,9 @@ namespace API
                 logger.LogError(ex, "An error occurred during migration");
             }
             
-            // Load all tasks from DI (TODO: This is not working)
+            // Load all tasks from DI (TODO: This is not working - WarmupServicesStartupTask is Null)
             var startupTasks = host.Services.GetServices<WarmupServicesStartupTask>();
-
+            
             // Execute all the tasks
             foreach (var startupTask in startupTasks)
             {

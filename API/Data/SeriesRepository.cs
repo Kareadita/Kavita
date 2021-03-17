@@ -280,87 +280,52 @@ namespace API.Data
         }
 
         /// <summary>
-        /// Returns a list of Series that were added within 2 weeks.
+        /// Returns a list of Series that were added, ordered by Created desc
         /// </summary>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
-        /// <param name="limit"></param>
+        /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit)
         {
-            // TODO: Remove 2 week condition
-            var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14));
-            _logger.LogDebug("2 weeks from today is: {Date}", twoWeeksAgo);
             return await _context.Series
-                .Where(s => s.Created > twoWeeksAgo && (libraryId <= 0 || s.LibraryId == libraryId))
+                .Where(s => (libraryId <= 0 || s.LibraryId == libraryId))
                 .Take(limit)
-                .OrderBy(s => s.Created)
+                .OrderByDescending(s => s.Created)
                 .AsNoTracking()
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="libraryId"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
-            //&& (libraryId <= 0 || s.Series.LibraryId == libraryId) 
-            var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14));
-            _logger.LogInformation("GetInProgress");
-            _logger.LogDebug("2 weeks from today is: {Date}", twoWeeksAgo);
-            // var series = await _context.Series
-            //      .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-            //      {
-            //          Series = s,
-            //          Progress = progress
-            //      })
-            //      .DefaultIfEmpty()
-            //      .Where(s => s.Series.Created > twoWeeksAgo 
-            //                  && s.Progress.AppUserId == userId 
-            //                  && s.Progress.PagesRead > s.Series.Pages)
-            //      .Take(limit)
-            //      .OrderBy(s => s.Series.Created)
-            //      .AsNoTracking()
-            //      .Select(s => s.Series)
-            //      .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //      .ToListAsync();
+            //var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14)); // TODO: Think about moving this to a setting
             var series = await _context.Series
-                .Where(s => s.Created > twoWeeksAgo) // && (libraryId <= 0 || s.LibraryId == libraryId)
-                .AsNoTracking()
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-
-            await AddSeriesModifiers(userId, series);
-            
-            return series.Where(s => s.PagesRead > 0).Take(limit).ToList();
-        }
-        
-
-        public async Task<IEnumerable<SeriesDto>> GetSeriesStream(int userId)
-        {
-            // Testing out In Progress to figure out how to design generalized solution
-            var userProgress = await _context.AppUserProgresses
-                .Where(p => p.AppUserId == userId && p.PagesRead > 0)
-                .AsNoTracking()
-                .ToListAsync();
-            if (!userProgress.Any()) return new SeriesDto[] {};
-
-            var seriesIds = userProgress.Select(p => p.SeriesId).ToList();
-            /*
-             *select P.*, S.Name, S.Pages from AppUserProgresses AS P
-                   LEFT join Series as "S" on s.Id = P.SeriesId
-            where AppUserId = 1 AND P.PagesRead > 0 AND P.PagesRead < S.Pages
-             * 
-             */
-            
-            
-            
-            
-            // var series = await _context.Series
-            //     .Where(s => seriesIds.Contains(s.Id) && s.Pages) // I need a join
-                
-            
-            
-            
-            return new SeriesDto[] {};
+                  .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+                  {
+                      Series = s,
+                      progress.PagesRead,
+                      progress.AppUserId,
+                      progress.LastModified
+                  })
+                  .Where(s =>  s.AppUserId == userId 
+                              && s.PagesRead > 0
+                              && s.PagesRead < s.Series.Pages
+                              && (libraryId <= 0 || s.Series.LibraryId == libraryId) )
+                  .Take(limit)
+                  .OrderByDescending(s => s.LastModified)
+                  .AsNoTracking()
+                  .Select(s => s.Series)
+                  .Distinct()
+                  .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                  .ToListAsync();
+            return series;
         }
     }
 }

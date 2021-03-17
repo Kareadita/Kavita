@@ -6,6 +6,8 @@ using API.Extensions;
 using API.Middleware;
 using API.Services;
 using Hangfire;
+using Hangfire.LiteDB;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -25,10 +27,12 @@ namespace API
     public class Startup
     {
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration config)
+        public Startup(IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
+            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -62,6 +66,24 @@ namespace API
             });
             
             services.AddResponseCaching();
+            
+            if (_env.IsDevelopment())
+            {
+                services.AddHangfire(configuration => configuration
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseMemoryStorage());
+            }
+            else
+            {
+                services.AddHangfire(configuration => configuration
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseLiteDbStorage());
+            }
+
+            // Add the processing server as IHostedService
+            services.AddHangfireServer();
             
 
             // services
@@ -127,6 +149,10 @@ namespace API
             });
             
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
+            applicationLifetime.ApplicationStarted.Register(() =>
+            {
+                Console.WriteLine("Kavita - v0.3");
+            });
         }
         
         private void OnShutdown()

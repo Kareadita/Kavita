@@ -140,6 +140,15 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
         }
         
+        [HttpGet("continue-reading")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetContinueReading(int libraryId = 0, int limit = 20)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.VolumeRepository.GetContinueReading(user.Id, libraryId, limit));
+        }
+        
+        
+        
         
     }
 }

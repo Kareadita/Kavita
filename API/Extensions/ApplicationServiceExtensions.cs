@@ -7,6 +7,7 @@ using API.Services.Tasks;
 using AutoMapper;
 using Hangfire;
 using Hangfire.LiteDB;
+using Hangfire.MemoryStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,15 +46,7 @@ namespace API.Extensions
                 var loggingSection = config.GetSection("Logging");
                 loggingBuilder.AddFile(loggingSection);
             });
-
-            services.AddHangfire(configuration => configuration
-                .UseSimpleAssemblyNameTypeSerializer()
-                .UseRecommendedSerializerSettings()
-                .UseLiteDbStorage());
             
-            // Add the processing server as IHostedService
-            services.AddHangfireServer();
-
             return services;
         }
         
