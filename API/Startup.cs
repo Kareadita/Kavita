@@ -1,8 +1,8 @@
 using System;
 using System.IO.Compression;
 using System.Linq;
-using API.Data;
 using API.Extensions;
+using API.Interfaces.Services;
 using API.Middleware;
 using API.Services;
 using Hangfire;
@@ -18,9 +18,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using IApplicationLifetime = Microsoft.AspNetCore.Hosting.IApplicationLifetime;
 
 namespace API
 {
@@ -85,10 +83,8 @@ namespace API
             // Add the processing server as IHostedService
             services.AddHangfireServer();
             
-
-            // services
-            //     .AddStartupTask<WarmupServicesStartupTask>()
-            //     //.TryAddSingleton(services);
+            //services.AddStartupTask<WarmupServicesStartupTask>(services).
+            services.AddTransient<IStartupTask, WarmupServicesStartupTask>().TryAddSingleton(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
