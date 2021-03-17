@@ -56,4 +56,6 @@ export class LibraryDetailComponent implements OnInit {
     return manga.name;
   }
 
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}`;
+
 }

@@ -9,7 +9,7 @@
     </div>
 
     <div class="row no-gutters">
-        <div class="col-auto" *ngFor="let manga of series"> <!-- TODO: Implement trackby -->
+        <div class="col-auto" *ngFor="let manga of series; trackBy:trackByIdentity">
             <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
         </div>
 

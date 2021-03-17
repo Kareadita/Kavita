@@ -13,7 +13,7 @@ import { Chapter } from '../_models/chapter';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -340,5 +340,4 @@ export class SeriesDetailComponent implements OnInit {
       action.callback(action.action, this.series);
     }
   }
-
 }

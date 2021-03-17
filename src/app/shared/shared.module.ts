@@ -7,7 +7,6 @@ import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipM
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
-import { Base64ImageComponent } from './base64-image/base64-image.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
@@ -21,7 +20,6 @@ import { CardActionablesComponent } from './card-item/card-actionables/card-acti
     LibraryCardComponent,
     SeriesCardComponent,
     CardDetailsModalComponent,
-    Base64ImageComponent,
     ConfirmDialogComponent,
     SafeHtmlPipe,
     CardActionablesComponent
@@ -41,7 +39,6 @@ import { CardActionablesComponent } from './card-item/card-actionables/card-acti
     LibraryCardComponent,
     SeriesCardComponent, // TODO: Remove this component and use just AppCardComponent
     SafeHtmlPipe,
-    //Base64ImageComponent, // TODO: Delete this component
     CardActionablesComponent
   ]
 })

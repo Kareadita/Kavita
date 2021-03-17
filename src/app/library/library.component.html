@@ -1,5 +1,6 @@
 
 <div class="container-fluid">
+    <h2 style="margin-left: 10px">Libraries</h2>
     <div class="row no-gutters">
         <div class="col-auto" *ngFor="let library of libraries">
             <app-library-card [data]="library"></app-library-card>
@@ -13,4 +14,29 @@
             </div>
         </ng-container>
     </div>
+
+    <div class="">
+        <app-carousel-reel [items]="inProgress" title="In Progress" (sectionClick)="handleSectionClick($event)">
+            <ng-template #carouselItem let-item let-position="idx">
+                <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
+            </ng-template>
+        </app-carousel-reel>
+    </div>
+
+    <div class="">
+        <app-carousel-reel [items]="continueReading" title="Continue Reading" (sectionClick)="handleSectionClick($event)">
+            <ng-template #carouselItem let-item let-position="idx">
+                <app-card-item [entity]="item" title="{{item.seriesName}} - {{item.range}}" [imageUrl]="item.coverImage"></app-card-item>
+            </ng-template>
+        </app-carousel-reel>
+    </div>
+
+    <div class="">
+        <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
+            <ng-template #carouselItem let-item let-position="idx">
+                <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
+            </ng-template>
+        </app-carousel-reel>
+    </div>
+    
 </div>

@@ -13,4 +13,5 @@ export interface Series {
     pagesRead: number; // Total pages the logged in user has read
     userRating: number; // User rating
     userReview: string; // User review
+    libraryId: number;
 }
