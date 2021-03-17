@@ -101,8 +101,8 @@ namespace API.Data
         public async Task<IEnumerable<InProgressChapterDto>> GetContinueReading(int userId, int libraryId, int limit)
         {
             _logger.LogInformation("Get Continue Reading");
-            var progress = await _context.Chapter
-                .Join(_context.AppUserProgresses, chapter => chapter.Id, progress => progress.ChapterId,
+            var chapters = await _context.Chapter
+                .Join(_context.AppUserProgresses, c => c.Id, p => p.ChapterId,
                     (chapter, progress) =>
                         new
                         {
@@ -123,7 +123,7 @@ namespace API.Data
                 .Take(limit)
                 .ToListAsync();
 
-            return progress
+            return chapters
                 .OrderBy(c => float.Parse(c.Chapter.Number), new ChapterSortComparer())
                 .DistinctBy(p => p.Series.Id)
                 .Select(arg => new InProgressChapterDto()
@@ -136,48 +136,6 @@ namespace API.Data
                     LibraryId = arg.Series.LibraryId,
                     Pages = arg.Chapter.Pages,
                 });
-
-            // var chapters = await _context.Chapter
-            //     .Join(_context.AppUserProgresses, chapter => chapter.Id, progress => progress.ChapterId, (chapter, progress) =>
-            //         new
-            //         {
-            //             Chapter = chapter,
-            //             Progress = progress
-            //         })
-            //     .Where(arg => arg.Progress.AppUserId == userId && arg.Progress.PagesRead < arg.Chapter.Pages)
-            //     .Join(_context.Series, arg => arg.Progress.SeriesId, series => series.Id, (arg, series) => 
-            //         new
-            //         {
-            //             arg.Chapter,
-            //             arg.Progress,
-            //             Series = series
-            //         })
-            //     .AsNoTracking()
-            //     //.OrderBy(s => s.Chapter.Number)
-            //     .GroupBy(p => p.Series.Id)
-            //     .Select(g => g.FirstOrDefault())
-            //     .Select(arg => new InProgressChapterDto()
-            //     {
-            //         Id = arg.Chapter.Id,
-            //         Number = arg.Chapter.Number,
-            //         Range = arg.Chapter.Range,
-            //         SeriesId = arg.Progress.SeriesId,
-            //         SeriesName = arg.Series.Name,
-            //         LibraryId = arg.Series.LibraryId,
-            //         Pages = arg.Chapter.Pages,
-            //     })
-            //
-            //     //.OrderBy(c => float.Parse(c.Number)) //can't convert to SQL
-            //     
-            //     .ToListAsync();
-            //
-            //
-            // return chapters;
-            
-            
-            // return chapters
-            //     .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
-            //     .DistinctBy(c => c.SeriesName);
         }
     }
 }
