@@ -21,21 +21,27 @@ export class CarouselReelComponent implements OnInit{
 
 
   nextPage() {
-    const maxScrollLeft = this.reelContents.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
-    const scrollPercent = Number(maxScrollLeft * scrollAmount);
+    const [scrollPercent, maxWidth] = this.calculateScrollAmount();
     this.reelContents.nativeElement.scrollLeft += scrollPercent;
-    if (this.reelContents.nativeElement.scrollLeft >= maxScrollLeft) {
-      this.reelContents.nativeElement.scrollLeft = maxScrollLeft;
+    if (this.reelContents.nativeElement.scrollLeft >= maxWidth) {
+      this.reelContents.nativeElement.scrollLeft = maxWidth;
     }
   }
 
   prevPage() {
-    const maxScrollLeft = this.reelContents.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
-    const scrollPercent = Number(maxScrollLeft * scrollAmount);
+    const [scrollPercent, _] = this.calculateScrollAmount();
     this.reelContents.nativeElement.scrollLeft -= scrollPercent;
     if (this.reelContents.nativeElement.scrollLeft < 0) {
       this.reelContents.nativeElement.scrollLeft = 0;
     }
+  }
+
+  calculateScrollAmount() {
+    const maxScrollLeft = this.reelContents.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
+    const screenWidth = window.innerWidth;
+    const scrollLeft = Number(maxScrollLeft * scrollAmount);
+    return [scrollLeft, maxScrollLeft];
+
   }
 
   sectionClicked(event: any) {
