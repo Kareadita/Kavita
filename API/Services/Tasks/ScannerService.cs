@@ -66,7 +66,7 @@ namespace API.Services.Tasks
 
        //[DisableConcurrentExecution(5)]
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public async void ScanLibrary(int libraryId, bool forceUpdate)
+       public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
           var sw = Stopwatch.StartNew();
