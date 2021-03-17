@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs/operators';
 import { Chapter } from '../_models/chapter';
+import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
 import { User } from '../_models/user';
@@ -20,10 +21,9 @@ export class LibraryComponent implements OnInit {
   isLoading = false;
   isAdmin = false;
 
-  testCarouselItems: Library[] = [];
   recentlyAdded: Series[] = [];
   inProgress: Series[] = [];
-  continueReading: Chapter[] = [];
+  continueReading: InProgressChapter[] = [];
 
   constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private imageService: ImageService) { }
 
@@ -34,9 +34,6 @@ export class LibraryComponent implements OnInit {
       this.isAdmin = this.accountService.hasAdminRole(this.user);
       this.libraryService.getLibrariesForMember().subscribe(libraries => {
         this.libraries = libraries;
-        this.testCarouselItems.push(...libraries);
-        this.testCarouselItems.push(...libraries);
-        console.log(this.testCarouselItems);
         this.isLoading = false;
       });
     });
@@ -55,12 +52,10 @@ export class LibraryComponent implements OnInit {
       chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
       this.continueReading = chapters;
     });
-
-    
   }
 
   handleSectionClick(sectionTitle: string) {
-    console.log('Section clicked: ', sectionTitle);
+    // TODO: Implement this in future. For now, it is not supported
   }
 
 }

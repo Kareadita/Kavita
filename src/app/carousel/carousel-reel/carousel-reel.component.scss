@@ -15,7 +15,6 @@
     overflow: hidden;
     display: flex;
     scroll-behavior: smooth;
-
 }
 
 .carousel-container .carousel-reel .item { 
@@ -26,11 +25,11 @@
     margin-left: 0px;
     padding-left: 0px;
 }
-.carousel-container .carousel-reel .item > div { text-align: center; padding:10px; margin:10px; background:#f1f1f1; color:#666;}
 
 .section-title {
     font-size: 1.2rem;
     font-weight: 400;
     color: black;
     margin-left: 10px;
+    text-decoration: none;
 }

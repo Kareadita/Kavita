@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
+import { InProgressChapter } from '../_models/in-progress-chapter';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -92,6 +93,6 @@ export class SeriesService {
   }
 
   getContinueReading(libraryId: number = 0) {
-    return this.httpClient.get<Chapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
+    return this.httpClient.get<InProgressChapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
   }
 }

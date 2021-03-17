@@ -1,5 +1,6 @@
 
 <div class="container-fluid">
+    <h2>Libraries</h2>
     <div class="row no-gutters">
         <div class="col-auto" *ngFor="let library of libraries">
             <app-library-card [data]="library"></app-library-card>
@@ -14,21 +15,6 @@
         </ng-container>
     </div>
 
-
-    <h2>New Page here</h2>
-    All have a cap of 20 items
-    In Progress (not finished with a volume/chapter) (2 week window)
-    Continue reading (haven't completed whole series, but each volume is either complete or not.) (returns next chapter/volume? or series page to jump into? ) (2 week window)
-    Recently Updated (a series with read progress and a new volume/chapter is available)
-    Newly Added (a volume/chapter is added to the server)
-
-    <div class="">
-        <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
-            <ng-template #carouselItem let-item let-position="idx">
-                <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
-            </ng-template>
-        </app-carousel-reel>
-    </div>
     <div class="">
         <app-carousel-reel [items]="inProgress" title="In Progress" (sectionClick)="handleSectionClick($event)">
             <ng-template #carouselItem let-item let-position="idx">
@@ -40,8 +26,17 @@
     <div class="">
         <app-carousel-reel [items]="continueReading" title="Continue Reading" (sectionClick)="handleSectionClick($event)">
             <ng-template #carouselItem let-item let-position="idx">
+                <app-card-item [entity]="item" title="{{item.seriesName}} - {{item.range}}" [imageUrl]="item.coverImage"></app-card-item>
+            </ng-template>
+        </app-carousel-reel>
+    </div>
+
+    <div class="">
+        <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
+            <ng-template #carouselItem let-item let-position="idx">
                 <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
             </ng-template>
         </app-carousel-reel>
     </div>
+    
 </div>
