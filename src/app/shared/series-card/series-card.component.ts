@@ -78,6 +78,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       if (closeResult.success) {
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
+          this.reload.emit(true);
         });
       }
     });

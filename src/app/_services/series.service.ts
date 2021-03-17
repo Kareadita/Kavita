@@ -82,4 +82,16 @@ export class SeriesService {
   markUnread(seriesId: number) {
     return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
+
+  getRecentlyAdded(libraryId: number = 0) {
+    return this.httpClient.get<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId);
+  }
+
+  getInProgress(libraryId: number = 0) {
+    return this.httpClient.get<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId);
+  }
+
+  getContinueReading(libraryId: number = 0) {
+    return this.httpClient.get<Chapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
+  }
 }

@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs/operators';
+import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
+import { Series } from '../_models/series';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
+import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
+import { SeriesService } from '../_services/series.service';
 @Component({
   selector: 'app-library',
   templateUrl: './library.component.html',
@@ -16,7 +20,12 @@ export class LibraryComponent implements OnInit {
   isLoading = false;
   isAdmin = false;
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService) { }
+  testCarouselItems: Library[] = [];
+  recentlyAdded: Series[] = [];
+  inProgress: Series[] = [];
+  continueReading: Chapter[] = [];
+
+  constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private imageService: ImageService) { }
 
   ngOnInit(): void {
     this.isLoading = true;
@@ -25,9 +34,33 @@ export class LibraryComponent implements OnInit {
       this.isAdmin = this.accountService.hasAdminRole(this.user);
       this.libraryService.getLibrariesForMember().subscribe(libraries => {
         this.libraries = libraries;
+        this.testCarouselItems.push(...libraries);
+        this.testCarouselItems.push(...libraries);
+        console.log(this.testCarouselItems);
         this.isLoading = false;
       });
     });
+
+    this.seriesService.getRecentlyAdded().subscribe((series) => {
+      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
+      this.recentlyAdded = series;
+    });
+
+    this.seriesService.getInProgress().subscribe((series) => {
+      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
+      this.inProgress = series;
+    });
+
+    this.seriesService.getContinueReading().subscribe((chapters) => {
+      chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
+      this.continueReading = chapters;
+    });
+
+    
+  }
+
+  handleSectionClick(sectionTitle: string) {
+    console.log('Section clicked: ', sectionTitle);
   }
 
 }

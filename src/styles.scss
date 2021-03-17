@@ -43,6 +43,11 @@ img.ng-lazyloaded {
   to   { opacity: 1; }
 }
 
+// Global Styles
+button:disabled {
+  cursor: not-allowed;
+}
+
 
 // TODO: Move the Plex theme into a separate file and copy how  https://bootswatch.com/darkly/ did it
 // h1, h2, h3, h4, h5, h6 {
