@@ -1,7 +1,7 @@
 <ng-container *ngIf="data !== undefined">
     <div class="card" style="width: 18rem;">
         <div class="overlay" (click)="handleClick()">
-          <i class="fa {{icon}} card-img-top text-center"></i>
+          <i class="fa {{icon}} card-img-top text-center" aria-hidden="true"></i>
           <div class="card-actions">
             <app-card-actionables [actions]="actions" [labelBy]="data.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event)"></app-card-actionables>
           </div>

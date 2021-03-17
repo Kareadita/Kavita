@@ -16,11 +16,11 @@
                     <h4>Navigation</h4>
                     Page {{pageNum + 1}} / {{maxPages}}
                     <div class="row no-gutters">
-                        <button class="btn btn-small btn-icon col-2" (click)="goToPage(0)"><i class="fa fa-fast-backward"></i></button>
+                        <button class="btn btn-small btn-icon col-2" (click)="goToPage(0)"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                         <div class="col-8">
                             <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()" style="margin: 0 auto;margin-top: 10px"></ngb-progressbar>
                         </div>
-                        <button class="btn btn-small btn-icon col-2" (click)="goToPage(maxPages)"><i class="fa fa-fast-forward"></i></button>
+                        <button class="btn btn-small btn-icon col-2" (click)="goToPage(maxPages)"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-6 mt-4">
@@ -67,11 +67,11 @@
         </div>
         <div class="right" (click)="toggleMenu()">
             <p>{{readingDirection === 0 ? 'Next' : 'Previous'}} Page</p>
-            <i class="fa fa-arrow-right"></i>
+            <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </div>
         <div class="left" (click)="toggleMenu()">
             <p>{{readingDirection === 0 ? 'Previous' : 'Next'}} Page</p>
-            <i class="fa fa-arrow-left"></i>
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
         </div>
     </div>
 
