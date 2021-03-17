@@ -55,7 +55,6 @@ export class CarouselReelComponent implements OnInit{
     }
     const maxScrollLeft = this.reelContents?.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
     return this.reelContents?.nativeElement.scrollLeft < maxScrollLeft;
-    // TODO: There is a visible lag as UI is updating after this is called, hence state doesn't instantly reflect
   }
 
 }

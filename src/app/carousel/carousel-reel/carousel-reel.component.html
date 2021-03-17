@@ -1,12 +1,11 @@
 <div class="carousel-container" *ngIf="items.length > 0">
-    <div class="">
-        <h4><a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title">{{title}}</a></h4>
+    <div>
+        <h4 style="display: inline-block;"><a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title">{{title}}</a></h4>
         <div class="float-right">
             <button class="btn btn-icon" [disabled]="!canScrollLeft" (click)="prevPage()"><i class="fa fa-angle-left"></i></button>
             <button class="btn btn-icon" [disabled]="!canScrollRight" (click)="nextPage()"><i class="fa fa-angle-right"></i></button>
         </div>
     </div>
-    <br/>
     <div class="carousel-reel" #contents>
         <div *ngFor="let item of items; index as i" class="item">
             <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
