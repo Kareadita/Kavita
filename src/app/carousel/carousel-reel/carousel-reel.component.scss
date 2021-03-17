@@ -1,13 +1,13 @@
 .carousel-container {
     overflow: hidden;
-    padding: 15px;
+    padding-top: 15px;
     width: 100%;
     position: relative;
     display: flex;
     float: left;
     flex-direction: column;
-    
 }
+
 
 .carousel-reel {
     transition: 1s ease all;
