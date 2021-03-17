@@ -1,11 +1,13 @@
 using System;
 using System.IO.Compression;
 using System.Linq;
-using API.Data;
 using API.Extensions;
+using API.Interfaces.Services;
 using API.Middleware;
 using API.Services;
 using Hangfire;
+using Hangfire.LiteDB;
+using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +18,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -24,10 +25,12 @@ namespace API
     public class Startup
     {
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration config)
+        public Startup(IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
+            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -62,15 +65,30 @@ namespace API
             
             services.AddResponseCaching();
             
+            if (_env.IsDevelopment())
+            {
+                services.AddHangfire(configuration => configuration
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseMemoryStorage());
+            }
+            else
+            {
+                services.AddHangfire(configuration => configuration
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseLiteDbStorage());
+            }
 
-            services
-                .AddStartupTask<WarmupServicesStartupTask>()
-                .TryAddSingleton(services);
+            // Add the processing server as IHostedService
+            services.AddHangfireServer();
             
+            //services.AddStartupTask<WarmupServicesStartupTask>(services).
+            services.AddTransient<IStartupTask, WarmupServicesStartupTask>().TryAddSingleton(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
             app.UseMiddleware<ExceptionMiddleware>();
             
@@ -125,6 +143,20 @@ namespace API
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });
+            
+            applicationLifetime.ApplicationStopping.Register(OnShutdown);
+            applicationLifetime.ApplicationStarted.Register(() =>
+            {
+                Console.WriteLine("Kavita - v0.3");
+            });
+        }
+        
+        private void OnShutdown()
+        {
+            Console.WriteLine("Server is shutting down. Going to dispose Hangfire");
+            //this code is called when the application stops
+            TaskScheduler.Client.Dispose();
+            System.Threading.Thread.Sleep(1000);
         }
     }
 }

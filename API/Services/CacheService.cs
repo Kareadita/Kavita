@@ -52,6 +52,7 @@ namespace API.Services
             return chapter;
         }
 
+        
         public void Cleanup()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");

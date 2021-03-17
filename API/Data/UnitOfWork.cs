@@ -12,21 +12,21 @@ namespace API.Data
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
-        private readonly ILogger<UnitOfWork> _seriesLogger;
+        private readonly ILogger<UnitOfWork> _logger;
 
-        public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager, ILogger<UnitOfWork> seriesLogger)
+        public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager, ILogger<UnitOfWork> logger)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
-            _seriesLogger = seriesLogger;
+            _logger = logger;
         }
 
-        public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _seriesLogger);
+        public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _logger);
         public IUserRepository UserRepository => new UserRepository(_context, _userManager);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
-        public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
+        public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper, _logger);
 
         public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
         

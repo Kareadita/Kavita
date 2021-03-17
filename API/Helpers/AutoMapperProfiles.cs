@@ -20,7 +20,7 @@ namespace API.Helpers
             CreateMap<Chapter, ChapterDto>();
 
             CreateMap<Series, SeriesDto>();
-            
+
             CreateMap<AppUserPreferences, UserPreferencesDto>();
 
             CreateMap<Series, SearchResultDto>()

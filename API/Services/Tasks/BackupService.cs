@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using Hangfire;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -57,6 +59,7 @@ namespace API.Services.Tasks
             return files;
         }
 
+        [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public void BackupDatabase()
         {
             _logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
-    [Index(nameof(Name), nameof(NormalizedName), nameof(LocalizedName), IsUnique = true)]
+    [Index(nameof(Name), nameof(NormalizedName), nameof(LocalizedName), nameof(LibraryId), IsUnique = true)]
     public class Series : IEntityDate
     {
         public int Id { get; set; }
@@ -36,7 +36,6 @@ namespace API.Entities
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
-        // NOTE: Do I want to store a thumbImage for search results? 
         /// <summary>
         /// Sum of all Volume page counts
         /// </summary>

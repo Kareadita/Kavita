@@ -21,5 +21,7 @@
         /// Review from logged in user. Calculated at API-time.
         /// </summary>
         public string UserReview { get; set; }
+
+        public int LibraryId { get; set; }
     }
 }

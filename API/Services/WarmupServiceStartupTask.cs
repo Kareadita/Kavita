@@ -18,14 +18,13 @@ namespace API.Services
             _provider = provider;
         }
 
-        public Task ExecuteAsync(CancellationToken cancellationToken)
+        public Task ExecuteAsync(CancellationToken cancellationToken = default)
         {
-            using (var scope = _provider.CreateScope())
+            using var scope = _provider.CreateScope();
+            foreach (var singleton in GetServices(_services))
             {
-                foreach (var singleton in GetServices(_services))
-                {
-                    scope.ServiceProvider.GetServices(singleton);
-                }
+                Console.WriteLine("DI preloading of " + singleton.FullName);
+                scope.ServiceProvider.GetServices(singleton);
             }
 
             return Task.CompletedTask;

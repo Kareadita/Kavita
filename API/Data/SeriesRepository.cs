@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,6 +11,7 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data
@@ -274,6 +277,55 @@ namespace API.Data
                 
                 v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
             }
+        }
+
+        /// <summary>
+        /// Returns a list of Series that were added, ordered by Created desc
+        /// </summary>
+        /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
+        /// <param name="limit">How many series to pick.</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit)
+        {
+            return await _context.Series
+                .Where(s => (libraryId <= 0 || s.LibraryId == libraryId))
+                .Take(limit)
+                .OrderByDescending(s => s.Created)
+                .AsNoTracking()
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="libraryId"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
+        {
+            //var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14)); // TODO: Think about moving this to a setting
+            var series = await _context.Series
+                  .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+                  {
+                      Series = s,
+                      progress.PagesRead,
+                      progress.AppUserId,
+                      progress.LastModified
+                  })
+                  .Where(s =>  s.AppUserId == userId 
+                              && s.PagesRead > 0
+                              && s.PagesRead < s.Series.Pages
+                              && (libraryId <= 0 || s.Series.LibraryId == libraryId) )
+                  .Take(limit)
+                  .OrderByDescending(s => s.LastModified)
+                  .AsNoTracking()
+                  .Select(s => s.Series)
+                  .Distinct()
+                  .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                  .ToListAsync();
+            return series;
         }
     }
 }

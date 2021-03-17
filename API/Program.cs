@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Interfaces;
+using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +42,13 @@ namespace API
                 var logger = services.GetRequiredService < ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
-
+            
+            // Load all tasks from DI and initialize them (TODO: This is not working - WarmupServicesStartupTask is Null)
+            var startupTasks = host.Services.GetServices<WarmupServicesStartupTask>();
+            foreach (var startupTask in startupTasks)
+            {
+                await startupTask.ExecuteAsync();
+            }
 
             await host.RunAsync();
         }

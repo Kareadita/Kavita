@@ -49,6 +49,7 @@ namespace API.Tests
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12", "0")]
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch27_[VISCANS].zip", "4")]
+        [InlineData("Mob Psycho 100 v02 (2019) (Digital) (Shizu).cbz", "2")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -130,6 +131,7 @@ namespace API.Tests
         [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
         [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "11")]
         [InlineData("Yumekui-Merry DKThiasScanlations Chapter51v2", "51")]
+        [InlineData("Yumekui-Merry_DKThiasScanlations&RenzokuseiScans_Chapter61", "61")]
         [InlineData("Goblin Slayer Side Story - Year One 017.5", "17.5")]
         [InlineData("Beelzebub_53[KSH].zip", "53")]
         [InlineData("Black Bullet - v4 c20.5 [batoto]", "20.5")]
@@ -139,7 +141,6 @@ namespace API.Tests
         [InlineData("Vol 1", "0")]
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
-        //[InlineData("[Tempus Edax Rerum] Epigraph of the Closed Curve - Chapter 6.zip", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -301,10 +302,7 @@ namespace API.Tests
                 Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
-            
-            
-            
+
 
             foreach (var file in expected.Keys)
             {

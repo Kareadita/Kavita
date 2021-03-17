@@ -6,6 +6,8 @@ using API.Helpers.Converters;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -21,15 +23,15 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
         private readonly IDirectoryService _directoryService;
 
-        public BackgroundJobServer Client => new BackgroundJobServer();
-        // new BackgroundJobServerOptions()
-        // {
-        //     WorkerCount = 1
-        // }
+        public static BackgroundJobServer Client => new BackgroundJobServer(new BackgroundJobServerOptions()
+        {
+            WorkerCount = 1
+        });
+        
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
-            IDirectoryService directoryService)
+            IDirectoryService directoryService, IWebHostEnvironment env)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -40,15 +42,23 @@ namespace API.Services
             _cleanupService = cleanupService;
             _directoryService = directoryService;
 
-            //Hangfire.RecurringJob.RemoveIfExists();
-            ScheduleTasks();
-            //JobStorage.Current.GetMonitoringApi().EnqueuedJobs()
-
+            if (!env.IsDevelopment())
+            {
+                ScheduleTasks();
+            }
+            else
+            {
+                RecurringJob.RemoveIfExists("scan-libraries");
+                RecurringJob.RemoveIfExists("backup");
+                RecurringJob.RemoveIfExists("cleanup");
+            }
+            
         }
 
         public void ScheduleTasks()
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
+
             string setting = null;
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
             if (setting != null)
@@ -80,8 +90,7 @@ namespace API.Services
             
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
-            //BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
-            RecurringJob.Trigger("cleanup"); // TODO: Alternate way to trigger jobs. Test this out and see if we should switch.
+            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
         }
 
         public void CleanupChapters(int[] chapterIds)

@@ -33,7 +33,8 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
        }
 
-       [DisableConcurrentExecution(timeoutInSeconds: 120)] 
+       //[DisableConcurrentExecution(timeoutInSeconds: 5)] 
+       [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
@@ -63,7 +64,7 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       [DisableConcurrentExecution(5)]
+       //[DisableConcurrentExecution(5)]
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {

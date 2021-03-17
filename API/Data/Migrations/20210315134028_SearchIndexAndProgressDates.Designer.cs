@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210313001830_SearchIndex")]
-    partial class SearchIndex
+    [Migration("20210315134028_SearchIndexAndProgressDates")]
+    partial class SearchIndexAndProgressDates
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -160,6 +160,12 @@ namespace API.Data.Migrations
 
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
@@ -367,7 +373,7 @@ namespace API.Data.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.HasIndex("Name", "NormalizedName", "LocalizedName")
+                    b.HasIndex("Name", "NormalizedName", "LocalizedName", "LibraryId")
                         .IsUnique();
 
                     b.ToTable("Series");

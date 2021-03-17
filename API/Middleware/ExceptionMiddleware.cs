@@ -25,6 +25,7 @@ namespace API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
+            // BUG: I think Hangfire timeouts are triggering the middleware to hijack an API call
             try
             {
                 await _next(context); // downstream middlewares or http call

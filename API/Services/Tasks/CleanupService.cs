@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using API.Interfaces.Services;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
@@ -20,6 +21,7 @@ namespace API.Services.Tasks
             _logger = logger;
         }
 
+        [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public void Cleanup()
         {
             _logger.LogInformation("Cleaning temp directory");

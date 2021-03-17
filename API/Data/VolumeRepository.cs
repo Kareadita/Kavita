@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -14,11 +17,13 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public VolumeRepository(DataContext context, IMapper mapper)
+        public VolumeRepository(DataContext context, IMapper mapper, ILogger logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
         
         public void Update(Volume volume)
@@ -83,6 +88,54 @@ namespace API.Data
                 .Where(c => chapterId == c.Id)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Gets the first (ordered) volume/chapter in a series where the user has progress on it. Only completed volumes/chapters, next entity shouldn't
+        /// have any read progress on it. 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="libraryId"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<InProgressChapterDto>> GetContinueReading(int userId, int libraryId, int limit)
+        {
+            _logger.LogInformation("Get Continue Reading");
+            var chapters = await _context.Chapter
+                .Join(_context.AppUserProgresses, c => c.Id, p => p.ChapterId,
+                    (chapter, progress) =>
+                        new
+                        {
+                            Chapter = chapter,
+                            Progress = progress
+                        })
+                .Join(_context.Series, arg => arg.Progress.SeriesId, series => series.Id, (arg, series) => 
+                    new
+                    {
+                        arg.Chapter,
+                        arg.Progress,
+                        Series = series
+                    })
+                .AsNoTracking()
+                .Where(arg => arg.Progress.AppUserId == userId 
+                              && arg.Progress.PagesRead < arg.Chapter.Pages)
+                .OrderByDescending(d => d.Progress.LastModified)
+                .Take(limit)
+                .ToListAsync();
+
+            return chapters
+                .OrderBy(c => float.Parse(c.Chapter.Number), new ChapterSortComparer())
+                .DistinctBy(p => p.Series.Id)
+                .Select(arg => new InProgressChapterDto()
+                {
+                    Id = arg.Chapter.Id,
+                    Number = arg.Chapter.Number,
+                    Range = arg.Chapter.Range,
+                    SeriesId = arg.Progress.SeriesId,
+                    SeriesName = arg.Series.Name,
+                    LibraryId = arg.Series.LibraryId,
+                    Pages = arg.Chapter.Pages,
+                });
         }
     }
 }

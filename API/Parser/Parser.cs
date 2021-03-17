@@ -124,9 +124,10 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
-
                 @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Mob Psycho 100
+            
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
                 @"^(?!Vol)(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
