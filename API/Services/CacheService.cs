@@ -32,7 +32,7 @@ namespace API.Services
         public void EnsureCacheDirectory()
         {
             _logger.LogDebug("Checking if valid Cache directory: {CacheDirectory}", CacheDirectory);
-            if (_directoryService.ExistOrCreate(CacheDirectory))
+            if (!_directoryService.ExistOrCreate(CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
             }
