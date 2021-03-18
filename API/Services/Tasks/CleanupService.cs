@@ -13,12 +13,14 @@ namespace API.Services.Tasks
         private readonly ICacheService _cacheService;
         private readonly IDirectoryService _directoryService;
         private readonly ILogger<CleanupService> _logger;
+        private readonly IBackupService _backupService;
 
-        public CleanupService(ICacheService cacheService, IDirectoryService directoryService, ILogger<CleanupService> logger)
+        public CleanupService(ICacheService cacheService, IDirectoryService directoryService, ILogger<CleanupService> logger, IBackupService backupService)
         {
             _cacheService = cacheService;
             _directoryService = directoryService;
             _logger = logger;
+            _backupService = backupService;
         }
 
         [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
@@ -29,7 +31,9 @@ namespace API.Services.Tasks
             _directoryService.ClearDirectory(tempDirectory);
             _logger.LogInformation("Cleaning cache directory");
             _cacheService.Cleanup();
-            
+            _logger.LogInformation("Cleaning old database backups");
+            _backupService.CleanupBackups();
+
         }
     }
 }

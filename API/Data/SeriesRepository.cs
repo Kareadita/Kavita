@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
@@ -297,7 +298,7 @@ namespace API.Data
         }
 
         /// <summary>
-        /// 
+        /// Returns Series that the user 
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId"></param>
@@ -305,12 +306,11 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
-            //var twoWeeksAgo = DateTime.Today.Subtract(TimeSpan.FromDays(14)); // TODO: Think about moving this to a setting
             var series = await _context.Series
                   .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                   {
                       Series = s,
-                      progress.PagesRead,
+                      PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
                       progress.AppUserId,
                       progress.LastModified
                   })
@@ -320,12 +320,11 @@ namespace API.Data
                               && (libraryId <= 0 || s.Series.LibraryId == libraryId) )
                   .Take(limit)
                   .OrderByDescending(s => s.LastModified)
-                  .AsNoTracking()
                   .Select(s => s.Series)
-                  .Distinct()
                   .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                  .AsNoTracking()
                   .ToListAsync();
-            return series;
+            return series.DistinctBy(s => s.Name);
         }
     }
 }
