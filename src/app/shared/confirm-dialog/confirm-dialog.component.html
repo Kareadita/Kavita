@@ -10,7 +10,7 @@
 </div>
 <div class="modal-footer">
     <div *ngFor="let btn of config.buttons">
-        <button type="button" class="btn btn-{{btn.type}}" (click)="clickButton(btn)">Cancel</button>
+        <button type="button" class="btn btn-{{btn.type}}" (click)="clickButton(btn)">{{btn.text}}</button>
     </div>
     
 </div>
