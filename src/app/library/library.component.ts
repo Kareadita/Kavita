@@ -48,10 +48,10 @@ export class LibraryComponent implements OnInit {
       this.inProgress = series;
     });
 
-    this.seriesService.getContinueReading().subscribe((chapters) => {
-      chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
-      this.continueReading = chapters;
-    });
+    // this.seriesService.getContinueReading().subscribe((chapters) => {
+    //   chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
+    //   this.continueReading = chapters;
+    // });
   }
 
   handleSectionClick(sectionTitle: string) {

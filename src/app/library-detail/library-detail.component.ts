@@ -27,6 +27,7 @@ export class LibraryDetailComponent implements OnInit {
       this.router.navigateByUrl('/home');
       return;
     }
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.loadPage();
   }
@@ -35,6 +36,10 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   loadPage() {
+    const page = this.route.snapshot.queryParamMap.get('page');
+    if (page != null) {
+      this.pageNumber = parseInt(page, 10);
+    }
     this.loadingSeries = true;
     this.seriesService.getSeriesForLibrary(this.libraryId, this.pageNumber, this.pageSize).subscribe(series => {
       this.series = series.result;
@@ -45,7 +50,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   onPageChange(page: number) {
-    this.loadPage();
+    this.router.navigate(['library', this.libraryId], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page} });
   }
 
   seriesClicked(series: Series) {

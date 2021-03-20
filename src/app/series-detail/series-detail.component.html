@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
-    <div class="row">
+    <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">
-            <img [lazyLoad]="imageService.getSeriesCoverImage(series.id)" [defaultImage]="imageService.placeholderImage">
+            <img class="poster" [lazyLoad]="imageService.getSeriesCoverImage(series.id)" [defaultImage]="imageService.placeholderImage">
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters"><h2>{{series?.name}}</h2></div>
@@ -60,20 +60,17 @@
         </div>
     </div>
 
-    <h4 class="mt-3">Volumes</h4>
+    <h4>Volumes</h4>
     <div class="row">
         <div *ngFor="let volume of volumes">
-            <ng-container *ngIf="volume.number != 0">
-                <app-card-item class="col-auto" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
-                    [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                    [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
-            </ng-container>
+            <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
         </div>
-        <div *ngFor="let chapter of chapters">
+        <div *ngFor="let chapter of chapters" >
             <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
         </div>
     </div>
-
 </div>

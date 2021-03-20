@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 export class ImageService {
 
   baseUrl = environment.apiUrl;
-  public placeholderImage = 'assets/images/image-placeholder.jpg';
+  public placeholderImage = 'assets/images/image-placeholder-min.png';
 
   constructor() { }
 

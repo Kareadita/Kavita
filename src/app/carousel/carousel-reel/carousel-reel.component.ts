@@ -1,6 +1,6 @@
-import { AfterContentChecked, AfterContentInit, AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ContentChild, ElementRef, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 
-const scrollAmount = 0.2; // TODO: Make this a bit more responsive to the layout size. 0.2 works great on smaller screens, but not as good on desktop
+const scrollAmount = 0.4;
 
 @Component({
   selector: 'app-carousel-reel',
@@ -37,11 +37,15 @@ export class CarouselReelComponent implements OnInit{
   }
 
   calculateScrollAmount() {
-    const maxScrollLeft = this.reelContents.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
     const screenWidth = window.innerWidth;
-    const scrollLeft = Number(maxScrollLeft * scrollAmount);
+    const maxScrollLeft = this.reelContents.nativeElement.scrollWidth - this.reelContents.nativeElement.clientWidth;
+    let scrollLeft = Number(maxScrollLeft * scrollAmount);
+    if (this.reelContents.nativeElement.children.length > 0) {
+      const itemWidth = this.reelContents.nativeElement.children[0].clientWidth;
+      const itemsInView = (screenWidth ) / itemWidth;
+      scrollLeft = (itemsInView - 1) * itemWidth;
+    }
     return [scrollLeft, maxScrollLeft];
-
   }
 
   sectionClicked(event: any) {

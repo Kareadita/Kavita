@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CarouselReelComponent } from './carousel-reel/carousel-reel.component';
-import { VirtualScrollerModule } from 'ngx-virtual-scroller';
 
 
 
@@ -9,7 +8,6 @@ import { VirtualScrollerModule } from 'ngx-virtual-scroller';
   declarations: [CarouselReelComponent],
   imports: [
     CommonModule,
-    VirtualScrollerModule
   ],
   exports: [
     CarouselReelComponent
