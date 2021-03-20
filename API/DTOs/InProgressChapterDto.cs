@@ -18,6 +18,7 @@
         public int SeriesId { get; init; }
         public int LibraryId { get; init; }
         public string SeriesName { get; init; }
+        public int VolumeId { get; init; }
         
     }
 }

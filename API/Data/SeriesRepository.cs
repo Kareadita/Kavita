@@ -306,6 +306,7 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
+            // TODO: Idea: Put Total PagesRead and as return so that we can show a progress bar for full series read progress
             var series = await _context.Series
                   .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                   {
