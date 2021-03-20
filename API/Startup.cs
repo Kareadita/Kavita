@@ -6,7 +6,6 @@ using API.Interfaces.Services;
 using API.Middleware;
 using API.Services;
 using Hangfire;
-using Hangfire.LiteDB;
 using Hangfire.MemoryStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -65,20 +64,10 @@ namespace API
             
             services.AddResponseCaching();
             
-            if (_env.IsDevelopment())
-            {
-                services.AddHangfire(configuration => configuration
-                    .UseSimpleAssemblyNameTypeSerializer()
-                    .UseRecommendedSerializerSettings()
-                    .UseMemoryStorage());
-            }
-            else
-            {
-                services.AddHangfire(configuration => configuration
-                    .UseSimpleAssemblyNameTypeSerializer()
-                    .UseRecommendedSerializerSettings()
-                    .UseLiteDbStorage());
-            }
+            services.AddHangfire(configuration => configuration
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseMemoryStorage());
 
             // Add the processing server as IHostedService
             services.AddHangfireServer();
@@ -132,7 +121,7 @@ namespace API
                         MaxAge = TimeSpan.FromSeconds(10)
                     };
                 context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
-                    new string[] { "Accept-Encoding" };
+                    new[] { "Accept-Encoding" };
             
                 await next();
             });

@@ -13,5 +13,7 @@ namespace API.Interfaces.Services
         /// <param name="logFileName"></param>
         /// <returns></returns>
         IEnumerable<string> LogFiles(int maxRollingFiles, string logFileName);
+
+        void CleanupBackups();
     }
 }

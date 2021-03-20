@@ -39,7 +39,13 @@ namespace API.Services
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
-       
+
+       public bool Exists(string directory)
+       {
+          var di = new DirectoryInfo(directory);
+          return di.Exists;
+       }
+
        public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "", 
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {

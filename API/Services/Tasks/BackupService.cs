@@ -99,6 +99,54 @@ namespace API.Services.Tasks
             _directoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
         }
+
+        /// <summary>
+        /// Removes Database backups older than 30 days. If all backups are older than 30 days, the latest is kept.
+        /// </summary>
+        public void CleanupBackups()
+        {
+            const int dayThreshold = 30;
+            _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
+            var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
+            if (!_directoryService.Exists(backupDirectory)) return;
+            var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
+            var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
+            var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
+                .Where(f => f.CreationTime > deltaTime)
+                .ToList();
+            if (expiredBackups.Count == allBackups.Count)
+            {
+                _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
+                var toDelete = expiredBackups.OrderByDescending(f => f.CreationTime).ToList();
+                for (var i = 1; i < toDelete.Count; i++)
+                {
+                    try
+                    {
+                        toDelete[i].Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue deleting {FileName}", toDelete[i].Name);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var file in expiredBackups)
+                {
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue deleting {FileName}", file.Name);
+                    }
+                }
+                
+            }
+            _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
+        }
         
     }
 }

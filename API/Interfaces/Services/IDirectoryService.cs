@@ -42,6 +42,7 @@ namespace API.Interfaces.Services
         void ClearDirectory(string directoryPath);
 
         bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath);
+        bool Exists(string directory);
 
         IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
