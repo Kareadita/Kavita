@@ -47,9 +47,9 @@ namespace API.Services
                 {
                     try
                     {
-                        _logger.LogDebug("Archive Type: {ArchiveType}", reader.ArchiveType);
+                        _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
                     }
-                    catch (System.InvalidOperationException ex)
+                    catch (InvalidOperationException ex)
                     {
                         _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted");
                         return 0;
@@ -86,37 +86,7 @@ namespace API.Services
             try
             {
                 if (!IsValidArchive(filepath)) return Array.Empty<byte>();
-
-                // if (SharpCompress.Archives.Zip.ZipArchive.IsZipFile(filepath))
-                // {
-                //     using var archive = SharpCompress.Archives.Zip.ZipArchive.Open(filepath);
-                //     return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
-                // }
-                //
-                // if (GZipArchive.IsGZipFile(filepath))
-                // {
-                //     using var archive = GZipArchive.Open(filepath);
-                //     return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
-                // }
-                //
-                // if (RarArchive.IsRarFile(filepath))
-                // {
-                //     using var archive = RarArchive.Open(filepath);
-                //     return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
-                // }
-                //
-                // if (SevenZipArchive.IsSevenZipFile(filepath))
-                // {
-                //     using var archive = SevenZipArchive.Open(filepath);
-                //     return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
-                // }
-                //
-                // if (TarArchive.IsTarFile(filepath))
-                // {
-                //     using var archive = TarArchive.Open(filepath);
-                //     return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
-                // }
-
+                
                 using var archive = ArchiveFactory.Open(filepath);
                 return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
             }
@@ -293,40 +263,11 @@ namespace API.Services
         {
             if (!File.Exists(archivePath)) return;
 
+            if (new DirectoryInfo(extractPath).Exists) return;
+            
             var sw = Stopwatch.StartNew();
-            // if (SharpCompress.Archives.Zip.ZipArchive.IsZipFile(archivePath))
-            // {
-            //     
-            //     //using var archive = SharpCompress.Archives.Zip.ZipArchive.Open(archivePath);
-            //     using var archive = ArchiveFactory.Open(archivePath);
-            //     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            // }
-            // else if (GZipArchive.IsGZipFile(archivePath))
-            // {
-            //     using var archive = GZipArchive.Open(archivePath);
-            //     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            // } else if (RarArchive.IsRarFile(archivePath))
-            // {
-            //     using var archive = RarArchive.Open(archivePath);
-            //     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            // } else if (SevenZipArchive.IsSevenZipFile(archivePath))
-            // {
-            //     using var archive = SevenZipArchive.Open(archivePath);
-            //     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            // }
-            // else if (TarArchive.IsTarFile(archivePath))
-            // {
-            //     using var archive = TarArchive.Open(archivePath);
-            //     ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            // }
-            // else
-            // {
-            //     _logger.LogError("Could not parse archive file");
-            //     return;
-            // }
             using var archive = ArchiveFactory.Open(archivePath);
             ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-
             _logger.LogDebug("[Fallback] Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
     }

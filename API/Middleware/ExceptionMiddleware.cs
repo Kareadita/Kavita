@@ -25,14 +25,13 @@ namespace API.Middleware
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // BUG: I think Hangfire timeouts are triggering the middleware to hijack an API call
             try
             {
                 await _next(context); // downstream middlewares or http call
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "There was an exception");
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
                 

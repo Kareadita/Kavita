@@ -35,7 +35,7 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
-            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, page);
+            var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
 
             var content = await _directoryService.ReadFileAsync(path);
@@ -53,7 +53,7 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
-            var (path, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
+            var (_, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
             return Ok(mangaFile.FilePath);
         }
 

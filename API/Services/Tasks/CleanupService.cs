@@ -11,14 +11,12 @@ namespace API.Services.Tasks
     public class CleanupService : ICleanupService
     {
         private readonly ICacheService _cacheService;
-        private readonly IDirectoryService _directoryService;
         private readonly ILogger<CleanupService> _logger;
         private readonly IBackupService _backupService;
 
-        public CleanupService(ICacheService cacheService, IDirectoryService directoryService, ILogger<CleanupService> logger, IBackupService backupService)
+        public CleanupService(ICacheService cacheService, ILogger<CleanupService> logger, IBackupService backupService)
         {
             _cacheService = cacheService;
-            _directoryService = directoryService;
             _logger = logger;
             _backupService = backupService;
         }

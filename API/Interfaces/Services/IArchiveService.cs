@@ -1,7 +1,4 @@
-﻿using System.IO.Compression;
-using API.Entities;
-
-namespace API.Interfaces.Services
+﻿namespace API.Interfaces.Services
 {
     public interface IArchiveService
     {

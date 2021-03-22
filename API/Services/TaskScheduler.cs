@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Helpers.Converters;
@@ -21,17 +20,13 @@ namespace API.Services
         private readonly IMetadataService _metadataService;
         private readonly IBackupService _backupService;
         private readonly ICleanupService _cleanupService;
-        private readonly IDirectoryService _directoryService;
 
-        public static BackgroundJobServer Client => new BackgroundJobServer(new BackgroundJobServerOptions()
-        {
-            WorkerCount = 1
-        });
+        public static BackgroundJobServer Client => new BackgroundJobServer();
         
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
-            IDirectoryService directoryService, IWebHostEnvironment env)
+            IWebHostEnvironment env)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -40,7 +35,6 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
-            _directoryService = directoryService;
 
             if (!env.IsDevelopment())
             {
@@ -58,9 +52,8 @@ namespace API.Services
         public void ScheduleTasks()
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
-
-            string setting = null;
-            setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
+            
+            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Scan Library Task for {Cron}", setting);
@@ -87,7 +80,7 @@ namespace API.Services
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
-            
+            // TODO: We shouldn't queue up a job if one is already in progress
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change

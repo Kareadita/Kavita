@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
@@ -55,7 +54,7 @@ namespace API.Services.Tasks
 
             var files = maxRollingFiles > 0
                 ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
-                : new string[] {"kavita.log"};
+                : new[] {"kavita.log"};
             return files;
         }
 

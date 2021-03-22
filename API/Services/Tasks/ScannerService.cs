@@ -284,7 +284,7 @@ namespace API.Services.Tasks
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
              chapter.Range = info.Chapters;
-             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
+             chapter.Pages = chapter.Files.Sum(f => f.Pages);
              _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
           
@@ -350,7 +350,7 @@ namespace API.Services.Tasks
           {
              FilePath = info.FullFilePath,
              Format = info.Format,
-             NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
+             Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
           };
        }
   
@@ -361,7 +361,7 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
           }
           else
           {

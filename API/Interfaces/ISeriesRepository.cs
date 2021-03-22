@@ -18,6 +18,7 @@ namespace API.Interfaces
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="userId"></param>
+        /// <param name="userParams"></param>
         /// <returns></returns>
         Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams);
 

@@ -10,7 +10,6 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

@@ -84,13 +84,17 @@ namespace API.Services
           {
              Directory.CreateDirectory(directoryPath);
           }
-          catch (Exception ex)
+          catch (Exception)
           {
              return false;
           }
           return true;
        }
 
+       /// <summary>
+       /// Deletes all files within the directory, then the directory itself.
+       /// </summary>
+       /// <param name="directoryPath"></param>
        public void ClearAndDeleteDirectory(string directoryPath)
        {
           DirectoryInfo di = new DirectoryInfo(directoryPath);
@@ -100,6 +104,11 @@ namespace API.Services
           di.Delete(true);
        }
 
+       /// <summary>
+       /// Deletes all files within the directory.
+       /// </summary>
+       /// <param name="directoryPath"></param>
+       /// <returns></returns>
        public void ClearDirectory(string directoryPath)
        {
           var di = new DirectoryInfo(directoryPath);
@@ -239,7 +248,8 @@ namespace API.Services
                                                     return ++localCount;
                                                   },
                                       (c) => {
-                                                Interlocked.Add(ref fileCount, c);
+                                         // ReSharper disable once AccessToModifiedClosure
+                                         Interlocked.Add(ref fileCount, c);
                                       });
                   }
                }

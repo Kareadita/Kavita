@@ -67,15 +67,8 @@ namespace API.Tests.Services
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var sw = Stopwatch.StartNew();
-            try
-            {
-                Assert.Equal(expected, _archiveService.GetNumberOfPagesFromArchive(Path.Join(testDirectory, archivePath)));
-                _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
-            }
-            catch (Exception e)
-            {
-                _testOutputHelper.WriteLine("Could not process");
-            }
+            Assert.Equal(expected, _archiveService.GetNumberOfPagesFromArchive(Path.Join(testDirectory, archivePath)));
+            _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
         }
         
 
@@ -95,15 +88,8 @@ namespace API.Tests.Services
             var sw = Stopwatch.StartNew();
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             
-            try
-            {
-                Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
-                _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
-            }
-            catch (Exception e)
-            {
-                _testOutputHelper.WriteLine("Could not process");
-            }
+            Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
+            _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
         }
         
         
