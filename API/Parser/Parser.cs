@@ -8,7 +8,7 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
+        public static readonly string MangaFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
         public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
