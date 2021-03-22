@@ -178,9 +178,9 @@ namespace API.Tests
         
         [Theory]
         [InlineData("test.cbz", true)]
-        [InlineData("test.cbr", false)]
+        [InlineData("test.cbr", true)]
         [InlineData("test.zip", true)]
-        [InlineData("test.rar", false)]
+        [InlineData("test.rar", true)]
         [InlineData("test.rar.!qb", false)]
         [InlineData("[shf-ma-khs-aqs]negi_pa_vol15007.jpg", false)]
         public void IsArchiveTest(string input, bool expected)
