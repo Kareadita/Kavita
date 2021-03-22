@@ -52,7 +52,7 @@ namespace API.Controllers
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
             
             var tempLocation = Path.Join(tempDirectory, "logs_" + dateString);
-            _directoryService.ExistOrCreate(tempLocation);
+            DirectoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 return BadRequest("Unable to copy files to temp directory for log download.");

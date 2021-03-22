@@ -71,7 +71,12 @@ namespace API.Services
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
-       public bool ExistOrCreate(string directoryPath)
+       /// <summary>
+       /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
+       /// </summary>
+       /// <param name="directoryPath"></param>
+       /// <returns></returns>
+       public static bool ExistOrCreate(string directoryPath)
        {
           var di = new DirectoryInfo(directoryPath);
           if (di.Exists) return true;
@@ -81,7 +86,6 @@ namespace API.Services
           }
           catch (Exception ex)
           {
-             _logger.LogError(ex, "There was an issue creating directory: {Directory}", directoryPath);
              return false;
           }
           return true;

@@ -33,7 +33,7 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
        }
 
-       //[DisableConcurrentExecution(timeoutInSeconds: 5)] 
+       [DisableConcurrentExecution(timeoutInSeconds: 5)] 
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
@@ -64,7 +64,7 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       //[DisableConcurrentExecution(5)]
+       [DisableConcurrentExecution(5)]
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {

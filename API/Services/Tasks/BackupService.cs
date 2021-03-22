@@ -66,7 +66,7 @@ namespace API.Services.Tasks
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
             
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
-            if (!_directoryService.ExistOrCreate(backupDirectory))
+            if (!DirectoryService.ExistOrCreate(backupDirectory))
             {
                 _logger.LogError("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
                 return;
@@ -82,7 +82,7 @@ namespace API.Services.Tasks
             }
 
             var tempDirectory = Path.Join(_tempDirectory, dateString);
-            _directoryService.ExistOrCreate(tempDirectory);
+            DirectoryService.ExistOrCreate(tempDirectory);
             _directoryService.ClearDirectory(tempDirectory);
             
             _directoryService.CopyFilesToDirectory(

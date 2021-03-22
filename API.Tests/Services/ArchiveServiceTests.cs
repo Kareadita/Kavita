@@ -63,7 +63,6 @@ namespace API.Tests.Services
         [InlineData("not supported 1.zip", 1)]
         [InlineData("not supported 2.cbz", 0)]
         [InlineData("not supported 3.cbz", 0)]
-        [InlineData("mangadex_131.zip", 577)]
         public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
@@ -119,7 +118,6 @@ namespace API.Tests.Services
         [InlineData("not supported 1.zip", 1)]
         [InlineData("not supported 2.cbz", 169)]
         [InlineData("not supported 3.cbz", 1)]
-        [InlineData("mangadex_131.zip", 577)]
         public void CanExtractArchive(string archivePath, int expectedFileCount)
         {
             
@@ -128,17 +126,10 @@ namespace API.Tests.Services
             DirectoryService.ClearAndDeleteDirectory(extractDirectory);
             
             Stopwatch sw = Stopwatch.StartNew();
-            try
-            {
-                _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
-                var di1 = new DirectoryInfo(extractDirectory);
-                Assert.Equal(expectedFileCount, di1.GetFiles().Length);
-                _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
-            }
-            catch (Exception e)
-            {
-                _testOutputHelper.WriteLine("Could not process");
-            }
+            _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
+            var di1 = new DirectoryInfo(extractDirectory);
+            Assert.Equal(expectedFileCount, di1.Exists ? di1.GetFiles().Length : 0);
+            _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
             
             DirectoryService.ClearAndDeleteDirectory(extractDirectory);
         }
@@ -157,6 +148,15 @@ namespace API.Tests.Services
             Stopwatch sw = Stopwatch.StartNew();
             Assert.Equal(expectedBytes, _archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
+        }
+
+        [Theory]
+        [InlineData("not supported 2.cbz")]
+        [InlineData("06_v01[DMM].zip")]
+        public void CanParseCoverImage(string inputFile)
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            Assert.NotEmpty(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
         }
 
         [Fact]

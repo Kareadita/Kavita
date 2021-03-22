@@ -20,12 +20,7 @@ namespace API.Interfaces.Services
         /// <param name="searchPatternExpression"></param>
         /// <returns></returns>
         string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
-        /// <summary>
-        /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <returns></returns>
-        bool ExistOrCreate(string directoryPath);
+        //bool ExistOrCreate(string directoryPath);
 
         Task<byte[]> ReadFileAsync(string path);
 
