@@ -461,7 +461,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage = this.cachedImages.current();
     if (this.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-      this.canvasImage.onload = () => this.renderPage();
+      this.canvasImage.onload = () => this.renderPage(); // BUG: Likely bug here where spread image isn't loaded, causes flasing of both sides. Likely onload somehow is invoked.
     } else {
       this.renderPage();
     }
