@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -21,17 +22,15 @@ namespace API.Controllers
         private readonly IConfiguration _config;
         private readonly IDirectoryService _directoryService;
         private readonly IBackupService _backupService;
-        private readonly ITaskScheduler _taskScheduler;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IDirectoryService directoryService, IBackupService backupService, ITaskScheduler taskScheduler)
+            IDirectoryService directoryService, IBackupService backupService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
             _directoryService = directoryService;
             _backupService = backupService;
-            _taskScheduler = taskScheduler;
         }
 
         [HttpPost("restart")]
@@ -52,7 +51,7 @@ namespace API.Controllers
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
             
             var tempLocation = Path.Join(tempDirectory, "logs_" + dateString);
-            _directoryService.ExistOrCreate(tempLocation);
+            DirectoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 return BadRequest("Unable to copy files to temp directory for log download.");
@@ -70,7 +69,7 @@ namespace API.Controllers
             }
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
             
-            _directoryService.ClearAndDeleteDirectory(tempLocation);
+            DirectoryService.ClearAndDeleteDirectory(tempLocation);
             (new FileInfo(zipPath)).Delete(); 
             
             return File(fileBytes, "application/zip", Path.GetFileName(zipPath));  

@@ -71,7 +71,12 @@ namespace API.Services
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
-       public bool ExistOrCreate(string directoryPath)
+       /// <summary>
+       /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
+       /// </summary>
+       /// <param name="directoryPath"></param>
+       /// <returns></returns>
+       public static bool ExistOrCreate(string directoryPath)
        {
           var di = new DirectoryInfo(directoryPath);
           if (di.Exists) return true;
@@ -79,16 +84,21 @@ namespace API.Services
           {
              Directory.CreateDirectory(directoryPath);
           }
-          catch (Exception ex)
+          catch (Exception)
           {
-             _logger.LogError(ex, "There was an issue creating directory: {Directory}", directoryPath);
              return false;
           }
           return true;
        }
 
-       public void ClearAndDeleteDirectory(string directoryPath)
+       /// <summary>
+       /// Deletes all files within the directory, then the directory itself.
+       /// </summary>
+       /// <param name="directoryPath"></param>
+       public static void ClearAndDeleteDirectory(string directoryPath)
        {
+          if (!Directory.Exists(directoryPath)) return;
+          
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
           ClearDirectory(directoryPath);
@@ -96,7 +106,12 @@ namespace API.Services
           di.Delete(true);
        }
 
-       public void ClearDirectory(string directoryPath)
+       /// <summary>
+       /// Deletes all files within the directory.
+       /// </summary>
+       /// <param name="directoryPath"></param>
+       /// <returns></returns>
+       public static void ClearDirectory(string directoryPath)
        {
           var di = new DirectoryInfo(directoryPath);
           if (!di.Exists) return;
@@ -235,7 +250,8 @@ namespace API.Services
                                                     return ++localCount;
                                                   },
                                       (c) => {
-                                                Interlocked.Add(ref fileCount, c);
+                                         // ReSharper disable once AccessToModifiedClosure
+                                         Interlocked.Add(ref fileCount, c);
                                       });
                   }
                }

@@ -8,8 +8,8 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string MangaFileExtensions = @"\.cbz|\.zip"; // |\.rar|\.cbr
-        public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg|\.gif";
+        public static readonly string MangaFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
+        public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -25,6 +25,10 @@ namespace API.Parser
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kodomo no Jikan vol. 10
+            new Regex(
+                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -130,7 +134,7 @@ namespace API.Parser
             
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
-                @"^(?!Vol)(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
+                @"^(?!Vol)(?<Series>.*) (?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
@@ -399,20 +403,17 @@ namespace API.Parser
         
         public static bool IsArchive(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return MangaFileRegex.IsMatch(fileInfo.Extension);
+            return MangaFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsImage(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return ImageRegex.IsMatch(fileInfo.Extension);
+            return ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
         
         public static bool IsXml(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return XmlRegex.IsMatch(fileInfo.Extension);
+            return XmlRegex.IsMatch(Path.GetExtension(filePath));
         }
         
         public static float MinimumNumberFromRange(string range)

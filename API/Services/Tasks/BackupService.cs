@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
@@ -55,7 +54,7 @@ namespace API.Services.Tasks
 
             var files = maxRollingFiles > 0
                 ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
-                : new string[] {"kavita.log"};
+                : new[] {"kavita.log"};
             return files;
         }
 
@@ -66,7 +65,7 @@ namespace API.Services.Tasks
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
             
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
-            if (!_directoryService.ExistOrCreate(backupDirectory))
+            if (!DirectoryService.ExistOrCreate(backupDirectory))
             {
                 _logger.LogError("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
                 return;
@@ -82,8 +81,8 @@ namespace API.Services.Tasks
             }
 
             var tempDirectory = Path.Join(_tempDirectory, dateString);
-            _directoryService.ExistOrCreate(tempDirectory);
-            _directoryService.ClearDirectory(tempDirectory);
+            DirectoryService.ExistOrCreate(tempDirectory);
+            DirectoryService.ClearDirectory(tempDirectory);
             
             _directoryService.CopyFilesToDirectory(
                 _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
@@ -96,7 +95,7 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "There was an issue when archiving library backup");
             }
 
-            _directoryService.ClearAndDeleteDirectory(tempDirectory);
+            DirectoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
         }
 

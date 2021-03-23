@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using API.DTOs;
 
 namespace API.Interfaces.Services
 {
@@ -20,27 +19,7 @@ namespace API.Interfaces.Services
         /// <param name="searchPatternExpression"></param>
         /// <returns></returns>
         string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
-        /// <summary>
-        /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <returns></returns>
-        bool ExistOrCreate(string directoryPath);
-
         Task<byte[]> ReadFileAsync(string path);
-
-        /// <summary>
-        /// Deletes all files within the directory, then the directory itself.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        void ClearAndDeleteDirectory(string directoryPath);
-        /// <summary>
-        /// Deletes all files within the directory.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <returns></returns>
-        void ClearDirectory(string directoryPath);
-
         bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath);
         bool Exists(string directory);
 

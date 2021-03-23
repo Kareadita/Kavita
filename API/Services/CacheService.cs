@@ -32,7 +32,7 @@ namespace API.Services
         public void EnsureCacheDirectory()
         {
             _logger.LogDebug("Checking if valid Cache directory: {CacheDirectory}", CacheDirectory);
-            if (!_directoryService.ExistOrCreate(CacheDirectory))
+            if (!DirectoryService.ExistOrCreate(CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
             }
@@ -106,7 +106,7 @@ namespace API.Services
             var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapter(chapter.Id);
             foreach (var mangaFile in chapterFiles)
             {
-                if (page <= (mangaFile.NumberOfPages + pagesSoFar))
+                if (page <= (mangaFile.Pages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
                     var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions); 
@@ -121,7 +121,7 @@ namespace API.Services
                     return (files.ElementAt(page - pagesSoFar), mangaFile);
                 }
             
-                pagesSoFar += mangaFile.NumberOfPages;
+                pagesSoFar += mangaFile.Pages;
             }
 
             return ("", null);

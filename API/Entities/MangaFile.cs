@@ -13,7 +13,7 @@ namespace API.Entities
         /// <summary>
         /// Number of pages for the given file
         /// </summary>
-        public int NumberOfPages { get; set; } // TODO: Refactor this to Pages
+        public int Pages { get; set; }
         public MangaFormat Format { get; set; }
 
         // Relationship Mapping

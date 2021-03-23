@@ -13,6 +13,5 @@ namespace API.Interfaces
         Task<IList<MangaFile>> GetFilesForChapter(int chapterId);
         Task<IList<Chapter>> GetChaptersAsync(int volumeId);
         Task<byte[]> GetChapterCoverImageAsync(int chapterId);
-        Task<IEnumerable<InProgressChapterDto>> GetContinueReading(int userId, int libraryId, int limit);
     }
 }

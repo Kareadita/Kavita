@@ -1,28 +1,16 @@
-﻿using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using API.DTOs;
+﻿using System.Threading.Tasks;
 using API.Extensions;
 using API.Interfaces;
-using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
     public class ImageController : BaseApiController
     {
-        private readonly IDirectoryService _directoryService;
-        private readonly ICacheService _cacheService;
-        private readonly ILogger<ImageController> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ImageController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ImageController> logger, IUnitOfWork unitOfWork)
+        public ImageController(IUnitOfWork unitOfWork)
         {
-            _directoryService = directoryService;
-            _cacheService = cacheService;
-            _logger = logger;
             _unitOfWork = unitOfWork;
         }
         

@@ -10,7 +10,6 @@ using API.Helpers.Converters;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -110,7 +109,7 @@ namespace API.Controllers
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {
-            return Ok(new string[] {"Trace", "Debug", "Information", "Warning", "Critical", "None"});
+            return Ok(new [] {"Trace", "Debug", "Information", "Warning", "Critical", "None"});
         }
     }
 }

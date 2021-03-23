@@ -11,14 +11,12 @@ namespace API.Services.Tasks
     public class CleanupService : ICleanupService
     {
         private readonly ICacheService _cacheService;
-        private readonly IDirectoryService _directoryService;
         private readonly ILogger<CleanupService> _logger;
         private readonly IBackupService _backupService;
 
-        public CleanupService(ICacheService cacheService, IDirectoryService directoryService, ILogger<CleanupService> logger, IBackupService backupService)
+        public CleanupService(ICacheService cacheService, ILogger<CleanupService> logger, IBackupService backupService)
         {
             _cacheService = cacheService;
-            _directoryService = directoryService;
             _logger = logger;
             _backupService = backupService;
         }
@@ -28,7 +26,7 @@ namespace API.Services.Tasks
         {
             _logger.LogInformation("Cleaning temp directory");
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-            _directoryService.ClearDirectory(tempDirectory);
+            DirectoryService.ClearDirectory(tempDirectory);
             _logger.LogInformation("Cleaning cache directory");
             _cacheService.Cleanup();
             _logger.LogInformation("Cleaning old database backups");

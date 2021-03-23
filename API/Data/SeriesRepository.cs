@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +10,6 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data
@@ -207,8 +204,7 @@ namespace API.Data
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ToListAsync();
-
-            // TODO: refactor this
+            
             IList<int> chapterIds = new List<int>();
             foreach (var s in series)
             {
@@ -306,7 +302,6 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
-            // TODO: Idea: Put Total PagesRead and as return so that we can show a progress bar for full series read progress
             var series = await _context.Series
                   .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                   {

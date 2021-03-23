@@ -32,10 +32,7 @@ namespace API.Extensions
 
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlite(config.GetConnectionString("DefaultConnection"), builder =>
-                {
-                    //builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-                });
+                options.UseSqlite(config.GetConnectionString("DefaultConnection"));
             });
 
             services.AddLogging(loggingBuilder =>

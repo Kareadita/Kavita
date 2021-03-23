@@ -1,15 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using API.Data;
-using API.Entities;
-using API.Interfaces;
-using API.Interfaces.Services;
-using API.Services;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
-
-namespace API.Tests.Services
+﻿namespace API.Tests.Services
 {
     public class CacheServiceTests
     {
@@ -70,7 +59,7 @@ namespace API.Tests.Services
         //     //             Chapter = 0,
         //     //             FilePath = archivePath,
         //     //             Format = MangaFormat.Archive,
-        //     //             NumberOfPages = 1,
+        //     //             Pages = 1,
         //     //         }
         //     //     },
         //     //     Name = "1",

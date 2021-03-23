@@ -33,7 +33,7 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
        }
 
-       //[DisableConcurrentExecution(timeoutInSeconds: 5)] 
+       [DisableConcurrentExecution(timeoutInSeconds: 5)] 
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
@@ -64,7 +64,7 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       //[DisableConcurrentExecution(5)]
+       [DisableConcurrentExecution(5)]
        [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
@@ -193,6 +193,7 @@ namespace API.Services.Tasks
              series.Pages = series.Volumes.Sum(v => v.Pages);
              _metadataService.UpdateMetadata(series, _forceUpdate);
           });
+          
 
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
@@ -224,7 +225,7 @@ namespace API.Services.Tasks
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
-             _metadataService.UpdateMetadata(volume, _forceUpdate);
+              _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
           
           
@@ -284,7 +285,7 @@ namespace API.Services.Tasks
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
              chapter.Range = info.Chapters;
-             chapter.Pages = chapter.Files.Sum(f => f.NumberOfPages);
+             chapter.Pages = chapter.Files.Sum(f => f.Pages);
              _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
           
@@ -350,7 +351,7 @@ namespace API.Services.Tasks
           {
              FilePath = info.FullFilePath,
              Format = info.Format,
-             NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
+             Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
           };
        }
   
@@ -361,7 +362,7 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             existingFile.NumberOfPages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
           }
           else
           {

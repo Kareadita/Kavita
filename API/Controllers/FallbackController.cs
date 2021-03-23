@@ -6,6 +6,7 @@ namespace API.Controllers
 {
     public class FallbackController : Controller
     {
+        // ReSharper disable once S4487
         private readonly ITaskScheduler _taskScheduler;
 
         public FallbackController(ITaskScheduler taskScheduler)

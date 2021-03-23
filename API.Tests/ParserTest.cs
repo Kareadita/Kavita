@@ -50,6 +50,8 @@ namespace API.Tests
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Ichiban_Ushiro_no_Daimaou_v04_ch27_[VISCANS].zip", "4")]
         [InlineData("Mob Psycho 100 v02 (2019) (Digital) (Shizu).cbz", "2")]
+        [InlineData("Kodomo no Jikan vol. 1.cbz", "1")]
+        [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -178,9 +180,9 @@ namespace API.Tests
         
         [Theory]
         [InlineData("test.cbz", true)]
-        [InlineData("test.cbr", false)]
+        [InlineData("test.cbr", true)]
         [InlineData("test.zip", true)]
-        [InlineData("test.rar", false)]
+        [InlineData("test.rar", true)]
         [InlineData("test.rar.!qb", false)]
         [InlineData("[shf-ma-khs-aqs]negi_pa_vol15007.jpg", false)]
         public void IsArchiveTest(string input, bool expected)

@@ -318,7 +318,7 @@ namespace API.Data.Migrations
                     b.Property<int>("Format")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("NumberOfPages")
+                    b.Property<int>("Pages")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

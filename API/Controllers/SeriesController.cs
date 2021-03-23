@@ -105,9 +105,9 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
             
-            // TODO: check if new name isn't an existing series
-            var existingSeries = await _unitOfWork.SeriesRepository.GetSeriesByNameAsync(updateSeries.Name); // NOTE: This isnt checking library
-            if (existingSeries != null && existingSeries.Id != series.Id)
+            // TODO: Ensure we check against Library for Series Name change
+            var existingSeries = await _unitOfWork.SeriesRepository.GetSeriesByNameAsync(updateSeries.Name);
+            if (existingSeries != null && existingSeries.Id != series.Id )
             {
                 return BadRequest("A series already exists with this name. Name must be unique.");
             }
@@ -115,8 +115,7 @@ namespace API.Controllers
             series.LocalizedName = updateSeries.LocalizedName;
             series.SortName = updateSeries.SortName;
             series.Summary = updateSeries.Summary;
-            //series.CoverImage = updateSeries.CoverImage;
-            
+
             _unitOfWork.SeriesRepository.Update(series);
 
             if (await _unitOfWork.Complete())
@@ -139,16 +138,5 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
         }
-        
-        [HttpGet("continue-reading")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetContinueReading(int libraryId = 0, int limit = 20)
-        {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.VolumeRepository.GetContinueReading(user.Id, libraryId, limit));
-        }
-        
-        
-        
-        
     }
 }
