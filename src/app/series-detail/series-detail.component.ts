@@ -181,6 +181,7 @@ export class SeriesDetailComponent implements OnInit {
   setContinuePoint() {
     this.currentlyReadingVolume = undefined;
     this.currentlyReadingChapter = undefined;
+    this.hasReadingProgress = false;
 
     for (let v of this.volumes) {
       if (v.number === 0) {
@@ -283,8 +284,8 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openVolume(volume: Volume) {
-    if (volume.chapters === undefined) {
-      console.error('openVolume not implemented. Need to fetch chapter information.');
+    if (volume.chapters === undefined || volume.chapters?.length === 0) {
+      this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
     this.openChapter(volume.chapters[0]);
