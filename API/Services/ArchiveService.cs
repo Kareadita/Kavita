@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Xml.Serialization;
+using API.Archive;
+using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
@@ -42,35 +46,48 @@ namespace API.Services
             var count = 0;
             try
             {
-                using Stream stream = File.OpenRead(archivePath);
-                using (var reader = ReaderFactory.Open(stream))
-                {
-                    try
-                    {
-                        _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted");
-                        return 0;
-                    }
-                        
-                    while (reader.MoveToNextEntry())
-                    {
-                        if (!reader.Entry.IsDirectory && Parser.Parser.IsImage(reader.Entry.Key))
-                        {
-                            count++;
-                        }
-                    }
-                }
+                using var archive = ArchiveFactory.Open(archivePath);
+                return archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)).Count();
+
+                // using Stream stream = File.OpenRead(archivePath);
+                // using (var reader = ReaderFactory.Open(stream))
+                // {
+                //     try
+                //     {
+                //         _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
+                //     }
+                //     catch (InvalidOperationException ex)
+                //     {
+                //         _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted, {ArchivePath}", archivePath);
+                //         return 0;
+                //     }
+                //         
+                //     while (reader.MoveToNextEntry())
+                //     {
+                //         if (!reader.Entry.IsDirectory && Parser.Parser.IsImage(reader.Entry.Key))
+                //         {
+                //             count++;
+                //         }
+                //     }
+                // }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                _logger.LogError(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                 return 0;
             }
 
             return count;
+        }
+
+        public ArchiveMetadata GetArchiveData(string archivePath, bool createThumbnail)
+        {
+            return new ArchiveMetadata()
+            {
+                Pages = GetNumberOfPagesFromArchive(archivePath),
+                //Summary = GetSummaryInfo(archivePath),
+                CoverImage = GetCoverImage(archivePath, createThumbnail)
+            };
         }
 
         /// <summary>
@@ -92,7 +109,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when reading archive stream: {Filepath}. Defaulting to no cover image", filepath);
+                _logger.LogError(ex, "[GetCoverImage] There was an exception when reading archive stream: {Filepath}. Defaulting to no cover image", filepath);
             }
             
             return Array.Empty<byte>();
@@ -140,7 +157,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation. Defaulting to no cover image");
+                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image");
             }
 
             return Array.Empty<byte>();
@@ -187,6 +204,7 @@ namespace API.Services
             
             return null;
         }
+
         public string GetSummaryInfo(string archivePath)
         {
             var summary = string.Empty;
@@ -228,11 +246,11 @@ namespace API.Services
                     return info.Summary;
                 }
 
-                _logger.LogError("Could not parse archive file");
+                _logger.LogError("[GetSummaryInfo] Could not parse archive file: {Filepath}", archivePath);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when reading archive stream: {Filepath}", archivePath);
+                _logger.LogError(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
             }
             
             return summary;
@@ -249,6 +267,9 @@ namespace API.Services
                     Overwrite = false
                 });
             }
+            
+            // using ZipArchive archive = ZipFile.OpenRead(archivePath);
+            // archive.ExtractToDirectory(extractPath, true);
         }
 
         /// <summary>
@@ -268,7 +289,7 @@ namespace API.Services
             var sw = Stopwatch.StartNew();
             using var archive = ArchiveFactory.Open(archivePath);
             ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
-            _logger.LogDebug("[Fallback] Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
+            _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
     }
 }

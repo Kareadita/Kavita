@@ -26,6 +26,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kodomo no Jikan vol. 10
+            new Regex(
+                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
                 @"(vol\.? ?)(?<Volume>0*[1-9]+)",

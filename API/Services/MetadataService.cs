@@ -36,8 +36,10 @@ namespace API.Services
              var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
              if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
           }
+          // NOTE: Can I put page calculation here? chapter.Pages = chapter.Files.Sum(f => f.Pages);
        }
 
+       
        public void UpdateMetadata(Volume volume, bool forceUpdate)
        {
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
@@ -45,14 +47,23 @@ namespace API.Services
              // TODO: Create a custom sorter for Chapters so it's consistent across the application
              volume.Chapters ??= new List<Chapter>();
              var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
+             
              var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-             if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             // Skip calculating Cover Image (I/O) if the chapter already has it set
+             if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
+             {
+                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             }
+             else
+             {
+                volume.CoverImage = firstChapter.CoverImage;
+             }
           }
        }
 
        public void UpdateMetadata(Series series, bool forceUpdate)
        {
-          // TODO: this doesn't actually invoke finding a new cover. Also all these should be groupped ideally so we limit
+          // TODO: this doesn't actually invoke finding a new cover. Also all these should be grouped ideally so we limit
           // disk I/O to one method.
           if (series == null) return;
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
