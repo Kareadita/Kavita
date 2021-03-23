@@ -100,7 +100,7 @@ namespace API.Services
         public void CleanupTemp()
         {
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-            BackgroundJob.Enqueue((() => _directoryService.ClearDirectory(tempDirectory)));
+            BackgroundJob.Enqueue((() => DirectoryService.ClearDirectory(tempDirectory)));
         }
 
         public void BackupDatabase()

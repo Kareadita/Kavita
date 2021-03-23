@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -68,7 +69,7 @@ namespace API.Controllers
             }
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
             
-            _directoryService.ClearAndDeleteDirectory(tempLocation);
+            DirectoryService.ClearAndDeleteDirectory(tempLocation);
             (new FileInfo(zipPath)).Delete(); 
             
             return File(fileBytes, "application/zip", Path.GetFileName(zipPath));  

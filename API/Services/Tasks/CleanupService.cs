@@ -26,7 +26,7 @@ namespace API.Services.Tasks
         {
             _logger.LogInformation("Cleaning temp directory");
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-            _directoryService.ClearDirectory(tempDirectory);
+            DirectoryService.ClearDirectory(tempDirectory);
             _logger.LogInformation("Cleaning cache directory");
             _cacheService.Cleanup();
             _logger.LogInformation("Cleaning old database backups");

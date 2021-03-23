@@ -82,7 +82,7 @@ namespace API.Services.Tasks
 
             var tempDirectory = Path.Join(_tempDirectory, dateString);
             DirectoryService.ExistOrCreate(tempDirectory);
-            _directoryService.ClearDirectory(tempDirectory);
+            DirectoryService.ClearDirectory(tempDirectory);
             
             _directoryService.CopyFilesToDirectory(
                 _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
@@ -95,7 +95,7 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "There was an issue when archiving library backup");
             }
 
-            _directoryService.ClearAndDeleteDirectory(tempDirectory);
+            DirectoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
         }
 

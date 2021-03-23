@@ -95,7 +95,7 @@ namespace API.Services
        /// Deletes all files within the directory, then the directory itself.
        /// </summary>
        /// <param name="directoryPath"></param>
-       public void ClearAndDeleteDirectory(string directoryPath)
+       public static void ClearAndDeleteDirectory(string directoryPath)
        {
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
@@ -109,7 +109,7 @@ namespace API.Services
        /// </summary>
        /// <param name="directoryPath"></param>
        /// <returns></returns>
-       public void ClearDirectory(string directoryPath)
+       public static void ClearDirectory(string directoryPath)
        {
           var di = new DirectoryInfo(directoryPath);
           if (!di.Exists) return;
