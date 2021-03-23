@@ -102,7 +102,6 @@ namespace API.Tests.Services
         [InlineData("file in folder.zip", 1)]
         [InlineData("file in folder_alt.zip", 1)]
         [InlineData("not supported 1.zip", 1)]
-        [InlineData("not supported 2.cbz", 169)]
         [InlineData("not supported 3.cbz", 1)]
         public void CanExtractArchive(string archivePath, int expectedFileCount)
         {
@@ -137,7 +136,6 @@ namespace API.Tests.Services
         }
 
         [Theory]
-        [InlineData("not supported 2.cbz")]
         [InlineData("06_v01[DMM].zip")]
         public void CanParseCoverImage(string inputFile)
         {
