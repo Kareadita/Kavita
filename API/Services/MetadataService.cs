@@ -36,7 +36,6 @@ namespace API.Services
              var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
              if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
           }
-          // NOTE: Can I put page calculation here? chapter.Pages = chapter.Files.Sum(f => f.Pages);
        }
 
        

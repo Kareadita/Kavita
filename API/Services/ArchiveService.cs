@@ -44,10 +44,11 @@ namespace API.Services
             }
             var count = 0;
 
-            var libraryHandler = Archive.Archive.CanOpen(archivePath);
+            
             
             try
             {
+                var libraryHandler = Archive.Archive.CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
@@ -153,21 +154,47 @@ namespace API.Services
         /// Given a path to a compressed file (zip, rar, cbz, cbr, etc), will ensure the first image is returned unless
         /// a folder.extension exists in the root directory of the compressed file.
         /// </summary>
-        /// <param name="filepath"></param>
+        /// <param name="archivePath"></param>
         /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
         /// <returns></returns>
-        public byte[] GetCoverImage(string filepath, bool createThumbnail = false)
+        public byte[] GetCoverImage(string archivePath, bool createThumbnail = false)
         {
             try
             {
-                if (!IsValidArchive(filepath)) return Array.Empty<byte>();
+                if (!IsValidArchive(archivePath)) return Array.Empty<byte>();
                 
-                using var archive = ArchiveFactory.Open(filepath);
-                return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
+                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+            
+
+                switch (libraryHandler)
+                {
+                    case ArchiveLibrary.Default:
+                    {
+                        _logger.LogDebug("Using default compression handling");
+                        using var archive = ZipFile.OpenRead(archivePath);
+                        var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
+                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
+                        var entry = folder ?? entries[0];
+
+                        return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        _logger.LogDebug("Using SharpCompress compression handling");
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogError("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
+                        return Array.Empty<byte>();
+                    default:
+                        _logger.LogError("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
+                        return Array.Empty<byte>();
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[GetCoverImage] There was an exception when reading archive stream: {Filepath}. Defaulting to no cover image", filepath);
+                _logger.LogError(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
             
             return Array.Empty<byte>();
@@ -221,9 +248,53 @@ namespace API.Services
             return Array.Empty<byte>();
         }
         
+        private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
+        {
+            using var stream = entry.Open();
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            var data = ms.ToArray();
+
+            return data;
+        }
+        
+        /// <summary>
+        /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
+        /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
+        /// </summary>
+        /// <param name="archive">An opened archive stream</param>
+        /// <returns></returns>
+        public bool ArchiveNeedsFlattening(ZipArchive archive)
+        {
+            // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
+            return archive.Entries.Count > 0 &&
+                   !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
+                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar));
+        }
+
+        
+        private byte[] CreateThumbnail(ZipArchiveEntry entry, string formatExtension = ".jpg")
+        {
+            if (!formatExtension.StartsWith("."))
+            {
+                formatExtension = $".{formatExtension}";
+            }
+            try
+            {
+                using var stream = entry.Open();
+                using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+                return thumbnail.WriteToBuffer(formatExtension); // TODO: Validate this code works with .png files
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entry.FullName);
+            }
+
+            return Array.Empty<byte>();
+        }
 
         /// <summary>
-        /// Test if the archive path exists and there are images inside it. This will log as an error. 
+        /// Test if the archive path exists and an archive
         /// </summary>
         /// <param name="archivePath"></param>
         /// <returns></returns>
@@ -272,32 +343,39 @@ namespace API.Services
             try
             {
                 if (!File.Exists(archivePath)) return summary;
-
-                if (SharpCompress.Archives.Zip.ZipArchive.IsZipFile(archivePath))
+                
+                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+                switch (libraryHandler)
                 {
-                    using var archive = SharpCompress.Archives.Zip.ZipArchive.Open(archivePath);
-                    info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
+                    case ArchiveLibrary.Default:
+                    {
+                        _logger.LogDebug("Using default compression handling");
+                        using var archive = ZipFile.OpenRead(archivePath);
+                        var entry = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
+                        if (entry != null)
+                        {
+                            using var stream = entry.Open();
+                            var serializer = new XmlSerializer(typeof(ComicInfo));
+                            info = (ComicInfo) serializer.Deserialize(stream);
+                        }
+                        break;
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        _logger.LogDebug("Using SharpCompress compression handling");
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
+                        break;
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return summary;
+                    default:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return summary;
                 }
-                else if (GZipArchive.IsGZipFile(archivePath))
-                {
-                    using var archive = GZipArchive.Open(archivePath);
-                    info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
-                }
-                else if (RarArchive.IsRarFile(archivePath))
-                {
-                    using var archive = RarArchive.Open(archivePath);
-                    info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
-                }
-                else if (SevenZipArchive.IsSevenZipFile(archivePath))
-                {
-                    using var archive = SevenZipArchive.Open(archivePath);
-                    info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
-                }
-                else if (TarArchive.IsTarFile(archivePath))
-                {
-                    using var archive = TarArchive.Open(archivePath);
-                    info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
-                }
+                
+                
 
                 if (info != null)
                 {
@@ -330,6 +408,19 @@ namespace API.Services
             // archive.ExtractToDirectory(extractPath, true);
         }
 
+        private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
+        {
+            var needsFlattening = ArchiveNeedsFlattening(archive);
+            if (!archive.HasFiles() && !needsFlattening) return;
+            
+            archive.ExtractToDirectory(extractPath, true);
+            if (needsFlattening)
+            {
+                _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
+                new DirectoryInfo(extractPath).Flatten();
+            }
+        }
+
         /// <summary>
         /// Extracts an archive to a temp cache directory. Returns path to new directory. If temp cache directory already exists,
         /// will return that without performing an extraction. Returns empty string if there are any invalidations which would
@@ -342,13 +433,37 @@ namespace API.Services
         {
             if (!File.Exists(archivePath)) return;
 
-            if (new DirectoryInfo(extractPath).Exists) return;
+            if (Directory.Exists(extractPath)) return;
             
             var sw = Stopwatch.StartNew();
-            using var archive = ArchiveFactory.Open(archivePath);
+
             try
             {
-                ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
+                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+                switch (libraryHandler)
+                {
+                    case ArchiveLibrary.Default:
+                    {
+                        _logger.LogDebug("Using default compression handling");
+                        using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                        ExtractArchiveEntries(archive, extractPath);
+                        break;
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        _logger.LogDebug("Using SharpCompress compression handling");
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
+                        break;
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return;
+                    default:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return;
+                }
+                
             }
             catch (Exception e)
             {

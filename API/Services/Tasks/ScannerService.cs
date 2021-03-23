@@ -193,6 +193,7 @@ namespace API.Services.Tasks
              series.Pages = series.Volumes.Sum(v => v.Pages);
              _metadataService.UpdateMetadata(series, _forceUpdate);
           });
+          
 
           foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
@@ -224,7 +225,7 @@ namespace API.Services.Tasks
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
-             // _metadataService.UpdateMetadata(volume, _forceUpdate); // NOTE: Testing removing here. We do at the end of all DB work
+              _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
           
           
@@ -285,7 +286,7 @@ namespace API.Services.Tasks
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
              chapter.Range = info.Chapters;
              chapter.Pages = chapter.Files.Sum(f => f.Pages);
-             //_metadataService.UpdateMetadata(chapter, _forceUpdate); // NOTE: Testing removing here. We do at the end of all DB work
+             _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
           
           

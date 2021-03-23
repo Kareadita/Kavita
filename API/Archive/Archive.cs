@@ -14,6 +14,7 @@ namespace API.Archive
         /// <returns></returns>
         public static ArchiveLibrary CanOpen(string archivePath)
         {
+            // TODO: Should I introduce something for NotFound?
             if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath)) return ArchiveLibrary.NotSupported;
             
             try
