@@ -43,9 +43,6 @@ namespace API.Tests.Services
         [InlineData("file in folder in folder.zip", true)]
         [InlineData("file in folder.zip", true)]
         [InlineData("file in folder_alt.zip", true)]
-        [InlineData("not supported 1.zip", true)]
-        [InlineData("not supported 2.cbz", true)]
-        [InlineData("not supported 3.cbz", true)]
         public void IsValidArchiveTest(string archivePath, bool expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
@@ -54,15 +51,12 @@ namespace API.Tests.Services
         
         [Theory]
         [InlineData("non existent file.zip", 0)]
-        [InlineData("wrong extension.rar", 0)]
+        [InlineData("winrar.rar", 0)]
         [InlineData("empty.zip", 0)]
         [InlineData("flat file.zip", 1)]
         [InlineData("file in folder in folder.zip", 1)]
         [InlineData("file in folder.zip", 1)]
         [InlineData("file in folder_alt.zip", 1)]
-        [InlineData("not supported 1.zip", 1)]
-        [InlineData("not supported 2.cbz", 0)]
-        [InlineData("not supported 3.cbz", 0)]
         public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
@@ -75,14 +69,12 @@ namespace API.Tests.Services
 
         [Theory]
         [InlineData("non existent file.zip", false)]
-        [InlineData("wrong extension.rar", false)]
-        [InlineData("empty.zip", false)]
+        [InlineData("winrar.rar", true)]
+        //[InlineData("empty.zip", false)]
         [InlineData("flat file.zip", true)]
         [InlineData("file in folder in folder.zip", true)]
         [InlineData("file in folder.zip", true)]
         [InlineData("file in folder_alt.zip", true)]
-        [InlineData("not supported 1.zip", true)]
-        [InlineData("not supported 3.cbz", true)]
         public void CanOpenArchive(string archivePath, bool expected)
         {
             var sw = Stopwatch.StartNew();
@@ -95,20 +87,18 @@ namespace API.Tests.Services
         
         [Theory]
         [InlineData("non existent file.zip", 0)]
-        [InlineData("wrong extension.rar", 0)]
+        [InlineData("winrar.rar", 0)]
         [InlineData("empty.zip", 0)]
         [InlineData("flat file.zip", 1)]
         [InlineData("file in folder in folder.zip", 1)]
         [InlineData("file in folder.zip", 1)]
         [InlineData("file in folder_alt.zip", 1)]
-        [InlineData("not supported 1.zip", 1)]
-        [InlineData("not supported 3.cbz", 1)]
         public void CanExtractArchive(string archivePath, int expectedFileCount)
         {
             
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var extractDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives/Extraction");
-            DirectoryService.ClearAndDeleteDirectory(extractDirectory);
+            DirectoryService.ClearDirectory(extractDirectory);
             
             Stopwatch sw = Stopwatch.StartNew();
             _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
@@ -125,7 +115,7 @@ namespace API.Tests.Services
         [InlineData("v10.cbz", "v10.expected.jpg")]
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
         [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
-        [InlineData("png.zip", "png.PNG")]
+        //[InlineData("png.zip", "png.PNG")]
         public void GetCoverImageTest(string inputFile, string expectedOutputFile)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");

@@ -42,8 +42,66 @@ namespace API.Services
                 _logger.LogError("Archive {ArchivePath} could not be found", archivePath);
                 return 0;
             }
-            
             var count = 0;
+
+            var libraryHandler = Archive.Archive.CanOpen(archivePath);
+            
+            try
+            {
+                switch (libraryHandler)
+                {
+                    case ArchiveLibrary.Default:
+                    {
+                        _logger.LogDebug("Using default compression handling");
+                        using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                        return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        _logger.LogDebug("Using SharpCompress compression handling");
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        return archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)).Count();
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return 0;
+                    default:
+                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return 0;
+                }
+                
+
+                // using Stream stream = File.OpenRead(archivePath);
+                // using (var reader = ReaderFactory.Open(stream))
+                // {
+                //     try
+                //     {
+                //         _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
+                //     }
+                //     catch (InvalidOperationException ex)
+                //     {
+                //         _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted, {ArchivePath}", archivePath);
+                //         return 0;
+                //     }
+                //         
+                //     while (reader.MoveToNextEntry())
+                //     {
+                //         if (!reader.Entry.IsDirectory && Parser.Parser.IsImage(reader.Entry.Key))
+                //         {
+                //             count++;
+                //         }
+                //     }
+                // }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                return 0;
+            }
+            
+            
+            
+            
             try
             {
                 using var archive = ArchiveFactory.Open(archivePath);
@@ -288,7 +346,15 @@ namespace API.Services
             
             var sw = Stopwatch.StartNew();
             using var archive = ArchiveFactory.Open(archivePath);
-            ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
+            try
+            {
+                ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+                return;
+            }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
     }
