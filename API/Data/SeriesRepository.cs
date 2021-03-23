@@ -204,8 +204,7 @@ namespace API.Data
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ToListAsync();
-
-            // TODO: refactor this
+            
             IList<int> chapterIds = new List<int>();
             foreach (var s in series)
             {

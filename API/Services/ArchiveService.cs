@@ -42,7 +42,6 @@ namespace API.Services
             {
                 using var a2 = ZipFile.OpenRead(archivePath);
                 return ArchiveLibrary.Default;
-                
             }
             catch (Exception)
             {
@@ -65,10 +64,7 @@ namespace API.Services
                 _logger.LogError("Archive {ArchivePath} could not be found", archivePath);
                 return 0;
             }
-            var count = 0;
 
-            
-            
             try
             {
                 var libraryHandler = CanOpen(archivePath);
@@ -316,14 +312,12 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[GetSummaryInfo] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return summary;
                     default:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return summary;
                 }
-                
-                
 
                 if (info != null)
                 {
@@ -340,7 +334,7 @@ namespace API.Services
             return summary;
         }
 
-        private void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
+        private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
             DirectoryService.ExistOrCreate(extractPath);
             foreach (var entry in entries)
@@ -390,7 +384,7 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         _logger.LogDebug("Using default compression handling");
-                        using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                        using var archive = ZipFile.OpenRead(archivePath);
                         ExtractArchiveEntries(archive, extractPath);
                         break;
                     }
@@ -418,5 +412,4 @@ namespace API.Services
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
     }
-    
 }
