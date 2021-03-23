@@ -20,19 +20,6 @@ namespace API.Interfaces.Services
         /// <returns></returns>
         string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
         Task<byte[]> ReadFileAsync(string path);
-
-        /// <summary>
-        /// Deletes all files within the directory, then the directory itself.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        //void ClearAndDeleteDirectory(string directoryPath);
-        /// <summary>
-        /// Deletes all files within the directory.
-        /// </summary>
-        /// <param name="directoryPath"></param>
-        /// <returns></returns>
-        //void ClearDirectory(string directoryPath);
-
         bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath);
         bool Exists(string directory);
 

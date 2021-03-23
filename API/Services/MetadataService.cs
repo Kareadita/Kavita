@@ -62,7 +62,7 @@ namespace API.Services
 
        public void UpdateMetadata(Series series, bool forceUpdate)
        {
-          // TODO: this doesn't actually invoke finding a new cover. Also all these should be grouped ideally so we limit
+          // NOTE: this doesn't actually invoke finding a new cover. Also all these should be grouped ideally so we limit
           // disk I/O to one method.
           if (series == null) return;
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))

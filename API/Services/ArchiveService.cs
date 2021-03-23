@@ -80,7 +80,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)).Count();
+                        return archive.Entries.Count(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key));
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
