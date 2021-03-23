@@ -403,20 +403,17 @@ namespace API.Parser
         
         public static bool IsArchive(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return MangaFileRegex.IsMatch(fileInfo.Extension);
+            return MangaFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsImage(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return ImageRegex.IsMatch(fileInfo.Extension);
+            return ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
         
         public static bool IsXml(string filePath)
         {
-            var fileInfo = new FileInfo(filePath);
-            return XmlRegex.IsMatch(fileInfo.Extension);
+            return XmlRegex.IsMatch(Path.GetExtension(filePath));
         }
         
         public static float MinimumNumberFromRange(string range)
