@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,12 +11,7 @@ using API.Interfaces.Services;
 using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using SharpCompress.Archives;
-using SharpCompress.Archives.GZip;
-using SharpCompress.Archives.Rar;
-using SharpCompress.Archives.SevenZip;
-using SharpCompress.Archives.Tar;
 using SharpCompress.Common;
-using SharpCompress.Readers;
 using Image = NetVips.Image;
 
 namespace API.Services
@@ -35,6 +29,35 @@ namespace API.Services
             _logger = logger;
         }
         
+        /// <summary>
+        /// Checks if a File can be opened. Requires up to 2 opens of the filestream.
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <returns></returns>
+        public ArchiveLibrary CanOpen(string archivePath)
+        {
+            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath)) return ArchiveLibrary.NotSupported;
+            
+            try
+            {
+                using var a2 = ZipFile.OpenRead(archivePath);
+                return ArchiveLibrary.Default;
+                
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    using var a1 = ArchiveFactory.Open(archivePath);
+                    return ArchiveLibrary.SharpCompress;
+                }
+                catch (Exception)
+                {
+                    return ArchiveLibrary.NotSupported;
+                }
+            }
+        }
+        
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
             if (!IsValidArchive(archivePath))
@@ -48,7 +71,7 @@ namespace API.Services
             
             try
             {
-                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+                var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
@@ -70,85 +93,14 @@ namespace API.Services
                         _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return 0;
                 }
-                
-
-                // using Stream stream = File.OpenRead(archivePath);
-                // using (var reader = ReaderFactory.Open(stream))
-                // {
-                //     try
-                //     {
-                //         _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
-                //     }
-                //     catch (InvalidOperationException ex)
-                //     {
-                //         _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted, {ArchivePath}", archivePath);
-                //         return 0;
-                //     }
-                //         
-                //     while (reader.MoveToNextEntry())
-                //     {
-                //         if (!reader.Entry.IsDirectory && Parser.Parser.IsImage(reader.Entry.Key))
-                //         {
-                //             count++;
-                //         }
-                //     }
-                // }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                 return 0;
             }
-            
-            
-            
-            
-            try
-            {
-                using var archive = ArchiveFactory.Open(archivePath);
-                return archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)).Count();
-
-                // using Stream stream = File.OpenRead(archivePath);
-                // using (var reader = ReaderFactory.Open(stream))
-                // {
-                //     try
-                //     {
-                //         _logger.LogDebug("{ArchivePath}'s Type: {ArchiveType}", archivePath, reader.ArchiveType);
-                //     }
-                //     catch (InvalidOperationException ex)
-                //     {
-                //         _logger.LogError(ex, "Could not parse the archive. Please validate it is not corrupted, {ArchivePath}", archivePath);
-                //         return 0;
-                //     }
-                //         
-                //     while (reader.MoveToNextEntry())
-                //     {
-                //         if (!reader.Entry.IsDirectory && Parser.Parser.IsImage(reader.Entry.Key))
-                //         {
-                //             count++;
-                //         }
-                //     }
-                // }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
-                return 0;
-            }
-
-            return count;
         }
-
-        public ArchiveMetadata GetArchiveData(string archivePath, bool createThumbnail)
-        {
-            return new ArchiveMetadata()
-            {
-                Pages = GetNumberOfPagesFromArchive(archivePath),
-                //Summary = GetSummaryInfo(archivePath),
-                CoverImage = GetCoverImage(archivePath, createThumbnail)
-            };
-        }
-
+        
         /// <summary>
         /// Generates byte array of cover image.
         /// Given a path to a compressed file (zip, rar, cbz, cbr, etc), will ensure the first image is returned unless
@@ -159,13 +111,10 @@ namespace API.Services
         /// <returns></returns>
         public byte[] GetCoverImage(string archivePath, bool createThumbnail = false)
         {
+            if (archivePath == null || !IsValidArchive(archivePath)) return Array.Empty<byte>();
             try
             {
-                if (!IsValidArchive(archivePath)) return Array.Empty<byte>();
-                
-                var libraryHandler = Archive.Archive.CanOpen(archivePath);
-            
-
+                var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
@@ -228,26 +177,6 @@ namespace API.Services
             return Array.Empty<byte>();
         }
         
-        private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
-        {
-            if (!formatExtension.StartsWith("."))
-            {
-                formatExtension = "." + formatExtension;
-            }
-            // TODO: Validate if jpeg is same as jpg
-            try
-            {
-                using var thumbnail = Image.ThumbnailBuffer(entry, ThumbnailWidth);
-                return thumbnail.WriteToBuffer(formatExtension); 
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image");
-            }
-
-            return Array.Empty<byte>();
-        }
-        
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
@@ -272,6 +201,25 @@ namespace API.Services
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar));
         }
 
+        private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
+        {
+            if (!formatExtension.StartsWith("."))
+            {
+                formatExtension = "." + formatExtension;
+            }
+            // TODO: Validate if jpeg is same as jpg
+            try
+            {
+                using var thumbnail = Image.ThumbnailBuffer(entry, ThumbnailWidth);
+                return thumbnail.WriteToBuffer(formatExtension); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image");
+            }
+
+            return Array.Empty<byte>();
+        }
         
         private byte[] CreateThumbnail(ZipArchiveEntry entry, string formatExtension = ".jpg")
         {
@@ -344,7 +292,7 @@ namespace API.Services
             {
                 if (!File.Exists(archivePath)) return summary;
                 
-                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+                var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
@@ -403,9 +351,6 @@ namespace API.Services
                     Overwrite = false
                 });
             }
-            
-            // using ZipArchive archive = ZipFile.OpenRead(archivePath);
-            // archive.ExtractToDirectory(extractPath, true);
         }
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
@@ -431,7 +376,7 @@ namespace API.Services
         /// <returns></returns>
         public void ExtractArchive(string archivePath, string extractPath)
         {
-            if (!File.Exists(archivePath)) return;
+            if (!IsValidArchive(archivePath)) return;
 
             if (Directory.Exists(extractPath)) return;
             
@@ -439,7 +384,7 @@ namespace API.Services
 
             try
             {
-                var libraryHandler = Archive.Archive.CanOpen(archivePath);
+                var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
@@ -473,4 +418,5 @@ namespace API.Services
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
     }
+    
 }

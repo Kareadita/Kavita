@@ -1,6 +1,7 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using API.Archive;
 using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
@@ -22,18 +23,18 @@ namespace API.Tests.Services
             _archiveService = new ArchiveService(_logger);
         }
 
-        // [Theory]
-        // [InlineData("flat file.zip", false)]
-        // [InlineData("file in folder in folder.zip", true)]
-        // [InlineData("file in folder.zip", true)]
-        // [InlineData("file in folder_alt.zip", true)]
-        // public void ArchiveNeedsFlatteningTest(string archivePath, bool expected)
-        // {
-        //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
-        //     var file = Path.Join(testDirectory, archivePath);
-        //     using ZipArchive archive = ZipFile.OpenRead(file);
-        //     Assert.Equal(expected, _archiveService.ArchiveNeedsFlattening(archive));
-        // }
+        [Theory]
+        [InlineData("flat file.zip", false)]
+        [InlineData("file in folder in folder.zip", true)]
+        [InlineData("file in folder.zip", true)]
+        [InlineData("file in folder_alt.zip", true)]
+        public void ArchiveNeedsFlatteningTest(string archivePath, bool expected)
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            var file = Path.Join(testDirectory, archivePath);
+            using ZipArchive archive = ZipFile.OpenRead(file);
+            Assert.Equal(expected, _archiveService.ArchiveNeedsFlattening(archive));
+        }
 
         [Theory]
         [InlineData("non existent file.zip", false)]
@@ -68,19 +69,19 @@ namespace API.Tests.Services
 
 
         [Theory]
-        [InlineData("non existent file.zip", false)]
-        [InlineData("winrar.rar", true)]
-        //[InlineData("empty.zip", false)]
-        [InlineData("flat file.zip", true)]
-        [InlineData("file in folder in folder.zip", true)]
-        [InlineData("file in folder.zip", true)]
-        [InlineData("file in folder_alt.zip", true)]
-        public void CanOpenArchive(string archivePath, bool expected)
+        [InlineData("non existent file.zip", ArchiveLibrary.NotSupported)]
+        [InlineData("winrar.rar", ArchiveLibrary.SharpCompress)]
+        [InlineData("empty.zip", ArchiveLibrary.Default)]
+        [InlineData("flat file.zip", ArchiveLibrary.Default)]
+        [InlineData("file in folder in folder.zip", ArchiveLibrary.Default)]
+        [InlineData("file in folder.zip", ArchiveLibrary.Default)]
+        [InlineData("file in folder_alt.zip", ArchiveLibrary.Default)]
+        public void CanOpenArchive(string archivePath, ArchiveLibrary expected)
         {
             var sw = Stopwatch.StartNew();
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             
-            Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
+            Assert.Equal(expected, _archiveService.CanOpen(Path.Join(testDirectory, archivePath)));
             _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
         }
         
@@ -98,7 +99,8 @@ namespace API.Tests.Services
             
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var extractDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives/Extraction");
-            DirectoryService.ClearDirectory(extractDirectory);
+
+            DirectoryService.ClearAndDeleteDirectory(extractDirectory);
             
             Stopwatch sw = Stopwatch.StartNew();
             _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);

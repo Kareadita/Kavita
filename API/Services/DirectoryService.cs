@@ -97,6 +97,8 @@ namespace API.Services
        /// <param name="directoryPath"></param>
        public static void ClearAndDeleteDirectory(string directoryPath)
        {
+          if (!Directory.Exists(directoryPath)) return;
+          
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
           ClearDirectory(directoryPath);
