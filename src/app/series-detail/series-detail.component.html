@@ -62,6 +62,7 @@
 
     <h4>Volumes</h4>
     <div class="row">
+        <!-- TODO: If only 1 number 0 volume exists, we need to show it or inform user -->
         <div *ngFor="let volume of volumes">
             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                 [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
