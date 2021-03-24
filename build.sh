@@ -62,7 +62,6 @@ Package()
 
     ProgressStart "Creating $runtime Package for $framework"
 
-    BuildUI
     
     echo "Building"
     cd API
@@ -91,16 +90,25 @@ Package()
 RID="$1"
 
 Build
+BuildUI
+
+dir=$PWD
 
 if [[ -z "$RID" ]];
 then
     Package "net5.0" "win-x64"
+    cd "$dir"
     Package "net5.0" "win-x86"
+    cd "$dir"
     Package "net5.0" "linux-x64"
+    cd "$dir"
     Package "net5.0" "linux-musl-x64"
+    cd "$dir"
     Package "net5.0" "osx-x64"
+    cd "$dir"
 else
     Package "net5.0" "$RID"
+    cd "$dir"
 fi
 
 
