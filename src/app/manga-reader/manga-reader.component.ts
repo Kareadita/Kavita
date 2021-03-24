@@ -13,6 +13,7 @@ import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 const PREFETCH_PAGES = 3;
 
@@ -178,7 +179,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-              private formBuilder: FormBuilder, private navService: NavService) {
+              private formBuilder: FormBuilder, private navService: NavService, private toastr: ToastrService) {
                 this.navService.hideNavBar();
   }
 
@@ -368,11 +369,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    if (this.pageNum + 1 >= this.maxPages) {
-      // TODO: Ask if they want to load next chapter/volume
-      // if (this.confirmService.confirm('Do you want to load the next Volume/Chapter?')) {
-
-      // }
+    if (this.pageNum + 1 >= this.maxPages || this.isLoading) {
       return;
     }
 
@@ -390,7 +387,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (this.pageNum - 1 < 0) {
+    if (this.pageNum - 1 < 0 || this.isLoading) {
       return;
     }
 
@@ -405,6 +402,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     if (this.ctx && this.canvas) {
+      this.canvasImage.onload = null;
       this.canvas.nativeElement.width = this.canvasImage.width;
       this.canvas.nativeElement.height = this.canvasImage.height;
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;
@@ -413,11 +411,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
-        console.log('Rendering Left half');
       } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
-        console.log('Rendering Right half');
       } else {
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
@@ -445,23 +441,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-    // Circular array looks to be working fine. Need to debug on real manga
-    console.log('Current Page: ' + this.pageNum + ' Current Index: ', this.cachedImages.currentIndex);
-    console.log('Cached Pages: ', this.cachedImages.arr.map(item => item.src.split('&page=')[1]));
   }
 
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
-      console.error('Could not save bookmark status. Current page is: ', this.pageNum);
+      this.toastr.error('Could not save bookmark status. Current page is: ' + this.pageNum);
     });
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
     if (this.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-      this.canvasImage.onload = () => this.renderPage(); // BUG: Likely bug here where spread image isn't loaded, causes flasing of both sides. Likely onload somehow is invoked.
+      this.canvasImage.onload = () => this.renderPage();
     } else {
       this.renderPage();
     }
