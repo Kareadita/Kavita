@@ -13,12 +13,11 @@ Think: ***Plex but for Manga.***
 
 
 ## How to Deploy
-* Build kavita-webui via ng build --prod. The dest should be placed in the API/wwwroot directory
-* Run publish command
+- Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 ## How to install
 1. Unzip the archive for your target OS
 2. Place in a directory that is writable. If on windows, do not place in Program Files
 3. Open appsettings.json and modify TokenKey to a random string ideally generated from [https://passwordsgenerator.net/](https://passwordsgenerator.net/)
-4. Run API.exe
+4. Run Kavita
 

@@ -1,0 +1,4 @@
+﻿How to Install
+1. Unzip the archive to a directory that is writable. If on windows, do not place in Program Files
+2. Open appsettings.json and modify TokenKey to a random string ideally generated from https://passwordsgenerator.net/
+3. Run Kavita executable
