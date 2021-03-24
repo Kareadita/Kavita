@@ -203,7 +203,7 @@ namespace API.Services
             {
                 formatExtension = "." + formatExtension;
             }
-            // TODO: Validate if jpeg is same as jpg
+            
             try
             {
                 using var thumbnail = Image.ThumbnailBuffer(entry, ThumbnailWidth);
@@ -227,7 +227,7 @@ namespace API.Services
             {
                 using var stream = entry.Open();
                 using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
-                return thumbnail.WriteToBuffer(formatExtension); // TODO: Validate this code works with .png files
+                return thumbnail.WriteToBuffer(formatExtension);
             }
             catch (Exception ex)
             {

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
@@ -51,7 +53,10 @@ namespace API.Services
              // Skip calculating Cover Image (I/O) if the chapter already has it set
              if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
              {
-                if (firstFile != null) volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+                if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
+                {
+                   volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+                }
              }
              else
              {
@@ -80,9 +85,11 @@ namespace API.Services
           
           var firstVolume = series.Volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number == 1);
           var firstChapter = firstVolume?.Chapters.FirstOrDefault(c => c.Files.Any());
-          if (firstChapter != null)
+          
+          var firstFile = firstChapter?.Files.FirstOrDefault();
+          if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
           {
-             series.Summary = _archiveService.GetSummaryInfo(firstChapter.Files.FirstOrDefault()?.FilePath);
+             series.Summary = _archiveService.GetSummaryInfo(firstFile.FilePath);
           }
        }
        
