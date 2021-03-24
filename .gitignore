@@ -452,3 +452,5 @@ cache/
 /API/wwwroot/
 /API/cache/
 /API/temp/
+_temp/
+_output/
