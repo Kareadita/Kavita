@@ -61,8 +61,12 @@
     </div>
 
     <h4>Volumes</h4>
+    <div class="row" *ngIf="isLoading">
+        <div class="spinner-border text-secondary loading" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </div>
     <div class="row">
-        <!-- TODO: If only 1 number 0 volume exists, we need to show it or inform user -->
         <div *ngFor="let volume of volumes">
             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                 [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
@@ -72,6 +76,12 @@
             <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+        </div>
+        <!-- Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. -->
+        <div *ngIf="(volumes.length === 1 && volumes[0].number === 0)">
+            <app-card-item class="col-auto" [entity]="volumes[0]" [title]="series.name" (click)="openVolume(volumes[0])"
+            [imageUrl]="imageService.getVolumeCoverImage(volumes[0].id)"
+            [read]="volumes[0].pagesRead" [total]="volumes[0].pages" [actions]="volumeActions"></app-card-item>
         </div>
     </div>
 </div>
