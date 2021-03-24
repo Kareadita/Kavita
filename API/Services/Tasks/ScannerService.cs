@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;
@@ -264,7 +265,7 @@ namespace API.Services.Tasks
                 volume.Chapters.Add(chapter);
              }
 
-             chapter.Files = new List<MangaFile>();
+             chapter.Files ??= new List<MangaFile>();
           }
           
           // Add files
@@ -278,7 +279,7 @@ namespace API.Services.Tasks
              }
              catch (Exception ex)
              {
-                _logger.LogError(ex, "There was an exception parsing chapter. Skipping Vol {VolumeNume} Chapter {ChapterNumber}", volume.Name, info.Chapters);
+                _logger.LogError(ex, "There was an exception parsing chapter. Skipping Vol {VolumeNumber} Chapter {ChapterNumber}", volume.Name, info.Chapters);
              }
              if (chapter == null) continue;
              // I need to reset Files for the first time, hence this work should be done in a separate loop
@@ -362,18 +363,27 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             if (!new FileInfo(existingFile.FilePath).DoesLastWriteMatch(existingFile.LastModified))
+             {
+                existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+             }
           }
           else
           {
              if (info.Format == MangaFormat.Archive)
              {
                 chapter.Files.Add(CreateMangaFile(info));
+                existingFile = chapter.Files.Last();
              }
              else
              {
                 _logger.LogDebug("Ignoring {Filename}. Non-archives are not supported", info.Filename);
              }
+          }
+
+          if (existingFile != null)
+          {
+             existingFile.LastModified = new FileInfo(existingFile.FilePath).LastWriteTime;
           }
        }
     }

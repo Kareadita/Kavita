@@ -1,5 +1,7 @@
 ﻿
+using System;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 
 namespace API.Entities
 {
@@ -15,10 +17,13 @@ namespace API.Entities
         /// </summary>
         public int Pages { get; set; }
         public MangaFormat Format { get; set; }
+        /// <summary>
+        /// Last time underlying file was modified
+        /// </summary>
+        public DateTime LastModified { get; set; }
 
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
-        
     }
 }
