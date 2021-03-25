@@ -1,7 +1,11 @@
 ﻿# Kavita
-Kavita, meaning Stories, is a lightweight manga server. The goal is to replace Ubooquity with an 
-open source variant that is flexible and packs more punch, without sacrificing ease to use. 
-Think: ***Plex but for Manga.***
+![alt text](https://github.com/Kareadita/kareadita.github.io/blob/main/img/features/seriesdetail.PNG?raw=true)
+
+Kavita is a fast, feature rich, cross platform OSS manga server. Built with a focus for manga, 
+and the goal of being a full solution for all your reading needs. Setup your own server and share 
+your manga collection with your friends and family!
+
+
 
 ## Goals:
 * Serve up Manga (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
@@ -21,3 +25,6 @@ Think: ***Plex but for Manga.***
 3. Open appsettings.json and modify TokenKey to a random string ideally generated from [https://passwordsgenerator.net/](https://passwordsgenerator.net/)
 4. Run Kavita
 
+## Buy me a beer
+I've gone through many beers building Kavita and expect to go through many more. If you want to throw me a few bucks you can [here](https://paypal.me/majora2007?locale.x=en_US). Money will go 
+towards beer or hosting for the upcoming Metadata release. 
