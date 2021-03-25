@@ -5,7 +5,8 @@ Kavita is a fast, feature rich, cross platform OSS manga server. Built with a fo
 and the goal of being a full solution for all your reading needs. Setup your own server and share 
 your manga collection with your friends and family!
 
-
+[![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
+![Github Downloads](https://img.shields.io/github/downloads/Kareadita/Kavita/total.svg)
 
 ## Goals:
 * Serve up Manga (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
