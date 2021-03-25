@@ -67,21 +67,21 @@
         </div>
     </div>
     <div class="row">
+        <!-- Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. -->
+        <div *ngIf="(volumes.length === 1 && volumes[0].number === 0 && chapters.length === 0)">
+            <app-card-item class="col-auto" [entity]="volumes[0]" [title]="series.name" (click)="openVolume(volumes[0])"
+            [imageUrl]="imageService.getVolumeCoverImage(volumes[0].id)"
+            [read]="volumes[0].pagesRead" [total]="volumes[0].pages" [actions]="volumeActions"></app-card-item>
+        </div>
         <div *ngFor="let volume of volumes">
             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                 [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                 [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
         </div>
-        <div *ngFor="let chapter of chapters" >
-            <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+        <div *ngFor="let chapter of chapters">
+            <app-card-item class="col-auto" [entity]="chapter" [title]="chapter.range === '0' ? 'Specials' : 'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
-        </div>
-        <!-- Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. -->
-        <div *ngIf="(volumes.length === 1 && volumes[0].number === 0)">
-            <app-card-item class="col-auto" [entity]="volumes[0]" [title]="series.name" (click)="openVolume(volumes[0])"
-            [imageUrl]="imageService.getVolumeCoverImage(volumes[0].id)"
-            [read]="volumes[0].pagesRead" [total]="volumes[0].pages" [actions]="volumeActions"></app-card-item>
         </div>
     </div>
 </div>
