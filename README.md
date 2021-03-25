@@ -8,6 +8,7 @@ your manga collection with your friends and family!
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
 ![Github Downloads](https://img.shields.io/github/downloads/Kareadita/Kavita/total.svg)
 
+
 ## Goals:
 * Serve up Manga (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
 * Provide Reader for Manga and Books (Light Novels) via web app that is responsive
