@@ -186,9 +186,9 @@ export class SeriesDetailComponent implements OnInit {
     for (let v of this.volumes) {
       if (v.number === 0) {
         continue;
-      } else if (v.pagesRead >= v.pages) {
+      } else if (v.pagesRead >= v.pages - 1) {
         continue;
-      } else if (v.pagesRead < v.pages) { // Issue is off by 1 again...
+      } else if (v.pagesRead < v.pages - 1) { // Issue is off by 1 again...
         this.currentlyReadingVolume = v;
         this.hasReadingProgress = true;
         break;
