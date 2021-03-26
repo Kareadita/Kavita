@@ -41,12 +41,19 @@ namespace API.Services
         public async Task<Chapter> Ensure(int chapterId)
         {
             EnsureCacheDirectory();
-            Chapter chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var fileCount = 0;
+            var extractPath = GetCachePath(chapterId);
             
             foreach (var file in chapter.Files)
             {
-                var extractPath = GetCachePath(chapterId);
-                _archiveService.ExtractArchive(file.FilePath, extractPath);
+                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, file.Id + ""));
+                fileCount++;
+            }
+
+            if (fileCount > 1)
+            {
+                new DirectoryInfo(extractPath).Flatten();
             }
 
             return chapter;

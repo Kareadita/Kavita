@@ -62,7 +62,7 @@ Package()
 
     ProgressStart "Creating $runtime Package for $framework"
 
-    
+    # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
     cd API
     echo dotnet publish -c release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
