@@ -296,15 +296,13 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg', scrollable: true });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
   }
 
   openEditSeriesModal() {
-    // TODO: Some library bug with modal where scorllable isn't working. Leave off to use underlying page scroll
-    //scrollable: true,
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  scrollable: true, size: 'lg', windowClass: 'scrollable-modal' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
       window.scrollTo(0, 0);

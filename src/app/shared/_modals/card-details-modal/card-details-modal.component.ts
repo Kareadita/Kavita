@@ -23,13 +23,12 @@ export class CardDetailsModalComponent implements OnInit {
   isChapter = false;
   chapters: Chapter[] = [];
   seriesVolumes: any[] = [];
-  //imageStyles = {width: '74px'};
   isLoadingVolumes = false;
 
   formatKeys = Object.keys(MangaFormat);
 
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, private seriesService: SeriesService, public utilityService: UtilityService, public imageService: ImageService) { }
+  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.isChapter = this.isObjectChapter(this.data);
@@ -39,6 +38,7 @@ export class CardDetailsModalComponent implements OnInit {
     } else if (!this.isChapter) {
       this.chapters.push(...this.data?.chapters);
     }
+    this.chapters.sort(this.utilityService.sortChapters);
   }
 
   isObjectChapter(object: any): object is Chapter {

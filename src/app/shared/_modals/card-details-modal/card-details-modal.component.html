@@ -6,15 +6,15 @@
         <span aria-hidden="true">&times;</span>
         </button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body scrollable-modal">
         <h4 *ngIf="isObjectVolume(this.data)">Information</h4>
         <ng-container *ngIf="isObjectVolume(this.data)">
             <div class="row no-gutters">
                 <div class="col">
-                    Created: {{(this.data.created | date: 'dd/MM/yyyy') || '-'}}
+                    Created: {{(this.data.created | date: 'MM/dd/yyyy') || '-'}}
                 </div>
                 <div class="col">
-                    Last Modified: {{(this.data.lastModified | date: 'dd/MM/yyyy') || '-'}}
+                    Last Modified: {{(this.data.lastModified | date: 'MM/dd/yyyy') || '-'}}
                 </div>
             </div>
             <div class="row no-gutters">

@@ -16,7 +16,7 @@
                         <button class="btn btn-primary" (click)="openEditLibraryAccess(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
                     </div>
                 </h4>
-                <div>Last Active: {{member.lastActive | date: 'dd/MM/yyyy'}}</div>
+                <div>Last Active: {{member.lastActive | date: 'MM/dd/yyyy'}}</div>
                 <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
             </div>
         </li>
