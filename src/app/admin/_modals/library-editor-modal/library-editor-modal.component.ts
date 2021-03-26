@@ -43,12 +43,14 @@ export class LibraryEditorModalComponent implements OnInit {
 
     if (this.library !== undefined) {
       model.id = this.library.id;
+      model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       this.libraryService.update(model).subscribe(() => {
         this.close(true);
       }, err => {
         this.errorMessage = err;
       });
     } else {
+      model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       this.libraryService.create(model).subscribe(() => {
         this.close(true);
       }, err => {
