@@ -11,16 +11,15 @@
         <ng-container *ngIf="isObjectVolume(this.data)">
             <div class="row no-gutters">
                 <div class="col">
-                    Created: {{(this.data.created | date: 'MM/dd/yyyy') || '-'}}
+                    Id: {{this.data.id}}
                 </div>
                 <div class="col">
-                    Last Modified: {{(this.data.lastModified | date: 'MM/dd/yyyy') || '-'}}
+                    Special: {{(this.data.isSpecial ? 'Yes' : 'No') || 'N/A'}}
                 </div>
             </div>
             <div class="row no-gutters">
                 <div class="col">
-                    <!--Is Special: {{this.data.isSpecial || 'N/A'}}-->
-                    Id: {{this.data.id}}
+                    Added: {{(this.data.created | date: 'MM/dd/yyyy') || '-'}}
                 </div>
                 <div class="col">
                     Pages: {{this.data.pages}}

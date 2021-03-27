@@ -59,14 +59,14 @@ export class DirectoryPickerComponent implements OnInit {
   selectNode(folderName: string) {
     this.currentRoot = folderName;
     this.routeStack.push(folderName);
-    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
+    const fullPath = this.routeStack.items.join('/');
     this.loadChildren(fullPath);
   }
 
   goBack() {
     this.routeStack.pop();
     this.currentRoot = this.routeStack.peek();
-    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
+    const fullPath = this.routeStack.items.join('/');
     this.loadChildren(fullPath);
   }
 
@@ -83,7 +83,11 @@ export class DirectoryPickerComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
 
-    const fullPath = (this.routeStack.items.join('\\') + '\\' + folderName).replace('\\\\', '\\');
+    let fullPath = folderName;
+    if (this.routeStack.items.length > 0) {
+      const pathJoin = this.routeStack.items.join('/');
+      fullPath = pathJoin + ((pathJoin.endsWith('/') || pathJoin.endsWith('\\')) ? '' : '/') + folderName;
+    }
 
     this.modal.close({success: true, folderPath: fullPath});
   }

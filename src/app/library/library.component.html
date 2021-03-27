@@ -6,7 +6,7 @@
             <app-library-card [data]="library"></app-library-card>
         </div>
         <div *ngIf="libraries.length === 0 && !isLoading && isAdmin">
-            <p>There are no libraries setup yet. Configure some in <a href="/admin/dashboard">Server settings</a>.</p>
+            <p>There are no libraries setup yet. Configure some in <a href="/admin/dashboard#libraries">Server settings</a>.</p>
         </div>
         <ng-container *ngIf="isLoading">
             <div class="spinner-border text-secondary" role="status">

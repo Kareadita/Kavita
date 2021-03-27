@@ -52,7 +52,7 @@ import { CarouselModule } from './carousel/carousel.module';
     NgbRatingModule, // Series Detail
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
-    NgbAccordionModule, // User Preferences 
+    NgbAccordionModule, // User Preferences
     NgbPaginationModule,
     LazyLoadImageModule,
     SharedModule,

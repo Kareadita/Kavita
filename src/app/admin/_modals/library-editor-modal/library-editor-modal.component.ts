@@ -21,6 +21,7 @@ export class LibraryEditorModalComponent implements OnInit {
 
   selectedFolders: string[] = [];
   errorMessage = '';
+  madeChanges = false;
 
   constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal) { }
 
@@ -31,6 +32,7 @@ export class LibraryEditorModalComponent implements OnInit {
 
   removeFolder(folder: string) {
     this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
+    this.madeChanges = true;
   }
 
   submitLibrary() {
@@ -73,6 +75,7 @@ export class LibraryEditorModalComponent implements OnInit {
       this.libraryForm.get('name')?.setValue(this.library.name);
       this.libraryForm.get('type')?.setValue(this.library.type);
       this.selectedFolders = this.library.folders;
+      this.madeChanges = false;
     }
   }
 
@@ -80,11 +83,12 @@ export class LibraryEditorModalComponent implements OnInit {
     const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
-        this.selectedFolders.push(closeResult.folderPath);
+        if (!this.selectedFolders.includes(closeResult.folderPath)) {
+          this.selectedFolders.push(closeResult.folderPath);
+          this.madeChanges = true;
+        }
       }
     });
   }
-
-
 
 }

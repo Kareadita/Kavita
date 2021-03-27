@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RegisterMemberComponent } from './register-member/register-member.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
 import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -11,6 +10,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
+import { RegisterMemberComponent } from './register-member/register-member.component';
 
 
 @NgModule({
