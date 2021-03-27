@@ -42,13 +42,18 @@ namespace API.Services
         {
             EnsureCacheDirectory();
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            var fileCount = 0;
+            var files = chapter.Files.ToList();
+            var fileCount = files.Count;
             var extractPath = GetCachePath(chapterId);
+            var extraPath = "";
             
-            foreach (var file in chapter.Files)
+            foreach (var file in files)
             {
-                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, file.Id + ""));
-                fileCount++;
+                if (fileCount > 1)
+                {
+                    extraPath = file.Id + "";
+                }
+                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
             }
 
             if (fileCount > 1)
