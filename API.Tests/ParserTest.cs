@@ -111,6 +111,7 @@ namespace API.Tests
         [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
+        [InlineData("[BAA]_Darker_than_Black_Omake-1.zip", "Darker than Black")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));

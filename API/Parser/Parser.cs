@@ -106,15 +106,15 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
             new Regex(
-                @"(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
+                @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)", // TODO: This is breaking a ton of cases
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)(\d+)", 
+                @"^(?!Vol)(?<Series>.*)( |_|-)(\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)( |_)(c)\d+",
+                @"(?<Series>.*)( |_|-)(c)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
         
@@ -265,7 +265,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
-                @"(\b|_)(?<Edition>Omnibus)(\b|_)",
+                @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
@@ -540,6 +540,25 @@ namespace API.Parser
             return title;
         }
         
+        private static string RemoveSpecialTags(string title)
+        {
+            foreach (var regex in MangaSpecialRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, "");
+                    }
+                }
+            }
+
+            return title;
+        }
+        
+        
+        
         /// <summary>
         /// Translates _ -> spaces, trims front and back of string, removes release groups
         /// </summary>
@@ -550,6 +569,8 @@ namespace API.Parser
             title = RemoveReleaseGroup(title);
 
             title = RemoveEditionTagHolders(title);
+
+            title = RemoveSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-"))

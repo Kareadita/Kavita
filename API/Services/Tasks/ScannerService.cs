@@ -49,15 +49,15 @@ namespace API.Services.Tasks
        {
           // NOTE: This solution isn't the best, but it has potential. We need to handle a few other cases so it works great. 
           return false;
-          
-          // if (/*_environment.IsProduction() && */!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
+
+          // if (!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
           // {
-          //    _logger.LogDebug($"{folder.Path} hasn't been updated since last scan. Skipping.");
+          //    _logger.LogDebug("{FolderPath} hasn't been modified since last scan. Skipping", folder.Path);
           //    skippedFolders += 1;
           //    return true;
           // }
-          //
-          // return false;
+          
+          //return false;
        }
 
        private void Cleanup()
@@ -134,7 +134,6 @@ namespace API.Services.Tasks
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
-              
               _logger.LogInformation("Scan completed on {LibraryName}. Parsed {ParsedSeriesCount} series in {ElapsedScanTime} ms", library.Name, series.Keys.Count, sw.ElapsedMilliseconds);
            }
            else
@@ -148,6 +147,13 @@ namespace API.Services.Tasks
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
+          
+          // For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
+          // foreach (var series in parsedSeries)
+          // {
+          //    var seriesName = series.Key;
+          //    if (parsedSeries.ContainsKey(seriesName))
+          // }
           
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
@@ -222,7 +228,7 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0");
+             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial);
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
@@ -266,7 +272,6 @@ namespace API.Services.Tasks
              }
 
              chapter.Files ??= new List<MangaFile>();
-             chapter.IsSpecial = 
           }
           
           // Add files
@@ -315,7 +320,7 @@ namespace API.Services.Tasks
        private void TrackSeries(ParserInfo info)
        {
           if (info.Series == string.Empty) return;
-          
+
           _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
