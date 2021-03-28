@@ -278,6 +278,16 @@ namespace API.Tests
             Assert.Equal(expected, ParseComicChapter(filename));
         }
 
+        [Theory]
+        [InlineData("test.jpg", true)]
+        [InlineData("test.jpeg", true)]
+        [InlineData("test.png", true)]
+        [InlineData(".test.jpg", false)]
+        public void IsImageTest(string filename, bool expected)
+        {
+            Assert.Equal(expected, IsImage(filename));
+        }
+
 
         [Fact]
         public void ParseInfoTest()
