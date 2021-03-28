@@ -24,5 +24,10 @@ namespace API.Parser
         /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
         /// </summary>
         public string Edition { get; set; } = "";
+
+        /// <summary>
+        /// If the file contains no volume/chapter information and contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
+        /// </summary>
+        public bool IsSpecial { get; set; } = false;
     }
 }

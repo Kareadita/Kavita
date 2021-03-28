@@ -53,6 +53,7 @@ namespace API.Tests
         [InlineData("Kodomo no Jikan vol. 1.cbz", "1")]
         [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
+        [InlineData("Vagabond_v03", "3")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -105,6 +106,9 @@ namespace API.Tests
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
         [InlineData("Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)", "Goblin Slayer - Brand New Day")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01 [Dametrans][v2]", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Vagabond_v03", "Vagabond")]
+        [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -148,6 +152,8 @@ namespace API.Tests
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
         [InlineData("To Love Ru v11 Uncensored (Ch.089-097+Omake)", "89-97")]
         [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", "153-162.5")]
+        [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "1")]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", "2")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -199,9 +205,21 @@ namespace API.Tests
         [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
         [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
         [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
+        [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, ParseEdition(input));
+        }
+        [Theory]
+        [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
+        [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
+        [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
+        [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
+        public void ParseMangaSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected, ParseMangaSpecial(input) != "");
         }
         
         [Theory]

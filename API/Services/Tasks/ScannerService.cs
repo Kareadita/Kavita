@@ -266,6 +266,7 @@ namespace API.Services.Tasks
              }
 
              chapter.Files ??= new List<MangaFile>();
+             chapter.IsSpecial = 
           }
           
           // Add files
