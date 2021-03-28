@@ -52,6 +52,7 @@ namespace API.Tests
         [InlineData("Mob Psycho 100 v02 (2019) (Digital) (Shizu).cbz", "2")]
         [InlineData("Kodomo no Jikan vol. 1.cbz", "1")]
         [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -103,7 +104,7 @@ namespace API.Tests
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09", "Kedouin Makoto - Corpse Party Musume")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
         [InlineData("Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)", "Goblin Slayer - Brand New Day")]
-        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01 [Dametrans][v2]", "Kedouin Makoto - Corpse Party Musume")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));

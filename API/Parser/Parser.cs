@@ -24,7 +24,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Kodomo no Jikan vol. 10
             new Regex(
@@ -60,6 +60,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (\b|_|-)v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
+            new Regex(
+                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
             new Regex(
                 @"(?<Series>.*)(?: _|-|\[|\() ?v",
@@ -80,10 +84,6 @@ namespace API.Parser
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
-            new Regex(
-                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
