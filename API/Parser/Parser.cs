@@ -9,7 +9,7 @@ namespace API.Parser
     public static class Parser
     {
         public static readonly string MangaFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
-        public static readonly string ImageFileExtensions = @"\.png|\.jpeg|\.jpg";
+        public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -24,7 +24,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Kodomo no Jikan vol. 10
             new Regex(
@@ -60,6 +60,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (\b|_|-)v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
+            new Regex(
+                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
             new Regex(
                 @"(?<Series>.*)(?: _|-|\[|\() ?v",
@@ -80,10 +84,6 @@ namespace API.Parser
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ", 
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
-            new Regex(
-                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
@@ -108,6 +108,106 @@ namespace API.Parser
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
                 @"(?<Series>.*)( |_)(c)\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicSeriesRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+            @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+            @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+            @"(?<Series>.*(\d{4})?)( |_)(?:\(\d+ of \d+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // The First Asterix Frieze (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // MUST BE LAST: Batman & Daredevil - King of New York
+            new Regex(
+                @"^(?<Series>.*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicVolumeRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: (?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicChapterRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: (?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -184,8 +284,9 @@ namespace API.Parser
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="rootPath">Root folder</param>
+        /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo Parse(string filePath, string rootPath)
+        public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
             var fileName = Path.GetFileName(filePath);
             var directoryName = (new FileInfo(filePath)).Directory?.Name;
@@ -193,9 +294,9 @@ namespace API.Parser
             
             var ret = new ParserInfo()
             {
-                Chapters = ParseChapter(fileName),
-                Series = ParseSeries(fileName),
-                Volumes = ParseVolume(fileName),
+                Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
+                Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
+                Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
                 Filename = fileName,
                 Format = ParseFormat(filePath),
                 FullFilePath = filePath
@@ -261,6 +362,22 @@ namespace API.Parser
             
             return string.Empty;
         }
+        public static string ParseComicSeries(string filename)
+        {
+            foreach (var regex in ComicSeriesRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
+                    {
+                        return CleanTitle(match.Groups["Series"].Value);
+                    }
+                }
+            }
+            
+            return string.Empty;
+        }
 
         public static string ParseVolume(string filename)
         {
@@ -283,10 +400,60 @@ namespace API.Parser
             
             return "0";
         }
+        
+        public static string ParseComicVolume(string filename)
+        {
+            foreach (var regex in ComicVolumeRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Volume"] == Match.Empty) continue;
+                    
+                    var value = match.Groups["Volume"].Value;
+                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
+                    var tokens = value.Split("-");
+                    var from = RemoveLeadingZeroes(tokens[0]);
+                    var to = RemoveLeadingZeroes(tokens[1]);
+                    return $"{@from}-{to}";
+
+                }
+            }
+            
+            return "0";
+        }
 
         public static string ParseChapter(string filename)
         {
             foreach (var regex in MangaChapterRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Chapter"] != Match.Empty)
+                    {
+                        var value = match.Groups["Chapter"].Value;
+
+                        if (value.Contains("-"))
+                        {
+                            var tokens = value.Split("-");
+                            var from = RemoveLeadingZeroes(tokens[0]);
+                            var to = RemoveLeadingZeroes(tokens[1]);
+                            return $"{from}-{to}";
+                        }
+
+                        return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                    }
+
+                }
+            }
+
+            return "0";
+        }
+        
+        public static string ParseComicChapter(string filename)
+        {
+            foreach (var regex in ComicChapterRegex)
             {
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
@@ -408,6 +575,7 @@ namespace API.Parser
 
         public static bool IsImage(string filePath)
         {
+            if (filePath.StartsWith(".")) return false;
             return ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
         
