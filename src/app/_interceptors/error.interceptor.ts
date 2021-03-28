@@ -64,14 +64,17 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.toastr.error('There was an unknown critical error.');
               break;
             default:
-              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
-              {
+              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
                 this.toastr.error('Something unexpected went wrong.');
-                // TODO:  We should store information about what URL we are on so that on refresh of no-connection, we can redirect back to original url
-                console.log('url: ', this.router.url);
+              }
+
+              if (!localStorage.getItem('kavita--no-connection-url')) {
+                localStorage.setItem('kavita--no-connection-url', this.router.url);
+              }
+
+              if (this.router.url !== '/no-connection') {
                 this.router.navigateByUrl('/no-connection');
               }
-              console.error(error);
               break;
           }
         }

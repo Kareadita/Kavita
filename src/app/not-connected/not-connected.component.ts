@@ -13,7 +13,15 @@ export class NotConnectedComponent implements OnInit {
 
   ngOnInit(): void {
     // We make a call to backend on refresh so that if it's up, we can redirect to /home
-    this.memberService.adminExists().subscribe((exists) => this.router.navigateByUrl('/home'));
+    this.memberService.adminExists().subscribe((exists) => {
+      const pageResume = localStorage.getItem('kavita--no-connection-url');
+      if (pageResume && pageResume !== '/no-connection') {
+        localStorage.setItem('kavita--no-connection-url', '');
+        this.router.navigateByUrl(pageResume);
+      } else {
+        this.router.navigateByUrl('/home');
+      }
+    });
   }
 
 }

@@ -68,10 +68,11 @@
     </div>
     <div class="row">
         <!-- Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. -->
-        <div *ngIf="(volumes.length === 1 && volumes[0].number === 0 && chapters.length === 0)">
-            <app-card-item class="col-auto" [entity]="volumes[0]" [title]="series.name" (click)="openVolume(volumes[0])"
-            [imageUrl]="imageService.getVolumeCoverImage(volumes[0].id)"
-            [read]="volumes[0].pagesRead" [total]="volumes[0].pages" [actions]="volumeActions"></app-card-item>
+        <div >
+            <app-card-item *ngIf="(volumes.length >= 1 && volumes[volumes.length - 1].number === 0 && chapters.length === 0)" class="col-auto" [entity]="volumes[volumes.length - 1]" [title]="'Specials'" (click)="openVolume(volumes[0])"
+            [imageUrl]="imageService.getVolumeCoverImage(volumes[volumes.length - 1].id)"
+            [read]="volumes[volumes.length - 1].pagesRead" [total]="volumes[volumes.length - 1].pages" [actions]="volumeActions"></app-card-item>
+            
         </div>
         <div *ngFor="let volume of volumes">
             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
