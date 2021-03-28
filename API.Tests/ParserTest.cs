@@ -54,6 +54,7 @@ namespace API.Tests
         [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
         [InlineData("Vagabond_v03", "3")]
+        //[InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -109,6 +110,7 @@ namespace API.Tests
         [InlineData("Vagabond_v03", "Vagabond")]
         [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
+        //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -207,6 +209,7 @@ namespace API.Tests
         [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
         [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
         [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
+        [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, ParseEdition(input));
