@@ -146,6 +146,8 @@ namespace API.Tests
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
+        [InlineData("To Love Ru v11 Uncensored (Ch.089-097+Omake)", "89-97")]
+        [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", "153-162.5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -236,6 +238,7 @@ namespace API.Tests
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
+        [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicSeries(filename));

@@ -223,8 +223,9 @@ namespace API.Parser
 
         private static readonly Regex[] MangaChapterRegex = new[]
         {
+            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                @"(c|ch)(\.? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
