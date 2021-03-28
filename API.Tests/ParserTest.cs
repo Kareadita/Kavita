@@ -103,11 +103,12 @@ namespace API.Tests
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09", "Kedouin Makoto - Corpse Party Musume")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
         [InlineData("Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)", "Goblin Slayer - Brand New Day")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "Kedouin Makoto - Corpse Party Musume")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
         }
-
+        
         [Theory]
         [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
         [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "9")]
@@ -143,6 +144,7 @@ namespace API.Tests
         [InlineData("Vol 1", "0")]
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -217,6 +219,61 @@ namespace API.Tests
         public void NormalizeTest(string input, string expected)
         {
             Assert.Equal(expected, Normalize(input));
+        }
+        
+        [Theory]
+        [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
+        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
+        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "The First Asterix Frieze")]
+        [InlineData("Batman & Catwoman - Trail of the Gun 01", "Batman & Catwoman - Trail of the Gun")]
+        [InlineData("Batman & Daredevil - King of New York", "Batman & Daredevil - King of New York")]
+        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "Batman & Grendel")]
+        [InlineData("Batman & Robin the Teen Wonder #0", "Batman & Robin the Teen Wonder")]
+        [InlineData("Batman & Wildcat (1 of 3)", "Batman & Wildcat")]
+        [InlineData("Batman And Superman World's Finest #01", "Batman And Superman World's Finest")]
+        [InlineData("Babe 01", "Babe")]
+        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
+        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
+        public void ParseComicSeriesTest(string filename, string expected)
+        {
+            Assert.Equal(expected, ParseComicSeries(filename));
+        }
+        
+        [Theory]
+        [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
+        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "4")]
+        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
+        [InlineData("Batman & Catwoman - Trail of the Gun 01", "1")]
+        [InlineData("Batman & Daredevil - King of New York", "0")]
+        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
+        [InlineData("Batman & Robin the Teen Wonder #0", "0")]
+        [InlineData("Batman & Wildcat (1 of 3)", "0")]
+        [InlineData("Batman And Superman World's Finest #01", "1")]
+        [InlineData("Babe 01", "1")]
+        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
+        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        public void ParseComicVolumeTest(string filename, string expected)
+        {
+            Assert.Equal(expected, ParseComicVolume(filename));
+        }
+        
+        [Theory]
+        [InlineData("01 Spider-Man & Wolverine 01.cbr", "0")]
+        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "0")]
+        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
+        [InlineData("Batman & Catwoman - Trail of the Gun 01", "0")]
+        [InlineData("Batman & Daredevil - King of New York", "0")]
+        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "0")]
+        [InlineData("Batman & Robin the Teen Wonder #0", "0")]
+        [InlineData("Batman & Wildcat (1 of 3)", "1")]
+        [InlineData("Batman & Wildcat (2 of 3)", "2")]
+        [InlineData("Batman And Superman World's Finest #01", "0")]
+        [InlineData("Babe 01", "0")]
+        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
+        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "0")]
+        public void ParseComicChapterTest(string filename, string expected)
+        {
+            Assert.Equal(expected, ParseComicChapter(filename));
         }
 
 

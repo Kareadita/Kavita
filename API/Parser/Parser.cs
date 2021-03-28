@@ -14,6 +14,7 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex ComicFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -108,6 +109,98 @@ namespace API.Parser
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
                 @"(?<Series>.*)( |_)(c)\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicSeriesRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+            @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+            @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+            @"(?<Series>.*(\d{4})?)( |_)(?:\(\d+ of \d+)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // The First Asterix Frieze (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // MUST BE LAST: Batman & Daredevil - King of New York
+            new Regex(
+                @"^(?<Series>.*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicVolumeRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: (?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+        
+        private static readonly Regex[] ComicChapterRegex = new[]
+        {
+            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            new Regex(
+                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // 01 Spider-Man & Wolverine 01.cbr
+            new Regex(
+                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Wildcat (1 of 3)
+            new Regex(
+                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.*)(?: (?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -261,6 +354,22 @@ namespace API.Parser
             
             return string.Empty;
         }
+        public static string ParseComicSeries(string filename)
+        {
+            foreach (var regex in ComicSeriesRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
+                    {
+                        return CleanTitle(match.Groups["Series"].Value);
+                    }
+                }
+            }
+            
+            return string.Empty;
+        }
 
         public static string ParseVolume(string filename)
         {
@@ -283,10 +392,60 @@ namespace API.Parser
             
             return "0";
         }
+        
+        public static string ParseComicVolume(string filename)
+        {
+            foreach (var regex in ComicVolumeRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Volume"] == Match.Empty) continue;
+                    
+                    var value = match.Groups["Volume"].Value;
+                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
+                    var tokens = value.Split("-");
+                    var from = RemoveLeadingZeroes(tokens[0]);
+                    var to = RemoveLeadingZeroes(tokens[1]);
+                    return $"{@from}-{to}";
+
+                }
+            }
+            
+            return "0";
+        }
 
         public static string ParseChapter(string filename)
         {
             foreach (var regex in MangaChapterRegex)
+            {
+                var matches = regex.Matches(filename);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Chapter"] != Match.Empty)
+                    {
+                        var value = match.Groups["Chapter"].Value;
+
+                        if (value.Contains("-"))
+                        {
+                            var tokens = value.Split("-");
+                            var from = RemoveLeadingZeroes(tokens[0]);
+                            var to = RemoveLeadingZeroes(tokens[1]);
+                            return $"{from}-{to}";
+                        }
+
+                        return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                    }
+
+                }
+            }
+
+            return "0";
+        }
+        
+        public static string ParseComicChapter(string filename)
+        {
+            foreach (var regex in ComicChapterRegex)
             {
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
