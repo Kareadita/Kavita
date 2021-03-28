@@ -53,6 +53,8 @@ namespace API.Tests
         [InlineData("Kodomo no Jikan vol. 1.cbz", "1")]
         [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
+        [InlineData("Vagabond_v03", "3")]
+        [InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -105,6 +107,11 @@ namespace API.Tests
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "Goblin Slayer Side Story - Year One")]
         [InlineData("Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)", "Goblin Slayer - Brand New Day")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01 [Dametrans][v2]", "Kedouin Makoto - Corpse Party Musume")]
+        [InlineData("Vagabond_v03", "Vagabond")]
+        [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
+        [InlineData("[BAA]_Darker_than_Black_Omake-1.zip", "Darker than Black")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -146,6 +153,10 @@ namespace API.Tests
         [InlineData("VanDread-v01-c001[MD].zip", "1")]
         [InlineData("Goblin Slayer Side Story - Year One 025.5", "25.5")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 01", "1")]
+        [InlineData("To Love Ru v11 Uncensored (Ch.089-097+Omake)", "89-97")]
+        [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", "153-162.5")]
+        [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "1")]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", "2")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -197,9 +208,22 @@ namespace API.Tests
         [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
         [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
         [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
+        [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
+        [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, ParseEdition(input));
+        }
+        [Theory]
+        [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
+        [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
+        [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
+        [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
+        public void ParseMangaSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected, ParseMangaSpecial(input) != "");
         }
         
         [Theory]
@@ -236,6 +260,7 @@ namespace API.Tests
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
+        [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicSeries(filename));

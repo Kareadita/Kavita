@@ -14,8 +14,7 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        //?: is a non-capturing group in C#, else anything in () will be a group
+        
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
             // Dance in the Vampire Bund v16-17
@@ -32,11 +31,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(vol\.? ?)(?<Volume>0*[1-9]+)",
+                @"(vol\.? ?)(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(volume )(?<Volume>0?[1-9]+)",
+                @"(volume )(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Tower Of God S01 014 (CBT) (digital).cbz
@@ -101,13 +100,21 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
+            new Regex(
+                @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
+            new Regex(
+                @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)", // TODO: This is breaking a ton of cases
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)(\d+)", 
+                @"^(?!Vol)(?<Series>.*)( |_|-)(\d+)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)( |_)(c)\d+",
+                @"(?<Series>.*)( |_|-)(c)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
         
@@ -223,8 +230,9 @@ namespace API.Parser
 
         private static readonly Regex[] MangaChapterRegex = new[]
         {
+            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                @"(c|ch)(\.? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -251,13 +259,17 @@ namespace API.Parser
             
         };
         private static readonly Regex[] MangaEditionRegex = {
-            //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+            // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
                 @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            //Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+            // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
-                @"(\b|_)(?<Edition>Omnibus)(\b|_)",
+                @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // To Love Ru v01 Uncensored (Ch.001-007)
+            new Regex(
+                @"(\b|_)(?<Edition>Uncensored)(\b|_)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -274,6 +286,14 @@ namespace API.Parser
             // Anything in parenthesis
             new Regex(
                 @"\(.*\)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        };
+
+        private static readonly Regex[] MangaSpecialRegex =
+        {
+            // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+            new Regex(
+                @"(?<Special>Special|OneShot|One\-Shot|Omake|Extra)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -314,6 +334,13 @@ namespace API.Parser
                 ret.Series = CleanTitle(ret.Series.Replace(edition, ""));
                 ret.Edition = edition;
             }
+
+            var isSpecial = ParseMangaSpecial(fileName);
+            if (ret.Chapters == "0" && ret.Volumes == "0" && !string.IsNullOrEmpty(isSpecial))
+            {
+                ret.IsSpecial = true;
+            }
+            
             
 
             return ret.Series == string.Empty ? null : ret;
@@ -339,6 +366,23 @@ namespace API.Parser
                             .Replace("[", "").Replace("]", "").Replace("(", "").Replace(")", "");
                         
                         return edition;
+                    }
+                }
+            }
+            
+            return string.Empty;
+        }
+        
+        public static string ParseMangaSpecial(string filePath)
+        {
+            foreach (var regex in MangaSpecialRegex)
+            {
+                var matches = regex.Matches(filePath);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
+                    {
+                        return match.Groups["Special"].Value;
                     }
                 }
             }
@@ -496,6 +540,25 @@ namespace API.Parser
             return title;
         }
         
+        private static string RemoveSpecialTags(string title)
+        {
+            foreach (var regex in MangaSpecialRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, "");
+                    }
+                }
+            }
+
+            return title;
+        }
+        
+        
+        
         /// <summary>
         /// Translates _ -> spaces, trims front and back of string, removes release groups
         /// </summary>
@@ -506,6 +569,8 @@ namespace API.Parser
             title = RemoveReleaseGroup(title);
 
             title = RemoveEditionTagHolders(title);
+
+            title = RemoveSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-"))
