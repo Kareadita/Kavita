@@ -234,6 +234,7 @@ namespace API.Tests
         [InlineData("Babe 01", "Babe")]
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
+        [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicSeries(filename));
@@ -252,6 +253,7 @@ namespace API.Tests
         [InlineData("Babe 01", "1")]
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "2")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicVolume(filename));
@@ -270,7 +272,7 @@ namespace API.Tests
         [InlineData("Batman And Superman World's Finest #01", "0")]
         [InlineData("Babe 01", "0")]
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
-        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "0")]
+        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicChapter(filename));

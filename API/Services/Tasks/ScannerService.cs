@@ -98,7 +98,7 @@ namespace API.Services.Tasks
                  {
                     try
                     {
-                       ProcessFile(f, folderPath.Path);
+                       ProcessFile(f, folderPath.Path, library.Type);
                     }
                     catch (FileNotFoundException exception)
                     {
@@ -333,9 +333,10 @@ namespace API.Services.Tasks
        /// </summary>
        /// <param name="path">Path of a file</param>
        /// <param name="rootPath"></param>
-       private void ProcessFile(string path, string rootPath)
+       /// <param name="type">Library type to determine parsing to perform</param>
+       private void ProcessFile(string path, string rootPath, LibraryType type)
        {
-          var info = Parser.Parser.Parse(path, rootPath);
+          var info = Parser.Parser.Parse(path, rootPath, type);
           
           if (info == null)
           {

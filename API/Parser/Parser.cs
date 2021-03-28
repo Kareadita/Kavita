@@ -14,7 +14,6 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex ComicFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         //?: is a non-capturing group in C#, else anything in () will be a group
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -128,7 +127,7 @@ namespace API.Parser
             RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v+",
+                @"^(?<Series>.*)(?: |_)v\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
@@ -137,6 +136,10 @@ namespace API.Parser
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
@@ -166,6 +169,10 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: (?<Volume>\d+))",
@@ -192,7 +199,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
@@ -277,8 +284,9 @@ namespace API.Parser
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="rootPath">Root folder</param>
+        /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo Parse(string filePath, string rootPath)
+        public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
             var fileName = Path.GetFileName(filePath);
             var directoryName = (new FileInfo(filePath)).Directory?.Name;
@@ -286,9 +294,9 @@ namespace API.Parser
             
             var ret = new ParserInfo()
             {
-                Chapters = ParseChapter(fileName),
-                Series = ParseSeries(fileName),
-                Volumes = ParseVolume(fileName),
+                Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
+                Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
+                Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
                 Filename = fileName,
                 Format = ParseFormat(filePath),
                 FullFilePath = filePath
