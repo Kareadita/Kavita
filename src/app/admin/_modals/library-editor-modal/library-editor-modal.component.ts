@@ -46,6 +46,7 @@ export class LibraryEditorModalComponent implements OnInit {
     if (this.library !== undefined) {
       model.id = this.library.id;
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
+      model.type = parseInt(model.type, 10);
       this.libraryService.update(model).subscribe(() => {
         this.close(true);
       }, err => {
@@ -53,6 +54,7 @@ export class LibraryEditorModalComponent implements OnInit {
       });
     } else {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
+      model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
         this.close(true);
       }, err => {

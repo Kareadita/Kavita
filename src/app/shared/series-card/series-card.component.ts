@@ -71,7 +71,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   openEditModal(data: Series) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg', scrollable: true });
     modalRef.componentInstance.series = data;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
       window.scrollTo(0, 0);

@@ -447,7 +447,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canvas || !this.ctx) { return; }
 
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
-      this.toastr.error('Could not save bookmark status. Current page is: ' + this.pageNum);
+      //this.toastr.error('Could not save bookmark status. Current page is: ' + this.pageNum); // This seems to be firing for no reason.
     });
 
     this.isLoading = true;

@@ -16,7 +16,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   @Input() series!: Series;
   seriesVolumes: any[] = [];
-  //imageStyles = {width: '74px'};
   isLoadingVolumes = false;
 
   isCollapsed = true;

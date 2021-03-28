@@ -280,6 +280,10 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openChapter(chapter: Chapter) {
+    if (chapter.pages === 0) {
+      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+      return;
+    }
     this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
   }
 
