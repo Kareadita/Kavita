@@ -14,8 +14,7 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        //?: is a non-capturing group in C#, else anything in () will be a group
+        
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
             // Dance in the Vampire Bund v16-17
@@ -32,11 +31,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(vol\.? ?)(?<Volume>0*[1-9]+)",
+                @"(vol\.? ?)(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(volume )(?<Volume>0?[1-9]+)",
+                @"(volume )(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Tower Of God S01 014 (CBT) (digital).cbz
@@ -104,6 +103,10 @@ namespace API.Parser
             // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
             new Regex(
                 @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
+            new Regex(
+                @"(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(

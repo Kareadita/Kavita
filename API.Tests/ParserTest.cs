@@ -54,7 +54,7 @@ namespace API.Tests
         [InlineData("Kodomo no Jikan vol. 10.cbz", "10")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
         [InlineData("Vagabond_v03", "3")]
-        //[InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
+        [InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -110,7 +110,7 @@ namespace API.Tests
         [InlineData("Vagabond_v03", "Vagabond")]
         [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
-        //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
