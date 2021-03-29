@@ -55,6 +55,10 @@ namespace API.Tests
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
         [InlineData("Vagabond_v03", "3")]
         [InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
+        [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "3")]
+        [InlineData("Volume 12 - Janken Boy is Coming!.cbz", "12")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
+        [InlineData("Gantz.V26.cbz", "26")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -110,8 +114,18 @@ namespace API.Tests
         [InlineData("Vagabond_v03", "Vagabond")]
         [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "Mahoutsukai to Deshi no Futekisetsu na Kankei")]
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", "Beelzebub Side Story")]
-        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("[BAA]_Darker_than_Black_Omake-1.zip", "Darker than Black")]
+        [InlineData("Baketeriya ch01-05.zip", "Baketeriya")]
+        [InlineData("[PROzess]Kimi_ha_midara_na_Boku_no_Joou_-_Ch01", "Kimi ha midara na Boku no Joou")]
+        [InlineData("[SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar", "NEEDLESS")]
+        [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "Fullmetal Alchemist")]
+        [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "To Love Ru")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece")]
+        //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
+        [InlineData("Vol03_ch15-22.rar", "")]
+        [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
+        [InlineData("Ani-Hina Art Collection.cbz", "")] // This has to be a fallback case
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -157,6 +171,11 @@ namespace API.Tests
         [InlineData("To Love Ru v18 Uncensored (Ch.153-162.5)", "153-162.5")]
         [InlineData("[AN] Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1", "1")]
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", "2")]
+        [InlineData("[PROzess]Kimi_ha_midara_na_Boku_no_Joou_-_Ch01", "1")]
+        [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "101-108")]
+        [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "2")]
+        [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "71-79")]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -211,6 +230,8 @@ namespace API.Tests
         [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
         [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
         [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "Digital Colored Comics")]
+        [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, ParseEdition(input));
@@ -221,6 +242,8 @@ namespace API.Tests
         [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
         [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
         [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
+        [InlineData("Ani-Hina Art Collection.cbz", true)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, ParseMangaSpecial(input) != "");

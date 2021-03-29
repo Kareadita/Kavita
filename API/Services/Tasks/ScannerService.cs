@@ -148,13 +148,6 @@ namespace API.Services.Tasks
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
           
-          // For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
-          // foreach (var series in parsedSeries)
-          // {
-          //    var seriesName = series.Key;
-          //    if (parsedSeries.ContainsKey(seriesName))
-          // }
-          
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
           var missingSeries = library.Series.Where(existingSeries =>
@@ -190,7 +183,7 @@ namespace API.Services.Tasks
              existingSeries.NormalizedName = Parser.Parser.Normalize(key);
              existingSeries.LocalizedName ??= key;
           }
-          
+
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           var librarySeries = library.Series.ToList();
           Parallel.ForEach(librarySeries, (series) =>
@@ -320,7 +313,25 @@ namespace API.Services.Tasks
        private void TrackSeries(ParserInfo info)
        {
           if (info.Series == string.Empty) return;
-
+          
+          // Check if normalized info.Series already exists and if so, update info to use that name instead
+          var normalizedSeries = Parser.Parser.Normalize(info.Series);
+          var existingName = _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
+             .Key;
+          if (!string.IsNullOrEmpty(existingName))
+          {
+             _logger.LogInformation("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
+             info.Series = existingName;
+          }
+          
+          // TODO: For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
+          // foreach (var series in parsedSeries)
+          // {
+          //    var seriesName = series.Key;
+          //    if (parsedSeries.ContainsKey(seriesName))
+          // }
+          
+       
           _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
