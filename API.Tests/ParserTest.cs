@@ -343,6 +343,7 @@ namespace API.Tests
         [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
         [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
         [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")] 
+        [InlineData("C:/", "C:/Beelzebub/Beelzebub_Omake_June_2012_RHS.zip", "Beelzebub")] 
         public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
         {
             var actual = Parse(inputPath, rootDir);
