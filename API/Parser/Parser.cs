@@ -125,19 +125,19 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*", //fails on 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Baketeriya ch01-05.zip
             new Regex(
-                @"(?<Series>.*)ch\d+-?\d?",
+                @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_Omake-1.zip 
             new Regex(
-                @"(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
+                @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)( |_|-)(ch?)\d+",
+                @"^(?!Vol)(?<Series>.*)( |_|-)(ch?)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
         
@@ -327,7 +327,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Special|OneShot|One\-Shot|Omake|Extra)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
