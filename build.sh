@@ -65,11 +65,14 @@ Package()
     # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
     cd API
-    echo dotnet publish -c release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    dotnet publish -c release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
+    
+    echo "Copying LICENSE"
+    cp ../LICENSE "$lOutputFolder"/LICENSE.txt
     
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita

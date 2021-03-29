@@ -49,15 +49,15 @@ namespace API.Services.Tasks
        {
           // NOTE: This solution isn't the best, but it has potential. We need to handle a few other cases so it works great. 
           return false;
-          
-          // if (/*_environment.IsProduction() && */!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
+
+          // if (!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
           // {
-          //    _logger.LogDebug($"{folder.Path} hasn't been updated since last scan. Skipping.");
+          //    _logger.LogDebug("{FolderPath} hasn't been modified since last scan. Skipping", folder.Path);
           //    skippedFolders += 1;
           //    return true;
           // }
-          //
-          // return false;
+          
+          //return false;
        }
 
        private void Cleanup()
@@ -134,7 +134,6 @@ namespace API.Services.Tasks
 
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
-              
               _logger.LogInformation("Scan completed on {LibraryName}. Parsed {ParsedSeriesCount} series in {ElapsedScanTime} ms", library.Name, series.Keys.Count, sw.ElapsedMilliseconds);
            }
            else
@@ -184,7 +183,7 @@ namespace API.Services.Tasks
              existingSeries.NormalizedName = Parser.Parser.Normalize(key);
              existingSeries.LocalizedName ??= key;
           }
-          
+
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           var librarySeries = library.Series.ToList();
           Parallel.ForEach(librarySeries, (series) =>
@@ -222,7 +221,7 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0");
+             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial);
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
@@ -315,6 +314,24 @@ namespace API.Services.Tasks
        {
           if (info.Series == string.Empty) return;
           
+          // Check if normalized info.Series already exists and if so, update info to use that name instead
+          var normalizedSeries = Parser.Parser.Normalize(info.Series);
+          var existingName = _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
+             .Key;
+          if (!string.IsNullOrEmpty(existingName))
+          {
+             _logger.LogInformation("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
+             info.Series = existingName;
+          }
+          
+          // TODO: For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
+          // foreach (var series in parsedSeries)
+          // {
+          //    var seriesName = series.Key;
+          //    if (parsedSeries.ContainsKey(seriesName))
+          // }
+          
+       
           _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
