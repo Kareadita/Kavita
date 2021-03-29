@@ -40,6 +40,29 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
+       /// <summary>
+       /// Returns a list of folders from end of fullPath to rootPath.
+       ///
+       /// Example) (C:/Manga/, C:/Manga/Love Hina/Specials/Omake/) returns [Omake, Specials, Love Hina]
+       /// </summary>
+       /// <param name="rootPath"></param>
+       /// <param name="fullPath"></param>
+       /// <returns></returns>
+       public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
+       {
+          var path = fullPath.EndsWith(Path.AltDirectorySeparatorChar) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
+          var root = rootPath.EndsWith(Path.AltDirectorySeparatorChar) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
+          var paths = new List<string>();
+          while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
+          {
+             var folder = new DirectoryInfo(path).Name;
+             paths.Add(folder);
+             path = path.Replace(Path.AltDirectorySeparatorChar + folder, string.Empty); // + (path.EndsWith(Path.AltDirectorySeparatorChar) ? Path.AltDirectorySeparatorChar : string.Empty)
+          }
+
+          return paths;
+       }
+
        public bool Exists(string directory)
        {
           var di = new DirectoryInfo(directory);

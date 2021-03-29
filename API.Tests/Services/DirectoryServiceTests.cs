@@ -74,5 +74,15 @@ namespace API.Tests.Services
             Assert.DoesNotContain(dirs, s => s.Contains("regex"));
 
         }
+
+        [Theory]
+        [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake", "Omake,Specials,Love Hina")]
+        [InlineData("C:/Manga", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
+        {
+            var expected = expectedArray.Split(",");
+            Assert.Equal(expected, DirectoryService.GetFoldersTillRoot(rootPath, fullpath));
+        }
     }
 }
