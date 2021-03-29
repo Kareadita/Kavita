@@ -303,6 +303,7 @@ namespace API.Tests
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "2")]
+        [InlineData("Superman v1 024 (09-10 1943)", "1")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicVolume(filename));
@@ -322,6 +323,7 @@ namespace API.Tests
         [InlineData("Babe 01", "0")]
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        [InlineData("Superman v1 024 (09-10 1943)", "24")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicChapter(filename));
@@ -335,6 +337,22 @@ namespace API.Tests
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));
+        }
+        
+        [Theory]
+        [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
+        [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
+        [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
+        public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
+        {
+            var actual = Parse(inputPath, rootDir);
+            if (actual == null)
+            {
+                Assert.NotNull(actual);
+                return;
+            }
+            
+            Assert.Equal(expectedSeries, actual.Series);
         }
 
 
