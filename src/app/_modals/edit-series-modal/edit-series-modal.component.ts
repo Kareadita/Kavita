@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Series } from 'src/app/_models/series';
@@ -25,8 +25,7 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
 
 
-  constructor(private modalService: NgbModal,
-              public modal: NgbActiveModal,
+  constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
               public utilityService: UtilityService,
               private fb: FormBuilder,
