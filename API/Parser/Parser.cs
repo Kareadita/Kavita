@@ -344,9 +344,7 @@ namespace API.Parser
         public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
             var fileName = Path.GetFileName(filePath);
-            var directoryName = (new FileInfo(filePath)).Directory?.Name;
-            var rootName = (new DirectoryInfo(rootPath)).Name;
-            
+
             var ret = new ParserInfo()
             {
                 Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
@@ -356,13 +354,7 @@ namespace API.Parser
                 Format = ParseFormat(filePath),
                 FullFilePath = filePath
             };
-
-            // if (ret.Series == string.Empty && directoryName != null && directoryName != rootName)
-            // {
-            //     ret.Series = ParseSeries(directoryName);
-            //     if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
-            // }
-
+            
             if (ret.Series == string.Empty)
             {
                 // Try to parse information out of each folder all the way to rootPath
@@ -590,7 +582,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "");
+                        title = title.Replace(match.Value, "").Trim();
                     }
                 }
             }
@@ -602,7 +594,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "");
+                        title = title.Replace(match.Value, "").Trim();
                     }
                 }
             }
@@ -619,7 +611,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "");
+                        title = title.Replace(match.Value, "").Trim();
                     }
                 }
             }
