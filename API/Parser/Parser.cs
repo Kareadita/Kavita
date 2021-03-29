@@ -153,7 +153,7 @@ namespace API.Parser
             RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Wildcat (1 of 3)
             new Regex(
-            @"(?<Series>.*(\d{4})?)( |_)(?:\(\d+ of \d+)",
+            @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
@@ -201,11 +201,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
-                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
+                @"^(?<Series>.*)(?: |_)(?<!of )(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: (?<Volume>\d+))",
+                @"^(?<Series>.*)(?<!of)(?: (?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Robin the Teen Wonder #0
             new Regex(
