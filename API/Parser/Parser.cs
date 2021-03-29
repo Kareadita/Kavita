@@ -37,10 +37,13 @@ namespace API.Parser
             new Regex(
                 @"(volume )(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(   
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz
+            new Regex(   
+                @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
@@ -54,6 +57,10 @@ namespace API.Parser
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
+            new Regex(
+                @"(?<Series>.*) (\b|_|-)(vol)\.?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -96,7 +103,7 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)( |_)\((c |ch |chapter )",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Black Bullet (This is very loose, keep towards bottom) (?<Series>.*)(_)(v|vo|c|volume)
+            // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
@@ -106,15 +113,31 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)", // TODO: This is breaking a ton of cases
+                @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_|-)(\d+)", 
+                @"^(?<Series>.*)( |_)Vol\.?\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Fullmetal Alchemist chapters 101-108.cbz
+            new Regex(
+                @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            new Regex(
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Baketeriya ch01-05.zip
+            new Regex(
+                @"(?<Series>.*)ch\d+-?\d?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [BAA]_Darker_than_Black_Omake-1.zip 
+            new Regex(
+                @"(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
-                @"(?<Series>.*)( |_|-)(c)\d+",
+                @"(?<Series>.*)( |_|-)(ch?)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
         
@@ -238,11 +261,14 @@ namespace API.Parser
             new Regex(
                 @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Mob Psycho 100
+            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
+            new Regex(   
+                @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
-                @"^(?!Vol)(?<Series>.*) (?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?", 
+                @"^(?!Vol)(?<Series>.*) (?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?(\b|_|-)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
@@ -256,7 +282,7 @@ namespace API.Parser
             new Regex(
                 @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
+
         };
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
@@ -270,6 +296,14 @@ namespace API.Parser
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
                 @"(\b|_)(?<Edition>Uncensored)(\b|_)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
+            new Regex(
+                @"(\b|_)(?<Edition>Digital(?: |_)Colored(?: |_)Comics)(\b|_)?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz
+            new Regex(
+                @"(\b|_)(?<Edition>Full(?: |_)Color)(\b|_)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -430,7 +464,7 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Volume"] == Match.Empty) continue;
+                    if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
                     
                     var value = match.Groups["Volume"].Value;
                     if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
@@ -452,7 +486,7 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Volume"] == Match.Empty) continue;
+                    if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
                     
                     var value = match.Groups["Volume"].Value;
                     if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
@@ -474,20 +508,16 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Chapter"] != Match.Empty)
-                    {
-                        var value = match.Groups["Chapter"].Value;
+                    if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
+                    
+                    var value = match.Groups["Chapter"].Value;
 
-                        if (value.Contains("-"))
-                        {
-                            var tokens = value.Split("-");
-                            var from = RemoveLeadingZeroes(tokens[0]);
-                            var to = RemoveLeadingZeroes(tokens[1]);
-                            return $"{from}-{to}";
-                        }
-
-                        return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
-                    }
+                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                    
+                    var tokens = value.Split("-");
+                    var from = RemoveLeadingZeroes(tokens[0]);
+                    var to = RemoveLeadingZeroes(tokens[1]);
+                    return $"{@from}-{to}";
 
                 }
             }
@@ -502,7 +532,7 @@ namespace API.Parser
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
                 {
-                    if (match.Groups["Chapter"] != Match.Empty)
+                    if (match.Groups["Chapter"].Success && match.Groups["Chapter"] != Match.Empty)
                     {
                         var value = match.Groups["Chapter"].Value;
 
@@ -526,6 +556,18 @@ namespace API.Parser
         private static string RemoveEditionTagHolders(string title)
         {
             foreach (var regex in CleanupRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, "");
+                    }
+                }
+            }
+            
+            foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);
                 foreach (Match match in matches)

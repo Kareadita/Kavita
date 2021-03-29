@@ -324,7 +324,7 @@ namespace API.Services.Tasks
              info.Series = existingName;
           }
           
-          // For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
+          // TODO: For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
           // foreach (var series in parsedSeries)
           // {
           //    var seriesName = series.Key;

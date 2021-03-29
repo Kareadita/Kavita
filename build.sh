@@ -71,6 +71,9 @@ Package()
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
     
+    echo "Copying LICENSE"
+    cp ../LICENSE "$lOutputFolder"/LICENSE.txt
+    
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
