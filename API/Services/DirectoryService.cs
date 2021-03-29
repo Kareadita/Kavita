@@ -50,14 +50,25 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-          var path = fullPath.EndsWith(Path.AltDirectorySeparatorChar) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
-          var root = rootPath.EndsWith(Path.AltDirectorySeparatorChar) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
+          var separator = Path.AltDirectorySeparatorChar;
+          if (fullPath.Contains(Path.DirectorySeparatorChar))
+          {
+             fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+          }
+          
+          if (rootPath.Contains(Path.DirectorySeparatorChar))
+          {
+             rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+          }
+          
+          var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
+          var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
           var paths = new List<string>();
           while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
              var folder = new DirectoryInfo(path).Name;
              paths.Add(folder);
-             path = path.Replace(Path.AltDirectorySeparatorChar + folder, string.Empty); // + (path.EndsWith(Path.AltDirectorySeparatorChar) ? Path.AltDirectorySeparatorChar : string.Empty)
+             path = path.Replace(separator + folder, string.Empty);
           }
 
           return paths;

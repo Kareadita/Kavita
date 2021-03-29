@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
+using API.Services;
 
 namespace API.Parser
 {
@@ -356,10 +357,37 @@ namespace API.Parser
                 FullFilePath = filePath
             };
 
-            if (ret.Series == string.Empty && directoryName != null && directoryName != rootName)
+            // if (ret.Series == string.Empty && directoryName != null && directoryName != rootName)
+            // {
+            //     ret.Series = ParseSeries(directoryName);
+            //     if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
+            // }
+
+            if (ret.Series == string.Empty)
             {
-                ret.Series = ParseSeries(directoryName);
-                if (ret.Series == string.Empty) ret.Series = CleanTitle(directoryName);
+                // Try to parse information out of each folder all the way to rootPath
+                var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
+                for (var i = 0; i < fallbackFolders.Count; i++)
+                {
+                    var folder = fallbackFolders[i];
+                    if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
+                    if (ParseVolume(folder) != "0" || ParseChapter(folder) != "0") continue;
+
+                    var series = ParseSeries(folder);
+                    
+                    if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+                    {
+                        ret.Series = CleanTitle(folder);
+                        break;
+                    }
+
+                    if (!string.IsNullOrEmpty(series))
+                    {
+                        ret.Series = series;
+                        break;
+                    }
+                }
+                
             }
 
             var edition = ParseEdition(fileName);
