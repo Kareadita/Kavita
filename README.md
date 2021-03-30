@@ -17,6 +17,11 @@ your manga collection with your friends and family!
 * Metadata should allow for collections, want to read integration from 3rd party services, genres.
 * Ability to manage users, access, and ratings
 
+## How to Build
+1. Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui
+2. In Kavita-webui, run ng serve. This will start the webserver on localhost:4200
+3. Run API project in Kavita, this will start the backend on localhost:5000
+
 
 ## How to Deploy
 - Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
