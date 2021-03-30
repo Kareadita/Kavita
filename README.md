@@ -18,19 +18,22 @@ your manga collection with your friends and family!
 * Ability to manage users, access, and ratings
 
 ## How to Build
-1. Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui
-2. In Kavita-webui, run ng serve. This will start the webserver on localhost:4200
-3. Run API project in Kavita, this will start the backend on localhost:5000
+- Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui
+- In Kavita-webui, run ng serve. This will start the webserver on localhost:4200
+- Run API project in Kavita, this will start the backend on localhost:5000
 
 
 ## How to Deploy
 - Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 ## How to install
-1. Unzip the archive for your target OS
-2. Place in a directory that is writable. If on windows, do not place in Program Files
-3. Open appsettings.json and modify TokenKey to a random string ideally generated from [https://passwordsgenerator.net/](https://passwordsgenerator.net/)
-4. Run Kavita
+- Unzip the archive for your target OS
+- Place in a directory that is writable. If on windows, do not place in Program Files
+- Open appsettings.json and modify TokenKey to a random string ideally generated from [https://passwordsgenerator.net/](https://passwordsgenerator.net/)
+- Run Kavita
+
+## Docker
+- Docker is supported and tested, you can find the image and instructions [here](https://github.com/Kizaing/KavitaDocker). 
 
 ## Buy me a beer
 I've gone through many beers building Kavita and expect to go through many more. If you want to throw me a few bucks you can [here](https://paypal.me/majora2007?locale.x=en_US). Money will go 
