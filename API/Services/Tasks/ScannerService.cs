@@ -221,8 +221,10 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial);
+             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); // TODO: I don't think we need this as chapters now handle specials
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
+             // Remove any instances of Chapters with Range of 0. Range of 0 chapters are no longer supported.
+             //volume.Chapters = volume.Chapters.Where(c => c.IsSpecial && c.Files.Count > 1).ToList();
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
               _metadataService.UpdateMetadata(volume, _forceUpdate);
@@ -249,42 +251,66 @@ namespace API.Services.Tasks
        private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
        {
           var startingChapters = volume.Chapters.Count;
+          
+          
           // Add new chapters
           foreach (var info in parsedInfos)
           {
-             var chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             // Specials go into their own chapters with Range being their filename and IsSpecial = True
+             // BUG: If we have an existing chapter with Range == 0 and it has our file, we wont split. 
+             var chapter = info.IsSpecial ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
+                : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+
+             if (info.IsSpecial && chapter != null && chapter.Files.Count > 1)
+             {
+                var fileToKeep = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+                if (fileToKeep != null)
+                {
+                   chapter.Files = new List<MangaFile>()
+                   {
+                      fileToKeep
+                   };
+                }
+             }
+
+
              if (chapter == null)
              {
                 chapter = new Chapter()
                 {
                    Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
-                   Range = info.Chapters,
-                   Files = new List<MangaFile>()
+                   Range = info.IsSpecial ? info.Filename : info.Chapters,
+                   Files = new List<MangaFile>(),
+                   IsSpecial = info.IsSpecial
                 };
                 volume.Chapters.Add(chapter);
              }
+             
+             if (info.IsSpecial && chapter.Files.Count > 1)
+             {
+                // Split the Manga files into 2 separate chapters
+             }
 
              chapter.Files ??= new List<MangaFile>();
+             chapter.IsSpecial = info.IsSpecial;
           }
           
           // Add files
-          
           foreach (var info in parsedInfos)
           {
              Chapter chapter = null;
              try
              {
-                chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+                chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters || (info.IsSpecial && c.Range == info.Filename));
              }
              catch (Exception ex)
              {
                 _logger.LogError(ex, "There was an exception parsing chapter. Skipping Vol {VolumeNumber} Chapter {ChapterNumber}", volume.Name, info.Chapters);
              }
              if (chapter == null) continue;
-             // I need to reset Files for the first time, hence this work should be done in a separate loop
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
-             chapter.Range = info.Chapters;
+             chapter.Range = info.IsSpecial ? info.Filename : info.Chapters;
              chapter.Pages = chapter.Files.Sum(f => f.Pages);
              _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
@@ -295,11 +321,18 @@ namespace API.Services.Tasks
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
           {
-             var hasInfo = parsedInfos.Any(v => v.Chapters == existingChapter.Range);
+             var hasInfo = existingChapter.IsSpecial ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
+                : parsedInfos.Any(v => v.Chapters == existingChapter.Range);
+             
              if (!hasInfo || !existingChapter.Files.Any())
              {
                 volume.Chapters.Remove(existingChapter);
              }
+
+             // if (hasInfo && existingChapter.IsSpecial && existingChapter.Files.Count > 1)
+             // {
+             //    
+             // }
           }
           
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
@@ -318,20 +351,12 @@ namespace API.Services.Tasks
           var normalizedSeries = Parser.Parser.Normalize(info.Series);
           var existingName = _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
              .Key;
-          if (!string.IsNullOrEmpty(existingName))
+          if (!string.IsNullOrEmpty(existingName) && info.Series != existingName)
           {
-             _logger.LogInformation("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
+             _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);   
              info.Series = existingName;
           }
-          
-          // TODO: For all parsedSeries, any infos that contain same series name and IsSpecial is true are combined
-          // foreach (var series in parsedSeries)
-          // {
-          //    var seriesName = series.Key;
-          //    if (parsedSeries.ContainsKey(seriesName))
-          // }
-          
-       
+
           _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
@@ -357,7 +382,7 @@ namespace API.Services.Tasks
           
           if (info == null)
           {
-             _logger.LogWarning("Could not parse series from {Path}", path);
+             _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
              return;
           }
           

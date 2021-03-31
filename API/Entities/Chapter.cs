@@ -26,6 +26,10 @@ namespace API.Entities
         /// Total number of pages in all MangaFiles
         /// </summary>
         public int Pages { get; set; }
+        /// <summary>
+        /// If this Chapter contains files that could only be identified as Series or has Special Identifier from filename
+        /// </summary>
+        public bool IsSpecial { get; set; }
 
         // Relationships
         public Volume Volume { get; set; }
