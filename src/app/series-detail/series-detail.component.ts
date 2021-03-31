@@ -45,6 +45,9 @@ export class SeriesDetailComponent implements OnInit {
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
 
+  hasSpecials = false;
+  specials: Array<Chapter> = [];
+
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
@@ -173,6 +176,14 @@ export class SeriesDetailComponent implements OnInit {
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.setContinuePoint();
+        this.hasSpecials = this.chapters.filter(c => c.isSpecial).length > 0 ;
+        if (this.hasSpecials) {
+          this.specials = this.volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().filter(c => c.isSpecial).map(c => {
+            c.range = c.range.replace(/_/g, ' ');
+            return c;
+          });
+        }
+
         this.isLoading = false;
       });
     });
@@ -188,7 +199,7 @@ export class SeriesDetailComponent implements OnInit {
         continue;
       } else if (v.pagesRead >= v.pages - 1) {
         continue;
-      } else if (v.pagesRead < v.pages - 1) { // Issue is off by 1 again...
+      } else if (v.pagesRead < v.pages - 1) {
         this.currentlyReadingVolume = v;
         this.hasReadingProgress = true;
         break;
