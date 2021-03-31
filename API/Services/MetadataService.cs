@@ -32,19 +32,17 @@ namespace API.Services
 
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
        {
-          // TODO: Figure a way to skip UpdateMetadata:  && new FileInfo(chapter.Files.FirstOrDefault()?.FilePath).LastWriteTime < 
-          if (chapter != null && ShouldFindCoverImage(chapter.CoverImage, forceUpdate))
+          var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+          if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && new FileInfo(firstFile.FilePath).IsLastWriteOlder(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
-             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-             if (firstFile != null) chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
           }
        }
 
        
        public void UpdateMetadata(Volume volume, bool forceUpdate)
        {
-          // TODO: Figure a way to skip UpdateMetadata:  
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
              // TODO: Create a custom sorter for Chapters so it's consistent across the application
@@ -55,7 +53,7 @@ namespace API.Services
              // Skip calculating Cover Image (I/O) if the chapter already has it set
              if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
              {
-                if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
+                if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteOlder(firstFile.LastModified))
                 {
                    volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
                 }
