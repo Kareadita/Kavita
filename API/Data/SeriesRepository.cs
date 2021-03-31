@@ -302,22 +302,27 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
+
+            var seriesWithProgress = _context.Series
+                .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+                {
+                    Series = s,
+                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
+                    progress.AppUserId,
+                    progress.LastModified
+                })
+                .Where(s => s.AppUserId == userId
+                            && s.PagesRead > 0
+                            && s.PagesRead < s.Series.Pages
+                            && (libraryId <= 0 || s.Series.LibraryId == libraryId))
+                .Select(s => s.Series.Id);
+
+
             var series = await _context.Series
-                  .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-                  {
-                      Series = s,
-                      PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
-                      progress.AppUserId,
-                      progress.LastModified
-                  })
-                  .Where(s =>  s.AppUserId == userId 
-                              && s.PagesRead > 0
-                              && s.PagesRead < s.Series.Pages
-                              && (libraryId <= 0 || s.Series.LibraryId == libraryId) )
-                  .Take(limit)
+                .Where(s =>  seriesWithProgress.Contains(s.Id))
                   .OrderByDescending(s => s.LastModified)
-                  .Select(s => s.Series)
-                  .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                  .Take(limit)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                   .AsNoTracking()
                   .ToListAsync();
             return series.DistinctBy(s => s.Name);
