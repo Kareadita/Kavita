@@ -32,6 +32,7 @@ namespace API.Services
 
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
        {
+          // TODO: Figure a way to skip UpdateMetadata:  && new FileInfo(chapter.Files.FirstOrDefault()?.FilePath).LastWriteTime < 
           if (chapter != null && ShouldFindCoverImage(chapter.CoverImage, forceUpdate))
           {
              chapter.Files ??= new List<MangaFile>();
@@ -43,6 +44,7 @@ namespace API.Services
        
        public void UpdateMetadata(Volume volume, bool forceUpdate)
        {
+          // TODO: Figure a way to skip UpdateMetadata:  
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
              // TODO: Create a custom sorter for Chapters so it's consistent across the application
@@ -67,8 +69,6 @@ namespace API.Services
 
        public void UpdateMetadata(Series series, bool forceUpdate)
        {
-          // NOTE: this doesn't actually invoke finding a new cover. Also all these should be grouped ideally so we limit
-          // disk I/O to one method.
           if (series == null) return;
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
           {

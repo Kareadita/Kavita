@@ -55,4 +55,8 @@
     <Content Remove="obj\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="logs\kavita.json" />
+  </ItemGroup>
+
 </Project>

@@ -5,7 +5,7 @@ using API.Entities.Interfaces;
 namespace API.Entities
 {
     /// <summary>
-    /// Represents the progress a single user has on a given Volume. Progress is realistically tracked against the Volume's chapters.
+    /// Represents the progress a single user has on a given Chapter.
     /// </summary>
     public class AppUserProgress : IEntityDate
     {
