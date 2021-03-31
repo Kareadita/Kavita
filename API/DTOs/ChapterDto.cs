@@ -18,6 +18,10 @@ namespace API.DTOs
         /// </summary>
         public int Pages { get; init; }
         /// <summary>
+        /// If this Chapter contains files that could only be identified as Series or has Special Identifier from filename
+        /// </summary>
+        public bool IsSpecial { get; init; }
+        /// <summary>
         /// The files that represent this Chapter
         /// </summary>
         public ICollection<MangaFileDto> Files { get; init; }
