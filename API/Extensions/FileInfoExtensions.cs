@@ -10,9 +10,9 @@ namespace API.Extensions
             return comparison.Equals(fileInfo.LastWriteTime);
         }
         
-        public static bool IsLastWriteOlder(this FileInfo fileInfo, DateTime comparison)
+        public static bool IsLastWriteLessThan(this FileInfo fileInfo, DateTime comparison)
         {
-            return comparison > fileInfo.LastWriteTime;
+            return fileInfo.LastWriteTime < comparison;
         }
     }
 }

@@ -33,7 +33,7 @@ namespace API.Services
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
        {
           var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-          if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && new FileInfo(firstFile.FilePath).IsLastWriteOlder(firstFile.LastModified))
+          if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
              chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
@@ -53,7 +53,7 @@ namespace API.Services
              // Skip calculating Cover Image (I/O) if the chapter already has it set
              if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
              {
-                if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteOlder(firstFile.LastModified))
+                if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
                    volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
                 }
