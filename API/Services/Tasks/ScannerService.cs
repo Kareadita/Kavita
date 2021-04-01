@@ -223,26 +223,27 @@ namespace API.Services.Tasks
              
              volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); // TODO: I don't think we need this as chapters now handle specials
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
-             // Remove any instances of Chapters with Range of 0. Range of 0 chapters are no longer supported.
-             //volume.Chapters = volume.Chapters.Where(c => c.IsSpecial && c.Files.Count > 1).ToList();
+
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
-              _metadataService.UpdateMetadata(volume, _forceUpdate);
+             // NOTE: Volume is not getting State changed to Modified. It may get updated, but its nor updating LastModified volume.LastModified = DateTime.Now;
+             _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
           
           
 
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
-          var existingVolumes = series.Volumes.ToList();
-          foreach (var volume in existingVolumes)
-          {
-             // I can't remove based on chapter count as I haven't updated Chapters  || volume.Chapters.Count == 0
-             var hasInfo = parsedInfos.Any(v => v.Volumes == volume.Name);
-             if (!hasInfo)
-             {
-                series.Volumes.Remove(volume);
-             }
-          }
+          series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          //var existingVolumes = series.Volumes.ToList();
+          // foreach (var volume in existingVolumes)
+          // {
+          //    // I can't remove based on chapter count as I haven't updated Chapters  || volume.Chapters.Count == 0
+          //    var hasInfo = parsedInfos.Any(v => v.Volumes == volume.Name);
+          //    if (!hasInfo)
+          //    {
+          //       series.Volumes.Remove(volume);
+          //    }
+          // }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
              series.Name, startingVolumeCount, series.Volumes.Count);
@@ -258,7 +259,8 @@ namespace API.Services.Tasks
           {
              // Specials go into their own chapters with Range being their filename and IsSpecial = True
              // BUG: If we have an existing chapter with Range == 0 and it has our file, we wont split. 
-             var chapter = info.IsSpecial ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
+             var chapter = info.IsSpecial ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename 
+                   || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
                 : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
 
 
