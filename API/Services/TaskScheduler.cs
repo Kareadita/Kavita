@@ -6,7 +6,6 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -36,16 +35,17 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
 
-            if (!env.IsDevelopment())
-            {
-                ScheduleTasks();
-            }
-            else
-            {
-                RecurringJob.RemoveIfExists("scan-libraries");
-                RecurringJob.RemoveIfExists("backup");
-                RecurringJob.RemoveIfExists("cleanup");
-            }
+            // if (!env.IsDevelopment())
+            // {
+            //     ScheduleTasks();
+            // }
+            // else
+            // {
+            //     RecurringJob.RemoveIfExists("scan-libraries");
+            //     RecurringJob.RemoveIfExists("backup");
+            //     RecurringJob.RemoveIfExists("cleanup");
+            // }
+            ScheduleTasks();
             
         }
 
@@ -80,7 +80,6 @@ namespace API.Services
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
-            // TODO: We shouldn't queue up a job if one is already in progress
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change

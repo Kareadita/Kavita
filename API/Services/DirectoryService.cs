@@ -6,10 +6,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Services
 {

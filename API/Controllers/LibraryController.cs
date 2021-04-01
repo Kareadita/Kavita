@@ -164,23 +164,7 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
         }
-
-        [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
-        {
-            // TODO: Move this to SeriesController
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
-            
-            // Apply progress/rating information (I can't work out how to do this in initial query)
-            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            
-            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-            
-            return Ok(series);
-        }
-
+        
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
