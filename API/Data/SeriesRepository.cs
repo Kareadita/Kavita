@@ -315,13 +315,13 @@ namespace API.Data
                             && s.PagesRead > 0
                             && s.PagesRead < s.Series.Pages
                             && (libraryId <= 0 || s.Series.LibraryId == libraryId))
+                .OrderByDescending(s => s.LastModified)
+                .Take(limit)
                 .Select(s => s.Series.Id);
 
 
             var series = await _context.Series
                 .Where(s =>  seriesWithProgress.Contains(s.Id))
-                  .OrderByDescending(s => s.LastModified)
-                  .Take(limit)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                   .AsNoTracking()
                   .ToListAsync();

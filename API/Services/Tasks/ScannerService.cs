@@ -261,18 +261,6 @@ namespace API.Services.Tasks
              var chapter = info.IsSpecial ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
                 : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
 
-             if (info.IsSpecial && chapter != null && chapter.Files.Count > 1)
-             {
-                var fileToKeep = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-                if (fileToKeep != null)
-                {
-                   chapter.Files = new List<MangaFile>()
-                   {
-                      fileToKeep
-                   };
-                }
-             }
-
 
              if (chapter == null)
              {

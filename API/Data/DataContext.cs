@@ -47,11 +47,16 @@ namespace API.Data
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
         }
+
         
         void OnEntityTracked(object sender, EntityTrackedEventArgs e)
         {
             if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
+            {
                 entity.Created = DateTime.Now;
+                entity.LastModified = DateTime.Now;
+            }
+                
         }
 
         void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +20,16 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly DataContext _dataContext;
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
+            ILogger<ReaderController> logger, IUnitOfWork unitOfWork, DataContext dataContext)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _logger = logger;
             _unitOfWork = unitOfWork;
+            _dataContext = dataContext;
         }
 
         [HttpGet("image")]
@@ -218,7 +221,8 @@ namespace API.Controllers
                     PagesRead = bookmarkDto.PageNum,
                     VolumeId = bookmarkDto.VolumeId,
                     SeriesId = bookmarkDto.SeriesId,
-                    ChapterId = bookmarkDto.ChapterId
+                    ChapterId = bookmarkDto.ChapterId,
+                    LastModified = DateTime.Now
                 });
             }
             else
@@ -226,8 +230,9 @@ namespace API.Controllers
                 userProgress.PagesRead = bookmarkDto.PageNum;
                 userProgress.SeriesId = bookmarkDto.SeriesId;
                 userProgress.VolumeId = bookmarkDto.VolumeId;
+                userProgress.LastModified = DateTime.Now;
             }
-
+            
             _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.Complete())
