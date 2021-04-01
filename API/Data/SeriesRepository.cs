@@ -51,6 +51,18 @@ namespace API.Data
         {
             return await _context.Series.SingleOrDefaultAsync(x => x.Name == name);
         }
+
+        public async Task<bool> DoesSeriesNameExistInLibrary(string name)
+        {
+            var libraries = _context.Series
+                .AsNoTracking()
+                .Where(x => x.Name == name)
+                .Select(s => s.LibraryId);
+
+            return await _context.Series
+                .AsNoTracking()
+                .AnyAsync(s => libraries.Contains(s.LibraryId) && s.Name == name);
+        }
         
         public Series GetSeriesByName(string name)
         {
