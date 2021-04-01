@@ -22,7 +22,7 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format);
+            return File(content, "image/" + format, $"chapterId");
         }
 
         [HttpGet("volume-cover")]
@@ -33,7 +33,7 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format);
+            return File(content, "image/" + format, $"volumeId");
         }
         
         [HttpGet("series-cover")]
@@ -44,7 +44,7 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format);
+            return File(content, "image/" + format, $"seriesId");
         }
     }
 }
