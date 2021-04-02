@@ -61,7 +61,8 @@ namespace API.Data
 
             return await _context.Series
                 .AsNoTracking()
-                .AnyAsync(s => libraries.Contains(s.LibraryId) && s.Name == name);
+                .Where(s => libraries.Contains(s.LibraryId) && s.Name == name)
+                .CountAsync() > 1;
         }
         
         public Series GetSeriesByName(string name)
