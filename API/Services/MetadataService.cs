@@ -74,6 +74,7 @@ namespace API.Services
              var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
              if (firstCover == null && series.Volumes.Any())
              {
+                // BUG: Specials can still produce Series Cover image
                 firstCover = series.Volumes.FirstOrDefault(x => x.Number == 0);
              }
              series.CoverImage = firstCover?.CoverImage;
@@ -88,22 +89,22 @@ namespace API.Services
           if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
           {
              series.Summary = _archiveService.GetSummaryInfo(firstFile.FilePath);
+             firstFile.LastModified = DateTime.Now;
           }
        }
+       
        
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();
-          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
-          var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
-          
+          Library library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
-          foreach (var series in allSeries)
+          foreach (var series in library.Series)
           {
              series.NormalizedName = Parser.Parser.Normalize(series.Name);
              
-             var volumes = Task.Run(() => _unitOfWork.SeriesRepository.GetVolumes(series.Id)).Result.ToList();
-             foreach (var volume in volumes)
+             foreach (var volume in series.Volumes)
              {
                 foreach (var chapter in volume.Chapters)
                 {
