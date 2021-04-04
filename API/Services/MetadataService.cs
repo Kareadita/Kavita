@@ -45,7 +45,7 @@ namespace API.Services
        {
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
-             // TODO: Create a custom sorter for Chapters so it's consistent across the application
+             // TODO: Replace this with ChapterSortComparator
              volume.Chapters ??= new List<Chapter>();
              var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
              
