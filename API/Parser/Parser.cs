@@ -9,11 +9,11 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string MangaFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -697,7 +697,7 @@ namespace API.Parser
         
         public static bool IsArchive(string filePath)
         {
-            return MangaFileRegex.IsMatch(Path.GetExtension(filePath));
+            return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsImage(string filePath)
