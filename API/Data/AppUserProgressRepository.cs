@@ -19,7 +19,6 @@ namespace API.Data
         /// </summary>
         public async Task<bool> CleanupAbandonedChapters()
         {
-            //SELECT * from AppUserProgresses as AUP WHERE ChapterId NOT IN (SELECT Id From Chapter);
             var chapterIds = _context.Chapter.Select(c => c.Id);
 
             var rowsToRemove = await _context.AppUserProgresses

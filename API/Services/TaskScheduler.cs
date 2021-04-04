@@ -74,12 +74,6 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); 
         }
 
-        public void ScanSeries(int seriesId, bool forceUpdate = false)
-        {
-            _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
-        }
-
         public void CleanupChapters(int[] chapterIds)
         {
             BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));

@@ -84,25 +84,5 @@ namespace API.Data
                 .AsNoTracking()
                 .ToListAsync();
         }
-
-        public IList<MangaFile> GetFilesForSeries(int seriesId)
-        {
-            var volumes = _context.Volume
-                .Where(v => v.SeriesId == seriesId)
-                .AsNoTracking()
-                .Select(v => v.Id)
-                .ToList();
-            
-            var chapters = _context.Chapter
-                .Where(c => volumes.Contains(c.VolumeId))
-                .AsNoTracking()
-                .Select(c => c.Id)
-                .ToList();
-            
-            return _context.MangaFile
-                .Where(c => chapters.Contains(c.ChapterId))
-                .AsNoTracking()
-                .ToList();
-        }
     }
 }

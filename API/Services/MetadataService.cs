@@ -97,7 +97,7 @@ namespace API.Services
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();
-          Library library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
 
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
           foreach (var series in library.Series)

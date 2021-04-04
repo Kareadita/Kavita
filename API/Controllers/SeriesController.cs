@@ -152,13 +152,5 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
         }
-        
-        [Authorize(Policy = "RequireAdminRole")]
-        [HttpPost("scan")]
-        public ActionResult Scan(int seriesId)
-        {
-            _taskScheduler.ScanSeries(seriesId);
-            return Ok();
-        }
     }
 }

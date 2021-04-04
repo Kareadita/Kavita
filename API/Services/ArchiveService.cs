@@ -10,6 +10,7 @@ using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using Image = NetVips.Image;
@@ -22,7 +23,8 @@ namespace API.Services
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
-        private const int ThumbnailWidth = 320; // 153w x 230h TODO: Look into optimizing the images to be smaller
+        private const int ThumbnailWidth = 320; // 153w x 230h
+        private static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
 
         public ArchiveService(ILogger<ArchiveService> logger)
         {
@@ -152,10 +154,12 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower() == "folder")
                 {
-                    using var ms = new MemoryStream();
+                    //using var ms = new MemoryStream();
+                    using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;
-                    return createThumbnail ? CreateThumbnail(ms.ToArray(), Path.GetExtension(entry.Key)) : ms.ToArray();
+                    var data = ms.ToArray();
+                    return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
                 }
             }
 
@@ -163,7 +167,8 @@ namespace API.Services
             {
                 var entry = images.OrderBy(e => e.Key).FirstOrDefault();
                 if (entry == null) return Array.Empty<byte>();
-                using var ms = new MemoryStream();
+                //using var ms = new MemoryStream();
+                using var ms = _streamManager.GetStream();
                 entry.WriteTo(ms);
                 ms.Position = 0;
                 var data = ms.ToArray();
@@ -176,11 +181,11 @@ namespace API.Services
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            using var ms = new MemoryStream();
+            //using var ms = new MemoryStream();
+            using var ms = _streamManager.GetStream();
             stream.CopyTo(ms);
-            var data = ms.ToArray();
-
-            return data;
+            //var data = ms.ToArray();
+            return ms.ToArray();
         }
         
         /// <summary>
@@ -263,7 +268,8 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && Parser.Parser.IsXml(entry.Key))
                 {
-                    using var ms = new MemoryStream();
+                    //using var ms = new MemoryStream();
+                    using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;
 
