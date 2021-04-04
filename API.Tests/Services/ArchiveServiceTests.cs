@@ -128,10 +128,11 @@ namespace API.Tests.Services
         }
 
         [Theory]
-        [InlineData("06_v01[DMM].zip")]
+        [InlineData("Archives/06_v01[DMM].zip")]
+        [InlineData("Formats/One File with DB_Supported.zip")]
         public void CanParseCoverImage(string inputFile)
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
             Assert.NotEmpty(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
         }
 

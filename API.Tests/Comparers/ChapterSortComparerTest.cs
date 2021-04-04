@@ -2,7 +2,7 @@
 using API.Comparators;
 using Xunit;
 
-namespace API.Tests
+namespace API.Tests.Comparers
 {
     public class ChapterSortComparerTest
     {

@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace API.Comparators
 {
-    public class NaturalSortComparer<T> : IComparer<string>, IDisposable
+    public class NaturalSortComparer : IComparer<string>, IDisposable
     {
         private readonly bool _isAscending;
 

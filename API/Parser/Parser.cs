@@ -22,6 +22,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
+            new Regex(
+                @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
@@ -144,6 +148,10 @@ namespace API.Parser
         
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
+            // Invincible Vol 01 Family matters (2005) (Digital)
+            new Regex(
+                @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
             @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
