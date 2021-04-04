@@ -177,6 +177,8 @@ namespace API.Tests
         [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "2")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "71-79")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
+        [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
+        [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));

@@ -283,9 +283,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+(?:.\d+|-\d+)?)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Beelzebub_01_[Noodles].zip
+            // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)( |_|\[|\()", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<ChapterPart>b)?( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
@@ -539,18 +539,36 @@ namespace API.Parser
                     if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
                     
                     var value = match.Groups["Chapter"].Value;
+                    var hasChapterPart = match.Groups["ChapterPart"].Success;
 
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                    if (!value.Contains("-"))
+                    {
+                        if (hasChapterPart)
+                        {
+                            value = AddChapterPart(value);
+                        }
+                        return RemoveLeadingZeroes(value);
+                    }
                     
                     var tokens = value.Split("-");
                     var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
+                    var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
                     return $"{@from}-{to}";
 
                 }
             }
 
             return "0";
+        }
+
+        private static string AddChapterPart(string value)
+        {
+            if (value.Contains("."))
+            {
+                return value;
+            }
+
+            return $"{value}.5";
         }
         
         public static string ParseComicChapter(string filename)
