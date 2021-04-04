@@ -74,8 +74,7 @@ namespace API.Services
              var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
              if (firstCover == null && series.Volumes.Any())
              {
-                // BUG: Specials can still produce Series Cover image
-                firstCover = series.Volumes.FirstOrDefault(x => x.Number == 0);
+                firstCover = series.Volumes.FirstOrDefault(x => x.Number == 0 && !x.IsSpecial);
              }
              series.CoverImage = firstCover?.CoverImage;
           }
