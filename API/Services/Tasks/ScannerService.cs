@@ -34,8 +34,10 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
        }
 
-       [DisableConcurrentExecution(timeoutInSeconds: 5)] 
-       [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+       
+
+       [DisableConcurrentExecution(timeoutInSeconds: 360)] 
+       //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
@@ -65,8 +67,8 @@ namespace API.Services.Tasks
           _scannedSeries = null;
        }
 
-       [DisableConcurrentExecution(5)]
-       [AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+       [DisableConcurrentExecution(360)]
+       //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           _forceUpdate = forceUpdate;
@@ -132,6 +134,7 @@ namespace API.Services.Tasks
            UpdateLibrary(library, series);
            _unitOfWork.LibraryRepository.Update(library);
 
+
            if (Task.Run(() => _unitOfWork.Complete()).Result)
            {
               _logger.LogInformation("Scan completed on {LibraryName}. Parsed {ParsedSeriesCount} series in {ElapsedScanTime} ms", library.Name, series.Keys.Count, sw.ElapsedMilliseconds);
@@ -142,6 +145,19 @@ namespace API.Services.Tasks
            }
            
            _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+           
+           // Cleanup any user progress that doesn't exist
+           var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
+           if (cleanedUp)
+           {
+              _logger.LogInformation("Removed all abandoned progress rows");
+           }
+           else
+           {
+              _logger.LogWarning("There are abandoned user progress entities in the DB. In Progress activity stream will be skewed");
+           }
+
+           BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
        }
 
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
@@ -191,7 +207,6 @@ namespace API.Services.Tasks
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
              UpdateVolumes(series, parsedSeries[series.Name].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
-             _metadataService.UpdateMetadata(series, _forceUpdate);
           });
           
 
@@ -221,29 +236,16 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); // TODO: I don't think we need this as chapters now handle specials
+             // TODO: I don't think we need this as chapters now handle specials
+             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); 
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
 
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
-             // NOTE: Volume is not getting State changed to Modified. It may get updated, but its nor updating LastModified volume.LastModified = DateTime.Now;
-             _metadataService.UpdateMetadata(volume, _forceUpdate);
           }
-          
-          
 
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
           series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
-          //var existingVolumes = series.Volumes.ToList();
-          // foreach (var volume in existingVolumes)
-          // {
-          //    // I can't remove based on chapter count as I haven't updated Chapters  || volume.Chapters.Count == 0
-          //    var hasInfo = parsedInfos.Any(v => v.Volumes == volume.Name);
-          //    if (!hasInfo)
-          //    {
-          //       series.Volumes.Remove(volume);
-          //    }
-          // }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
              series.Name, startingVolumeCount, series.Volumes.Count);
@@ -257,9 +259,10 @@ namespace API.Services.Tasks
           // Add new chapters
           foreach (var info in parsedInfos)
           {
+             var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              // Specials go into their own chapters with Range being their filename and IsSpecial = True
-             // BUG: If we have an existing chapter with Range == 0 and it has our file, we wont split. 
-             var chapter = info.IsSpecial ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename 
+             // BUG: If we have a file with series, but 0 volume, 0 chapter, it won't group as a special
+             var chapter = specialTreatment ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename 
                    || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
                 : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
 
@@ -269,16 +272,11 @@ namespace API.Services.Tasks
                 chapter = new Chapter()
                 {
                    Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
-                   Range = info.IsSpecial ? info.Filename : info.Chapters,
+                   Range = specialTreatment ? info.Filename : info.Chapters,
                    Files = new List<MangaFile>(),
                    IsSpecial = info.IsSpecial
                 };
                 volume.Chapters.Add(chapter);
-             }
-             
-             if (info.IsSpecial && chapter.Files.Count > 1)
-             {
-                // Split the Manga files into 2 separate chapters
              }
 
              chapter.Files ??= new List<MangaFile>();
@@ -288,10 +286,11 @@ namespace API.Services.Tasks
           // Add files
           foreach (var info in parsedInfos)
           {
+             var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              Chapter chapter = null;
              try
              {
-                chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters || (info.IsSpecial && c.Range == info.Filename));
+                chapter = volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters || (specialTreatment && c.Range == info.Filename));
              }
              catch (Exception ex)
              {
@@ -300,29 +299,25 @@ namespace API.Services.Tasks
              if (chapter == null) continue;
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
-             chapter.Range = info.IsSpecial ? info.Filename : info.Chapters;
+             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
              chapter.Pages = chapter.Files.Sum(f => f.Pages);
-             _metadataService.UpdateMetadata(chapter, _forceUpdate);
           }
           
           
           
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
+          int i = 0;
           foreach (var existingChapter in existingChapters)
           {
-             var hasInfo = existingChapter.IsSpecial ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
+             var specialTreatment = (existingChapter.IsSpecial || (existingChapter.Number == "0" && !int.TryParse(existingChapter.Range, out i)));
+             var hasInfo = specialTreatment ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
                 : parsedInfos.Any(v => v.Chapters == existingChapter.Range);
              
              if (!hasInfo || !existingChapter.Files.Any())
              {
                 volume.Chapters.Remove(existingChapter);
              }
-
-             // if (hasInfo && existingChapter.IsSpecial && existingChapter.Files.Count > 1)
-             // {
-             //    
-             // }
           }
           
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
