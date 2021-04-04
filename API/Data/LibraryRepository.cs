@@ -38,6 +38,7 @@ namespace API.Data
             return await _context.Library
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(x => x.UserName == userName))
+                .OrderBy(l => l.Name)
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
