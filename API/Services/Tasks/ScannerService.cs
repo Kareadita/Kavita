@@ -22,8 +22,6 @@ namespace API.Services.Tasks
        private readonly ILogger<ScannerService> _logger;
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
-       private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
-       private bool _forceUpdate;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
           IMetadataService metadataService)
@@ -34,7 +32,99 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
        }
 
-       
+       public void ScanSeries(int seriesId, bool forceUpdate)
+       {
+          _logger.LogInformation("Beginning ScanSeries for {SeriesId}", seriesId);
+          var series = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId)).GetAwaiter().GetResult(); 
+          if (series == null) return;
+
+          var files = _unitOfWork.VolumeRepository.GetFilesForSeries(seriesId)
+             .Select(file => file.FilePath)
+             .ToList();
+
+          if (files.Count == 0) return;
+
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId)).GetAwaiter().GetResult();
+          var folderRoots = library.Folders.Select(f => f.Path).ToList();
+
+          Dictionary<string, string> folders = new Dictionary<string, string>();
+          foreach (var filepath in files)
+          {
+             foreach (var folder in folderRoots)
+             {
+                var directoryPaths = DirectoryService.GetFoldersTillRoot(folder, Path.GetDirectoryName(filepath));
+
+                foreach (var path in directoryPaths)
+                {
+                   folders.TryAdd(path, Path.Join(folder, path));
+                }
+             }
+          }
+          
+          _logger.LogInformation("Found {Count} base folders", folders.Keys.Count);
+          
+          // Scan & collect parsed infos then process
+          var scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+          var totalFiles = 0;
+          var skippedFolders = 0;
+          foreach (var folderPath in folders.Values)
+          {
+             try {
+                totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath, (f) =>
+                {
+                   try
+                   {
+                      ProcessFile(f, folderPath, library.Type, scannedSeries);
+                   }
+                   catch (FileNotFoundException exception)
+                   {
+                      _logger.LogError(exception, "The file {Filename} could not be found", f);
+                   }
+                }, Parser.Parser.ArchiveFileExtensions);
+             }
+             catch (ArgumentException ex) {
+                _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath);
+             }
+          }
+          
+          var filtered = scannedSeries.Where(kvp => kvp.Value.Count != 0);
+          var seriesDict = filtered.ToDictionary(v => v.Key, v => v.Value);
+
+          UpdateLibrary(library, seriesDict);
+          _unitOfWork.LibraryRepository.Update(library);
+
+
+          if (Task.Run(() => _unitOfWork.Complete()).Result)
+          {
+             //_logger.LogInformation("Scan completed on {LibraryName}. Parsed {ParsedSeriesCount} series in {ElapsedScanTime} ms", library.Name, series.Keys.Count, sw.ElapsedMilliseconds);
+          }
+          else
+          {
+             _logger.LogError("There was a critical error that resulted in a failed scan. Please check logs and rescan");
+          }
+           
+             
+           
+          // Cleanup any user progress that doesn't exist
+          var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
+          if (cleanedUp)
+          {
+             _logger.LogInformation("Removed all abandoned progress rows");
+          }
+          else
+          {
+             _logger.LogWarning("There are abandoned user progress entities in the DB. In Progress activity stream will be skewed");
+          }
+          
+          
+          //_logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {SeriesName}", totalFiles, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
+          
+          
+          
+          
+          
+          
+       }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)] 
        //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -62,22 +152,15 @@ namespace API.Services.Tasks
           //return false;
        }
 
-       private void Cleanup()
-       {
-          _scannedSeries = null;
-       }
-
        [DisableConcurrentExecution(360)]
        //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
-          _forceUpdate = forceUpdate;
           var sw = Stopwatch.StartNew();
-          Cleanup();
-           Library library;
+          Library library;
            try
            {
-              library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+              library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
            }
            catch (Exception ex)
            {
@@ -86,8 +169,10 @@ namespace API.Services.Tasks
               return;
            }
            
-           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+           
            _logger.LogInformation("Beginning scan on {LibraryName}. Forcing metadata update: {ForceUpdate}", library.Name, forceUpdate);
+           
+           var scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
 
            var totalFiles = 0;
            var skippedFolders = 0;
@@ -100,13 +185,13 @@ namespace API.Services.Tasks
                  {
                     try
                     {
-                       ProcessFile(f, folderPath.Path, library.Type);
+                       ProcessFile(f, folderPath.Path, library.Type, scannedSeries);
                     }
                     catch (FileNotFoundException exception)
                     {
                        _logger.LogError(exception, "The file {Filename} could not be found", f);
                     }
-                 }, Parser.Parser.MangaFileExtensions);
+                 }, Parser.Parser.ArchiveFileExtensions);
               }
               catch (ArgumentException ex) {
                  _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath.Path);
@@ -123,14 +208,13 @@ namespace API.Services.Tasks
               _logger.LogInformation("All Folders were skipped due to no modifications to the directories");
               _unitOfWork.LibraryRepository.Update(library);
               _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, sw.ElapsedMilliseconds, library.Name);
-              Cleanup();
               return;
            }
-
-           // Remove any series where there were no parsed infos
-           var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
-           var series = filtered.ToDictionary(v => v.Key, v => v.Value);
            
+           // Remove any series where there were no parsed infos
+           var filtered = scannedSeries.Where(kvp => kvp.Value.Count != 0);
+           var series = filtered.ToDictionary(v => v.Key, v => v.Value);
+
            UpdateLibrary(library, series);
            _unitOfWork.LibraryRepository.Update(library);
 
@@ -159,6 +243,59 @@ namespace API.Services.Tasks
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
        }
+
+       // private bool FindAndProcessFiles(Library library, Stopwatch sw, out int totalFiles, out long scanElapsedTime,
+       //    out Dictionary<string, List<ParserInfo>> series)
+       // {
+       //    // TODO: Make this instanced to the current loop so ScanLibrary and ScanSeries can run in parallel.
+       //    _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+       //    totalFiles = 0;
+       //    var skippedFolders = 0;
+       //    foreach (var folderPath in library.Folders)
+       //    {
+       //       if (ShouldSkipFolderScan(folderPath, ref skippedFolders)) continue;
+       //
+       //       try
+       //       {
+       //          totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
+       //          {
+       //             try
+       //             {
+       //                ProcessFile(f, folderPath.Path, library.Type);
+       //             }
+       //             catch (FileNotFoundException exception)
+       //             {
+       //                _logger.LogError(exception, "The file {Filename} could not be found", f);
+       //             }
+       //          }, Parser.Parser.ArchiveFileExtensions);
+       //       }
+       //       catch (ArgumentException ex)
+       //       {
+       //          _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath.Path);
+       //       }
+       //
+       //       folderPath.LastScanned = DateTime.Now;
+       //    }
+       //
+       //    scanElapsedTime = sw.ElapsedMilliseconds;
+       //    _logger.LogInformation("Folders Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
+       //       scanElapsedTime);
+       //    sw.Restart();
+       //    if (skippedFolders == library.Folders.Count)
+       //    {
+       //       _logger.LogInformation("All Folders were skipped due to no modifications to the directories");
+       //       _unitOfWork.LibraryRepository.Update(library);
+       //       _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}",
+       //          totalFiles, sw.ElapsedMilliseconds, library.Name);
+       //       Cleanup();
+       //       return true;
+       //    }
+       //
+       //    // Remove any series where there were no parsed infos
+       //    var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
+       //    series = filtered.ToDictionary(v => v.Key, v => v.Value);
+       //    return false;
+       // }
 
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
@@ -236,7 +373,7 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             // TODO: I don't think we need this as chapters now handle specials
+             // NOTE: I don't think we need this as chapters now handle specials
              volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); 
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
 
@@ -260,8 +397,8 @@ namespace API.Services.Tasks
           foreach (var info in parsedInfos)
           {
              var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
-             // Specials go into their own chapters with Range being their filename and IsSpecial = True
-             // BUG: If we have a file with series, but 0 volume, 0 chapter, it won't group as a special
+             // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
+             // also are treated like specials but without the flag.
              var chapter = specialTreatment ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename 
                    || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
                 : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
@@ -328,13 +465,14 @@ namespace API.Services.Tasks
        /// Attempts to either add a new instance of a show mapping to the scannedSeries bag or adds to an existing.
        /// </summary>
        /// <param name="info"></param>
-       private void TrackSeries(ParserInfo info)
+       /// <param name="scannedSeries"></param>
+       private void TrackSeries(ParserInfo info, ConcurrentDictionary<string, List<ParserInfo>> scannedSeries)
        {
           if (info.Series == string.Empty) return;
           
           // Check if normalized info.Series already exists and if so, update info to use that name instead
           var normalizedSeries = Parser.Parser.Normalize(info.Series);
-          var existingName = _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
+          var existingName = scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
              .Key;
           if (!string.IsNullOrEmpty(existingName) && info.Series != existingName)
           {
@@ -342,7 +480,7 @@ namespace API.Services.Tasks
              info.Series = existingName;
           }
 
-          _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
+          scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
              if (!oldValue.Contains(info))
@@ -361,7 +499,8 @@ namespace API.Services.Tasks
        /// <param name="path">Path of a file</param>
        /// <param name="rootPath"></param>
        /// <param name="type">Library type to determine parsing to perform</param>
-       private void ProcessFile(string path, string rootPath, LibraryType type)
+       /// <param name="scannedSeries"></param>
+       private void ProcessFile(string path, string rootPath, LibraryType type, ConcurrentDictionary<string, List<ParserInfo>> scannedSeries)
        {
           var info = Parser.Parser.Parse(path, rootPath, type);
           
@@ -371,7 +510,7 @@ namespace API.Services.Tasks
              return;
           }
           
-          TrackSeries(info);
+          TrackSeries(info, scannedSeries);
        }
 
        private MangaFile CreateMangaFile(ParserInfo info)

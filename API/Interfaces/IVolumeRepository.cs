@@ -11,6 +11,7 @@ namespace API.Interfaces
         Task<Chapter> GetChapterAsync(int chapterId);
         Task<ChapterDto> GetChapterDtoAsync(int chapterId);
         Task<IList<MangaFile>> GetFilesForChapter(int chapterId);
+        IList<MangaFile> GetFilesForSeries(int seriesId);
         Task<IList<Chapter>> GetChaptersAsync(int volumeId);
         Task<byte[]> GetChapterCoverImageAsync(int chapterId);
     }

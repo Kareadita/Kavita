@@ -5,7 +5,6 @@ using API.Helpers.Converters;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -24,8 +23,7 @@ namespace API.Services
         
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
-            IWebHostEnvironment env)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -35,18 +33,7 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
 
-            // if (!env.IsDevelopment())
-            // {
-            //     ScheduleTasks();
-            // }
-            // else
-            // {
-            //     RecurringJob.RemoveIfExists("scan-libraries");
-            //     RecurringJob.RemoveIfExists("backup");
-            //     RecurringJob.RemoveIfExists("cleanup");
-            // }
             ScheduleTasks();
-            
         }
 
         public void ScheduleTasks()
@@ -56,8 +43,9 @@ namespace API.Services
             string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Scan Library Task for {Cron}", setting);
-                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting));
+                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", setting);
+                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), 
+                    () => CronConverter.ConvertToCronNotation(setting));
             }
             else
             {
@@ -67,7 +55,7 @@ namespace API.Services
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Result.Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Backup Task for {Cron}", setting);
+                _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
                 RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
             }
             else
@@ -82,7 +70,14 @@ namespace API.Services
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
-            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
+            // When we do a scan, force cache to re-unpack in case page numbers change
+            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); 
+        }
+
+        public void ScanSeries(int seriesId, bool forceUpdate = false)
+        {
+            _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
+            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
         }
 
         public void CleanupChapters(int[] chapterIds)
