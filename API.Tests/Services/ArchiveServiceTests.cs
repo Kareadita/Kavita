@@ -60,6 +60,7 @@ namespace API.Tests.Services
         [InlineData("file in folder_alt.zip", 1)]
         [InlineData("macos_none.zip", 0)]
         [InlineData("macos_one.zip", 1)]
+        [InlineData("macos_native.zip", 21)]
         public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
@@ -120,6 +121,7 @@ namespace API.Tests.Services
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
         [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
         //[InlineData("png.zip", "png.PNG")]
+        [InlineData("macos_native.zip", "macos_native.jpg")]
         public void GetCoverImageTest(string inputFile, string expectedOutputFile)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
@@ -130,7 +132,7 @@ namespace API.Tests.Services
         }
 
         [Theory]
-        [InlineData("Archives/06_v01[DMM].zip")]
+        [InlineData("Archives/macos_native.zip")]
         [InlineData("Formats/One File with DB_Supported.zip")]
         public void CanParseCoverImage(string inputFile)
         {
