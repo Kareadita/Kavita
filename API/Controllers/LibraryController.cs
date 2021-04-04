@@ -155,7 +155,7 @@ namespace API.Controllers
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshMetadata(int libraryId)
         {
-            _taskScheduler.ScanLibrary(libraryId, true);
+            _taskScheduler.RefreshMetadata(libraryId);
             return Ok();
         }
 
