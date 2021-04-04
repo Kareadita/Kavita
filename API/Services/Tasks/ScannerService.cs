@@ -318,13 +318,13 @@ namespace API.Services.Tasks
                    Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
                    Range = specialTreatment ? info.Filename : info.Chapters,
                    Files = new List<MangaFile>(),
-                   IsSpecial = info.IsSpecial
+                   IsSpecial = specialTreatment
                 };
                 volume.Chapters.Add(chapter);
              }
 
              chapter.Files ??= new List<MangaFile>();
-             chapter.IsSpecial = info.IsSpecial;
+             chapter.IsSpecial = specialTreatment;
           }
           
           // Add files
