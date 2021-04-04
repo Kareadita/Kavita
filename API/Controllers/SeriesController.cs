@@ -121,9 +121,9 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
             
-            if (await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
+            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
             {
-                return BadRequest("A series already exists in this library with this name. Name must be unique.");
+                return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
             series.Name = updateSeries.Name;
             series.LocalizedName = updateSeries.LocalizedName;
@@ -151,6 +151,14 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
+        }
+        
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("scan")]
+        public ActionResult Scan(int seriesId)
+        {
+            _taskScheduler.ScanSeries(seriesId);
+            return Ok();
         }
     }
 }
