@@ -15,6 +15,7 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex FolderRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -724,7 +725,7 @@ namespace API.Parser
 
         public static bool IsImage(string filePath)
         {
-            if (filePath.StartsWith(".")) return false;
+            if (filePath.StartsWith(".") || filePath.StartsWith("!")) return false;
             return ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
         
@@ -742,6 +743,21 @@ namespace API.Parser
         public static string Normalize(string name)
         {
             return name.ToLower().Replace("-", "").Replace(" ", "").Replace(":", "");
+        }
+
+        /// <summary>
+        /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static bool IsCoverImage(string name)
+        {
+            return IsImage(name) && (FolderRegex.IsMatch(name));
+        }
+
+        public static bool HasBlacklistedFolderInPath(string path)
+        {
+            return path.Contains("__MACOSX");
         }
 
         

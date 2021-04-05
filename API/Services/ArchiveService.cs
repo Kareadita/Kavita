@@ -61,7 +61,7 @@ namespace API.Services
                 }
             }
         }
-        
+
         public int GetNumberOfPagesFromArchive(string archivePath)
         {
             if (!IsValidArchive(archivePath))
@@ -79,14 +79,14 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using ZipArchive archive = ZipFile.OpenRead(archivePath);
-                        return archive.Entries.Count(e => !e.FullName.Contains("__MACOSX") && Parser.Parser.IsImage(e.FullName));
+                        return archive.Entries.Count(e => !Parser.Parser.HasBlacklistedFolderInPath(e.FullName) && Parser.Parser.IsImage(e.FullName));
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         return archive.Entries.Count(entry => !entry.IsDirectory && 
-                                                              !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                              !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                               && Parser.Parser.IsImage(entry.Key));
                     }
                     case ArchiveLibrary.NotSupported:
@@ -124,8 +124,14 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var folder = archive.Entries.SingleOrDefault(x => !x.FullName.Contains("__MACOSX") && Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && !x.FullName.Contains("__MACOSX") &&  Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName, _comparer).ToList();
+                        // NOTE: We can probably reduce our iteration by performing 1 filter on MACOSX then do our folder check and image chack. 
+                        var folder = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName) 
+                                                                          && Parser.Parser.IsImage(x.FullName)
+                                                                          && Parser.Parser.IsCoverImage(x.FullName));
+                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) 
+                                                                 && !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
+                                                                 && Parser.Parser.IsImage(x.FullName))
+                                                                .OrderBy(x => x.FullName, _comparer).ToList();
                         var entry = folder ?? entries[0];
 
                         return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
@@ -134,9 +140,12 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory 
-                                                                             &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
-                                                                             && Parser.Parser.IsImage(entry.Key)), createThumbnail);
+                        var entries = archive.Entries
+                                                                .Where(entry => !entry.IsDirectory
+                                                                    && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
+                                                                     && Parser.Parser.IsImage(entry.Key))
+                                                                .OrderBy(x => x.Key, _comparer);
+                        return FindCoverImage(entries, createThumbnail);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogError("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -202,7 +211,7 @@ namespace API.Services
             // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
             return archive.Entries.Count > 0 &&
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
-                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !e.FullName.Contains("__MACOSX"));
+                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
         private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
@@ -269,7 +278,7 @@ namespace API.Services
         {
             foreach (var entry in entries)
             {
-                if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && Parser.Parser.IsXml(entry.Key))
+                if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key) && Parser.Parser.IsXml(entry.Key))
                 {
                     using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
@@ -303,7 +312,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x => !x.FullName.Contains("__MACOSX") &&  Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
+                        var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName) &&  Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
                         if (entry != null)
                         {
                             using var stream = entry.Open();
@@ -317,7 +326,7 @@ namespace API.Services
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory 
-                                                                               &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                                && Parser.Parser.IsXml(entry.Key)));
                         break;
                     }
@@ -403,7 +412,7 @@ namespace API.Services
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory 
-                                                                              &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                                              && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                               && Parser.Parser.IsImage(entry.Key)), extractPath);
                         break;
                     }

@@ -338,6 +338,7 @@ namespace API.Tests
         [InlineData("test.jpeg", true)]
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
+        [InlineData("!test.jpg", false)]
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));
@@ -357,6 +358,27 @@ namespace API.Tests
             }
             
             Assert.Equal(expectedSeries, actual.Series);
+        }
+        
+        [Theory]
+        [InlineData("Love Hina - Special.jpg", false)]
+        [InlineData("folder.jpg", true)]
+        [InlineData("DearS_v01_cover.jpg", true)]
+        [InlineData("DearS_v01_covers.jpg", false)]
+        [InlineData("!cover.jpg", true)]
+        public void IsCoverImageTest(string inputPath, bool expected)
+        {
+            Assert.Equal(expected, IsCoverImage(inputPath));
+        }
+        
+        [Theory]
+        [InlineData("__MACOSX/Love Hina - Special.jpg", true)]
+        [InlineData("TEST/Love Hina - Special.jpg", false)]
+        [InlineData("__macosx/Love Hina/", false)]
+        [InlineData("MACOSX/Love Hina/", false)]
+        public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
+        {
+            Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
         }
 
 
