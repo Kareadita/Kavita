@@ -5,7 +5,6 @@ namespace API.Helpers.Converters
 {
     public static class CronConverter
     {
-        // TODO: this isn't used. Replace strings with Enums? 
         public static readonly IEnumerable<string> Options = new []
         {
             "disabled",

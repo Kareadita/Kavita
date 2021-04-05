@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -45,9 +46,9 @@ namespace API.Services
        {
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
-             // TODO: Create a custom sorter for Chapters so it's consistent across the application
+             // TODO: Replace this with ChapterSortComparator
              volume.Chapters ??= new List<Chapter>();
-             var firstChapter = volume.Chapters.OrderBy(x => Double.Parse(x.Number)).FirstOrDefault();
+             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number)).FirstOrDefault();
              
              var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
              // Skip calculating Cover Image (I/O) if the chapter already has it set
@@ -67,16 +68,29 @@ namespace API.Services
 
        public void UpdateMetadata(Series series, bool forceUpdate)
        {
+          // TODO: Use new ChapterSortComparer() here instead
           if (series == null) return;
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
           {
              series.Volumes ??= new List<Volume>();
              var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+             byte[] coverImage = null; 
              if (firstCover == null && series.Volumes.Any())
              {
-                firstCover = series.Volumes.FirstOrDefault(x => x.Number == 0);
+                // If firstCover is null and one volume, the whole series is Chapters under Vol 0. 
+                if (series.Volumes.Count == 1)
+                {
+                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number))
+                      .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
+                }
+
+                if (coverImage == null)
+                {
+                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number))
+                      .FirstOrDefault()?.CoverImage;
+                }
              }
-             series.CoverImage = firstCover?.CoverImage;
+             series.CoverImage = firstCover?.CoverImage ?? coverImage;
           }
 
           if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
@@ -88,22 +102,20 @@ namespace API.Services
           if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
           {
              series.Summary = _archiveService.GetSummaryInfo(firstFile.FilePath);
+             firstFile.LastModified = DateTime.Now;
           }
        }
+       
        
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();
-          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId)).Result;
-          var allSeries = Task.Run(() => _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId)).Result.ToList();
-          
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
-          foreach (var series in allSeries)
+          foreach (var series in library.Series)
           {
-             series.NormalizedName = Parser.Parser.Normalize(series.Name);
-             
-             var volumes = Task.Run(() => _unitOfWork.SeriesRepository.GetVolumes(series.Id)).Result.ToList();
-             foreach (var volume in volumes)
+             foreach (var volume in series.Volumes)
              {
                 foreach (var chapter in volume.Chapters)
                 {

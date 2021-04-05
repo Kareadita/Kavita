@@ -35,15 +35,13 @@ namespace API.Data
 
         public async Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            var libs = await _context.Library
+            return await _context.Library
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(x => x.UserName == userName))
+                .OrderBy(l => l.Name)
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-            Console.WriteLine("Processed GetLibraryDtosForUsernameAsync in {0} milliseconds", sw.ElapsedMilliseconds);
-            return libs;
         }
         
         public async Task<IEnumerable<Library>> GetLibrariesAsync()
@@ -73,7 +71,10 @@ namespace API.Data
         {
             return await _context.Library
                 .Include(f => f.Folders)
-                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .OrderBy(l => l.Name)
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Library> GetLibraryForIdAsync(int libraryId)
@@ -98,19 +99,25 @@ namespace API.Data
                 .ThenInclude(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
+                .AsSplitQuery()
                 .SingleAsync();
         }
         
         public async Task<bool> LibraryExists(string libraryName)
         {
-            return await _context.Library.AnyAsync(x => x.Name == libraryName);
+            return await _context.Library
+                .AsNoTracking()
+                .AnyAsync(x => x.Name == libraryName);
         }
 
         public async Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user)
         {
-            return await _context.Library.Where(library => library.AppUsers.Contains(user))
+            return await _context.Library
+                .Where(library => library.AppUsers.Contains(user))
                 .Include(l => l.Folders)
-                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).ToListAsync();
+                .AsNoTracking()
+                .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
         
         

@@ -2,14 +2,14 @@
 {
     public class ComicInfo
     {
-        public string Summary;
-        public string Title;
-        public string Series;
-        public string Notes;
-        public string Publisher;
-        public string Genre;
-        public int PageCount;
-        public string LanguageISO;
-        public string Web;
+        public string Summary { get; set; }
+        public string Title { get; set; }
+        public string Series { get; set; }
+        public string Notes { get; set; }
+        public string Publisher { get; set; }
+        public string Genre { get; set; }
+        public int PageCount { get; set; }
+        public string LanguageISO { get; set; }
+        public string Web { get; set; }
     }
 }
