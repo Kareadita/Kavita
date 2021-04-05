@@ -8,22 +8,12 @@ namespace API.Comparators
     public class NaturalSortComparer : IComparer<string>, IDisposable
     {
         private readonly bool _isAscending;
+        private Dictionary<string, string[]> _table = new();
 
         public NaturalSortComparer(bool inAscendingOrder = true)
         {
             _isAscending = inAscendingOrder;
         }
-
-        #region IComparer<string> Members
-
-        public int Compare(string x, string y)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region IComparer<string> Members
 
         int IComparer<string>.Compare(string x, string y)
         {
@@ -80,10 +70,6 @@ namespace API.Comparators
 
             return x.CompareTo(y);
         }
-
-        #endregion
-
-        private Dictionary<string, string[]> _table = new Dictionary<string, string[]>();
 
         public void Dispose()
         {

@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Xml.Serialization;
 using API.Archive;
+using API.Comparators;
 using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
@@ -24,11 +25,13 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private const int ThumbnailWidth = 320; // 153w x 230h
-        private static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
+        private static readonly RecyclableMemoryStreamManager _streamManager = new();
+        private readonly NaturalSortComparer _comparer;
 
         public ArchiveService(ILogger<ArchiveService> logger)
         {
             _logger = logger;
+            _comparer = new NaturalSortComparer();
         }
         
         /// <summary>
@@ -122,7 +125,7 @@ namespace API.Services
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var folder = archive.Entries.SingleOrDefault(x => !x.FullName.Contains("__MACOSX") && Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && !x.FullName.Contains("__MACOSX") &&  Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
+                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && !x.FullName.Contains("__MACOSX") &&  Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName, _comparer).ToList();
                         var entry = folder ?? entries[0];
 
                         return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
