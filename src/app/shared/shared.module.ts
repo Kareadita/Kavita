@@ -11,6 +11,7 @@ import { SafeHtmlPipe } from './safe-html.pipe';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { RegisterMemberComponent } from './register-member/register-member.component';
+import { ReadMoreComponent } from './read-more/read-more.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { RegisterMemberComponent } from './register-member/register-member.compo
     CardDetailsModalComponent,
     ConfirmDialogComponent,
     SafeHtmlPipe,
-    CardActionablesComponent
+    CardActionablesComponent,
+    ReadMoreComponent
   ],
   imports: [
     CommonModule,
@@ -39,7 +41,8 @@ import { RegisterMemberComponent } from './register-member/register-member.compo
     LibraryCardComponent,
     SeriesCardComponent, // TODO: Remove this component and use just AppCardComponent
     SafeHtmlPipe,
-    CardActionablesComponent
+    CardActionablesComponent,
+    ReadMoreComponent
   ]
 })
 export class SharedModule { }

@@ -334,10 +334,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          const r2lSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : r2lSplittingPart;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.LEFT_PART;
+          const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? l2rSplittingPart : SPLIT_PAGE_PART.LEFT_PART;
           break;
       }
     } else if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
@@ -346,10 +348,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.RIGHT_PART;
+          const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? l2rSplittingPart : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
           break;
       }
     }
@@ -369,12 +372,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    if (this.pageNum + 1 >= this.maxPages || this.isLoading) {
+    const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
+
+    if ((this.pageNum + 1 >= this.maxPages && notInSplit) || this.isLoading) {
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
-    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART)) {
+    if (this.isNoSplit() || notInSplit) {
       this.pageNum++;
       this.canvasImage = this.cachedImages.next();
     }
@@ -387,12 +392,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (this.pageNum - 1 < 0 || this.isLoading) {
+
+    const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
+
+    if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
-    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART)) {
+    if (this.isNoSplit() || notInSplit) {
       this.pageNum--;
       this.canvasImage = this.cachedImages.prev();
     }
@@ -446,9 +454,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
-      //this.toastr.error('Could not save bookmark status. Current page is: ' + this.pageNum); // This seems to be firing for no reason.
-    });
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {});
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
@@ -483,12 +489,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       page = parseInt(goToPageNum.trim(), 10);
     }
 
-    if (page === undefined) { return; }
+    if (page === undefined || this.pageNum === page) { return; }
 
-    if (page >= this.maxPages) {
-      page = this.maxPages - 1;
+    if (page > this.maxPages) {
+      page = this.maxPages;
     } else if (page < 0) {
       page = 0;
+    }
+
+    if (page !== 0 || page !== this.maxPages - 1) {
+      page -= 1;
+    }
+
+    if (page > this.pageNum) {
+      this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    } else {
+      this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     }
 
     this.pageNum = page;

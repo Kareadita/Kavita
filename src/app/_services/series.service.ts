@@ -26,7 +26,7 @@ export class SeriesService {
       params = params.append('pageNumber', pageNum + '');
       params = params.append('pageSize', itemsPerPage + '');
     }
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'library/series?libraryId=' + libraryId, {observe: 'response', params}).pipe(
+    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, {observe: 'response', params}).pipe(
       map((response: any) => {
         if (response.body === null) {
           this.paginatedResults.result = [];

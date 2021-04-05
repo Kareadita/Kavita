@@ -36,7 +36,7 @@ export class LibraryCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      if (this.data.type === 0) {
+      if (this.data.type === 0 || this.data.type === 1) {
         this.icon = 'fa-book-open';
       } else {
         this.icon = 'fa-book';

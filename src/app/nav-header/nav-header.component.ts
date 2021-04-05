@@ -19,6 +19,7 @@ export class NavHeaderComponent implements OnInit {
   debounceTime = 300;
   imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResult[] = [];
+  searchTerm = '';
   constructor(public accountService: AccountService, private router: Router, public navService: NavService, private libraryService: LibraryService, public imageService: ImageService) { }
 
   ngOnInit(): void {
@@ -35,12 +36,14 @@ export class NavHeaderComponent implements OnInit {
 
   onChangeSearch(val: string) {
       this.isLoading = true;
+      this.searchTerm = val;
       this.libraryService.search(val).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
       }, err => {
         this.searchResults = [];
         this.isLoading = false;
+        this.searchTerm = '';
       });
   }
 
@@ -49,6 +52,7 @@ export class NavHeaderComponent implements OnInit {
     const seriesId = item.seriesId;
     this.searchViewRef.clear();
     this.searchResults = [];
+    this.searchTerm = '';
     this.router.navigate(['library', libraryId, 'series', seriesId]);
   }
 }

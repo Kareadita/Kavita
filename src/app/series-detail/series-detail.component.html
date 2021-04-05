@@ -29,15 +29,14 @@
                 </div>
                 <div class="ml-2">
                     <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
+                    <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>
             </div>
             <div class="row no-gutters">
-                <p class="user-review {{series?.userReview ? 'mt-1' : ''}}">{{series?.userReview}} 
-                    <button *ngIf="series?.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
+                <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
-                <!-- TODO: Read more component -->
-                <p>{{series?.summary}}</p>
+                <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
             <div>
                 <div class="row no-gutters" *ngIf="false">
@@ -61,8 +60,8 @@
     </div>
 
     <div *ngIf="hasSpecials; else noSpecials">
-        <ul ngbNav #nav="ngbNav" class="nav-tabs">
-            <li ngbNavItem>
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
+            <li [ngbNavItem]="1">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row">
@@ -74,7 +73,7 @@
                 </div>
               </ng-template>
             </li>
-            <li ngbNavItem>
+            <li [ngbNavItem]="2">
               <a ngbNavLink>Volumes/Chapters</a>
               <ng-template ngbNavContent>
                   <div class="row">
@@ -96,7 +95,7 @@
     </div>
 
       <ng-template #noSpecials>
-        <h4>Volumes</h4>
+        <h4>Volumes/Chapters</h4>
         <div class="row">
             <div *ngFor="let volume of volumes">
                 <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"

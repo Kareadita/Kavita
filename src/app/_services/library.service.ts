@@ -1,11 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library } from '../_models/library';
 import { SearchResult } from '../_models/search-result';
-import { Series } from '../_models/series';
 
 @Injectable({
   providedIn: 'root'
