@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using static System.GC;
 
 namespace API.Comparators
 {
@@ -86,6 +87,7 @@ namespace API.Comparators
 
         public void Dispose()
         {
+            SuppressFinalize(this);
             _table.Clear();
             _table = null;
         }

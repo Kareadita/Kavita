@@ -77,7 +77,7 @@ namespace API.Services
              byte[] coverImage = null; 
              if (firstCover == null && series.Volumes.Any())
              {
-                // If firstCover is null, we have to think if we only have chapters. In that case, we need to handle differently
+                // If firstCover is null and one volume, the whole series is Chapters under Vol 0. 
                 if (series.Volumes.Count == 1)
                 {
                    coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number))

@@ -268,7 +268,6 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && Parser.Parser.IsXml(entry.Key))
                 {
-                    //using var ms = new MemoryStream();
                     using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;

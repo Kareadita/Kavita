@@ -543,11 +543,7 @@ namespace API.Parser
 
                     if (!value.Contains("-"))
                     {
-                        if (hasChapterPart)
-                        {
-                            value = AddChapterPart(value);
-                        }
-                        return RemoveLeadingZeroes(value);
+                        return RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(value) : value);
                     }
                     
                     var tokens = value.Split("-");
