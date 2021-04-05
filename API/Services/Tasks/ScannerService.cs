@@ -162,10 +162,13 @@ namespace API.Services.Tasks
           
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
-          var missingSeries = library.Series.Where(existingSeries =>
-             !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
-              || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
-              || !parsedSeries.ContainsKey(existingSeries.OriginalName));
+          // var missingSeries = library.Series.Where(existingSeries =>
+          //    !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
+          //     || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
+          //     || !parsedSeries.ContainsKey(existingSeries.OriginalName));
+
+          var missingSeries = library.Series.Where(existingSeries => !existingSeries.NameInList(foundSeries)
+                                                                     || !existingSeries.NameInList(parsedSeries.Keys));
           var removeCount = 0;
           foreach (var existingSeries in missingSeries)
           {
@@ -201,7 +204,7 @@ namespace API.Services.Tasks
           Parallel.ForEach(librarySeries, (series) =>
           {
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
-             UpdateVolumes(series, parsedSeries[series.Name].ToArray());
+             UpdateVolumes(series, parsedSeries[series.OriginalName].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
           });
           
