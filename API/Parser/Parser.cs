@@ -723,9 +723,9 @@ namespace API.Parser
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
-        public static bool IsImage(string filePath)
+        public static bool IsImage(string filePath, bool suppressExtraChecks = false)
         {
-            if (filePath.StartsWith(".") || filePath.StartsWith("!")) return false;
+            if (filePath.StartsWith(".") || (!suppressExtraChecks && filePath.StartsWith("!"))) return false;
             return ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
         
@@ -752,7 +752,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool IsCoverImage(string name)
         {
-            return IsImage(name) && (FolderRegex.IsMatch(name));
+            return IsImage(name, true) && (FolderRegex.IsMatch(name));
         }
 
         public static bool HasBlacklistedFolderInPath(string path)
