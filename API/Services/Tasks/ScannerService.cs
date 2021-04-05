@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -23,6 +24,7 @@ namespace API.Services.Tasks
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
+       private readonly NaturalSortComparer _naturalSort;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
           IMetadataService metadataService)
@@ -31,6 +33,7 @@ namespace API.Services.Tasks
           _logger = logger;
           _archiveService = archiveService;
           _metadataService = metadataService;
+          _naturalSort = new NaturalSortComparer(true);
        }
 
 
@@ -247,8 +250,7 @@ namespace API.Services.Tasks
        private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
        {
           var startingChapters = volume.Chapters.Count;
-          
-          
+
           // Add new chapters
           foreach (var info in parsedInfos)
           {
@@ -324,7 +326,13 @@ namespace API.Services.Tasks
              {
                 volume.Chapters.Remove(existingChapter);
              }
+             else
+             {
+                existingChapter.Files = existingChapter.Files.OrderBy(f => f.FilePath, _naturalSort).ToList();
+             }
           }
+          
+          
           
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
              startingChapters, volume.Chapters.Count);
