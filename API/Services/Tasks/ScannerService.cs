@@ -256,9 +256,9 @@ namespace API.Services.Tasks
           {
              var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
-             // also are treated like specials
+             // also are treated like specials for UI grouping.
              _logger.LogDebug("Adding new chapters, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);
-             // If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
+             // NOTE: If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
              // vs Historys strongest), this code will break and the duplicate will be skipped.
              Chapter chapter = null;
              try
@@ -314,6 +314,7 @@ namespace API.Services.Tasks
           
           
           
+          
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
@@ -328,7 +329,10 @@ namespace API.Services.Tasks
              }
              else
              {
-                existingChapter.Files = existingChapter.Files.OrderBy(f => f.FilePath, _naturalSort).ToList();
+                // Ensure we remove any files that no longer exist AND order
+                existingChapter.Files = existingChapter.Files
+                   .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
+                   .OrderBy(f => f.FilePath, _naturalSort).ToList();
              }
           }
           
