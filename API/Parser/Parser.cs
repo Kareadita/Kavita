@@ -9,11 +9,11 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string MangaFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex MangaFileRegex = new Regex(MangaFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -21,6 +21,10 @@ namespace API.Parser
             // Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
+            new Regex(
+                @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
@@ -144,6 +148,10 @@ namespace API.Parser
         
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
+            // Invincible Vol 01 Family matters (2005) (Digital)
+            new Regex(
+                @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
             @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
@@ -275,9 +283,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) S(?<Volume>\d+) (?<Chapter>\d+(?:.\d+|-\d+)?)", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Beelzebub_01_[Noodles].zip
+            // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)( |_|\[|\()", 
+                @"^((?!v|vo|vol|Volume).)*( |_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<ChapterPart>b)?( |_|\[|\()", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
@@ -531,18 +539,32 @@ namespace API.Parser
                     if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
                     
                     var value = match.Groups["Chapter"].Value;
+                    var hasChapterPart = match.Groups["ChapterPart"].Success;
 
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                    if (!value.Contains("-"))
+                    {
+                        return RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(value) : value);
+                    }
                     
                     var tokens = value.Split("-");
                     var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
+                    var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
                     return $"{@from}-{to}";
 
                 }
             }
 
             return "0";
+        }
+
+        private static string AddChapterPart(string value)
+        {
+            if (value.Contains("."))
+            {
+                return value;
+            }
+
+            return $"{value}.5";
         }
         
         public static string ParseComicChapter(string filename)
@@ -697,7 +719,7 @@ namespace API.Parser
         
         public static bool IsArchive(string filePath)
         {
-            return MangaFileRegex.IsMatch(Path.GetExtension(filePath));
+            return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsImage(string filePath)

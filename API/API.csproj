@@ -25,6 +25,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.0.0" />
     <PackageReference Include="NetVips" Version="2.0.0" />
     <PackageReference Include="NetVips.Native" Version="8.10.6" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.1" />

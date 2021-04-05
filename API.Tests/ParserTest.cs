@@ -59,6 +59,7 @@ namespace API.Tests
         [InlineData("Volume 12 - Janken Boy is Coming!.cbz", "12")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
         [InlineData("Gantz.V26.cbz", "26")]
+        [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -176,6 +177,8 @@ namespace API.Tests
         [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "2")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "71-79")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
+        [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
+        [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -284,6 +287,7 @@ namespace API.Tests
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
         [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
+        [InlineData("Invincible Vol 01 Family matters (2005) (Digital).cbr", "Invincible")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseComicSeries(filename));

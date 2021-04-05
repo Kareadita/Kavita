@@ -9,6 +9,7 @@ namespace API.Interfaces
         ILibraryRepository LibraryRepository { get; }
         IVolumeRepository VolumeRepository { get; }
         ISettingsRepository SettingsRepository { get; }
+        IAppUserProgressRepository AppUserProgressRepository { get; }
         Task<bool> Complete();
         bool HasChanges();
     }

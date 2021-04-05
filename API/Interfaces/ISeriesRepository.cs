@@ -11,6 +11,7 @@ namespace API.Interfaces
         void Add(Series series);
         void Update(Series series);
         Task<Series> GetSeriesByNameAsync(string name);
+        Task<bool> DoesSeriesNameExistInLibrary(string name);
         Series GetSeriesByName(string name);
 
         /// <summary>

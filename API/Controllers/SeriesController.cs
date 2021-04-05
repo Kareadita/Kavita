@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +22,21 @@ namespace API.Controllers
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
+            
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+            
+            return Ok(series);
         }
         
         [HttpGet("{seriesId}")]
@@ -105,11 +121,9 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
             
-            // TODO: Ensure we check against Library for Series Name change
-            var existingSeries = await _unitOfWork.SeriesRepository.GetSeriesByNameAsync(updateSeries.Name);
-            if (existingSeries != null && existingSeries.Id != series.Id )
+            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
             {
-                return BadRequest("A series already exists with this name. Name must be unique.");
+                return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
             series.Name = updateSeries.Name;
             series.LocalizedName = updateSeries.LocalizedName;

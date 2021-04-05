@@ -10,6 +10,7 @@ using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using Image = NetVips.Image;
@@ -22,7 +23,8 @@ namespace API.Services
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
-        private const int ThumbnailWidth = 320; // 153w x 230h TODO: Look into optimizing the images to be smaller
+        private const int ThumbnailWidth = 320; // 153w x 230h
+        private static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
 
         public ArchiveService(ILogger<ArchiveService> logger)
         {
@@ -74,13 +76,15 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using ZipArchive archive = ZipFile.OpenRead(archivePath);
-                        return archive.Entries.Count(e => Parser.Parser.IsImage(e.FullName));
+                        return archive.Entries.Count(e => !e.FullName.Contains("__MACOSX") && Parser.Parser.IsImage(e.FullName));
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return archive.Entries.Count(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key));
+                        return archive.Entries.Count(entry => !entry.IsDirectory && 
+                                                              !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                              && Parser.Parser.IsImage(entry.Key));
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
@@ -117,8 +121,8 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var folder = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
-                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
+                        var folder = archive.Entries.SingleOrDefault(x => !x.FullName.Contains("__MACOSX") && Path.GetFileNameWithoutExtension(x.Name).ToLower() == "folder");
+                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) && !x.FullName.Contains("__MACOSX") &&  Parser.Parser.IsImage(x.FullName)).OrderBy(x => x.FullName).ToList();
                         var entry = folder ?? entries[0];
 
                         return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
@@ -127,7 +131,9 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), createThumbnail);
+                        return FindCoverImage(archive.Entries.Where(entry => !entry.IsDirectory 
+                                                                             &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                                             && Parser.Parser.IsImage(entry.Key)), createThumbnail);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogError("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -152,10 +158,11 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower() == "folder")
                 {
-                    using var ms = new MemoryStream();
+                    using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;
-                    return createThumbnail ? CreateThumbnail(ms.ToArray(), Path.GetExtension(entry.Key)) : ms.ToArray();
+                    var data = ms.ToArray();
+                    return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
                 }
             }
 
@@ -163,7 +170,7 @@ namespace API.Services
             {
                 var entry = images.OrderBy(e => e.Key).FirstOrDefault();
                 if (entry == null) return Array.Empty<byte>();
-                using var ms = new MemoryStream();
+                using var ms = _streamManager.GetStream();
                 entry.WriteTo(ms);
                 ms.Position = 0;
                 var data = ms.ToArray();
@@ -176,11 +183,9 @@ namespace API.Services
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            using var ms = new MemoryStream();
+            using var ms = _streamManager.GetStream();
             stream.CopyTo(ms);
-            var data = ms.ToArray();
-
-            return data;
+            return ms.ToArray();
         }
         
         /// <summary>
@@ -194,7 +199,7 @@ namespace API.Services
             // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
             return archive.Entries.Count > 0 &&
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
-                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar));
+                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !e.FullName.Contains("__MACOSX"));
         }
 
         private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
@@ -211,7 +216,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image");
+                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image. Format Extension {Extension}", formatExtension);
             }
 
             return Array.Empty<byte>();
@@ -263,7 +268,7 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && Parser.Parser.IsXml(entry.Key))
                 {
-                    using var ms = new MemoryStream();
+                    using var ms = _streamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;
 
@@ -295,7 +300,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x => Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
+                        var entry = archive.Entries.SingleOrDefault(x => !x.FullName.Contains("__MACOSX") &&  Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
                         if (entry != null)
                         {
                             using var stream = entry.Open();
@@ -308,7 +313,9 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsXml(entry.Key)));
+                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory 
+                                                                               &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                                               && Parser.Parser.IsXml(entry.Key)));
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
@@ -392,7 +399,9 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory && Parser.Parser.IsImage(entry.Key)), extractPath);
+                        ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory 
+                                                                              &&  !(Path.GetDirectoryName(entry.Key) ?? string.Empty).Contains("__MACOSX")
+                                                                              && Parser.Parser.IsImage(entry.Key)), extractPath);
                         break;
                     }
                     case ArchiveLibrary.NotSupported:

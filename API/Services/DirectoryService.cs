@@ -6,10 +6,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Services
 {
@@ -60,6 +58,7 @@ namespace API.Services
           {
              rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
+          // NOTE: I Could use Path.GetRelativePath and split on separator character instead.
           
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;

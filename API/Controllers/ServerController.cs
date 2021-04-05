@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using API.Extensions;
-using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;

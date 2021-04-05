@@ -4,7 +4,6 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
