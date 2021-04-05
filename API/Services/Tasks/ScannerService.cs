@@ -254,17 +254,31 @@ namespace API.Services.Tasks
           {
              var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
-             // also are treated like specials but without the flag.
-             var chapter = specialTreatment ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename 
-                   || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath))) 
-                : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             // also are treated like specials
+             _logger.LogDebug("Adding new chapters, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);
+             // If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
+             // vs Historys strongest), this code will break and the duplicate will be skipped.
+             Chapter chapter = null;
+             try
+             {
+                chapter = specialTreatment
+                   ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename
+                                                          || (c.Files.Select(f => f.FilePath)
+                                                             .Contains(info.FullFilePath)))
+                   : volume.Chapters.SingleOrDefault(c => c.Range == info.Chapters);
+             }
+             catch (Exception ex)
+             {
+                _logger.LogError(ex, "{FileName} mapped as '{Series} - Vol {Volume} Ch {Chapter}' is a duplicate, skipping", info.FullFilePath, info.Series, info.Volumes, info.Chapters);
+                return;
+             }
 
 
              if (chapter == null)
              {
                 chapter = new Chapter()
                 {
-                   Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "",
+                   Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
                    Range = specialTreatment ? info.Filename : info.Chapters,
                    Files = new List<MangaFile>(),
                    IsSpecial = specialTreatment
@@ -287,7 +301,7 @@ namespace API.Services.Tasks
              }
              catch (Exception ex)
              {
-                _logger.LogError(ex, "There was an exception parsing chapter. Skipping Vol {VolumeNumber} Chapter {ChapterNumber}", volume.Name, info.Chapters);
+                _logger.LogError(ex, "There was an exception parsing chapter. Skipping {SeriesName} Vol {VolumeNumber} Chapter {ChapterNumber} - Special treatment: {NeedsSpecialTreatment}", info.Series, volume.Name, info.Chapters, specialTreatment);
              }
              if (chapter == null) continue;
              AddOrUpdateFileForChapter(chapter, info);
@@ -300,10 +314,9 @@ namespace API.Services.Tasks
           
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
-          int i = 0;
           foreach (var existingChapter in existingChapters)
           {
-             var specialTreatment = (existingChapter.IsSpecial || (existingChapter.Number == "0" && !int.TryParse(existingChapter.Range, out i)));
+             var specialTreatment = (existingChapter.IsSpecial || (existingChapter.Number == "0" && !int.TryParse(existingChapter.Range, out int i)));
              var hasInfo = specialTreatment ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
                 : parsedInfos.Any(v => v.Chapters == existingChapter.Range);
              
