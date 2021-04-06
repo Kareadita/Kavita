@@ -10,12 +10,14 @@ namespace API.Parser
     public static class Parser
     {
         public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
+        public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex FolderRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex BookFileRegex = new Regex(BookFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -413,6 +415,7 @@ namespace API.Parser
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;
+            if (IsBook(filePath)) return MangaFormat.Book;
             return MangaFormat.Unknown;
         }
 
@@ -721,6 +724,10 @@ namespace API.Parser
         public static bool IsArchive(string filePath)
         {
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
+        }
+        public static bool IsBook(string filePath)
+        {
+            return BookFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsImage(string filePath, bool suppressExtraChecks = false)

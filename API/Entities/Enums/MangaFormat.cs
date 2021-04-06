@@ -9,6 +9,8 @@ namespace API.Entities.Enums
         [Description("Archive")]
         Archive = 1,
         [Description("Unknown")]
-        Unknown = 2
+        Unknown = 2,
+        [Description("Book")]
+        Book = 3
     }
 }
