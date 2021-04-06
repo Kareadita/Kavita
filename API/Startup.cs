@@ -136,7 +136,7 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v0.3.6");
+                Console.WriteLine("Kavita - v0.3.7");
             });
         }
         
