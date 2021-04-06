@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -103,6 +104,13 @@ namespace API.Controllers
         public ActionResult<IEnumerable<string>> GetTaskFrequencies()
         {
             return Ok(CronConverter.Options);
+        }
+        
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet("library-types")]
+        public ActionResult<IEnumerable<string>> GetLibraryTypes()
+        {
+            return Ok(Enum.GetNames(typeof(LibraryType)));
         }
         
         [Authorize(Policy = "RequireAdminRole")]

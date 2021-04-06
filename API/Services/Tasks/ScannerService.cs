@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -23,16 +24,18 @@ namespace API.Services.Tasks
        private readonly ILogger<ScannerService> _logger;
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
+       private readonly IBookService _bookService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
        private readonly NaturalSortComparer _naturalSort;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
-          IMetadataService metadataService)
+          IMetadataService metadataService, IBookService bookService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
           _metadataService = metadataService;
+          _bookService = bookService;
           _naturalSort = new NaturalSortComparer(true);
        }
 
@@ -385,7 +388,16 @@ namespace API.Services.Tasks
        /// <param name="type">Library type to determine parsing to perform</param>
        private void ProcessFile(string path, string rootPath, LibraryType type)
        {
-          var info = Parser.Parser.Parse(path, rootPath, type);
+          ParserInfo info = null;
+          if (Parser.Parser.IsEpub(path) && type == LibraryType.Book)
+          {
+             info = _bookService.ParseInfo(path);
+          }
+          else
+          {
+             info = Parser.Parser.Parse(path, rootPath, type);
+          }
+          //var info = Parser.Parser.Parse(path, rootPath, type);
           
           if (info == null)
           {
@@ -398,12 +410,33 @@ namespace API.Services.Tasks
 
        private MangaFile CreateMangaFile(ParserInfo info)
        {
-          return new MangaFile()
+          switch (info.Format)
           {
-             FilePath = info.FullFilePath,
-             Format = info.Format,
-             Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
-          };
+             case MangaFormat.Archive:
+             {
+                return new MangaFile()
+                {
+                   FilePath = info.FullFilePath,
+                   Format = info.Format,
+                   Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
+                };
+             }
+             case MangaFormat.Book:
+             {
+                return new MangaFile()
+                {
+                   FilePath = info.FullFilePath,
+                   Format = info.Format,
+                   Pages = _bookService.GetNumberOfPages(info.FullFilePath)
+                };
+                break;
+             }
+             default:
+                _logger.LogWarning("[Scanner] Ignoring {Filename}. Non-archives are not supported", info.Filename);
+                break;
+          }
+
+          return null;
        }
   
        private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
@@ -420,14 +453,11 @@ namespace API.Services.Tasks
           }
           else
           {
-             if (info.Format == MangaFormat.Archive)
+             var file = CreateMangaFile(info);
+             if (file != null)
              {
-                chapter.Files.Add(CreateMangaFile(info));
+                chapter.Files.Add(file);
                 existingFile = chapter.Files.Last();
-             }
-             else
-             {
-                _logger.LogDebug("Ignoring {Filename}. Non-archives are not supported", info.Filename);
              }
           }
 

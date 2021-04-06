@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities;
+using API.Entities.Interfaces;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
@@ -19,6 +20,7 @@ namespace API.Tests.Services
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
+        private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IMetadataService _metadataService;
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
         private Library _libraryMock;
@@ -26,7 +28,7 @@ namespace API.Tests.Services
         public ScannerServiceTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
+            _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
             _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService);
             _libraryMock = new Library()
             {

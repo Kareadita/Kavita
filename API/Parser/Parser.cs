@@ -767,6 +767,10 @@ namespace API.Parser
             return path.Contains("__MACOSX");
         }
 
-        
+
+        public static bool IsEpub(string filePath)
+        {
+            return Path.GetExtension(filePath).ToLower() == ".epub";
+        }
     }
 }

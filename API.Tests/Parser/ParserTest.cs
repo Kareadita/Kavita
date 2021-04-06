@@ -60,6 +60,8 @@ namespace API.Tests
         [Theory]
         [InlineData("test.epub", true)]
         [InlineData("test.pdf", false)]
+        [InlineData("test.mobi", false)]
+        [InlineData("test.djvu", false)]
         [InlineData("test.zip", false)]
         [InlineData("test.rar", false)]
         [InlineData("test.epub.!qb", false)]
@@ -67,6 +69,17 @@ namespace API.Tests
         public void IsBookTest(string input, bool expected)
         {
             Assert.Equal(expected, IsBook(input));
+        }
+        
+        [Theory]
+        [InlineData("test.epub", true)]
+        [InlineData("test.EPUB", true)]
+        [InlineData("test.mobi", false)]
+        [InlineData("test.epub.!qb", false)]
+        [InlineData("[shf-ma-khs-aqs]negi_pa_vol15007.ebub", false)]
+        public void IsEpubTest(string input, bool expected)
+        {
+            Assert.Equal(expected, IsEpub(input));
         }
 
         [Theory]

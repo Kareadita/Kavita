@@ -36,6 +36,7 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
+    <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>
 
   <ItemGroup>
