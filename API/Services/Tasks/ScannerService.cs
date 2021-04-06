@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -23,6 +24,7 @@ namespace API.Services.Tasks
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
+       private readonly NaturalSortComparer _naturalSort;
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
           IMetadataService metadataService)
@@ -31,6 +33,7 @@ namespace API.Services.Tasks
           _logger = logger;
           _archiveService = archiveService;
           _metadataService = metadataService;
+          _naturalSort = new NaturalSortComparer(true);
        }
 
 
@@ -159,10 +162,13 @@ namespace API.Services.Tasks
           
           // First, remove any series that are not in parsedSeries list
           var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
-          var missingSeries = library.Series.Where(existingSeries =>
-             !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
-              || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
-              || !parsedSeries.ContainsKey(existingSeries.OriginalName));
+          // var missingSeries = library.Series.Where(existingSeries =>
+          //    !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
+          //     || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
+          //     || !parsedSeries.ContainsKey(existingSeries.OriginalName));
+
+          var missingSeries = library.Series.Where(existingSeries => !existingSeries.NameInList(foundSeries)
+                                                                     || !existingSeries.NameInList(parsedSeries.Keys));
           var removeCount = 0;
           foreach (var existingSeries in missingSeries)
           {
@@ -198,7 +204,7 @@ namespace API.Services.Tasks
           Parallel.ForEach(librarySeries, (series) =>
           {
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
-             UpdateVolumes(series, parsedSeries[series.Name].ToArray());
+             UpdateVolumes(series, parsedSeries[series.OriginalName].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
           });
           
@@ -247,16 +253,15 @@ namespace API.Services.Tasks
        private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
        {
           var startingChapters = volume.Chapters.Count;
-          
-          
+
           // Add new chapters
           foreach (var info in parsedInfos)
           {
              var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
-             // also are treated like specials
+             // also are treated like specials for UI grouping.
              _logger.LogDebug("Adding new chapters, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);
-             // If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
+             // NOTE: If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
              // vs Historys strongest), this code will break and the duplicate will be skipped.
              Chapter chapter = null;
              try
@@ -312,6 +317,7 @@ namespace API.Services.Tasks
           
           
           
+          
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
@@ -324,7 +330,16 @@ namespace API.Services.Tasks
              {
                 volume.Chapters.Remove(existingChapter);
              }
+             else
+             {
+                // Ensure we remove any files that no longer exist AND order
+                existingChapter.Files = existingChapter.Files
+                   .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
+                   .OrderBy(f => f.FilePath, _naturalSort).ToList();
+             }
           }
+          
+          
           
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
              startingChapters, volume.Chapters.Count);
