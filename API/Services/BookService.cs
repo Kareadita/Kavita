@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Parser;
@@ -67,7 +68,7 @@ namespace API.Services
             
             try
             {
-                var coverImageContent = epubBook.CoverImage;
+                var coverImageContent = epubBook.CoverImage ?? epubBook.Content.Images.Values.First().Content;
 
                 if (coverImageContent != null && createThumbnail)
                 {
