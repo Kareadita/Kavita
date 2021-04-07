@@ -7,5 +7,6 @@ namespace API.Entities.Interfaces
         int GetNumberOfPages(string filePath);
 
         ParserInfo ParseInfo(string filePath);
+        byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true);
     }
 }

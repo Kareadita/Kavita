@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Entities;
+using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -18,17 +20,31 @@ namespace API.Services
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<MetadataService> _logger;
        private readonly IArchiveService _archiveService;
+       private readonly IBookService _bookService;
 
-       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService)
+       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService, IBookService bookService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
+          _bookService = bookService;
        }
        
        private static bool ShouldFindCoverImage(byte[] coverImage, bool forceUpdate = false)
        {
           return forceUpdate || coverImage == null || !coverImage.Any();
+       }
+
+       private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
+       {
+          if (file.Format == MangaFormat.Book)
+          {
+             return _bookService.GetCoverImage(file.FilePath, createThumbnail);
+          }
+          else
+          {
+             return _archiveService.GetCoverImage(file.FilePath, createThumbnail);   
+          }
        }
 
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
@@ -37,7 +53,7 @@ namespace API.Services
           if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
-             chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             chapter.CoverImage = GetCoverImage(firstFile, true); 
           }
        }
 
@@ -56,7 +72,7 @@ namespace API.Services
              {
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                   volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+                   volume.CoverImage = GetCoverImage(firstFile, true);
                 }
              }
              else

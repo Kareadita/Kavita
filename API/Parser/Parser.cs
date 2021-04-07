@@ -355,17 +355,33 @@ namespace API.Parser
         public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
             var fileName = Path.GetFileName(filePath);
+            ParserInfo ret;
 
-            var ret = new ParserInfo()
+            if (type == LibraryType.Book)
             {
-                Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
-                Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
-                Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
-                Filename = fileName,
-                Format = ParseFormat(filePath),
-                FullFilePath = filePath
-            };
-            
+                ret = new ParserInfo()
+                {
+                    Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
+                    Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
+                    Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
+                    Filename = fileName,
+                    Format = ParseFormat(filePath),
+                    FullFilePath = filePath
+                };
+            }
+            else
+            {
+                ret = new ParserInfo()
+                {
+                    Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
+                    Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
+                    Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
+                    Filename = fileName,
+                    Format = ParseFormat(filePath),
+                    FullFilePath = filePath
+                };
+            }
+
             if (ret.Series == string.Empty)
             {
                 // Try to parse information out of each folder all the way to rootPath

@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Parser;
 using Microsoft.Extensions.Logging;
+using NetVips;
 using VersOne.Epub;
 
 namespace API.Services
@@ -10,6 +12,7 @@ namespace API.Services
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
+        private const int ThumbnailWidth = 320; // 153w x 230h
 
         public BookService(ILogger<BookService> logger)
         {
@@ -54,5 +57,38 @@ namespace API.Services
                 Volumes = "0"
             };
         }
+
+        public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
+        {
+            if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
+            
+            var epubBook = EpubReader.ReadBook(fileFilePath);
+            
+            
+            try
+            {
+                var coverImageContent = epubBook.CoverImage;
+
+                if (coverImageContent != null && createThumbnail)
+                {
+                    using var stream = new MemoryStream(coverImageContent);
+
+                    using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+                    return thumbnail.WriteToBuffer(".jpg");
+                }
+
+                return coverImageContent;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+            }
+            
+            
+
+            return Array.Empty<byte>();
+            
+        }
+
     }
 }

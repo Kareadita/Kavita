@@ -93,7 +93,13 @@ namespace API.Services.Tasks
            foreach (var folderPath in library.Folders)
            {
               if (ShouldSkipFolderScan(folderPath, ref skippedFolders)) continue;
-
+              
+              // TODO: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
+              var searchPattern = Parser.Parser.ArchiveFileExtensions;
+              if (library.Type == LibraryType.Book)
+              {
+                 searchPattern = Parser.Parser.BookFileExtensions;
+              }
               try {
                  totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
                  {
@@ -105,7 +111,7 @@ namespace API.Services.Tasks
                     {
                        _logger.LogError(exception, "The file {Filename} could not be found", f);
                     }
-                 }, Parser.Parser.ArchiveFileExtensions);
+                 }, searchPattern);
               }
               catch (ArgumentException ex) {
                  _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath.Path);
@@ -389,16 +395,16 @@ namespace API.Services.Tasks
        private void ProcessFile(string path, string rootPath, LibraryType type)
        {
           ParserInfo info = null;
-          if (Parser.Parser.IsEpub(path) && type == LibraryType.Book)
+
+          info = Parser.Parser.Parse(path, rootPath, type);
+
+          if (type == LibraryType.Book && info == null && Parser.Parser.IsEpub(path))
           {
+             // We need to parse information out of filename rather than via bookservice as LN's have Volumes, etc. 
+             // Only traditional books are separate
              info = _bookService.ParseInfo(path);
           }
-          else
-          {
-             info = Parser.Parser.Parse(path, rootPath, type);
-          }
-          //var info = Parser.Parser.Parse(path, rootPath, type);
-          
+
           if (info == null)
           {
              _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
