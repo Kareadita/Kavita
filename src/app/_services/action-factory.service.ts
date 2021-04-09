@@ -45,6 +45,7 @@ export class ActionFactoryService {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
       } else {
+        this._resetActions();
         return; // If user is logged out, we don't need to do anything
       }
 
@@ -107,6 +108,8 @@ export class ActionFactoryService {
   dummyCallback(action: Action, data: any) {}
 
   _resetActions() {
+    this.libraryActions = [];
+    
     this.seriesActions = [
       {
         action: Action.MarkAsRead,
