@@ -40,7 +40,7 @@ namespace API.Services
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
             
-            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
+            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Scan Library Task for {Setting}", setting);
