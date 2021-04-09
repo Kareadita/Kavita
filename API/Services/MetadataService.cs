@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -41,19 +40,19 @@ namespace API.Services
           }
        }
 
-       
+
        public void UpdateMetadata(Volume volume, bool forceUpdate)
        {
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
              // TODO: Replace this with ChapterSortComparator
              volume.Chapters ??= new List<Chapter>();
-             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number)).FirstOrDefault();
+             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number)).FirstOrDefault(); 
              
-             var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
              // Skip calculating Cover Image (I/O) if the chapter already has it set
              if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
              {
+                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
                    volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
@@ -112,6 +111,7 @@ namespace API.Services
           var sw = Stopwatch.StartNew();
           var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
 
+          // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
           foreach (var series in library.Series)
           {
