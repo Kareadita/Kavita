@@ -366,6 +366,9 @@ namespace API.Tests
         [InlineData("DearS_v01_cover.jpg", true)]
         [InlineData("DearS_v01_covers.jpg", false)]
         [InlineData("!cover.jpg", true)]
+        [InlineData("cover.jpg", true)]
+        [InlineData("cover.png", true)]
+        [InlineData("ch1/cover.png", true)]
         public void IsCoverImageTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, IsCoverImage(inputPath));
