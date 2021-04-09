@@ -41,7 +41,7 @@ namespace API.Services
         /// <returns></returns>
         public ArchiveLibrary CanOpen(string archivePath)
         {
-            if (!File.Exists(archivePath) || !Parser.Parser.IsArchive(archivePath)) return ArchiveLibrary.NotSupported;
+            if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
             
             try
             {
@@ -267,7 +267,7 @@ namespace API.Services
                 return false;
             }
 
-            if (Parser.Parser.IsArchive(archivePath)) return true;
+            if (Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath)) return true;
             
             _logger.LogError("Archive {ArchivePath} is not a valid archive", archivePath);
             return false;
@@ -417,10 +417,10 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return;
                     default:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return;
                 }
                 

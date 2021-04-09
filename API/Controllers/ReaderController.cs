@@ -9,6 +9,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -46,7 +47,7 @@ namespace API.Controllers
 
             return File(content, "image/" + format);
         }
-
+        
         [HttpGet("chapter-path")]
         public async Task<ActionResult<string>> GetImagePath(int chapterId)
         {

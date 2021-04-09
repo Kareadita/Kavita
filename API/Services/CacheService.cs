@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Entities;
+using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -17,21 +19,23 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
-        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, 
+            IDirectoryService directoryService, IBookService bookService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
+            _bookService = bookService;
             _numericComparer = new NumericComparer();
         }
 
         public void EnsureCacheDirectory()
         {
-            _logger.LogDebug("Checking if valid Cache directory: {CacheDirectory}", CacheDirectory);
             if (!DirectoryService.ExistOrCreate(CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
@@ -53,7 +57,15 @@ namespace API.Services
                 {
                     extraPath = file.Id + "";
                 }
-                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+
+                if (file.Format == MangaFormat.Archive)
+                {
+                    _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));    
+                } else if (file.Format == MangaFormat.Book)
+                {
+                    _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
+                }
+                
             }
 
             if (fileCount > 1)
@@ -123,6 +135,11 @@ namespace API.Services
                     var path = GetCachePath(chapter.Id);
                     var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions); 
                     Array.Sort(files, _numericComparer);
+
+                    if (files.Length == 0)
+                    {
+                        return (files.ElementAt(0), mangaFile);
+                    }
                     
                     // Since array is 0 based, we need to keep that in account (only affects last image)
                     if (page == files.Length)

@@ -8,5 +8,6 @@ namespace API.Entities.Interfaces
 
         ParserInfo ParseInfo(string filePath);
         byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true);
+        void ExtractToFolder(string fileFilePath, string destDirectory);
     }
 }

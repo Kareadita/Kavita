@@ -1,5 +1,7 @@
 ﻿using System.IO;
+using System.IO.Compression;
 using API.Entities.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -11,10 +13,13 @@ namespace API.Tests.Services
     {
         private readonly IBookService _bookService;
         private readonly ILogger<BookService> _logger = Substitute.For<ILogger<BookService>>();
+        private readonly IArchiveService _archiveService;
+        private readonly ILogger<ArchiveService> archiveServiceLogger = Substitute.For<ILogger<ArchiveService>>();
         
         public BookServiceTests()
         {
-            _bookService = new BookService(_logger);
+            _archiveService = new ArchiveService(archiveServiceLogger);
+            _bookService = new BookService(_logger, _archiveService);
         }
 
         [Theory]
@@ -25,6 +30,15 @@ namespace API.Tests.Services
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
+        }
+
+        [Fact]
+        public void CanExtract_Test()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
+            var file = "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub";
+            using var archive = ZipFile.OpenRead(Path.Join(testDirectory, file));
+            archive.ExtractToDirectory(testDirectory);
         }
     }
 }

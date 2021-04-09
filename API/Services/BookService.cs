@@ -1,11 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using API.Archive;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Extensions;
+using API.Interfaces.Services;
 using API.Parser;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.ObjectPool;
 using NetVips;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 using VersOne.Epub;
 
 namespace API.Services
@@ -13,11 +22,16 @@ namespace API.Services
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
-        private const int ThumbnailWidth = 320; // 153w x 230h
+        private readonly IArchiveService _archiveService;
 
-        public BookService(ILogger<BookService> logger)
+        private const int ThumbnailWidth = 320; // 153w x 230h
+        //private readonly ObjectPool<EpubBook> _readerPool;
+
+        public BookService(ILogger<BookService> logger, IArchiveService archiveService)
         {
             _logger = logger;
+            _archiveService = archiveService;
+            //_readerPool = new DefaultObjectPool<EpubBook>();
         }
 
         private bool IsValidFile(string filePath)
@@ -91,5 +105,67 @@ namespace API.Services
             
         }
 
+        public void ExtractToFolder(string archivePath, string extractPath)
+        {
+            if (!_archiveService.IsValidArchive(archivePath)) return;
+
+            if (Directory.Exists(extractPath)) return;
+            
+            var sw = Stopwatch.StartNew();
+
+            try
+            {
+                var libraryHandler = _archiveService.CanOpen(archivePath);
+                switch (libraryHandler)
+                {
+                    case ArchiveLibrary.Default:
+                    {
+                        _logger.LogDebug("Using default compression handling");
+                        using var archive = ZipFile.OpenRead(archivePath);
+                        ExtractArchiveEntries(archive, extractPath);
+                        break;
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        _logger.LogDebug("Using SharpCompress compression handling");
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        ExtractArchiveEntities(archive.Entries, extractPath);
+                        break;
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogError("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return;
+                    default:
+                        _logger.LogError("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        return;
+                }
+                
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+                return;
+            }
+            _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
+        }
+        
+        private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
+        {
+            DirectoryService.ExistOrCreate(extractPath);
+            foreach (var entry in entries)
+            {
+                entry.WriteToDirectory(extractPath, new ExtractionOptions()
+                {
+                    ExtractFullPath = false,
+                    Overwrite = false
+                });
+            }
+        }
+
+        private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
+        {
+            if (!archive.HasFiles()) return;
+            archive.ExtractToDirectory(extractPath, true);
+        }
     }
 }
