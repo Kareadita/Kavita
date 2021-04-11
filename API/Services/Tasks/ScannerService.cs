@@ -207,9 +207,6 @@ namespace API.Services.Tasks
              UpdateVolumes(series, parsedSeries[series.OriginalName].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
           });
-          
-
-          foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
        }
 
        private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
