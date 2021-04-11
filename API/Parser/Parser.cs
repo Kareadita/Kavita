@@ -15,7 +15,7 @@ namespace API.Parser
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex FolderRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -752,7 +752,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool IsCoverImage(string name)
         {
-            return IsImage(name, true) && (FolderRegex.IsMatch(name));
+            return IsImage(name, true) && (CoverImageRegex.IsMatch(name));
         }
 
         public static bool HasBlacklistedFolderInPath(string path)
