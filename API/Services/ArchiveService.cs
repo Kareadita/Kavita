@@ -189,37 +189,6 @@ namespace API.Services
             return Array.Empty<byte>();
         }
 
-        // private byte[] FindCoverImage(IEnumerable<IArchiveEntry> entries, bool createThumbnail)
-        // {
-        //     var images = entries.Where(entry => !entry.IsDirectory
-        //                                         && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-        //                                         && Parser.Parser.IsImage(entry.Key)).ToList();
-        //     foreach (var entry in images)
-        //     {
-        //         if (Parser.Parser.IsCoverImage(entry.Key))
-        //         {
-        //             using var ms = _streamManager.GetStream();
-        //             entry.WriteTo(ms);
-        //             ms.Position = 0;
-        //             var data = ms.ToArray();
-        //             return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
-        //         }
-        //     }
-        //
-        //     if (images.Any())
-        //     {
-        //         var entry = images.OrderBy(e => e.Key).FirstOrDefault();
-        //         if (entry == null) return Array.Empty<byte>();
-        //         using var ms = _streamManager.GetStream();
-        //         entry.WriteTo(ms);
-        //         ms.Position = 0;
-        //         var data = ms.ToArray();
-        //         return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
-        //     }
-        //     
-        //     return Array.Empty<byte>();
-        // }
-        //
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
@@ -241,27 +210,7 @@ namespace API.Services
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
-
-        // private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
-        // {
-        //     if (!formatExtension.StartsWith("."))
-        //     {
-        //         formatExtension = "." + formatExtension;
-        //     }
-        //     
-        //     try
-        //     {
-        //         using var thumbnail = Image.ThumbnailBuffer(entry, ThumbnailWidth);
-        //         return thumbnail.WriteToBuffer(formatExtension); 
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image. Format Extension {Extension}", formatExtension);
-        //     }
-        //
-        //     return Array.Empty<byte>();
-        // }
-        //
+        
         private byte[] CreateThumbnail(string entryName, Stream stream, string formatExtension = ".jpg")
         {
             if (!formatExtension.StartsWith("."))
