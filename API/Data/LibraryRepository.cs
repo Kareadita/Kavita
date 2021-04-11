@@ -92,6 +92,7 @@ namespace API.Data
         /// <returns></returns>
         public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
         {
+            
             return await _context.Library
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)
