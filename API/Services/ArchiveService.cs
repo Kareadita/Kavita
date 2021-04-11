@@ -118,6 +118,11 @@ namespace API.Services
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
+        /// <summary>
+        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="NaturalSortComparer"/> for ordering files
+        /// </summary>
+        /// <param name="entryFullNames"></param>
+        /// <returns>Entry name of match, null if no match</returns>
         public string FirstFileEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
