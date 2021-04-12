@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using API.Entities;
+using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Parser;
 using API.Services;
 using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,32 +33,123 @@ namespace API.Tests.Services
             _testOutputHelper = testOutputHelper;
             _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
             _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService);
-            _libraryMock = new Library()
-            {
-                Id = 1,
-                Name = "Manga",
-                Folders = new List<FolderPath>()
-                {
-                    new FolderPath()
-                    {
-                        Id = 1,
-                        LastScanned = DateTime.Now,
-                        LibraryId = 1,
-                        Path = "E:/Manga"
-                    }
-                },
-                LastModified = DateTime.Now,
-                Series = new List<Series>()
-                {
-                    new Series()
-                    {
-                        Id = 0, 
-                        Name = "Darker Than Black"
-                    }
-                }
-            };
+            // _libraryMock = new Library()
+            // {
+            //     Id = 1,
+            //     Name = "Manga",
+            //     Folders = new List<FolderPath>()
+            //     {
+            //         new FolderPath()
+            //         {
+            //             Id = 1,
+            //             LastScanned = DateTime.Now,
+            //             LibraryId = 1,
+            //             Path = "E:/Manga"
+            //         }
+            //     },
+            //     LastModified = DateTime.Now,
+            //     Series = new List<Series>()
+            //     {
+            //         new Series()
+            //         {
+            //             Id = 0, 
+            //             Name = "Darker Than Black"
+            //         }
+            //     }
+            // };
             
         }
+
+        // [Theory]
+        // [InlineData(new [] {"Darker than Black", "Darker than Black", "Darker than Black"}, new [] {"Darker than Black"}, true)]
+        // [InlineData(new [] {"Darker Than Black", "Darker Than Black", "Darker than Black"}, new [] {"Darker than Black"}, true)]
+        // [InlineData(new [] {"Darker Than Black ", "Darker Than Black ", "Darker Than Black "}, new [] {"Darker than Black"}, true)]
+        // [InlineData(new [] {"Darker Than Black! ", "Darker Than Black!", "Darker Than Black - Shin"}, new [] {"Darker than Black"}, false)]
+        // public void FindSeriesNotOnDiskTest(string[] seriesInput, string[] existingSeriesNames, bool expected)
+        // {
+        //     var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+        //     foreach (var seriesName in existingSeriesNames)
+        //     {
+        //         AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
+        //     }
+        //     
+        //     var series = new Series()
+        //     {
+        //         Name = seriesInput[0],
+        //         LocalizedName = seriesInput[1],
+        //         OriginalName = seriesInput[2],
+        //         NormalizedName = Parser.Parser.Normalize(seriesInput[0])
+        //     };
+        //     
+        //     
+        //     
+        //     Assert.Equal(expected, );
+        // }
+        
+        [Theory]
+        [InlineData(new [] {"", "", ""}, new [] {""}, new [] {""})]
+        public void RemoveMissingSeriesTest(string[] seriesInput, string[] list, string[] expectedNames)
+        {
+            // TODO
+            var scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
+            
+            var existingSeries = new List<Series>();
+            
+            var series = new Series()
+            {
+                Name = seriesInput[0],
+                LocalizedName = seriesInput[1],
+                OriginalName = seriesInput[2],
+                NormalizedName = Parser.Parser.Normalize(seriesInput[0])
+            };
+
+            // var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+            // foreach (var seriesName in existingSeriesNames)
+            // {
+            //     AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
+            // }
+
+            //Assert.Equal(expected, scannerService.RemoveMissingSeries(existingSeries, list).Select(s => s.Name).ToList());
+        }
+
+        [Theory]
+        [InlineData(new [] {"Darker than Black"}, "Darker than Black", "Darker than Black")]
+        [InlineData(new [] {"Darker than Black"}, "Darker Than Black", "Darker than Black")]
+        [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker Than Black!")]
+        [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
+        public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
+        {
+            var scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
+
+            var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+            foreach (var seriesName in existingSeriesNames)
+            {
+                AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
+            }
+
+            var actualName = scannerService.MergeName(collectedSeries, new ParserInfo()
+            {
+                Series = parsedInfoName
+            });
+            
+            Assert.Equal(expected, actualName);
+        }
+
+        private void AddToParsedInfo(ConcurrentDictionary<string, List<ParserInfo>> collectedSeries, ParserInfo info)
+        {
+            collectedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
+            {
+                oldValue ??= new List<ParserInfo>();
+                if (!oldValue.Contains(info))
+                {
+                    oldValue.Add(info);
+                }
+
+                return oldValue;
+            });
+        }
+        
+        
 
         // [Fact]
         // public void ExistingOrDefault_Should_BeFromLibrary()

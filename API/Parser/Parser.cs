@@ -409,7 +409,7 @@ namespace API.Parser
             return ret.Series == string.Empty ? null : ret;
         }
 
-        private static MangaFormat ParseFormat(string filePath)
+        public static MangaFormat ParseFormat(string filePath)
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;

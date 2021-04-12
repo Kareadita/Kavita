@@ -15,7 +15,7 @@ namespace API.Extensions
         {
             foreach (var name in list)
             {
-                if (name == series.Name || name == series.LocalizedName || name == series.OriginalName || name == series.NormalizedName)
+                if (Parser.Parser.Normalize(name) == series.NormalizedName || name == series.Name || name == series.LocalizedName || name == series.OriginalName)
                 {
                     return true;
                 }
