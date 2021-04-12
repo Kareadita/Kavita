@@ -266,6 +266,7 @@ namespace API.Tests
         [Theory]
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
+        [InlineData("Darker Than_Black", "darkerthanblack")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
