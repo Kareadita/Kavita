@@ -60,56 +60,36 @@ namespace API.Tests.Services
             
         }
 
-        // [Theory]
-        // [InlineData(new [] {"Darker than Black", "Darker than Black", "Darker than Black"}, new [] {"Darker than Black"}, true)]
-        // [InlineData(new [] {"Darker Than Black", "Darker Than Black", "Darker than Black"}, new [] {"Darker than Black"}, true)]
-        // [InlineData(new [] {"Darker Than Black ", "Darker Than Black ", "Darker Than Black "}, new [] {"Darker than Black"}, true)]
-        // [InlineData(new [] {"Darker Than Black! ", "Darker Than Black!", "Darker Than Black - Shin"}, new [] {"Darker than Black"}, false)]
-        // public void FindSeriesNotOnDiskTest(string[] seriesInput, string[] existingSeriesNames, bool expected)
-        // {
-        //     var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
-        //     foreach (var seriesName in existingSeriesNames)
-        //     {
-        //         AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
-        //     }
-        //     
-        //     var series = new Series()
-        //     {
-        //         Name = seriesInput[0],
-        //         LocalizedName = seriesInput[1],
-        //         OriginalName = seriesInput[2],
-        //         NormalizedName = Parser.Parser.Normalize(seriesInput[0])
-        //     };
-        //     
-        //     
-        //     
-        //     Assert.Equal(expected, );
-        // }
-        
-        [Theory]
-        [InlineData(new [] {"", "", ""}, new [] {""}, new [] {""})]
-        public void RemoveMissingSeriesTest(string[] seriesInput, string[] list, string[] expectedNames)
+        [Fact]
+        public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
-            // TODO
             var scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService);
+            var infos = new Dictionary<string, List<ParserInfo>>();
             
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black"});
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1"});
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10"});
+
             var existingSeries = new List<Series>();
-            
-            var series = new Series()
+            existingSeries.Add(new Series()
             {
-                Name = seriesInput[0],
-                LocalizedName = seriesInput[1],
-                OriginalName = seriesInput[2],
-                NormalizedName = Parser.Parser.Normalize(seriesInput[0])
-            };
-
-            // var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
-            // foreach (var seriesName in existingSeriesNames)
-            // {
-            //     AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
-            // }
-
-            //Assert.Equal(expected, scannerService.RemoveMissingSeries(existingSeries, list).Select(s => s.Name).ToList());
+                Name = "Cage of Eden",
+                LocalizedName = "Cage of Eden",
+                OriginalName = "Cage of Eden",
+                NormalizedName = Parser.Parser.Normalize("Cage of Eden")
+            });
+            existingSeries.Add(new Series()
+            {
+                Name = "Darker Than Black",
+                LocalizedName = "Darker Than Black",
+                OriginalName = "Darker Than Black",
+                NormalizedName = Parser.Parser.Normalize("Darker Than Black")
+            });
+            var expectedSeries = new List<Series>();
+            
+            
+            
+            Assert.Empty(scannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
 
         [Theory]
@@ -135,18 +115,40 @@ namespace API.Tests.Services
             Assert.Equal(expected, actualName);
         }
 
-        private void AddToParsedInfo(ConcurrentDictionary<string, List<ParserInfo>> collectedSeries, ParserInfo info)
+        private void AddToParsedInfo(IDictionary<string, List<ParserInfo>> collectedSeries, ParserInfo info)
         {
-            collectedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
+            if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
             {
-                oldValue ??= new List<ParserInfo>();
-                if (!oldValue.Contains(info))
+                ((ConcurrentDictionary<string, List<ParserInfo>>) collectedSeries).AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
                 {
-                    oldValue.Add(info);
-                }
+                    oldValue ??= new List<ParserInfo>();
+                    if (!oldValue.Contains(info))
+                    {
+                        oldValue.Add(info);
+                    }
 
-                return oldValue;
-            });
+                    return oldValue;
+                });
+            }
+            else
+            {
+                if (!collectedSeries.ContainsKey(info.Series))
+                {
+                    collectedSeries.Add(info.Series, new List<ParserInfo>() {info});
+                }
+                else
+                {
+                    var list = collectedSeries[info.Series];
+                    if (!list.Contains(info))
+                    {
+                        list.Add(info);
+                    }
+
+                    collectedSeries[info.Series] = list;
+                }
+                
+            }
+            
         }
         
         
