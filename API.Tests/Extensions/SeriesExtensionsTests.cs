@@ -17,7 +17,7 @@ namespace API.Tests.Extensions
                 Name = seriesInput[0],
                 LocalizedName = seriesInput[1],
                 OriginalName = seriesInput[2],
-                NormalizedName = Parser.Parser.Normalize(seriesInput[0])
+                NormalizedName = API.Parser.Parser.Normalize(seriesInput[0])
             };
             
             Assert.Equal(expected, series.NameInList(list));

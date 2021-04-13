@@ -29,8 +29,8 @@ namespace API.Tests.Services
         public ScannerServiceTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService, _bookService);
             _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
-            _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService);
             // _libraryMock = new Library()
             // {
             //     Id = 1,
@@ -61,7 +61,6 @@ namespace API.Tests.Services
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
-            var scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
             var infos = new Dictionary<string, List<ParserInfo>>();
             
             AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black"});
@@ -87,7 +86,7 @@ namespace API.Tests.Services
             
             
             
-            Assert.Empty(scannerService.FindSeriesNotOnDisk(existingSeries, infos));
+            Assert.Empty(_scannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
 
         [Theory]
@@ -97,15 +96,13 @@ namespace API.Tests.Services
         [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
         public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
         {
-            var scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
-
             var collectedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
             foreach (var seriesName in existingSeriesNames)
             {
                 AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
             }
 
-            var actualName = scannerService.MergeName(collectedSeries, new ParserInfo()
+            var actualName = _scannerService.MergeName(collectedSeries, new ParserInfo()
             {
                 Series = parsedInfoName
             });
