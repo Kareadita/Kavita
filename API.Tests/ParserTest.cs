@@ -121,12 +121,15 @@ namespace API.Tests
         [InlineData("[SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar", "NEEDLESS")]
         [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "Fullmetal Alchemist")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "To Love Ru")]
-        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
         //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
         [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
         [InlineData("Ani-Hina Art Collection.cbz", "")] // This has to be a fallback case
+        [InlineData("Magi - Ch.252-005.cbz", "Magi")]
+        [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
+        [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -179,6 +182,12 @@ namespace API.Tests
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
         [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
         [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
+        [InlineData("Transferred to another world magical swordsman v1.1", "1")]
+        [InlineData("Transferred to another world magical swordsman v1.2", "2")]
+        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
+        [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
+        [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
+        [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));
@@ -234,7 +243,7 @@ namespace API.Tests
         [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
         [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
         [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
-        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "Digital Colored Comics")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
         [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
         public void ParseEditionTest(string input, string expected)
         {
