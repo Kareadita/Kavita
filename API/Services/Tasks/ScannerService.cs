@@ -164,27 +164,16 @@ namespace API.Services.Tasks
            
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
        }
+       
 
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
           
           // First, remove any series that are not in parsedSeries list
-          var foundSeries = parsedSeries.Select(s => Parser.Parser.Normalize(s.Key)).ToList();
-          // var missingSeries = library.Series.Where(existingSeries =>
-          //    !foundSeries.Contains(existingSeries.NormalizedName) || !parsedSeries.ContainsKey(existingSeries.Name)
-          //     || (existingSeries.LocalizedName != null && !parsedSeries.ContainsKey(existingSeries.LocalizedName))
-          //     || !parsedSeries.ContainsKey(existingSeries.OriginalName));
-
-          var missingSeries = library.Series.Where(existingSeries => !existingSeries.NameInList(foundSeries)
-                                                                     || !existingSeries.NameInList(parsedSeries.Keys));
-          var removeCount = 0;
-          foreach (var existingSeries in missingSeries)
-          {
-             library.Series?.Remove(existingSeries);
-             removeCount += 1;
-          }
-          _logger.LogInformation("Removed {RemoveCount} series that are no longer on disk", removeCount);
+          var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries);
+          var removeCount = RemoveMissingSeries(library.Series, missingSeries);
+          _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk", removeCount);
           
           // Add new series that have parsedInfos
           foreach (var (key, _) in parsedSeries)
@@ -216,9 +205,29 @@ namespace API.Services.Tasks
              UpdateVolumes(series, parsedSeries[series.OriginalName].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
           });
-          
+       }
 
-          foreach (var folder in library.Folders) folder.LastScanned = DateTime.Now;
+       public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<string, List<ParserInfo>> parsedSeries)
+       {
+          var foundSeries = parsedSeries.Select(s => s.Key).ToList();
+          var missingSeries = existingSeries.Where(existingSeries => !existingSeries.NameInList(foundSeries)
+                                                                     || !existingSeries.NameInList(parsedSeries.Keys));
+          return missingSeries;
+       }
+
+       public int RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries)
+       {
+          
+          var removeCount = 0;
+          //library.Series = library.Series.Except(missingSeries).ToList();
+          if (existingSeries == null || existingSeries.Count == 0) return 0;
+          foreach (var existing in missingSeries)
+          {
+             existingSeries.Remove(existing);
+             removeCount += 1;
+          }
+
+          return removeCount;
        }
 
        private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
@@ -275,6 +284,7 @@ namespace API.Services.Tasks
              Chapter chapter = null;
              try
              {
+                // TODO: Extract to FindExistingChapter()
                 chapter = specialTreatment
                    ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename
                                                           || (c.Files.Select(f => f.FilePath)
@@ -326,7 +336,7 @@ namespace API.Services.Tasks
           
           
           
-          
+          // TODO: Extract to 
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
@@ -363,15 +373,7 @@ namespace API.Services.Tasks
           if (info.Series == string.Empty) return;
           
           // Check if normalized info.Series already exists and if so, update info to use that name instead
-          var normalizedSeries = Parser.Parser.Normalize(info.Series);
-          _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
-          var existingName = _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
-             .Key;
-          if (!string.IsNullOrEmpty(existingName) && info.Series != existingName)
-          {
-             _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);   
-             info.Series = existingName;
-          }
+          info.Series = MergeName(_scannedSeries, info);
 
           _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
           {
@@ -383,6 +385,21 @@ namespace API.Services.Tasks
 
              return oldValue;
           });
+       }
+
+       public string MergeName(ConcurrentDictionary<string,List<ParserInfo>> collectedSeries, ParserInfo info)
+       {
+          var normalizedSeries = Parser.Parser.Normalize(info.Series);
+          _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
+          var existingName = collectedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
+             .Key;
+          if (!string.IsNullOrEmpty(existingName) && info.Series != existingName)
+          {
+             _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
+             return existingName;
+          }
+
+          return info.Series;
        }
 
        /// <summary>

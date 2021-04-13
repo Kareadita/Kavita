@@ -58,6 +58,7 @@ namespace API.Tests.Parser
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
         [InlineData("Gantz.V26.cbz", "26")]
         [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -119,12 +120,16 @@ namespace API.Tests.Parser
         [InlineData("[SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar", "NEEDLESS")]
         [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "Fullmetal Alchemist")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "To Love Ru")]
-        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
         //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
         [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
         [InlineData("Ani-Hina Art Collection.cbz", "")] // This has to be a fallback case
+        [InlineData("Magi - Ch.252-005.cbz", "Magi")]
+        [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
+        [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -177,11 +182,167 @@ namespace API.Tests.Parser
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
         [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
         [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
+        [InlineData("Transferred to another world magical swordsman v1.1", "1")]
+        [InlineData("Transferred to another world magical swordsman v1.2", "2")]
+        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
+        [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
+        [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
+        [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
         }
+
+
+        [Theory]
+        [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
+        [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
+        [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
+        [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
+        [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
+        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
+        [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
+        public void ParseEditionTest(string input, string expected)
+        {
+            Assert.Equal(expected, API.Parser.Parser.ParseEdition(input));
+        }
+        [Theory]
+        [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
+        [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
+        [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
+        [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
+        [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
+        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
+        [InlineData("Ani-Hina Art Collection.cbz", true)]
+        public void ParseMangaSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(input) != "");
+        }
+
+
+        // [Theory]
+        // [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
+        // [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
+        // [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "The First Asterix Frieze")]
+        // [InlineData("Batman & Catwoman - Trail of the Gun 01", "Batman & Catwoman - Trail of the Gun")]
+        // [InlineData("Batman & Daredevil - King of New York", "Batman & Daredevil - King of New York")]
+        // [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "Batman & Grendel")]
+        // [InlineData("Batman & Robin the Teen Wonder #0", "Batman & Robin the Teen Wonder")]
+        // [InlineData("Batman & Wildcat (1 of 3)", "Batman & Wildcat")]
+        // [InlineData("Batman And Superman World's Finest #01", "Batman And Superman World's Finest")]
+        // [InlineData("Babe 01", "Babe")]
+        // [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
+        // [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
+        // [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
+        // [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
+        // [InlineData("Invincible Vol 01 Family matters (2005) (Digital).cbr", "Invincible")]
+        // public void ParseComicSeriesTest(string filename, string expected)
+        // {
+        //     Assert.Equal(expected, ParseComicSeries(filename));
+        // }
         
+        // [Theory]
+        // [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
+        // [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "4")]
+        // [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
+        // [InlineData("Batman & Catwoman - Trail of the Gun 01", "1")]
+        // [InlineData("Batman & Daredevil - King of New York", "0")]
+        // [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
+        // [InlineData("Batman & Robin the Teen Wonder #0", "0")]
+        // [InlineData("Batman & Wildcat (1 of 3)", "0")]
+        // [InlineData("Batman And Superman World's Finest #01", "1")]
+        // [InlineData("Babe 01", "1")]
+        // [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
+        // [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        // [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "2")]
+        // [InlineData("Superman v1 024 (09-10 1943)", "1")]
+        // public void ParseComicVolumeTest(string filename, string expected)
+        // {
+        //     Assert.Equal(expected, ParseComicVolume(filename));
+        // }
+        
+        // [Theory]
+        // [InlineData("01 Spider-Man & Wolverine 01.cbr", "0")]
+        // [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "0")]
+        // [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
+        // [InlineData("Batman & Catwoman - Trail of the Gun 01", "0")]
+        // [InlineData("Batman & Daredevil - King of New York", "0")]
+        // [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "0")]
+        // [InlineData("Batman & Robin the Teen Wonder #0", "0")]
+        // [InlineData("Batman & Wildcat (1 of 3)", "1")]
+        // [InlineData("Batman & Wildcat (2 of 3)", "2")]
+        // [InlineData("Batman And Superman World's Finest #01", "0")]
+        // [InlineData("Babe 01", "0")]
+        // [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
+        // [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        // [InlineData("Superman v1 024 (09-10 1943)", "24")]
+        // public void ParseComicChapterTest(string filename, string expected)
+        // {
+        //     Assert.Equal(expected, ParseComicChapter(filename));
+        // }
+
+        // [Theory]
+        // [InlineData("test.jpg", true)]
+        // [InlineData("test.jpeg", true)]
+        // [InlineData("test.png", true)]
+        // [InlineData(".test.jpg", false)]
+        // [InlineData("!test.jpg", false)]
+        // public void IsImageTest(string filename, bool expected)
+        // {
+        //     Assert.Equal(expected, IsImage(filename));
+        // }
+        
+        // [Theory]
+        // [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
+        // [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
+        // [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
+        // public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
+        // {
+        //     var actual = API.Parser.Parser.Parse(inputPath, rootDir);
+        //     if (actual == null)
+        //     {
+        //         Assert.NotNull(actual);
+        //         return;
+        //     }
+        //     
+        //     Assert.Equal(expectedSeries, actual.Series);
+        // }
+        
+        // [Theory]
+        // [InlineData("Love Hina - Special.jpg", false)]
+        // [InlineData("folder.jpg", true)]
+        // [InlineData("DearS_v01_cover.jpg", true)]
+        // [InlineData("DearS_v01_covers.jpg", false)]
+        // [InlineData("!cover.jpg", true)]
+        // [InlineData("cover.jpg", true)]
+        // [InlineData("cover.png", true)]
+        // [InlineData("ch1/cover.png", true)]
+        // public void IsCoverImageTest(string inputPath, bool expected)
+        // {
+        //     Assert.Equal(expected, API.Parser.Parser.IsCoverImage(inputPath));
+        // }
+        
+        // [Theory]
+        // [InlineData("__MACOSX/Love Hina - Special.jpg", true)]
+        // [InlineData("TEST/Love Hina - Special.jpg", false)]
+        // [InlineData("__macosx/Love Hina/", false)]
+        // [InlineData("MACOSX/Love Hina/", false)]
+        // public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
+        // {
+        //     Assert.Equal(expected, API.Parser.Parser.HasBlacklistedFolderInPath(inputPath));
+        // }
+
+        [Theory]
+        [InlineData("image.png", MangaFormat.Image)]
+        [InlineData("image.cbz", MangaFormat.Archive)]
+        [InlineData("image.txt", MangaFormat.Unknown)]
+        public void ParseFormatTest(string inputFile, MangaFormat expected)
+        {
+            Assert.Equal(expected, API.Parser.Parser.ParseFormat(inputFile));
+        }
+
         [Fact]
         public void ParseInfoTest()
         {

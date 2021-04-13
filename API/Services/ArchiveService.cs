@@ -39,7 +39,7 @@ namespace API.Services
         /// </summary>
         /// <param name="archivePath"></param>
         /// <returns></returns>
-        public ArchiveLibrary CanOpen(string archivePath)
+        public virtual ArchiveLibrary CanOpen(string archivePath)
         {
             if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
             
@@ -103,11 +103,42 @@ namespace API.Services
                 return 0;
             }
         }
+
+        /// <summary>
+        /// Finds the first instance of a folder entry and returns it
+        /// </summary>
+        /// <param name="entryFullNames"></param>
+        /// <returns>Entry name of match, null if no match</returns>
+        public string FindFolderEntry(IEnumerable<string> entryFullNames)
+        {
+            var result = entryFullNames
+                .FirstOrDefault(x => !Path.EndsInDirectorySeparator(x) && !Parser.Parser.HasBlacklistedFolderInPath(x)
+                       && Parser.Parser.IsCoverImage(x));
+
+            return string.IsNullOrEmpty(result) ? null : result;
+        }
+
+        /// <summary>
+        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="NaturalSortComparer"/> for ordering files
+        /// </summary>
+        /// <param name="entryFullNames"></param>
+        /// <returns>Entry name of match, null if no match</returns>
+        public string FirstFileEntry(IEnumerable<string> entryFullNames)
+        {
+            var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
+                .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
+                                     && Parser.Parser.IsImage(x));
+            
+            return string.IsNullOrEmpty(result) ? null : result;
+        }
         
+
         /// <summary>
         /// Generates byte array of cover image.
-        /// Given a path to a compressed file (zip, rar, cbz, cbr, etc), will ensure the first image is returned unless
-        /// a folder.extension exists in the root directory of the compressed file.
+        /// Given a path to a compressed file <see cref="Parser.Parser.ArchiveFileExtensions"/>, will ensure the first image (respects directory structure) is returned unless
+        /// a folder/cover.(image extension) exists in the the compressed file (if duplicate, the first is chosen)
+        ///
+        /// This skips over any __MACOSX folder/file iteration.
         /// </summary>
         /// <param name="archivePath"></param>
         /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
@@ -124,28 +155,28 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        // NOTE: We can probably reduce our iteration by performing 1 filter on MACOSX then do our folder check and image chack. 
-                        var folder = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName) 
-                                                                          && Parser.Parser.IsImage(x.FullName)
-                                                                          && Parser.Parser.IsCoverImage(x.FullName));
-                        var entries = archive.Entries.Where(x => Path.HasExtension(x.FullName) 
-                                                                 && !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
-                                                                 && Parser.Parser.IsImage(x.FullName))
-                                                                .OrderBy(x => x.FullName, _comparer).ToList();
-                        var entry = folder ?? entries[0];
+                        var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
-                        return createThumbnail ? CreateThumbnail(entry) : ConvertEntryToByteArray(entry);
+                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
+                        var entry = archive.Entries.Single(e => e.FullName == entryName);
+                        using var stream = entry.Open();
+
+                        return createThumbnail ? CreateThumbnail(entry.FullName, stream) : ConvertEntryToByteArray(entry);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        var entries = archive.Entries
-                                                                .Where(entry => !entry.IsDirectory
-                                                                    && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-                                                                     && Parser.Parser.IsImage(entry.Key))
-                                                                .OrderBy(x => x.Key, _comparer);
-                        return FindCoverImage(entries, createThumbnail);
+                        var entryNames = archive.Entries.Where(entry => !entry.IsDirectory).Select(e => e.Key).ToList();
+                        
+                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
+                        var entry = archive.Entries.Single(e => e.Key == entryName);
+                        
+                        using var ms = _streamManager.GetStream();
+                        entry.WriteTo(ms);
+                        ms.Position = 0;
+                        
+                        return createThumbnail ? CreateThumbnail(entry.Key, ms, Path.GetExtension(entry.Key)) : ms.ToArray();
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogError("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -163,35 +194,6 @@ namespace API.Services
             return Array.Empty<byte>();
         }
 
-        private byte[] FindCoverImage(IEnumerable<IArchiveEntry> entries, bool createThumbnail)
-        {
-            var images = entries.ToList();
-            foreach (var entry in images)
-            {
-                if (Path.GetFileNameWithoutExtension(entry.Key).ToLower() == "folder")
-                {
-                    using var ms = _streamManager.GetStream();
-                    entry.WriteTo(ms);
-                    ms.Position = 0;
-                    var data = ms.ToArray();
-                    return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
-                }
-            }
-
-            if (images.Any())
-            {
-                var entry = images.OrderBy(e => e.Key).FirstOrDefault();
-                if (entry == null) return Array.Empty<byte>();
-                using var ms = _streamManager.GetStream();
-                entry.WriteTo(ms);
-                ms.Position = 0;
-                var data = ms.ToArray();
-                return createThumbnail ? CreateThumbnail(data, Path.GetExtension(entry.Key)) : data;
-            }
-            
-            return Array.Empty<byte>();
-        }
-        
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
@@ -213,28 +215,8 @@ namespace API.Services
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
-
-        private byte[] CreateThumbnail(byte[] entry, string formatExtension = ".jpg")
-        {
-            if (!formatExtension.StartsWith("."))
-            {
-                formatExtension = "." + formatExtension;
-            }
-            
-            try
-            {
-                using var thumbnail = Image.ThumbnailBuffer(entry, ThumbnailWidth);
-                return thumbnail.WriteToBuffer(formatExtension); 
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[CreateThumbnail] There was a critical error and prevented thumbnail generation. Defaulting to no cover image. Format Extension {Extension}", formatExtension);
-            }
-
-            return Array.Empty<byte>();
-        }
         
-        private byte[] CreateThumbnail(ZipArchiveEntry entry, string formatExtension = ".jpg")
+        private byte[] CreateThumbnail(string entryName, Stream stream, string formatExtension = ".jpg")
         {
             if (!formatExtension.StartsWith("."))
             {
@@ -242,13 +224,12 @@ namespace API.Services
             }
             try
             {
-                using var stream = entry.Open();
                 using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
                 return thumbnail.WriteToBuffer(formatExtension);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entry.FullName);
+                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
             return Array.Empty<byte>();

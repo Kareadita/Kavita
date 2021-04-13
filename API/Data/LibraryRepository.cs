@@ -41,6 +41,7 @@ namespace API.Data
                 .OrderBy(l => l.Name)
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .AsSingleQuery()
                 .ToListAsync();
         }
         
@@ -92,6 +93,7 @@ namespace API.Data
         /// <returns></returns>
         public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
         {
+            
             return await _context.Library
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)

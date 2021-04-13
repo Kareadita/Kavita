@@ -82,31 +82,32 @@ namespace API.Tests
             Assert.Equal(expected, IsEpub(input));
         }
 
-        [Theory]
-        [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
-        [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
-        [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
-        [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
-        [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
-        [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
-        [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "Digital Colored Comics")]
-        [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
-        public void ParseEditionTest(string input, string expected)
-        {
-            Assert.Equal(expected, ParseEdition(input));
-        }
-        [Theory]
-        [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
-        [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
-        [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
-        [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
-        [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
-        [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
-        [InlineData("Ani-Hina Art Collection.cbz", true)]
-        public void ParseMangaSpecialTest(string input, bool expected)
-        {
-            Assert.Equal(expected, ParseMangaSpecial(input) != "");
-        }
+        // [Theory]
+        // [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
+        // [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
+        // [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        // [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
+        // [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
+        // [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
+        // [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "Digital Colored Comics")]
+        // [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
+        // public void ParseEditionTest(string input, string expected)
+        // {
+        //     Assert.Equal(expected, ParseEdition(input));
+        // }
+        
+        // [Theory]
+        // [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
+        // [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
+        // [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
+        // [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
+        // [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
+        // [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
+        // [InlineData("Ani-Hina Art Collection.cbz", true)]
+        // public void ParseMangaSpecialTest(string input, bool expected)
+        // {
+        //     Assert.Equal(expected, ParseMangaSpecial(input) != "");
+        // }
         
         [Theory]
         [InlineData("12-14", 12)]
@@ -122,6 +123,7 @@ namespace API.Tests
         [Theory]
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
+        [InlineData("Darker Than_Black", "darkerthanblack")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -163,6 +165,9 @@ namespace API.Tests
         [InlineData("DearS_v01_cover.jpg", true)]
         [InlineData("DearS_v01_covers.jpg", false)]
         [InlineData("!cover.jpg", true)]
+        [InlineData("cover.jpg", true)]
+        [InlineData("cover.png", true)]
+        [InlineData("ch1/cover.png", true)]
         public void IsCoverImageTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, IsCoverImage(inputPath));

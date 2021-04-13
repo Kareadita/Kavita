@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using static System.GC;
+using static System.String;
 
 namespace API.Comparators
 {
@@ -17,20 +18,18 @@ namespace API.Comparators
 
         int IComparer<string>.Compare(string x, string y)
         {
-            if (x == y)
-                return 0;
+            if (x == y) return 0;
 
-            string[] x1, y1;
-
-            if (!_table.TryGetValue(x, out x1))
+            if (!_table.TryGetValue(x, out var x1))
             {
-                x1 = Regex.Split(x.Replace(" ", ""), "([0-9]+)");
+                // .Replace(" ", Empty)
+                x1 = Regex.Split(x, "([0-9]+)");
                 _table.Add(x, x1);
             }
 
-            if (!_table.TryGetValue(y ?? string.Empty, out y1))
+            if (!_table.TryGetValue(y, out var y1))
             {
-                y1 = Regex.Split(y?.Replace(" ", ""), "([0-9]+)");
+                y1 = Regex.Split(y, "([0-9]+)");
                 _table.Add(y, y1);
             }
 
@@ -61,12 +60,11 @@ namespace API.Comparators
 
         private static int PartCompare(string left, string right)
         {
-            int x, y;
-            if (!int.TryParse(left, out x))
-                return left.CompareTo(right);
+            if (!int.TryParse(left, out var x))
+                return Compare(left, right, StringComparison.Ordinal);
 
-            if (!int.TryParse(right, out y))
-                return left.CompareTo(right);
+            if (!int.TryParse(right, out var y))
+                return Compare(left, right, StringComparison.Ordinal);
 
             return x.CompareTo(y);
         }
