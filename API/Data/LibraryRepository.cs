@@ -41,6 +41,7 @@ namespace API.Data
                 .OrderBy(l => l.Name)
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .AsSingleQuery()
                 .ToListAsync();
         }
         

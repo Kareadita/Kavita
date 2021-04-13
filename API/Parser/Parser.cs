@@ -68,10 +68,7 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (\b|_|-)(vol)\.?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
-            new Regex(
-                @"(?<Series>.*) (\b|_|-)v",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
@@ -83,6 +80,10 @@ namespace API.Parser
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
             new Regex(
                 @"(?<Series>.*)(\bc\d+\b)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
+            new Regex(
+                @"(?<Series>.*) (\b|_|-)v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             // due to duplicate version identifiers in file.
@@ -113,6 +114,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+            new Regex(
+                @"(?<Series>.*)( |_)(vol\d+)?( |_)(?:Chp\.? ?\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
             new Regex(
                 @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
@@ -129,13 +134,21 @@ namespace API.Parser
             new Regex(
                 @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1
+            new Regex(
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode ?)\d+-?\d*",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*", //fails on 
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Magi - Ch.252-005.cbz
+            new Regex(
+                @"(?<Series>.*)( ?- ?)Ch\.\d+-?\d*", 
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_Omake-1.zip 
             new Regex(
@@ -292,6 +305,10 @@ namespace API.Parser
             new Regex(
                 @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+            new Regex(
+                @"(?<Series>.*)( |_)(vol\d+)?( |_)Chp\.? ?(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
         };
         private static readonly Regex[] MangaEditionRegex = {
@@ -306,10 +323,6 @@ namespace API.Parser
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
                 @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
-            new Regex(
-                @"(\b|_)(?<Edition>Digital(?: |_)Colored(?: |_)Comics)(\b|_)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz
             new Regex(
