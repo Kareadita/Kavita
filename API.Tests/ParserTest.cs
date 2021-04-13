@@ -60,6 +60,7 @@ namespace API.Tests
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
         [InlineData("Gantz.V26.cbz", "26")]
         [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseVolume(filename));
@@ -130,6 +131,7 @@ namespace API.Tests
         [InlineData("Magi - Ch.252-005.cbz", "Magi")]
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
         [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseSeries(filename));
@@ -188,6 +190,7 @@ namespace API.Tests
         [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
+        [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, ParseChapter(filename));

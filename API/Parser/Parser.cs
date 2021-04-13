@@ -114,6 +114,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+            new Regex(
+                @"(?<Series>.*)( |_)(vol\d+)?( |_)(?:Chp\.? ?\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
             new Regex(
                 @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
@@ -300,6 +304,10 @@ namespace API.Parser
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
                 @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+            new Regex(
+                @"(?<Series>.*)( |_)(vol\d+)?( |_)Chp\.? ?(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
         };
