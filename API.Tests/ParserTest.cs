@@ -198,6 +198,7 @@ namespace API.Tests
         [InlineData("1", "001")]
         [InlineData("10", "010")]
         [InlineData("100", "100")]
+        [InlineData("4-8", "004-008")]
         public void PadZerosTest(string input, string expected)
         {
             Assert.Equal(expected, PadZeros(input));
@@ -266,6 +267,7 @@ namespace API.Tests
         [Theory]
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
+        [InlineData("Darker Than_Black", "darkerthanblack")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -384,6 +386,14 @@ namespace API.Tests
             Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
         }
 
+        [Theory]
+        [InlineData("image.png", MangaFormat.Image)]
+        [InlineData("image.cbz", MangaFormat.Archive)]
+        [InlineData("image.txt", MangaFormat.Unknown)]
+        public void ParseFormatTest(string inputFile, MangaFormat expected)
+        {
+            Assert.Equal(expected, ParseFormat(inputFile));
+        }
 
         [Fact]
         public void ParseInfoTest()
