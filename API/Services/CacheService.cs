@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Controllers;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -65,6 +66,7 @@ namespace API.Services
                 {
                     
                     _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
+                    //_bookService.MapHtmlFiles(Path.Join(extractPath, extraPath));
                 }
                 
             }

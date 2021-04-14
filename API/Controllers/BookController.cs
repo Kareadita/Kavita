@@ -1,10 +1,14 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using API.Entities.Interfaces;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
@@ -18,6 +22,9 @@ namespace API.Controllers
         private readonly IBookService _bookService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
+        public readonly static string BookApiUrl = "book-resources?file=";
+        
+        private static readonly Regex StyleSheetKeyRegex = new Regex("href=\"(?<Key>[a-z0-9\\./]*)/\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork, ICacheService cacheService)
         {
@@ -30,6 +37,7 @@ namespace API.Controllers
         [HttpGet("{chapterId}/book-resources")]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
+            // TODO: Ensure the files have no ../ in it, so the API can't access anything outside of chapter folder.
             _logger.LogDebug("GetBookPageResources endpoint hit");
             var chapter = await _cacheService.Ensure(chapterId);
 
@@ -39,49 +47,49 @@ namespace API.Controllers
                 folder[0], folder[1]);
             var contentType = GetContentType(fullFile);
             return PhysicalFile(fullFile, contentType);
-            
-            return Ok();
         }
 
 
 
         [HttpGet("{chapterId}/book-page")]
-        public async Task<ActionResult> GetBookPage(int chapterId, [FromQuery] int page)
+        public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {
             _logger.LogDebug("Book endpoint hit");
-            // First POC: Generate a mapping between page Num and the file
-            // Send the file back as html and let user render it
             var chapter = await _cacheService.Ensure(chapterId);
+            var host = Request.Host;
             
-            //var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
-            
-            //if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such html for page {page}");
-            var pageName = "titlepage.xhtml";
-            var api = "book-resources?file=";
-
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var counter = 0;
-            foreach (var contentFileRef in book.GetReadingOrder())
+            var doc = new HtmlDocument();
+            // TODO: Figure out a less hacky way to accomplish this
+            var apiBase = "http://" + Request.Host + "/api/book/" + chapterId + "/" + BookApiUrl;
+            foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
                 var content = await contentFileRef.ReadContentAsync();
                 if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
                 {
-                    content = content.Replace("src=\"../", $"src=\"{api}").Replace("href=\"../", $"href=\"{api}");    
+                    doc.LoadHtml(content);
+
+                    var styleNode = doc.DocumentNode.SelectSingleNode("/html/head/link");
+                    var key = styleNode.Attributes["href"].Value.Replace("../", "");
+                    var styleContent = await book.Content.Css[key].ReadContentAsync();
+                    var body = doc.DocumentNode.SelectSingleNode("/html/body");
+                    body.PrependChild(HtmlNode.CreateNode($"<style>{BookService.RemoveWhiteSpaceFromStylesheets(styleContent)}</style>"));
+                    content = body.InnerHtml
+                                .Replace("src=\"../", $"src=\"{apiBase}")
+                                .Replace("href=\"../", $"href=\"{apiBase}");
                 }
                 
 
                 if (page == counter)
                 {
-                    return new FileContentResult(Encoding.ASCII.GetBytes(content), "text/html");
+                    return Ok(content);
                 }
 
                 counter++;
             }
 
-            var fullFile = Path.Combine(Directory.GetCurrentDirectory(), "cache", chapterId + "", "OEBPS",
-                "Text", pageName);
-            var contentType = GetContentType(fullFile);
-            return PhysicalFile(fullFile, contentType);
+            return BadRequest("Could not find the appropriate html for that page");
         }
 
         private static string GetContentType(string fullFile)

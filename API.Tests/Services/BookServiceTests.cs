@@ -19,12 +19,13 @@ namespace API.Tests.Services
         private readonly ILogger<BookService> _logger = Substitute.For<ILogger<BookService>>();
         private readonly IArchiveService _archiveService;
         private readonly ILogger<ArchiveService> archiveServiceLogger = Substitute.For<ILogger<ArchiveService>>();
+        private readonly ILogger<DirectoryService> directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
         
         public BookServiceTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
             _archiveService = new ArchiveService(archiveServiceLogger);
-            _bookService = new BookService(_logger, _archiveService);
+            _bookService = new BookService(_logger, _archiveService, new DirectoryService(directoryServiceLogger));
         }
 
         [Theory]

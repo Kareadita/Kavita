@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
 using API.Archive;
+using API.Controllers;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 using API.Extensions;
@@ -23,14 +25,16 @@ namespace API.Services
     {
         private readonly ILogger<BookService> _logger;
         private readonly IArchiveService _archiveService;
+        private readonly IDirectoryService _directoryService;
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         //private readonly ObjectPool<EpubBook> _readerPool;
 
-        public BookService(ILogger<BookService> logger, IArchiveService archiveService)
+        public BookService(ILogger<BookService> logger, IArchiveService archiveService, IDirectoryService directoryService)
         {
             _logger = logger;
             _archiveService = archiveService;
+            _directoryService = directoryService;
             //_readerPool = new DefaultObjectPool<EpubBook>();
         }
 
@@ -149,7 +153,45 @@ namespace API.Services
             }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
+
+        public void MapHtmlFiles(string folderPath)
+        {
+            // var book = EpubReader.OpenBook(archiveFile);
+            // foreach (var contentFileRef in book.GetReadingOrder())
+            // {
+            //     var content = contentFileRef.ReadContent();
+            //     if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
+            //     {
+            //         content = content.Replace("src=\"../", $"src=\"{BookController.BookApiUrl}").Replace("href=\"../", $"href=\"{BookController.BookApiUrl}");    
+            //     }
+            // }
+            
+            var files = _directoryService.GetFilesWithExtension(Path.Join(folderPath, "Text"));
+            foreach (var file in files)
+            {
+                var content = System.IO.File.ReadAllText(file);
+                content = content.Replace("src=\"../", $"src=\"{BookController.BookApiUrl}").Replace("href=\"../", $"href=\"{BookController.BookApiUrl}");  
+
+                File.WriteAllText(file, content);
+            }
+            
+        }
         
+        public static string RemoveWhiteSpaceFromStylesheets(string body)
+        {
+            body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
+            body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty);
+            body = Regex.Replace(body, @"\s+", " ");
+            body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1");
+            body = body.Replace(";}", "}");
+            body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");
+
+            // Remove comments from CSS
+            body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
+
+            return body;
+        }
+
         private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
             DirectoryService.ExistOrCreate(extractPath);
