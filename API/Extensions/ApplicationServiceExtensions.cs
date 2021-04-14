@@ -3,6 +3,7 @@ using API.Entities.Interfaces;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Middleware;
 using API.Services;
 using API.Services.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +29,7 @@ namespace API.Extensions
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
-
-
+            
 
             services.AddDbContext<DataContext>(options =>
             {

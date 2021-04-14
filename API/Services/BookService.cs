@@ -112,6 +112,7 @@ namespace API.Services
             if (Directory.Exists(extractPath)) return;
             
             var sw = Stopwatch.StartNew();
+            
 
             try
             {

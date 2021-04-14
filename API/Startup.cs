@@ -82,7 +82,7 @@ namespace API
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
         {
             app.UseMiddleware<ExceptionMiddleware>();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
@@ -119,7 +119,7 @@ namespace API
             {
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), "cache")),
-                RequestPath = new PathString("/book")
+                //RequestPath = new PathString("/book")
             });
             
             app.Use(async (context, next) =>
@@ -135,6 +135,14 @@ namespace API
             
                 await next();
             });
+
+            // app.Use(async (context, next) =>
+            // {
+            //     Console.WriteLine("BookRedirect Path: " + context.Request.Path.ToString());
+            //     await next();
+            // });
+            
+            
 
             app.UseEndpoints(endpoints =>
             {
