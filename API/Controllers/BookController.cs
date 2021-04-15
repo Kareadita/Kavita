@@ -40,8 +40,17 @@ namespace API.Controllers
             // TODO: Ensure the files have no ../ in it, so the API can't access anything outside of chapter folder.
             _logger.LogDebug("GetBookPageResources endpoint hit");
             var chapter = await _cacheService.Ensure(chapterId);
+            
+            // TODO: Apply link-rewriting here as well (especially for TOC)
+
+            // NOTE: We need to use container.xml and opf to create the new paths
 
             var folder = file.Split("/");
+
+            if (folder[1] == "toc.xhtml")
+            {
+                
+            }
             
             var fullFile = Path.Combine(Directory.GetCurrentDirectory(), "cache", chapterId + "", "OEBPS",
                 folder[0], folder[1]);
@@ -61,6 +70,7 @@ namespace API.Controllers
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var counter = 0;
             var doc = new HtmlDocument();
+            // NOTE: We might want to remove toc links and put some marker for the UI to hook a click handler in (for drawer opening)
             // TODO: Figure out a less hacky way to accomplish this
             var apiBase = "http://" + Request.Host + "/api/book/" + chapterId + "/" + BookApiUrl;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
