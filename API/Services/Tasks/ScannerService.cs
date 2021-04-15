@@ -144,15 +144,8 @@ namespace API.Services.Tasks
            
            // Cleanup any user progress that doesn't exist
            var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
-           if (cleanedUp)
-           {
-              _logger.LogInformation("Removed all abandoned progress rows");
-           }
-           else
-           {
-              _logger.LogWarning("There are abandoned user progress entities in the DB. In Progress activity stream will be skewed");
-           }
-           
+           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
+
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
        }
        
@@ -167,16 +160,17 @@ namespace API.Services.Tasks
           _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk", removeCount);
           
           // Add new series that have parsedInfos
-          foreach (var (key, _) in parsedSeries)
+          foreach (var (key, infos) in parsedSeries)
           {
              var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(key));
              if (existingSeries == null)
              {
+                var name = infos.Count > 0 ? infos[0].Series : key;
                 existingSeries = new Series()
                 {
-                   Name = key,
-                   OriginalName = key,
-                   LocalizedName = key,
+                   Name = name,
+                   OriginalName = name,
+                   LocalizedName = name,
                    NormalizedName = Parser.Parser.Normalize(key),
                    SortName = key,
                    Summary = "",
@@ -192,8 +186,9 @@ namespace API.Services.Tasks
           var librarySeries = library.Series.ToList();
           Parallel.ForEach(librarySeries, (series) =>
           {
+             // BUG: Vandread is in parsedSeries, but series.OriginalName is VanDread
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
-             UpdateVolumes(series, parsedSeries[series.OriginalName].ToArray());
+             UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
           });
        }
@@ -201,8 +196,8 @@ namespace API.Services.Tasks
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           var foundSeries = parsedSeries.Select(s => s.Key).ToList();
-          var missingSeries = existingSeries.Where(existingSeries => !existingSeries.NameInList(foundSeries)
-                                                                     || !existingSeries.NameInList(parsedSeries.Keys));
+          var missingSeries = existingSeries.Where(es => !es.NameInList(foundSeries)
+                                                                     || !es.NameInList(parsedSeries.Keys));
           return missingSeries;
        }
 
@@ -252,8 +247,21 @@ namespace API.Services.Tasks
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
           }
 
+          // BUG: This is causing volumes to be removed when they shouldn't
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
-          series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          var existingVolumeLength = series.Volumes.Count;
+          foreach (var v in series.Volumes)
+          {
+             if (!parsedInfos.Any(p => p.Volumes == v.Name) || v.Chapters.Count == 0)
+             {
+                series.Volumes.Remove(v);
+             }
+          }
+          //series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          if (existingVolumeLength != series.Volumes.Count)
+          {
+             _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
+          }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
              series.Name, startingVolumeCount, series.Volumes.Count);
@@ -269,7 +277,6 @@ namespace API.Services.Tasks
              var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
              // also are treated like specials for UI grouping.
-             _logger.LogDebug("Adding new chapters, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);
              // NOTE: If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
              // vs Historys strongest), this code will break and the duplicate will be skipped.
              Chapter chapter = null;
@@ -291,6 +298,7 @@ namespace API.Services.Tasks
 
              if (chapter == null)
              {
+                _logger.LogDebug("Adding new chapter, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);
                 chapter = new Chapter()
                 {
                    Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
@@ -320,14 +328,12 @@ namespace API.Services.Tasks
              }
              if (chapter == null) continue;
              AddOrUpdateFileForChapter(chapter, info);
-             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + "";
+             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
              chapter.Range = specialTreatment ? info.Filename : info.Chapters;
              chapter.Pages = chapter.Files.Sum(f => f.Pages);
           }
           
           
-          
-          // TODO: Extract to 
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
@@ -338,6 +344,7 @@ namespace API.Services.Tasks
              
              if (!hasInfo || !existingChapter.Files.Any())
              {
+                _logger.LogDebug("Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, volume.Series.Name);
                 volume.Chapters.Remove(existingChapter);
              }
              else
@@ -365,8 +372,8 @@ namespace API.Services.Tasks
           
           // Check if normalized info.Series already exists and if so, update info to use that name instead
           info.Series = MergeName(_scannedSeries, info);
-
-          _scannedSeries.AddOrUpdate(info.Series, new List<ParserInfo>() {info}, (_, oldValue) =>
+          
+          _scannedSeries.AddOrUpdate(Parser.Parser.Normalize(info.Series), new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
              if (!oldValue.Contains(info))
