@@ -37,8 +37,7 @@ namespace API.Services.Tasks
        }
 
 
-       [DisableConcurrentExecution(timeoutInSeconds: 360)] 
-       //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+       [DisableConcurrentExecution(timeoutInSeconds: 360)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
@@ -64,7 +63,6 @@ namespace API.Services.Tasks
        }
 
        [DisableConcurrentExecution(360)]
-       //[AutomaticRetry(Attempts = 0, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           var sw = Stopwatch.StartNew();
@@ -186,7 +184,6 @@ namespace API.Services.Tasks
           var librarySeries = library.Series.ToList();
           Parallel.ForEach(librarySeries, (series) =>
           {
-             // BUG: Vandread is in parsedSeries, but series.OriginalName is VanDread
              _logger.LogInformation("Processing series {SeriesName}", series.Name);
              UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
              series.Pages = series.Volumes.Sum(v => v.Pages);
