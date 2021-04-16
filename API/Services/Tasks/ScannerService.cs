@@ -201,14 +201,16 @@ namespace API.Services.Tasks
        public int RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries)
        {
           
-          var removeCount = 0;
-          //library.Series = library.Series.Except(missingSeries).ToList();
-          if (existingSeries == null || existingSeries.Count == 0) return 0;
-          foreach (var existing in missingSeries)
-          {
-             existingSeries.Remove(existing);
-             removeCount += 1;
-          }
+          var removeCount = existingSeries.Count;
+          var missingList = missingSeries.ToList();
+          existingSeries = existingSeries.Except(missingList).ToList();
+          // if (existingSeries == null || existingSeries.Count == 0) return 0;
+          // foreach (var existing in missingSeries)
+          // {
+          //    existingSeries.Remove(existing);
+          //    removeCount += 1;
+          // }
+          removeCount -= existingSeries.Count;
 
           return removeCount;
        }
@@ -237,7 +239,7 @@ namespace API.Services.Tasks
              }
              
              // NOTE: I don't think we need this as chapters now handle specials
-             volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); 
+             //volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); 
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
 
              UpdateChapters(volume, infos);
@@ -247,14 +249,17 @@ namespace API.Services.Tasks
           // BUG: This is causing volumes to be removed when they shouldn't
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
           var existingVolumeLength = series.Volumes.Count;
-          foreach (var v in series.Volumes)
-          {
-             if (!parsedInfos.Any(p => p.Volumes == v.Name) || v.Chapters.Count == 0)
-             {
-                series.Volumes.Remove(v);
-             }
-          }
-          //series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          // var existingVols = series.Volumes;
+          // foreach (var v in existingVols)
+          // {
+          //    // NOTE: I think checking if Chapter count is 0 is enough, we don't need parsedInfos
+          //    if (parsedInfos.All(p => p.Volumes != v.Name)) //  || v.Chapters.Count == 0 (this wont work yet because we don't take care of chapters correctly vs parsedInfos)
+          //    {
+          //       _logger.LogDebug("Removed {Series} - {Volume} as there were no chapters", series.Name, v.Name);
+          //       series.Volumes.Remove(v);
+          //    }
+          // }
+          series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
           if (existingVolumeLength != series.Volumes.Count)
           {
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
@@ -339,9 +344,9 @@ namespace API.Services.Tasks
              var hasInfo = specialTreatment ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
                 : parsedInfos.Any(v => v.Chapters == existingChapter.Range);
              
-             if (!hasInfo || !existingChapter.Files.Any())
+             if (!hasInfo || existingChapter.Files.Count == 0)
              {
-                _logger.LogDebug("Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, volume.Series.Name);
+                _logger.LogDebug("Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
              }
              else
