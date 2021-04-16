@@ -4,6 +4,6 @@ namespace API.Interfaces
 {
     public interface IAppUserProgressRepository
     {
-        Task<bool> CleanupAbandonedChapters();
+        Task<int> CleanupAbandonedChapters();
     }
 }

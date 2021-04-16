@@ -17,7 +17,7 @@ namespace API.Data
         /// <summary>
         /// This will remove any entries that have chapterIds that no longer exists. This will execute the save as well.
         /// </summary>
-        public async Task<bool> CleanupAbandonedChapters()
+        public async Task<int> CleanupAbandonedChapters()
         {
             var chapterIds = _context.Chapter.Select(c => c.Id);
 
@@ -26,7 +26,7 @@ namespace API.Data
                 .ToListAsync();
             
             _context.RemoveRange(rowsToRemove);
-            return (await _context.SaveChangesAsync()) > 0;
+            return await _context.SaveChangesAsync() > 0 ? rowsToRemove.Count : 0;
         }
     }
 }
