@@ -99,7 +99,7 @@ export class DirectoryPickerComponent implements OnInit {
   getStem(path: string): string {
 
     const lastPath = this.routeStack.peek();
-    if (lastPath) {
+    if (lastPath && lastPath != path) {
       let replaced = path.replace(lastPath, '');
       if (replaced.startsWith('/') || replaced.startsWith('\\')) {
         replaced = replaced.substr(1, replaced.length);

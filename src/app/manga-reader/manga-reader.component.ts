@@ -243,7 +243,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }, () => {
       setTimeout(() => {
-        this.location.back();
+        this.closeReader();
       }, 200);
     });
   }
@@ -272,10 +272,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
     } else if (event.key === KEY_CODES.ESC_KEY) {
-      this.location.back();
+      this.closeReader();
     } else if (event.key === KEY_CODES.SPACE) {
       this.toggleMenu();
     }
+  }
+
+  closeReader() {
+    this.location.back();
   }
 
   setOverrideStyles() {
@@ -497,7 +501,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       page = 0;
     }
 
-    if (page !== 0 || page !== this.maxPages - 1) {
+    if (!(page === 0 || page === this.maxPages - 1)) {
       page -= 1;
     }
 

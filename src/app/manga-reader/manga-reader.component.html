@@ -7,9 +7,14 @@
 
     <div *ngIf="menuOpen" class="overlay" (click)="toggleMenu()">
         <div class="center-menu" (click)="$event.stopPropagation()">
-                <div class="col" *ngIf="mangaFileName !== ''">
-                    {{ mangaFileName }}
-                </div>
+            <div class="col" *ngIf="mangaFileName !== ''">
+                {{ mangaFileName }}
+            </div>
+            <div class="col">
+                <button class="btn btn-small btn-primary" (click)="closeReader()">
+                    <i class="fa fa-times-circle not-phone-hidden" aria-hidden="true"></i>&nbsp;Close<span class="phone-hidden"> Reader</span>
+                </button>
+            </div>
 
             <div class="row no-gutters">
                 <div class="col-sm-12 col-md-6 mt-4">
