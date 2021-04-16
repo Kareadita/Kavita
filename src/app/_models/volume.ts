@@ -10,5 +10,4 @@ export interface Volume {
     pages: number;
     pagesRead: number;
     chapters?: Array<Chapter>;
-    isSpecial: boolean; // For side stories, etc.
 }

@@ -179,7 +179,7 @@ export class SeriesDetailComponent implements OnInit {
       this.createHTML();
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); // volumes.filter(!v.isSpecial && )
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.setContinuePoint();
