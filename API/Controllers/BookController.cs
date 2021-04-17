@@ -24,7 +24,7 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         public readonly static string BookApiUrl = "book-resources?file=";
         
-        private static readonly Regex StyleSheetKeyRegex = new Regex("href=\"(?<Key>[a-z0-9\\./]*)/\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        
 
         public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork, ICacheService cacheService)
         {
@@ -46,11 +46,7 @@ namespace API.Controllers
             // NOTE: We need to use container.xml and opf to create the new paths
 
             var folder = file.Split("/");
-
-            if (folder[1] == "toc.xhtml")
-            {
-                
-            }
+            
             
             var fullFile = Path.Combine(Directory.GetCurrentDirectory(), "cache", chapterId + "", "OEBPS",
                 folder[0], folder[1]);
@@ -58,41 +54,73 @@ namespace API.Controllers
             return PhysicalFile(fullFile, contentType);
         }
 
+        [HttpGet("{chapterId}/chapters")]
+        public async Task<ActionResult> GetBookChapters(int chapterId)
+        {
+            // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
+            // this is used to rewrite anchors in the book text so that we always load properly in FE
+            var chapter = await _cacheService.Ensure(chapterId);
+            return Ok(await _bookService.CreateKeyToPageMappingAsync(chapter.Files.ElementAt(0).FilePath));
+        }
+
 
 
         [HttpGet("{chapterId}/book-page")]
-        public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
+        public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page, [FromQuery] string baseUrl)
         {
             _logger.LogDebug("Book endpoint hit");
             var chapter = await _cacheService.Ensure(chapterId);
-            var host = Request.Host;
+            var mappings = await _bookService.CreateKeyToPageMappingAsync(chapter.Files.ElementAt(0).FilePath);
             
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var counter = 0;
             var doc = new HtmlDocument();
-            // NOTE: We might want to remove toc links and put some marker for the UI to hook a click handler in (for drawer opening)
-            // TODO: Figure out a less hacky way to accomplish this
-            var apiBase = "http://" + Request.Host + "/api/book/" + chapterId + "/" + BookApiUrl;
-            foreach (var contentFileRef in await book.GetReadingOrderAsync())
+            
+            var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
+            var bookPages = await book.GetReadingOrderAsync();
+            foreach (var contentFileRef in bookPages)
             {
-                var content = await contentFileRef.ReadContentAsync();
-                if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
-                {
-                    doc.LoadHtml(content);
-
-                    var styleNode = doc.DocumentNode.SelectSingleNode("/html/head/link");
-                    var key = styleNode.Attributes["href"].Value.Replace("../", "");
-                    var styleContent = await book.Content.Css[key].ReadContentAsync();
-                    var body = doc.DocumentNode.SelectSingleNode("/html/body");
-                    body.PrependChild(HtmlNode.CreateNode($"<style>{BookService.RemoveWhiteSpaceFromStylesheets(styleContent)}</style>"));
-                    content = body.InnerHtml
-                                .Replace("src=\"../", $"src=\"{apiBase}")
-                                .Replace("href=\"../", $"href=\"{apiBase}");
-                }
-                
-
                 if (page == counter)
                 {
+                    var content = await contentFileRef.ReadContentAsync();
+                    if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
+                    
+                    doc.LoadHtml(content);
+                    var body = doc.DocumentNode.SelectSingleNode("/html/body");
+                    
+                    var styleNode = doc.DocumentNode.SelectSingleNode("/html/head/link");
+                    if (styleNode != null)
+                    {
+                        var key = styleNode.Attributes["href"].Value.Replace("../", "");
+                        var styleContent = await book.Content.Css[key].ReadContentAsync();
+                        body.PrependChild(HtmlNode.CreateNode($"<style>{BookService.RemoveWhiteSpaceFromStylesheets(styleContent)}</style>"));
+                    }
+                    
+                        
+                    var anchors = doc.DocumentNode.SelectNodes("//a");
+                    if (anchors != null)
+                    {
+                        foreach (var anchor in anchors)
+                        {
+                            if (anchor.Name != "a") continue;
+                                
+                            var mappingKey = anchor.GetAttributeValue("href", string.Empty).Replace("../", string.Empty).Split("#")[0];
+                            if (!mappings.ContainsKey(mappingKey))
+                            {
+                                anchor.Attributes.Add("target", "_blank");
+                                continue;
+                            }
+                                
+                            var mappedPage = mappings[mappingKey];
+                            anchor.Attributes.Add("kavita-page", $"{mappedPage}");
+                            anchor.Attributes.Remove("href");
+                            anchor.Attributes.Add("href", "javascript:void(0)");
+                        }
+                    }
+                        
+                        
+                    content = body.InnerHtml
+                        .Replace("src=\"../", $"src=\"{apiBase}");
                     return Ok(content);
                 }
 

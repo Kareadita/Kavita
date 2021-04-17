@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using API.Archive;
 using API.Controllers;
 using API.Entities.Enums;
@@ -29,6 +30,9 @@ namespace API.Services
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         //private readonly ObjectPool<EpubBook> _readerPool;
+        
+
+        public static readonly Regex StyleSheetKeyRegex = new Regex("href=\"(?<Key>[a-z0-9\\./#-]*)\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         public BookService(ILogger<BookService> logger, IArchiveService archiveService, IDirectoryService directoryService)
         {
@@ -36,6 +40,35 @@ namespace API.Services
             _archiveService = archiveService;
             _directoryService = directoryService;
             //_readerPool = new DefaultObjectPool<EpubBook>();
+        }
+
+        public static string GetHrefKey(string htmlContent)
+        {
+            var matches = StyleSheetKeyRegex.Matches(htmlContent);
+            foreach (Match match in matches)
+            {
+                if (match.Groups["Key"].Success && match.Groups["Key"].Value != string.Empty)
+                {
+                    return match.Groups["Key"].Value;
+                }
+            }
+
+            return string.Empty;
+        }
+        
+        public static ICollection<string> GetHrefKeys(string htmlContent)
+        {
+            var keys = new List<string>();
+            var matches = StyleSheetKeyRegex.Matches(htmlContent);
+            foreach (Match match in matches)
+            {
+                if (match.Groups["Key"].Success && match.Groups["Key"].Value != string.Empty)
+                {
+                    keys.Add(match.Groups["Key"].Value);
+                }
+            }
+
+            return keys;
         }
 
         private bool IsValidFile(string filePath)
@@ -58,6 +91,26 @@ namespace API.Services
 
             var epubBook = EpubReader.ReadBook(filePath);
             return epubBook.Content.Html.Count;
+        }
+
+        public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(string filePath)
+        {
+            var dict = new Dictionary<string, int>();
+            if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return dict;
+
+            var book = await EpubReader.OpenBookAsync(filePath);
+            int pageCount = 0;
+            foreach (var contentFileRef in await book.GetReadingOrderAsync())
+            {
+                if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
+                {
+                    dict.Add(contentFileRef.FileName, pageCount);
+                    pageCount += 1;    
+                }
+            }
+
+
+            return dict;
         }
 
         public ParserInfo ParseInfo(string filePath)

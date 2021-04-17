@@ -62,12 +62,12 @@ namespace API.Services
                 if (file.Format == MangaFormat.Archive)
                 {
                     _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));    
-                } else if (file.Format == MangaFormat.Book)
-                {
-                    
-                    _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
-                    //_bookService.MapHtmlFiles(Path.Join(extractPath, extraPath));
                 }
+                // else if (file.Format == MangaFormat.Book)
+                // {
+                //     
+                //     _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
+                // }
                 
             }
 

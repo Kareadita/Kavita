@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using API.Parser;
 
 namespace API.Entities.Interfaces
@@ -15,5 +16,7 @@ namespace API.Entities.Interfaces
         /// </summary>
         /// <param name="archiveFile"></param>
         void MapHtmlFiles(string archiveFile);
+
+        Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(string filePath);
     }
 }

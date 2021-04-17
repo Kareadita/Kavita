@@ -38,6 +38,14 @@ namespace API.Tests.Services
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
         }
 
+        [Theory]
+        [InlineData("<a href=\"../Styles/chapter01.xhtml\"/>", "../Styles/chapter01.xhtml")]
+        [InlineData("<h1 class=\"copyright-title\"><a href=\"../Text/toc.xhtml#toc-copyright\">Copyright</a></h1>", "../Text/toc.xhtml#toc-copyright")]
+        public void StylesheetHrefParse(string content, string expected)
+        {
+            Assert.Equal(expected, BookService.GetHrefKey(content));
+        }
+
         // [Fact]
         // public void CanExtract_Test()
         // {
