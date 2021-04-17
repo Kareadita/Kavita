@@ -63,11 +63,11 @@ namespace API.Services
                 {
                     _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));    
                 }
-                // else if (file.Format == MangaFormat.Book)
-                // {
-                //     
-                //     _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
-                // }
+                else if (file.Format == MangaFormat.Book)
+                {
+                    
+                    _bookService.ExtractToFolder(file.FilePath, Path.Join(extractPath, extraPath));
+                }
                 
             }
 
