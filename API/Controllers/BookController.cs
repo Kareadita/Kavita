@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -55,12 +56,29 @@ namespace API.Controllers
         }
 
         [HttpGet("{chapterId}/chapters")]
-        public async Task<ActionResult> GetBookChapters(int chapterId)
+        public async Task<ActionResult<Dictionary<string, int>>> GetBookChapters(int chapterId)
         {
             // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
             // this is used to rewrite anchors in the book text so that we always load properly in FE
             var chapter = await _cacheService.Ensure(chapterId);
-            return Ok(await _bookService.CreateKeyToPageMappingAsync(chapter.Files.ElementAt(0).FilePath));
+            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            var mappings = await _bookService.CreateKeyToPageMappingAsync(book, chapter.Files.ElementAt(0).FilePath);
+            var dict = new Dictionary<string, int>();
+            var navItems = await book.GetNavigationAsync();
+            foreach (var navigationItem in navItems)
+            {
+                foreach (var nestedChapter in navigationItem.NestedItems)
+                {
+                    if (nestedChapter.Link == null) continue;
+                    var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
+                    if (mappings.ContainsKey(key))
+                    {
+                        dict.Add(nestedChapter.Title, mappings[key]);    
+                    }
+                }
+                
+            }
+            return Ok(dict);
         }
 
 
@@ -70,9 +88,10 @@ namespace API.Controllers
         {
             _logger.LogDebug("Book endpoint hit");
             var chapter = await _cacheService.Ensure(chapterId);
-            var mappings = await _bookService.CreateKeyToPageMappingAsync(chapter.Files.ElementAt(0).FilePath);
-            
+
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            var mappings = await _bookService.CreateKeyToPageMappingAsync(book, chapter.Files.ElementAt(0).FilePath);
+
             var counter = 0;
             var doc = new HtmlDocument();
             
@@ -91,7 +110,7 @@ namespace API.Controllers
                     var styleNode = doc.DocumentNode.SelectSingleNode("/html/head/link");
                     if (styleNode != null)
                     {
-                        var key = styleNode.Attributes["href"].Value.Replace("../", "");
+                        var key = BookService.CleanContentKeys(styleNode.Attributes["href"].Value);
                         var styleContent = await book.Content.Css[key].ReadContentAsync();
                         body.PrependChild(HtmlNode.CreateNode($"<style>{BookService.RemoveWhiteSpaceFromStylesheets(styleContent)}</style>"));
                     }
@@ -103,8 +122,8 @@ namespace API.Controllers
                         foreach (var anchor in anchors)
                         {
                             if (anchor.Name != "a") continue;
-                                
-                            var mappingKey = anchor.GetAttributeValue("href", string.Empty).Replace("../", string.Empty).Split("#")[0];
+                            
+                            var mappingKey = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty)).Split("#")[0];
                             if (!mappings.ContainsKey(mappingKey))
                             {
                                 anchor.Attributes.Add("target", "_blank");

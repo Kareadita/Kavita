@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Parser;
+using VersOne.Epub;
 
 namespace API.Entities.Interfaces
 {
@@ -11,12 +12,6 @@ namespace API.Entities.Interfaces
         ParserInfo ParseInfo(string filePath);
         byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true);
         void ExtractToFolder(string fileFilePath, string destDirectory);
-        /// <summary>
-        /// Rewrites hrefs and srcs that contain ../ to an API endpoint, so we can appropriately serve them.
-        /// </summary>
-        /// <param name="archiveFile"></param>
-        void MapHtmlFiles(string archiveFile);
-
-        Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(string filePath);
+        Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, string filePath);
     }
 }

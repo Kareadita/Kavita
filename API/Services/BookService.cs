@@ -93,12 +93,17 @@ namespace API.Services
             return epubBook.Content.Html.Count;
         }
 
-        public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(string filePath)
+        public static string CleanContentKeys(string key)
+        {
+            return key.Replace("../", string.Empty);
+        }
+
+        public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, string filePath)
         {
             var dict = new Dictionary<string, int>();
-            if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return dict;
+            //if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return dict;
 
-            var book = await EpubReader.OpenBookAsync(filePath);
+            //var book = await EpubReader.OpenBookAsync(filePath);
             int pageCount = 0;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
@@ -108,8 +113,7 @@ namespace API.Services
                     pageCount += 1;    
                 }
             }
-
-
+            
             return dict;
         }
 
@@ -207,29 +211,6 @@ namespace API.Services
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }
 
-        public void MapHtmlFiles(string folderPath)
-        {
-            // var book = EpubReader.OpenBook(archiveFile);
-            // foreach (var contentFileRef in book.GetReadingOrder())
-            // {
-            //     var content = contentFileRef.ReadContent();
-            //     if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
-            //     {
-            //         content = content.Replace("src=\"../", $"src=\"{BookController.BookApiUrl}").Replace("href=\"../", $"href=\"{BookController.BookApiUrl}");    
-            //     }
-            // }
-            
-            var files = _directoryService.GetFilesWithExtension(Path.Join(folderPath, "Text"));
-            foreach (var file in files)
-            {
-                var content = System.IO.File.ReadAllText(file);
-                content = content.Replace("src=\"../", $"src=\"{BookController.BookApiUrl}").Replace("href=\"../", $"href=\"{BookController.BookApiUrl}");  
-
-                File.WriteAllText(file, content);
-            }
-            
-        }
-        
         public static string RemoveWhiteSpaceFromStylesheets(string body)
         {
             body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
