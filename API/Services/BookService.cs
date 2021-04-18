@@ -98,12 +98,9 @@ namespace API.Services
             return key.Replace("../", string.Empty);
         }
 
-        public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book, string filePath)
+        public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
         {
             var dict = new Dictionary<string, int>();
-            //if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return dict;
-
-            //var book = await EpubReader.OpenBookAsync(filePath);
             int pageCount = 0;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
