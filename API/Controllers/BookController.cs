@@ -67,6 +67,9 @@ namespace API.Controllers
                 case EpubContentType.FONT_TRUETYPE:
                     contentType = "font/ttf";
                     break;
+                case EpubContentType.IMAGE_SVG:
+                    contentType = "image/svg+xml";
+                    break;
                 default:
                     contentType = "application/octet-stream";
                     break;
@@ -196,7 +199,15 @@ namespace API.Controllers
                             var mappingKey = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty)).Split("#")[0];
                             if (!mappings.ContainsKey(mappingKey))
                             {
-                                anchor.Attributes.Add("target", "_blank");
+                                if (HasClickableHrefPart(anchor))
+                                {
+                                    // TODO: If there are anchors like href="#p_FdzFEXmy5/" and tabindex or role aren't present, we need to map them with a part for the current page.
+                                    anchor.Attributes.Add("kavita-page", $"{page}");
+                                }
+                                else
+                                {
+                                    anchor.Attributes.Add("target", "_blank");    
+                                }
                                 continue;
                             }
                                 
@@ -204,6 +215,7 @@ namespace API.Controllers
                             anchor.Attributes.Add("kavita-page", $"{mappedPage}");
                             anchor.Attributes.Remove("href");
                             anchor.Attributes.Add("href", "javascript:void(0)");
+
                         }
                     }
                     
@@ -227,6 +239,13 @@ namespace API.Controllers
             }
 
             return BadRequest("Could not find the appropriate html for that page");
+        }
+
+        private static bool HasClickableHrefPart(HtmlNode anchor)
+        {
+            return anchor.GetAttributeValue("href", string.Empty).Contains("#") 
+                   && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
+                   && anchor.GetAttributeValue("role", string.Empty) != "presentation";
         }
 
         private static string GetContentType(string fullFile)
