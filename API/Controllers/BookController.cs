@@ -43,9 +43,10 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
 
-            if (!book.Content.AllFiles.ContainsKey(file)) return BadRequest("File was not found in book");
+            var key = BookService.CleanContentKeys(file);
+            if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
             
-            var bookFile = book.Content.AllFiles[file];
+            var bookFile = book.Content.AllFiles[key];
             var content = await bookFile.ReadContentAsBytesAsync();
             Response.AddCacheHeader(content);
             var contentType = string.Empty;
@@ -88,7 +89,6 @@ namespace API.Controllers
             
             foreach (var navigationItem in navItems)
             {
-                if (navigationItem.Link == null) continue;
                 if (navigationItem.NestedItems.Count > 0)
                 {
                     _logger.LogDebug("Header: {Header}", navigationItem.Title);
@@ -111,18 +111,28 @@ namespace API.Controllers
                             });
                         }
                     }
-                    
-                    var groupKey = BookService.CleanContentKeys(navigationItem.Link.ContentFileName);
-                    if (mappings.ContainsKey(groupKey))
+
+                    if (navigationItem.Link == null)
                     {
                         chaptersList.Add(new BookChapterItem()
                         {
                             Title = navigationItem.Title,
-                            Page = mappings[groupKey],
                             Children = nestedChapters
                         });
                     }
-                    
+                    else
+                    {
+                        var groupKey = BookService.CleanContentKeys(navigationItem.Link.ContentFileName);
+                        if (mappings.ContainsKey(groupKey))
+                        {
+                            chaptersList.Add(new BookChapterItem()
+                            {
+                                Title = navigationItem.Title,
+                                Page = mappings[groupKey],
+                                Children = nestedChapters
+                            });
+                        }
+                    }
                 }
             }
             return Ok(chaptersList);
