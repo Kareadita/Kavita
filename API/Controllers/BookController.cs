@@ -103,13 +103,11 @@ namespace API.Controllers
                         var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
                         if (mappings.ContainsKey(key))
                         {
-                            var partTokens = nestedChapter.Link.ContentFileName.Split('#');
-
                             nestedChapters.Add(new BookChapterItem()
                             {
                                 Title = nestedChapter.Title,
                                 Page = mappings[key],
-                                Part = partTokens.Length > 1 ? partTokens[1] : string.Empty,
+                                Part = nestedChapter.Link.Anchor ?? string.Empty,
                                 Children = new List<BookChapterItem>()
                             });
                         }
@@ -117,11 +115,16 @@ namespace API.Controllers
 
                     if (navigationItem.Link == null)
                     {
-                        chaptersList.Add(new BookChapterItem()
+                        var item = new BookChapterItem()
                         {
-                            Title = navigationItem.Title,
+                            Title = navigationItem.Title, 
                             Children = nestedChapters
-                        });
+                        };
+                        if (nestedChapters.Count > 0)
+                        {
+                            item.Page = nestedChapters[0].Page;
+                        }
+                        chaptersList.Add(item);
                     }
                     else
                     {
@@ -131,7 +134,7 @@ namespace API.Controllers
                             chaptersList.Add(new BookChapterItem()
                             {
                                 Title = navigationItem.Title,
-                                Page = mappings[groupKey],
+                                Page = mappings[groupKey], 
                                 Children = nestedChapters
                             });
                         }
@@ -195,14 +198,21 @@ namespace API.Controllers
                         foreach (var anchor in anchors)
                         {
                             if (anchor.Name != "a") continue;
-                            
-                            var mappingKey = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty)).Split("#")[0];
+                            var hrefParts = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
+                                .Split("#");
+                            var mappingKey = hrefParts[0];
                             if (!mappings.ContainsKey(mappingKey))
                             {
                                 if (HasClickableHrefPart(anchor))
                                 {
+                                    var part = hrefParts.Length > 1
+                                        ? hrefParts[1]
+                                        : anchor.GetAttributeValue("href", string.Empty);
                                     // TODO: If there are anchors like href="#p_FdzFEXmy5/" and tabindex or role aren't present, we need to map them with a part for the current page.
                                     anchor.Attributes.Add("kavita-page", $"{page}");
+                                    anchor.Attributes.Add("kavita-part", part);
+                                    anchor.Attributes.Remove("href");
+                                    anchor.Attributes.Add("href", "javascript:void(0)");
                                 }
                                 else
                                 {
@@ -213,9 +223,14 @@ namespace API.Controllers
                                 
                             var mappedPage = mappings[mappingKey];
                             anchor.Attributes.Add("kavita-page", $"{mappedPage}");
+                            if (hrefParts.Length > 1)
+                            {
+                                anchor.Attributes.Add("kavita-part",
+                                    hrefParts[1]);
+                            }
+                            
                             anchor.Attributes.Remove("href");
                             anchor.Attributes.Add("href", "javascript:void(0)");
-
                         }
                     }
                     
