@@ -15,7 +15,7 @@ namespace API.Tests
         {
             _testOutputHelper = testOutputHelper;
         }
-        
+
         [Theory]
         [InlineData("0001", "1")]
         [InlineData("1", "1")]

@@ -12,12 +12,15 @@ namespace API.Parser
         public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
         public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\()([a-z0-9/\._]+)(\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        
 
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -539,7 +542,7 @@ namespace API.Parser
             
             return "0";
         }
-        
+
         public static string ParseComicVolume(string filename)
         {
             foreach (var regex in ComicVolumeRegex)

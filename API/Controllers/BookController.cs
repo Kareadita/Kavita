@@ -48,7 +48,30 @@ namespace API.Controllers
             var bookFile = book.Content.AllFiles[file];
             var content = await bookFile.ReadContentAsBytesAsync();
             Response.AddCacheHeader(content);
-            return File(content, "image/jpeg", $"{chapterId}-{file}");
+            var contentType = string.Empty;
+            switch (bookFile.ContentType)
+            {
+                case EpubContentType.IMAGE_GIF:
+                    contentType = "image/gif";
+                    break;
+                case EpubContentType.IMAGE_PNG:
+                    contentType = "image/png";
+                    break;
+                case EpubContentType.IMAGE_JPEG:
+                    contentType = "image/jpeg";
+                    break;
+                case EpubContentType.FONT_OPENTYPE:
+                    contentType = "font/otf";
+                    break;
+                case EpubContentType.FONT_TRUETYPE:
+                    contentType = "font/ttf";
+                    break;
+                default:
+                    contentType = "application/octet-stream";
+                    break;
+                
+            }
+            return File(content, contentType, $"{chapterId}-{file}");
         }
 
         [HttpGet("{chapterId}/chapters")]
@@ -61,8 +84,8 @@ namespace API.Controllers
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
             
             var navItems = await book.GetNavigationAsync();
-            // TODO: We need to refactor this to be more generic and allow for chapters to have groupings
             var chaptersList = new List<BookChapterItem>();
+            
             foreach (var navigationItem in navItems)
             {
                 if (navigationItem.Link == null) continue;
@@ -104,9 +127,7 @@ namespace API.Controllers
             }
             return Ok(chaptersList);
         }
-
-
-
+        
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page, [FromQuery] string baseUrl)
         {
@@ -131,15 +152,30 @@ namespace API.Controllers
                     doc.LoadHtml(content);
                     var body = doc.DocumentNode.SelectSingleNode("/html/body");
                     
-                    var styleNode = doc.DocumentNode.SelectSingleNode("/html/head/link");
-                    if (styleNode != null)
+                    var inlineStyles = doc.DocumentNode.SelectNodes("//style");
+                    if (inlineStyles != null)
                     {
-                        var key = BookService.CleanContentKeys(styleNode.Attributes["href"].Value);
-                        var styleContent = await book.Content.Css[key].ReadContentAsync();
-                        body.PrependChild(HtmlNode.CreateNode($"<style>{BookService.RemoveWhiteSpaceFromStylesheets(styleContent)}</style>"));
-                    } // TODO: We need to also check if there are inline style tags and copy them over to the body
-                    // TODO: I need to check for font loading in the css to ensure we load them (src:url(font/cinzel_bold.otf)})
-                        
+                        foreach (var inlineStyle in inlineStyles)
+                        {
+                            var styleContent =
+                                Parser.Parser.FontSrcUrlRegex.Replace(inlineStyle.InnerHtml, "$1" + apiBase + "$2" + "$3");
+                            body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                        }
+                    }
+                    
+                    var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
+                    if (styleNodes != null)
+                    {
+                        foreach (var styleLinks in styleNodes)
+                        {
+                            var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
+                            var styleContent = BookService.RemoveWhiteSpaceFromStylesheets(await book.Content.Css[key].ReadContentAsync());
+                            styleContent =
+                                Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
+                            body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                        }
+                    }
+
                     var anchors = doc.DocumentNode.SelectNodes("//a");
                     if (anchors != null)
                     {
@@ -160,8 +196,7 @@ namespace API.Controllers
                             anchor.Attributes.Add("href", "javascript:void(0)");
                         }
                     }
-                        
-                    // TODO: Rewrite this for images to use html parsing since the paths aren't always going to be ../
+                    
                     var images = doc.DocumentNode.SelectNodes("//img");
                     if (images != null)
                     {
@@ -174,8 +209,8 @@ namespace API.Controllers
                             image.Attributes.Add("src", $"{apiBase}" + imageFile);
                         }
                     }
-                    content = body.InnerHtml; // .Replace("src=\"../", $"src=\"{apiBase}");
-                    return Ok(content);
+
+                    return Ok(body.InnerHtml);
                 }
 
                 counter++;
