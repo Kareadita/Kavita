@@ -268,10 +268,17 @@ namespace API.Services.Tasks
           //       series.Volumes.Remove(v);
           //    }
           // }
+          var deletedVolumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes != v.Name)).ToList();
           series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
           if (existingVolumeLength != series.Volumes.Count)
           {
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
+             foreach (var volume in deletedVolumes)
+             {
+                var file = volume.Chapters.FirstOrDefault()?.Files.FirstOrDefault()?.FilePath ?? "no files";
+                _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+             }
+             
           }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
