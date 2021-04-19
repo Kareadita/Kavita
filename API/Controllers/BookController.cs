@@ -184,12 +184,7 @@ namespace API.Controllers
                     {
                         foreach (var inlineStyle in inlineStyles)
                         {
-                            // TODO: Might be good to scope any body styles to "reading-section"
-                            var styleContent =
-                                Parser.Parser.FontSrcUrlRegex.Replace(inlineStyle.InnerHtml, "$1" + apiBase + "$2" + "$3");
-                            var stylesheet = await cssParser.ParseAsync(styleContent);
-                            //styleContent = styleContent.Replace("body", ".reading-section"); // We basically need this for all css styles
-                            styleContent = stylesheet.ToCss();
+                            var styleContent = await _bookService.ScopeStyles(inlineStyle.InnerHtml, apiBase);
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
                     }
@@ -199,27 +194,8 @@ namespace API.Controllers
                     {
                         foreach (var styleLinks in styleNodes)
                         {
-                            // TODO: refactor this to a common method since it's similar to inlineStyles
                             var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
-                            var styleContent = BookService.RemoveWhiteSpaceFromStylesheets(await book.Content.Css[key].ReadContentAsync());
-                            styleContent =
-                                Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
-                            styleContent = styleContent.Replace("body", ".reading-section");
-                            var stylesheet = await cssParser.ParseAsync(styleContent);
-                            foreach (var styleRule in stylesheet.StyleRules)
-                            {
-                                if (styleRule.Selector.Text == ".reading-section") continue;
-                                if (styleRule.Selector.Text.Contains(","))
-                                {
-                                    styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
-                                        string.Join(", ",
-                                            styleRule.Selector.Text.Split(",").Select(s => ".reading-section " + s)));
-                                    continue;
-                                }
-                                styleRule.Text = ".reading-section " + styleRule.Text;
-                            }
-                            styleContent = stylesheet.ToCss();
-                            
+                            var styleContent = await _bookService.ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase);
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
                     }

@@ -13,6 +13,7 @@ using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces.Services;
 using API.Parser;
+using ExCSS;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using NetVips;
@@ -30,6 +31,7 @@ namespace API.Services
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         //private readonly ObjectPool<EpubBook> _readerPool;
+        private readonly StylesheetParser _cssParser = new ();
         
 
         public static readonly Regex StyleSheetKeyRegex = new Regex("href=\"(?<Key>[a-z0-9\\./#-]*)\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -40,6 +42,30 @@ namespace API.Services
             _archiveService = archiveService;
             _directoryService = directoryService;
             //_readerPool = new DefaultObjectPool<EpubBook>();
+            
+        }
+
+        public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase)
+        {
+            var styleContent = BookService.RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
+            styleContent =
+                Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
+            styleContent = styleContent.Replace("body", ".reading-section");
+            
+            var stylesheet = await _cssParser.ParseAsync(styleContent);
+            foreach (var styleRule in stylesheet.StyleRules)
+            {
+                if (styleRule.Selector.Text == ".reading-section") continue;
+                if (styleRule.Selector.Text.Contains(","))
+                {
+                    styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
+                        string.Join(", ",
+                            styleRule.Selector.Text.Split(",").Select(s => ".reading-section " + s)));
+                    continue;
+                }
+                styleRule.Text = ".reading-section " + styleRule.Text;
+            }
+            return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
         public static string GetHrefKey(string htmlContent)
