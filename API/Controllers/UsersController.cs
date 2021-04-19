@@ -53,7 +53,10 @@ namespace API.Controllers
             existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
             existingPreferences.ScalingOption = preferencesDto.ScalingOption;
             existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
-            existingPreferences.HideReadOnDetails = preferencesDto.HideReadOnDetails;
+            existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
+            existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
+            existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
+            existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

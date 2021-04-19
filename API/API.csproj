@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Hangfire" Version="1.7.20" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.20" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />

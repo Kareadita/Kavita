@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
+using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -35,6 +36,15 @@ namespace API.Controllers
             _bookService = bookService;
             _unitOfWork = unitOfWork;
             _cacheService = cacheService;
+        }
+
+        [HttpGet("{chapterId}/book-info")]
+        public async Task<ActionResult<string>> GetBookInfo(int chapterId)
+        {
+            var chapter = await _cacheService.Ensure(chapterId);
+            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+
+            return book.Title;
         }
 
         [HttpGet("{chapterId}/book-resources")]
@@ -155,6 +165,7 @@ namespace API.Controllers
 
             var counter = 0;
             var doc = new HtmlDocument();
+            var cssParser = new StylesheetParser();
             
             var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
             var bookPages = await book.GetReadingOrderAsync();
@@ -173,8 +184,12 @@ namespace API.Controllers
                     {
                         foreach (var inlineStyle in inlineStyles)
                         {
+                            // TODO: Might be good to scope any body styles to "reading-section"
                             var styleContent =
                                 Parser.Parser.FontSrcUrlRegex.Replace(inlineStyle.InnerHtml, "$1" + apiBase + "$2" + "$3");
+                            var stylesheet = await cssParser.ParseAsync(styleContent);
+                            //styleContent = styleContent.Replace("body", ".reading-section"); // We basically need this for all css styles
+                            styleContent = stylesheet.ToCss();
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
                     }
@@ -184,10 +199,27 @@ namespace API.Controllers
                     {
                         foreach (var styleLinks in styleNodes)
                         {
+                            // TODO: refactor this to a common method since it's similar to inlineStyles
                             var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
                             var styleContent = BookService.RemoveWhiteSpaceFromStylesheets(await book.Content.Css[key].ReadContentAsync());
                             styleContent =
                                 Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
+                            styleContent = styleContent.Replace("body", ".reading-section");
+                            var stylesheet = await cssParser.ParseAsync(styleContent);
+                            foreach (var styleRule in stylesheet.StyleRules)
+                            {
+                                if (styleRule.Selector.Text == ".reading-section") continue;
+                                if (styleRule.Selector.Text.Contains(","))
+                                {
+                                    styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
+                                        string.Join(", ",
+                                            styleRule.Selector.Text.Split(",").Select(s => ".reading-section " + s)));
+                                    continue;
+                                }
+                                styleRule.Text = ".reading-section " + styleRule.Text;
+                            }
+                            styleContent = stylesheet.ToCss();
+                            
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
                     }
@@ -208,7 +240,6 @@ namespace API.Controllers
                                     var part = hrefParts.Length > 1
                                         ? hrefParts[1]
                                         : anchor.GetAttributeValue("href", string.Empty);
-                                    // TODO: If there are anchors like href="#p_FdzFEXmy5/" and tabindex or role aren't present, we need to map them with a part for the current page.
                                     anchor.Attributes.Add("kavita-page", $"{page}");
                                     anchor.Attributes.Add("kavita-part", part);
                                     anchor.Attributes.Remove("href");

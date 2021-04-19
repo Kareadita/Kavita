@@ -468,7 +468,6 @@ namespace API.Services.Tasks
                    Format = info.Format,
                    Pages = _bookService.GetNumberOfPages(info.FullFilePath)
                 };
-                break;
              }
              default:
                 _logger.LogWarning("[Scanner] Ignoring {Filename}. Non-archives are not supported", info.Filename);
