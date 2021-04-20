@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -36,6 +37,13 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
         {
             return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
+        }
+
+        [HttpGet("has-reading-progress")]
+        public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
+        {
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type));
         }
 
         [HttpGet("has-library-access")]

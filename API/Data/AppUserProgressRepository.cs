@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using API.Entities.Enums;
 using API.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,28 @@ namespace API.Data
             
             _context.RemoveRange(rowsToRemove);
             return await _context.SaveChangesAsync() > 0 ? rowsToRemove.Count : 0;
+        }
+
+        /// <summary>
+        /// Checks if user has any progress against a library of passed type
+        /// </summary>
+        /// <param name="libraryType"></param>
+        /// <returns></returns>
+        public async Task<bool> UserHasProgress(LibraryType libraryType)
+        {
+            var seriesIds = await _context.AppUserProgresses
+                .Where(aup => aup.PagesRead > 0)
+                .AsNoTracking()
+                .Select(aup => aup.SeriesId)
+                .ToListAsync();
+
+            if (seriesIds.Count == 0) return false;
+            
+            return await _context.Series
+                .Include(s => s.Library)
+                .Where(s => seriesIds.Contains(s.Id) && s.Library.Type == libraryType)
+                .AsNoTracking()
+                .AnyAsync();
         }
     }
 }
