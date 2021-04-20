@@ -14,6 +14,7 @@ using API.Extensions;
 using API.Interfaces.Services;
 using API.Parser;
 using ExCSS;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using NetVips;
@@ -44,6 +45,82 @@ namespace API.Services
             //_readerPool = new DefaultObjectPool<EpubBook>();
             
         }
+        
+        private static bool HasClickableHrefPart(HtmlNode anchor)
+        {
+            return anchor.GetAttributeValue("href", string.Empty).Contains("#") 
+                   && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
+                   && anchor.GetAttributeValue("role", string.Empty) != "presentation";
+        }
+
+        public static string GetContentType(EpubContentType type)
+        {
+            string contentType;
+            switch (type)
+            {
+                case EpubContentType.IMAGE_GIF:
+                    contentType = "image/gif";
+                    break;
+                case EpubContentType.IMAGE_PNG:
+                    contentType = "image/png";
+                    break;
+                case EpubContentType.IMAGE_JPEG:
+                    contentType = "image/jpeg";
+                    break;
+                case EpubContentType.FONT_OPENTYPE:
+                    contentType = "font/otf";
+                    break;
+                case EpubContentType.FONT_TRUETYPE:
+                    contentType = "font/ttf";
+                    break;
+                case EpubContentType.IMAGE_SVG:
+                    contentType = "image/svg+xml";
+                    break;
+                default:
+                    contentType = "application/octet-stream";
+                    break;
+            }
+
+            return contentType;
+        }
+
+        public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
+        {
+            if (anchor.Name != "a") return;
+            var hrefParts = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
+                .Split("#");
+            var mappingKey = hrefParts[0];
+            if (!mappings.ContainsKey(mappingKey))
+            {
+                if (HasClickableHrefPart(anchor))
+                {
+                    var part = hrefParts.Length > 1
+                        ? hrefParts[1]
+                        : anchor.GetAttributeValue("href", string.Empty);
+                    anchor.Attributes.Add("kavita-page", $"{currentPage}");
+                    anchor.Attributes.Add("kavita-part", part);
+                    anchor.Attributes.Remove("href");
+                    anchor.Attributes.Add("href", "javascript:void(0)");
+                }
+                else
+                {
+                    anchor.Attributes.Add("target", "_blank");    
+                }
+
+                return;
+            }
+                                
+            var mappedPage = mappings[mappingKey];
+            anchor.Attributes.Add("kavita-page", $"{mappedPage}");
+            if (hrefParts.Length > 1)
+            {
+                anchor.Attributes.Add("kavita-part",
+                    hrefParts[1]);
+            }
+                            
+            anchor.Attributes.Remove("href");
+            anchor.Attributes.Add("href", "javascript:void(0)");
+        }
 
         public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase)
         {
@@ -66,35 +143,6 @@ namespace API.Services
                 styleRule.Text = ".reading-section " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
-        }
-
-        public static string GetHrefKey(string htmlContent)
-        {
-            var matches = StyleSheetKeyRegex.Matches(htmlContent);
-            foreach (Match match in matches)
-            {
-                if (match.Groups["Key"].Success && match.Groups["Key"].Value != string.Empty)
-                {
-                    return match.Groups["Key"].Value;
-                }
-            }
-
-            return string.Empty;
-        }
-        
-        public static ICollection<string> GetHrefKeys(string htmlContent)
-        {
-            var keys = new List<string>();
-            var matches = StyleSheetKeyRegex.Matches(htmlContent);
-            foreach (Match match in matches)
-            {
-                if (match.Groups["Key"].Success && match.Groups["Key"].Value != string.Empty)
-                {
-                    keys.Add(match.Groups["Key"].Value);
-                }
-            }
-
-            return keys;
         }
 
         private bool IsValidFile(string filePath)
@@ -127,14 +175,12 @@ namespace API.Services
         public async Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book)
         {
             var dict = new Dictionary<string, int>();
-            int pageCount = 0;
+            var pageCount = 0;
             foreach (var contentFileRef in await book.GetReadingOrderAsync())
             {
-                if (contentFileRef.ContentType == EpubContentType.XHTML_1_1)
-                {
-                    dict.Add(contentFileRef.FileName, pageCount);
-                    pageCount += 1;    
-                }
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
+                dict.Add(contentFileRef.FileName, pageCount);
+                pageCount += 1;
             }
             
             return dict;

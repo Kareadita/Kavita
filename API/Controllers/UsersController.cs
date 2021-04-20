@@ -57,6 +57,7 @@ namespace API.Controllers
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
             existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
+            existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

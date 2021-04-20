@@ -31,6 +31,10 @@ namespace API.Entities
         /// </summary>
         public int BookReaderLineSpacing { get; set; } = 100;
         /// <summary>
+        /// Book Reader Option: Override font size
+        /// </summary>
+        public int BookReaderFontSize { get; set; } = 100;
+        /// <summary>
         /// Book Reader Option: Maps to the default Kavita font-family (inherit) or an override
         /// </summary>
         public string BookReaderFontFamily { get; set; } = "default";

@@ -10,6 +10,7 @@ namespace API.DTOs
         public bool BookReaderDarkMode { get; set; } = false;
         public int BookReaderMargin { get; set; }
         public int BookReaderLineSpacing { get; set; }
+        public int BookReaderFontSize { get; set; }
         public string BookReaderFontFamily { get; set; }
     }
 }

@@ -1,20 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using API.DTOs;
 using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
-using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 
@@ -24,17 +18,14 @@ namespace API.Controllers
     {
         private readonly ILogger<BookController> _logger;
         private readonly IBookService _bookService;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
-        public readonly static string BookApiUrl = "book-resources?file=";
-        
-        
+        private static readonly string BookApiUrl = "book-resources?file=";
 
-        public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork, ICacheService cacheService)
+
+        public BookController(ILogger<BookController> logger, IBookService bookService, ICacheService cacheService)
         {
             _logger = logger;
             _bookService = bookService;
-            _unitOfWork = unitOfWork;
             _cacheService = cacheService;
         }
 
@@ -59,32 +50,7 @@ namespace API.Controllers
             var bookFile = book.Content.AllFiles[key];
             var content = await bookFile.ReadContentAsBytesAsync();
             Response.AddCacheHeader(content);
-            var contentType = string.Empty;
-            switch (bookFile.ContentType)
-            {
-                case EpubContentType.IMAGE_GIF:
-                    contentType = "image/gif";
-                    break;
-                case EpubContentType.IMAGE_PNG:
-                    contentType = "image/png";
-                    break;
-                case EpubContentType.IMAGE_JPEG:
-                    contentType = "image/jpeg";
-                    break;
-                case EpubContentType.FONT_OPENTYPE:
-                    contentType = "font/otf";
-                    break;
-                case EpubContentType.FONT_TRUETYPE:
-                    contentType = "font/ttf";
-                    break;
-                case EpubContentType.IMAGE_SVG:
-                    contentType = "image/svg+xml";
-                    break;
-                default:
-                    contentType = "application/octet-stream";
-                    break;
-                
-            }
+            var contentType = BookService.GetContentType(bookFile.ContentType);
             return File(content, contentType, $"{chapterId}-{file}");
         }
 
@@ -165,8 +131,7 @@ namespace API.Controllers
 
             var counter = 0;
             var doc = new HtmlDocument();
-            var cssParser = new StylesheetParser();
-            
+
             var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
             var bookPages = await book.GetReadingOrderAsync();
             foreach (var contentFileRef in bookPages)
@@ -205,39 +170,7 @@ namespace API.Controllers
                     {
                         foreach (var anchor in anchors)
                         {
-                            if (anchor.Name != "a") continue;
-                            var hrefParts = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
-                                .Split("#");
-                            var mappingKey = hrefParts[0];
-                            if (!mappings.ContainsKey(mappingKey))
-                            {
-                                if (HasClickableHrefPart(anchor))
-                                {
-                                    var part = hrefParts.Length > 1
-                                        ? hrefParts[1]
-                                        : anchor.GetAttributeValue("href", string.Empty);
-                                    anchor.Attributes.Add("kavita-page", $"{page}");
-                                    anchor.Attributes.Add("kavita-part", part);
-                                    anchor.Attributes.Remove("href");
-                                    anchor.Attributes.Add("href", "javascript:void(0)");
-                                }
-                                else
-                                {
-                                    anchor.Attributes.Add("target", "_blank");    
-                                }
-                                continue;
-                            }
-                                
-                            var mappedPage = mappings[mappingKey];
-                            anchor.Attributes.Add("kavita-page", $"{mappedPage}");
-                            if (hrefParts.Length > 1)
-                            {
-                                anchor.Attributes.Add("kavita-part",
-                                    hrefParts[1]);
-                            }
-                            
-                            anchor.Attributes.Remove("href");
-                            anchor.Attributes.Add("href", "javascript:void(0)");
+                            BookService.UpdateLinks(anchor, mappings, page);
                         }
                     }
                     
@@ -253,7 +186,6 @@ namespace API.Controllers
                             image.Attributes.Add("src", $"{apiBase}" + imageFile);
                         }
                     }
-
                     return Ok(body.InnerHtml);
                 }
 
@@ -261,36 +193,6 @@ namespace API.Controllers
             }
 
             return BadRequest("Could not find the appropriate html for that page");
-        }
-
-        private static bool HasClickableHrefPart(HtmlNode anchor)
-        {
-            return anchor.GetAttributeValue("href", string.Empty).Contains("#") 
-                   && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
-                   && anchor.GetAttributeValue("role", string.Empty) != "presentation";
-        }
-
-        private static string GetContentType(string fullFile)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(fullFile, out var contentType))
-            {
-                var extension = Path.GetExtension(fullFile);
-                if (extension == ".xhtml")
-                {
-                    contentType = "application/xhtml+xml";
-                }
-                else if (extension == ".xml" || extension == ".opf")
-                {
-                    contentType = "text/xml";
-                }
-                else
-                {
-                    contentType = "application/octet-stream";
-                }
-            }
-
-            return contentType;
         }
     }
 }

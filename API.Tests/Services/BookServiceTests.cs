@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
+﻿using System.IO;
 using API.Entities.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using VersOne.Epub;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -36,14 +33,6 @@ namespace API.Tests.Services
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
-        }
-
-        [Theory]
-        [InlineData("<a href=\"../Styles/chapter01.xhtml\"/>", "../Styles/chapter01.xhtml")]
-        [InlineData("<h1 class=\"copyright-title\"><a href=\"../Text/toc.xhtml#toc-copyright\">Copyright</a></h1>", "../Text/toc.xhtml#toc-copyright")]
-        public void StylesheetHrefParse(string content, string expected)
-        {
-            Assert.Equal(expected, BookService.GetHrefKey(content));
         }
 
         // [Fact]
