@@ -35,10 +35,10 @@ namespace API.Data
         /// </summary>
         /// <param name="libraryType"></param>
         /// <returns></returns>
-        public async Task<bool> UserHasProgress(LibraryType libraryType)
+        public async Task<bool> UserHasProgress(LibraryType libraryType, int userId)
         {
             var seriesIds = await _context.AppUserProgresses
-                .Where(aup => aup.PagesRead > 0)
+                .Where(aup => aup.PagesRead > 0 && aup.AppUserId == userId)
                 .AsNoTracking()
                 .Select(aup => aup.SeriesId)
                 .ToListAsync();

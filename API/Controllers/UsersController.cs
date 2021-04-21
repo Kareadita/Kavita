@@ -43,7 +43,8 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
         {
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type));
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, user.Id));
         }
 
         [HttpGet("has-library-access")]

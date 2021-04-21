@@ -6,6 +6,6 @@ namespace API.Interfaces
     public interface IAppUserProgressRepository
     {
         Task<int> CleanupAbandonedChapters();
-        Task<bool> UserHasProgress(LibraryType libraryType);
+        Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     }
 }
