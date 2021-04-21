@@ -179,12 +179,36 @@ namespace API.Controllers
                         foreach (var image in images)
                         {
                             if (image.Name != "img") continue;
-
-                            var imageFile = image.Attributes["src"].Value;
-                            image.Attributes.Remove("src");
-                            image.Attributes.Add("src", $"{apiBase}" + imageFile);
+                            
+                            // Need to do for xlink:href
+                            if (image.Attributes["src"] != null)
+                            {
+                                var imageFile = image.Attributes["src"].Value;
+                                image.Attributes.Remove("src");
+                                image.Attributes.Add("src", $"{apiBase}" + imageFile);
+                            }
                         }
                     }
+                    
+                    images = doc.DocumentNode.SelectNodes("//image");
+                    if (images != null)
+                    {
+                        foreach (var image in images)
+                        {
+                            if (image.Name != "image") continue;
+                            
+                            if (image.Attributes["xlink:href"] != null)
+                            {
+                                var imageFile = image.Attributes["xlink:href"].Value;
+                                image.Attributes.Remove("xlink:href");
+                                image.Attributes.Add("xlink:href", $"{apiBase}" + imageFile);
+                            }
+                        }
+                    }
+                    
+                    
+                    
+
                     return Ok(body.InnerHtml);
                 }
 
