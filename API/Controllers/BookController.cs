@@ -18,21 +18,21 @@ namespace API.Controllers
     {
         private readonly ILogger<BookController> _logger;
         private readonly IBookService _bookService;
-        private readonly ICacheService _cacheService;
+        private readonly IUnitOfWork _unitOfWork;
         private static readonly string BookApiUrl = "book-resources?file=";
 
 
-        public BookController(ILogger<BookController> logger, IBookService bookService, ICacheService cacheService)
+        public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _bookService = bookService;
-            _cacheService = cacheService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet("{chapterId}/book-info")]
         public async Task<ActionResult<string>> GetBookInfo(int chapterId)
         {
-            var chapter = await _cacheService.Ensure(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
 
             return book.Title;
@@ -41,7 +41,7 @@ namespace API.Controllers
         [HttpGet("{chapterId}/book-resources")]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
-            var chapter = await _cacheService.Ensure(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
 
             var key = BookService.CleanContentKeys(file);
@@ -59,7 +59,7 @@ namespace API.Controllers
         {
             // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
             // this is used to rewrite anchors in the book text so that we always load properly in FE
-            var chapter = await _cacheService.Ensure(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
             
@@ -123,8 +123,7 @@ namespace API.Controllers
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page, [FromQuery] string baseUrl)
         {
-            _logger.LogDebug("Book endpoint hit");
-            var chapter = await _cacheService.Ensure(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
 
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
