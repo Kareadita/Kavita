@@ -1,28 +1,20 @@
 ﻿using System.IO;
 using API.Entities.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {
     public class BookServiceTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly IBookService _bookService;
         private readonly ILogger<BookService> _logger = Substitute.For<ILogger<BookService>>();
-        private readonly IArchiveService _archiveService;
-        private readonly ILogger<ArchiveService> archiveServiceLogger = Substitute.For<ILogger<ArchiveService>>();
-        private readonly ILogger<DirectoryService> directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
-        
-        public BookServiceTests(ITestOutputHelper testOutputHelper)
+
+        public BookServiceTests()
         {
-            _testOutputHelper = testOutputHelper;
-            _archiveService = new ArchiveService(archiveServiceLogger);
-            _bookService = new BookService(_logger, _archiveService, new DirectoryService(directoryServiceLogger));
+            _bookService = new BookService(_logger);
         }
 
         [Theory]

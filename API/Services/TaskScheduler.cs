@@ -38,12 +38,13 @@ namespace API.Services
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
             
-            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
+            var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", setting);
+                var scanLibrarySetting = setting;
+                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
                 RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), 
-                    () => CronConverter.ConvertToCronNotation(setting));
+                    () => CronConverter.ConvertToCronNotation(scanLibrarySetting));
             }
             else
             {

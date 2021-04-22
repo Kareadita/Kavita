@@ -3,7 +3,6 @@ using API.Entities.Interfaces;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
-using API.Middleware;
 using API.Services;
 using API.Services.Tasks;
 using Microsoft.EntityFrameworkCore;

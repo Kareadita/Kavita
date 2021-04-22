@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Parser;
-using HtmlAgilityPack;
 using VersOne.Epub;
 
 namespace API.Entities.Interfaces

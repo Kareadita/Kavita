@@ -1,20 +1,10 @@
-using System.Collections.Generic;
-using API.Entities.Enums;
-using API.Parser;
 using Xunit;
-using Xunit.Abstractions;
 using static API.Parser.Parser;
 
-namespace API.Tests
+namespace API.Tests.Parser
 {
     public class ParserTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-        
-        public ParserTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
 
         [Theory]
         [InlineData("0001", "1")]

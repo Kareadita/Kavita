@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.Entities

@@ -36,7 +36,7 @@ namespace API.Services.Tasks
           _archiveService = archiveService;
           _metadataService = metadataService;
           _bookService = bookService;
-          _naturalSort = new NaturalSortComparer(true);
+          _naturalSort = new NaturalSortComparer();
        }
 
 
@@ -53,7 +53,7 @@ namespace API.Services.Tasks
 
        private bool ShouldSkipFolderScan(FolderPath folder, ref int skippedFolders)
        {
-          // NOTE: This solution isn't the best, but it has potential. We need to handle a few other cases so it works great. 
+          // NOTE: The only way to skip folders is if Directory hasn't been modified, we aren't doing a forcedUpdate and version hasn't changed between scans.
           return false;
 
           // if (!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
@@ -253,9 +253,7 @@ namespace API.Services.Tasks
           var existingVolumeLength = series.Volumes.Count;
           // BUG: ParsedInfos aren't coming when files are still on disk causing removal of volumes then re-added on another scan.
           var deletedVolumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes != v.Name)).ToList();
-          //series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
           series.Volumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
-          //series.Volumes = series.Volumes.Except(deletedVolumes).ToList();
           if (existingVolumeLength != series.Volumes.Count)
           {
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
@@ -286,7 +284,6 @@ namespace API.Services.Tasks
              Chapter chapter;
              try
              {
-                // TODO: Extract to FindExistingChapter()
                 chapter = specialTreatment
                    ? volume.Chapters.SingleOrDefault(c => c.Range == info.Filename
                                                           || (c.Files.Select(f => f.FilePath)
@@ -341,7 +338,7 @@ namespace API.Services.Tasks
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
           {
-             var specialTreatment = (existingChapter.IsSpecial || (existingChapter.Number == "0" && !int.TryParse(existingChapter.Range, out int i)));
+             var specialTreatment = (existingChapter.IsSpecial || (existingChapter.Number == "0" && !int.TryParse(existingChapter.Range, out _)));
              var hasInfo = specialTreatment ? parsedInfos.Any(v => v.Filename == existingChapter.Range) 
                 : parsedInfos.Any(v => v.Chapters == existingChapter.Range);
              
@@ -414,14 +411,10 @@ namespace API.Services.Tasks
        /// <param name="type">Library type to determine parsing to perform</param>
        private void ProcessFile(string path, string rootPath, LibraryType type)
        {
-          ParserInfo info = null;
-
-          info = Parser.Parser.Parse(path, rootPath, type);
+          var info = Parser.Parser.Parse(path, rootPath, type);
 
           if (type == LibraryType.Book && info == null && Parser.Parser.IsEpub(path))
           {
-             // We need to parse information out of filename rather than via bookservice as LN's have Volumes, etc. 
-             // Only traditional books are separate
              info = _bookService.ParseInfo(path);
           }
 

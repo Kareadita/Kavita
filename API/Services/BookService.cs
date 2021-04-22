@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
-using API.Interfaces.Services;
 using API.Parser;
 using ExCSS;
 using HtmlAgilityPack;
@@ -19,15 +18,13 @@ namespace API.Services
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
-        private readonly IArchiveService _archiveService;
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         private readonly StylesheetParser _cssParser = new ();
       
-        public BookService(ILogger<BookService> logger, IArchiveService archiveService)
+        public BookService(ILogger<BookService> logger)
         {
             _logger = logger;
-            _archiveService = archiveService;
         }
         
         private static bool HasClickableHrefPart(HtmlNode anchor)

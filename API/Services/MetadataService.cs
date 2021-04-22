@@ -52,7 +52,7 @@ namespace API.Services
           if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
-             chapter.CoverImage = GetCoverImage(firstFile, true); 
+             chapter.CoverImage = GetCoverImage(firstFile); 
           }
        }
 
@@ -71,7 +71,7 @@ namespace API.Services
                 var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                   volume.CoverImage = GetCoverImage(firstFile, true);
+                   volume.CoverImage = GetCoverImage(firstFile);
                 }
              }
              else

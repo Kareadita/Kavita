@@ -1,10 +1,8 @@
 using System;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
 using API.Interfaces;
-using API.Interfaces.Services;
 using API.Middleware;
 using API.Services;
 using Hangfire;
@@ -17,8 +15,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
@@ -27,12 +23,10 @@ namespace API
     public class Startup
     {
         private readonly IConfiguration _config;
-        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration config, IWebHostEnvironment env)
+        public Startup(IConfiguration config)
         {
             _config = config;
-            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

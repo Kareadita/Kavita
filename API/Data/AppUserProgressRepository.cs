@@ -34,6 +34,7 @@ namespace API.Data
         /// Checks if user has any progress against a library of passed type
         /// </summary>
         /// <param name="libraryType"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         public async Task<bool> UserHasProgress(LibraryType libraryType, int userId)
         {

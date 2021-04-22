@@ -21,11 +21,12 @@ namespace API.Services
     /// <summary>
     /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> and <see cref="ScannerService"/>
     /// </summary>
+    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
         private const int ThumbnailWidth = 320; // 153w x 230h
-        private static readonly RecyclableMemoryStreamManager _streamManager = new();
+        private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
 
         public ArchiveService(ILogger<ArchiveService> logger)
@@ -172,7 +173,7 @@ namespace API.Services
                         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
                         
-                        using var ms = _streamManager.GetStream();
+                        using var ms = StreamManager.GetStream();
                         entry.WriteTo(ms);
                         ms.Position = 0;
                         
@@ -197,7 +198,7 @@ namespace API.Services
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
         {
             using var stream = entry.Open();
-            using var ms = _streamManager.GetStream();
+            using var ms = StreamManager.GetStream();
             stream.CopyTo(ms);
             return ms.ToArray();
         }
@@ -261,7 +262,7 @@ namespace API.Services
             {
                 if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key) && Parser.Parser.IsXml(entry.Key))
                 {
-                    using var ms = _streamManager.GetStream();
+                    using var ms = StreamManager.GetStream();
                     entry.WriteTo(ms);
                     ms.Position = 0;
 
