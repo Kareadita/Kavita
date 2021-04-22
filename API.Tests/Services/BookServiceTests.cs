@@ -35,27 +35,5 @@ namespace API.Tests.Services
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
         }
 
-        // [Fact]
-        // public void CanExtract_Test()
-        // {
-        //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
-        //     var file = "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub";
-        //     using var archive = ZipFile.OpenRead(Path.Join(testDirectory, file));
-        //     archive.ExtractToDirectory(testDirectory);
-        // }
-        
-        
-        [Fact]
-        public void CanExtract_Test()
-        {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
-            var file = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
-            
-            // var epubBook = EpubReader.ReadBook(file);
-            // foreach (var contentFile in epubBook.ReadingOrder)
-            // {
-            //     _testOutputHelper.WriteLine(contentFile.Content);
-            // }
-        }
     }
 }

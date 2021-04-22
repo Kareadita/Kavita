@@ -46,6 +46,7 @@ namespace API.Services.Tasks
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
           foreach (var lib in libraries)
           {
+             // BUG?: I think we need to keep _scannedSeries within the ScanLibrary instance since this is multithreaded.
              ScanLibrary(lib.Id, false);
           }
        }
@@ -92,7 +93,7 @@ namespace API.Services.Tasks
            {
               if (ShouldSkipFolderScan(folderPath, ref skippedFolders)) continue;
               
-              // TODO: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
+              // NOTE: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
               var searchPattern = Parser.Parser.ArchiveFileExtensions;
               if (library.Type == LibraryType.Book)
               {
@@ -131,7 +132,7 @@ namespace API.Services.Tasks
            }
            
            // Remove any series where there were no parsed infos
-           var filtered = _scannedSeries.Where(kvp => kvp.Value.Count != 0);
+           var filtered = _scannedSeries.Where(kvp => kvp.Value.Count > 0);
            var series = filtered.ToDictionary(v => v.Key, v => v.Value);
 
            UpdateLibrary(library, series);
@@ -213,12 +214,6 @@ namespace API.Services.Tasks
           var removeCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
           existingSeries = existingSeries.Except(missingList).ToList();
-          // if (existingSeries == null || existingSeries.Count == 0) return 0;
-          // foreach (var existing in missingSeries)
-          // {
-          //    existingSeries.Remove(existing);
-          //    removeCount += 1;
-          // }
           removeCount -= existingSeries.Count;
 
           return removeCount;
@@ -247,8 +242,6 @@ namespace API.Services.Tasks
                 series.Volumes.Add(volume);
              }
              
-             // NOTE: I don't think we need this as chapters now handle specials
-             //volume.IsSpecial = volume.Number == 0 && infos.All(p => p.Chapters == "0" || p.IsSpecial); 
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
 
              UpdateChapters(volume, infos);
@@ -258,18 +251,11 @@ namespace API.Services.Tasks
           // BUG: This is causing volumes to be removed when they shouldn't
           // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
           var existingVolumeLength = series.Volumes.Count;
-          // var existingVols = series.Volumes;
-          // foreach (var v in existingVols)
-          // {
-          //    // NOTE: I think checking if Chapter count is 0 is enough, we don't need parsedInfos
-          //    if (parsedInfos.All(p => p.Volumes != v.Name)) //  || v.Chapters.Count == 0 (this wont work yet because we don't take care of chapters correctly vs parsedInfos)
-          //    {
-          //       _logger.LogDebug("Removed {Series} - {Volume} as there were no chapters", series.Name, v.Name);
-          //       series.Volumes.Remove(v);
-          //    }
-          // }
+          // BUG: ParsedInfos aren't coming when files are still on disk causing removal of volumes then re-added on another scan.
           var deletedVolumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes != v.Name)).ToList();
-          series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          //series.Volumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes == v.Name)).ToList();
+          series.Volumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
+          //series.Volumes = series.Volumes.Except(deletedVolumes).ToList();
           if (existingVolumeLength != series.Volumes.Count)
           {
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
@@ -312,8 +298,7 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "{FileName} mapped as '{Series} - Vol {Volume} Ch {Chapter}' is a duplicate, skipping", info.FullFilePath, info.Series, info.Volumes, info.Chapters);
                 return;
              }
-
-
+             
              if (chapter == null)
              {
                 _logger.LogDebug("Adding new chapter, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}", info.Series, info.Volumes, info.Chapters, specialTreatment);

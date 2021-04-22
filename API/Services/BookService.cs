@@ -196,6 +196,7 @@ namespace API.Services
                 Chapters = "0",
                 Edition = "",
                 Format = MangaFormat.Book,
+                Filename = filePath,
                 FullFilePath = filePath,
                 IsSpecial = false,
                 Series = epubBook.Title,
@@ -212,7 +213,10 @@ namespace API.Services
             
             try
             {
-                var coverImageContent = epubBook.CoverImage ?? epubBook.Content.Images.Values.First().Content;
+                // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
+                var coverImageContent = epubBook.CoverImage 
+                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))?.Content 
+                                        ?? epubBook.Content.Images.Values.First().Content;
 
                 if (coverImageContent != null && createThumbnail)
                 {
@@ -229,10 +233,7 @@ namespace API.Services
                 _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
             
-            
-
             return Array.Empty<byte>();
-            
         }
 
         public void ExtractToFolder(string archivePath, string extractPath)
