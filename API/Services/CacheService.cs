@@ -3,10 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
-using API.Controllers;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -20,18 +18,16 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, 
-            IDirectoryService directoryService, IBookService bookService)
+            IDirectoryService directoryService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
-            _bookService = bookService;
             _numericComparer = new NumericComparer();
         }
 

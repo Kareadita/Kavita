@@ -12,7 +12,6 @@ namespace API.Entities.Interfaces
 
         ParserInfo ParseInfo(string filePath);
         byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true);
-        void ExtractToFolder(string fileFilePath, string destDirectory);
         Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
         /// <summary>
         /// Scopes styles to .reading-section and replaces img src to the passed apiBase
