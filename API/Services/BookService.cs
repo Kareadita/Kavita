@@ -196,7 +196,7 @@ namespace API.Services
                 Chapters = "0",
                 Edition = "",
                 Format = MangaFormat.Book,
-                Filename = filePath,
+                Filename = Path.GetFileName(filePath),
                 FullFilePath = filePath,
                 IsSpecial = false,
                 Series = epubBook.Title,

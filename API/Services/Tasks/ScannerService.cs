@@ -283,7 +283,7 @@ namespace API.Services.Tasks
              // also are treated like specials for UI grouping.
              // NOTE: If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
              // vs Historys strongest), this code will break and the duplicate will be skipped.
-             Chapter chapter = null;
+             Chapter chapter;
              try
              {
                 // TODO: Extract to FindExistingChapter()
