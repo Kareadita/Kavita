@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
+using API.Interfaces;
 using API.Interfaces.Services;
 using API.Middleware;
 using API.Services;
@@ -73,13 +74,11 @@ namespace API
 
             // Add the processing server as IHostedService
             services.AddHangfireServer();
-            
-            //services.AddStartupTask<WarmupServicesStartupTask>(services).
-            services.AddTransient<IStartupTask, WarmupServicesStartupTask>().TryAddSingleton(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, 
+            IHostApplicationLifetime applicationLifetime, ITaskScheduler taskScheduler)
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
@@ -98,7 +97,7 @@ namespace API
             // Ordering is important. Cors, authentication, authorization
             if (env.IsDevelopment())
             {
-                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200", "http://localhost:5000"));
+                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
             }
             
             app.UseResponseCaching();
@@ -112,14 +111,6 @@ namespace API
             app.UseStaticFiles(new StaticFileOptions
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
-            });
-            
-            // For serving books from cache
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "cache")),
-                //RequestPath = new PathString("/book")
             });
             
             app.Use(async (context, next) =>
@@ -136,14 +127,6 @@ namespace API
                 await next();
             });
 
-            // app.Use(async (context, next) =>
-            // {
-            //     Console.WriteLine("BookRedirect Path: " + context.Request.Path.ToString());
-            //     await next();
-            // });
-            
-            
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -156,6 +139,9 @@ namespace API
             {
                 Console.WriteLine("Kavita - v0.4.0");
             });
+            
+            // Any services that should be bootstrapped go here
+            taskScheduler.ScheduleTasks();
         }
         
         private void OnShutdown()

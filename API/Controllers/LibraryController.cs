@@ -228,9 +228,7 @@ namespace API.Controllers
         [HttpGet("type")]
         public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)
         {
-            // TODO: Write a custom query for this
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            return Ok(library.Type);
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId));
         }
     }
 }

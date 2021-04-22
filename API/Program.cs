@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API
 {
@@ -39,13 +40,6 @@ namespace API
             {
                 var logger = services.GetRequiredService < ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
-            }
-            
-            // Load all tasks from DI and initialize them (TODO: This is not working - WarmupServicesStartupTask is Null)
-            var startupTasks = host.Services.GetServices<WarmupServicesStartupTask>();
-            foreach (var startupTask in startupTasks)
-            {
-                await startupTask.ExecuteAsync();
             }
 
             await host.RunAsync();

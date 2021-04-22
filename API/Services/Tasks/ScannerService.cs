@@ -278,7 +278,7 @@ namespace API.Services.Tasks
           // Add new chapters
           foreach (var info in parsedInfos)
           {
-             var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
+             var specialTreatment = info.IsSpecialInfo();
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
              // also are treated like specials for UI grouping.
              // NOTE: If there are duplicate files that parse out to be the same but a different series name (but parses to same normalized name ie History's strongest 
@@ -319,7 +319,7 @@ namespace API.Services.Tasks
           // Add files
           foreach (var info in parsedInfos)
           {
-             var specialTreatment = (info.IsSpecial || (info.Volumes == "0" && info.Chapters == "0"));
+             var specialTreatment = info.IsSpecialInfo();
              Chapter chapter = null;
              try
              {
@@ -364,6 +364,8 @@ namespace API.Services.Tasks
           _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
              startingChapters, volume.Chapters.Count);
        }
+
+       
 
        /// <summary>
        /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.

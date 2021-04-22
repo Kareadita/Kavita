@@ -29,5 +29,10 @@ namespace API.Parser
         /// If the file contains no volume/chapter information and contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
         /// </summary>
         public bool IsSpecial { get; set; } = false;
+        
+        public bool IsSpecialInfo()
+        { 
+            return (IsSpecial || (Volumes == "0" && Chapters == "0"));
+        }
     }
 }

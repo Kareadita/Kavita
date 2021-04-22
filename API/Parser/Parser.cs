@@ -375,7 +375,6 @@ namespace API.Parser
 
             if (type == LibraryType.Book)
             {
-                // TODO: we need to use book.title here
                 ret = new ParserInfo()
                 {
                     Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),

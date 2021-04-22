@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 
 namespace API.Interfaces
 {
@@ -17,5 +18,6 @@ namespace API.Interfaces
         Task<IEnumerable<Library>> GetLibrariesAsync();
         Task<bool> DeleteLibrary(int libraryId);
         Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
+        Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     }
 }

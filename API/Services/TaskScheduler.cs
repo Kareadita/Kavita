@@ -32,8 +32,6 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
-            
-            ScheduleTasks();
         }
 
         public void ScheduleTasks()
