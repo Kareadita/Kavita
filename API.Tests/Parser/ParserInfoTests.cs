@@ -93,6 +93,7 @@ namespace API.Tests.Parser
             AssertSame(expected, p1);
 
         }
+        
 
         private void AssertSame(ParserInfo expected, ParserInfo actual)
         {

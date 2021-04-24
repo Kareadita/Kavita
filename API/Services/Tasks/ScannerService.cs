@@ -215,11 +215,25 @@ namespace API.Services.Tasks
 
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           var librarySeries = library.Series.ToList();
-          Parallel.ForEach(librarySeries, (series) =>
+          // Parallel.ForEach(librarySeries, (series) =>
+          // {
+          //    try
+          //    {
+          //       _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+          //       UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
+          //       series.Pages = series.Volumes.Sum(v => v.Pages);
+          //    }
+          //    catch (Exception ex)
+          //    {
+          //       _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+          //    }
+          // });
+          // TODO: Remove this debug code
+          foreach (var series in library.Series)
           {
              try
              {
-                _logger.LogInformation("Processing series {SeriesName}", series.Name);
+                _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
                 UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
              }
@@ -227,7 +241,7 @@ namespace API.Services.Tasks
              {
                 _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
              }
-          });
+          }
        }
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<string, List<ParserInfo>> parsedSeries)
@@ -275,20 +289,27 @@ namespace API.Services.Tasks
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
           }
           
-          // Remove existing volumes that aren't in parsedInfos and volumes that have no chapters
+          // Remove existing volumes that aren't in parsedInfos or volumes that have no chapters
           var existingVolumeLength = series.Volumes.Count;
           // BUG: ParsedInfos aren't coming when files are still on disk causing removal of volumes then re-added on another scan.
-          var deletedVolumes = series.Volumes.Where(v => parsedInfos.Any(p => p.Volumes != v.Name)).ToList();
-          series.Volumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
-          if (existingVolumeLength != series.Volumes.Count)
+          //var deletedVolumes = series.Volumes.Where(v => !parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
+          var nonDeletedVolumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
+          if (series.Volumes.Count != nonDeletedVolumes.Count)
           {
-             _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name", (existingVolumeLength - series.Volumes.Count), series.Name);
+             _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+                (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
+             var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
              foreach (var volume in deletedVolumes)
              {
                 var file = volume.Chapters.FirstOrDefault()?.Files.FirstOrDefault()?.FilePath ?? "no files";
+                if (!new FileInfo(file).Exists)
+                {
+                   _logger.LogError("Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}", file);
+                }
                 _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
              }
-             
+
+             series.Volumes = nonDeletedVolumes;
           }
 
           _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
@@ -363,6 +384,7 @@ namespace API.Services.Tasks
           
           
           // Remove chapters that aren't in parsedInfos or have no files linked
+          // TODO: See if we can use Except() here
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
           {
