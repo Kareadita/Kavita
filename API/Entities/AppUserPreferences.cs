@@ -25,7 +25,7 @@ namespace API.Entities
         /// <summary>
         /// Book Reader Option: Override extra Margin
         /// </summary>
-        public int BookReaderMargin { get; set; } = 15; // not sure how to handle this with mobile
+        public int BookReaderMargin { get; set; } = 15;
         /// <summary>
         /// Book Reader Option: Override line-height
         /// </summary>
