@@ -129,7 +129,7 @@ namespace API.Controllers
 
             var counter = 0;
             var doc = new HtmlDocument();
-            var baseUrl = Request.Scheme + "://" + Request.Host + Request.PathBase;
+            var baseUrl = Request.Scheme + "://" + Request.Host + Request.PathBase + "/api/";
             var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
             var bookPages = await book.GetReadingOrderAsync();
             foreach (var contentFileRef in bookPages)

@@ -11,7 +11,7 @@ namespace API.Data.Migrations
                 table: "AppUserPreferences",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 100);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

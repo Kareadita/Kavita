@@ -22,14 +22,15 @@ namespace API.Data.Migrations
                 name: "BookReaderFontFamily",
                 table: "AppUserPreferences",
                 type: "TEXT",
-                nullable: true);
+                nullable: true,
+                defaultValue: "default");
 
             migrationBuilder.AddColumn<int>(
                 name: "BookReaderLineSpacing",
                 table: "AppUserPreferences",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 100);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
