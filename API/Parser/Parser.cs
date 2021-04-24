@@ -12,8 +12,8 @@ namespace API.Parser
         public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
         public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\()([a-z0-9/\._]+)(\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        
+        public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -394,6 +394,7 @@ namespace API.Parser
                     Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
                     Filename = fileName,
                     Format = ParseFormat(filePath),
+                    Title = Path.GetFileNameWithoutExtension(fileName),
                     FullFilePath = filePath
                 };
             }
@@ -775,13 +776,17 @@ namespace API.Parser
         
         public static float MinimumNumberFromRange(string range)
         {
-            var tokens = range.Split("-");
+            var tokens = range.Replace("_", string.Empty).Split("-");
             return tokens.Min(float.Parse);
         }
 
         public static string Normalize(string name)
         {
-            return name.ToLower().Replace("-", "").Replace(" ", "").Replace(":", "").Replace("_", "");
+            return name.ToLower()
+                .Replace("-", string.Empty)
+                .Replace(" ", string.Empty)
+                .Replace(":", string.Empty)
+                .Replace("_", string.Empty);
         }
 
         /// <summary>

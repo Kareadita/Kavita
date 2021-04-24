@@ -6,12 +6,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Interfaces;
 using API.Parser;
 using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using VersOne.Epub;
+using VersOne.Epub.Schema;
 
 namespace API.Services
 {
@@ -108,6 +110,7 @@ namespace API.Services
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
             styleContent =
                 Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
+
             styleContent = styleContent.Replace("body", ".reading-section");
             
             var stylesheet = await _cssParser.ParseAsync(styleContent);
@@ -126,17 +129,25 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
+        public string GetSummaryInfo(string filePath)
+        {
+            if (!IsValidFile(filePath)) return string.Empty;
+            
+            var epubBook = EpubReader.OpenBook(filePath);
+            return epubBook.Schema.Package.Metadata.Description;
+        }
+
         private bool IsValidFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError("Book {ArchivePath} could not be found", filePath);
+                _logger.LogError("Book {EpubFile} could not be found", filePath);
                 return false;
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
             
-            _logger.LogError("Book {ArchivePath} is not a valid EPUB", filePath);
+            _logger.LogError("Book {EpubFile} is not a valid EPUB", filePath);
             return false; 
         }
 
@@ -144,8 +155,17 @@ namespace API.Services
         {
             if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return 0;
 
-            var epubBook = EpubReader.ReadBook(filePath);
-            return epubBook.Content.Html.Count;
+            try
+            {
+                var epubBook = EpubReader.OpenBook(filePath);
+                return epubBook.Content.Html.Count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception getting number of pages, defaulting to 0");
+            }
+
+            return 0;
         }
 
         public static string CleanContentKeys(string key)
@@ -167,9 +187,9 @@ namespace API.Services
             return dict;
         }
 
-        public ParserInfo ParseInfo(string filePath)
+        public static ParserInfo ParseInfo(string filePath)
         {
-            var epubBook = EpubReader.ReadBook(filePath);
+            var epubBook = EpubReader.OpenBook(filePath);
 
             return new ParserInfo()
             {
@@ -177,6 +197,7 @@ namespace API.Services
                 Edition = "",
                 Format = MangaFormat.Book,
                 Filename = Path.GetFileName(filePath),
+                Title = epubBook.Title,
                 FullFilePath = filePath,
                 IsSpecial = false,
                 Series = epubBook.Title,
@@ -188,25 +209,27 @@ namespace API.Services
         {
             if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
             
-            var epubBook = EpubReader.ReadBook(fileFilePath);
-            
-            
+            var epubBook = EpubReader.OpenBook(fileFilePath);
+
+
             try
             {
                 // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
-                var coverImageContent = epubBook.CoverImage 
-                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))?.Content 
-                                        ?? epubBook.Content.Images.Values.First().Content;
+                var coverImageContent = epubBook.Content.Cover
+                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
+                                        ?? epubBook.Content.Images.Values.First();
+                
+                if (coverImageContent == null) return Array.Empty<byte>();
 
-                if (coverImageContent != null && createThumbnail)
+                if (createThumbnail)
                 {
-                    using var stream = new MemoryStream(coverImageContent);
+                    using var stream = new MemoryStream(coverImageContent.ReadContent());
 
                     using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
                     return thumbnail.WriteToBuffer(".jpg");
                 }
 
-                return coverImageContent;
+                return coverImageContent.ReadContent();
             }
             catch (Exception ex)
             {

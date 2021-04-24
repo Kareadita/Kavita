@@ -30,6 +30,10 @@ namespace API.Entities
         /// If this Chapter contains files that could only be identified as Series or has Special Identifier from filename
         /// </summary>
         public bool IsSpecial { get; set; }
+        /// <summary>
+        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/> 
+        /// </summary>
+        public string Title { get; set; }
 
         // Relationships
         public Volume Volume { get; set; }

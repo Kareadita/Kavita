@@ -45,5 +45,6 @@ namespace API.Entities
         public List<Volume> Volumes { get; set; }
         public Library Library { get; set; }
         public int LibraryId { get; set; }
+
     }
 }

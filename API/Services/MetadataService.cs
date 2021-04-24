@@ -108,20 +108,29 @@ namespace API.Services
              series.CoverImage = firstCover?.CoverImage ?? coverImage;
           }
 
+          UpdateSeriesSummary(series, forceUpdate);
+       }
+
+       private void UpdateSeriesSummary(Series series, bool forceUpdate)
+       {
           if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
           
-          var firstVolume = series.Volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number == 1);
-          var firstChapter = firstVolume?.Chapters.FirstOrDefault(c => c.Files.Any());
-          
+          var isBook = series.Library.Type == LibraryType.Book;
+          var firstVolume = series.Volumes.FirstWithChapters(isBook);
+          var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+
+          // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
-          if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
+          if (firstFile != null &&
+              (forceUpdate || !firstFile.HasFileBeenModified()))
           {
-             series.Summary = _archiveService.GetSummaryInfo(firstFile.FilePath);
+             series.Summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+
              firstFile.LastModified = DateTime.Now;
           }
        }
-       
-       
+
+
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();

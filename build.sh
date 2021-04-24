@@ -47,10 +47,10 @@ Build()
 BuildUI()
 {
     ProgressStart 'Building UI'
-    cd ../kavita-webui/ || exit
+    cd ../Kavita-webui/ || exit
     npm install
     npm run prod
-    cd ../kavita/ || exit
+    cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }
 
@@ -66,7 +66,7 @@ Package()
     echo "Building"
     cd API
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    dotnet publish --no-restore -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
@@ -113,6 +113,3 @@ else
     Package "net5.0" "$RID"
     cd "$dir"
 fi
-
-
-

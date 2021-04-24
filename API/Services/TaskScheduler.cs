@@ -20,10 +20,11 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
-        
+
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService, 
+            IBackgroundJobClient jobClient)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -68,7 +69,7 @@ namespace API.Services
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
+            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate)); 
             // When we do a scan, force cache to re-unpack in case page numbers change
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); 
         }

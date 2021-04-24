@@ -1,5 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using API.Data;
 using API.Entities;
 using API.Entities.Interfaces;
 using API.Interfaces;
@@ -7,57 +13,91 @@ using API.Interfaces.Services;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks;
+using AutoMapper;
+using Hangfire;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Tests.Services
 {
-    public class ScannerServiceTests
+    public class ScannerServiceTests : IDisposable
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
-        private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IMetadataService _metadataService;
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
-        private Library _libraryMock;
+
+        private readonly DbConnection _connection;
+        private readonly DataContext _context;
+
+        private readonly IBackgroundJobClient _backgroundJobClient;
+        private static BackgroundJobServer Client => new BackgroundJobServer();
 
         public ScannerServiceTests(ITestOutputHelper testOutputHelper)
         {
+            var contextOptions = new DbContextOptionsBuilder()
+                .UseSqlite(CreateInMemoryDatabase())
+                .Options;
+            _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+
+            _context = new DataContext(contextOptions);
+            Task.Run(SeedDb).GetAwaiter().GetResult();
+            
+            
+            //BackgroundJob.Enqueue is what I need to mock or something (it's static...)
+            // ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
+            //     IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService, 
+            //     IBackgroundJobClient jobClient
+            //var taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(), Substitute.For<)
+            
+            
+            // Substitute.For<UserManager<AppUser>>() - Not needed because only for UserService
+            _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null,
+                Substitute.For<ILogger<UnitOfWork>>());
+            
+            
             _testOutputHelper = testOutputHelper;
             _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService, _bookService);
             _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
-            // _libraryMock = new Library()
-            // {
-            //     Id = 1,
-            //     Name = "Manga",
-            //     Folders = new List<FolderPath>()
-            //     {
-            //         new FolderPath()
-            //         {
-            //             Id = 1,
-            //             LastScanned = DateTime.Now,
-            //             LibraryId = 1,
-            //             Path = "E:/Manga"
-            //         }
-            //     },
-            //     LastModified = DateTime.Now,
-            //     Series = new List<Series>()
-            //     {
-            //         new Series()
-            //         {
-            //             Id = 0, 
-            //             Name = "Darker Than Black"
-            //         }
-            //     }
-            // };
-            
         }
 
+        private async Task<bool> SeedDb()
+        {
+            await _context.Database.MigrateAsync();
+            await Seed.SeedSettings(_context);
+
+            _context.Library.Add(new Library()
+            {
+                Name = "Manga",
+                Folders = new List<FolderPath>()
+                {
+                    new FolderPath()
+                    {
+                        Path = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga")
+                    }
+                }
+            });
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        [Fact]
+        public void Test()
+        {
+            _scannerService.ScanLibrary(1, false);
+
+            var series = _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Result.Series;
+        }
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
@@ -204,5 +244,16 @@ namespace API.Tests.Services
             // _testOutputHelper.WriteLine(_libraryMock.ToString());
             Assert.True(true);
         }
+        
+        private static DbConnection CreateInMemoryDatabase()
+        {
+            var connection = new SqliteConnection("Filename=:memory:");
+
+            connection.Open();
+
+            return connection;
+        }
+
+        public void Dispose() => _connection.Dispose();
     }
 }

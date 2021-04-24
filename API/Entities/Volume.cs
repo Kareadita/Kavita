@@ -15,12 +15,7 @@ namespace API.Entities
         public byte[] CoverImage { get; set; }
         public int Pages { get; set; }
 
-        /// <summary>
-        /// Represents a Side story that is linked to the original Series. Omake, One Shot, etc.
-        /// </summary>
-        public bool IsSpecial { get; set; } = false;
-        
-        
+
 
         // Relationships
         public Series Series { get; set; }
