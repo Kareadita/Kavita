@@ -66,7 +66,7 @@ Package()
     echo "Building"
     cd API
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    dotnet publish --no-restore -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
