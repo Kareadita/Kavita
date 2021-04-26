@@ -88,7 +88,7 @@ namespace API.Services
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
           {
              series.Volumes ??= new List<Volume>();
-             var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+             var firstCover = series.Volumes.GetCoverImage(series.Library.Type);
              byte[] coverImage = null; 
              if (firstCover == null && series.Volumes.Any())
              {
@@ -134,7 +134,7 @@ namespace API.Services
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();
-          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
 
           // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);

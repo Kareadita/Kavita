@@ -59,6 +59,7 @@ namespace API.Tests.Parser
         [InlineData("Gantz.V26.cbz", "26")]
         [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
+        [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -130,6 +131,7 @@ namespace API.Tests.Parser
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
         [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
+        [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "NEEDLESS")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -189,7 +191,6 @@ namespace API.Tests.Parser
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
-        [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -217,9 +218,10 @@ namespace API.Tests.Parser
         [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
         [InlineData("Ani-Hina Art Collection.cbz", true)]
+        [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(input) != "");
+            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
         }
         
         [Theory]
@@ -229,6 +231,13 @@ namespace API.Tests.Parser
         public void ParseFormatTest(string inputFile, MangaFormat expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseFormat(inputFile));
+        }
+
+        [Theory]
+        [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", "Side Stories")]
+        public void ParseSpecialTest(string inputFile, string expected)
+        {
+            Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
         [Fact]

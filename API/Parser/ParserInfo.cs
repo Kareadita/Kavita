@@ -44,13 +44,14 @@ namespace API.Parser
         /// Merges non empty/null properties from info2 into this entity.
         /// </summary>
         /// <param name="info2"></param>
-        public void MergeFrom(ParserInfo info2)
+        public void Merge(ParserInfo info2)
         {
-            Chapters = string.IsNullOrEmpty(info2.Chapters) || info2.Chapters == "0" ? Chapters : info2.Chapters;
-            Volumes = string.IsNullOrEmpty(info2.Volumes) || info2.Volumes == "0" ? Volumes : info2.Volumes;
-            Edition = string.IsNullOrEmpty(info2.Edition) ? Edition : info2.Edition;
-            Title = string.IsNullOrEmpty(info2.Title) ? Title : info2.Title;
-            Series = string.IsNullOrEmpty(info2.Series) ? Series : info2.Series;
+            if (info2 == null) return;
+            Chapters = string.IsNullOrEmpty(Chapters) || Chapters == "0" ? info2.Chapters: Chapters;
+            Volumes = string.IsNullOrEmpty(Volumes) || Volumes == "0" ? info2.Volumes : Volumes;
+            Edition = string.IsNullOrEmpty(Edition) ? info2.Edition : Edition;
+            Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
+            Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;
             IsSpecial = IsSpecial || info2.IsSpecial;
         }
     }

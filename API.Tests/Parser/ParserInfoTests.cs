@@ -44,7 +44,7 @@ namespace API.Tests.Parser
                 Title = "darker than black",
                 Volumes = "0"
             };
-            p1.MergeFrom(p2);
+            p1.Merge(p2);
             
             AssertSame(expected, p1);
 
@@ -88,7 +88,7 @@ namespace API.Tests.Parser
                 Title = "darker than black",
                 Volumes = "1"
             };
-            p1.MergeFrom(p2);
+            p1.Merge(p2);
 
             AssertSame(expected, p1);
 

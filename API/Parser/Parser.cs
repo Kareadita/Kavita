@@ -61,6 +61,10 @@ namespace API.Parser
 
         private static readonly Regex[] MangaSeriesRegex = new[]
         {
+            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
+            new Regex(
+                @"^(?<Series>.*)( |_)Vol\.?\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip
             new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_)",
@@ -131,10 +135,7 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
-            new Regex(
-                @"^(?<Series>.*)( |_)Vol\.?\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+           
             // Fullmetal Alchemist chapters 101-108.cbz
             new Regex(
                 @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
@@ -355,7 +356,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -782,11 +783,14 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return name.ToLower()
-                .Replace("-", string.Empty)
-                .Replace(" ", string.Empty)
-                .Replace(":", string.Empty)
-                .Replace("_", string.Empty);
+            // return name.ToLower()
+            //     .Replace("-", string.Empty)
+            //     .Replace(" ", string.Empty)
+            //     .Replace(":", string.Empty)
+            //     .Replace("_", string.Empty)
+            //     .Replace(",", string.Empty)
+            //     .Replace("!", string.Empty);
+            return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
 
         /// <summary>
