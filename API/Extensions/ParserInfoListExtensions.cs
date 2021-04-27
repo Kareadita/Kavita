@@ -27,15 +27,6 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool HasInfo(this IList<ParserInfo> infos, Chapter chapter)
         {
-            // NOTE: When I refactored this I think it broke the code and caused duplicate series?
-            // var range = chapter.Range;
-            // if (chapter.Range.Contains("-"))
-            // {
-            //     range = Parser.Parser.MinimumNumberFromRange(chapter.Range) + string.Empty;
-            // }
-            // Chapters should be marked as Special and thus we shouldn't need to check for number or if range is parsable
-            //var specialTreatment = (chapter.IsSpecial || (chapter.Number == "0" && !float.TryParse(range, out _)));
-            
             return chapter.IsSpecial ? infos.Any(v => v.Filename == chapter.Range) 
                                     : infos.Any(v => v.Chapters == chapter.Range);
         }

@@ -13,7 +13,6 @@ namespace API.Data
     {
         public static Series Series(string name)
         {
-            // var name = infos.Count > 0 ? infos[0].Series : key; // NOTE: Why do I need this? When will i have no infos?
             return new ()
             {
                 Name = name,

@@ -185,7 +185,7 @@ namespace API.Services.Tasks
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
-          
+
           // First, remove any series that are not in parsedSeries list
           var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries).ToList();
           library.Series = RemoveMissingSeries(library.Series, missingSeries, out var removeCount);
@@ -202,7 +202,8 @@ namespace API.Services.Tasks
           // Add new series that have parsedInfos
           foreach (var (key, infos) in parsedSeries)
           {
-             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(key));
+             // Key is normalized already
+             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
              if (existingSeries == null)
              {
                 existingSeries = DbFactory.Series(infos[0].Series);
@@ -215,21 +216,7 @@ namespace API.Services.Tasks
 
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
           var librarySeries = library.Series.ToList();
-          // Parallel.ForEach(librarySeries, (series) =>
-          // {
-          //    try
-          //    {
-          //       _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
-          //       UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
-          //       series.Pages = series.Volumes.Sum(v => v.Pages);
-          //    }
-          //    catch (Exception ex)
-          //    {
-          //       _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
-          //    }
-          // });
-          // TODO: Remove this debug code
-          foreach (var series in library.Series)
+          Parallel.ForEach(librarySeries, (series) =>
           {
              try
              {
@@ -241,7 +228,7 @@ namespace API.Services.Tasks
              {
                 _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
              }
-          }
+          });
        }
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<string, List<ParserInfo>> parsedSeries)
