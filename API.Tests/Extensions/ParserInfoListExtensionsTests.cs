@@ -1,63 +1,45 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Parser;
+using API.Tests.Helpers;
 using Xunit;
 
 namespace API.Tests.Extensions
 {
     public class ParserInfoListExtensions
     {
-        [Fact]
-        public void HasInfoTest()
+        [Theory]
+        [InlineData(new string[] {"1", "1", "3-5", "5", "8", "0", "0"}, new string[] {"1", "3-5", "5", "8", "0"})]
+        public void DistinctVolumesTest(string[] volumeNumbers, string[] expectedNumbers)
         {
-            var info = new ParserInfo()
+            var infos = volumeNumbers.Select(n => new ParserInfo() {Volumes = n}).ToList();
+            Assert.Equal(expectedNumbers, infos.DistinctVolumes());
+        }
+        
+        [Theory]
+        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new string[] {})]
+        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new string[] {})]
+        [InlineData(new string[] {@"Cynthia The Mission [Desudesu&Brolen].zip"}, new string[] {})]
+        public void HasInfoTest(string[] inputInfos, string[] inputChapters)
+        {
+            var infos = new List<ParserInfo>();
+            foreach (var filename in inputInfos)
             {
-                Chapters = "0-6",
-                Edition = "",
-                Format = MangaFormat.Archive,
-                FullFilePath = @"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip",
-                Filename = "Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip",
-                IsSpecial = false,
-                Title = "Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen]",
-                Series = "cynthiathemission",
-                Volumes = "6"
-            };
+                infos.Add(API.Parser.Parser.Parse(
+                    filename,
+                    string.Empty));
+            }
 
-            var infos = new ParserInfo[]
+            // I need a simple way to generate chapters that is based on real code, not these simple mocks. 
+            var chapter = EntityFactory.CreateChapter("0-6", false, new List<MangaFile>()
             {
-                info
-            };
+                EntityFactory.CreateMangaFile(@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", MangaFormat.Archive, 199)
+            });
 
-            var chapters = new List<Chapter>()
-            {
-                new Chapter()
-                {
-                    Id = 0,
-                    IsSpecial = false,
-                    Number = "0",
-                    Pages = 199,
-                    Range = "0-6",
-                    Title = "0-6",
-                    Volume = null,
-                    Files = new List<MangaFile>()
-                    {
-                        new MangaFile()
-                        {
-                            FilePath = @"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip",
-                            Chapter = null,
-                            Format = MangaFormat.Archive,
-                            Id = 0,
-                            Pages = 199
-                        }
-                        
-                    }
-                }
-            };
-
-
-            Assert.True(infos.HasInfo(chapters[0]));
+            Assert.True(infos.HasInfo(chapter));
         }
     }
 }

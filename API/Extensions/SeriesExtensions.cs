@@ -14,7 +14,7 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool NameInList(this Series series, IEnumerable<string> list)
         {
-            return list.Any(name => Parser.Parser.Normalize(name) == series.NormalizedName || name == series.Name || name == series.LocalizedName || name == series.OriginalName);
+            return list.Any(name => Parser.Parser.Normalize(name) == series.NormalizedName || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.Name) || name == series.Name || name == series.LocalizedName || name == series.OriginalName);
         }
     }
 }

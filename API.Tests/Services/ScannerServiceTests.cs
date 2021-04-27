@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -13,6 +14,7 @@ using API.Interfaces.Services;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks;
+using API.Tests.Helpers;
 using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
@@ -148,6 +150,27 @@ namespace API.Tests.Services
             });
             
             Assert.Equal(expected, actualName);
+        }
+
+        [Fact]
+        public void RemoveMissingSeries_Should_RemoveSeries()
+        {
+            var existingSeries = new List<Series>()
+            {
+                EntityFactory.CreateSeries("Darker than Black Vol 1"),
+                EntityFactory.CreateSeries("Darker than Black"),
+                EntityFactory.CreateSeries("Beastars"),
+            };
+            var missingSeries = new List<Series>()
+            {
+                EntityFactory.CreateSeries("Darker than Black Vol 1"),
+            };
+
+            var removedCount = ScannerService.RemoveMissingSeries(existingSeries, missingSeries);
+            existingSeries = removedCount.Item1.ToList();
+            
+            Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
+            Assert.Equal(missingSeries.Count, removedCount.Item2);
         }
 
         private void AddToParsedInfo(IDictionary<string, List<ParserInfo>> collectedSeries, ParserInfo info)

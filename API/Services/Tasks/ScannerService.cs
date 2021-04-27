@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -141,7 +142,7 @@ namespace API.Services.Tasks
                    {
                       _logger.LogError(exception, "The file {Filename} could not be found", f);
                    }
-                }, searchPattern);
+                }, searchPattern, _logger);
              }
              catch (ArgumentException ex)
              {
@@ -186,9 +187,18 @@ namespace API.Services.Tasks
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
           
           // First, remove any series that are not in parsedSeries list
-          var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries);
-          var removeCount = RemoveMissingSeries(library.Series, missingSeries);
-          _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk", removeCount);
+          var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries).ToList();
+          var removeData = RemoveMissingSeries(library.Series, missingSeries);
+          library.Series = removeData.Item1;
+          if (removeData.Item2 > 0)
+          {
+             _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeData.Item2);
+             foreach (var s in missingSeries)
+             {
+                _logger.LogDebug("Removed {SeriesName}", s.Name);
+             }
+          }
+          
           
           // Add new series that have parsedInfos
           foreach (var (key, infos) in parsedSeries)
@@ -196,22 +206,12 @@ namespace API.Services.Tasks
              var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == Parser.Parser.Normalize(key));
              if (existingSeries == null)
              {
-                var name = infos.Count > 0 ? infos[0].Series : key;
-                existingSeries = new Series()
-                {
-                   Name = name,
-                   OriginalName = name,
-                   LocalizedName = name,
-                   NormalizedName = Parser.Parser.Normalize(key),
-                   SortName = name,
-                   Summary = "",
-                   Volumes = new List<Volume>()
-                };
+                existingSeries = DbFactory.Series(infos[0].Series);
                 library.Series.Add(existingSeries);
              }
              
-             existingSeries.NormalizedName = Parser.Parser.Normalize(key);
-             existingSeries.LocalizedName ??= key;
+             existingSeries.NormalizedName = Parser.Parser.Normalize(infos[0].Series);
+             existingSeries.OriginalName ??= infos[0].Series;
           }
 
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
@@ -248,19 +248,27 @@ namespace API.Services.Tasks
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           var foundSeries = parsedSeries.Select(s => s.Key).ToList();
-          var missingSeries = existingSeries.Where(es => !es.NameInList(foundSeries)); // || !es.NameInList(parsedSeries.Keys)
-          return missingSeries;
+          return existingSeries.Where(es => !es.NameInList(foundSeries));
        }
 
-       public int RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries)
+       /// <summary>
+       /// Removes all instances of missingSeries' Series from existingSeries Collection. Existing series is updated by
+       /// reference and the removed element count is returned.
+       /// </summary>
+       /// <param name="existingSeries">Existing Series in DB</param>
+       /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
+       /// <returns>Tuple<ICollection<Series>, int> where Item1 is the updated existingSeries and Item2 is the count of removed items from the original existingSeries</returns>
+       public static Tuple<ICollection<Series>, int> RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries)
        {
-          
           var removeCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
-          existingSeries = existingSeries.Except(missingList).ToList();
-          removeCount -= existingSeries.Count;
+          
+          var setToRemove = new HashSet<string>(missingList.Select(s => s.NormalizedName).ToList());
+          existingSeries = existingSeries.Where(s => !setToRemove.Contains(s.NormalizedName)).ToList();
 
-          return removeCount;
+          removeCount -= existingSeries.Count;
+          
+          return new Tuple<ICollection<Series>, int>(existingSeries, removeCount);
        }
 
        private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
@@ -274,12 +282,13 @@ namespace API.Services.Tasks
              var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
              if (volume == null)
              {
-                volume = new Volume()
-                {
-                   Name = volumeNumber,
-                   Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
-                   Chapters = new List<Chapter>()
-                }; 
+                // volume = new Volume()
+                // {
+                //    Name = volumeNumber,
+                //    Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                //    Chapters = new List<Chapter>()
+                // }; 
+                volume = DbFactory.Volume(volumeNumber);
                 series.Volumes.Add(volume);
              }
              
@@ -407,8 +416,8 @@ namespace API.Services.Tasks
              }
           }
 
-          _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
-             startingChapters, volume.Chapters.Count);
+          // _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
+          //    startingChapters, volume.Chapters.Count);
        }
 
        private Chapter CreateChapter(ParserInfo info)

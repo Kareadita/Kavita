@@ -214,9 +214,9 @@ namespace API.Services
        /// <param name="action">Action to apply on file path</param>
        /// <param name="searchPattern">Regex pattern to search against</param>
        /// <exception cref="ArgumentException"></exception>
-       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern)
-        {
-           //Count of files traversed and timer for diagnostic output
+       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
+       {
+          //Count of files traversed and timer for diagnostic output
             var fileCount = 0;
 
             // Determine whether to parallelize file processing on each folder based on processor count.
@@ -241,11 +241,13 @@ namespace API.Services
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
                   Console.WriteLine(e.Message);
+                  logger.LogError(e, "Unauthorized access on {Directory}", currentDir);
                   continue;
                }
                // Thrown if another process has deleted the directory after we retrieved its name.
                catch (DirectoryNotFoundException e) {
                   Console.WriteLine(e.Message);
+                  logger.LogError(e, "Directory not found on {Directory}", currentDir);
                   continue;
                }
 
@@ -267,24 +269,27 @@ namespace API.Services
                }
 
                // Execute in parallel if there are enough files in the directory.
-               // Otherwise, execute sequentially.Files are opened and processed
+               // Otherwise, execute sequentially. Files are opened and processed
                // synchronously but this could be modified to perform async I/O.
                try {
-                  if (files.Length < procCount) {
-                     foreach (var file in files) {
-                        action(file);
-                        fileCount++;
-                     }
-                  }
-                  else {
-                     Parallel.ForEach(files, () => 0, (file, _, localCount) =>
-                                                  { action(file);
-                                                    return ++localCount;
-                                                  },
-                                      (c) => {
-                                         // ReSharper disable once AccessToModifiedClosure
-                                         Interlocked.Add(ref fileCount, c);
-                                      });
+                  // if (files.Length < procCount) {
+                  //    foreach (var file in files) {
+                  //       action(file);
+                  //       fileCount++;
+                  //    }
+                  // }
+                  // else {
+                  //    Parallel.ForEach(files, () => 0, (file, _, localCount) =>
+                  //                                 { action(file);
+                  //                                   return ++localCount;
+                  //                                 },
+                  //                     (c) => {
+                  //                        Interlocked.Add(ref fileCount, c);
+                  //                     });
+                  // }
+                  foreach (var file in files) {
+                     action(file);
+                     fileCount++;
                   }
                }
                catch (AggregateException ae) {

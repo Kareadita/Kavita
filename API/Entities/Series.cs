@@ -46,5 +46,16 @@ namespace API.Entities
         public Library Library { get; set; }
         public int LibraryId { get; set; }
 
+        /// <summary>
+        /// Merges data from other into this Series. This does not merge Relationship entities or Id. 
+        /// </summary>
+        /// <param name="other">Series to merge from</param>
+        public void Merge(Series other)
+        {
+            Pages = Pages == 0 && other.Pages > 0 ? other.Pages : Pages;
+            // NOTE: DO I need this?
+            
+        }
+
     }
 }

@@ -23,7 +23,6 @@ namespace API.Extensions
         /// <returns></returns>
         public static Volume GetCoverImage(this IList<Volume> volumes, LibraryType libraryType)
         {
-            // BUG: This needs to account for books which usually are only 1 special
             // TODO: Make this function like description describes
             if (libraryType == LibraryType.Book)
             {
