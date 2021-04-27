@@ -19,7 +19,7 @@ namespace API.Tests.Entities
             Assert.Equal(0, series.Id);
             Assert.Equal(0, series.Pages);
             Assert.Equal(name, series.Name);
-            Assert.Equal(Array.Empty<byte>(), series.CoverImage);
+            Assert.Null(series.CoverImage);
             Assert.Equal(name, series.LocalizedName);
             Assert.Equal(name, series.SortName);
             Assert.Equal(name, series.OriginalName);

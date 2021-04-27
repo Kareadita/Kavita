@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Parser;
 
 namespace API.Entities
 {
@@ -39,5 +41,18 @@ namespace API.Entities
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
 
+        public void UpdateFrom(ParserInfo info)
+        {
+            Files ??= new List<MangaFile>();
+            IsSpecial = info.IsSpecialInfo();
+            if (IsSpecial)
+            {
+                Number = "0";
+            }
+            Title = (IsSpecial && info.Format == MangaFormat.Book)
+                ? info.Title
+                : Range;
+            
+        }
     }
 }

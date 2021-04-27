@@ -93,13 +93,14 @@ namespace API.Tests.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        [Fact]
-        public void Test()
-        {
-            _scannerService.ScanLibrary(1, false);
-
-            var series = _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Result.Series;
-        }
+        // [Fact]
+        // public void Test()
+        // {
+        //     _scannerService.ScanLibrary(1, false);
+        //
+        //     var series = _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Result.Series;
+        // }
+        
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
@@ -134,7 +135,7 @@ namespace API.Tests.Services
         [Theory]
         [InlineData(new [] {"Darker than Black"}, "Darker than Black", "Darker than Black")]
         [InlineData(new [] {"Darker than Black"}, "Darker Than Black", "Darker than Black")]
-        [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker Than Black!")]
+        [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker than Black")]
         [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
         public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
         {
@@ -165,12 +166,10 @@ namespace API.Tests.Services
             {
                 EntityFactory.CreateSeries("Darker than Black Vol 1"),
             };
-
-            var removedCount = ScannerService.RemoveMissingSeries(existingSeries, missingSeries);
-            existingSeries = removedCount.Item1.ToList();
+            existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
             
             Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
-            Assert.Equal(missingSeries.Count, removedCount.Item2);
+            Assert.Equal(missingSeries.Count, removeCount);
         }
 
         private void AddToParsedInfo(IDictionary<string, List<ParserInfo>> collectedSeries, ParserInfo info)

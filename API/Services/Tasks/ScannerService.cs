@@ -188,11 +188,10 @@ namespace API.Services.Tasks
           
           // First, remove any series that are not in parsedSeries list
           var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries).ToList();
-          var removeData = RemoveMissingSeries(library.Series, missingSeries);
-          library.Series = removeData.Item1;
-          if (removeData.Item2 > 0)
+          library.Series = RemoveMissingSeries(library.Series, missingSeries, out var removeCount);
+          if (removeCount > 0)
           {
-             _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeData.Item2);
+             _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
              foreach (var s in missingSeries)
              {
                 _logger.LogDebug("Removed {SeriesName}", s.Name);
@@ -257,18 +256,19 @@ namespace API.Services.Tasks
        /// </summary>
        /// <param name="existingSeries">Existing Series in DB</param>
        /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
-       /// <returns>Tuple<ICollection<Series>, int> where Item1 is the updated existingSeries and Item2 is the count of removed items from the original existingSeries</returns>
-       public static Tuple<ICollection<Series>, int> RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries)
+       /// <param name="removeCount"></param>
+       /// <returns>the updated existingSeries</returns>
+       public static ICollection<Series> RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
        {
-          var removeCount = existingSeries.Count;
+          var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
           
           var setToRemove = new HashSet<string>(missingList.Select(s => s.NormalizedName).ToList());
           existingSeries = existingSeries.Where(s => !setToRemove.Contains(s.NormalizedName)).ToList();
 
-          removeCount -= existingSeries.Count;
+          removeCount = existingCount -  existingSeries.Count;
           
-          return new Tuple<ICollection<Series>, int>(existingSeries, removeCount);
+          return existingSeries;
        }
 
        private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
@@ -282,12 +282,6 @@ namespace API.Services.Tasks
              var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
              if (volume == null)
              {
-                // volume = new Volume()
-                // {
-                //    Name = volumeNumber,
-                //    Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
-                //    Chapters = new List<Chapter>()
-                // }; 
                 volume = DbFactory.Volume(volumeNumber);
                 series.Volumes.Add(volume);
              }
@@ -336,7 +330,6 @@ namespace API.Services.Tasks
           // Add new chapters
           foreach (var info in parsedInfos)
           {
-             var specialTreatment = info.IsSpecialInfo();
              // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
              // also are treated like specials for UI grouping.
              Chapter chapter;
@@ -353,23 +346,12 @@ namespace API.Services.Tasks
              if (chapter == null)
              {
                 _logger.LogDebug(
-                   "Adding new chapter, {Series} - Vol {Volume} Ch {Chapter} - Needs Special Treatment? {NeedsSpecialTreatment}",
-                   info.Series, info.Volumes, info.Chapters, specialTreatment);
-                volume.Chapters.Add(CreateChapter(info));
+                   "Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
+                volume.Chapters.Add(DbFactory.Chapter(info));
              }
              else
              {
-                chapter.Files ??= new List<MangaFile>();
-                chapter.IsSpecial = specialTreatment;
-                // If Special, we need to override the volume/chapter and set to 0
-                if (chapter.IsSpecial)
-                {
-                   chapter.Number = "0";
-                }
-                chapter.Title = (specialTreatment && info.Format == MangaFormat.Book)
-                   ? info.Title
-                   : chapter.Range;
-                //Problem is that we need a merge. Because old chapter might need new code generation
+                chapter.UpdateFrom(info);
              }
              
           }
@@ -415,9 +397,6 @@ namespace API.Services.Tasks
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
              }
           }
-
-          // _logger.LogDebug("Updated chapters from {StartingChaptersCount} to {ChapterCount}", 
-          //    startingChapters, volume.Chapters.Count);
        }
 
        private Chapter CreateChapter(ParserInfo info)
