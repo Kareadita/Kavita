@@ -51,15 +51,16 @@ namespace API.Tests.Parser
         [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
         [InlineData("Batman & Catwoman - Trail of the Gun 01", "0")]
         [InlineData("Batman & Daredevil - King of New York", "0")]
-        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "0")]
+        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
         [InlineData("Batman & Robin the Teen Wonder #0", "0")]
         [InlineData("Batman & Wildcat (1 of 3)", "1")]
         [InlineData("Batman & Wildcat (2 of 3)", "2")]
         [InlineData("Batman And Superman World's Finest #01", "0")]
         [InlineData("Babe 01", "0")]
-        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
+        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Superman v1 024 (09-10 1943)", "24")]
+        [InlineData("Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr", "70.5")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

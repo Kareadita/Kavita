@@ -210,7 +210,7 @@ namespace API.Services.Tasks
                 library.Series.Add(existingSeries);
              }
              
-             existingSeries.NormalizedName = Parser.Parser.Normalize(infos[0].Series);
+             existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
              existingSeries.OriginalName ??= infos[0].Series;
           }
 

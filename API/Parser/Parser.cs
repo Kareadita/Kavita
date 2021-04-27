@@ -244,21 +244,21 @@ namespace API.Parser
         
         private static readonly Regex[] ComicChapterRegex = new[]
         {
-            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            new Regex(
-                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // 01 Spider-Man & Wolverine 01.cbr
-            new Regex(
-                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            // new Regex(
+            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // // 01 Spider-Man & Wolverine 01.cbr
+            // new Regex(
+            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?", // NOTE: WHy is this here without a capture group
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>\d+)",
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
@@ -267,6 +267,10 @@ namespace API.Parser
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
