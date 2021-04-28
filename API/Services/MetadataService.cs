@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -17,17 +19,31 @@ namespace API.Services
        private readonly IUnitOfWork _unitOfWork;
        private readonly ILogger<MetadataService> _logger;
        private readonly IArchiveService _archiveService;
+       private readonly IBookService _bookService;
 
-       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService)
+       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService, IBookService bookService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
+          _bookService = bookService;
        }
        
        private static bool ShouldFindCoverImage(byte[] coverImage, bool forceUpdate = false)
        {
           return forceUpdate || coverImage == null || !coverImage.Any();
+       }
+
+       private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
+       {
+          if (file.Format == MangaFormat.Book)
+          {
+             return _bookService.GetCoverImage(file.FilePath, createThumbnail);
+          }
+          else
+          {
+             return _archiveService.GetCoverImage(file.FilePath, createThumbnail);   
+          }
        }
 
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
@@ -36,7 +52,7 @@ namespace API.Services
           if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
-             chapter.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+             chapter.CoverImage = GetCoverImage(firstFile); 
           }
        }
 
@@ -55,7 +71,7 @@ namespace API.Services
                 var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                   volume.CoverImage = _archiveService.GetCoverImage(firstFile.FilePath, true);
+                   volume.CoverImage = GetCoverImage(firstFile);
                 }
              }
              else
@@ -72,7 +88,7 @@ namespace API.Services
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
           {
              series.Volumes ??= new List<Volume>();
-             var firstCover = series.Volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+             var firstCover = series.Volumes.GetCoverImage(series.Library.Type);
              byte[] coverImage = null; 
              if (firstCover == null && series.Volumes.Any())
              {
@@ -92,24 +108,33 @@ namespace API.Services
              series.CoverImage = firstCover?.CoverImage ?? coverImage;
           }
 
+          UpdateSeriesSummary(series, forceUpdate);
+       }
+
+       private void UpdateSeriesSummary(Series series, bool forceUpdate)
+       {
           if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
           
-          var firstVolume = series.Volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number == 1);
-          var firstChapter = firstVolume?.Chapters.FirstOrDefault(c => c.Files.Any());
-          
+          var isBook = series.Library.Type == LibraryType.Book;
+          var firstVolume = series.Volumes.FirstWithChapters(isBook);
+          var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+
+          // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
-          if (firstFile != null && !new FileInfo(firstFile.FilePath).DoesLastWriteMatch(firstFile.LastModified))
+          if (firstFile != null &&
+              (forceUpdate || !firstFile.HasFileBeenModified()))
           {
-             series.Summary = _archiveService.GetSummaryInfo(firstFile.FilePath);
+             series.Summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+
              firstFile.LastModified = DateTime.Now;
           }
        }
-       
-       
+
+
        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
        {
           var sw = Stopwatch.StartNew();
-          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).Result;
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
 
           // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
           _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);

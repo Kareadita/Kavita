@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using AutoMapper;
@@ -222,6 +222,12 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), queryString);
 
             return Ok(series);
+        }
+
+        [HttpGet("type")]
+        public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)
+        {
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId));
         }
     }
 }

@@ -1,18 +1,16 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Parser;
 using Xunit;
 using Xunit.Abstractions;
-using static API.Parser.Parser;
 
-namespace API.Tests
+namespace API.Tests.Parser
 {
-    public class ParserTests
+    public class MangaParserTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
         
-
-        public ParserTests(ITestOutputHelper testOutputHelper)
+        public MangaParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
         }
@@ -61,9 +59,10 @@ namespace API.Tests
         [InlineData("Gantz.V26.cbz", "26")]
         [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
+        [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
         public void ParseVolumeTest(string filename, string expected)
         {
-            Assert.Equal(expected, ParseVolume(filename));
+            Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
         }
         
         [Theory]
@@ -132,9 +131,10 @@ namespace API.Tests
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
         [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
+        [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "NEEDLESS")]
         public void ParseSeriesTest(string filename, string expected)
         {
-            Assert.Equal(expected, ParseSeries(filename));
+            Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
         }
         
         [Theory]
@@ -193,51 +193,9 @@ namespace API.Tests
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         public void ParseChaptersTest(string filename, string expected)
         {
-            Assert.Equal(expected, ParseChapter(filename));
-        }
- 
-
-        [Theory]
-        [InlineData("0001", "1")]
-        [InlineData("1", "1")]
-        [InlineData("0013", "13")]
-        public void RemoveLeadingZeroesTest(string input, string expected)
-        {
-            Assert.Equal(expected, RemoveLeadingZeroes(input));
+            Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
         }
 
-        [Theory]
-        [InlineData("1", "001")]
-        [InlineData("10", "010")]
-        [InlineData("100", "100")]
-        [InlineData("4-8", "004-008")]
-        public void PadZerosTest(string input, string expected)
-        {
-            Assert.Equal(expected, PadZeros(input));
-        }
-
-        [Theory]
-        [InlineData("Hello_I_am_here", "Hello I am here")]
-        [InlineData("Hello_I_am_here   ", "Hello I am here")]
-        [InlineData("[ReleaseGroup] The Title", "The Title")]
-        [InlineData("[ReleaseGroup]_The_Title", "The Title")]
-        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", "Kasumi Otoko no Ko v1.1")]
-        public void CleanTitleTest(string input, string expected)
-        {
-            Assert.Equal(expected, CleanTitle(input));
-        }
-        
-        [Theory]
-        [InlineData("test.cbz", true)]
-        [InlineData("test.cbr", true)]
-        [InlineData("test.zip", true)]
-        [InlineData("test.rar", true)]
-        [InlineData("test.rar.!qb", false)]
-        [InlineData("[shf-ma-khs-aqs]negi_pa_vol15007.jpg", false)]
-        public void IsArchiveTest(string input, bool expected)
-        {
-            Assert.Equal(expected, IsArchive(input));
-        }
 
         [Theory]
         [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
@@ -250,7 +208,7 @@ namespace API.Tests
         [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
         public void ParseEditionTest(string input, string expected)
         {
-            Assert.Equal(expected, ParseEdition(input));
+            Assert.Equal(expected, API.Parser.Parser.ParseEdition(input));
         }
         [Theory]
         [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
@@ -260,151 +218,26 @@ namespace API.Tests
         [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
         [InlineData("Ani-Hina Art Collection.cbz", true)]
+        [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
-            Assert.Equal(expected, ParseMangaSpecial(input) != "");
+            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
         }
         
-        [Theory]
-        [InlineData("12-14", 12)]
-        [InlineData("24", 24)]
-        [InlineData("18-04", 4)]
-        [InlineData("18-04.5", 4.5)]
-        [InlineData("40", 40)]
-        public void MinimumNumberFromRangeTest(string input, float expected)
-        {
-            Assert.Equal(expected, MinimumNumberFromRange(input));
-        }
-
-        [Theory]
-        [InlineData("Darker Than Black", "darkerthanblack")]
-        [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
-        [InlineData("Darker Than_Black", "darkerthanblack")]
-        [InlineData("", "")]
-        public void NormalizeTest(string input, string expected)
-        {
-            Assert.Equal(expected, Normalize(input));
-        }
-        
-        [Theory]
-        [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
-        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
-        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "The First Asterix Frieze")]
-        [InlineData("Batman & Catwoman - Trail of the Gun 01", "Batman & Catwoman - Trail of the Gun")]
-        [InlineData("Batman & Daredevil - King of New York", "Batman & Daredevil - King of New York")]
-        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "Batman & Grendel")]
-        [InlineData("Batman & Robin the Teen Wonder #0", "Batman & Robin the Teen Wonder")]
-        [InlineData("Batman & Wildcat (1 of 3)", "Batman & Wildcat")]
-        [InlineData("Batman And Superman World's Finest #01", "Batman And Superman World's Finest")]
-        [InlineData("Babe 01", "Babe")]
-        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "Scott Pilgrim")]
-        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
-        [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
-        [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
-        [InlineData("Invincible Vol 01 Family matters (2005) (Digital).cbr", "Invincible")]
-        public void ParseComicSeriesTest(string filename, string expected)
-        {
-            Assert.Equal(expected, ParseComicSeries(filename));
-        }
-        
-        [Theory]
-        [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
-        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "4")]
-        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
-        [InlineData("Batman & Catwoman - Trail of the Gun 01", "1")]
-        [InlineData("Batman & Daredevil - King of New York", "0")]
-        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
-        [InlineData("Batman & Robin the Teen Wonder #0", "0")]
-        [InlineData("Batman & Wildcat (1 of 3)", "0")]
-        [InlineData("Batman And Superman World's Finest #01", "1")]
-        [InlineData("Babe 01", "1")]
-        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
-        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
-        [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "2")]
-        [InlineData("Superman v1 024 (09-10 1943)", "1")]
-        public void ParseComicVolumeTest(string filename, string expected)
-        {
-            Assert.Equal(expected, ParseComicVolume(filename));
-        }
-        
-        [Theory]
-        [InlineData("01 Spider-Man & Wolverine 01.cbr", "0")]
-        [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "0")]
-        [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
-        [InlineData("Batman & Catwoman - Trail of the Gun 01", "0")]
-        [InlineData("Batman & Daredevil - King of New York", "0")]
-        [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "0")]
-        [InlineData("Batman & Robin the Teen Wonder #0", "0")]
-        [InlineData("Batman & Wildcat (1 of 3)", "1")]
-        [InlineData("Batman & Wildcat (2 of 3)", "2")]
-        [InlineData("Batman And Superman World's Finest #01", "0")]
-        [InlineData("Babe 01", "0")]
-        [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "0")]
-        [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
-        [InlineData("Superman v1 024 (09-10 1943)", "24")]
-        public void ParseComicChapterTest(string filename, string expected)
-        {
-            Assert.Equal(expected, ParseComicChapter(filename));
-        }
-
-        [Theory]
-        [InlineData("test.jpg", true)]
-        [InlineData("test.jpeg", true)]
-        [InlineData("test.png", true)]
-        [InlineData(".test.jpg", false)]
-        [InlineData("!test.jpg", false)]
-        public void IsImageTest(string filename, bool expected)
-        {
-            Assert.Equal(expected, IsImage(filename));
-        }
-        
-        [Theory]
-        [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
-        public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
-        {
-            var actual = Parse(inputPath, rootDir);
-            if (actual == null)
-            {
-                Assert.NotNull(actual);
-                return;
-            }
-            
-            Assert.Equal(expectedSeries, actual.Series);
-        }
-        
-        [Theory]
-        [InlineData("Love Hina - Special.jpg", false)]
-        [InlineData("folder.jpg", true)]
-        [InlineData("DearS_v01_cover.jpg", true)]
-        [InlineData("DearS_v01_covers.jpg", false)]
-        [InlineData("!cover.jpg", true)]
-        [InlineData("cover.jpg", true)]
-        [InlineData("cover.png", true)]
-        [InlineData("ch1/cover.png", true)]
-        public void IsCoverImageTest(string inputPath, bool expected)
-        {
-            Assert.Equal(expected, IsCoverImage(inputPath));
-        }
-        
-        [Theory]
-        [InlineData("__MACOSX/Love Hina - Special.jpg", true)]
-        [InlineData("TEST/Love Hina - Special.jpg", false)]
-        [InlineData("__macosx/Love Hina/", false)]
-        [InlineData("MACOSX/Love Hina/", false)]
-        public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
-        {
-            Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
-        }
-
         [Theory]
         [InlineData("image.png", MangaFormat.Image)]
         [InlineData("image.cbz", MangaFormat.Archive)]
         [InlineData("image.txt", MangaFormat.Unknown)]
         public void ParseFormatTest(string inputFile, MangaFormat expected)
         {
-            Assert.Equal(expected, ParseFormat(inputFile));
+            Assert.Equal(expected, API.Parser.Parser.ParseFormat(inputFile));
+        }
+
+        [Theory]
+        [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", "Side Stories")]
+        public void ParseSpecialTest(string inputFile, string expected)
+        {
+            Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
         [Fact]
@@ -496,7 +329,7 @@ namespace API.Tests
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = Parse(file, rootPath);
+                var actual = API.Parser.Parser.Parse(file, rootPath);
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);

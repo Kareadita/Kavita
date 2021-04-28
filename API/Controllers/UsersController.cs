@@ -38,6 +38,14 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
         }
 
+        [HttpGet("has-reading-progress")]
+        public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
+        {
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, user.Id));
+        }
+
         [HttpGet("has-library-access")]
         public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
         {
@@ -53,7 +61,11 @@ namespace API.Controllers
             existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
             existingPreferences.ScalingOption = preferencesDto.ScalingOption;
             existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
-            existingPreferences.HideReadOnDetails = preferencesDto.HideReadOnDetails;
+            existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
+            existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
+            existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
+            existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
+            existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

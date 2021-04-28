@@ -7,9 +7,10 @@ namespace API.DTOs
         public ReadingDirection ReadingDirection { get; set; }
         public ScalingOption ScalingOption { get; set; }
         public PageSplitOption PageSplitOption { get; set; }
-        /// <summary>
-        /// Whether UI hides read Volumes on Details page
-        /// </summary>
-        public bool HideReadOnDetails { get; set; }
+        public bool BookReaderDarkMode { get; set; } = false;
+        public int BookReaderMargin { get; set; }
+        public int BookReaderLineSpacing { get; set; }
+        public int BookReaderFontSize { get; set; }
+        public string BookReaderFontFamily { get; set; }
     }
 }

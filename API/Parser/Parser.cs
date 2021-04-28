@@ -9,14 +9,19 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|.tar.gz|.7zip";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip";
+        public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
+        public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex BookFileRegex = new Regex(BookFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         
+
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
             // Dance in the Vampire Bund v16-17
@@ -56,6 +61,10 @@ namespace API.Parser
 
         private static readonly Regex[] MangaSeriesRegex = new[]
         {
+            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
+            new Regex(
+                @"^(?<Series>.*)( |_)Vol\.?\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip
             new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_)",
@@ -126,10 +135,7 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
-            new Regex(
-                @"^(?<Series>.*)( |_)Vol\.?\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+           
             // Fullmetal Alchemist chapters 101-108.cbz
             new Regex(
                 @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
@@ -238,21 +244,21 @@ namespace API.Parser
         
         private static readonly Regex[] ComicChapterRegex = new[]
         {
-            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            new Regex(
-                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // 01 Spider-Man & Wolverine 01.cbr
-            new Regex(
-                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            // new Regex(
+            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // // 01 Spider-Man & Wolverine 01.cbr
+            // new Regex(
+            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?", // NOTE: WHy is this here without a capture group
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>\d+)",
+                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
@@ -261,6 +267,10 @@ namespace API.Parser
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
+            new Regex(
+                @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -350,7 +360,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -366,17 +376,34 @@ namespace API.Parser
         public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
             var fileName = Path.GetFileName(filePath);
+            ParserInfo ret;
 
-            var ret = new ParserInfo()
+            if (type == LibraryType.Book)
             {
-                Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
-                Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
-                Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
-                Filename = fileName,
-                Format = ParseFormat(filePath),
-                FullFilePath = filePath
-            };
-            
+                ret = new ParserInfo()
+                {
+                    Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
+                    Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
+                    Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
+                    Filename = fileName,
+                    Format = ParseFormat(filePath),
+                    FullFilePath = filePath
+                };
+            }
+            else
+            {
+                ret = new ParserInfo()
+                {
+                    Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
+                    Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
+                    Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
+                    Filename = fileName,
+                    Format = ParseFormat(filePath),
+                    Title = Path.GetFileNameWithoutExtension(fileName),
+                    FullFilePath = filePath
+                };
+            }
+
             if (ret.Series == string.Empty)
             {
                 // Try to parse information out of each folder all the way to rootPath
@@ -412,6 +439,8 @@ namespace API.Parser
             }
 
             var isSpecial = ParseMangaSpecial(fileName);
+            // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that 
+            // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
             if (ret.Chapters == "0" && ret.Volumes == "0" && !string.IsNullOrEmpty(isSpecial))
             {
                 ret.IsSpecial = true;
@@ -426,6 +455,7 @@ namespace API.Parser
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;
+            if (IsBook(filePath)) return MangaFormat.Book;
             return MangaFormat.Unknown;
         }
 
@@ -520,7 +550,7 @@ namespace API.Parser
             
             return "0";
         }
-        
+
         public static string ParseComicVolume(string filename)
         {
             foreach (var regex in ComicVolumeRegex)
@@ -735,6 +765,10 @@ namespace API.Parser
         {
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
+        public static bool IsBook(string filePath)
+        {
+            return BookFileRegex.IsMatch(Path.GetExtension(filePath));
+        }
 
         public static bool IsImage(string filePath, bool suppressExtraChecks = false)
         {
@@ -749,13 +783,13 @@ namespace API.Parser
         
         public static float MinimumNumberFromRange(string range)
         {
-            var tokens = range.Split("-");
+            var tokens = range.Replace("_", string.Empty).Split("-");
             return tokens.Min(float.Parse);
         }
 
         public static string Normalize(string name)
         {
-            return name.ToLower().Replace("-", "").Replace(" ", "").Replace(":", "").Replace("_", "");
+            return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
 
         /// <summary>
@@ -773,6 +807,10 @@ namespace API.Parser
             return path.Contains("__MACOSX");
         }
 
-        
+
+        public static bool IsEpub(string filePath)
+        {
+            return Path.GetExtension(filePath).ToLower() == ".epub";
+        }
     }
 }

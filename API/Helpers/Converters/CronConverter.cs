@@ -13,7 +13,7 @@ namespace API.Helpers.Converters
         };
         public static string ConvertToCronNotation(string source)
         {
-            string destination = "";
+            var destination = string.Empty;
             destination = source.ToLower() switch
             {
                 "daily" => Cron.Daily(),
@@ -28,7 +28,7 @@ namespace API.Helpers.Converters
 
         public static string ConvertFromCronNotation(string cronNotation)
         {
-            string destination = "";
+            var destination = string.Empty;
             destination = cronNotation.ToLower() switch
             {
                 "0 0 31 2 *" => "disabled",

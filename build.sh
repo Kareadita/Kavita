@@ -47,10 +47,10 @@ Build()
 BuildUI()
 {
     ProgressStart 'Building UI'
-    cd ../kavita-webui/ || exit
+    cd ../Kavita-webui/ || exit
     npm install
     npm run prod
-    cd ../kavita/ || exit
+    cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }
 
@@ -113,6 +113,3 @@ else
     Package "net5.0" "$RID"
     cd "$dir"
 fi
-
-
-

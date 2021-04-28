@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Services;
+using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -16,6 +18,18 @@ namespace API.Tests.Services
         public DirectoryServiceTests()
         {
             _directoryService = new DirectoryService(_logger);
+        }
+
+        [Theory]
+        [InlineData("Manga-testcase.txt", 28)]
+        public void GetFilesTest(string file, int expectedFileCount)
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga");
+            var files = new List<string>();
+            var fileCount = DirectoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
+                API.Parser.Parser.ArchiveFileExtensions, _logger);
+            
+            Assert.Equal(expectedFileCount, fileCount);
         }
 
         [Fact]

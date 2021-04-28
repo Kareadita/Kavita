@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -66,6 +65,15 @@ namespace API.Data
                 .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        public async Task<LibraryType> GetLibraryTypeAsync(int libraryId)
+        {
+            return await _context.Library
+                .Where(l => l.Id == libraryId)
+                .AsNoTracking()
+                .Select(l => l.Type)
+                .SingleAsync();
         }
 
         public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()

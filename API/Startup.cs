@@ -2,7 +2,7 @@ using System;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
-using API.Interfaces.Services;
+using API.Interfaces;
 using API.Middleware;
 using API.Services;
 using Hangfire;
@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
@@ -24,12 +23,10 @@ namespace API
     public class Startup
     {
         private readonly IConfiguration _config;
-        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration config, IWebHostEnvironment env)
+        public Startup(IConfiguration config)
         {
             _config = config;
-            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -71,16 +68,14 @@ namespace API
 
             // Add the processing server as IHostedService
             services.AddHangfireServer();
-            
-            //services.AddStartupTask<WarmupServicesStartupTask>(services).
-            services.AddTransient<IStartupTask, WarmupServicesStartupTask>().TryAddSingleton(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, IHostApplicationLifetime applicationLifetime)
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, 
+            IHostApplicationLifetime applicationLifetime, ITaskScheduler taskScheduler)
         {
             app.UseMiddleware<ExceptionMiddleware>();
-            
+
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
@@ -136,8 +131,11 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v0.3.7");
+                Console.WriteLine("Kavita - v0.4.0");
             });
+            
+            // Any services that should be bootstrapped go here
+            taskScheduler.ScheduleTasks();
         }
         
         private void OnShutdown()

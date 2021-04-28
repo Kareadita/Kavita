@@ -1,4 +1,5 @@
 ﻿using API.Data;
+using API.Entities.Interfaces;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -26,8 +27,8 @@ namespace API.Extensions
             services.AddScoped<IMetadataService, MetadataService>();
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
-
-
+            services.AddScoped<IBookService, BookService>();
+            
 
             services.AddDbContext<DataContext>(options =>
             {

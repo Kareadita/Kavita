@@ -20,7 +20,7 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
-        
+
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
@@ -32,20 +32,19 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
-
-            ScheduleTasks();
         }
 
         public void ScheduleTasks()
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
             
-            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
+            var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", setting);
+                var scanLibrarySetting = setting;
+                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
                 RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), 
-                    () => CronConverter.ConvertToCronNotation(setting));
+                    () => CronConverter.ConvertToCronNotation(scanLibrarySetting));
             }
             else
             {
@@ -69,7 +68,7 @@ namespace API.Services
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
+            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate)); 
             // When we do a scan, force cache to re-unpack in case page numbers change
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); 
         }

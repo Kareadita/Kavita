@@ -46,7 +46,7 @@ namespace API.Controllers
 
             return File(content, "image/" + format);
         }
-
+        
         [HttpGet("chapter-path")]
         public async Task<ActionResult<string>> GetImagePath(int chapterId)
         {

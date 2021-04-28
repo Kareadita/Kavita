@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using API.Entities;
 
 namespace API.Extensions
@@ -13,15 +14,7 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool NameInList(this Series series, IEnumerable<string> list)
         {
-            foreach (var name in list)
-            {
-                if (Parser.Parser.Normalize(name) == series.NormalizedName || name == series.Name || name == series.LocalizedName || name == series.OriginalName)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return list.Any(name => Parser.Parser.Normalize(name) == series.NormalizedName || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.Name) || name == series.Name || name == series.LocalizedName || name == series.OriginalName);
         }
     }
 }

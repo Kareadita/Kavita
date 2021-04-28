@@ -106,6 +106,13 @@ namespace API.Controllers
         }
         
         [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet("library-types")]
+        public ActionResult<IEnumerable<string>> GetLibraryTypes()
+        {
+            return Ok(Enum.GetNames(typeof(LibraryType)));
+        }
+        
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {
