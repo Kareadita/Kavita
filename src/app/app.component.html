@@ -1,5 +1,5 @@
 <app-nav-header></app-nav-header>
-<div style="margin-top: 56px">
+<div [ngStyle]="(navService?.navbarVisible$ | async) ? {'margin-top': '56px'} : {}">
     <a id="content"></a>
     <router-outlet></router-outlet>
 </div>

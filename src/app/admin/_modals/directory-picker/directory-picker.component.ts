@@ -1,35 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Stack } from 'src/app/shared/data-structures/stack';
 import { LibraryService } from '../../../_services/library.service';
 
-class Stack {
-  items: any[];
-
-  constructor() {
-    this.items = [];
-  }
-
-  isEmpty() {
-    return this.items.length === 0;
-  }
-
-  peek() {
-    if (!this.isEmpty()) {
-      return this.items[this.items.length - 1];
-    }
-  }
-
-  pop() {
-    if (this.isEmpty()) {
-      return undefined;
-    }
-    return this.items.pop();
-  }
-
-  push(item: any) {
-    this.items.push(item);
-  }
-}
 
 export interface DirectoryPickerResult {
   success: boolean;
@@ -46,7 +19,7 @@ export class DirectoryPickerComponent implements OnInit {
 
   currentRoot = '';
   folders: string[] = [];
-  routeStack: Stack = new Stack();
+  routeStack: Stack<string> = new Stack<string>();
 
   constructor(public modal: NgbActiveModal, private libraryService: LibraryService) {
 
@@ -65,9 +38,13 @@ export class DirectoryPickerComponent implements OnInit {
 
   goBack() {
     this.routeStack.pop();
-    this.currentRoot = this.routeStack.peek();
-    const fullPath = this.routeStack.items.join('/');
-    this.loadChildren(fullPath);
+    const stackPeek = this.routeStack.peek();
+    if (stackPeek !== undefined) {
+      this.currentRoot = stackPeek;
+      const fullPath = this.routeStack.items.join('/');
+      this.loadChildren(fullPath);
+    }
+    
   }
 
   loadChildren(path: string) {

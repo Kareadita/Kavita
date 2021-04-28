@@ -3,6 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
+import { SettingsService } from '../../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../directory-picker/directory-picker.component';
 
 @Component({
@@ -22,11 +23,18 @@ export class LibraryEditorModalComponent implements OnInit {
   selectedFolders: string[] = [];
   errorMessage = '';
   madeChanges = false;
+  libraryTypes: string[] = []
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal) { }
+
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal, private settingService: SettingsService) { }
 
   ngOnInit(): void {
+
+    this.settingService.getLibraryTypes().subscribe((types) => {
+      this.libraryTypes = types;
+    });
     this.setValues();
+    
   }
 
 

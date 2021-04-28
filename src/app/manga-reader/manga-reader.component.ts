@@ -14,15 +14,11 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { KEY_CODES } from '../shared/_services/utility.service';
+import { CircularArray } from '../shared/data-structures/circular-array';
+import { MemberService } from '../_services/member.service';
 
 const PREFETCH_PAGES = 3;
-
-enum KEY_CODES {
-  RIGHT_ARROW = 'ArrowRight',
-  LEFT_ARROW = 'ArrowLeft',
-  ESC_KEY = 'Escape',
-  SPACE = ' '
-}
 
 enum FITTING_OPTION {
   HEIGHT = 'full-height',
@@ -41,102 +37,6 @@ enum PAGING_DIRECTION {
   BACKWARDS = -1,
 }
 
-export class CircularArray<T> {
-  arr: T[];
-  currentIndex: number;
-
-  constructor(arr: T[], startIndex: number) {
-    this.arr = arr;
-    this.currentIndex = startIndex || 0;
-  }
-
-  next() {
-    const i = this.currentIndex;
-    const arr = this.arr;
-    this.currentIndex = i < arr.length - 1 ? i + 1 : 0;
-    return this.current();
-  }
-
-  prev() {
-    const i = this.currentIndex;
-    const arr = this.arr;
-    this.currentIndex = i > 0 ? i - 1 : arr.length - 1;
-    return this.current();
-  }
-
-  current() {
-    return this.arr[this.currentIndex];
-  }
-
-  peek(offset: number = 0) {
-    const i = this.currentIndex + 1 + offset;
-    const arr = this.arr;
-    const peekIndex = i < arr.length - 1 ? i + 1 : 0;
-    return this.arr[peekIndex];
-  }
-
-  size() {
-    return this.arr.length;
-  }
-
-  applyUntil(func: (item: T, index: number) => void, index?: number) {
-    index = index || this.currentIndex;
-    /// Applies a func against elements up until index. If index is 1 and size is 3, will apply on [2, 3, 0]
-    for (let offset = 1; offset < this.size(); offset++) {
-      const i = this.currentIndex + offset;
-      const arr = this.arr;
-      const peekIndex = i < arr.length ? i : 0;
-
-      if (peekIndex === index) {
-        break;
-      }
-
-      func(this.arr[peekIndex], peekIndex);
-    }
-
-  }
-
-  /// Applies a func against elements for X times. If limit is 1, size is 3, and index is 2. It will apply on [3]
-  applyFor(func: (item: T, index: number) => void, limit: number) {
-    for (let offset = 1; offset < limit; offset++) {
-      const i = this.currentIndex + offset;
-      const peekIndex = i < this.arr.length ? i : 0;
-
-      func(this.arr[peekIndex], peekIndex);
-    }
-
-  }
-
-
-}
-
-export class Queue<T> {
-  elements: T[];
-
-  constructor() {
-    this.elements = [];
-  }
-
-  enqueue(data: T) {
-    this.elements.push(data);
-  }
-
-  dequeue() {
-    return this.elements.shift();
-  }
-
-  isEmpty() {
-    return this.elements.length === 0;
-  }
-
-  peek() {
-    return !this.isEmpty() ? this.elements[0] : undefined;
-  }
-
-  length = () => {
-    return this.elements.length;
-  }
-}
 
 @Component({
   selector: 'app-manga-reader',
@@ -164,7 +64,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
   menuOpen = false;
-  isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
+  isLoading = true; 
   mangaFileName = '';
 
   @ViewChild('content') canvas: ElementRef | undefined;
@@ -179,7 +79,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-              private formBuilder: FormBuilder, private navService: NavService, private toastr: ToastrService) {
+              private formBuilder: FormBuilder, private navService: NavService, private toastr: ToastrService,
+              private memberService: MemberService) {
                 this.navService.hideNavBar();
   }
 
@@ -192,6 +93,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigateByUrl('/home');
       return;
     }
+
+    this.libraryId = parseInt(libraryId, 10);
+    this.seriesId = parseInt(seriesId, 10);
+    this.chapterId = parseInt(chapterId, 10);
 
     this.setOverrideStyles();
 
@@ -207,12 +112,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.splitForm = this.formBuilder.group({
           pageSplitOption: this.pageSplitOption + ''
         });
+        this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
+          if (!progress) {
+            this.menuOpen = true;
+            this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+          }
+        })
       }
     });
 
-    this.libraryId = parseInt(libraryId, 10);
-    this.seriesId = parseInt(seriesId, 10);
-    this.chapterId = parseInt(chapterId, 10);
+    
 
     forkJoin({
       chapter: this.seriesService.getChapter(this.chapterId),
@@ -260,7 +169,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      bodyNode.style.height = '100%';
     }
     this.navService.showNavBar();
   }
@@ -287,7 +195,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (bodyNode !== undefined && bodyNode !== null) {
       this.originalBodyColor = bodyNode.style.background;
       bodyNode.style.background = 'black';
-      bodyNode.style.height = '0%';
     }
   }
 
@@ -311,10 +218,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
-  }
-
-  getPageKey(pageNum: number) {
-    return `kavita-page-cache-${this.user.username}-${this.chapterId}--${pageNum}`;
   }
 
   isSplitLeftToRight() {

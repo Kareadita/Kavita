@@ -11,6 +11,7 @@ import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { LibraryType } from '../_models/library';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
@@ -48,9 +49,11 @@ export class SeriesDetailComponent implements OnInit {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = 2;
+  hasNonSpecialVolumeChapters = true;
 
   seriesSummary: string = '';
   userReview: string = '';
+  libraryType: LibraryType = LibraryType.Manga;
 
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
@@ -84,7 +87,10 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
-    this.loadSeries(seriesId);
+    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
+      this.libraryType = type;
+      this.loadSeries(seriesId);
+    });
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
@@ -191,6 +197,13 @@ export class SeriesDetailComponent implements OnInit {
             return c;
           });
         }
+
+        if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
+          this.activeTabId = 1;
+          this.hasNonSpecialVolumeChapters = false;
+        }
+
+        console.log('Specials: ', this.specials);
 
         this.isLoading = false;
       });
@@ -308,7 +321,11 @@ export class SeriesDetailComponent implements OnInit {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
-    this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+    if (this.libraryType === LibraryType.Book) {
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id]);
+    } else {
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+    }
   }
 
   openVolume(volume: Volume) {

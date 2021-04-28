@@ -24,6 +24,7 @@ import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-serie
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
 
 
@@ -53,6 +54,7 @@ import { CarouselModule } from './carousel/carousel.module';
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
     NgbAccordionModule, // User Preferences
+    NgxSliderModule, // User Preference
     NgbPaginationModule,
     LazyLoadImageModule,
     SharedModule,
