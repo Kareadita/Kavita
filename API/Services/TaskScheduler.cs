@@ -23,8 +23,7 @@ namespace API.Services
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService, 
-            IBackgroundJobClient jobClient)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _logger = logger;

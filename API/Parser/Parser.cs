@@ -789,13 +789,6 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            // return name.ToLower()
-            //     .Replace("-", string.Empty)
-            //     .Replace(" ", string.Empty)
-            //     .Replace(":", string.Empty)
-            //     .Replace("_", string.Empty)
-            //     .Replace(",", string.Empty)
-            //     .Replace("!", string.Empty);
             return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
 

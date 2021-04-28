@@ -8,20 +8,6 @@ namespace API.Extensions
     public static class ChapterListExtensions
     {
         /// <summary>
-        /// Gets a single chapter (or null if doesn't exist) where Range matches the info.Chapters property. If the info
-        /// is <see cref="ParserInfo.IsSpecial"/> then, the filename is used to search. If either matches, the chapter will be returned.
-        /// </summary>
-        /// <param name="chapters"></param>
-        /// <param name="info"></param>
-        /// <returns></returns>
-        // public static Chapter GetAnyChapterByRange(this IList<Chapter> chapters, ParserInfo info)
-        // {
-        //     var specialTreatment = info.IsSpecialInfo();
-        //     return chapters.SingleOrDefault(c =>
-        //         c.Range == info.Chapters || (specialTreatment && c.Range == info.Filename));
-        // }
-
-        /// <summary>
         /// Returns first chapter in the list with at least one file
         /// </summary>
         /// <param name="chapters"></param>

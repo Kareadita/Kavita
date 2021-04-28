@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
-using API.Entities.Interfaces;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;
@@ -16,8 +14,6 @@ using API.Services;
 using API.Services.Tasks;
 using API.Tests.Helpers;
 using AutoMapper;
-using Hangfire;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -25,7 +21,6 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
-using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Tests.Services
 {
@@ -42,9 +37,7 @@ namespace API.Tests.Services
 
         private readonly DbConnection _connection;
         private readonly DataContext _context;
-
-        private readonly IBackgroundJobClient _backgroundJobClient;
-        private static BackgroundJobServer Client => new BackgroundJobServer();
+        
 
         public ScannerServiceTests(ITestOutputHelper testOutputHelper)
         {

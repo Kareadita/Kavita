@@ -23,12 +23,16 @@ namespace API.Extensions
         /// <returns></returns>
         public static Volume GetCoverImage(this IList<Volume> volumes, LibraryType libraryType)
         {
-            // TODO: Make this function like description describes
             if (libraryType == LibraryType.Book)
             {
                 return volumes.OrderBy(x => x.Number).FirstOrDefault();
             }
-            return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
+
+            if (volumes.Any(x => x.Number != 0))
+            {
+                return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);    
+            }
+            return volumes.OrderBy(x => x.Number).FirstOrDefault();
         }
     }
 }

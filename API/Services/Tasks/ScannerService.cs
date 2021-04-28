@@ -174,7 +174,7 @@ namespace API.Services.Tasks
        /// </summary>
        /// <param name="scannedSeries"></param>
        /// <returns></returns>
-       private Dictionary<string, List<ParserInfo>> SeriesWithInfos(IDictionary<string, List<ParserInfo>> scannedSeries)
+       private static Dictionary<string, List<ParserInfo>> SeriesWithInfos(IDictionary<string, List<ParserInfo>> scannedSeries)
        {
           var filtered = scannedSeries.Where(kvp => kvp.Value.Count > 0);
           var series = filtered.ToDictionary(v => v.Key, v => v.Value);
@@ -349,8 +349,7 @@ namespace API.Services.Tasks
              Chapter chapter = null;
              try
              {
-                // NOTE: Potential issue where we aren't updating volume range/number because a file exists in a chapter but chapter isn't isSpecial?
-                chapter = volume.Chapters.GetChapterByRange(info); // GetAnyChapterByRange(info);
+                chapter = volume.Chapters.GetChapterByRange(info);
              }
              catch (Exception ex)
              {
