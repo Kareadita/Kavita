@@ -250,8 +250,9 @@ namespace API.Services.Tasks
           var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
           
-          var setToRemove = new HashSet<string>(missingList.Select(s => s.NormalizedName).ToList());
-          existingSeries = existingSeries.Where(s => !setToRemove.Contains(s.NormalizedName)).ToList();
+          existingSeries = existingSeries.Where(
+             s => !missingList.Exists(
+                m => m.NormalizedName.Equals(s.NormalizedName))).ToList();
 
           removeCount = existingCount -  existingSeries.Count;
           
@@ -263,7 +264,7 @@ namespace API.Services.Tasks
           var startingVolumeCount = series.Volumes.Count;
           // Add new volumes and update chapters per volume
           var distinctVolumes = parsedInfos.DistinctVolumes();
-          _logger.LogDebug("Updating {DistinctVolumes} volumes", distinctVolumes.Count);
+          _logger.LogDebug("Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
           foreach (var volumeNumber in distinctVolumes)
           {
              var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
@@ -312,8 +313,6 @@ namespace API.Services.Tasks
        /// <param name="parsedInfos"></param>
        private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
        {
-          var startingChapters = volume.Chapters.Count;
-
           // Add new chapters
           foreach (var info in parsedInfos)
           {
@@ -350,7 +349,8 @@ namespace API.Services.Tasks
              Chapter chapter = null;
              try
              {
-                chapter = volume.Chapters.GetAnyChapterByRange(info);
+                // NOTE: Potential issue where we aren't updating volume range/number because a file exists in a chapter but chapter isn't isSpecial?
+                chapter = volume.Chapters.GetChapterByRange(info); // GetAnyChapterByRange(info);
              }
              catch (Exception ex)
              {
@@ -361,12 +361,10 @@ namespace API.Services.Tasks
              AddOrUpdateFileForChapter(chapter, info);
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
              chapter.Range = specialTreatment ? info.Filename : info.Chapters;
-             //chapter.Pages = chapter.Files.Sum(f => f.Pages);
           }
           
           
           // Remove chapters that aren't in parsedInfos or have no files linked
-          // TODO: See if we can use Except() here
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
           {
@@ -385,23 +383,6 @@ namespace API.Services.Tasks
              }
           }
        }
-
-       private Chapter CreateChapter(ParserInfo info)
-       {
-          var specialTreatment = info.IsSpecialInfo();
-          var specialTitle = specialTreatment ? info.Filename : info.Chapters;
-          return new Chapter()
-          {
-             Number = specialTreatment ? "0" : Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
-             Range = specialTreatment ? info.Filename : info.Chapters,
-             Title = (specialTreatment && info.Format == MangaFormat.Book)
-                ? info.Title
-                : specialTitle,
-             Files = new List<MangaFile>(),
-             IsSpecial = specialTreatment,
-          };
-       }
-
 
        /// <summary>
        /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.

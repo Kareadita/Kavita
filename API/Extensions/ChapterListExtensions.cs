@@ -14,12 +14,12 @@ namespace API.Extensions
         /// <param name="chapters"></param>
         /// <param name="info"></param>
         /// <returns></returns>
-        public static Chapter GetAnyChapterByRange(this IList<Chapter> chapters, ParserInfo info)
-        {
-            var specialTreatment = info.IsSpecialInfo();
-            return chapters.SingleOrDefault(c =>
-                c.Range == info.Chapters || (specialTreatment && c.Range == info.Filename));
-        }
+        // public static Chapter GetAnyChapterByRange(this IList<Chapter> chapters, ParserInfo info)
+        // {
+        //     var specialTreatment = info.IsSpecialInfo();
+        //     return chapters.SingleOrDefault(c =>
+        //         c.Range == info.Chapters || (specialTreatment && c.Range == info.Filename));
+        // }
 
         /// <summary>
         /// Returns first chapter in the list with at least one file

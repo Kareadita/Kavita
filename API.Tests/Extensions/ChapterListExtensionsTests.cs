@@ -47,10 +47,10 @@ namespace API.Tests.Extensions
 
             var chapterList = new List<Chapter>()
             {
-                CreateChapter("darker than black - Some special", "0", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true)
+                CreateChapter("darker than black - Some special", "0", CreateFile("/manga/darker than black - special.cbz", MangaFormat.Archive), true)
             };
 
-            var actualChapter = chapterList.GetAnyChapterByRange(info);
+            var actualChapter = chapterList.GetChapterByRange(info);
             
             Assert.NotEqual(chapterList[0], actualChapter);
             
@@ -77,7 +77,7 @@ namespace API.Tests.Extensions
                 CreateChapter("darker than black", "0", CreateFile("/manga/darker than black.cbz", MangaFormat.Archive), true)
             };
 
-            var actualChapter = chapterList.GetAnyChapterByRange(info);
+            var actualChapter = chapterList.GetChapterByRange(info);
             
             Assert.Equal(chapterList[0], actualChapter);
             

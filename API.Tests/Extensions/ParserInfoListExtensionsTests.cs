@@ -20,10 +20,10 @@ namespace API.Tests.Extensions
         }
         
         [Theory]
-        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new string[] {})]
-        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new string[] {})]
-        [InlineData(new string[] {@"Cynthia The Mission [Desudesu&Brolen].zip"}, new string[] {})]
-        public void HasInfoTest(string[] inputInfos, string[] inputChapters)
+        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new string[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
+        [InlineData(new string[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new string[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
+        [InlineData(new string[] {@"Cynthia The Mission v20 c12-20 [Desudesu&Brolen].zip"}, new string[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, false)]
+        public void HasInfoTest(string[] inputInfos, string[] inputChapters, bool expectedHasInfo)
         {
             var infos = new List<ParserInfo>();
             foreach (var filename in inputInfos)
@@ -33,13 +33,10 @@ namespace API.Tests.Extensions
                     string.Empty));
             }
 
-            // I need a simple way to generate chapters that is based on real code, not these simple mocks. 
-            var chapter = EntityFactory.CreateChapter("0-6", false, new List<MangaFile>()
-            {
-                EntityFactory.CreateMangaFile(@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", MangaFormat.Archive, 199)
-            });
+            var files = inputChapters.Select(s => EntityFactory.CreateMangaFile(s, MangaFormat.Archive, 199)).ToList();
+            var chapter = EntityFactory.CreateChapter("0-6", false, files);
 
-            Assert.True(infos.HasInfo(chapter));
+            Assert.Equal(expectedHasInfo, infos.HasInfo(chapter));
         }
     }
 }
