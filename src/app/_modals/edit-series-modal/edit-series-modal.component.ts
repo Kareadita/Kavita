@@ -1,10 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Series } from 'src/app/_models/series';
 import { ImageService } from 'src/app/_services/image.service';
+import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
@@ -12,7 +15,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss']
 })
-export class EditSeriesModalComponent implements OnInit {
+export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   @Input() series!: Series;
   seriesVolumes: any[] = [];
@@ -23,15 +26,22 @@ export class EditSeriesModalComponent implements OnInit {
   tabs = ['General', 'Fix Match', 'Cover Image', 'Info'];
   active = this.tabs[0];
   editSeriesForm!: FormGroup;
+  libraryName: string | undefined = undefined;
+  private readonly onDestroy = new Subject<void>();
 
 
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
               public utilityService: UtilityService,
               private fb: FormBuilder,
-              public imageService: ImageService) { }
+              public imageService: ImageService, 
+              private libraryService: LibraryService) { }
 
   ngOnInit(): void {
+
+    this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
+      this.libraryName = names[this.series.libraryId];
+    });
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
@@ -62,6 +72,10 @@ export class EditSeriesModalComponent implements OnInit {
         })).flat();
       });
     });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
   }
 
   close() {

@@ -200,6 +200,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   translateScalingOption(option: ScalingOption) {
     switch (option) {
+      case (ScalingOption.Automatic):
+      {
+        const windowWidth = window.innerWidth
+      || document.documentElement.clientWidth
+      || document.body.clientWidth;
+      const windowHeight = window.innerHeight
+      || document.documentElement.clientHeight
+      || document.body.clientHeight;
+      if (windowWidth < windowHeight) {
+        return FITTING_OPTION.WIDTH;
+      }
+        return FITTING_OPTION.HEIGHT;
+      }
       case (ScalingOption.FitToHeight):
         return FITTING_OPTION.HEIGHT;
       case (ScalingOption.FitToWidth):

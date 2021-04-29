@@ -130,8 +130,18 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.user = user;
+          
           if (this.user.preferences.bookReaderFontFamily === undefined) {
             this.user.preferences.bookReaderFontFamily = 'default';
+          }
+          if (this.user.preferences.bookReaderFontSize === undefined) {
+            this.user.preferences.bookReaderFontSize = 100;
+          }
+          if (this.user.preferences.bookReaderLineSpacing === undefined) {
+            this.user.preferences.bookReaderLineSpacing = 100;
+          }
+          if (this.user.preferences.bookReaderMargin === undefined) {
+            this.user.preferences.bookReaderMargin = 0;
           }
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
   

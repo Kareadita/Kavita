@@ -8,8 +8,8 @@ $primary-color: white;
 }
 
 .ng-autocomplete {
-    width: 400px;
     margin-bottom: 0px;
+    max-width: 400px;
 }
 
 .primary-text {
@@ -22,18 +22,16 @@ $primary-color: white;
     margin-top: 5px;
 }
 
-
 @include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
     .ng-autocomplete {
-        width: 240px;
+        width: 100%; // 232px
     }
 }
 
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 410px) { //370
+/* Extra small devices (phones, 300px and down) */
+@media only screen and (max-width: 300px) { //370
     .ng-autocomplete {
-        display: none !important;
+        max-width: 120px;
     }
 }
-
 

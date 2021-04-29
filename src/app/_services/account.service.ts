@@ -17,7 +17,7 @@ export class AccountService {
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User>(1);
-  currentUser$ = this.currentUserSource.asObservable(); // $ at end is because this is observable
+  currentUser$ = this.currentUserSource.asObservable();
 
   constructor(private httpClient: HttpClient) {}
 

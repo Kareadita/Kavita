@@ -12,6 +12,7 @@ import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { RegisterMemberComponent } from './register-member/register-member.component';
 import { ReadMoreComponent } from './read-more/read-more.component';
+import { RouterModule } from '@angular/router';
 import { DrawerComponent } from './drawer/drawer.component';
 
 
@@ -30,6 +31,7 @@ import { DrawerComponent } from './drawer/drawer.component';
   ],
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     NgbDropdownModule,
     NgbProgressbarModule,

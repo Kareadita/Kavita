@@ -3,7 +3,7 @@
         <h4 class="modal-title">
             {{this.series.name}} Details</h4>
         <button type="button" class="close" aria-label="Close" (click)="close()">
-        <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body scrollable-modal">
@@ -68,7 +68,6 @@
                     <div class="row no-gutters">
                         <div class="form-group" style="width: 100%">
                             <label for="summary">Summary</label>
-                            <!-- TODO: MaxLength needed -->
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                         </div>
                     </div>
@@ -91,6 +90,10 @@
                 <li [ngbNavItem]="tabs[3]">
                   <a ngbNavLink>{{tabs[3]}}</a>
                   <ng-template ngbNavContent>
+                    <h4>Information</h4>
+                    <div class="row no-gutters mb-2">
+                        <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | titlecase}}</div>
+                    </div>
                       <h4>Volumes</h4>
                       <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
                           <span class="invisible">Loading...</span>

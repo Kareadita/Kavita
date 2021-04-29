@@ -7,17 +7,19 @@
       </div>
       <div class="error-banner" *ngIf="total === 0">
         Cannot Read Archive
-        <!-- <p><ngb-progressbar type="error" height="5px" [value]="100" [max]="100"></ngb-progressbar></p> -->
       </div>
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
-      <div class="card-actions">
-        <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
-      </div>
     </div>
-    <div class="card-body text-center" *ngIf="title.length > 0 || actions.length > 0">
+    <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
+      <div>
         <span class="card-title" placement="top" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
           {{title}}
         </span>
+        <span class="card-actions float-right">
+          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+        </span>
+      </div>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="libraryName">{{libraryName | titlecase}}</a>
     </div>
 </div>

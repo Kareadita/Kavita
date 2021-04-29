@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
-import { SeriesService } from './series.service';
 
 export enum Action {
   MarkAsRead = 0,

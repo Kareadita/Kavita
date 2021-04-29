@@ -5,7 +5,7 @@
       <ul class="navbar-nav mr-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
-          <div class="col-xs-4 col-md-6">
+          <div>
             <fieldset class="form-inline">
               <div class="form-group" style="margin-bottom: 0px;">
                 <label for="nav-search" class="sr-only">Search series</label>
@@ -13,6 +13,7 @@
                   <ng-autocomplete
                     #search 
                     id="nav-search"
+                    [classList]="['ng-autocomplete']"
                     [data]="searchResults"
                     searchKeyword="name"
                     placeholder="Search Series"

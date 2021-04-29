@@ -28,7 +28,7 @@ $image-width: 160px;
 
 .card-title {
     font-size: 13px;
-    width: 150px;
+    width: 130px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -82,10 +82,17 @@ $image-width: 160px;
 
 .card-actions {
     position: absolute;
-    top: 195px;
-    right: -5px;
+    top: 228px;
+    right: 5px;
+    width: 20px;
 }
 
 .card-body {
     padding: 5px !important;
+}
+
+.library {
+    font-size: 13px;
+    text-decoration: none;
+    margin-top: 0px;
 }

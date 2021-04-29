@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library, LibraryType } from '../_models/library';
 import { SearchResult } from '../_models/search-result';
+
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +14,24 @@ export class LibraryService {
 
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) { }
+  libraryNames: {[key:number]: string} | undefined = undefined;
+
+  constructor(private httpClient: HttpClient) {}
+
+  getLibraryNames() {
+    if (this.libraryNames != undefined) {
+      return of(this.libraryNames);
+    }
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(l => {
+      this.libraryNames = {};
+      l.forEach(lib => {
+        if (this.libraryNames !== undefined) {
+          this.libraryNames[lib.id] = lib.name;
+        }        
+      });
+      return this.libraryNames;
+    }));
+  }
 
   listDirectories(rootPath: string) {
     let query = '';
@@ -60,12 +79,10 @@ export class LibraryService {
   }
 
   search(term: string) {
-    // TODO: Move to search service
     if (term === '') {
       return of([]);
     }
-     // TODO: Url encode this
-    return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + term);
+    return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
   }
 
 }
