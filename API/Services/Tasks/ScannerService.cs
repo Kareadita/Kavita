@@ -204,7 +204,27 @@ namespace API.Services.Tasks
           foreach (var (key, infos) in parsedSeries)
           {
              // Key is normalized already
-             var existingSeries = library.Series.FirstOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
+             Series existingSeries = null;
+             try
+             {
+                existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
+             }
+             catch (Exception e)
+             {
+                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key);
+                var duplicateSeries = library.Series.Where(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key).ToList();
+                //var firstSeries = duplicateSeries.First();
+                //duplicateSeries.
+                foreach (var series in duplicateSeries)
+                {
+                   _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
+                   
+                }
+                // Merge them together? 
+                //_unitOfWork.AppUserProgressRepository.MapSeriesProgressFromTo(firstSeries.Id, );
+                
+                continue;
+             }
              if (existingSeries == null)
              {
                 existingSeries = DbFactory.Series(infos[0].Series);
