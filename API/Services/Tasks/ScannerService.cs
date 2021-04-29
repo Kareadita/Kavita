@@ -48,7 +48,6 @@ namespace API.Services.Tasks
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
           foreach (var lib in libraries)
           {
-             // BUG?: I think we need to keep _scannedSeries within the ScanLibrary instance since this is multithreaded.
              ScanLibrary(lib.Id, false);
           }
        }
@@ -205,7 +204,7 @@ namespace API.Services.Tasks
           foreach (var (key, infos) in parsedSeries)
           {
              // Key is normalized already
-             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
+             var existingSeries = library.Series.FirstOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
              if (existingSeries == null)
              {
                 existingSeries = DbFactory.Series(infos[0].Series);
