@@ -42,12 +42,12 @@ namespace API.Services.Tasks
 
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
+       [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
           foreach (var lib in libraries)
           {
-             // BUG?: I think we need to keep _scannedSeries within the ScanLibrary instance since this is multithreaded.
              ScanLibrary(lib.Id, false);
           }
        }
@@ -68,6 +68,7 @@ namespace API.Services.Tasks
        }
 
        [DisableConcurrentExecution(360)]
+       [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           var sw = Stopwatch.StartNew();
@@ -203,7 +204,27 @@ namespace API.Services.Tasks
           foreach (var (key, infos) in parsedSeries)
           {
              // Key is normalized already
-             var existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
+             Series existingSeries = null;
+             try
+             {
+                existingSeries = library.Series.SingleOrDefault(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key);
+             }
+             catch (Exception e)
+             {
+                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key);
+                var duplicateSeries = library.Series.Where(s => s.NormalizedName == key || Parser.Parser.Normalize(s.OriginalName) == key).ToList();
+                //var firstSeries = duplicateSeries.First();
+                //duplicateSeries.
+                foreach (var series in duplicateSeries)
+                {
+                   _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
+                   
+                }
+                // Merge them together? 
+                //_unitOfWork.AppUserProgressRepository.MapSeriesProgressFromTo(firstSeries.Id, );
+                
+                continue;
+             }
              if (existingSeries == null)
              {
                 existingSeries = DbFactory.Series(infos[0].Series);
@@ -292,7 +313,7 @@ namespace API.Services.Tasks
              foreach (var volume in deletedVolumes)
              {
                 var file = volume.Chapters.FirstOrDefault()?.Files.FirstOrDefault()?.FilePath ?? "no files";
-                if (!new FileInfo(file).Exists)
+                if (new FileInfo(file).Exists)
                 {
                    _logger.LogError("Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}", file);
                 }
@@ -435,7 +456,7 @@ namespace API.Services.Tasks
           
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path))
           {
-             info = BookService.ParseInfo(path);
+             info = _bookService.ParseInfo(path);
           }
           else
           {
@@ -451,7 +472,7 @@ namespace API.Services.Tasks
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != "0")
           {
              info = Parser.Parser.Parse(path, rootPath, type);
-             var info2 = BookService.ParseInfo(path);
+             var info2 = _bookService.ParseInfo(path);
              info.Merge(info2);
           }
           

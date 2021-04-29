@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Parser;
 using VersOne.Epub;
 
 namespace API.Interfaces
@@ -17,5 +18,6 @@ namespace API.Interfaces
         /// <returns></returns>
         Task<string> ScopeStyles(string stylesheetHtml, string apiBase);
         string GetSummaryInfo(string filePath);
+        ParserInfo ParseInfo(string filePath);
     }
 }

@@ -32,6 +32,8 @@ namespace API.Controllers
                 await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
             
             // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series for library");
+
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
             
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);

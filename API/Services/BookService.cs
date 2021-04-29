@@ -187,22 +187,37 @@ namespace API.Services
             return dict;
         }
 
-        public static ParserInfo ParseInfo(string filePath)
+        /// <summary>
+        /// Parses out Title from book. Chapters and Volumes will always be "0". If there is any exception reading book (malformed books)
+        /// then null is returned.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public ParserInfo ParseInfo(string filePath)
         {
-            var epubBook = EpubReader.OpenBook(filePath);
-
-            return new ParserInfo()
+            try
             {
-                Chapters = "0",
-                Edition = "",
-                Format = MangaFormat.Book,
-                Filename = Path.GetFileName(filePath),
-                Title = epubBook.Title,
-                FullFilePath = filePath,
-                IsSpecial = false,
-                Series = epubBook.Title,
-                Volumes = "0"
-            };
+                var epubBook = EpubReader.OpenBook(filePath);
+
+                return new ParserInfo()
+                {
+                    Chapters = "0",
+                    Edition = "",
+                    Format = MangaFormat.Book,
+                    Filename = Path.GetFileName(filePath),
+                    Title = epubBook.Title,
+                    FullFilePath = filePath,
+                    IsSpecial = false,
+                    Series = epubBook.Title,
+                    Volumes = "0"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception when opening epub book: {FileName}", filePath);
+            }
+
+            return null;
         }
 
         public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
