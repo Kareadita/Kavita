@@ -23,5 +23,6 @@
         public string UserReview { get; set; }
 
         public int LibraryId { get; set; }
+        public string LibraryName { get; set; }
     }
 }

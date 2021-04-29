@@ -307,7 +307,7 @@ namespace API.Data
         }
 
         /// <summary>
-        /// Returns Series that the user 
+        /// Returns Series that the user has some partial progress on
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId"></param>
@@ -327,8 +327,8 @@ namespace API.Data
                             && s.PagesRead > 0
                             && s.PagesRead < s.Series.Pages
                             && (libraryId <= 0 || s.Series.LibraryId == libraryId))
-                .OrderByDescending(s => s.LastModified)
                 .Take(limit)
+                .OrderByDescending(s => s.LastModified)
                 .Select(s => s.Series)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
