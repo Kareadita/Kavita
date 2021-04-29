@@ -42,6 +42,7 @@ namespace API.Services.Tasks
 
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
+       [AutomaticRetry(Attempts = 0)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
@@ -68,6 +69,7 @@ namespace API.Services.Tasks
        }
 
        [DisableConcurrentExecution(360)]
+       [AutomaticRetry(Attempts = 0)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           var sw = Stopwatch.StartNew();
@@ -435,7 +437,7 @@ namespace API.Services.Tasks
           
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path))
           {
-             info = BookService.ParseInfo(path);
+             info = _bookService.ParseInfo(path);
           }
           else
           {
@@ -451,7 +453,7 @@ namespace API.Services.Tasks
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != "0")
           {
              info = Parser.Parser.Parse(path, rootPath, type);
-             var info2 = BookService.ParseInfo(path);
+             var info2 = _bookService.ParseInfo(path);
              info.Merge(info2);
           }
           
