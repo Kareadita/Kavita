@@ -313,7 +313,7 @@ namespace API.Services.Tasks
              foreach (var volume in deletedVolumes)
              {
                 var file = volume.Chapters.FirstOrDefault()?.Files.FirstOrDefault()?.FilePath ?? "no files";
-                if (!new FileInfo(file).Exists)
+                if (new FileInfo(file).Exists)
                 {
                    _logger.LogError("Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}", file);
                 }
