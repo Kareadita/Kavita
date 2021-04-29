@@ -42,7 +42,7 @@ namespace API.Services.Tasks
 
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
-       [AutomaticRetry(Attempts = 0)]
+       [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
@@ -69,7 +69,7 @@ namespace API.Services.Tasks
        }
 
        [DisableConcurrentExecution(360)]
-       [AutomaticRetry(Attempts = 0)]
+       [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
           var sw = Stopwatch.StartNew();
