@@ -145,7 +145,8 @@ namespace API.Controllers
         [HttpGet("recently-added")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(int libraryId = 0, int limit = 20)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, limit));
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAdded(user.Id, libraryId, limit));
         }
         
         [HttpGet("in-progress")]
@@ -153,6 +154,14 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("refresh-metadata")]
+        public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
+        {
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            return Ok();
         }
     }
 }

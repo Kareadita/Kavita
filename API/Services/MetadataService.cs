@@ -122,7 +122,7 @@ namespace API.Services
           // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
           if (firstFile != null &&
-              (forceUpdate || !firstFile.HasFileBeenModified()))
+              (forceUpdate || firstFile.HasFileBeenModified())) // !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified)
           {
              series.Summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
 
@@ -158,6 +158,39 @@ namespace API.Services
           if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.Complete()).Result)
           {
              _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
+          }
+       }
+       
+       
+       public void RefreshMetadataForSeries(int libraryId, int seriesId)
+       {
+          var sw = Stopwatch.StartNew();
+          var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
+          
+          var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
+          if (series == null)
+          {
+             _logger.LogError("Series {SeriesId} was not found on Library {LibraryName}", seriesId, libraryId);
+             return;
+          }
+          _logger.LogInformation("Beginning metadata refresh of {SeriesName}", series.Name);
+          foreach (var volume in series.Volumes)
+          {
+             foreach (var chapter in volume.Chapters)
+             {
+                UpdateMetadata(chapter, true);
+             }
+                
+             UpdateMetadata(volume, true);
+          }
+
+          UpdateMetadata(series, true);
+          _unitOfWork.SeriesRepository.Update(series);
+
+
+          if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.Complete()).Result)
+          {
+             _logger.LogInformation("Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
           }
        }
     }

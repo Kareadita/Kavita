@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 using API.Interfaces;
 using API.Parser;
 using ExCSS;
@@ -13,7 +12,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using VersOne.Epub;
-using VersOne.Epub.Schema;
 
 namespace API.Services
 {

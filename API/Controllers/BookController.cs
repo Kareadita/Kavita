@@ -158,6 +158,19 @@ namespace API.Controllers
                         foreach (var styleLinks in styleNodes)
                         {
                             var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
+                            // Some epubs are malformed the key in content.opf might be: content/resources/filelist_0_0.xml but the actual html links to resources/filelist_0_0.xml
+                            // In this case, we will do a search for the key that ends with
+                            if (!book.Content.Css.ContainsKey(key))
+                            {
+                                var correctedKey = book.Content.Css.Keys.SingleOrDefault(s => s.EndsWith(key));
+                                if (correctedKey == null)
+                                {
+                                    _logger.LogError("Epub is Malformed, key: {Key} is not matching OPF file", key);
+                                    continue;
+                                }
+
+                                key = correctedKey;
+                            }
                             var styleContent = await _bookService.ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase);
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
@@ -183,6 +196,14 @@ namespace API.Controllers
                             if (image.Attributes["src"] != null)
                             {
                                 var imageFile = image.Attributes["src"].Value;
+                                if (!book.Content.Images.ContainsKey(imageFile))
+                                {
+                                    var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                                    if (correctedKey != null)
+                                    {
+                                        imageFile = correctedKey;
+                                    }
+                                }
                                 image.Attributes.Remove("src");
                                 image.Attributes.Add("src", $"{apiBase}" + imageFile);
                             }
@@ -199,6 +220,14 @@ namespace API.Controllers
                             if (image.Attributes["xlink:href"] != null)
                             {
                                 var imageFile = image.Attributes["xlink:href"].Value;
+                                if (!book.Content.Images.ContainsKey(imageFile))
+                                {
+                                    var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                                    if (correctedKey != null)
+                                    {
+                                        imageFile = correctedKey;
+                                    }
+                                }
                                 image.Attributes.Remove("xlink:href");
                                 image.Attributes.Add("xlink:href", $"{apiBase}" + imageFile);
                             }

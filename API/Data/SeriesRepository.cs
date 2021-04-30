@@ -80,15 +80,12 @@ namespace API.Data
         
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
         {
-            var sw = Stopwatch.StartNew();
             var query =  _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
-
-            _logger.LogDebug("Processed GetSeriesDtoForLibraryIdAsync in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
         
@@ -295,15 +292,35 @@ namespace API.Data
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit)
+        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit)
         {
+            if (libraryId == 0)
+            {
+                var userLibraries = _context.Library
+                    .Include(l => l.AppUsers)
+                    .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                    .AsNoTracking()
+                    .Select(library => library.Id)
+                    .ToList();
+            
+                return await _context.Series
+                    .Where(s => userLibraries.Contains(s.LibraryId))
+                    .AsNoTracking()
+                    .OrderByDescending(s => s.Created)
+                    .Take(limit)
+                    .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            }
+            
             return await _context.Series
-                .Where(s => (libraryId <= 0 || s.LibraryId == libraryId))
-                .Take(limit)
-                .OrderByDescending(s => s.Created)
+                .Where(s => s.LibraryId == libraryId)
                 .AsNoTracking()
+                .OrderByDescending(s => s.Created)
+                .Take(limit)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+            
+            
         }
 
         /// <summary>
@@ -325,7 +342,7 @@ namespace API.Data
                 })
                 .Where(s => s.AppUserId == userId
                             && s.PagesRead > 0
-                            && s.PagesRead < s.Series.Pages
+                            && s.PagesRead < (s.Series.Pages - 1) // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
                             && (libraryId <= 0 || s.Series.LibraryId == libraryId))
                 .Take(limit)
                 .OrderByDescending(s => s.LastModified)
