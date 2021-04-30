@@ -342,7 +342,7 @@ namespace API.Data
                 })
                 .Where(s => s.AppUserId == userId
                             && s.PagesRead > 0
-                            && s.PagesRead < s.Series.Pages
+                            && s.PagesRead < (s.Series.Pages - 1) // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
                             && (libraryId <= 0 || s.Series.LibraryId == libraryId))
                 .Take(limit)
                 .OrderByDescending(s => s.LastModified)
