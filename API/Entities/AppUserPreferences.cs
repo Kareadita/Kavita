@@ -12,7 +12,7 @@ namespace API.Entities
         /// <summary>
         /// Manga Reader Option: How should the image be scaled to screen
         /// </summary>
-        public ScalingOption ScalingOption { get; set; } = ScalingOption.FitToHeight;
+        public ScalingOption ScalingOption { get; set; } = ScalingOption.Automatic;
         /// <summary>
         /// Manga Reader Option: Which side of a split image should we show first
         /// </summary>
