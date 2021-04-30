@@ -20,6 +20,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   @Input() actions: ActionItem<any>[] = [];
   @Input() read = 0; // Pages read
   @Input() total = 0; // Total Pages
+  @Input() supressLibraryLink = false;
   @Input() entity!: Series | Volume | Chapter; // This is the entity we are representing. It will be returned if an action is executed.
   @Output() clicked = new EventEmitter<string>();
 

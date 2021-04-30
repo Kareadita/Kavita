@@ -8,25 +8,6 @@
     flex-direction: column;
 }
 
-
-.carousel-reel {
-    transition: 1s ease all;
-    float: left;
-    overflow: hidden;
-    display: flex;
-    scroll-behavior: smooth;
-}
-
-.carousel-container .carousel-reel .item { 
-    float: left;
-    margin: 10px;
-
-    &:first {
-        margin-left: 0px;
-        padding-left: 0px;
-    }
-}
-
 .section-title {
     font-size: 1.2rem;
     font-weight: 400;

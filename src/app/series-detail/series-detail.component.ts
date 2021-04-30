@@ -104,6 +104,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.ScanLibrary):
         this.scanLibrary(series);
         break;
+      case(Action.RefreshMetadata):
+        this.refreshMetdata(series);
+        break;
       case(Action.Delete):
         this.deleteSeries(series);
         break;
@@ -142,6 +145,12 @@ export class SeriesDetailComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  refreshMetdata(series: Series) {
+    this.seriesService.refreshMetadata(series).subscribe((res: any) => {
+      this.toastr.success('Refresh started for ' + series.name);
+    });
   }
 
   scanLibrary(series: Series) {

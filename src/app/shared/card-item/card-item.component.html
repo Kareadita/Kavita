@@ -20,6 +20,6 @@
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="libraryName">{{libraryName | titlecase}}</a>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
     </div>
 </div>

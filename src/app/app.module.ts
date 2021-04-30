@@ -25,6 +25,7 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
 import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { SwiperModule } from 'swiper/angular';
 
 
 
@@ -59,6 +60,7 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
     LazyLoadImageModule,
     SharedModule,
     CarouselModule,
+    //SwiperModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),

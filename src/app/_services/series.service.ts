@@ -95,4 +95,8 @@ export class SeriesService {
   getContinueReading(libraryId: number = 0) {
     return this.httpClient.get<InProgressChapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
   }
+
+  refreshMetadata(series: Series) {
+    return this.httpClient.post(this.baseUrl + 'series/refresh-metadata', {libraryId: series.libraryId, seriesId: series.id});
+  }
 }

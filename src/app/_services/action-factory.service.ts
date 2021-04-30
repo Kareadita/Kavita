@@ -56,6 +56,12 @@ export class ActionFactoryService {
         });
 
         this.seriesActions.push({
+          action: Action.RefreshMetadata,
+          title: 'Refresh Metadata',
+          callback: this.dummyCallback
+        });
+
+        this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
           callback: this.dummyCallback

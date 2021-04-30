@@ -38,6 +38,8 @@
     src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
 }
 
+$primary-color: #0062cc;
+
 .control-container {
     padding-bottom: 5px;
 }
@@ -164,4 +166,46 @@
 
 .drawer-body {
     padding-bottom: 20px;
+}
+
+
+
+// Click to Paginate styles
+
+.icon-primary-color {
+    color: $primary-color;
+}
+
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    color: white;
+
+
+    .tint {
+        opacity: 0.4;
+        background-color: $primary-color;
+        transition: opacity 4s ease-in-out;
+    }
+  
+    .right {
+      position: absolute;
+      cursor: pointer;
+      width: 20%;
+      height: 100%;
+      right: 0px;
+      top: 0px;
+    }
+
+    .left {
+      cursor: pointer;
+      width: 20%;
+      height: 100%;
+    }
 }

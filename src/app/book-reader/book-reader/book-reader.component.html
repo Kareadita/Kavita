@@ -1,14 +1,8 @@
 <div class="container-flex {{darkMode ? 'dark-mode' : ''}}">
     <div class="fixed-top" #stickyTop>
-        <div class="reading-bar row no-gutters justify-content-between">
-            <!-- TODO: Skip to content button for screen readers-->
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="pageNum === 0" title="Previous Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Previous</span></button>
-            <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
-            <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="pageNum + 1 >= maxPages" (click)="nextPage()" title="Next Page"><span class="phone-hidden">Next&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
-        </div>
+        <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+        <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+        <ngb-progressbar style="cursor: pointer" (click)="goToPage()" type="warning" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
         <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="backgroundColor" (drawerClosed)="closeDrawer()">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
@@ -54,6 +48,13 @@
                         <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode"><i class="fa fa-sun" aria-hidden="true"></i></button>
                         <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode"><i class="fa fa-moon" aria-hidden="true"></i></button>
                     </div>
+                    <div class="controls">
+                        <label id="tap-pagination">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
+                        <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
+                        <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
+                        <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i></button>
+                        <!-- <button (click)="showClickToPaginateVisualOverlay()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-fill-drip  {{clickToPaginateVisualOverlay ? 'icon-primary-color' : ''}}" aria-hidden="true"></i></button> -->
+                    </div>
                     <div class="row no-gutters justify-content-between">
                         <button (click)="resetSettings()" class="btn btn-secondary col">Reset</button>
                         <button (click)="saveSettings()" class="btn btn-primary col" style="margin-left:10px;">Save</button>
@@ -86,9 +87,22 @@
             </div>
         </app-drawer>
     </div>
+
+    <div class="overlay" *ngIf="clickToPaginate" >
+        <div class="left {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="prevPage()">
+
+        </div>
+        <div class="right {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="nextPage()">
+
+        </div>
+    </div>
     
-    <div #readingSection class="reading-section" [ngStyle]="{'top': topOffset + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
+    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
         <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
+        
+        <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
+            <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+        </div>
     </div>
 
     <ng-container *ngIf="isLoading">
@@ -96,4 +110,16 @@
             <span class="invisible">Loading...</span>
         </div>
     </ng-container>
+
+    <ng-template #actionBar>
+        <div class="reading-bar row no-gutters justify-content-between">
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="pageNum === 0" title="Previous Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Previous</span></button>
+            <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
+            <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="pageNum + 1 >= maxPages" (click)="nextPage()" title="Next Page"><span class="phone-hidden">Next&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        </div>
+    </ng-template>
+
 </div>

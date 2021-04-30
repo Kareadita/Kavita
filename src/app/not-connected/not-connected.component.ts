@@ -8,7 +8,6 @@ import { MemberService } from '../_services/member.service';
   styleUrls: ['./not-connected.component.scss']
 })
 export class NotConnectedComponent implements OnInit {
-  // TODO: Move to shared module for lazy loading
   constructor(private memberService: MemberService, private router: Router) { }
 
   ngOnInit(): void {

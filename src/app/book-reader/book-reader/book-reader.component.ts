@@ -46,7 +46,12 @@ const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
       state('false', style({opacity: 1})),
       state('true', style({opacity: 0})),
       transition('false <=> true', animate('200ms'))
-  ])
+    ]),
+    trigger('fade', [
+      state('true', style({opacity: 0})),
+      state('false', style({opacity: 0.4})),
+      transition('false <=> true', animate('4000ms'))
+    ])
   ]
 })
 export class BookReaderComponent implements OnInit, OnDestroy {
@@ -69,6 +74,10 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   isLoading = true; 
   bookTitle: string = '';
   settingsForm: FormGroup = new FormGroup({});
+  clickToPaginate = false;
+  clickToPaginateVisualOverlay = false;
+  clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
+  clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
 
   page: SafeHtml | undefined = undefined; // This is the html we get from the server
   styles: SafeHtml | undefined = undefined; // This is the css we get from the server
@@ -87,6 +96,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   readerStyles: string = '';
   darkModeStyleElem!: HTMLElement;
   topOffset: number = 0; // Offset for drawer and rendering canvas
+  scrollbarNeeded = false; // Used for showing/hiding bottom action bar
 
 
   // Temp hack: Override background color for reader and restore it onDestroy
@@ -162,6 +172,16 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
     const head = document.querySelector('head');
     this.renderer.removeChild(head, this.darkModeStyleElem);
+
+    if (this.clickToPaginateVisualOverlayTimeout !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
+      this.clickToPaginateVisualOverlayTimeout = undefined;
+    }
+    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+      this.clickToPaginateVisualOverlayTimeout2 = undefined;
+    }
+
   }
 
   ngOnInit(): void {
@@ -181,7 +201,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
     this.memberService.hasReadingProgress(this.libraryId).subscribe(hasProgress => {
       if (!hasProgress) {
-        //this.drawerOpen = !hasProgress;
         this.toggleDrawer();
         this.toastr.info('You can modify book settings, save those settings for all books, and view table of contents from the drawer.');
       }
@@ -282,6 +301,45 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       });
   }
 
+  moveFocus() {
+    const elems = document.getElementsByClassName('reading-section');
+    if (elems.length > 0) {
+      (elems[0] as HTMLDivElement).focus();
+    }
+  }
+
+  promptForPage() {
+    const question = 'There are ' + (this.maxPages - 1) + ' pages. What page do you want to go to?';
+    const goToPageNum = window.prompt(question, '');
+    if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
+    return goToPageNum;
+  }
+
+  goToPage(pageNum?: number) {
+    let page = pageNum;
+    if (pageNum === null || pageNum === undefined) {
+      const goToPageNum = this.promptForPage();
+      if (goToPageNum === null) { return; }
+      page = parseInt(goToPageNum.trim(), 10);
+    }
+
+    if (page === undefined || this.pageNum === page) { return; }
+
+    if (page > this.maxPages) {
+      page = this.maxPages;
+    } else if (page < 0) {
+      page = 0;
+    }
+
+    if (!(page === 0 || page === this.maxPages - 1)) {
+      page -= 1;
+    }
+
+    this.pageNum = page;
+    this.loadPage();
+
+  }
+
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
     window.scroll({
@@ -297,9 +355,11 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles();
+        this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
 
         Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))).then(() => {
           this.isLoading = false;
+          this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
           if (part !== undefined && part !== '') {
             this.scrollTo(part);
@@ -466,7 +526,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   toggleDrawer() {
     this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
-    console.log('TopOffset: ', this.topOffset);
     this.drawerOpen = !this.drawerOpen;
   }
 
@@ -495,6 +554,33 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       top: element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET,
       behavior: 'smooth' 
     });
+  }
+
+  toggleClickToPaginate() {
+    this.clickToPaginate = !this.clickToPaginate;
+
+    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+      this.clickToPaginateVisualOverlayTimeout2 = undefined;
+    }
+    if (!this.clickToPaginate) { return; }
+
+    this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
+      this.showClickToPaginateVisualOverlay();
+    }, 200);
+  }
+
+  showClickToPaginateVisualOverlay() {
+    this.clickToPaginateVisualOverlay = true;
+
+    if (this.clickToPaginateVisualOverlay && this.clickToPaginateVisualOverlayTimeout !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
+      this.clickToPaginateVisualOverlayTimeout = undefined;
+    }
+    this.clickToPaginateVisualOverlayTimeout = setTimeout(() => {
+      this.clickToPaginateVisualOverlay = false;
+    }, 1000);
+
   }
 
 }

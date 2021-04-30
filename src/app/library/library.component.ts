@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs/operators';
-import { Chapter } from '../_models/chapter';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -52,6 +51,18 @@ export class LibraryComponent implements OnInit {
     //   chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
     //   this.continueReading = chapters;
     // });
+  }
+
+  reloadSeries() {
+    this.seriesService.getRecentlyAdded().subscribe((series) => {
+      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
+      this.recentlyAdded = series;
+    });
+
+    this.seriesService.getInProgress().subscribe((series) => {
+      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
+      this.inProgress = series;
+    });
   }
 
   handleSectionClick(sectionTitle: string) {

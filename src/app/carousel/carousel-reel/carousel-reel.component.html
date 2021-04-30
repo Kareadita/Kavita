@@ -6,9 +6,15 @@
             <button class="btn btn-icon" [disabled]="!canScrollRight" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="sr-only">Next Items</span></button>
         </div>
     </div>
-    <div class="carousel-reel" #contents>
-        <div *ngFor="let item of items; index as i" class="item">
-            <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-        </div>
+    <div>
+        <swiper
+            [slidesPerView]="'auto'"
+            (swiper)="onSwiper($event)"
+            [breakpoints]="slidesPerBreakpoint"
+            [freeMode]="true">
+            <ng-template *ngFor="let item of items; index as i" swiperSlide>
+                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            </ng-template>
+        </swiper>
     </div>
 </div>
