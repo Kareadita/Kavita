@@ -155,5 +155,13 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
         }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("refresh-metadata")]
+        public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
+        {
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            return Ok();
+        }
     }
 }

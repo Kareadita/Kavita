@@ -90,6 +90,12 @@ namespace API.Services
             BackgroundJob.Enqueue((() => DirectoryService.ClearDirectory(tempDirectory)));
         }
 
+        public void RefreshSeriesMetadata(int libraryId, int seriesId)
+        {
+            _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
+            BackgroundJob.Enqueue((() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId)));
+        }
+
         public void BackupDatabase()
         {
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());

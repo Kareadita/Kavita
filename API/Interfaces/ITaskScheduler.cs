@@ -10,5 +10,6 @@
         void CleanupChapters(int[] chapterIds);
         void RefreshMetadata(int libraryId, bool forceUpdate = true);
         void CleanupTemp();
+        void RefreshSeriesMetadata(int libraryId, int seriesId);
     }
 }
