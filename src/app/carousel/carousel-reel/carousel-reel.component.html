@@ -2,8 +2,8 @@
     <div>
         <h2 style="display: inline-block;"><a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title">{{title}}</a></h2>
         <div class="float-right">
-            <button class="btn btn-icon" [disabled]="!canScrollLeft" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="sr-only">Previous Items</span></button>
-            <button class="btn btn-icon" [disabled]="!canScrollRight" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="sr-only">Next Items</span></button>
+            <button class="btn btn-icon" [disabled]="swiper?.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="sr-only">Previous Items</span></button>
+            <button class="btn btn-icon" [disabled]="swiper?.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="sr-only">Next Items</span></button>
         </div>
     </div>
     <div>

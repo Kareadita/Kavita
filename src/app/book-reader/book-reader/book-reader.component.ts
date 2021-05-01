@@ -342,11 +342,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
-    window.scroll({
-      top: 0,
-      behavior: 'smooth'
-    });
-
 
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {});
 
@@ -366,6 +361,11 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           } else if (scrollTop !== undefined && scrollTop !== 0) {
             window.scroll({
               top: scrollTop,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scroll({
+              top: 0,
               behavior: 'smooth'
             });
           }

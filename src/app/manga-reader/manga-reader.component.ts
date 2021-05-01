@@ -203,15 +203,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case (ScalingOption.Automatic):
       {
         const windowWidth = window.innerWidth
-      || document.documentElement.clientWidth
-      || document.body.clientWidth;
-      const windowHeight = window.innerHeight
-      || document.documentElement.clientHeight
-      || document.body.clientHeight;
-      if (windowWidth < windowHeight) {
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+        const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
+
+        const ratio = windowWidth / windowHeight;
+        if (ratio > 0.6) {
+          return FITTING_OPTION.HEIGHT;
+        }
         return FITTING_OPTION.WIDTH;
-      }
-        return FITTING_OPTION.HEIGHT;
       }
       case (ScalingOption.FitToHeight):
         return FITTING_OPTION.HEIGHT;

@@ -171,9 +171,12 @@ $primary-color: #0062cc;
 
 
 // Click to Paginate styles
-
 .icon-primary-color {
     color: $primary-color;
+}
+
+.dark-mode .overlay {
+    opacity: 0;
 }
 
 .overlay {
@@ -185,8 +188,7 @@ $primary-color: #0062cc;
     right: 0;
     bottom: 0;
     z-index: 1;
-    color: white;
-
+    
 
     .tint {
         opacity: 0.4;
