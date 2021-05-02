@@ -60,6 +60,8 @@ namespace API.Tests.Parser
         [InlineData("NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar", "4")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
         [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
+        [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "1")]
+        
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -132,6 +134,7 @@ namespace API.Tests.Parser
         [InlineData("Kimetsu no Yaiba - Digital Colored Comics c162 Three Victorious Stars.cbz", "Kimetsu no Yaiba - Digital Colored Comics")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
         [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "NEEDLESS")]
+        [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "Okusama wa Shougakusei")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -191,6 +194,7 @@ namespace API.Tests.Parser
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
+        [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
