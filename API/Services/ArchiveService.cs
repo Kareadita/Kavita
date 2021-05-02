@@ -313,10 +313,10 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetSummaryInfo] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[GetSummaryInfo] This archive cannot be read: {ArchivePath}", archivePath);
                         return summary;
                     default:
-                        _logger.LogError("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogError("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}", archivePath);
                         return summary;
                 }
 
@@ -324,8 +324,6 @@ namespace API.Services
                 {
                     return info.Summary;
                 }
-
-                _logger.LogError("[GetSummaryInfo] Could not parse archive file: {Filepath}", archivePath);
             }
             catch (Exception ex)
             {
