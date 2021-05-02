@@ -10,7 +10,6 @@
         <swiper
             [slidesPerView]="'auto'"
             (swiper)="onSwiper($event)"
-            [cssMode]="true"
             [breakpoints]="slidesPerBreakpoint"
             [freeMode]="true">
             <ng-template *ngFor="let item of items; index as i" swiperSlide>
