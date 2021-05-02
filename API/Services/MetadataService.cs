@@ -124,7 +124,11 @@ namespace API.Services
           if (firstFile != null &&
               (forceUpdate || firstFile.HasFileBeenModified())) // !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified)
           {
-             series.Summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+             var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+             if (string.IsNullOrEmpty(series.Summary))
+             {
+                series.Summary = summary;
+             }
 
              firstFile.LastModified = DateTime.Now;
           }
