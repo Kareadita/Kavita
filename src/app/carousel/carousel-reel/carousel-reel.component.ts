@@ -15,7 +15,12 @@ export class CarouselReelComponent implements OnInit{
 
   swiper!: Swiper;
 
+
   slidesPerBreakpoint = {
+    200: {
+      slidesPerView: 1,
+      spaceBetween: 10,
+    },
     360: {
       slidesPerView: 3,
       spaceBetween: 10,
@@ -29,7 +34,7 @@ export class CarouselReelComponent implements OnInit{
       spaceBetween: 10,
     },
     1024: {
-      slidesPerView: 12,
+      slidesPerView: 10,
       spaceBetween: 10,
     },
       

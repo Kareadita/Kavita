@@ -212,8 +212,6 @@ export class SeriesDetailComponent implements OnInit {
           this.hasNonSpecialVolumeChapters = false;
         }
 
-        console.log('Specials: ', this.specials);
-
         this.isLoading = false;
       });
     });

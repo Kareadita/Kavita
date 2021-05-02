@@ -51,7 +51,7 @@ export class ManageSettingsComponent implements OnInit {
       this.resetForm();
       this.toastr.success('Server settings updated');
     }, (err: any) => {
-      console.log('err: ', err);
+      console.error('error: ', err);
     });
   }
 
