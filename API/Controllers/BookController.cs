@@ -64,7 +64,7 @@ namespace API.Controllers
             
             var navItems = await book.GetNavigationAsync();
             var chaptersList = new List<BookChapterItem>();
-            
+
             foreach (var navigationItem in navItems)
             {
                 if (navigationItem.NestedItems.Count > 0)
@@ -115,6 +115,53 @@ namespace API.Controllers
                         }
                     }
                 }
+            }
+
+            if (chaptersList.Count == 0)
+            {
+                // Generate from TOC
+                var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
+                if (tocPage == null) return Ok(chaptersList);
+                
+                // Find all anchor tags, for each anchor we get inner text, to lower then titlecase on UI. Get href and generate page content
+                var doc = new HtmlDocument();
+                var content = await book.Content.Html[tocPage].ReadContentAsync();
+                doc.LoadHtml(content);
+                var anchors = doc.DocumentNode.SelectNodes("//a");
+                if (anchors == null) return Ok(chaptersList);
+                
+                foreach (var anchor in anchors)
+                {
+                    if (anchor.Attributes.Contains("href"))
+                    {
+                        var key = BookService.CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
+                        if (!mappings.ContainsKey(key))
+                        {
+                            // Fallback to searching for key (bad epub metadata)
+                            var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+                            if (!string.IsNullOrEmpty(correctedKey))
+                            {
+                                key = correctedKey;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(key) && mappings.ContainsKey(key))
+                        {
+                            var part = string.Empty;
+                            if (anchor.Attributes["href"].Value.Contains("#"))
+                            {
+                                part = anchor.Attributes["href"].Value.Split("#")[1];
+                            }
+                            chaptersList.Add(new BookChapterItem()
+                            {
+                                Title = anchor.InnerText,
+                                Page = mappings[key],
+                                Part = part,
+                                Children = new List<BookChapterItem>()
+                            });
+                        }
+                    }
+                }
+                
             }
             return Ok(chaptersList);
         }

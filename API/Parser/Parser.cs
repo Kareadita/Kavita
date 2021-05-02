@@ -82,13 +82,13 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
-            new Regex(
-                @"(?<Series>.*)(?: _|-|\[|\() ?v",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
             new Regex(
                 @"(?<Series>.*)(\bc\d+\b)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
+            new Regex(
+                @"(?<Series>.*)(?: _|-|\[|\() ?v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
