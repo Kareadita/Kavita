@@ -65,9 +65,9 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.*)( |_)Vol\.?\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip
+            // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_)",
+            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_|-)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(

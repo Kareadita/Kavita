@@ -135,6 +135,7 @@ namespace API.Tests.Parser
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "Amaenaideyo MS")]
         [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "NEEDLESS")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "Okusama wa Shougakusei")]
+        [InlineData("VanDread-v01-c001[MD].zip", "VanDread")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
