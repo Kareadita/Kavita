@@ -350,27 +350,24 @@ namespace API.Data
                     .ToList();
                 series = series.Where(s => s.AppUserId == userId
                                            && s.PagesRead > 0
-                                           && s.PagesRead <
-                                           s.Series.Pages -
-                                           1 // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
+                                           && s.PagesRead < s.Series.Pages - 1 // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
                                            && userLibraries.Contains(s.Series.LibraryId));
             }
             else
             {
                 series = series.Where(s => s.AppUserId == userId
                             && s.PagesRead > 0
-                            && s.PagesRead <
-                            (s.Series.Pages - 1) // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
-                            && (s.Series.LibraryId == libraryId));
+                            && s.PagesRead < s.Series.Pages - 1 // - 1 because when reading, we start at 0 then go to pages - 1. But when summing, pages assumes starting at 1
+                            && s.Series.LibraryId == libraryId);
             }
-            var retSeries = await series.Take(limit)
+            var retSeries = await series
                 .OrderByDescending(s => s.LastModified)
                 .Select(s => s.Series)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
                 
-            return retSeries.DistinctBy(s => s.Name);
+            return retSeries.DistinctBy(s => s.Name).Take(limit); // SeriesDTO might need date information
         }
     }
 }
