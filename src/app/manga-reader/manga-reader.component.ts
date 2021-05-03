@@ -376,7 +376,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {});
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum + 1).subscribe(() => {/* No operation */});
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
