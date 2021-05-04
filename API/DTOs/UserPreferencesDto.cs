@@ -12,5 +12,6 @@ namespace API.DTOs
         public int BookReaderLineSpacing { get; set; }
         public int BookReaderFontSize { get; set; }
         public string BookReaderFontFamily { get; set; }
+        public bool BookReaderTapToPaginate { get; set; }
     }
 }

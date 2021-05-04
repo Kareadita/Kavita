@@ -88,6 +88,19 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
         }
+
+        /// <summary>
+        /// Returns the next logical volume from the series.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <returns>chapter id for next manga</returns>
+        [HttpGet("next-volume")]
+        public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId)
+        {
+            
+            return Ok();
+        }
         
 
         [HttpPost("update-rating")]

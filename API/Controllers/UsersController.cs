@@ -66,6 +66,7 @@ namespace API.Controllers
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
             existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
+            existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

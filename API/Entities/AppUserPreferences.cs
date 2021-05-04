@@ -38,6 +38,10 @@ namespace API.Entities
         /// Book Reader Option: Maps to the default Kavita font-family (inherit) or an override
         /// </summary>
         public string BookReaderFontFamily { get; set; } = "default";
+        /// <summary>
+        /// Book Reader Option: Allows tapping on side of screens to paginate
+        /// </summary>
+        public bool BookReaderTapToPaginate { get; set; } = false;
         
         
         
