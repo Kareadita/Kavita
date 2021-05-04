@@ -239,5 +239,80 @@ namespace API.Controllers
 
             return BadRequest("Could not save progress");
         }
+
+        /// <summary>
+        /// Returns the next logical volume from the series.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <param name="currentChapterId"></param>
+        /// <returns>chapter id for next manga</returns>
+        [HttpGet("next-chapter")]
+        public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+
+            var next = false;
+            if (currentVolume.Number == 0)
+            {
+                foreach (var chapter in currentVolume.Chapters)
+                {
+                    if (next)
+                    {
+                        return Ok(chapter.Id);
+                    }
+                    if (currentChapterId == chapter.Id) next = true;
+                }
+            }
+
+            foreach (var volume in volumes)
+            {
+                if (volume.Number == currentVolume.Number + 1)
+                {
+                    return Ok(volume.Chapters.FirstOrDefault()?.Id);
+                }
+            }
+            return Ok(-1);
+        }
+        
+        /// <summary>
+        /// Returns the previous logical volume from the series.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <returns>chapter id for next manga</returns>
+        [HttpGet("prev-chapter")]
+        public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+
+            var next = false;
+            if (currentVolume.Number == 0)
+            {
+                var chapters = currentVolume.Chapters.Reverse();
+                foreach (var chapter in chapters)
+                {
+                    if (next)
+                    {
+                        return Ok(chapter.Id);
+                    }
+                    if (currentChapterId == chapter.Id) next = true;
+                }
+            }
+
+            foreach (var volume in volumes.Reverse())
+            {
+                if (volume.Number == currentVolume.Number - 1)
+                {
+                    return Ok(volume.Chapters.LastOrDefault()?.Id);
+                }
+            }
+            return Ok(-1);
+        }
+        
     }
 }
