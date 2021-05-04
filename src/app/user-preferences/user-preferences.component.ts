@@ -65,6 +65,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []))
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []))
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []))
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.bookReaderTapToPaginate || false, []))
       }
     });
 
@@ -94,6 +95,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize);
     this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
+    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
   }
 
   resetPasswordForm() {
@@ -113,7 +115,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
-      bookReaderMargin: modelSettings.bookReaderMargin
+      bookReaderMargin: modelSettings.bookReaderMargin,
+      bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');

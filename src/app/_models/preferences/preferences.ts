@@ -11,4 +11,5 @@ export interface Preferences {
     bookReaderLineSpacing: number;
     bookReaderFontSize: number;
     bookReaderFontFamily: string;
+    bookReaderTapToPaginate: boolean;
 }

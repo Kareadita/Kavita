@@ -153,6 +153,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           if (this.user.preferences.bookReaderMargin === undefined) {
             this.user.preferences.bookReaderMargin = 0;
           }
+          this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
+          
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
   
           this.settingsForm.get('bookReaderFontFamily')!.valueChanges.subscribe(changes => {
@@ -519,7 +521,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
       bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
-      bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10)
+      bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
+      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate
     };
     this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
