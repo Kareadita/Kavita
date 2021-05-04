@@ -7,7 +7,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { LibraryService } from 'src/app/_services/library.service';
 
-// Represents a library type card. Uses a app-card-item internally
+// Represents a library type card.
 @Component({
   selector: 'app-library-card',
   templateUrl: './library-card.component.html',
