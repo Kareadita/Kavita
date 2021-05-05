@@ -53,7 +53,12 @@
         </div>
       </ul>
       
-
+      <div class="back-to-top">
+        <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
+          <i class="fa fa-angle-double-up" style="color: white" aria-hidden="true"></i>
+          <span class="sr-only">Scroll to Top</span>
+        </button>
+      </div>
       <!-- TODO: Put SignalR notification button dropdown here. -->
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>{{user.username | titlecase}}</button>

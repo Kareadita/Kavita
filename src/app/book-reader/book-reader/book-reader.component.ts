@@ -221,8 +221,9 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.pageNum = results.pageNum;
       this.bookTitle = results.info;
 
-      if (this.pageNum > this.maxPages) {
-        this.pageNum = this.maxPages;
+      if (this.pageNum >= this.maxPages) {
+        this.pageNum = this.maxPages - 1;
+        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
       }
 
       this.loadPage();
@@ -246,6 +247,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.toggleDrawer();
       event.stopPropagation();
       event.preventDefault(); 
+    } else if (event.key === KEY_CODES.G) {
+      this.goToPage();
     }
   }
 
@@ -345,13 +348,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    // Due to the fact that we start at image 0, but page 1, we need the last page to be bookmarked as page + 1 to be completed
-    let pageNum = this.pageNum;
-    if (this.pageNum == this.maxPages - 1) {
-      pageNum = this.pageNum + 1;
-    }
-
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {/* No operation */});
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);

@@ -17,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
+import { Stack } from '../shared/data-structures/stack';
 
 const PREFETCH_PAGES = 3;
 
@@ -72,6 +73,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private canvasImage = new Image();
 
   cachedImages!: CircularArray<HTMLImageElement>; // This is a circular array of size PREFETCH_PAGES + 2
+  continuousChaptersStack: Stack<number> = new Stack();
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -98,6 +100,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
+    this.continuousChaptersStack.push(this.chapterId);
+
     this.setOverrideStyles();
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -112,49 +116,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.splitForm = this.formBuilder.group({
           pageSplitOption: this.pageSplitOption + ''
         });
+        // On change of splitting, re-render the page if the page is already split
+        this.splitForm.valueChanges.subscribe(changes => {
+          const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+          if (needsSplitting) {
+            this.loadPage();
+          }
+        });
         this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
           if (!progress) {
             this.menuOpen = true;
             this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
           }
-        })
+        });
       }
     });
 
-    
 
-    forkJoin({
-      chapter: this.seriesService.getChapter(this.chapterId),
-      pageNum: this.readerService.getBookmark(this.chapterId),
-      chapterPath: this.readerService.getChapterPath(this.chapterId)
-    }).subscribe(results => {
-      this.chapter = results.chapter;
-      this.volumeId = results.chapter.volumeId;
-      this.maxPages = results.chapter.pages;
-
-      this.pageNum = results.pageNum;
-
-      if (this.pageNum > this.maxPages) {
-        this.pageNum = this.maxPages;
-      }
-
-
-      const images = [];
-      for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
-        images.push(new Image());
-      }
-
-      this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
-
-      this.mangaFileName = results.chapterPath;
-
-      this.loadPage();
-
-    }, () => {
-      setTimeout(() => {
-        this.closeReader();
-      }, 200);
-    });
+    this.init();
   }
 
   ngAfterViewInit() {
@@ -183,7 +162,44 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.closeReader();
     } else if (event.key === KEY_CODES.SPACE) {
       this.toggleMenu();
+    } else if (event.key === KEY_CODES.G) {
+      this.goToPage();
     }
+  }
+
+  init() {
+    forkJoin({
+      chapter: this.seriesService.getChapter(this.chapterId),
+      pageNum: this.readerService.getBookmark(this.chapterId),
+      chapterPath: this.readerService.getChapterPath(this.chapterId)
+    }).subscribe(results => {
+      this.chapter = results.chapter;
+      this.volumeId = results.chapter.volumeId;
+      this.maxPages = results.chapter.pages;
+
+      this.pageNum = results.pageNum;
+
+      if (this.pageNum >= this.maxPages) {
+        this.pageNum = this.maxPages - 1;
+      }
+
+
+      const images = [];
+      for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
+        images.push(new Image());
+      }
+
+      this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
+
+      this.mangaFileName = results.chapterPath;
+
+      this.loadPage();
+
+    }, () => {
+      setTimeout(() => {
+        this.closeReader();
+      }, 200);
+    });
   }
 
   closeReader() {
@@ -297,6 +313,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
     if ((this.pageNum + 1 >= this.maxPages && notInSplit) || this.isLoading) {
+
+      if (this.isLoading) { return; }
+
+      // Move to next volume/chapter automatically
+      this.isLoading = true;
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+        this.loadChapter(chapterId);
+      });
       return;
     }
 
@@ -318,6 +342,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
+
+      if (this.isLoading) { return; }
+
+      this.isLoading = true;
+
+      // Move to next volume/chapter automatically
+      this.continuousChaptersStack.pop();
+      const prevChapter = this.continuousChaptersStack.peek();
+      if (prevChapter != this.chapterId) {
+        if (prevChapter !== undefined) {
+          this.chapterId = prevChapter;
+          this.init();
+          return;
+        }
+      }
+      
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+        this.loadChapter(chapterId);
+      });  
       return;
     }
 
@@ -328,6 +371,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.loadPage();
+  }
+
+  loadChapter(chapterId: number) {
+    if (chapterId >= 0) {
+      this.chapterId = chapterId;
+      this.continuousChaptersStack.push(chapterId);
+      this.init();
+    }
   }
 
   renderPage() {
@@ -404,7 +455,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   promptForPage() {
-    const goToPageNum = window.prompt('What page would you like to go to?', '');
+    const goToPageNum = window.prompt('There are ' + this.maxPages + ' pages. What page would you like to go to?', '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }

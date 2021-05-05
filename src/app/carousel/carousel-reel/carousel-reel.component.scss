@@ -15,3 +15,7 @@
     margin-left: 10px;
     text-decoration: none;
 }
+
+::ng-deep .swiper-slide {
+    width: auto !important;
+}

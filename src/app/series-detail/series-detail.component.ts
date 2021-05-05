@@ -194,7 +194,7 @@ export class SeriesDetailComponent implements OnInit {
       this.createHTML();
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); // volumes.filter(!v.isSpecial && )
+        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.setContinuePoint();
@@ -227,33 +227,10 @@ export class SeriesDetailComponent implements OnInit {
     this.currentlyReadingChapter = undefined;
     this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
 
-    for (let v of this.volumes) {
-      if (v.number === 0) {
-        continue;
-      } else if (v.pagesRead >= v.pages - 1) {
-        continue;
-      } else if (v.pagesRead < v.pages - 1) {
-        this.currentlyReadingVolume = v;
-        break;
-      }
-    }
-
-    if (this.currentlyReadingVolume === undefined) {
-      // We need to check against chapters
-      this.chapters.forEach(c => {
-        if (c.pagesRead >= c.pages) {
-          return;
-        } else if (this.currentlyReadingChapter === undefined) {
-          this.currentlyReadingChapter = c;
-        }
-      });
-      if (this.currentlyReadingChapter === undefined) {
-        // Default to first chapter
-        this.currentlyReadingChapter = this.chapters[0];
-      }
-    }
+    const [currentVolume, currentChapter] = this.readerService.getCurrentVolumeAndChapter(this.volumes);
+    this.currentlyReadingVolume = currentVolume;
+    this.currentlyReadingChapter = currentChapter;
   }
-
 
   markAsRead(vol: Volume) {
     if (this.series === undefined) {

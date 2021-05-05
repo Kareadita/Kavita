@@ -23,7 +23,7 @@
                     <div class="row no-gutters">
                         <button class="btn btn-small btn-icon col-2" (click)="goToPage(0)"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                         <div class="col-8">
-                            <ngb-progressbar type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()" style="margin: 0 auto;margin-top: 10px"></ngb-progressbar>
+                            <ngb-progressbar title="Go to page" type="info" [value]="pageNum + 1" [max]="maxPages" (click)="goToPage()" style="margin: 0 auto; margin-top: 10px"></ngb-progressbar>
                         </div>
                         <button class="btn btn-small btn-icon col-2" (click)="goToPage(maxPages)"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                     </div>

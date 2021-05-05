@@ -35,3 +35,15 @@ $primary-color: white;
     }
 }
 
+.scroll-to-top:hover {
+    animation: MoveUpDown 1s linear infinite;
+}
+
+@keyframes MoveUpDown {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+}

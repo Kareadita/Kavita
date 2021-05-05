@@ -15,31 +15,6 @@ export class CarouselReelComponent implements OnInit{
 
   swiper!: Swiper;
 
-
-  slidesPerBreakpoint = {
-    200: {
-      slidesPerView: 1,
-      spaceBetween: 10,
-    },
-    360: {
-      slidesPerView: 3,
-      spaceBetween: 10,
-    },
-    640: {
-      slidesPerView: 3,
-      spaceBetween: 10,
-    },
-    768: {
-      slidesPerView: 4,
-      spaceBetween: 10,
-    },
-    1024: {
-      slidesPerView: 10,
-      spaceBetween: 10,
-    },
-      
-  }
-
   constructor() { }
 
   ngOnInit(): void {}

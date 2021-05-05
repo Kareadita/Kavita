@@ -3,7 +3,7 @@
       <img *ngIf="total > 0" class="card-img-top" [lazyLoad]="imageUrl" [defaultImage]="imageSerivce.placeholderImage" alt="title">
       <img *ngIf="total === 0" class="card-img-top" [lazyLoad]="imageSerivce.errorImage" alt="title">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
-        <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total - 1"></ngb-progressbar></p>
+        <p><ngb-progressbar type="warning" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
       </div>
       <div class="error-banner" *ngIf="total === 0">
         Cannot Read Archive

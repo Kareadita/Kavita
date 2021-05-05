@@ -7,7 +7,8 @@ export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
   LEFT_ARROW = 'ArrowLeft',
   ESC_KEY = 'Escape',
-  SPACE = ' '
+  SPACE = ' ',
+  G = 'g'
 }
 
 @Injectable({

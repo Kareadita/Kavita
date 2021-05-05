@@ -27,7 +27,7 @@
     "@angular/platform-browser-dynamic": "~11.0.0",
     "@angular/router": "~11.0.0",
     "@fortawesome/fontawesome-free": "^5.15.1",
-    "@ng-bootstrap/ng-bootstrap": "^8.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^9.1.0",
     "@ngx-lite/nav-drawer": "^0.4.6",
     "@ngx-lite/util": "0.0.0",
     "@types/file-saver": "^2.0.1",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.1100.0",
-    "@angular/cli": "~11.0.0",
+    "@angular/cli": "^11.2.11",
     "@angular/compiler-cli": "~11.0.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^12.11.1",

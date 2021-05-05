@@ -66,8 +66,8 @@
                     </div>
                     <div class="form-group">
                         <label for="settings-fontfamily-option">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
-                        <ng-template #fontFamilyOptionTooltip>Default Font familty to load up. Default will load the book's default font</ng-template>
-                        <span class="sr-only" id="settings-fontfamily-option-help">Default Font familty to load up. Default will load the book's default font</span>
+                        <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
+                        <span class="sr-only" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
                         <select class="form-control" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
                             <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
                         </select>
