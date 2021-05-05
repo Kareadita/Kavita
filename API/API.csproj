@@ -9,6 +9,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
+    <ApplicationIcon>../favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
