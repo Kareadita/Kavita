@@ -23,14 +23,6 @@
         </app-carousel-reel>
     </div>
 
-    <!-- <div class="">
-        <app-carousel-reel [items]="continueReading" title="Continue Reading" (sectionClick)="handleSectionClick($event)">
-            <ng-template #carouselItem let-item let-position="idx">
-                <app-card-item [entity]="item" title="{{item.seriesName}} {{item.number === '0' ? 'Vol' + '?' : 'Ch' + item.range}}" [imageUrl]="item.coverImage"></app-card-item>
-            </ng-template>
-        </app-carousel-reel>
-    </div> -->
-
     <div class="">
         <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
             <ng-template #carouselItem let-item let-position="idx">

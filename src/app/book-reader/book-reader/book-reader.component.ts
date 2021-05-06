@@ -133,6 +133,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService) {
       this.navService.hideNavBar();
+
+
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
       this.fontFamilies = this.bookService.getFontFamilies();
@@ -160,6 +162,11 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           this.settingsForm.get('bookReaderFontFamily')!.valueChanges.subscribe(changes => {
             this.updateFontFamily(changes);
           });
+        }
+
+        const bodyNode = document.querySelector('body');
+        if (bodyNode !== undefined && bodyNode !== null) {
+          this.originalBodyColor = bodyNode.style.background;
         }
         this.resetSettings();
       });
@@ -495,7 +502,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      this.originalBodyColor = bodyNode.style.background;
+      //this.originalBodyColor = bodyNode.style.background;
       bodyNode.style.background = this.getDarkModeBackgroundColor();
     }
     this.backgroundColor = this.getDarkModeBackgroundColor();
@@ -522,7 +529,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate
     };
     this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('Server settings updated');
+      this.toastr.success('User settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
       }
