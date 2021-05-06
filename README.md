@@ -31,9 +31,14 @@ your manga collection with your friends and family!
 - Place in a directory that is writable. If on windows, do not place in Program Files
 - Open appsettings.json and modify TokenKey to a random string ideally generated from [https://passwordsgenerator.net/](https://passwordsgenerator.net/)
 - Run Kavita
+- If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
 
 ## Docker
 - Docker is supported and tested, you can find the image and instructions [here](https://github.com/Kizaing/KavitaDocker). 
+
+## Want to help?
+I am looking for developers with a passion for building the next Plex for Manga, Comics, and Ebooks. I need developers with C#/ASP.NET, Angular 11 or CSS experience. 
+Reach out to me on [Discord]((https://discord.gg/eczRp9eeem)).  
 
 ## Buy me a beer
 I've gone through many beers building Kavita and expect to go through many more. If you want to throw me a few bucks you can [here](https://paypal.me/majora2007?locale.x=en_US). Money will go 
