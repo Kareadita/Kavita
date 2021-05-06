@@ -48,7 +48,7 @@ namespace API.Parser
         /// <summary>
         /// If the file contains no volume/chapter information or contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
         /// </summary>
-        public bool IsSpecial { get; set; } = false;
+        public bool IsSpecial { get; set; }
 
         /// <summary>
         /// Used for specials or books, stores what the UI should show.

@@ -2,9 +2,9 @@
 
 namespace API.Comparators
 {
-    public class ChapterSortComparer : IComparer<float>
+    public class ChapterSortComparer : IComparer<double>
     {
-        public int Compare(float x, float y)
+        public int Compare(double x, double y)
         {
             if (x == 0.0 && y == 0.0) return 0;
             // if x is 0, it comes second
