@@ -1,10 +1,4 @@
-﻿using System;
-using System.IO;
-using API.Extensions;
-using NSubstitute;
-using Xunit;
-
-namespace API.Tests.Extensions
+﻿namespace API.Tests.Extensions
 {
     public class FileInfoExtensionsTests
     {

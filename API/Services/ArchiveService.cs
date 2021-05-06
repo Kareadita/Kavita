@@ -168,7 +168,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        var entryNames = archive.Entries.Where(entry => !entry.IsDirectory).Select(e => e.Key).ToList();
+                        var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
                         
                         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);

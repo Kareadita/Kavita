@@ -1,6 +1,4 @@
-﻿using System;
-using API.Data;
-using API.Tests.Helpers;
+﻿using API.Data;
 using Xunit;
 
 namespace API.Tests.Entities

@@ -29,10 +29,8 @@ namespace API.Tests.Services
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         private readonly IBookService _bookService = Substitute.For<IBookService>();
-        private readonly IMetadataService _metadataService;
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
 
         private readonly DbConnection _connection;
@@ -58,13 +56,12 @@ namespace API.Tests.Services
             
             
             // Substitute.For<UserManager<AppUser>>() - Not needed because only for UserService
-            _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null,
-                Substitute.For<ILogger<UnitOfWork>>());
+            IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
             
             
             _testOutputHelper = testOutputHelper;
-            _metadataService= Substitute.For<MetadataService>(_unitOfWork, _metadataLogger, _archiveService, _bookService);
-            _scannerService = new ScannerService(_unitOfWork, _logger, _archiveService, _metadataService, _bookService);
+            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService);
+            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService);
         }
 
         private async Task<bool> SeedDb()
@@ -118,10 +115,9 @@ namespace API.Tests.Services
                 OriginalName = "Darker Than Black",
                 NormalizedName = API.Parser.Parser.Normalize("Darker Than Black")
             });
-            var expectedSeries = new List<Series>();
-            
-            
-            
+
+
+
             Assert.Empty(_scannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
 

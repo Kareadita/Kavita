@@ -276,12 +276,13 @@ namespace API.Controllers
             }
             return Ok(-1);
         }
-        
+
         /// <summary>
         /// Returns the previous logical volume from the series.
         /// </summary>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
+        /// <param name="currentChapterId"></param>
         /// <returns>chapter id for next manga</returns>
         [HttpGet("prev-chapter")]
         public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)

@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -20,6 +20,7 @@ namespace API.Services
        private readonly ILogger<MetadataService> _logger;
        private readonly IArchiveService _archiveService;
        private readonly IBookService _bookService;
+       private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
        public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService, IBookService bookService)
        {
@@ -61,10 +62,9 @@ namespace API.Services
        {
           if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
           {
-             // TODO: Replace this with ChapterSortComparator
              volume.Chapters ??= new List<Chapter>();
-             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number)).FirstOrDefault(); 
-             
+             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+
              // Skip calculating Cover Image (I/O) if the chapter already has it set
              if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
              {
@@ -83,7 +83,6 @@ namespace API.Services
 
        public void UpdateMetadata(Series series, bool forceUpdate)
        {
-          // TODO: Use new ChapterSortComparer() here instead
           if (series == null) return;
           if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
           {
@@ -95,13 +94,13 @@ namespace API.Services
                 // If firstCover is null and one volume, the whole series is Chapters under Vol 0. 
                 if (series.Volumes.Count == 1)
                 {
-                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number))
+                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
                       .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
                 }
 
                 if (coverImage == null)
                 {
-                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number))
+                   coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
                       .FirstOrDefault()?.CoverImage;
                 }
              }

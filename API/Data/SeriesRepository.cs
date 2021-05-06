@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -10,7 +9,6 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -18,13 +16,11 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
 
-        public SeriesRepository(DataContext context, IMapper mapper, ILogger logger)
+        public SeriesRepository(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
 
         public void Add(Series series)
@@ -289,6 +285,7 @@ namespace API.Data
         /// <summary>
         /// Returns a list of Series that were added, ordered by Created desc
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>

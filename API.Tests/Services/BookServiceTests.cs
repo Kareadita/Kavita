@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using API.Entities.Interfaces;
 using API.Interfaces;
 using API.Services;
 using Microsoft.Extensions.Logging;

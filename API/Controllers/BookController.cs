@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Entities.Interfaces;
 using API.Extensions;
 using API.Interfaces;
 using API.Services;

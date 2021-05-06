@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using API.Services;
+﻿using System.IO;
 
 namespace API.Tests.Helpers
 {

@@ -6,10 +6,13 @@ using static System.String;
 
 namespace API.Comparators
 {
-    public class NaturalSortComparer : IComparer<string>, IDisposable
+    public sealed class NaturalSortComparer : IComparer<string>, IDisposable
     {
         private readonly bool _isAscending;
         private Dictionary<string, string[]> _table = new();
+        
+        private bool _disposed;
+
 
         public NaturalSortComparer(bool inAscendingOrder = true)
         {
@@ -20,17 +23,17 @@ namespace API.Comparators
         {
             if (x == y) return 0;
 
-            if (!_table.TryGetValue(x, out var x1))
+            if (!_table.TryGetValue(x ?? Empty, out var x1))
             {
                 // .Replace(" ", Empty)
-                x1 = Regex.Split(x, "([0-9]+)");
-                _table.Add(x, x1);
+                x1 = Regex.Split(x ?? Empty, "([0-9]+)");
+                _table.Add(x ?? Empty, x1);
             }
 
-            if (!_table.TryGetValue(y, out var y1))
+            if (!_table.TryGetValue(y ?? Empty, out var y1))
             {
-                y1 = Regex.Split(y, "([0-9]+)");
-                _table.Add(y, y1);
+                y1 = Regex.Split(y ?? Empty, "([0-9]+)");
+                _table.Add(y ?? Empty, y1);
             }
 
             int returnVal;
@@ -69,11 +72,31 @@ namespace API.Comparators
             return x.CompareTo(y);
         }
 
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // called via myClass.Dispose(). 
+                    _table.Clear();
+                    _table = null;
+                }
+                // Release unmanaged resources.
+                // Set large fields to null.                
+                _disposed = true;
+            }
+        }
+
         public void Dispose()
         {
+            Dispose(true);
             SuppressFinalize(this);
-            _table.Clear();
-            _table = null;
+        }
+        
+        ~NaturalSortComparer() // the finalizer
+        {
+            Dispose(false);
         }
     }
 }
