@@ -57,6 +57,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       if (user) {
         this.user = user;
 
+        if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
+          this.user.preferences.bookReaderFontFamily = 'default';
+        }
+
         this.settingsForm.addControl('readingDirection', new FormControl(user.preferences.readingDirection, []));
         this.settingsForm.addControl('scalingOption', new FormControl(user.preferences.scalingOption, []));
         this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));

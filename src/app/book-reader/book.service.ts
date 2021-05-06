@@ -20,7 +20,7 @@ export class BookService {
   constructor(private http: HttpClient) { }
 
   getFontFamilies() {
-    return ['default', 'EBGaramond', 'Fira Sans', 'Lato', 'Libre Baskerville', 'Libre Caslon', 'Merriweather', 'Nanum Gothic', 'Oswald', 'RocknRoll One'];
+    return ['default', 'EBGaramond', 'Fira Sans', 'Lato', 'Libre Baskerville', 'Merriweather', 'Nanum Gothic', 'RocknRoll One'];
   }
 
   getBookChapters(chapterId: number) {

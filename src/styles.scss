@@ -1,22 +1,3 @@
-
-//html, body { height: 100%; }
-// body { 
-//   margin: 0; 
-//   font-family: Open Sans, Helvetica Neue, Helvetica, Arial, sans-serif;
-//   background: #3f4245 url('./assets/images/preset-light.png');
-//   background-size: cover;
-//   background-position: center center;
-//   background-repeat: no-repeat;
-//   background-attachment: fixed;
-//   //color: rgba(255, 255, 255, 0.7);
-// }
-
-
-
-// input, a, p {
-//   color: hsla(0,0%,100%,.45);
-// }
-
 /* Importing Bootstrap SCSS file. */
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
@@ -64,28 +45,6 @@ button:disabled {
 
 
 // TODO: Move the Plex theme into a separate file and copy how  https://bootswatch.com/darkly/ did it
-// h1, h2, h3, h4, h5, h6 {
-//   color: white;
-// }
-
-// p, label {
-//   color: rgba(255, 255, 255, 0.7);
-// }
-
-// label {
-//   color: rgb(238, 238, 238);
-//   font-size: 13px;
-// }
-
-// .btn-primary {
-//   text-transform: uppercase;
-//   border-radius: 3px;
-//   border: 0;
-//   background-color: #cc7b19 !important;
-//   &:hover {
-//       background-color: darken(#cc7b19, 10%) !important;
-//   }
-// }
 html, body { height: 100%; }
 body {
   margin: 0; 

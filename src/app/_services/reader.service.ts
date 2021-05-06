@@ -50,9 +50,9 @@ export class ReaderService {
     for (let v of volumes) {
       if (v.number === 0) {
         continue;
-      } else if (v.pagesRead >= v.pages) {
+      } else if (v.pagesRead >= v.pages - 1) {
         continue;
-      } else if (v.pagesRead < v.pages) {
+      } else if (v.pagesRead < v.pages - 1) {
         currentlyReadingVolume = v;
         break;
       }

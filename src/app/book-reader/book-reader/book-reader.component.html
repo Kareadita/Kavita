@@ -44,15 +44,14 @@
                     </div>
                     <div class="controls">
                         <label id="darkmode">Dark Mode</label>
-                        <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode"><i class="fa fa-sun" aria-hidden="true"></i></button>
-                        <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode"><i class="fa fa-moon" aria-hidden="true"></i></button>
+                        <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
+                        <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
                         <label id="tap-pagination">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
                         <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
                         <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
-                        <!-- <button (click)="showClickToPaginateVisualOverlay()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-fill-drip  {{clickToPaginateVisualOverlay ? 'icon-primary-color' : ''}}" aria-hidden="true"></i></button> -->
                     </div>
                     <div class="row no-gutters justify-content-between">
                         <button (click)="resetSettings()" class="btn btn-secondary col">Reset</button>
@@ -63,7 +62,7 @@
                 <div class="table-of-contents">
                     <h3>Table of Contents</h3>
                     <div *ngIf="chapters.length === 0">
-                        <em>This book does not have Table of Contents set in the metadata</em>
+                        <em>This book does not have Table of Contents set in the metadata or a toc file</em>
                     </div>
                     <div *ngIf="chapters.length === 1; else nestedChildren">
                         <ul>
