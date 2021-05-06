@@ -90,6 +90,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?: _|-|\[|\() ?v",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz
+            new Regex(
+                @"(?<Series>.*) (\b|_|-)(?:chapter)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
                 @"(?<Series>.*) (\b|_|-)v",
