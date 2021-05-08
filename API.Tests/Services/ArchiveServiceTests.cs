@@ -2,10 +2,10 @@
 using System.IO;
 using System.IO.Compression;
 using API.Archive;
-using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -14,7 +14,7 @@ namespace API.Tests.Services
     public class ArchiveServiceTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        private readonly IArchiveService _archiveService;
+        private readonly ArchiveService _archiveService;
         private readonly ILogger<ArchiveService> _logger = Substitute.For<ILogger<ArchiveService>>();
 
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
@@ -58,6 +58,9 @@ namespace API.Tests.Services
         [InlineData("file in folder in folder.zip", 1)]
         [InlineData("file in folder.zip", 1)]
         [InlineData("file in folder_alt.zip", 1)]
+        [InlineData("macos_none.zip", 0)]
+        [InlineData("macos_one.zip", 1)]
+        [InlineData("macos_native.zip", 21)]
         public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
@@ -110,6 +113,34 @@ namespace API.Tests.Services
             
             DirectoryService.ClearAndDeleteDirectory(extractDirectory);
         }
+
+
+        [Theory]
+        [InlineData(new [] {"folder.jpg"}, "folder.jpg")]
+        [InlineData(new [] {"vol1/"}, "")]
+        [InlineData(new [] {"folder.jpg", "vol1/folder.jpg"}, "folder.jpg")]
+        [InlineData(new [] {"cover.jpg", "vol1/folder.jpg"}, "cover.jpg")]
+        [InlineData(new [] {"__MACOSX/cover.jpg", "vol1/page 01.jpg"}, "")]
+        [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "folder.jpg")]
+        public void FindFolderEntry(string[] files, string expected)
+        {
+            var foundFile = _archiveService.FindFolderEntry(files);
+            Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
+        }
+
+        [Theory]
+        [InlineData(new [] {"folder.jpg"}, "folder.jpg")]
+        [InlineData(new [] {"vol1/"}, "")]
+        [InlineData(new [] {"folder.jpg", "vol1/folder.jpg"}, "folder.jpg")]
+        [InlineData(new [] {"cover.jpg", "vol1/folder.jpg"}, "cover.jpg")]
+        [InlineData(new [] {"page 2.jpg", "page 10.jpg"}, "page 2.jpg")]
+        [InlineData(new [] {"__MACOSX/cover.jpg", "vol1/page 01.jpg"}, "vol1/page 01.jpg")]
+        [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg")]
+        public void FindFirstEntry(string[] files, string expected)
+        {
+            var foundFile = _archiveService.FirstFileEntry(files);
+            Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
+        }
         
         
         
@@ -118,20 +149,47 @@ namespace API.Tests.Services
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
         [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
         //[InlineData("png.zip", "png.PNG")]
-        public void GetCoverImageTest(string inputFile, string expectedOutputFile)
+        [InlineData("macos_native.zip", "macos_native.jpg")]
+        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.jpg")]
+        [InlineData("sorting.zip", "sorting.expected.jpg")]
+        public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
         {
+            var archiveService =  Substitute.For<ArchiveService>(_logger);
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
+            archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.Equal(expectedBytes, _archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            Assert.Equal(expectedBytes, archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
+        }
+        
+        
+        [Theory]
+        [InlineData("v10.cbz", "v10.expected.jpg")]
+        [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
+        [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
+        //[InlineData("png.zip", "png.PNG")]
+        [InlineData("macos_native.zip", "macos_native.jpg")]
+        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.jpg")]
+        [InlineData("sorting.zip", "sorting.expected.jpg")]
+        public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
+        {
+            var archiveService =  Substitute.For<ArchiveService>(_logger);
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
+            var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
+            
+            archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
+            Stopwatch sw = Stopwatch.StartNew();
+            Assert.Equal(expectedBytes, archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
         }
 
         [Theory]
-        [InlineData("06_v01[DMM].zip")]
+        [InlineData("Archives/macos_native.zip")]
+        [InlineData("Formats/One File with DB_Supported.zip")]
         public void CanParseCoverImage(string inputFile)
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
             Assert.NotEmpty(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
         }
 

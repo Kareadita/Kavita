@@ -3,7 +3,6 @@ using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -12,23 +11,23 @@ namespace API.Data
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
-        private readonly ILogger<UnitOfWork> _logger;
 
-        public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager, ILogger<UnitOfWork> logger)
+        public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
-            _logger = logger;
         }
 
-        public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper, _logger);
+        public ISeriesRepository SeriesRepository => new SeriesRepository(_context, _mapper);
         public IUserRepository UserRepository => new UserRepository(_context, _userManager);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
         public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
 
         public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
+
+        public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         
         public async Task<bool> Complete()
         {

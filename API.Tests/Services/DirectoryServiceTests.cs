@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using API.Services;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,17 @@ namespace API.Tests.Services
         public DirectoryServiceTests()
         {
             _directoryService = new DirectoryService(_logger);
+        }
+
+        [Fact]
+        public void GetFilesTest_Should_Be28()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga");
+            var files = new List<string>();
+            var fileCount = DirectoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
+                API.Parser.Parser.ArchiveFileExtensions, _logger);
+            
+            Assert.Equal(28, fileCount);
         }
 
         [Fact]
@@ -73,6 +85,18 @@ namespace API.Tests.Services
             var dirs = _directoryService.ListDirectory("");
             Assert.DoesNotContain(dirs, s => s.Contains("regex"));
 
+        }
+
+        [Theory]
+        [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake", "Omake,Specials,Love Hina")]
+        [InlineData("C:/Manga", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        [InlineData("C:/Manga", @"C:\Manga\Love Hina\Specials\Omake\", "Omake,Specials,Love Hina")]
+        [InlineData(@"/manga/", @"/manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
+        {
+            var expected = expectedArray.Split(",");
+            Assert.Equal(expected, DirectoryService.GetFoldersTillRoot(rootPath, fullpath));
         }
     }
 }

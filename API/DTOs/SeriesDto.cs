@@ -1,4 +1,6 @@
-﻿namespace API.DTOs
+﻿using System;
+
+namespace API.DTOs
 {
     public class SeriesDto
     {
@@ -21,7 +23,10 @@
         /// Review from logged in user. Calculated at API-time.
         /// </summary>
         public string UserReview { get; set; }
+        
+        public DateTime Created { get; set; }
 
         public int LibraryId { get; set; }
+        public string LibraryName { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace API.Interfaces
         void Add(Series series);
         void Update(Series series);
         Task<Series> GetSeriesByNameAsync(string name);
+        Task<bool> DoesSeriesNameExistInLibrary(string name);
         Series GetSeriesByName(string name);
 
         /// <summary>
@@ -57,6 +58,6 @@ namespace API.Interfaces
         Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
         Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit);
-        Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit);
+        Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit);
     }
 }

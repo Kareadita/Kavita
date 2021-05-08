@@ -2,7 +2,7 @@
 {
     public static class PolicyConstants
     {
-        public static readonly string AdminRole = "Admin";
-        public static readonly string PlebRole = "Pleb";
+        public const string AdminRole = "Admin";
+        public const string PlebRole = "Pleb";
     }
 }

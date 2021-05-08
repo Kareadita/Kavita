@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Parser;
 
 namespace API.Entities
 {
@@ -26,10 +28,31 @@ namespace API.Entities
         /// Total number of pages in all MangaFiles
         /// </summary>
         public int Pages { get; set; }
+        /// <summary>
+        /// If this Chapter contains files that could only be identified as Series or has Special Identifier from filename
+        /// </summary>
+        public bool IsSpecial { get; set; }
+        /// <summary>
+        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/> 
+        /// </summary>
+        public string Title { get; set; }
 
         // Relationships
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
 
+        public void UpdateFrom(ParserInfo info)
+        {
+            Files ??= new List<MangaFile>();
+            IsSpecial = info.IsSpecialInfo();
+            if (IsSpecial)
+            {
+                Number = "0";
+            }
+            Title = (IsSpecial && info.Format == MangaFormat.Book)
+                ? info.Title
+                : Range;
+            
+        }
     }
 }

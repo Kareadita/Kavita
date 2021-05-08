@@ -5,8 +5,6 @@ using API.Helpers.Converters;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -22,11 +20,10 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
-        
+
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
-            IWebHostEnvironment env)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -35,29 +32,19 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
-
-            if (!env.IsDevelopment())
-            {
-                ScheduleTasks();
-            }
-            else
-            {
-                RecurringJob.RemoveIfExists("scan-libraries");
-                RecurringJob.RemoveIfExists("backup");
-                RecurringJob.RemoveIfExists("cleanup");
-            }
-            
         }
 
         public void ScheduleTasks()
         {
             _logger.LogInformation("Scheduling reoccurring tasks");
             
-            string setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Result.Value;
+            var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Scan Library Task for {Cron}", setting);
-                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), () => CronConverter.ConvertToCronNotation(setting));
+                var scanLibrarySetting = setting;
+                _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
+                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), 
+                    () => CronConverter.ConvertToCronNotation(scanLibrarySetting));
             }
             else
             {
@@ -67,7 +54,7 @@ namespace API.Services
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Result.Value;
             if (setting != null)
             {
-                _logger.LogDebug("Scheduling Backup Task for {Cron}", setting);
+                _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
                 RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
             }
             else
@@ -80,10 +67,10 @@ namespace API.Services
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
-            // TODO: We shouldn't queue up a job if one is already in progress
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
-            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); // When we do a scan, force cache to re-unpack in case page numbers change
+            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate)); 
+            // When we do a scan, force cache to re-unpack in case page numbers change
+            BackgroundJob.Enqueue(() => _cleanupService.Cleanup()); 
         }
 
         public void CleanupChapters(int[] chapterIds)
@@ -101,6 +88,12 @@ namespace API.Services
         {
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
             BackgroundJob.Enqueue((() => DirectoryService.ClearDirectory(tempDirectory)));
+        }
+
+        public void RefreshSeriesMetadata(int libraryId, int seriesId)
+        {
+            _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
+            BackgroundJob.Enqueue((() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId)));
         }
 
         public void BackupDatabase()

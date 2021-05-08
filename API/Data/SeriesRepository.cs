@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -10,7 +9,6 @@ using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data
 {
@@ -18,13 +16,11 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger _logger;
 
-        public SeriesRepository(DataContext context, IMapper mapper, ILogger logger)
+        public SeriesRepository(DataContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _logger = logger;
         }
 
         public void Add(Series series)
@@ -51,6 +47,19 @@ namespace API.Data
         {
             return await _context.Series.SingleOrDefaultAsync(x => x.Name == name);
         }
+
+        public async Task<bool> DoesSeriesNameExistInLibrary(string name)
+        {
+            var libraries = _context.Series
+                .AsNoTracking()
+                .Where(x => x.Name == name)
+                .Select(s => s.LibraryId);
+
+            return await _context.Series
+                .AsNoTracking()
+                .Where(s => libraries.Contains(s.LibraryId) && s.Name == name)
+                .CountAsync() > 1;
+        }
         
         public Series GetSeriesByName(string name)
         {
@@ -67,15 +76,12 @@ namespace API.Data
         
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
         {
-            var sw = Stopwatch.StartNew();
             var query =  _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
-
-            _logger.LogDebug("Processed GetSeriesDtoForLibraryIdAsync in {ElapsedMilliseconds} milliseconds", sw.ElapsedMilliseconds);
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
         
@@ -279,22 +285,43 @@ namespace API.Data
         /// <summary>
         /// Returns a list of Series that were added, ordered by Created desc
         /// </summary>
+        /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int libraryId, int limit)
+        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit)
         {
+            if (libraryId == 0)
+            {
+                var userLibraries = _context.Library
+                    .Include(l => l.AppUsers)
+                    .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                    .AsNoTracking()
+                    .Select(library => library.Id)
+                    .ToList();
+            
+                return await _context.Series
+                    .Where(s => userLibraries.Contains(s.LibraryId))
+                    .AsNoTracking()
+                    .OrderByDescending(s => s.Created)
+                    .Take(limit)
+                    .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            }
+            
             return await _context.Series
-                .Where(s => (libraryId <= 0 || s.LibraryId == libraryId))
-                .Take(limit)
-                .OrderByDescending(s => s.Created)
+                .Where(s => s.LibraryId == libraryId)
                 .AsNoTracking()
+                .OrderByDescending(s => s.Created)
+                .Take(limit)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+            
+            
         }
 
         /// <summary>
-        /// Returns Series that the user 
+        /// Returns Series that the user has some partial progress on
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId"></param>
@@ -302,25 +329,42 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
         {
-            var series = await _context.Series
-                  .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-                  {
-                      Series = s,
-                      PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
-                      progress.AppUserId,
-                      progress.LastModified
-                  })
-                  .Where(s =>  s.AppUserId == userId 
-                              && s.PagesRead > 0
-                              && s.PagesRead < s.Series.Pages
-                              && (libraryId <= 0 || s.Series.LibraryId == libraryId) )
-                  .Take(limit)
-                  .OrderByDescending(s => s.LastModified)
-                  .Select(s => s.Series)
-                  .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                  .AsNoTracking()
-                  .ToListAsync();
-            return series.DistinctBy(s => s.Name);
+            var series = _context.Series
+                .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+                {
+                    Series = s,
+                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
+                    progress.AppUserId,
+                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id).Max(p => p.LastModified)
+                });
+            if (libraryId == 0)
+            {
+                var userLibraries = _context.Library
+                    .Include(l => l.AppUsers)
+                    .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                    .AsNoTracking()
+                    .Select(library => library.Id)
+                    .ToList();
+                series = series.Where(s => s.AppUserId == userId
+                                           && s.PagesRead > 0
+                                           && s.PagesRead < s.Series.Pages
+                                           && userLibraries.Contains(s.Series.LibraryId));
+            }
+            else
+            {
+                series = series.Where(s => s.AppUserId == userId
+                            && s.PagesRead > 0
+                            && s.PagesRead < s.Series.Pages 
+                            && s.Series.LibraryId == libraryId);
+            }
+            var retSeries = await series
+                .OrderByDescending(s => s.LastModified)
+                .Select(s => s.Series)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+                
+            return retSeries.DistinctBy(s => s.Name).Take(limit);
         }
     }
 }

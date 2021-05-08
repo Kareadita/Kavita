@@ -1,7 +1,8 @@
 ﻿
 using System;
+using System.IO;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
+using API.Extensions;
 
 namespace API.Entities
 {
@@ -25,5 +26,11 @@ namespace API.Entities
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
+        
+        // Methods
+        public bool HasFileBeenModified()
+        {
+            return new FileInfo(FilePath).DoesLastWriteMatch(LastModified);
+        }
     }
 }

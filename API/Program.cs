@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
-using API.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,13 +40,6 @@ namespace API
                 var logger = services.GetRequiredService < ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
-            
-            // Load all tasks from DI and initialize them (TODO: This is not working - WarmupServicesStartupTask is Null)
-            var startupTasks = host.Services.GetServices<WarmupServicesStartupTask>();
-            foreach (var startupTask in startupTasks)
-            {
-                await startupTask.ExecuteAsync();
-            }
 
             await host.RunAsync();
         }
@@ -57,38 +50,12 @@ namespace API
                 {
                     webBuilder.UseKestrel((opts) =>
                     {
-                        opts.ListenAnyIP(HttpPort);
+                        opts.ListenAnyIP(HttpPort, options =>
+                        {
+                            options.Protocols = HttpProtocols.Http1AndHttp2;
+                        });
                     });
                     webBuilder.UseStartup<Startup>();
                 });
-
-        // private static void StartNewInstance()
-        // {
-        //     //_logger.LogInformation("Starting new instance");
-        //
-        //     var module = options.RestartPath;
-        //
-        //     if (string.IsNullOrWhiteSpace(module))
-        //     {
-        //         module = Environment.GetCommandLineArgs()[0];
-        //     }
-        //
-        //     // string commandLineArgsString;
-        //     // if (options.RestartArgs != null)
-        //     // {
-        //     //     commandLineArgsString = options.RestartArgs ?? string.Empty;
-        //     // }
-        //     // else
-        //     // {
-        //     //     commandLineArgsString = string.Join(
-        //     //         ' ',
-        //     //         Environment.GetCommandLineArgs().Skip(1).Select(NormalizeCommandLineArgument));
-        //     // }
-        //
-        //     //_logger.LogInformation("Executable: {0}", module);
-        //     //_logger.LogInformation("Arguments: {0}", commandLineArgsString);
-        //
-        //     Process.Start(module, Array.Empty<string>);
-        // }
     }
 }

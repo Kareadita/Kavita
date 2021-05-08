@@ -4,12 +4,9 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Services
 {
@@ -38,6 +35,40 @@ namespace API.Services
           return Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
+       }
+
+       /// <summary>
+       /// Returns a list of folders from end of fullPath to rootPath.
+       ///
+       /// Example) (C:/Manga/, C:/Manga/Love Hina/Specials/Omake/) returns [Omake, Specials, Love Hina]
+       /// </summary>
+       /// <param name="rootPath"></param>
+       /// <param name="fullPath"></param>
+       /// <returns></returns>
+       public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
+       {
+          var separator = Path.AltDirectorySeparatorChar;
+          if (fullPath.Contains(Path.DirectorySeparatorChar))
+          {
+             fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+          }
+          
+          if (rootPath.Contains(Path.DirectorySeparatorChar))
+          {
+             rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+          }
+
+          var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
+          var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
+          var paths = new List<string>();
+          while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
+          {
+             var folder = new DirectoryInfo(path).Name;
+             paths.Add(folder);
+             path = path.Replace(separator + folder, string.Empty);
+          }
+
+          return paths;
        }
 
        public bool Exists(string directory)
@@ -182,9 +213,9 @@ namespace API.Services
        /// <param name="action">Action to apply on file path</param>
        /// <param name="searchPattern">Regex pattern to search against</param>
        /// <exception cref="ArgumentException"></exception>
-       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern)
-        {
-           //Count of files traversed and timer for diagnostic output
+       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
+       {
+          //Count of files traversed and timer for diagnostic output
             var fileCount = 0;
 
             // Determine whether to parallelize file processing on each folder based on processor count.
@@ -209,11 +240,13 @@ namespace API.Services
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
                   Console.WriteLine(e.Message);
+                  logger.LogError(e, "Unauthorized access on {Directory}", currentDir);
                   continue;
                }
                // Thrown if another process has deleted the directory after we retrieved its name.
                catch (DirectoryNotFoundException e) {
                   Console.WriteLine(e.Message);
+                  logger.LogError(e, "Directory not found on {Directory}", currentDir);
                   continue;
                }
 
@@ -235,24 +268,27 @@ namespace API.Services
                }
 
                // Execute in parallel if there are enough files in the directory.
-               // Otherwise, execute sequentially.Files are opened and processed
+               // Otherwise, execute sequentially. Files are opened and processed
                // synchronously but this could be modified to perform async I/O.
                try {
-                  if (files.Length < procCount) {
-                     foreach (var file in files) {
-                        action(file);
-                        fileCount++;
-                     }
-                  }
-                  else {
-                     Parallel.ForEach(files, () => 0, (file, _, localCount) =>
-                                                  { action(file);
-                                                    return ++localCount;
-                                                  },
-                                      (c) => {
-                                         // ReSharper disable once AccessToModifiedClosure
-                                         Interlocked.Add(ref fileCount, c);
-                                      });
+                  // if (files.Length < procCount) {
+                  //    foreach (var file in files) {
+                  //       action(file);
+                  //       fileCount++;
+                  //    }
+                  // }
+                  // else {
+                  //    Parallel.ForEach(files, () => 0, (file, _, localCount) =>
+                  //                                 { action(file);
+                  //                                   return ++localCount;
+                  //                                 },
+                  //                     (c) => {
+                  //                        Interlocked.Add(ref fileCount, c);
+                  //                     });
+                  // }
+                  foreach (var file in files) {
+                     action(file);
+                     fileCount++;
                   }
                }
                catch (AggregateException ae) {

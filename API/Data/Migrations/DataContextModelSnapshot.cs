@@ -14,7 +14,7 @@ namespace API.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.4");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -127,7 +127,22 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("HideReadOnDetails")
+                    b.Property<bool>("BookReaderDarkMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BookReaderFontFamily")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("BookReaderFontSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookReaderLineSpacing")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookReaderMargin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -233,6 +248,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsSpecial")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -243,6 +261,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Range")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("VolumeId")
@@ -408,9 +429,6 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsSpecial")
-                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");

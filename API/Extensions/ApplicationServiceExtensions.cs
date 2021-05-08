@@ -4,7 +4,6 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,8 +26,8 @@ namespace API.Extensions
             services.AddScoped<IMetadataService, MetadataService>();
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
-
-
+            services.AddScoped<IBookService, BookService>();
+            
 
             services.AddDbContext<DataContext>(options =>
             {

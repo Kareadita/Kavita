@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using AutoMapper;
@@ -155,7 +155,7 @@ namespace API.Controllers
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshMetadata(int libraryId)
         {
-            _taskScheduler.ScanLibrary(libraryId, true);
+            _taskScheduler.RefreshMetadata(libraryId);
             return Ok();
         }
 
@@ -164,23 +164,7 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
         }
-
-        [HttpGet("series")]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
-        {
-            // TODO: Move this to SeriesController
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
-            
-            // Apply progress/rating information (I can't work out how to do this in initial query)
-            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            
-            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-            
-            return Ok(series);
-        }
-
+        
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
@@ -238,6 +222,12 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), queryString);
 
             return Ok(series);
+        }
+
+        [HttpGet("type")]
+        public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)
+        {
+            return Ok(await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(libraryId));
         }
     }
 }
