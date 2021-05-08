@@ -24,6 +24,8 @@ import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-serie
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { SwiperModule } from 'swiper/angular';
 
 
 
@@ -52,11 +54,13 @@ import { CarouselModule } from './carousel/carousel.module';
     NgbRatingModule, // Series Detail
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
-    NgbAccordionModule, // User Preferences 
+    NgbAccordionModule, // User Preferences
+    NgxSliderModule, // User Preference
     NgbPaginationModule,
     LazyLoadImageModule,
     SharedModule,
     CarouselModule,
+    //SwiperModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),

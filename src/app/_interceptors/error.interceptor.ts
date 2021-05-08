@@ -26,9 +26,16 @@ export class ErrorInterceptor implements HttpInterceptor {
               // IF type of array, this comes from signin handler
               if (Array.isArray(error.error)) {
                 const modalStateErrors: any[] = [];
-                error.error.forEach((issue: {status: string, details: string, message: string}) => {
-                  modalStateErrors.push(issue.details);
-                });
+                if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
+                  error.error.forEach((issue: {status: string, details: string, message: string}) => {
+                    modalStateErrors.push(issue.details);
+                  });
+                } else {
+                  error.error.forEach((issue: {code: string, description: string}) => {
+                    modalStateErrors.push(issue.description);
+                  });
+                }
+                
                 throw modalStateErrors.flat();
               } else if (error.error.errors) {
                 // Validation error
@@ -64,13 +71,17 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.toastr.error('There was an unknown critical error.');
               break;
             default:
-              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
-              {
+              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
                 this.toastr.error('Something unexpected went wrong.');
-                // TODO:  We should store information about what URL we are on so that on refresh of no-connection, we can redirect back to original url
+              }
+
+              if (!localStorage.getItem('kavita--no-connection-url')) {
+                localStorage.setItem('kavita--no-connection-url', this.router.url);
+              }
+
+              if (this.router.url !== '/no-connection') {
                 this.router.navigateByUrl('/no-connection');
               }
-              console.error(error);
               break;
           }
         }

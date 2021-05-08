@@ -9,4 +9,6 @@ export interface Chapter {
     pages: number;
     volumeId: number;
     pagesRead: number; // Attached for the given user when requesting from API
+    isSpecial: boolean;
+    title: string;
 }

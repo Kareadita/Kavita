@@ -1,35 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Stack } from 'src/app/shared/data-structures/stack';
 import { LibraryService } from '../../../_services/library.service';
 
-class Stack {
-  items: any[];
-
-  constructor() {
-    this.items = [];
-  }
-
-  isEmpty() {
-    return this.items.length === 0;
-  }
-
-  peek() {
-    if (!this.isEmpty()) {
-      return this.items[this.items.length - 1];
-    }
-  }
-
-  pop() {
-    if (this.isEmpty()) {
-      return undefined;
-    }
-    return this.items.pop();
-  }
-
-  push(item: any) {
-    this.items.push(item);
-  }
-}
 
 export interface DirectoryPickerResult {
   success: boolean;
@@ -46,7 +19,7 @@ export class DirectoryPickerComponent implements OnInit {
 
   currentRoot = '';
   folders: string[] = [];
-  routeStack: Stack = new Stack();
+  routeStack: Stack<string> = new Stack<string>();
 
   constructor(public modal: NgbActiveModal, private libraryService: LibraryService) {
 
@@ -59,15 +32,19 @@ export class DirectoryPickerComponent implements OnInit {
   selectNode(folderName: string) {
     this.currentRoot = folderName;
     this.routeStack.push(folderName);
-    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
+    const fullPath = this.routeStack.items.join('/');
     this.loadChildren(fullPath);
   }
 
   goBack() {
     this.routeStack.pop();
-    this.currentRoot = this.routeStack.peek();
-    const fullPath = this.routeStack.items.join('\\').replace('\\\\', '\\');
-    this.loadChildren(fullPath);
+    const stackPeek = this.routeStack.peek();
+    if (stackPeek !== undefined) {
+      this.currentRoot = stackPeek;
+      const fullPath = this.routeStack.items.join('/');
+      this.loadChildren(fullPath);
+    }
+    
   }
 
   loadChildren(path: string) {
@@ -83,7 +60,11 @@ export class DirectoryPickerComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
 
-    const fullPath = (this.routeStack.items.join('\\') + '\\' + folderName).replace('\\\\', '\\');
+    let fullPath = folderName;
+    if (this.routeStack.items.length > 0) {
+      const pathJoin = this.routeStack.items.join('/');
+      fullPath = pathJoin + ((pathJoin.endsWith('/') || pathJoin.endsWith('\\')) ? '' : '/') + folderName;
+    }
 
     this.modal.close({success: true, folderPath: fullPath});
   }
@@ -95,7 +76,7 @@ export class DirectoryPickerComponent implements OnInit {
   getStem(path: string): string {
 
     const lastPath = this.routeStack.peek();
-    if (lastPath) {
+    if (lastPath && lastPath != path) {
       let replaced = path.replace(lastPath, '');
       if (replaced.startsWith('/') || replaced.startsWith('\\')) {
         replaced = replaced.substr(1, replaced.length);

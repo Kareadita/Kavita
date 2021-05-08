@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RegisterMemberComponent } from './register-member/register-member.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
 import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -11,6 +10,10 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
+import { RegisterMemberComponent } from './register-member/register-member.component';
+import { ReadMoreComponent } from './read-more/read-more.component';
+import { RouterModule } from '@angular/router';
+import { DrawerComponent } from './drawer/drawer.component';
 
 
 @NgModule({
@@ -22,10 +25,13 @@ import { CardActionablesComponent } from './card-item/card-actionables/card-acti
     CardDetailsModalComponent,
     ConfirmDialogComponent,
     SafeHtmlPipe,
-    CardActionablesComponent
+    CardActionablesComponent,
+    ReadMoreComponent,
+    DrawerComponent
   ],
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     NgbDropdownModule,
     NgbProgressbarModule,
@@ -36,10 +42,12 @@ import { CardActionablesComponent } from './card-item/card-actionables/card-acti
   exports: [
     RegisterMemberComponent, // TODO: Move this out and put in normal app
     CardItemComponent,
-    LibraryCardComponent,
-    SeriesCardComponent, // TODO: Remove this component and use just AppCardComponent
+    LibraryCardComponent, // TODO: Move this out and put in normal app
+    SeriesCardComponent, // TODO: Move this out and put in normal app
     SafeHtmlPipe,
-    CardActionablesComponent
+    CardActionablesComponent,
+    ReadMoreComponent,
+    DrawerComponent
   ]
 })
 export class SharedModule { }

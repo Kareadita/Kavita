@@ -29,15 +29,14 @@
                 </div>
                 <div class="ml-2">
                     <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
+                    <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>
             </div>
             <div class="row no-gutters">
-                <p class="user-review {{series?.userReview ? 'mt-1' : ''}}">{{series?.userReview}} 
-                    <button *ngIf="series?.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen"></i></button></p>
+                <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
-                <!-- TODO: Read more component -->
-                <p>{{series?.summary}}</p>
+                <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
             <div>
                 <div class="row no-gutters" *ngIf="false">
@@ -60,28 +59,83 @@
         </div>
     </div>
 
-    <h4>Volumes</h4>
-    <div class="row" *ngIf="isLoading">
+
+    <div *ngIf="hasSpecials; else noSpecials"> <!-- -->
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
+            <li [ngbNavItem]="1"> <!--  *ngIf="hasSpecials" (having this will cause the item to not display despite it being true)-->
+              <a ngbNavLink>Specials</a>
+              <ng-template ngbNavContent>
+                <div class="row">
+                    <div *ngFor="let chapter of specials">
+                        <!-- *ngIf="chapter.range !== '0'"-->
+                        <app-card-item class="col-auto" *ngIf="chapter.range !== '0'"  [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
+                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                    </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="2"> <!--  *ngIf="hasNonSpecialVolumeChapters"-->
+              <a ngbNavLink>Volumes/Chapters</a>
+              <ng-template ngbNavContent>
+                  <div class="row">
+                    <div *ngFor="let volume of volumes">
+                        <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                            [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
+                    </div>
+                    <div *ngFor="let chapter of chapters">
+                        <!-- TOOD: Find a way to show this based on if there is specials or not, so that I can only have code-->
+                        <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                    </div>
+                  </div>
+              </ng-template>
+            </li>
+          </ul>
+          <div [ngbNavOutlet]="nav"></div>
+    </div>
+
+      <ng-template #noSpecials>
+        <h4>Volumes/Chapters</h4>
+        <div class="row">
+            <div *ngFor="let volume of volumes">
+                <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                    [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                    [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
+            </div>
+            <div *ngFor="let chapter of chapters">
+                <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+                [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+            </div>
+        </div>
+      </ng-template>
+
+      <div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
         <div class="spinner-border text-secondary loading" role="status">
             <span class="invisible">Loading...</span>
         </div>
     </div>
-    <div class="row">
+
+    <!-- <div class="row">
+        Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. 
+        <div>
+            <app-card-item *ngIf="(volumes.length >= 1 && volumes[volumes.length - 1].number === 0 && chapters.length === 0)" class="col-auto" [entity]="volumes[volumes.length - 1]" [title]="'Specials'" (click)="openVolume(volumes[0])"
+            [imageUrl]="imageService.getVolumeCoverImage(volumes[volumes.length - 1].id)"
+            [read]="volumes[volumes.length - 1].pagesRead" [total]="volumes[volumes.length - 1].pages" [actions]="volumeActions"></app-card-item>
+            
+        </div>
         <div *ngFor="let volume of volumes">
             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                 [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                 [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
         </div>
-        <div *ngFor="let chapter of chapters" >
-            <app-card-item class="col-auto" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+        <div *ngFor="let chapter of chapters">
+            <app-card-item class="col-auto" [entity]="chapter" [title]="chapter.range === '0' ? 'Specials' : 'Chapter ' + chapter.range" (click)="openChapter(chapter)"
             [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
         </div>
-        <!-- Special case when the whole series is just one volume and it's a special aka we can't parse vol/chapter from it. -->
-        <div *ngIf="(volumes.length === 1 && volumes[0].number === 0)">
-            <app-card-item class="col-auto" [entity]="volumes[0]" [title]="series.name" (click)="openVolume(volumes[0])"
-            [imageUrl]="imageService.getVolumeCoverImage(volumes[0].id)"
-            [read]="volumes[0].pagesRead" [total]="volumes[0].pages" [actions]="volumeActions"></app-card-item>
-        </div>
-    </div>
+    </div> -->
 </div>

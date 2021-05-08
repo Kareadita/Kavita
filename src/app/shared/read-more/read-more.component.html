@@ -1,0 +1,4 @@
+<div>
+    <span [innerHTML]="currentText | safeHtml"></span>
+    <a [class.hidden]="hideToggle" *ngIf="text && text.length > maxLength" class="read-more-link" (click)="toggleView()">&nbsp;<i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}}"></i>&nbsp;Read {{isCollapsed ? 'More' : 'Less'}}</a>
+</div>

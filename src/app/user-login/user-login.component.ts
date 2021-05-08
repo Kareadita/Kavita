@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
 
@@ -17,7 +18,7 @@ export class UserLoginComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService) { }
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     // Validate that there are users so you can refresh to home. This is important for first installs
@@ -38,6 +39,8 @@ export class UserLoginComponent implements OnInit {
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
       this.router.navigateByUrl('/library');
+    }, err => {
+      this.toastr.error(err.error);
     });
   }
 

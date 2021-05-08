@@ -29,6 +29,10 @@ const routes: Routes = [
       {
         path: 'library/:libraryId/series/:seriesId/manga',
         loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+      },
+      {
+        path: 'library/:libraryId/series/:seriesId/book',
+        loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
       }
     ]
   },

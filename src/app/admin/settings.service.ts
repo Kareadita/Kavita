@@ -27,4 +27,8 @@ export class SettingsService {
   getLoggingLevels() {
     return this.http.get<string[]>(this.baseUrl + 'settings/log-levels');
   }
+
+  getLibraryTypes() {
+    return this.http.get<string[]>(this.baseUrl + 'settings/library-types');
+  }
 }

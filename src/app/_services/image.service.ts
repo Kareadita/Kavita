@@ -8,6 +8,7 @@ export class ImageService {
 
   baseUrl = environment.apiUrl;
   public placeholderImage = 'assets/images/image-placeholder-min.png';
+  public errorImage = 'assets/images/error-placeholder2-min.png';
 
   constructor() { }
 

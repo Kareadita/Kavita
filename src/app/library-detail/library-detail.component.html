@@ -10,7 +10,7 @@
 
     <div class="row no-gutters">
         <div class="col-auto" *ngFor="let manga of series; trackBy:trackByIdentity">
-            <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
+            <app-series-card [data]="manga" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card>
         </div>
 
         <div class="spinner-border text-secondary" role="status" *ngIf="loadingSeries">

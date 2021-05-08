@@ -11,6 +11,7 @@
 }
 
 
+
 // Including breakpoint has issue with resovling variable, so copying gridpoints here
 @include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
     .poster {

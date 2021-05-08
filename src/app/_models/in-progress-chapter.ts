@@ -10,4 +10,5 @@ export interface InProgressChapter {
     seriesName: string;
     coverImage: string;
     libraryId: number;
+    libraryName: string;
 }

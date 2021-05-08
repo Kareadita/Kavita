@@ -45,7 +45,7 @@ export class HomeComponent implements OnInit {
 
   onAdminCreated(success: boolean) {
     if (success) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl('/login');
     }
   }
 }

@@ -5,7 +5,7 @@
       <ul class="navbar-nav mr-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
-          <div class="col-xs-4 col-md-6">
+          <div>
             <fieldset class="form-inline">
               <div class="form-group" style="margin-bottom: 0px;">
                 <label for="nav-search" class="sr-only">Search series</label>
@@ -13,10 +13,13 @@
                   <ng-autocomplete
                     #search 
                     id="nav-search"
+                    [classList]="['ng-autocomplete']"
                     [data]="searchResults"
                     searchKeyword="name"
                     placeholder="Search Series"
                     [initialValue]=""
+                    [focusFirst]="true"
+                    [minQueryLength]="2"
                     (selected)='clickSearchResult($event)'
                     (inputChanged)='onChangeSearch($event)'
                     [isLoading]="isLoading"
@@ -31,7 +34,10 @@
                         <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
                       </div>
                       <div class="ml-1">
-                        <span [innerHTML]="item.name"></span>
+                        <span *ngIf="item.name.toLowerCase().indexOf(searchTerm) >= 0; else localizedName" [innerHTML]="item.name"></span>
+                        <ng-template #localizedName>
+                          <span [innerHTML]="item.localizedName"></span>
+                        </ng-template>
                         <span class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</span>
                       </div>
                     </div>
@@ -47,7 +53,12 @@
         </div>
       </ul>
       
-
+      <div class="back-to-top">
+        <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
+          <i class="fa fa-angle-double-up" style="color: white" aria-hidden="true"></i>
+          <span class="sr-only">Scroll to Top</span>
+        </button>
+      </div>
       <!-- TODO: Put SignalR notification button dropdown here. -->
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>{{user.username | titlecase}}</button>
@@ -58,5 +69,5 @@
         </div>
       </div>
     </div>
-  </nav>
+</nav>
   

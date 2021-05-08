@@ -6,5 +6,10 @@ export interface Preferences {
     readingDirection: ReadingDirection;
     scalingOption: ScalingOption;
     pageSplitOption: PageSplitOption;
-    hideReadOnDetails: boolean;
+    bookReaderDarkMode: boolean;
+    bookReaderMargin: number;
+    bookReaderLineSpacing: number;
+    bookReaderFontSize: number;
+    bookReaderFontFamily: string;
+    bookReaderTapToPaginate: boolean;
 }
