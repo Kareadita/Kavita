@@ -1,32 +1,22 @@
 /* Importing Bootstrap SCSS file. */
+
+$theme-colors: (
+  "primary": #4ac694,
+  "danger": #ff4136
+);
+
+
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
 
 @import '~swiper/swiper.scss';
-
-
 
 @font-face {
   font-family: "EBGarmond";
   src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
 }
 
-.disabled, :disabled {
-  cursor: not-allowed !important;
-}
 
-
-@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-    .phone-hidden {
-      display: none;
-    }
-}
-
-@include media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-    .not-phone-hidden {
-      display: none;
-    }
-}
 
 // Custom animation for ng-lazyload-image
 img.ng-lazyloaded {
@@ -37,16 +27,47 @@ img.ng-lazyloaded {
   to   { opacity: 1; }
 }
 
+
+
+
+@import './assets/themes/dark.scss';
+
 // Global Styles
-button:disabled {
+button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
   cursor: not-allowed;
+}
+
+label, select {
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: white;
 }
 
 
 
-// TODO: Move the Plex theme into a separate file and copy how  https://bootswatch.com/darkly/ did it
 html, body { height: 100%; }
 body {
   margin: 0; 
-  font-family: "EBGaramond", Roboto, "Helvetica Neue", sans-serif;
+  font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+}
+
+// .disabled, :disabled {
+//   cursor: not-allowed !important;
+// }
+
+
+
+// Utiliities
+@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+  .phone-hidden {
+    display: none;
+  }
+}
+
+@include media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+  .not-phone-hidden {
+    display: none;
+  }
 }

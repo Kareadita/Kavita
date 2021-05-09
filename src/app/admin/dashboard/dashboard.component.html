@@ -1,24 +1,26 @@
-<h1 style="margin-left: 15px;">Admin Dashboard</h1>
+<div class="container">
+  <h1>Admin Dashboard</h1>
 
-<!-- <button class="btn btn-primary" (click)="restartServer()">Restart Server</button> -->
-<div class="float-right">
-  <button class="btn btn-secondary" (click)="fetchLogs()">Download Logs</button>
+  <div class="float-right">
+    <button class="btn btn-secondary" (click)="fetchLogs()">Download Logs</button>
+  </div>
+
+  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+      <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
+        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
+        <ng-template ngbNavContent>
+          <ng-container *ngIf="tab.fragment === ''">
+            <app-manage-settings></app-manage-settings>
+          </ng-container>
+          <ng-container *ngIf="tab.fragment === 'users'">
+              <app-manage-users></app-manage-users>
+          </ng-container>
+          <ng-container *ngIf="tab.fragment === 'libraries'">
+              <app-manage-library></app-manage-library>
+          </ng-container>
+        </ng-template>
+      </li>
+  </ul>
+  <div [ngbNavOutlet]="nav" class="mt-2"></div>
+
 </div>
-
-<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
-    <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-      <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
-      <ng-template ngbNavContent>
-        <ng-container *ngIf="tab.fragment === ''">
-          <app-manage-settings></app-manage-settings>
-        </ng-container>
-        <ng-container *ngIf="tab.fragment === 'users'">
-            <app-manage-users></app-manage-users>
-        </ng-container>
-        <ng-container *ngIf="tab.fragment === 'libraries'">
-            <app-manage-library></app-manage-library>
-        </ng-container>
-      </ng-template>
-    </li>
-</ul>
-<div [ngbNavOutlet]="nav" class="mt-2"></div>

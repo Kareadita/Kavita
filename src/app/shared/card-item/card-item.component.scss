@@ -18,6 +18,7 @@ $image-width: 160px;
     right: 0px;
 }
 
+
 .card {
     margin: 5px;
     max-width: $image-width;
@@ -66,7 +67,7 @@ $image-width: 160px;
 .overlay {
     height: $image-height;
     &:hover {
-        background-color: rgba(0, 0, 0, 0.4);
+        //background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;
 
         .overlay-item {

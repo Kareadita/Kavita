@@ -10,6 +10,7 @@ import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { Options } from '@angular-slider/ngx-slider';
 import { BookService } from '../book-reader/book.service';
+import { NavService } from '../_services/nav.service';
 
 @Component({
   selector: 'app-user-preferences',
@@ -48,7 +49,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   };
   fontFamilies: Array<string> = [];
 
-  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService) {
+  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, private navService: NavService) {
     this.fontFamilies = this.bookService.getFontFamilies();
   }
 
@@ -64,12 +65,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('readingDirection', new FormControl(user.preferences.readingDirection, []));
         this.settingsForm.addControl('scalingOption', new FormControl(user.preferences.scalingOption, []));
         this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));
-        this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []))
-        this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []))
-        this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []))
-        this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []))
-        this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []))
-        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.bookReaderTapToPaginate || false, []))
+        this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []));
+        this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
+        this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
+        this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
+        this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.siteDarkMode || false, []));
+
+        this.settingsForm.addControl('siteDarkMode', new FormControl(user.preferences.siteDarkMode || false, []));
       }
     });
 
@@ -100,6 +103,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.settingsForm.get('siteDarkMode')?.setValue(this.user.preferences.siteDarkMode);
   }
 
   resetPasswordForm() {
@@ -120,12 +124,15 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
       bookReaderMargin: modelSettings.bookReaderMargin,
-      bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate
+      bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
+      siteDarkMode: modelSettings.siteDarkMode
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
+
+        this.navService.setDarkMode(this.user.preferences.siteDarkMode);
       }
       this.resetForm();
     }));

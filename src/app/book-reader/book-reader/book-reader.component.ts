@@ -134,7 +134,6 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService) {
       this.navService.hideNavBar();
 
-
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
       this.fontFamilies = this.bookService.getFontFamilies();
@@ -155,6 +154,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           if (this.user.preferences.bookReaderMargin === undefined) {
             this.user.preferences.bookReaderMargin = 0;
           }
+
           this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
@@ -176,6 +176,9 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
+      if (this.user.preferences.siteDarkMode) {
+        bodyNode.classList.add('bg-dark');
+      }
     }
     this.navService.showNavBar();
 
@@ -282,6 +285,9 @@ export class BookReaderComponent implements OnInit, OnDestroy {
         margin = this.user.preferences.bookReaderMargin + '%';
       }
       this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
+      if (this.user.preferences.siteDarkMode && !this.user.preferences.bookReaderDarkMode) {
+        this.user.preferences.bookReaderDarkMode = true;
+      }
       this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
     } else {
       this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
@@ -502,7 +508,10 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      //this.originalBodyColor = bodyNode.style.background;
+      if (this.user.preferences.siteDarkMode) {
+        bodyNode.classList.remove('bg-dark');
+      }
+      
       bodyNode.style.background = this.getDarkModeBackgroundColor();
     }
     this.backgroundColor = this.getDarkModeBackgroundColor();
@@ -526,7 +535,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
       bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
       bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
-      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate
+      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate,
+      siteDarkMode: this.user.preferences.siteDarkMode,
     };
     this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('User settings updated');
