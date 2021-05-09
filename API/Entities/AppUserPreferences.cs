@@ -42,6 +42,10 @@ namespace API.Entities
         /// Book Reader Option: Allows tapping on side of screens to paginate
         /// </summary>
         public bool BookReaderTapToPaginate { get; set; } = false;
+        /// <summary>
+        /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
+        /// </summary>
+        public bool SiteDarkMode { get; set; }
         
         
         
