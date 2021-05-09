@@ -131,7 +131,7 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v0.4.0");
+                Console.WriteLine("Kavita - v0.4.1");
             });
             
             // Any services that should be bootstrapped go here
