@@ -61,7 +61,6 @@ namespace API.Tests.Parser
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
         [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "1")]
-        
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -137,6 +136,7 @@ namespace API.Tests.Parser
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "Okusama wa Shougakusei")]
         [InlineData("VanDread-v01-c001[MD].zip", "VanDread")]
         [InlineData("Momo The Blood Taker - Chapter 027 Violent Emotion.cbz", "Momo The Blood Taker")]
+        [InlineData("Green Worldz - Chapter 112 Final Chapter (End).cbz", "Green Worldz")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
