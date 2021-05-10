@@ -7,7 +7,7 @@
 
     <div *ngIf="menuOpen" class="overlay" (click)="toggleMenu()">
         <div class="center-menu" (click)="$event.stopPropagation()">
-            <div class="col" *ngIf="mangaFileName !== ''">
+            <div class="col phone-hidden" *ngIf="mangaFileName !== ''">
                 {{ mangaFileName }}
             </div>
             <div class="col">

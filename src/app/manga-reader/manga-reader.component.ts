@@ -210,7 +210,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
       this.originalBodyColor = bodyNode.style.background;
-      bodyNode.style.background = 'black';
+      bodyNode.setAttribute('style', 'background-color: black !important');
     }
   }
 

@@ -285,7 +285,13 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   read() {
-    if (this.currentlyReadingVolume !== undefined) { this.openVolume(this.currentlyReadingVolume); }
+    if (this.currentlyReadingVolume !== undefined) { 
+      if (this.currentlyReadingChapter !== undefined) {
+        this.openChapter(this.currentlyReadingChapter);
+      } else {
+        this.openVolume(this.currentlyReadingVolume);
+      }
+    }
     else if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
     else { this.openVolume(this.volumes[0]); }
   }
