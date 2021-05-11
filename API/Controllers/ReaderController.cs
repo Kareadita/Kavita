@@ -279,7 +279,7 @@ namespace API.Controllers
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 
-                if (volume.Number == currentVolume.Number)
+                if (volume.Number == currentVolume.Number + 1)
                 {
                     return Ok(volume.Chapters.FirstOrDefault()?.Id);
                 }
