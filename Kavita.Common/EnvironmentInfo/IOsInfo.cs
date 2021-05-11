@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using NLog;
 
 namespace Kavita.Common.EnvironmentInfo
 {
@@ -44,44 +43,44 @@ namespace Kavita.Common.EnvironmentInfo
             }
         }
 
-        // public OsInfo(IEnumerable<IOsVersionAdapter> versionAdapters, Logger logger)
-        // {
-        //     OsVersionModel osInfo = null;
-        //
-        //     foreach (var osVersionAdapter in versionAdapters.Where(c => c.Enabled))
-        //     {
-        //         try
-        //         {
-        //             osInfo = osVersionAdapter.Read();
-        //         }
-        //         catch (Exception e)
-        //         {
-        //             logger.Error(e, "Couldn't get OS Version info");
-        //         }
-        //
-        //         if (osInfo != null)
-        //         {
-        //             break;
-        //         }
-        //     }
-        //
-        //     if (osInfo != null)
-        //     {
-        //         Name = osInfo.Name;
-        //         Version = osInfo.Version;
-        //         FullName = osInfo.FullName;
-        //     }
-        //     else
-        //     {
-        //         Name = Os.ToString();
-        //         FullName = Name;
-        //     }
-        //
-        //     if (IsLinux && File.Exists("/proc/1/cgroup") && File.ReadAllText("/proc/1/cgroup").Contains("/docker/"))
-        //     {
-        //         IsDocker = true;
-        //     }
-        // }
+        public OsInfo(IEnumerable<IOsVersionAdapter> versionAdapters)
+        {
+            OsVersionModel osInfo = null;
+        
+            foreach (var osVersionAdapter in versionAdapters.Where(c => c.Enabled))
+            {
+                try
+                {
+                    osInfo = osVersionAdapter.Read();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Couldn't get OS Version info: " + e.Message);
+                }
+        
+                if (osInfo != null)
+                {
+                    break;
+                }
+            }
+        
+            if (osInfo != null)
+            {
+                Name = osInfo.Name;
+                Version = osInfo.Version;
+                FullName = osInfo.FullName;
+            }
+            else
+            {
+                Name = Os.ToString();
+                FullName = Name;
+            }
+        
+            if (IsLinux && File.Exists("/proc/1/cgroup") && File.ReadAllText("/proc/1/cgroup").Contains("/docker/"))
+            {
+                IsDocker = true;
+            }
+        }
 
         private static Os GetPosixFlavour()
         {
