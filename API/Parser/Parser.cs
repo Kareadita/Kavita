@@ -364,7 +364,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)|Anthology",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 

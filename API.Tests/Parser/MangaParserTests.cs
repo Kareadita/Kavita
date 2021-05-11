@@ -225,6 +225,7 @@ namespace API.Tests.Parser
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
         [InlineData("Ani-Hina Art Collection.cbz", true)]
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
+        [InlineData("Yuki Merry - 4-Komga Anthology", true)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
