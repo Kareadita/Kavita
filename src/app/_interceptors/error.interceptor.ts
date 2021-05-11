@@ -6,7 +6,7 @@ import {
   HttpInterceptor
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { NavigationExtras, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, take } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
@@ -20,7 +20,6 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError(error => {
         if (error && error.status !== 200) {
-          console.error('error:', error);
           switch (error.status) {
             case 400:
               // IF type of array, this comes from signin handler
@@ -47,6 +46,7 @@ export class ErrorInterceptor implements HttpInterceptor {
                 }
                 throw modalStateErrors.flat();
               } else {
+                console.error('error:', error);
                 if (error.statusText === 'Bad Request') {
                   this.toastr.error(error.error, error.status);
                 } else {
@@ -65,9 +65,11 @@ export class ErrorInterceptor implements HttpInterceptor {
               });
               break;
             case 404:
+              console.error('error:', error);
               this.toastr.error('That url does not exist.');
               break;
             case 500:
+              console.error('error:', error);
               this.toastr.error('There was an unknown critical error.');
               break;
             default:

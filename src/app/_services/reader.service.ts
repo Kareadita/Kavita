@@ -60,7 +60,6 @@ export class ReaderService {
         }
         for (let c of currentlyReadingVolume.chapters) {
           if (c.pagesRead < c.pages) {
-            console.log('Current chapter is: v' + v.number + ' c' + c.number );
             currentlyReadingChapter = c;
             break;
           }

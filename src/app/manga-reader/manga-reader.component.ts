@@ -78,6 +78,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
 
+  prevPageDisabled = false;
+  nextPageDisabled = false;
+
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
@@ -321,10 +324,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.isLoading) { return; }
 
       // Move to next volume/chapter automatically
-      this.isLoading = true;
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
-        this.loadChapter(chapterId);
-      });
+      if (!this.nextPageDisabled) {
+        this.isLoading = true;
+        this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+          this.loadChapter(chapterId, 'next');
+        });
+      }
       return;
     }
 
@@ -349,22 +354,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.isLoading) { return; }
 
-      this.isLoading = true;
-
       // Move to next volume/chapter automatically
-      this.continuousChaptersStack.pop();
-      const prevChapter = this.continuousChaptersStack.peek();
-      if (prevChapter != this.chapterId) {
-        if (prevChapter !== undefined) {
-          this.chapterId = prevChapter;
-          this.init();
-          return;
+      if (!this.prevPageDisabled) {
+        this.isLoading = true;
+        this.continuousChaptersStack.pop();
+        const prevChapter = this.continuousChaptersStack.peek();
+        if (prevChapter != this.chapterId) {
+          if (prevChapter !== undefined) {
+            this.chapterId = prevChapter;
+            this.init();
+            return;
+          }
         }
+        
+        this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+          this.loadChapter(chapterId, 'prev');
+        });  
       }
-      
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
-        this.loadChapter(chapterId);
-      });  
       return;
     }
 
@@ -377,11 +383,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
-  loadChapter(chapterId: number) {
+  loadChapter(chapterId: number, direction: 'next' | 'prev') {
     if (chapterId >= 0) {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
       this.init();
+    } else {
+      this.toastr.warning('Could not find ' + direction + ' chapter')
+      this.isLoading = false;
+      if (direction === 'prev') {
+        this.prevPageDisabled = true;
+      } else {
+        this.nextPageDisabled = true;
+      }
+      
     }
   }
 
@@ -436,6 +451,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum == this.maxPages - 1) {
       pageNum = this.pageNum + 1;
     }
+
 
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {/* No operation */});
 

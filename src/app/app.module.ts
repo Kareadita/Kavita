@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, Injectable, NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -25,7 +25,37 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
 import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { SwiperModule } from 'swiper/angular';
+
+import * as Sentry from "@sentry/angular";
+import { environment } from 'src/environments/environment';
+import { version } from 'package.json';
+import { Router } from '@angular/router';
+import { RewriteFrames as RewriteFramesIntegration } from "@sentry/integrations";
+import { Dedupe as DedupeIntegration } from "@sentry/integrations";
+
+Sentry.init({
+  dsn: "https://db1a1f6445994b13a6f479512aecdd48@o641015.ingest.sentry.io/5757426",
+  environment: environment.production ? 'prod' : 'dev',
+  release: version,
+  integrations: [
+    new Sentry.Integrations.GlobalHandlers({ 
+      onunhandledrejection: true,
+      onerror: true
+    }),
+    new DedupeIntegration(),
+    new RewriteFramesIntegration()
+  ],
+  ignoreErrors: [new RegExp(/\/api\/admin/)],
+  tracesSampleRate: environment.production ? 0 : 1.0,
+});
+
+Sentry.configureScope(scope => {
+  scope.setUser({
+    username: 'Not authorized'
+  });
+  scope.setTag('production', environment.production);
+  scope.setTag('version', version);
+});
 
 
 
@@ -69,6 +99,22 @@ import { SwiperModule } from 'swiper/angular';
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
+    {
+      provide: ErrorHandler,
+      useValue: Sentry.createErrorHandler({
+        showDialog: false,
+      }),
+    },
+    {
+      provide: Sentry.TraceService,
+      deps: [Router],
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => () => {},
+      deps: [Sentry.TraceService],
+      multi: true,
+    }
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
