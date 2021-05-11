@@ -92,7 +92,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz
             new Regex(
-                @"(?<Series>.*) (\b|_|-)(?:chapter)",
+                @"(?<Series>.*)(\b|_|-|\s)(?:chapter)(\b|_|-|\s)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -101,7 +101,7 @@ namespace API.Parser
             //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             // due to duplicate version identifiers in file.
             new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?(_| )",
+                @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -121,7 +121,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
-                @"(?<Series>.*)( |_)\((c |ch |chapter )",
+                @"(?<Series>.*)(\s|_)\((c\s|ch\s|chapter\s)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
@@ -364,7 +364,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|(?<!The\s)Anthology)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 

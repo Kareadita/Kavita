@@ -1,12 +1,14 @@
 using System;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using API.Extensions;
 using API.Interfaces;
 using API.Middleware;
 using API.Services;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -131,7 +133,7 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v0.4.1");
+                Console.WriteLine("Kavita - v" + BuildInfo.Version);
             });
             
             // Any services that should be bootstrapped go here
@@ -140,10 +142,10 @@ namespace API
         
         private void OnShutdown()
         {
-            Console.WriteLine("Server is shutting down. Going to dispose Hangfire");
-            //this code is called when the application stops
+            Console.WriteLine("Server is shutting down. Please allow a few seconds to stop any background jobs...");
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("You may now close the application window.");
         }
     }
 }
