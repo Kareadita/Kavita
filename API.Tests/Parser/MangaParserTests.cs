@@ -197,6 +197,7 @@ namespace API.Tests.Parser
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
+        [InlineData("Tomogui Kyoushitsu - Chapter 006 Game 005 - Fingernails On Right Hand (Part 002).cbz", "6")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
