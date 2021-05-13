@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry;
+using Sentry.Extensions.Logging;
 
 namespace API
 {
@@ -24,10 +25,12 @@ namespace API
         protected Program()
         {
         }
-
+        
         public static async Task Main(string[] args)
         {
             // Before anything, check if JWT has been generated properly or if user still has default
+
+            
             
             var host = CreateHostBuilder(args).Build();
 
@@ -45,7 +48,7 @@ namespace API
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService < ILogger<Program>>();
+                var logger = services.GetRequiredService <ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
 
@@ -77,6 +80,19 @@ namespace API
                         options.AddExceptionFilterForType<OutOfMemoryException>();
                         options.AddExceptionFilterForType<NetVips.VipsException>();
                         options.AddExceptionFilterForType<InvalidDataException>();
+                        
+                        options.BeforeSend = sentryEvent =>
+                        {
+                            if (sentryEvent.Exception != null
+                                && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:"))
+                            {
+                                return null; // Don't send this event to Sentry
+                            }
+
+                            sentryEvent.ServerName = null; // Never send Server Name to Sentry
+                            return sentryEvent;
+                        };
+                        
                         options.ConfigureScope(scope =>
                         {
                             scope.User = new User()
