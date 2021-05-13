@@ -18,8 +18,11 @@ $dark-form-readonly: #434648;
   }
 
   a, .btn-link {
-    //color: $dark-link-color;
     color: #4ac694;
+  }
+
+  .btn-information {
+      color: $dark-text-color;
   }
 
   .rating-star, .close, i.fa {

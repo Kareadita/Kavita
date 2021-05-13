@@ -46,7 +46,7 @@ Sentry.init({
     new RewriteFramesIntegration()
   ],
   ignoreErrors: [new RegExp(/\/api\/admin/)],
-  tracesSampleRate: environment.production ? 0 : 1.0,
+  tracesSampleRate: 0,
 });
 
 Sentry.configureScope(scope => {

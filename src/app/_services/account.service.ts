@@ -42,16 +42,15 @@ export class AccountService {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
       Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
+      Sentry.setContext('admin', {'admin': this.hasAdminRole(user)});
+      Sentry.configureScope(scope => {
+        scope.setUser({
+          username: user.username
+        });
+      });
     }
 
     localStorage.setItem(this.userKey, JSON.stringify(user));
-    Sentry.configureScope(scope => {
-      scope.setUser({
-        username: user.username
-      });
-    });
-
-    Sentry.setContext('admin', {'admin': this.hasAdminRole(user)});
     this.currentUserSource.next(user);
     this.currentUser = user;
   }
