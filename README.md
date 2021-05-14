@@ -7,6 +7,7 @@ your manga collection with your friends and family!
 
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
 ![Github Downloads](https://img.shields.io/github/downloads/Kareadita/Kavita/total.svg)
+[![Feature Requests](https://feathub.com/Kareadita/Kavita?format=svg)](https://feathub.com/Kareadita/Kavita)
 
 
 ## Goals:

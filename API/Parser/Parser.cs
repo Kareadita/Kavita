@@ -9,7 +9,7 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z";
         public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);

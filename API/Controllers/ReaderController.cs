@@ -288,21 +288,6 @@ namespace API.Controllers
             return Ok(-1);
         }
 
-        private int GetNextChapterId(Volume currentVolume, int currentChapterId)
-        {
-            var next = false;
-            foreach (var chapter in currentVolume.Chapters)
-            {
-                if (next)
-                {
-                    return chapter.Id;
-                }
-                if (currentChapterId == chapter.Id) next = true;
-            }
-
-            return -1;
-        }
-        
         private int GetNextChapterId(IEnumerable<Chapter> chapters, int currentChapterId)
         {
             var next = false;

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -14,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sentry;
-using Sentry.Extensions.Logging;
 
 namespace API
 {
@@ -26,12 +26,26 @@ namespace API
         {
         }
         
+        private static string GetAppSettingFilename()
+        {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var isDevelopment = environment == Environments.Development;
+            return "appSettings" + (isDevelopment ? ".Development" : "") + ".json";
+        }
+        
         public static async Task Main(string[] args)
         {
             // Before anything, check if JWT has been generated properly or if user still has default
+            if (!Configuration.CheckIfJwtTokenSet(GetAppSettingFilename()))
+            {
+                Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
+                var rBytes = new byte[24];
+                using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
+                var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
+                Configuration.UpdateJwtToken(GetAppSettingFilename(), base64);
+            }
 
-            
-            
+
             var host = CreateHostBuilder(args).Build();
 
             using var scope = host.Services.CreateScope();
