@@ -13,11 +13,10 @@ namespace Kavita.Common
                 var json = File.ReadAllText(filePath);
                 var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
                 const string key = "TokenKey";
-
-                JsonElement? tokenElement = null;
-                if (jsonObj?.TryGetProperty(key, out tokenElement))
+                
+                if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
                 {
-                    return tokenElement?.GetString() != "super secret unguessable key";
+                    return tokenElement.GetString() != "super secret unguessable key";
                 }
 
                 return false;
