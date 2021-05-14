@@ -32,6 +32,7 @@ namespace API.Controllers
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
+            if (page < 0) return BadRequest("Page cannot be less than 0");
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 

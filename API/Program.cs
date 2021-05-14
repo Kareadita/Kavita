@@ -25,7 +25,7 @@ namespace API
         protected Program()
         {
         }
-
+        
         public static async Task Main(string[] args)
         {
             // Before anything, check if JWT has been generated properly or if user still has default
@@ -37,8 +37,8 @@ namespace API
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
                 Configuration.UpdateJWTToken(base64);
             }
-            
-            
+
+
             var host = CreateHostBuilder(args).Build();
 
             using var scope = host.Services.CreateScope();
@@ -55,7 +55,7 @@ namespace API
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService < ILogger<Program>>();
+                var logger = services.GetRequiredService <ILogger<Program>>();
                 logger.LogError(ex, "An error occurred during migration");
             }
 
@@ -87,6 +87,19 @@ namespace API
                         options.AddExceptionFilterForType<OutOfMemoryException>();
                         options.AddExceptionFilterForType<NetVips.VipsException>();
                         options.AddExceptionFilterForType<InvalidDataException>();
+                        
+                        options.BeforeSend = sentryEvent =>
+                        {
+                            if (sentryEvent.Exception != null
+                                && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:"))
+                            {
+                                return null; // Don't send this event to Sentry
+                            }
+
+                            sentryEvent.ServerName = null; // Never send Server Name to Sentry
+                            return sentryEvent;
+                        };
+                        
                         options.ConfigureScope(scope =>
                         {
                             scope.User = new User()

@@ -91,16 +91,16 @@ namespace API.Services
                                                               && Parser.Parser.IsImage(entry.Key));
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return 0;
                     default:
-                        _logger.LogError("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return 0;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                _logger.LogWarning(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                 return 0;
             }
         }
@@ -180,16 +180,16 @@ namespace API.Services
                         return createThumbnail ? CreateThumbnail(entry.Key, ms, Path.GetExtension(entry.Key)) : ms.ToArray();
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
+                        _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
                         return Array.Empty<byte>();
                     default:
-                        _logger.LogError("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
+                        _logger.LogWarning("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
                         return Array.Empty<byte>();
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
+                _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
             
             return Array.Empty<byte>();
@@ -230,7 +230,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
+                _logger.LogWarning(ex, "There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
             return Array.Empty<byte>();
@@ -313,10 +313,10 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[GetSummaryInfo] This archive cannot be read: {ArchivePath}", archivePath);
+                        _logger.LogWarning("[GetSummaryInfo] This archive cannot be read: {ArchivePath}", archivePath);
                         return summary;
                     default:
-                        _logger.LogError("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}", archivePath);
+                        _logger.LogWarning("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}", archivePath);
                         return summary;
                 }
 
@@ -327,7 +327,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
+                _logger.LogWarning(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
             }
             
             return summary;
@@ -397,17 +397,17 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogError("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return;
                     default:
-                        _logger.LogError("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return;
                 }
                 
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+                _logger.LogWarning(e, "There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
                 return;
             }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
