@@ -1,23 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
-using Microsoft.Extensions.Hosting;
 
 namespace Kavita.Common
 {
-    public class Configuration
+    public static class Configuration
     {
-        private static string GetAppSettingFilename()
-        {
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            var isDevelopment = environment == Environments.Development;
-            return "appSettings" + (isDevelopment ? ".Development" : "") + ".json";
-        }
-        
-        public static bool CheckIfJwtTokenSet()
+
+        public static bool CheckIfJwtTokenSet(string filePath)
         {
             try {
-                var filePath = Path.Combine(AppContext.BaseDirectory, GetAppSettingFilename());
                 var json = File.ReadAllText(filePath);
                 var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
                 const string key = "TokenKey";
@@ -38,14 +30,11 @@ namespace Kavita.Common
             return false;
         }
 
-        public static bool UpdateJwtToken(string token)
+        public static bool UpdateJwtToken(string filePath, string token)
         {
             try
             {
-                var filePath = Path.Combine(AppContext.BaseDirectory, GetAppSettingFilename());
-                string json = File.ReadAllText(filePath);
-
-                json = json.Replace("super secret unguessable key", token);
+                var json = File.ReadAllText(filePath).Replace("super secret unguessable key", token);
                 File.WriteAllText(filePath, json);
                 return true;
             }
