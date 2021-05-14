@@ -29,13 +29,13 @@ namespace API
         public static async Task Main(string[] args)
         {
             // Before anything, check if JWT has been generated properly or if user still has default
-            if (!Configuration.CheckIfJWTTokenSet())
+            if (!Configuration.CheckIfJwtTokenSet())
             {
                 Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
                 var rBytes = new byte[24];
                 using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
-                Configuration.UpdateJWTToken(base64);
+                Configuration.UpdateJwtToken(base64);
             }
 
 

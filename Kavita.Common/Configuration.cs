@@ -14,18 +14,18 @@ namespace Kavita.Common
             return "appSettings" + (isDevelopment ? ".Development" : "") + ".json";
         }
         
-        public static bool CheckIfJWTTokenSet()
+        public static bool CheckIfJwtTokenSet()
         {
             try {
                 var filePath = Path.Combine(AppContext.BaseDirectory, GetAppSettingFilename());
                 var json = File.ReadAllText(filePath);
                 var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
                 const string key = "TokenKey";
-                
 
-                if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+                JsonElement? tokenElement = null;
+                if (jsonObj?.TryGetProperty(key, out tokenElement))
                 {
-                    return tokenElement.GetString() != "super secret unguessable key";
+                    return tokenElement?.GetString() != "super secret unguessable key";
                 }
 
                 return false;
@@ -38,7 +38,7 @@ namespace Kavita.Common
             return false;
         }
 
-        public static bool UpdateJWTToken(string token)
+        public static bool UpdateJwtToken(string token)
         {
             try
             {
