@@ -144,6 +144,7 @@ namespace API.Tests.Parser
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "Noblesse")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "X-Men")]
         [InlineData("Kodoja #001 (March 2016)", "Kodoja")]
+        [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "Boku No Kokoro No Yabai Yatsu")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -210,6 +211,7 @@ namespace API.Tests.Parser
         [InlineData("X-Men v1 #201 (September 2007).cbz", "201")]
         [InlineData("Kodoja #001 (March 2016)", "1")]
         [InlineData("Noblesse - Episode 429 (74 Pages).7z", "429")]
+        [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));

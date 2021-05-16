@@ -88,7 +88,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
             new Regex(
-                @"(?<Series>.*)(?: _|-|\[|\() ?v",
+                @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz
             new Regex(
