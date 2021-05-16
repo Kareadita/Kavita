@@ -323,7 +323,8 @@ export class SeriesDetailComponent implements OnInit {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    this.openChapter(volume.chapters[0]);
+    // Sort the chapters, then grab first
+    this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
   }
 
   isNullOrEmpty(val: string) {
