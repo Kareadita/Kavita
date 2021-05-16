@@ -52,10 +52,10 @@ namespace API.Parser
             new Regex(   
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz
-            new Regex(   
-                @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (this case is too limited, most other cases shouldn't parse out)
+            // new Regex(   
+            //     @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
 
@@ -115,6 +115,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Noblesse - Episode 429 (74 Pages).7z
+            new Regex(
+                @"(?<Series>.*)(\s|_)(?:Episode|Ep\.?)(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
                 @"(?<Series>.*)\(\d",
@@ -148,10 +152,7 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode ?)\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
-            new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
@@ -163,6 +164,14 @@ namespace API.Parser
             // [BAA]_Darker_than_Black_Omake-1.zip 
             new Regex(
                 @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kodoja #001 (March 2016)
+            new Regex(
+                @"(?<Series>.*)(\s|_|-)#",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            new Regex(
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
@@ -292,7 +301,7 @@ namespace API.Parser
         {
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -367,7 +376,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|(?<!The\s)Anthology)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|(?<!The\s)Anthology|Bonus)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
