@@ -36,7 +36,7 @@ namespace API
         public static async Task Main(string[] args)
         {
             // Before anything, check if JWT has been generated properly or if user still has default
-            if (!Configuration.CheckIfJwtTokenSet(GetAppSettingFilename()))
+            if (!Configuration.CheckIfJwtTokenSet(GetAppSettingFilename()) && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
             {
                 Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
                 var rBytes = new byte[24];

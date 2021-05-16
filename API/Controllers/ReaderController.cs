@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -19,6 +20,7 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
             ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
@@ -252,9 +254,9 @@ namespace API.Controllers
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            //if (user == null) return // TODO: Need to have GetUSerByUsernameAsync checks to throw not authorized (401) if it is null all throughout code 
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-
             
             if (currentVolume.Number == 0)
             {
@@ -268,7 +270,7 @@ namespace API.Controllers
                     if (currentChapterId == chapter.Id) next = true;
                 }
 
-                var chapterId = GetNextChapterId(currentVolume.Chapters, currentChapterId);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
                 if (chapterId > 0) return Ok(chapterId);
             }
 
@@ -276,7 +278,7 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
                 { 
-                    var chapterId = GetNextChapterId(currentVolume.Chapters, currentChapterId);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 
@@ -320,7 +322,7 @@ namespace API.Controllers
             
             if (currentVolume.Number == 0)
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.Reverse(), currentChapterId);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
                 if (chapterId > 0) return Ok(chapterId);
             }
 
@@ -328,7 +330,7 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number)
                 {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.Reverse(), currentChapterId);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 if (volume.Number == currentVolume.Number - 1)
