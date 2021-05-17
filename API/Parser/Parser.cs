@@ -799,6 +799,10 @@ namespace API.Parser
         
         public static float MinimumNumberFromRange(string range)
         {
+            if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+            {
+                return (float) 0.0;
+            }
             var tokens = range.Replace("_", string.Empty).Split("-");
             return tokens.Min(float.Parse);
         }
