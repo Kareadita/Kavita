@@ -366,5 +366,14 @@ namespace API.Data
                 
             return retSeries.DistinctBy(s => s.Name).Take(limit);
         }
+
+        public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
+        {
+            return await _context.SeriesMetadata
+                .Where(metadata => metadata.SeriesId == seriesId)
+                .AsNoTracking()
+                .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
     }
 }

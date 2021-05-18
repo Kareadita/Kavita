@@ -168,5 +168,11 @@ namespace API.Controllers
             _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
             return Ok();
         }
+
+        [HttpGet("metadata")]
+        public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId));
+        }
     }
 }

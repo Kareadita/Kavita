@@ -21,6 +21,16 @@ namespace API.Helpers
 
             CreateMap<Series, SeriesDto>();
 
+            CreateMap<SeriesMetadata, SeriesMetadataDto>()
+                .ForMember(dest => dest.Genres,
+                    opt =>
+                        opt.MapFrom(src => src.Genres.Select(x => x.Name).ToList()))
+                .ForMember(dest => dest.Tags,
+                    opt =>
+                        opt.MapFrom(src => src.Tags.Select(x => x.Title).ToList()));
+
+            CreateMap<Person, PersonDto>();
+
             CreateMap<AppUserPreferences, UserPreferencesDto>();
 
             CreateMap<Series, SearchResultDto>()
