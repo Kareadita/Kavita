@@ -46,18 +46,23 @@ else
 	ln -s /kavita/data/cache /kavita/cache
 fi
 
-if [ -d /kavita/data/logs ]
+# Checks for the log file
+
+if test -f "/kavita/data/logs/kavita.log"
 then
-	if [ -d /kavita/logs ]
-	then
-		unlink /kavita/logs
-		ln -s /kavita/data/logs /kavita/logs
-	else
-		ln -s /kavita/data/logs /kavita/logs
-	fi
+	rm /kavita/kavita.log
+	ln -s /kavita/data/logs/kavita.log /kavita/
 else
-	mkdir /kavita/data/logs
-	ln -s /kavita/data/logs /kavita/logs
+	if [ -d /kavita/data/logs ]
+	then
+		touch /kavita/data/logs/kavita.log
+		ln -s /kavita/data/logs/kavita.log /kavita/
+	else
+		mkdir /kavita/data/logs
+		touch /kavita/data/logs/kavita.log
+		ln -s /kavita/data/logs/kavita.log /kavita/
+	fi
+
 fi
 
 ./Kavita
