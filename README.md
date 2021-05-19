@@ -7,15 +7,17 @@ your manga collection with your friends and family!
 
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
 ![Github Downloads](https://img.shields.io/github/downloads/Kareadita/Kavita/total.svg)
+[![Feature Requests](https://feathub.com/Kareadita/Kavita?format=svg)](https://feathub.com/Kareadita/Kavita)
 
 
 ## Goals:
-* Serve up Manga (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
-* Provide Reader for Manga and Books (Light Novels) via web app that is responsive
-* Provide customization themes (server installed) for web app
+* Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
+* Provide Readers via web app that is responsive
+* Provide a dark theme for web app
 * Provide hooks into metadata providers to fetch Manga data
 * Metadata should allow for collections, want to read integration from 3rd party services, genres.
 * Ability to manage users, access, and ratings
+* Ability to sync ratings and reviews to external services
 
 ## How to Build
 - Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui

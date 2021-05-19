@@ -53,7 +53,7 @@ namespace API.Tests.Parser
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 12 [Dametrans][v2]", "0")]
         [InlineData("Vagabond_v03", "3")]
         [InlineData("Mujaki No Rakune Volume 10.cbz", "10")]
-        [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "3")]
+        [InlineData("Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz", "0")]
         [InlineData("Volume 12 - Janken Boy is Coming!.cbz", "12")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "20")]
         [InlineData("Gantz.V26.cbz", "26")]
@@ -61,7 +61,9 @@ namespace API.Tests.Parser
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "1")]
         [InlineData("NEEDLESS_Vol.4_-_Simeon_6_v2_[SugoiSugoi].rar", "4")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "1")]
-        
+        [InlineData("Sword Art Online Vol 10 - Alicization Running [Yen Press] [LuCaZ] {r2}.epub", "10")]
+        [InlineData("Noblesse - Episode 406 (52 Pages).7z", "0")]
+        [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -137,6 +139,12 @@ namespace API.Tests.Parser
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "Okusama wa Shougakusei")]
         [InlineData("VanDread-v01-c001[MD].zip", "VanDread")]
         [InlineData("Momo The Blood Taker - Chapter 027 Violent Emotion.cbz", "Momo The Blood Taker")]
+        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "Kiss x Sis")]
+        [InlineData("Green Worldz - Chapter 112 Final Chapter (End).cbz", "Green Worldz")]
+        [InlineData("Noblesse - Episode 406 (52 Pages).7z", "Noblesse")]
+        [InlineData("X-Men v1 #201 (September 2007).cbz", "X-Men")]
+        [InlineData("Kodoja #001 (March 2016)", "Kodoja")]
+        [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "Boku No Kokoro No Yabai Yatsu")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -197,6 +205,13 @@ namespace API.Tests.Parser
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
+        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
+        [InlineData("Tomogui Kyoushitsu - Chapter 006 Game 005 - Fingernails On Right Hand (Part 002).cbz", "6")]
+        [InlineData("Noblesse - Episode 406 (52 Pages).7z", "406")]
+        [InlineData("X-Men v1 #201 (September 2007).cbz", "201")]
+        [InlineData("Kodoja #001 (March 2016)", "1")]
+        [InlineData("Noblesse - Episode 429 (74 Pages).7z", "429")]
+        [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -225,6 +240,8 @@ namespace API.Tests.Parser
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
         [InlineData("Ani-Hina Art Collection.cbz", true)]
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
+        [InlineData("A Town Where You Live - Bonus Chapter.zip", true)]
+        [InlineData("Yuki Merry - 4-Komga Anthology", true)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));

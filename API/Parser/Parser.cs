@@ -9,7 +9,7 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z";
         public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -52,10 +52,10 @@ namespace API.Parser
             new Regex(   
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz
-            new Regex(   
-                @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (this case is too limited, most other cases shouldn't parse out)
+            // new Regex(   
+            //     @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
             
         };
 
@@ -88,11 +88,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
             new Regex(
-                @"(?<Series>.*)(?: _|-|\[|\() ?v",
+                @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz
             new Regex(
-                @"(?<Series>.*) (\b|_|-)(?:chapter)",
+                @"(?<Series>.*)(\b|_|-|\s)(?:chapter)(\b|_|-|\s)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -101,7 +101,7 @@ namespace API.Parser
             //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             // due to duplicate version identifiers in file.
             new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?(_| )",
+                @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -115,13 +115,17 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Noblesse - Episode 429 (74 Pages).7z
+            new Regex(
+                @"(?<Series>.*)(\s|_)(?:Episode|Ep\.?)(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
                 @"(?<Series>.*)\(\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
-                @"(?<Series>.*)( |_)\((c |ch |chapter )",
+                @"(?<Series>.*)(\s|_)\((c\s|ch\s|chapter\s)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
@@ -148,10 +152,7 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode ?)\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
-            new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
@@ -163,6 +164,14 @@ namespace API.Parser
             // [BAA]_Darker_than_Black_Omake-1.zip 
             new Regex(
                 @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Kodoja #001 (March 2016)
+            new Regex(
+                @"(?<Series>.*)(\s|_|-)#",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            new Regex(
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
@@ -292,7 +301,7 @@ namespace API.Parser
         {
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
             new Regex(
-                @"(c|ch)(\.? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
@@ -302,7 +311,10 @@ namespace API.Parser
             new Regex(   
                 @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
+            // Green Worldz - Chapter 027
+            new Regex(
+                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz 
             new Regex(
                 @"^(?!Vol)(?<Series>.*) (?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?: \(\d{4}\))?(\b|_|-)", 
@@ -364,7 +376,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|(?<!The\s)Anthology|Bonus)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
@@ -787,6 +799,10 @@ namespace API.Parser
         
         public static float MinimumNumberFromRange(string range)
         {
+            if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+            {
+                return (float) 0.0;
+            }
             var tokens = range.Replace("_", string.Empty).Split("-");
             return tokens.Min(float.Parse);
         }

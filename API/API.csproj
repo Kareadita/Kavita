@@ -12,6 +12,23 @@
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <!-- Set the Product and Version info for our own projects -->
+  <PropertyGroup>
+    <Product>Kavita</Product>
+    <Company>kareadita.github.io</Company>
+    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kareadita.github.io (GNU General Public v3)</Copyright>
+
+    <!-- Should be replaced by CI -->
+    <AssemblyVersion>0.4.1</AssemblyVersion>
+    <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
+
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+
+    <Deterministic Condition="$(AssemblyVersion.EndsWith('*'))">False</Deterministic>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
@@ -33,6 +50,7 @@
     <PackageReference Include="NetVips" Version="2.0.0" />
     <PackageReference Include="NetVips.Native" Version="8.10.6" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.1" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.3.4" />
     <PackageReference Include="SharpCompress" Version="0.28.1" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.20.0.28934">
       <PrivateAssets>all</PrivateAssets>
@@ -63,6 +81,10 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="logs\kavita.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -19,6 +20,7 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
             ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
@@ -32,6 +34,7 @@ namespace API.Controllers
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
+            if (page < 0) return BadRequest("Page cannot be less than 0");
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -251,12 +254,13 @@ namespace API.Controllers
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            //if (user == null) return // TODO: Need to have GetUSerByUsernameAsync checks to throw not authorized (401) if it is null all throughout code 
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-
-            var next = false;
+            
             if (currentVolume.Number == 0)
             {
+                var next = false;
                 foreach (var chapter in currentVolume.Chapters)
                 {
                     if (next)
@@ -265,16 +269,40 @@ namespace API.Controllers
                     }
                     if (currentChapterId == chapter.Id) next = true;
                 }
+
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                if (chapterId > 0) return Ok(chapterId);
             }
 
             foreach (var volume in volumes)
             {
+                if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
+                { 
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                    if (chapterId > 0) return Ok(chapterId);
+                }
+                
                 if (volume.Number == currentVolume.Number + 1)
                 {
                     return Ok(volume.Chapters.FirstOrDefault()?.Id);
                 }
             }
             return Ok(-1);
+        }
+
+        private int GetNextChapterId(IEnumerable<Chapter> chapters, int currentChapterId)
+        {
+            var next = false;
+            foreach (var chapter in chapters)
+            {
+                if (next)
+                {
+                    return chapter.Id;
+                }
+                if (currentChapterId == chapter.Id) next = true;
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -291,22 +319,20 @@ namespace API.Controllers
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
 
-            var next = false;
+            
             if (currentVolume.Number == 0)
             {
-                var chapters = currentVolume.Chapters.Reverse();
-                foreach (var chapter in chapters)
-                {
-                    if (next)
-                    {
-                        return Ok(chapter.Id);
-                    }
-                    if (currentChapterId == chapter.Id) next = true;
-                }
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                if (chapterId > 0) return Ok(chapterId);
             }
 
             foreach (var volume in volumes.Reverse())
             {
+                if (volume.Number == currentVolume.Number)
+                {
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                    if (chapterId > 0) return Ok(chapterId);
+                }
                 if (volume.Number == currentVolume.Number - 1)
                 {
                     return Ok(volume.Chapters.LastOrDefault()?.Id);
