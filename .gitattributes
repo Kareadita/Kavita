@@ -1,0 +1,3 @@
+# Set line formatting for scripts
+
+*.sh text eol=lf
