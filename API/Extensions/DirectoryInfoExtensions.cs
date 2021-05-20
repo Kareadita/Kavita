@@ -37,26 +37,29 @@ namespace API.Extensions
         /// <param name="directory"></param>
         public static void Flatten(this DirectoryInfo directory)
         {
-            FlattenDirectory(directory, directory);
+            FlattenDirectory(directory, directory, 0);
         }
 
-        private static void FlattenDirectory(DirectoryInfo root, DirectoryInfo directory)
+        private static void FlattenDirectory(DirectoryInfo root, DirectoryInfo directory, int directoryIndex)
         {
-            if (!root.FullName.Equals(directory.FullName)) // I might be able to replace this with root === directory
+            if (!root.FullName.Equals(directory.FullName))
             {
                 foreach (var file in directory.EnumerateFiles())
                 {
                     if (file.Directory == null) continue;
-                    var newName = $"{file.Directory.Name}_{file.Name}";
+                    var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
+                    var newName = $"{paddedIndex}_{file.Name}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
                     
                 }
             }
-            
+
+            var i = directoryIndex + 1;
             foreach (var subDirectory in directory.EnumerateDirectories())
             {
-                FlattenDirectory(root, subDirectory);
+                FlattenDirectory(root, subDirectory, i);
+                i += 1;
             }
         }
     }
