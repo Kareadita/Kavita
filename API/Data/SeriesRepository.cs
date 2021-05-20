@@ -197,8 +197,11 @@ namespace API.Data
 
         public async Task<Series> GetSeriesByIdAsync(int seriesId)
         {
+            // TODO: Validate if we should have a separate call for metdata inclusion. only needed in collections
             return await _context.Series
                 .Include(s => s.Volumes)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags)
                 .Where(s => s.Id == seriesId)
                 .SingleOrDefaultAsync();
         }
@@ -369,11 +372,22 @@ namespace API.Data
 
         public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
         {
-            return await _context.SeriesMetadata
+            var tags = await _context.CollectionTag
+                .Include(t => t.SeriesMetadatas)
+                .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
+                .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+            
+            var metadataDto = await _context.SeriesMetadata
                 .Where(metadata => metadata.SeriesId == seriesId)
                 .AsNoTracking()
                 .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
+            
+            metadataDto.Tags = tags;
+            
+            return metadataDto;
         }
     }
 }

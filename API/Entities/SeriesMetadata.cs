@@ -10,15 +10,11 @@ namespace API.Entities
     {
         public int Id { get; set; }
         /// <summary>
-        /// Gets a collection containing the genres for this item.
-        /// </summary>
-        public virtual ICollection<Genre> Genres { get; set; }
-        public virtual ICollection<Tag> Tags { get; set; }
-        public virtual ICollection<Person> Persons { get; set; }
-        /// <summary>
         /// Publisher of book or manga/comic
         /// </summary>
-        public string Publisher { get; set; }
+        //public string Publisher { get; set; }
+        
+        public ICollection<CollectionTag> CollectionTags { get; set; }
         
         // Relationship
         public Series Series { get; set; }

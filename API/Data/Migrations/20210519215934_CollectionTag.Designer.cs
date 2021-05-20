@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210517210211_CollectionsAndMetadata")]
-    partial class CollectionsAndMetadata
+    [Migration("20210519215934_CollectionTag")]
+    partial class CollectionTag
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -281,6 +281,33 @@ namespace API.Data.Migrations
                     b.ToTable("Chapter");
                 });
 
+            modelBuilder.Entity("API.Entities.CollectionTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NormalizedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Promoted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id", "Promoted")
+                        .IsUnique();
+
+                    b.ToTable("CollectionTag");
+                });
+
             modelBuilder.Entity("API.Entities.FolderPath", b =>
                 {
                     b.Property<int>("Id")
@@ -301,29 +328,6 @@ namespace API.Data.Migrations
                     b.HasIndex("LibraryId");
 
                     b.ToTable("FolderPath");
-                });
-
-            modelBuilder.Entity("API.Entities.Genre", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<uint>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SeriesMetadataId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesMetadataId");
-
-                    b.ToTable("Genre");
                 });
 
             modelBuilder.Entity("API.Entities.Library", b =>
@@ -378,32 +382,6 @@ namespace API.Data.Migrations
                     b.HasIndex("ChapterId");
 
                     b.ToTable("MangaFile");
-                });
-
-            modelBuilder.Entity("API.Entities.Person", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<uint>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SeriesMetadataId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesMetadataId");
-
-                    b.ToTable("Person");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>
@@ -461,9 +439,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Publisher")
-                        .HasColumnType("TEXT");
-
                     b.Property<uint>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("INTEGER");
@@ -497,29 +472,6 @@ namespace API.Data.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("ServerSetting");
-                });
-
-            modelBuilder.Entity("API.Entities.Tag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<uint>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("SeriesMetadataId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SeriesMetadataId");
-
-                    b.ToTable("Tag");
                 });
 
             modelBuilder.Entity("API.Entities.Volume", b =>
@@ -569,6 +521,21 @@ namespace API.Data.Migrations
                     b.HasIndex("LibrariesId");
 
                     b.ToTable("AppUserLibrary");
+                });
+
+            modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
+                {
+                    b.Property<int>("CollectionTagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionTagsId", "SeriesMetadatasId");
+
+                    b.HasIndex("SeriesMetadatasId");
+
+                    b.ToTable("CollectionTagSeriesMetadata");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -729,13 +696,6 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
-            modelBuilder.Entity("API.Entities.Genre", b =>
-                {
-                    b.HasOne("API.Entities.SeriesMetadata", null)
-                        .WithMany("Genres")
-                        .HasForeignKey("SeriesMetadataId");
-                });
-
             modelBuilder.Entity("API.Entities.MangaFile", b =>
                 {
                     b.HasOne("API.Entities.Chapter", "Chapter")
@@ -745,13 +705,6 @@ namespace API.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Chapter");
-                });
-
-            modelBuilder.Entity("API.Entities.Person", b =>
-                {
-                    b.HasOne("API.Entities.SeriesMetadata", null)
-                        .WithMany("Persons")
-                        .HasForeignKey("SeriesMetadataId");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>
@@ -776,13 +729,6 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
-            modelBuilder.Entity("API.Entities.Tag", b =>
-                {
-                    b.HasOne("API.Entities.SeriesMetadata", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("SeriesMetadataId");
-                });
-
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -805,6 +751,21 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Library", null)
                         .WithMany()
                         .HasForeignKey("LibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.CollectionTag", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionTagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -878,15 +839,6 @@ namespace API.Data.Migrations
                     b.Navigation("Metadata");
 
                     b.Navigation("Volumes");
-                });
-
-            modelBuilder.Entity("API.Entities.SeriesMetadata", b =>
-                {
-                    b.Navigation("Genres");
-
-                    b.Navigation("Persons");
-
-                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("API.Entities.Volume", b =>

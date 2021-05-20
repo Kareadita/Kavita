@@ -4,7 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <Company>kareadita.github.io</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.4.1.1</AssemblyVersion>
+        <AssemblyVersion>0.4.1.2</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 

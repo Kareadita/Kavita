@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
@@ -172,7 +173,82 @@ namespace API.Controllers
         [HttpGet("metadata")]
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId));
+            var metadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+            if (metadata == null)
+            {
+                // Create one
+                var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+                
+                series.Metadata = new SeriesMetadata();
+                if (await _unitOfWork.Complete())
+                {
+                    return await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+                }
+                _logger.LogCritical("Could not create a series metadata for {SeriesId}", seriesId);
+                return BadRequest("Could not create a series metadata");
+            }
+            return Ok(metadata);
+        }
+        
+        [HttpPost("metadata")]
+        public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
+        {
+            var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            if (series.Metadata == null)
+            {
+                series.Metadata = new SeriesMetadata()
+                {
+                    CollectionTags = updateSeriesMetadataDto.Tags.Select(dto => new CollectionTag()
+                    {
+                        Id = dto.Id,
+                        NormalizedTitle = Parser.Parser.Normalize(dto.Title).ToUpper(),
+                        Title = dto.Title,
+                        Promoted = dto.Promoted
+                    }).ToList()
+                };
+            }
+            else
+            {
+                // TODO: We need to manually patch existing items that already exist
+                var newTags = new List<CollectionTag>();
+                foreach (var tag in updateSeriesMetadataDto.Tags)
+                {
+                    // TODO: Ensure we can delete tags
+                    series.Metadata.CollectionTags ??= new List<CollectionTag>();
+                    var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
+                    if (existingTag != null)
+                    {
+                        // Update existingTag    
+                        existingTag.Promoted = tag.Promoted;
+                        existingTag.Title = tag.Title;
+                        existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
+                    }
+                    else
+                    {
+                        // Add new tag
+                        newTags.Add(new CollectionTag()
+                        {
+                            Id = tag.Id,
+                            NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper(),
+                            Title = tag.Title,
+                            Promoted = tag.Promoted
+                        });
+                    }
+                }
+
+                foreach (var tag in newTags)
+                {
+                    series.Metadata.CollectionTags.Add(tag);
+                }
+            }
+            
+            if (await _unitOfWork.Complete())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not update metadata");
         }
     }
 }

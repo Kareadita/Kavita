@@ -20,14 +20,10 @@ namespace API.Helpers
             CreateMap<Chapter, ChapterDto>();
 
             CreateMap<Series, SeriesDto>();
+            
+            CreateMap<CollectionTag, CollectionTagDto>();
 
-            CreateMap<SeriesMetadata, SeriesMetadataDto>()
-                .ForMember(dest => dest.Genres,
-                    opt =>
-                        opt.MapFrom(src => src.Genres.Select(x => x.Name).ToList()))
-                .ForMember(dest => dest.Tags,
-                    opt =>
-                        opt.MapFrom(src => src.Tags.Select(x => x.Title).ToList()));
+            CreateMap<SeriesMetadata, SeriesMetadataDto>();
 
             CreateMap<Person, PersonDto>();
 
