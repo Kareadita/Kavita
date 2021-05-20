@@ -372,20 +372,21 @@ namespace API.Data
 
         public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
         {
-            var tags = await _context.CollectionTag
-                .Include(t => t.SeriesMetadatas)
-                .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
-                .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
-            
             var metadataDto = await _context.SeriesMetadata
                 .Where(metadata => metadata.SeriesId == seriesId)
                 .AsNoTracking()
                 .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
-            
-            metadataDto.Tags = tags;
+
+            if (metadataDto != null)
+            {
+                metadataDto.Tags = await _context.CollectionTag
+                    .Include(t => t.SeriesMetadatas)
+                    .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
+                    .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
             
             return metadataDto;
         }

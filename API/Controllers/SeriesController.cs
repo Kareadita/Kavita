@@ -174,19 +174,19 @@ namespace API.Controllers
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {
             var metadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
-            if (metadata == null)
-            {
-                // Create one
-                var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-                
-                series.Metadata = new SeriesMetadata();
-                if (await _unitOfWork.Complete())
-                {
-                    return await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
-                }
-                _logger.LogCritical("Could not create a series metadata for {SeriesId}", seriesId);
-                return BadRequest("Could not create a series metadata");
-            }
+            // if (metadata == null)
+            // {
+            //     // Create one
+            //     var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            //     
+            //     series.Metadata = new SeriesMetadata();
+            //     if (await _unitOfWork.Complete())
+            //     {
+            //         return await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+            //     }
+            //     _logger.LogCritical("Could not create a series metadata for {SeriesId}", seriesId);
+            //     return BadRequest("Could not create a series metadata");
+            // }
             return Ok(metadata);
         }
         
