@@ -83,6 +83,7 @@ namespace API
                         });
                     });
 
+
                     webBuilder.UseSentry(options =>
                     {
                         options.Dsn = "https://40f4e7b49c094172a6f99d61efb2740f@o641015.ingest.sentry.io/5757423";

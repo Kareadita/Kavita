@@ -340,7 +340,7 @@ namespace API.Services
             {
                 entry.WriteToDirectory(extractPath, new ExtractionOptions()
                 {
-                    ExtractFullPath = false,
+                    ExtractFullPath = true, // Don't flatten, let the flatterner ensure correct order of nested folders
                     Overwrite = false
                 });
             }
