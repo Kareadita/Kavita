@@ -59,6 +59,8 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
+                // TODO: Remove this 
+                await Seed.SeedSeriesMetadata(context);
             }
             catch (Exception ex)
             {

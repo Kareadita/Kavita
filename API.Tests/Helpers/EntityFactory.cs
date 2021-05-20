@@ -17,7 +17,8 @@ namespace API.Tests.Helpers
                 SortName = name,
                 LocalizedName = name,
                 NormalizedName = API.Parser.Parser.Normalize(name),
-                Volumes = new List<Volume>()
+                Volumes = new List<Volume>(),
+                Metadata = new SeriesMetadata()
             };
         }
 
