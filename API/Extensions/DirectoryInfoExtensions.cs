@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
+using API.Services;
 
 namespace API.Extensions
 {
@@ -37,29 +40,32 @@ namespace API.Extensions
         /// <param name="directory"></param>
         public static void Flatten(this DirectoryInfo directory)
         {
-            FlattenDirectory(directory, directory, 0);
+            var index = 0;
+            FlattenDirectory(directory, directory, ref index);
         }
 
-        private static void FlattenDirectory(DirectoryInfo root, DirectoryInfo directory, int directoryIndex)
+        private static void FlattenDirectory(DirectoryInfo root, DirectoryInfo directory, ref int directoryIndex)
         {
             if (!root.FullName.Equals(directory.FullName))
             {
+                var fileIndex = 1;
                 foreach (var file in directory.EnumerateFiles())
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
-                    var newName = $"{paddedIndex}_{file.Name}";
+                    // We need to rename the files so that after flattening, they are in the order we found them
+                    var newName = $"{paddedIndex}_{fileIndex}.{file.Extension}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
-                    
+                    fileIndex++;
                 }
-            }
 
-            var i = directoryIndex + 1;
+                directoryIndex++;
+            }
+            
             foreach (var subDirectory in directory.EnumerateDirectories())
             {
-                FlattenDirectory(root, subDirectory, i);
-                i += 1;
+                FlattenDirectory(root, subDirectory, ref directoryIndex);
             }
         }
     }
