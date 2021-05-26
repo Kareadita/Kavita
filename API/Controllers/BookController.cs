@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Extensions;
@@ -31,7 +32,7 @@ namespace API.Controllers
         public async Task<ActionResult<string>> GetBookInfo(int chapterId)
         {
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
 
             return book.Title;
         }
@@ -58,7 +59,7 @@ namespace API.Controllers
             // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
             // this is used to rewrite anchors in the book text so that we always load properly in FE
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
             
             var navItems = await book.GetNavigationAsync();
@@ -170,11 +171,11 @@ namespace API.Controllers
         {
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
 
-            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 
             var counter = 0;
-            var doc = new HtmlDocument();
+            var doc = new HtmlDocument {OptionFixNestedTags = true};
             var baseUrl = Request.Scheme + "://" + Request.Host + Request.PathBase + "/api/";
             var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
             var bookPages = await book.GetReadingOrderAsync();
@@ -186,8 +187,25 @@ namespace API.Controllers
                     if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
                     
                     doc.LoadHtml(content);
-                    var body = doc.DocumentNode.SelectSingleNode("/html/body");
-                    
+                    var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                    if (body == null)
+                    {
+                        if (doc.ParseErrors.Any())
+                        {
+                            _logger.LogError("{FilePath} has an invalid html file (Page {PageName})", book.FilePath, contentFileRef.FileName);
+                            foreach (var error in doc.ParseErrors)
+                            {
+                                _logger.LogError("Line {LineNumber}, Reason: {Reason}", error.Line, error.Reason);
+                            }
+
+                            return BadRequest("The file is malformed! Cannot read.");
+                        }
+                        _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                        doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                        body = doc.DocumentNode.SelectSingleNode("/html/body");
+                    }
+
                     var inlineStyles = doc.DocumentNode.SelectNodes("//style");
                     if (inlineStyles != null)
                     {

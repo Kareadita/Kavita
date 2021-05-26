@@ -131,7 +131,7 @@ namespace API.Services
         {
             if (!IsValidFile(filePath)) return string.Empty;
             
-            var epubBook = EpubReader.OpenBook(filePath);
+            using var epubBook = EpubReader.OpenBook(filePath);
             return epubBook.Schema.Package.Metadata.Description;
         }
 
@@ -155,7 +155,7 @@ namespace API.Services
 
             try
             {
-                var epubBook = EpubReader.OpenBook(filePath);
+                using var epubBook = EpubReader.OpenBook(filePath);
                 return epubBook.Content.Html.Count;
             }
             catch (Exception ex)
@@ -195,7 +195,7 @@ namespace API.Services
         {
             try
             {
-                var epubBook = EpubReader.OpenBook(filePath);
+                using var epubBook = EpubReader.OpenBook(filePath);
 
                 return new ParserInfo()
                 {
@@ -222,7 +222,7 @@ namespace API.Services
         {
             if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
             
-            var epubBook = EpubReader.OpenBook(fileFilePath);
+            using var epubBook = EpubReader.OpenBook(fileFilePath);
 
 
             try
