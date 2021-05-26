@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Entities.Enums;
@@ -65,6 +66,11 @@ namespace API.Services
             return contentType;
         }
 
+        public static void CreateLinkTagsFromImportUrls(HtmlNode document, ref string styleContent)
+        {
+            
+        }
+
         public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
         {
             if (anchor.Name != "a") return;
@@ -103,8 +109,33 @@ namespace API.Services
             anchor.Attributes.Add("href", "javascript:void(0)");
         }
 
-        public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase)
+        public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
         {
+            // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be
+            // Scoped
+            var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), "") : string.Empty;
+            var importBuilder = new StringBuilder();
+            foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+            {
+                if (!match.Success) continue;
+                
+                var importFile = match.Groups["Filename"].Value;
+                var key = CleanContentKeys(importFile);
+                if (!key.Contains(prepend))
+                {
+                    key = prepend + key;
+                }
+                if (!book.Content.AllFiles.ContainsKey(key)) continue;
+            
+                var bookFile = book.Content.AllFiles[key];
+               var content = await bookFile.ReadContentAsBytesAsync();
+               importBuilder.Append(Encoding.UTF8.GetString(content));
+            }
+
+            stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
+            stylesheetHtml =
+                Parser.Parser.CssImportUrlRegex.Replace(stylesheetHtml, "$1" + apiBase + prepend + "$2" + "$3");
+            
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
             styleContent =
                 Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
@@ -217,6 +248,7 @@ namespace API.Services
 
             return null;
         }
+        
 
         public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
         {
