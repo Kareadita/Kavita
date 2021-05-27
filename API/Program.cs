@@ -30,7 +30,7 @@ namespace API
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
-            return "appSettings" + (isDevelopment ? ".Development" : "") + ".json";
+            return "appsettings" + (isDevelopment ? ".Development" : "") + ".json";
         }
         
         public static async Task Main(string[] args)

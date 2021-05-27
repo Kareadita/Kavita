@@ -284,7 +284,7 @@ namespace API.Controllers
                 
                 if (volume.Number == currentVolume.Number + 1)
                 {
-                    return Ok(volume.Chapters.FirstOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault()?.Id);
                 }
             }
             return Ok(-1);
@@ -335,7 +335,7 @@ namespace API.Controllers
                 }
                 if (volume.Number == currentVolume.Number - 1)
                 {
-                    return Ok(volume.Chapters.LastOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).LastOrDefault()?.Id);
                 }
             }
             return Ok(-1);
