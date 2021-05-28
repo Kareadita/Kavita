@@ -6,13 +6,14 @@ namespace API.Interfaces
 {
     public interface ICollectionTagRepository
     {
-        Task<IEnumerable<CollectionTagDto>> GetAllTagDtos();
+        Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
 
         Task<IEnumerable<SeriesDto>> GetSeriesForTag(int tagId); // Should this be tag name?
-        Task<IEnumerable<CollectionTagDto>> SearchTagDtos(string searchQuery);
+        Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery);
 
         Task<bool> DoesTagExist(string name);
 
         Task<byte[]> GetCoverImageAsync(int collectionTagId);
+        Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync();
     }
 }

@@ -393,11 +393,18 @@ namespace API.Data
 
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)
         {
+            var userLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                .AsNoTracking()
+                .Select(library => library.Id)
+                .ToList();
+            
             var query =  _context.CollectionTag
                 .Where(s => s.Id == collectionId)
                 .Include(c => c.SeriesMetadatas)
                 .ThenInclude(m => m.Series)
-                .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series))
+                .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 

@@ -210,7 +210,6 @@ namespace API.Controllers
             }
             else
             {
-                // TODO: We need to manually patch existing items that already exist
                 var newTags = new List<CollectionTag>();
                 foreach (var tag in updateSeriesMetadataDto.Tags)
                 {

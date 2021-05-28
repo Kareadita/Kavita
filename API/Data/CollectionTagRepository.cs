@@ -20,7 +20,7 @@ namespace API.Data
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtos()
+        public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
         {
             return await _context.CollectionTag
                 .Select(c => c)
@@ -29,7 +29,16 @@ namespace API.Data
                 .ToListAsync();
         }
         
-        public async Task<IEnumerable<CollectionTagDto>> SearchTagDtos(string searchQuery)
+        public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync()
+        {
+            return await _context.CollectionTag
+                .Where(c => c.Promoted)
+                .AsNoTracking()
+                .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
         {
             return await _context.CollectionTag
                 .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%") 
@@ -59,5 +68,7 @@ namespace API.Data
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
         }
+
+        
     }
 }
