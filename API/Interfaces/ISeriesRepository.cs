@@ -60,5 +60,6 @@ namespace API.Interfaces
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit);
         Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit);
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
+        Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     }
 }

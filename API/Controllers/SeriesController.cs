@@ -250,5 +250,24 @@ namespace API.Controllers
 
             return BadRequest("Could not update metadata");
         }
+
+        [HttpGet("series-by-collection")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, user.Id, userParams);
+            
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series for collection");
+
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+            
+            return Ok(series);
+        }
+        
+        
     }
 }

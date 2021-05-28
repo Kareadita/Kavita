@@ -7,6 +7,5 @@ namespace API.DTOs
         public int Id { get; set; }
         public string Title { get; set; }
         public bool Promoted { get; set; }
-        //public ICollection<SeriesMetadataDto> SeriesMetadatas { get; set; } // Maybe?
     }
 }

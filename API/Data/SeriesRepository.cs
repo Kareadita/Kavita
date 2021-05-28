@@ -390,5 +390,18 @@ namespace API.Data
             
             return metadataDto;
         }
+
+        public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)
+        {
+            var query =  _context.CollectionTag
+                .Where(s => s.Id == collectionId)
+                .Include(c => c.SeriesMetadatas)
+                .ThenInclude(m => m.Series)
+                .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series))
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
+
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        }
     }
 }

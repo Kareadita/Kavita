@@ -16,6 +16,11 @@ namespace API.Entities
         /// Visible title of the Tag
         /// </summary>
         public string Title { get; set; }
+        
+        /// <summary>
+        /// Cover Image for the collection tag
+        /// </summary>
+        //public byte[] CoverImage { get; set; }
 
         /// <summary>
         /// A normalized string used to check if the tag already exists in the DB
