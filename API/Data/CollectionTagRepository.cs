@@ -50,5 +50,14 @@ namespace API.Data
         {
             throw new System.NotImplementedException();
         }
+
+        public Task<byte[]> GetCoverImageAsync(int collectionTagId)
+        {
+            return _context.CollectionTag
+                .Where(c => c.Id == collectionTagId)
+                .Select(c => c.CoverImage)
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
+        }
     }
 }

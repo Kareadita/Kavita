@@ -12,6 +12,7 @@ namespace API.Interfaces
         Task<IEnumerable<CollectionTagDto>> SearchTagDtos(string searchQuery);
 
         Task<bool> DoesTagExist(string name);
-        
+
+        Task<byte[]> GetCoverImageAsync(int collectionTagId);
     }
 }

@@ -242,10 +242,15 @@ namespace API.Controllers
                     series.Metadata.CollectionTags.Add(tag);
                 }
             }
+
+            if (!_unitOfWork.HasChanges())
+            {
+                return Ok("No changes to save");
+            }
             
             if (await _unitOfWork.Complete())
             {
-                return Ok();
+                return Ok("Successfully updated");
             }
 
             return BadRequest("Could not update metadata");
