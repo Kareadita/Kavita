@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Entities;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -37,7 +38,14 @@ namespace API.Data
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
-        
+
+        public async Task<CollectionTag> GetTagAsync(int tagId)
+        {
+            return await _context.CollectionTag
+                .Where(c => c.Id == tagId)
+                .SingleOrDefaultAsync();
+        }
+
         public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
         {
             return await _context.CollectionTag

@@ -55,6 +55,33 @@ namespace API.Controllers
             return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString);
         }
         
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("update")]
+        public async Task<ActionResult> UpdateTag(CollectionTagDto updatedTag)
+        {
+            var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updatedTag.Id);
+            if (existingTag == null) return BadRequest("This tag does not exist");
+
+            existingTag.Promoted = updatedTag.Promoted;
+            existingTag.Title = updatedTag.Title;
+            existingTag.NormalizedTitle = Parser.Parser.Normalize(updatedTag.Title).ToUpper();
+
+            if (_unitOfWork.HasChanges())
+            {
+                if (await _unitOfWork.Complete())
+                {
+                    return Ok("Tag updated successfully");
+                }
+            }
+            else
+            {
+                return Ok("Tag updated successfully");
+            }
+
+            return BadRequest("Something went wrong, please try again");
+        }
+        
+        
         
     }
 }

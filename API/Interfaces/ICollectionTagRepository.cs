@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.Entities;
 
 namespace API.Interfaces
 {
@@ -15,5 +16,6 @@ namespace API.Interfaces
 
         Task<byte[]> GetCoverImageAsync(int collectionTagId);
         Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync();
+        Task<CollectionTag> GetTagAsync(int tagId);
     }
 }
