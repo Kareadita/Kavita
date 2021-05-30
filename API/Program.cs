@@ -59,7 +59,7 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
-                // TODO: Remove this 
+                // TODO: Remove this in v0.4.2
                 await Seed.SeedSeriesMetadata(context);
             }
             catch (Exception ex)

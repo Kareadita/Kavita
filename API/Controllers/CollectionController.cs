@@ -15,13 +15,11 @@ namespace API.Controllers
 {
     public class CollectionController : BaseApiController
     {
-        private readonly ILogger<CollectionController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
 
-        public CollectionController(ILogger<CollectionController> logger, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public CollectionController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
-            _logger = logger;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
         }
@@ -46,10 +44,7 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
         {
-            if (queryString == null)
-            {
-                queryString = "";
-            }
+            queryString ??= "";
             queryString = queryString.Replace(@"%", "");
             if (queryString.Length == 0) return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
             
@@ -89,16 +84,6 @@ namespace API.Controllers
             var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
             if (tag == null) return BadRequest("Not a valid Tag");
             tag.SeriesMetadatas ??= new List<SeriesMetadata>();
-            // var tagWithSeries = await _unitOfWork.CollectionTagRepository.GetSeriesForTagAsync(updateSeriesForTagDto.Tag.Id);
-            //
-            // foreach (var existingSeries in tagWithSeries)
-            // {
-            //     if (!updateSeriesForTagDto.SeriesIds.Contains(existingSeries.Id))
-            //     {
-            //         // Remove this series from the tag
-            //         tag.SeriesMetadatas = tag.SeriesMetadatas.Where(m => m.SeriesId != existingSeries.Id).ToList();
-            //     }
-            // }
 
             foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
             {
@@ -107,8 +92,14 @@ namespace API.Controllers
 
             if (tag.SeriesMetadatas.Count == 0)
             {
-                // TODO: Delete the tag itself
                 _unitOfWork.CollectionTagRepository.Remove(tag);
+            }
+            
+            // Check if Tag has updated (Summary)
+            if (tag.Summary == null || !tag.Summary.Equals(updateSeriesForTagDto.Tag.Summary))
+            {
+                tag.Summary = updateSeriesForTagDto.Tag.Summary;
+                _unitOfWork.CollectionTagRepository.Update(tag);
             }
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())

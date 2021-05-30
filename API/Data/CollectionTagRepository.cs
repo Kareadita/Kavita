@@ -25,11 +25,17 @@ namespace API.Data
         {
             _context.CollectionTag.Remove(tag);
         }
+        
+        public void Update(CollectionTag tag)
+        {
+            _context.Entry(tag).State = EntityState.Modified;
+        }
 
         public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
         {
             return await _context.CollectionTag
                 .Select(c => c)
+                .OrderBy(c => c.NormalizedTitle)
                 .AsNoTracking()
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -39,6 +45,7 @@ namespace API.Data
         {
             return await _context.CollectionTag
                 .Where(c => c.Promoted)
+                .OrderBy(c => c.NormalizedTitle)
                 .AsNoTracking()
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -66,6 +73,7 @@ namespace API.Data
                     .Include(c => c.SeriesMetadatas)
                     .ThenInclude(m => m.Series)
                     .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series))
+                    .OrderBy(s => s.SortName)
                     .ToListAsync();
         }
 
@@ -76,19 +84,9 @@ namespace API.Data
                             || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
                 .OrderBy(s => s.Title)
                 .AsNoTracking()
+                .OrderBy(c => c.NormalizedTitle)
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-        }
-
-
-        public async Task<IEnumerable<SeriesDto>> GetSeriesDtosForTagAsync(int tagId)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<bool> DoesTagExist(string name)
-        {
-            throw new System.NotImplementedException();
         }
 
         public Task<byte[]> GetCoverImageAsync(int collectionTagId)
@@ -99,7 +97,5 @@ namespace API.Data
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
         }
-
-        
     }
 }
