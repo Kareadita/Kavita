@@ -405,6 +405,8 @@ namespace API.Data
                 .Include(c => c.SeriesMetadatas)
                 .ThenInclude(m => m.Series)
                 .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
+                .OrderBy(s => s.LibraryId)
+                .ThenBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 
