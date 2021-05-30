@@ -66,17 +66,6 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
-        // public async Task<IEnumerable<Series>> GetSeriesForTagAsync(int tagId)
-        // {
-        //     return await _context.CollectionTag
-        //             .Where(s => s.Id == tagId)
-        //             .Include(c => c.SeriesMetadatas)
-        //             .ThenInclude(m => m.Series)
-        //             .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series))
-        //             .OrderBy(s => s.SortName)
-        //             .ToListAsync();
-        // }
-
         public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
         {
             return await _context.CollectionTag

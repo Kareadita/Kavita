@@ -197,7 +197,6 @@ namespace API.Data
 
         public async Task<Series> GetSeriesByIdAsync(int seriesId)
         {
-            // TODO: Validate if we should have a separate call for metdata inclusion. only needed in collections
             return await _context.Series
                 .Include(s => s.Volumes)
                 .Include(s => s.Metadata)

@@ -66,11 +66,6 @@ namespace API.Services
             return contentType;
         }
 
-        public static void CreateLinkTagsFromImportUrls(HtmlNode document, ref string styleContent)
-        {
-            
-        }
-
         public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
         {
             if (anchor.Name != "a") return;
