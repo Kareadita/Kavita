@@ -37,7 +37,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
   cursor: not-allowed;
 }
 
-label, select {
+label, select, .clickable {
   cursor: pointer;
 }
 

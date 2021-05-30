@@ -38,26 +38,40 @@
             <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
                 <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
-            <div>
-                <div class="row no-gutters" *ngIf="false">
-                    <div class="col-md-6">
+            <div *ngIf="seriesMetadata">
+                <div class="row no-gutters mt-2" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
+                    <div class="col-md-4">
                         <h5>Genres</h5>
                     </div>
-                    <div class="col-md-6">
-                        <p>Action, Fantasy, Gore, Romance</p>
+                    <div class="col-md-8">
+                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres">{{genre}}</app-tag-badge>
                     </div>
                 </div>
-                <div class="row no-gutters" *ngIf="false">
-                    <div class="col-md-6">
+                <div class="row no-gutters mt-1" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
+                    <div class="col-md-4">
                         <h5>Collections</h5>
                     </div>
-                    <div class="col-md-6">
-                        <p>Action, Favorites</p>
+                    <div class="col-md-8">
+                        <app-tag-badge *ngFor="let tag of seriesMetadata.tags" a11y-click="13,32" class="clickable" routerLink="/collections/{{tag.id}}">
+                            {{tag.title}}
+                        </app-tag-badge>
+                    </div>
+                </div>
+                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.persons && seriesMetadata.persons.length > 0">
+                    <div class="col-md-4">
+                        <h5>People</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-person-badge *ngFor="let person of seriesMetadata.persons">
+                            <div name>{{person.name}}</div>
+                            <div role>{{person.role}}</div>
+                        </app-person-badge>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <hr>
 
 
     <div *ngIf="hasSpecials; else noSpecials"> <!-- -->

@@ -13,9 +13,11 @@ import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/revie
 import { Chapter } from '../_models/chapter';
 import { LibraryType } from '../_models/library';
 import { Series } from '../_models/series';
+import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
+import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -54,7 +56,7 @@ export class SeriesDetailComponent implements OnInit {
   seriesSummary: string = '';
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
-
+  seriesMetadata: SeriesMetadata | null = null;
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
@@ -62,14 +64,14 @@ export class SeriesDetailComponent implements OnInit {
               private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService) {
+              private confirmService: ConfirmService, private collectionService: CollectionTagService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
       }
-    })
+    });
   }
 
   ngOnInit(): void {
@@ -87,6 +89,9 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
+      this.seriesMetadata = metadata;
+    });
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
       this.loadSeries(seriesId);
@@ -189,9 +194,13 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   loadSeries(seriesId: number) {
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
+      this.seriesMetadata = metadata;
+    });
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
       this.createHTML();
+      
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 

@@ -34,7 +34,7 @@ $dark-form-readonly: #434648;
     background-color: $dark-bg-color;
   }
 
-  input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control {
+  input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control, .typeahead-input {
     color: $dark-text-color;
     background-color: $dark-bg-color;
   }
@@ -50,10 +50,22 @@ $dark-form-readonly: #434648;
   .autocomplete-container .input-container .x {
     color: $dark-text-color;
   }
+  .autocomplete-container .not-found {
+    color: $dark-text-color;
+    background-color: $dark-bg-color;
+  }
+
+  .autocomplete-container .input-container .x i {
+    color: $dark-icon-color;
+  }
   .autocomplete-container .suggestions-container, .dropdown-menu, .list-group-item {
     color: $dark-text-color;
     background-color: $dark-bg-color;
     border-color: $dark-form-border;
+  }
+
+  .list-group-item:hover {
+    background-color: $dark-hover-color;
   }
 
   .ngx-slider .ngx-slider-bubble {
@@ -70,11 +82,11 @@ $dark-form-readonly: #434648;
     border-color: $dark-form-border;
   }
 
-  .nav-tabs {
+  .nav-tabs, .tagbadge {
       border-color: $dark-form-border;
   }
 
-  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link, .tagbadge {
       border-color: $dark-form-border;
       color: $dark-text-color;
       background-color: $dark-hover-color;
@@ -111,4 +123,5 @@ $dark-form-readonly: #434648;
   .error-banner, .dropdown-toggle {
     color: #efefef;
   }
+
 }

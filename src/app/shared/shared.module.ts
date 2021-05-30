@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardItemComponent } from './card-item/card-item.component';
-import { NgbCollapseModule, NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbDropdownModule, NgbPaginationModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
@@ -14,6 +14,10 @@ import { RegisterMemberComponent } from './register-member/register-member.compo
 import { ReadMoreComponent } from './read-more/read-more.component';
 import { RouterModule } from '@angular/router';
 import { DrawerComponent } from './drawer/drawer.component';
+import { TagBadgeComponent } from './tag-badge/tag-badge.component';
+import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layout.component';
+import { ShowIfScrollbarDirective } from './show-if-scrollbar.directive';
+import { A11yClickDirective } from './a11y-click.directive';
 
 
 @NgModule({
@@ -27,7 +31,11 @@ import { DrawerComponent } from './drawer/drawer.component';
     SafeHtmlPipe,
     CardActionablesComponent,
     ReadMoreComponent,
-    DrawerComponent
+    DrawerComponent,
+    TagBadgeComponent,
+    CardDetailLayoutComponent,
+    ShowIfScrollbarDirective,
+    A11yClickDirective
   ],
   imports: [
     CommonModule,
@@ -37,7 +45,8 @@ import { DrawerComponent } from './drawer/drawer.component';
     NgbProgressbarModule,
     NgbTooltipModule,
     NgbCollapseModule,
-    LazyLoadImageModule
+    LazyLoadImageModule,
+    NgbPaginationModule // CardDetailLayoutComponent
   ],
   exports: [
     RegisterMemberComponent, // TODO: Move this out and put in normal app
@@ -47,7 +56,11 @@ import { DrawerComponent } from './drawer/drawer.component';
     SafeHtmlPipe,
     CardActionablesComponent,
     ReadMoreComponent,
-    DrawerComponent
+    DrawerComponent,
+    TagBadgeComponent,
+    CardDetailLayoutComponent,
+    ShowIfScrollbarDirective,
+    A11yClickDirective
   ]
 })
 export class SharedModule { }

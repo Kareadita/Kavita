@@ -20,6 +20,10 @@ export class ImageService {
     return this.baseUrl + 'image/series-cover?seriesId=' + seriesId;
   }
 
+  getCollectionCoverImage(collectionTagId: number) {
+    return this.baseUrl + 'image/collection-cover?collectionTagId=' + collectionTagId;
+  }
+
   getChapterCoverImage(chapterId: number) {
     return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId;
   }

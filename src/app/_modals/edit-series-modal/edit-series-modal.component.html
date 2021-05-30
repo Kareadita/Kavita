@@ -34,7 +34,7 @@
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
+                    <div class="row no-gutters" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="author">Author</label>
@@ -49,8 +49,7 @@
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
-                        <!-- TODO: Use Badges like Plex has -->
+                    <div class="row no-gutters" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="genres">Genres</label>
@@ -60,7 +59,11 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="collections">Collections</label>
-                                <input id="collections" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="collections" type="text">
+                                <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
+                                    <ng-template #optionItem let-item let-position="idx">
+                                        {{item.title}}
+                                    </ng-template>
+                                </app-typeahead>
                             </div>
                         </div>
                     </div>

@@ -1,11 +1,15 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
+import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Series } from 'src/app/_models/series';
+import { SeriesMetadata } from 'src/app/_models/series-metadata';
+import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -29,19 +33,41 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   libraryName: string | undefined = undefined;
   private readonly onDestroy = new Subject<void>();
 
+  settings: TypeaheadSettings = new TypeaheadSettings();
+  tags: CollectionTag[] = [];
+  metadata!: SeriesMetadata;
+
 
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
               public utilityService: UtilityService,
               private fb: FormBuilder,
               public imageService: ImageService, 
-              private libraryService: LibraryService) { }
+              private libraryService: LibraryService,
+              private collectionService: CollectionTagService) { }
 
   ngOnInit(): void {
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
+
+    this.settings.displayFn = (data => data.title);
+    this.settings.minCharacters = 0;
+    this.settings.multiple = true;
+    this.settings.id = 'collections';
+    this.settings.unique = true;
+    this.settings.addIfNonExisting = true;
+    this.settings.fetchFn = (filter) => this.fetchCollectionTags(filter);
+    this.settings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title, promoted: false };
+    });
+    this.settings.compareFn = (options: CollectionTag[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f);
+    }
+
+    
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
@@ -50,11 +76,19 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       localizedName: new FormControl(this.series.localizedName, []),
       sortName: new FormControl(this.series.sortName, []),
       rating: new FormControl(this.series.userRating, []),
-      genres: new FormControl([''], []),
+
+      genres: new FormControl('', []),
       author: new FormControl('', []),
-      collections: new FormControl([''], []),
       artist: new FormControl('', []),
+
       coverImageIndex: new FormControl(0, [])
+    });
+
+    this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
+      if (metadata) {
+        this.metadata = metadata;
+        this.settings.savedData = metadata.tags;
+      }
     });
 
     this.isLoadingVolumes = true;
@@ -79,7 +113,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    this.modal.close({success: true, series: undefined});
+    this.modal.close({success: false, series: undefined});
+  }
+
+  fetchCollectionTags(filter: string = '') {
+    return this.collectionService.search(filter);
   }
 
   formatChapterNumber(chapter: Chapter) {
@@ -91,9 +129,17 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   save() {
     // TODO: In future (once locking or metadata implemented), do a converstion to updateSeriesDto
-    this.seriesService.updateSeries(this.editSeriesForm.value).subscribe(() => {
+
+    forkJoin([
+      this.seriesService.updateSeries(this.editSeriesForm.value),
+      this.seriesService.updateMetadata(this.metadata, this.tags)
+    ]).subscribe(results => {
       this.modal.close({success: true, series: this.editSeriesForm.value});
     });
+  }
+
+  updateCollections(tags: CollectionTag[]) {
+    this.tags = tags;
   }
 
 }

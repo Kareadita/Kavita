@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
     <div class="container-fluid">
       <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
-      <a class="navbar-brand" routerLink="/" routerLinkActive="active"><i class="fa fa-home" aria-hidden="true"></i><span class="phone-hidden"> Kavita</span></a>
+      <a class="navbar-brand" routerLink="/library" routerLinkActive="active"><i class="fa fa-home" aria-hidden="true"></i><span class="phone-hidden"> Kavita</span></a>
       <ul class="navbar-nav mr-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">

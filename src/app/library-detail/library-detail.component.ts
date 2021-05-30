@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
+import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -12,15 +13,12 @@ import { SeriesService } from '../_services/series.service';
 export class LibraryDetailComponent implements OnInit {
 
   libraryId!: number;
-  title = '';
+  libraryName = '';
   series: Series[] = [];
   loadingSeries = false;
-
   pagination!: Pagination;
-  pageNumber = 1;
-  pageSize = 30; // TODO: Refactor this into UserPreference or ServerSetting
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService) {
+  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, private libraryService: LibraryService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/home');
@@ -28,6 +26,9 @@ export class LibraryDetailComponent implements OnInit {
     }
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
+    this.libraryService.getLibraryNames().subscribe(names => {
+      this.libraryName = names[this.libraryId];
+    })
     this.loadPage();
   }
 
@@ -37,10 +38,13 @@ export class LibraryDetailComponent implements OnInit {
   loadPage() {
     const page = this.route.snapshot.queryParamMap.get('page');
     if (page != null) {
-      this.pageNumber = parseInt(page, 10);
+      if (this.pagination == undefined || this.pagination == null) {
+        this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+      }
+      this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingSeries = true;
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pageNumber, this.pageSize).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage || 0, this.pagination?.itemsPerPage || 30).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;
@@ -48,16 +52,12 @@ export class LibraryDetailComponent implements OnInit {
     });
   }
 
-  onPageChange(page: number) {
-    this.router.navigate(['library', this.libraryId], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page} });
+  onPageChange(pagination: Pagination) {
+    this.router.navigate(['library', this.libraryId], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
   }
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
-  }
-
-  mangaTrackBy(index: number, manga: Series) {
-    return manga.name;
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}`;

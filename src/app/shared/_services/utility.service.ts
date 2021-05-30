@@ -6,9 +6,14 @@ import { Volume } from 'src/app/_models/volume';
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
   LEFT_ARROW = 'ArrowLeft',
+  DOWN_ARROW = 'ArrowDown',
+  UP_ARROW = 'ArrowUp',
   ESC_KEY = 'Escape',
   SPACE = ' ',
-  G = 'g'
+  ENTER = 'Enter',
+  G = 'g',
+  BACKSPACE = 'Backspace',
+  DELETE = 'Delete'
 }
 
 @Injectable({

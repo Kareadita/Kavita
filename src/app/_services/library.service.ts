@@ -75,6 +75,7 @@ export class LibraryService {
   }
 
   getLibraryType(libraryId: number) {
+    // TODO: Cache this in browser
     return this.httpClient.get<LibraryType>(this.baseUrl + 'library/type?libraryId=' + libraryId);
   }
 
