@@ -32,7 +32,7 @@ namespace API.Entities
         /// <summary>
         /// Summary information related to the Series
         /// </summary>
-        public string Summary { get; set; }
+        public string Summary { get; set; } // TODO: Migrate into SeriesMetdata
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
@@ -40,6 +40,8 @@ namespace API.Entities
         /// Sum of all Volume page counts
         /// </summary>
         public int Pages { get; set; }
+        
+        public SeriesMetadata Metadata { get; set; }
 
         // Relationships
         public List<Volume> Volumes { get; set; }
