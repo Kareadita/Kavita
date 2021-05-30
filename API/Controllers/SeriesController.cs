@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -184,24 +185,28 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             if (series.Metadata == null)
             {
-                series.Metadata = new SeriesMetadata()
-                {
-                    CollectionTags = updateSeriesMetadataDto.Tags.Select(dto => new CollectionTag()
-                    {
-                        Id = dto.Id,
-                        NormalizedTitle = Parser.Parser.Normalize(dto.Title).ToUpper(),
-                        Title = dto.Title,
-                        Promoted = dto.Promoted
-                    }).ToList()
-                };
+                series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
+                    .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
             }
             else
             {
+                series.Metadata.CollectionTags ??= new List<CollectionTag>();
                 var newTags = new List<CollectionTag>();
+                
+                // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+                var existingTags = series.Metadata.CollectionTags.ToList();
+                foreach (var existing in existingTags)
+                {
+                    if (updateSeriesMetadataDto.Tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+                    {
+                        // Remove tag
+                        series.Metadata.CollectionTags.Remove(existing);
+                    }
+                }
+
+                // At this point, all tags that aren't in dto have been removed.
                 foreach (var tag in updateSeriesMetadataDto.Tags)
                 {
-                    // TODO: Ensure we can delete tags
-                    series.Metadata.CollectionTags ??= new List<CollectionTag>();
                     var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
                     if (existingTag != null)
                     {
@@ -213,13 +218,7 @@ namespace API.Controllers
                     else
                     {
                         // Add new tag
-                        newTags.Add(new CollectionTag()
-                        {
-                            Id = tag.Id,
-                            NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper(),
-                            Title = tag.Title,
-                            Promoted = tag.Promoted
-                        });
+                        newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
                     }
                 }
 
