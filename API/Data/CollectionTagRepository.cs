@@ -21,6 +21,11 @@ namespace API.Data
             _mapper = mapper;
         }
 
+        public void Remove(CollectionTag tag)
+        {
+            _context.CollectionTag.Remove(tag);
+        }
+
         public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
         {
             return await _context.CollectionTag
@@ -45,6 +50,24 @@ namespace API.Data
                 .Where(c => c.Id == tagId)
                 .SingleOrDefaultAsync();
         }
+        
+        public async Task<CollectionTag> GetFullTagAsync(int tagId)
+        {
+            return await _context.CollectionTag
+                .Where(c => c.Id == tagId)
+                .Include(c => c.SeriesMetadatas)
+                .SingleOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<Series>> GetSeriesForTagAsync(int tagId)
+        {
+            return await _context.CollectionTag
+                    .Where(s => s.Id == tagId)
+                    .Include(c => c.SeriesMetadatas)
+                    .ThenInclude(m => m.Series)
+                    .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series))
+                    .ToListAsync();
+        }
 
         public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
         {
@@ -58,7 +81,7 @@ namespace API.Data
         }
 
 
-        public async Task<IEnumerable<SeriesDto>> GetSeriesForTag(int tagId)
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtosForTagAsync(int tagId)
         {
             throw new System.NotImplementedException();
         }

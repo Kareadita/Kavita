@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
@@ -79,6 +80,44 @@ namespace API.Controllers
             }
 
             return BadRequest("Something went wrong, please try again");
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("update-series")]
+        public async Task<ActionResult> UpdateSeriesForTag(UpdateSeriesForTagDto updateSeriesForTagDto)
+        {
+            var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
+            if (tag == null) return BadRequest("Not a valid Tag");
+            tag.SeriesMetadatas ??= new List<SeriesMetadata>();
+            // var tagWithSeries = await _unitOfWork.CollectionTagRepository.GetSeriesForTagAsync(updateSeriesForTagDto.Tag.Id);
+            //
+            // foreach (var existingSeries in tagWithSeries)
+            // {
+            //     if (!updateSeriesForTagDto.SeriesIds.Contains(existingSeries.Id))
+            //     {
+            //         // Remove this series from the tag
+            //         tag.SeriesMetadatas = tag.SeriesMetadatas.Where(m => m.SeriesId != existingSeries.Id).ToList();
+            //     }
+            // }
+
+            foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
+            {
+                tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
+            }
+
+            if (tag.SeriesMetadatas.Count == 0)
+            {
+                // TODO: Delete the tag itself
+                _unitOfWork.CollectionTagRepository.Remove(tag);
+            }
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
+            {
+                return Ok("Tag updated");
+            }
+            
+            
+            return BadRequest("Something went wrong. Please try again.");
         }
         
         
