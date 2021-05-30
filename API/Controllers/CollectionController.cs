@@ -84,22 +84,23 @@ namespace API.Controllers
             var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
             if (tag == null) return BadRequest("Not a valid Tag");
             tag.SeriesMetadatas ??= new List<SeriesMetadata>();
-
-            foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
-            {
-                tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
-            }
-
-            if (tag.SeriesMetadatas.Count == 0)
-            {
-                _unitOfWork.CollectionTagRepository.Remove(tag);
-            }
             
             // Check if Tag has updated (Summary)
             if (tag.Summary == null || !tag.Summary.Equals(updateSeriesForTagDto.Tag.Summary))
             {
                 tag.Summary = updateSeriesForTagDto.Tag.Summary;
                 _unitOfWork.CollectionTagRepository.Update(tag);
+            }
+
+            foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
+            {
+                tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
+            }
+            
+
+            if (tag.SeriesMetadatas.Count == 0)
+            {
+                _unitOfWork.CollectionTagRepository.Remove(tag);
             }
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
