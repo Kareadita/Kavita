@@ -17,7 +17,8 @@ namespace API.Tests.Helpers
                 SortName = name,
                 LocalizedName = name,
                 NormalizedName = API.Parser.Parser.Normalize(name),
-                Volumes = new List<Volume>()
+                Volumes = new List<Volume>(),
+                Metadata = new SeriesMetadata()
             };
         }
 
@@ -51,6 +52,26 @@ namespace API.Tests.Helpers
                 FilePath = filename,
                 Format = format,
                 Pages = pages
+            };
+        }
+
+        public static SeriesMetadata CreateSeriesMetadata(ICollection<CollectionTag> collectionTags)
+        {
+            return new SeriesMetadata()
+            {
+                CollectionTags = collectionTags
+            };
+        }
+
+        public static CollectionTag CreateCollectionTag(int id, string title, string summary, bool promoted)
+        {
+            return new CollectionTag()
+            {
+                Id = id,
+                NormalizedTitle = API.Parser.Parser.Normalize(title).ToUpper(),
+                Title = title,
+                Summary = summary,
+                Promoted = promoted
             };
         }
     }
