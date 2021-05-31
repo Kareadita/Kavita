@@ -40,6 +40,7 @@ your reading collection with your friends and family!
 ## How to install
 - Unzip the archive for your target OS
 - Place in a directory that is writable. If on windows, do not place in Program Files
+- Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
 - Run Kavita
 - If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
 
