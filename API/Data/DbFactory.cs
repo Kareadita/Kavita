@@ -50,5 +50,25 @@ namespace API.Data
                 IsSpecial = specialTreatment,
             };
         }
+        
+        public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
+        {
+            return new SeriesMetadata()
+            {
+                CollectionTags = collectionTags
+            };
+        }
+
+        public static CollectionTag CollectionTag(int id, string title, string summary, bool promoted)
+        {
+            return new CollectionTag()
+            {
+                Id = id,
+                NormalizedTitle = API.Parser.Parser.Normalize(title).ToUpper(),
+                Title = title,
+                Summary = summary,
+                Promoted = promoted
+            };
+        }
     }
 }

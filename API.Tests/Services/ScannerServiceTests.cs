@@ -106,14 +106,16 @@ namespace API.Tests.Services
                 Name = "Cage of Eden",
                 LocalizedName = "Cage of Eden",
                 OriginalName = "Cage of Eden",
-                NormalizedName = API.Parser.Parser.Normalize("Cage of Eden")
+                NormalizedName = API.Parser.Parser.Normalize("Cage of Eden"),
+                Metadata = new SeriesMetadata()
             });
             existingSeries.Add(new Series()
             {
                 Name = "Darker Than Black",
                 LocalizedName = "Darker Than Black",
                 OriginalName = "Darker Than Black",
-                NormalizedName = API.Parser.Parser.Normalize("Darker Than Black")
+                NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                Metadata = new SeriesMetadata()
             });
 
 

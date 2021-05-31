@@ -239,6 +239,7 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
                 UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
+                // Test 
              }
              catch (Exception ex)
              {

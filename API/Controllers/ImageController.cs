@@ -46,5 +46,16 @@ namespace API.Controllers
             Response.AddCacheHeader(content);
             return File(content, "image/" + format, $"seriesId");
         }
+        
+        [HttpGet("collection-cover")]
+        public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
+        {
+            var content = await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId);
+            if (content == null) return BadRequest("No cover image");
+            const string format = "jpeg";
+
+            Response.AddCacheHeader(content);
+            return File(content, "image/" + format, $"collectionTagId");
+        }
     }
 }
