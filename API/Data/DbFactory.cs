@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
@@ -21,7 +22,8 @@ namespace API.Data
                 NormalizedName = Parser.Parser.Normalize(name),
                 SortName = name,
                 Summary = string.Empty,
-                Volumes = new List<Volume>()
+                Volumes = new List<Volume>(),
+                Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
             };
         }
 
