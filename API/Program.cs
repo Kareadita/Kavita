@@ -99,6 +99,7 @@ namespace API
                         options.AddExceptionFilterForType<OutOfMemoryException>();
                         options.AddExceptionFilterForType<NetVips.VipsException>();
                         options.AddExceptionFilterForType<InvalidDataException>();
+                        options.AddExceptionFilterForType<KavitaException>();
                         
                         options.BeforeSend = sentryEvent =>
                         {
