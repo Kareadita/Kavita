@@ -9,7 +9,7 @@ namespace API.Parser
 {
     public static class Parser
     {
-        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z";
+        public static readonly string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|.cb7";
         public static readonly string BookFileExtensions = @"\.epub";
         public static readonly string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -53,11 +53,6 @@ namespace API.Parser
             new Regex(   
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (this case is too limited, most other cases shouldn't parse out)
-            // new Regex(   
-            //     @"(?<Series>.*)( |_|-)(?:Episode)(?: |_)(?<Volume>\d+(-\d+)?)",
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            
         };
 
         private static readonly Regex[] MangaSeriesRegex = new[]
