@@ -15,8 +15,10 @@ export class ImageService {
     this.navSerivce.darkMode$.subscribe(res => {
       if (res) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
+        this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
+        this.errorImage = 'assets/images/error-placeholder2-min.png';
       }
     });
   }
