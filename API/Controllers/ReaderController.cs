@@ -244,7 +244,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Returns the next logical volume from the series.
+        /// Returns the next logical chapter from the series.
         /// </summary>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
@@ -254,7 +254,6 @@ namespace API.Controllers
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            //if (user == null) return // TODO: Need to have GetUSerByUsernameAsync checks to throw not authorized (401) if it is null all throughout code 
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             
@@ -306,7 +305,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Returns the previous logical volume from the series.
+        /// Returns the previous logical chapter from the series.
         /// </summary>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
@@ -340,6 +339,6 @@ namespace API.Controllers
             }
             return Ok(-1);
         }
-        
+
     }
 }
