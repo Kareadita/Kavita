@@ -37,12 +37,17 @@ const routes: Routes = [
       }
     ]
   },
-  //{path: 'recently-added', component: RecentlyAddedComponent},
-  
-  {path: 'collections', component: AllCollectionsComponent},
-  {path: 'collections/:id', component: AllCollectionsComponent},
-
-  {path: 'login', component: UserLoginComponent},
+  {
+    path: '',
+    runGuardsAndResolvers: 'always',
+    canActivate: [AuthGuard],
+    children: [
+      //{path: 'recently-added', component: RecentlyAddedComponent},
+        
+      {path: 'collections', component: AllCollectionsComponent},
+      {path: 'collections/:id', component: AllCollectionsComponent},
+    ]
+  },
   {path: 'login', component: UserLoginComponent},
   {path: 'preferences', component: UserPreferencesComponent},
   {path: 'no-connection', component: NotConnectedComponent},

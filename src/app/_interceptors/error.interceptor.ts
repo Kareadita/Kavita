@@ -70,7 +70,12 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
             case 500:
               console.error('error:', error);
-              this.toastr.error('There was an unknown critical error.');
+              const err = error.error;
+              if (err.hasOwnProperty('message') && err['message'].trim() != '') {
+                this.toastr.error(err.message);
+              } else {
+                this.toastr.error('There was an unknown critical error.');
+              }
               break;
             default:
               if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {

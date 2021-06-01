@@ -39,7 +39,6 @@ export class SeriesDetailComponent implements OnInit {
   isLoading = true;
   showBook = true;
 
-  currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;
 
@@ -232,13 +231,8 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   setContinuePoint() {
-    this.currentlyReadingVolume = undefined;
-    this.currentlyReadingChapter = undefined;
     this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
-
-    const [currentVolume, currentChapter] = this.readerService.getCurrentVolumeAndChapter(this.volumes);
-    this.currentlyReadingVolume = currentVolume;
-    this.currentlyReadingChapter = currentChapter;
+    this.currentlyReadingChapter = this.readerService.getCurrentChapter(this.volumes);
   }
 
   markAsRead(vol: Volume) {
@@ -294,15 +288,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   read() {
-    if (this.currentlyReadingVolume !== undefined) { 
-      if (this.currentlyReadingChapter !== undefined) {
-        this.openChapter(this.currentlyReadingChapter);
-      } else {
-        this.openVolume(this.currentlyReadingVolume);
-      }
-    }
-    else if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
-    else { this.openVolume(this.volumes[0]); }
+    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
   }
 
   updateRating(rating: any) {
@@ -332,7 +318,18 @@ export class SeriesDetailComponent implements OnInit {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    // Sort the chapters, then grab first
+    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes 
+    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background 
+    // to help the user make a good choice. 
+
+    // If user has progress on the volume, load them where they left off
+    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+      // Find the continue point chapter and load it
+      this.openChapter(this.readerService.getCurrentChapter([volume]));
+      return;
+    }
+
+    // Sort the chapters, then grab first if no reading progress
     this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
   }
 

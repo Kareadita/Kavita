@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { NavService } from './nav.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,15 @@ export class ImageService {
   public placeholderImage = 'assets/images/image-placeholder-min.png';
   public errorImage = 'assets/images/error-placeholder2-min.png';
 
-  constructor() { }
+  constructor(private navSerivce: NavService) {
+    this.navSerivce.darkMode$.subscribe(res => {
+      if (res) {
+        this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
+      } else {
+        this.placeholderImage = 'assets/images/image-placeholder-min.png';
+      }
+    });
+  }
 
   getVolumeCoverImage(volumeId: number) {
     return this.baseUrl + 'image/volume-cover?volumeId=' + volumeId;

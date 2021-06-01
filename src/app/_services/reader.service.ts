@@ -42,48 +42,32 @@ export class ReaderService {
     return this.httpClient.get<number>(this.baseUrl + 'reader/prev-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
-  getCurrentVolumeAndChapter(volumes: Array<Volume>): [Volume | undefined, Chapter | undefined] {
-    let currentlyReadingVolume: Volume | undefined = undefined;
+  getCurrentChapter(volumes: Array<Volume>): Chapter {
     let currentlyReadingChapter: Chapter | undefined = undefined;
-    const chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); // changed from === 0 to != 0
 
-
-    for (let v of volumes) {
-      if (v.number === 0) {
-        continue;
-      } else if (v.pagesRead >= v.pages - 1) {
-        continue;
-      } else if (v.pagesRead < v.pages - 1) {
-        currentlyReadingVolume = v;
-        if (currentlyReadingVolume.chapters == undefined) {
-          break;
-        }
-        for (let c of currentlyReadingVolume.chapters) {
-          if (c.pagesRead < c.pages) {
-            currentlyReadingChapter = c;
-            break;
-          }
-        }
+    for (const c of chapters) {
+      if (c.pagesRead < c.pages) {
+        currentlyReadingChapter = c;
         break;
       }
     }
 
-    // Why do I even need to deal with volumes? I can just do everything in chapters since chapters belong to volumes itself. 
-    if (currentlyReadingVolume === undefined) {
-      // We need to check against chapters
-      chapters.forEach(c => {
-        if (c.pagesRead >= c.pages) {
-          return;
-        } else if (currentlyReadingChapter === undefined) {
+    if (currentlyReadingChapter === undefined) {
+      // Check if there are specials we can load:
+      const specials = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+      for (const c of specials) {
+        if (c.pagesRead < c.pages) {
           currentlyReadingChapter = c;
+          break;
         }
-      });
+      }
       if (currentlyReadingChapter === undefined) {
         // Default to first chapter
         currentlyReadingChapter = chapters[0];
       }
     }
 
-    return [currentlyReadingVolume, currentlyReadingChapter];
+    return currentlyReadingChapter;
   }
 }
