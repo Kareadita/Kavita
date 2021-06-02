@@ -100,11 +100,12 @@ namespace API
                         options.AddExceptionFilterForType<NetVips.VipsException>();
                         options.AddExceptionFilterForType<InvalidDataException>();
                         options.AddExceptionFilterForType<KavitaException>();
-                        
+
                         options.BeforeSend = sentryEvent =>
                         {
                             if (sentryEvent.Exception != null
-                                && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:"))
+                                && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:")
+                                && sentryEvent.Exception.Message.Contains("[BookService] "))
                             {
                                 return null; // Don't send this event to Sentry
                             }
