@@ -1,7 +1,7 @@
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, Observer, of, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, last, map, shareReplay, switchMap, take, takeLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from './typeahead-settings';
 
@@ -169,8 +169,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         // Adjust input box to grow
         tap(val => {
           if (this.inputElem != null && this.inputElem.nativeElement != null) {
-            console.log(this.inputElem.nativeElement.value);
             this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * ((this.typeaheadControl.value + '').length + 1) + 'px');
+            this.focusedIndex = 0;
           }
         }),
         debounceTime(this.settings.debounce),
@@ -200,8 +200,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           this.isLoadingOptions = false; 
           this.focusedIndex = 0; 
           setTimeout(() => {
-            this.updateHighlight();
             this.updateShowAddItem(val);
+            this.updateHighlight();
           }, 10);
         }),
         shareReplay(),
@@ -250,14 +250,26 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       {
         document.querySelectorAll('.list-group-item').forEach((item, index) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((res: any) => {
-              var result = res.filter((item: any, index: number) => index === this.focusedIndex);
+            const classes = [...item.classList.value.split(' ')];
+            const indexClass = classes.filter(item => item.startsWith('index-'));
+            let focusedIndex = this.focusedIndex;
+            if (indexClass.length > 0) {
+              focusedIndex = parseInt(indexClass[0].split('-')[1], 10); 
+              console.log('index: ', index);
+            }
+
+            this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
+              // This isn't giving back the filtered array, but everything
+              //console.log(res);
+              const result = res.filter((item: any, index: number) => index === focusedIndex);
               if (result.length === 1) {
                 if (item.classList.contains('add-item')) {
-                  this.addNewItem(this.typeaheadControl.value)
+                  this.addNewItem(this.typeaheadControl.value);
                 } else {
                   this.toggleSelection(result[0]);
                 }
+                this.resetField();
+                this.focusedIndex = 0;
               }
             });
           }
@@ -276,6 +288,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         }
         break;
       }
+      case KEY_CODES.ESC_KEY:
+        this.hasFocus = false;
+        event.stopPropagation();
+        break;
       default:
         break;
     }
@@ -338,9 +354,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    
-
-    //if (this.hasFocus) { return; }
 
     if (this.inputElem) {
       this.inputElem.nativeElement.focus();
@@ -348,7 +361,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
    
     this.openDropdown();
-    //this.isLoadingOptions = true;
   }
 
 
@@ -357,6 +369,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);  
     }
     this.typeaheadControl.setValue('');
+    this.focusedIndex = 0;
   }
 
   // Updates the highlight to focus on the selected item
@@ -377,6 +390,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1) 
           && this.typeaheadControl.dirty
           && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
+
   }
 
 }

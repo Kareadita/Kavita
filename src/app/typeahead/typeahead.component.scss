@@ -4,13 +4,13 @@ input {
     width: 15px;
     opacity: 1px;
     position: relative;
-    left: 0px;
+    left: 4px;
     border: none;
 }
 
 .typeahead-input {
     border: 1px solid #ccc;
-    padding: 6px 12px;
+    padding: 4px 6px;
     display: inline-block;
     width: 100%;
     overflow: hidden;
@@ -20,9 +20,8 @@ input {
     box-shadow: none;
     border-radius: 4px;
     cursor: text;
-    min-height: 34px;
     background-color: #fff;
-
+    min-height: 38px;
 
     input {
         outline: 0 !important;
@@ -35,11 +34,6 @@ input {
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-    }
-
-    .has-items {
-        padding-left: 9px;
-        padding-right: 9px;
     }
 }
 
@@ -61,6 +55,14 @@ input {
     margin-top: -7px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
+    position: absolute;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    .list-group-item {
+        padding: 5px 5px;
+    }
 
 
     li {

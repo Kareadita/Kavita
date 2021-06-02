@@ -1,4 +1,4 @@
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { AfterContentInit, Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import Swiper from 'swiper';
 
 @Component({
@@ -6,7 +6,7 @@ import Swiper from 'swiper';
   templateUrl: './carousel-reel.component.html',
   styleUrls: ['./carousel-reel.component.scss']
 })
-export class CarouselReelComponent implements OnInit{
+export class CarouselReelComponent implements OnInit, AfterContentInit{
 
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
   @Input() items: any[] = [];
@@ -18,6 +18,10 @@ export class CarouselReelComponent implements OnInit{
   constructor() { }
 
   ngOnInit(): void {}
+
+  ngAfterContentInit() {
+    console.log(this.title + ': ', this.carouselItemTemplate);
+  }
 
 
   nextPage() {
