@@ -266,7 +266,7 @@ namespace API.Services
                 // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
                 var coverImageContent = epubBook.Content.Cover
                                         ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
-                                        ?? epubBook.Content.Images.Values.First();
+                                        ?? epubBook.Content.Images.Values.FirstOrDefault();
                 
                 if (coverImageContent == null) return Array.Empty<byte>();
 
