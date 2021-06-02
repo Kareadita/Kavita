@@ -156,22 +156,31 @@ namespace API.Services
         public string GetSummaryInfo(string filePath)
         {
             if (!IsValidFile(filePath)) return string.Empty;
-            
-            using var epubBook = EpubReader.OpenBook(filePath);
-            return epubBook.Schema.Package.Metadata.Description;
+
+            try
+            {
+                using var epubBook = EpubReader.OpenBook(filePath);
+                return epubBook.Schema.Package.Metadata.Description;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
+            }
+
+            return string.Empty;
         }
 
         private bool IsValidFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError("Book {EpubFile} could not be found", filePath);
+                _logger.LogError("[BookService] Book {EpubFile} could not be found", filePath);
                 return false;
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
             
-            _logger.LogError("Book {EpubFile} is not a valid EPUB", filePath);
+            _logger.LogError("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
             return false; 
         }
 
@@ -186,7 +195,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception getting number of pages, defaulting to 0");
+                _logger.LogError(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
             }
 
             return 0;
@@ -238,7 +247,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when opening epub book: {FileName}", filePath);
+                _logger.LogError(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
             }
 
             return null;
@@ -273,7 +282,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+                _logger.LogError(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
             
             return Array.Empty<byte>();
