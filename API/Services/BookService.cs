@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using API.Entities.Enums;
 using API.Interfaces;
 using API.Parser;
@@ -69,9 +70,11 @@ namespace API.Services
         public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
         {
             if (anchor.Name != "a") return;
-            var hrefParts = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
+            var hrefParts = CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
                 .Split("#");
-            var mappingKey = hrefParts[0];
+            // Some keys get uri encoded when parsed, so replace any of those characters with original
+            var mappingKey = HttpUtility.UrlDecode(hrefParts[0]);
+            
             if (!mappings.ContainsKey(mappingKey))
             {
                 if (HasClickableHrefPart(anchor))
