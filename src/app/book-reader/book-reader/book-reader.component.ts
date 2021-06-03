@@ -1,10 +1,10 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
 import {Location} from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { forkJoin, fromEvent, Subject } from 'rxjs';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -36,6 +36,7 @@ interface HistoryPoint {
   scrollOffset: number;
 }
 
+
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
 
 @Component({
@@ -55,7 +56,7 @@ const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
     ])
   ]
 })
-export class BookReaderComponent implements OnInit, OnDestroy {
+export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   libraryId!: number;
   seriesId!: number;
@@ -99,7 +100,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   topOffset: number = 0; // Offset for drawer and rendering canvas
   scrollbarNeeded = false; // Used for showing/hiding bottom action bar
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
-
+  private readonly onDestroy = new Subject<void>();
+  pageAnchors: {[n: string]: number } = {};
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -179,6 +181,26 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       });
   }
 
+  ngAfterViewInit() {
+    // check scroll offset and if offset is after any of the "id" markers, bookmark it
+    fromEvent(window, 'scroll')
+      .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
+        if (this.isLoading) return;
+      
+        // get the height of the document so we can capture markers that are halfway on the document viewport
+        const verticalOffset = (window.pageYOffset 
+          || document.documentElement.scrollTop 
+          || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
+      
+        const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
+
+        if (alreadyReached.length > 0) {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, Object.keys(this.pageAnchors)[alreadyReached.length - 1]).subscribe(() => {/* Intentionally blank */});
+          console.log('bookmarking part: ', Object.keys(this.pageAnchors)[alreadyReached.length - 1]);
+        }
+    });
+  }
+
   ngOnDestroy(): void {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
@@ -200,6 +222,8 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
       this.clickToPaginateVisualOverlayTimeout2 = undefined;
     }
+
+    this.onDestroy.next();
 
   }
 
@@ -227,7 +251,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
 
     forkJoin({
       chapter: this.seriesService.getChapter(this.chapterId),
-      pageNum: this.readerService.getBookmark(this.chapterId),
+      bookmark: this.readerService.getBookmark(this.chapterId),
       chapters: this.bookService.getBookChapters(this.chapterId),
       info: this.bookService.getBookInfo(this.chapterId)
     }).subscribe(results => {
@@ -235,16 +259,17 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
       this.chapters = results.chapters;
-      this.pageNum = results.pageNum;
+      this.pageNum = results.bookmark.pageNum;
       this.bookTitle = results.info;
+
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
         this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
       }
 
-      this.loadPage();
-
+      // Check if user bookmark has part, if so load it so we scroll to it
+      this.loadPage(results.bookmark.bookScrollId || undefined);
     }, () => {
       setTimeout(() => {
         this.closeReader();
@@ -305,6 +330,10 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     this.updateReaderStyles();
   }
 
+  /**
+   * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value 
+   * from 'kavita-part', which will cause the reader to scroll to the marker. 
+   */
   addLinkClickHandlers() {
     var links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach(link => {
@@ -315,12 +344,13 @@ export class BookReaderComponent implements OnInit, OnDestroy {
             this.adhocPageHistory.push({page: this.pageNum, scrollOffset: window.pageYOffset});
           }
           
-          this.setPageNum(page);
           var partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
           if (partValue && page === this.pageNum) {
             this.scrollTo(e.target.attributes['kavita-part'].value);
             return;
           }
+          
+          this.setPageNum(page);
           this.loadPage(partValue);
         });
       });
@@ -381,6 +411,16 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
+          // Find all the part ids and their top offset
+          const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part);
+          if (ids.length > 0) {
+            const elems = document.querySelectorAll(ids.map(id => '#' + id).join(', '));
+            elems.forEach(elem => {
+              this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
+            });
+          }
+          
+
           if (part !== undefined && part !== '') {
             this.scrollTo(part);
           } else if (scrollTop !== undefined && scrollTop !== 0) {
@@ -420,12 +460,14 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
   prevPage() {
+    const oldPageNum = this.pageNum;
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum - 1);
     } else {
       this.setPageNum(this.pageNum + 1);
     }
 
+    if (oldPageNum === this.pageNum) { return; }
     this.loadPage();
   }
 
@@ -435,12 +477,15 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
 
+    const oldPageNum = this.pageNum;
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum + 1);
     } else {
       this.setPageNum(this.pageNum - 1);
     }
     
+    if (oldPageNum === this.pageNum) { return; }
+
     this.loadPage();
   }
 
@@ -559,7 +604,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
       bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
       bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
-      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate,
+      bookReaderTapToPaginate: this.clickToPaginate,
       bookReaderReadingDirection: this.readingDirection,
       siteDarkMode: this.user.preferences.siteDarkMode,
     };
@@ -632,3 +677,4 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
 }
+

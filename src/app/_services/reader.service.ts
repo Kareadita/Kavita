@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
+import { Bookmark } from '../_models/bookmark';
 import { Chapter } from '../_models/chapter';
 import { Volume } from '../_models/volume';
 
@@ -15,7 +16,7 @@ export class ReaderService {
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getBookmark(chapterId: number) {
-    return this.httpClient.get<number>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
+    return this.httpClient.get<Bookmark>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
   }
 
   getPageUrl(chapterId: number, page: number) {
@@ -26,8 +27,8 @@ export class ReaderService {
     return this.httpClient.get(this.baseUrl + 'reader/chapter-path?chapterId=' + chapterId, {responseType: 'text'});
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page});
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

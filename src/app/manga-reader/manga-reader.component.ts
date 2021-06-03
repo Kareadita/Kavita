@@ -173,14 +173,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   init() {
     forkJoin({
       chapter: this.seriesService.getChapter(this.chapterId),
-      pageNum: this.readerService.getBookmark(this.chapterId),
+      bookmark: this.readerService.getBookmark(this.chapterId),
       chapterPath: this.readerService.getChapterPath(this.chapterId)
     }).subscribe(results => {
       this.chapter = results.chapter;
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
 
-      this.pageNum = results.pageNum;
+      this.pageNum = results.bookmark.pageNum;
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
