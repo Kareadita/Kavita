@@ -43,6 +43,10 @@
                         <button (click)="updateMargin(5)"  class="btn btn-icon" title="Add Margin" aria-labelledby="margin"><i class="fa fa-plus" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
+                        <label id="readingdirection">Reading Direction</label>
+                        <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
+                    </div>
+                    <div class="controls">
                         <label id="darkmode">Dark Mode</label>
                         <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
                         <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
@@ -86,13 +90,14 @@
         </app-drawer>
     </div>
 
-    <ng-container *ngIf="isLoading">
+    <!-- This pushes down the page. Need to overlay  
+        <ng-container *ngIf="isLoading">
         <div class="d-flex justify-content-center m-5">
             <div class="spinner-border text-secondary loading" role="status">
                 <span class="invisible">Loading...</span>
             </div>
         </div>
-    </ng-container>
+    </ng-container> -->
 
     <div class="overlay" *ngIf="clickToPaginate" >
         <div class="left {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="prevPage()">
@@ -113,12 +118,12 @@
 
     <ng-template #actionBar>
         <div class="reading-bar row no-gutters justify-content-between">
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="pageNum === 0" title="Previous Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Previous</span></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="readingDirection === 0 ? pageNum === 0 : pageNum + 1 >= maxPages - 1" title="{{readingDirection === 0 ? 'Previous' : 'Next'}} Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Previous' : 'Next'}}</span></button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
             <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="pageNum + 1 >= maxPages - 1" (click)="nextPage()" title="Next Page"><span class="phone-hidden">Next&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="readingDirection === 0 ? pageNum + 1 >= maxPages - 1 : pageNum === 0" (click)="nextPage()" title="{{readingDirection === 0 ? 'Next' : 'Previous'}} Page"><span class="phone-hidden">{{readingDirection === 0 ? 'Next' : 'Previous'}}&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
         </div>
     </ng-template>
 

@@ -44,7 +44,7 @@ export class LibraryDetailComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingSeries = true;
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination.currentPage, this.pagination.itemsPerPage).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;

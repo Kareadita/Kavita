@@ -12,5 +12,6 @@ export interface Preferences {
     bookReaderFontSize: number;
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
+    bookReaderReadingDirection: ReadingDirection;
     siteDarkMode: boolean;
 }

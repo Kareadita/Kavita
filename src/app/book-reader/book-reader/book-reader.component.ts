@@ -20,6 +20,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
+import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 
 
 interface PageStyle {
@@ -97,6 +98,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   darkModeStyleElem!: HTMLElement;
   topOffset: number = 0; // Offset for drawer and rendering canvas
   scrollbarNeeded = false; // Used for showing/hiding bottom action bar
+  readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
 
 
   // Temp hack: Override background color for reader and restore it onDestroy
@@ -154,6 +156,11 @@ export class BookReaderComponent implements OnInit, OnDestroy {
           if (this.user.preferences.bookReaderMargin === undefined) {
             this.user.preferences.bookReaderMargin = 0;
           }
+          if (this.user.preferences.bookReaderReadingDirection === undefined) {
+            this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
+          }
+
+          this.readingDirection = this.user.preferences.bookReaderReadingDirection;
 
           this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
           
@@ -413,7 +420,11 @@ export class BookReaderComponent implements OnInit, OnDestroy {
   }
 
   prevPage() {
-    this.setPageNum(this.pageNum - 1);
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.setPageNum(this.pageNum - 1);
+    } else {
+      this.setPageNum(this.pageNum + 1);
+    }
 
     this.loadPage();
   }
@@ -424,7 +435,12 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
 
-    this.setPageNum(this.pageNum + 1);
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.setPageNum(this.pageNum + 1);
+    } else {
+      this.setPageNum(this.pageNum - 1);
+    }
+    
     this.loadPage();
   }
 
@@ -501,6 +517,14 @@ export class BookReaderComponent implements OnInit, OnDestroy {
     this.setOverrideStyles();
   }
 
+  toggleReadingDirection() {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.readingDirection = ReadingDirection.RightToLeft;
+    } else {
+      this.readingDirection = ReadingDirection.LeftToRight;
+    }
+  }
+
   getDarkModeBackgroundColor() {
     return this.darkMode ? '#292929' : '#fff';
   }
@@ -536,6 +560,7 @@ export class BookReaderComponent implements OnInit, OnDestroy {
       bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
       bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
       bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate,
+      bookReaderReadingDirection: this.readingDirection,
       siteDarkMode: this.user.preferences.siteDarkMode,
     };
     this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

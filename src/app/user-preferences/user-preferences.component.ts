@@ -70,6 +70,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
+        this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.siteDarkMode || false, []));
 
         this.settingsForm.addControl('siteDarkMode', new FormControl(user.preferences.siteDarkMode || false, []));
@@ -103,6 +104,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
     this.settingsForm.get('siteDarkMode')?.setValue(this.user.preferences.siteDarkMode);
   }
 
@@ -125,6 +127,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderFontSize: modelSettings.bookReaderFontSize,
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
+      bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       siteDarkMode: modelSettings.siteDarkMode
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
