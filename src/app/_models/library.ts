@@ -1,8 +1,7 @@
 export enum LibraryType {
     Manga = 0,
     Comic = 1,
-    Book = 2,
-    Webtoon = 3
+    Book = 2
 }
 
 export interface Library {
