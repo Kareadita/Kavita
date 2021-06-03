@@ -61,13 +61,27 @@ namespace API.Controllers
         }
 
         [HttpGet("get-bookmark")]
-        public async Task<ActionResult<int>> GetBookmark(int chapterId)
+        public async Task<ActionResult<BookmarkDto>> GetBookmark(int chapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user.Progresses == null) return Ok(0);
+            var bookmark = new BookmarkDto()
+            {
+                PageNum = 0,
+                ChapterId = chapterId,
+                VolumeId = 0,
+                SeriesId = 0
+            };
+            if (user.Progresses == null) return Ok(bookmark);
             var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
-            return Ok(progress?.PagesRead ?? 0);
+            if (progress != null)
+            {
+                bookmark.SeriesId = progress.SeriesId;
+                bookmark.VolumeId = progress.VolumeId;
+                bookmark.PageNum = progress.PagesRead;
+                bookmark.BookScrollId = progress.BookScrollId;
+            }
+            return Ok(bookmark);
         }
 
         [HttpPost("mark-read")]
@@ -222,6 +236,7 @@ namespace API.Controllers
                     VolumeId = bookmarkDto.VolumeId,
                     SeriesId = bookmarkDto.SeriesId,
                     ChapterId = bookmarkDto.ChapterId,
+                    BookScrollId = bookmarkDto.BookScrollId,
                     LastModified = DateTime.Now
                 });
             }
@@ -230,6 +245,7 @@ namespace API.Controllers
                 userProgress.PagesRead = bookmarkDto.PageNum;
                 userProgress.SeriesId = bookmarkDto.SeriesId;
                 userProgress.VolumeId = bookmarkDto.VolumeId;
+                userProgress.BookScrollId = bookmarkDto.BookScrollId;
                 userProgress.LastModified = DateTime.Now;
             }
             
