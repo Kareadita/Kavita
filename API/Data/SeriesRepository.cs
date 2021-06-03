@@ -293,31 +293,60 @@ namespace API.Data
         /// <returns></returns>
         public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit)
         {
-            if (libraryId == 0)
+            if (limit == 0)
             {
-                var userLibraries = _context.Library
-                    .Include(l => l.AppUsers)
-                    .Where(library => library.AppUsers.Any(user => user.Id == userId))
-                    .AsNoTracking()
-                    .Select(library => library.Id)
-                    .ToList();
-            
+                if (libraryId == 0)
+                {
+                    var userLibraries = _context.Library
+                        .Include(l => l.AppUsers)
+                        .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                        .AsNoTracking()
+                        .Select(library => library.Id)
+                        .ToList();
+
+                    return await _context.Series
+                        .Where(s => userLibraries.Contains(s.LibraryId))
+                        .AsNoTracking()
+                        .OrderByDescending(s => s.Created)
+                        .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync();
+                }
+
                 return await _context.Series
-                    .Where(s => userLibraries.Contains(s.LibraryId))
+                    .Where(s => s.LibraryId == libraryId)
+                    .AsNoTracking()
+                    .OrderByDescending(s => s.Created)
+                    .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                    .ToListAsync();
+            } else
+            {
+                if (libraryId == 0)
+                {
+                    var userLibraries = _context.Library
+                        .Include(l => l.AppUsers)
+                        .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                        .AsNoTracking()
+                        .Select(library => library.Id)
+                        .ToList();
+
+                    return await _context.Series
+                        .Where(s => userLibraries.Contains(s.LibraryId))
+                        .AsNoTracking()
+                        .OrderByDescending(s => s.Created)
+                        .Take(limit)
+                        .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                        .ToListAsync();
+                }
+
+                return await _context.Series
+                    .Where(s => s.LibraryId == libraryId)
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
                     .Take(limit)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                     .ToListAsync();
             }
-            
-            return await _context.Series
-                .Where(s => s.LibraryId == libraryId)
-                .AsNoTracking()
-                .OrderByDescending(s => s.Created)
-                .Take(limit)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+
             
             
         }
@@ -406,6 +435,26 @@ namespace API.Data
                 .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
                 .OrderBy(s => s.LibraryId)
                 .ThenBy(s => s.SortName)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
+
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        }
+
+        public async Task<PagedList<SeriesDto>> GetSeriesDtoForRecentlyAddedAsync(int userId, UserParams userParams)
+        {
+
+            var userLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                .AsNoTracking()
+                .Select(library => library.Id)
+                .ToList();
+
+            var query = _context.Series
+                .Where(s => userLibraries.Contains(s.LibraryId))
+                .AsNoTracking()
+                .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
 

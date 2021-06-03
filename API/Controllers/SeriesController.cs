@@ -148,7 +148,7 @@ namespace API.Controllers
         }
 
         [HttpGet("recently-added")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(int libraryId = 0, int limit = 20)
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(int limit, int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user == null) return Ok(Array.Empty<SeriesDto>());
@@ -257,7 +257,23 @@ namespace API.Controllers
             
             return Ok(series);
         }
-        
-        
+
+        [HttpGet("series-by-recently-added")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByRecentlyAdded([FromQuery] UserParams userParams)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForRecentlyAddedAsync( user.Id, userParams);
+
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series for collection");
+
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+            return Ok(series);
+        }
+
     }
 }
