@@ -388,7 +388,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
       // Load chapter Id onto route but don't reload
-      //this.router.navigate(['collections', this.collectionTagId], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.seriesPagination.currentPage} });
+      const lastSlashIndex = this.router.url.lastIndexOf('/');
+      const newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      window.history.replaceState({}, '', newRoute);
       this.init();
     } else {
       this.toastr.warning('Could not find ' + direction + ' chapter')
