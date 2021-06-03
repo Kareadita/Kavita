@@ -33,7 +33,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   libraryName: string | undefined = undefined;
   private readonly onDestroy = new Subject<void>();
 
-  settings: TypeaheadSettings = new TypeaheadSettings();
+  settings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   tags: CollectionTag[] = [];
   metadata!: SeriesMetadata;
 
@@ -52,20 +52,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.libraryName = names[this.series.libraryId];
     });
 
-    this.settings.displayFn = (data => data.title);
-    this.settings.minCharacters = 0;
-    this.settings.multiple = true;
-    this.settings.id = 'collections';
-    this.settings.unique = true;
-    this.settings.addIfNonExisting = true;
-    this.settings.fetchFn = (filter) => this.fetchCollectionTags(filter);
-    this.settings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title, promoted: false };
-    });
-    this.settings.compareFn = (options: CollectionTag[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
-    }
+    this.setupTypeaheadSettings();
 
     
 
@@ -110,6 +97,22 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.onDestroy.next();
+  }
+
+  setupTypeaheadSettings() {
+    this.settings.minCharacters = 0;
+    this.settings.multiple = true;
+    this.settings.id = 'collections';
+    this.settings.unique = true;
+    this.settings.addIfNonExisting = true;
+    this.settings.fetchFn = (filter: string) => this.fetchCollectionTags(filter);
+    this.settings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title, promoted: false, coverImage: '', summary: '' };
+    });
+    this.settings.compareFn = (options: CollectionTag[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f);
+    }
   }
 
   close() {

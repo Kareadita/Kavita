@@ -41,10 +41,7 @@ export class SeriesService {
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
 
-    if (pageNum !== null && itemsPerPage !== null) {
-      params = params.append('pageNumber', pageNum + '');
-      params = params.append('pageSize', itemsPerPage + '');
-    }
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, {observe: 'response', params}).pipe(
       map((response: any) => {
@@ -133,10 +130,7 @@ export class SeriesService {
   getSeriesForTag(collectionTagId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
 
-    if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {
-      params = params.append('pageNumber', pageNum + '');
-      params = params.append('pageSize', itemsPerPage + '');
-    }
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
     
     // NOTE: I'm not sure the paginated result is doing anything
     // if (this.paginatedSeriesForTagsResults?.pagination !== undefined && this.paginatedSeriesForTagsResults?.pagination?.currentPage === pageNum) {
@@ -148,5 +142,13 @@ export class SeriesService {
         return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
       })
     );
+  }
+
+  _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {
+    if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {
+      params = params.append('pageNumber', pageNum + '');
+      params = params.append('pageSize', itemsPerPage + '');
+    }
+    return params;
   }
 }

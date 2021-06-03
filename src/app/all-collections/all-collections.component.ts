@@ -67,6 +67,14 @@ export class AllCollectionsComponent implements OnInit {
   }
 
   loadPage() {
+    // TODO: See if we can move this pagination code into layout code
+    const page = this.route.snapshot.queryParamMap.get('page');
+    if (page != null) {
+      if (this.seriesPagination == undefined || this.seriesPagination == null) {
+        this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+      }
+      this.seriesPagination.currentPage = parseInt(page, 10);
+    }
     // Reload page after a series is updated or first load
     if (this.collectionTagId === 0) {
       this.collectionService.allTags().subscribe(tags => {
@@ -74,7 +82,7 @@ export class AllCollectionsComponent implements OnInit {
         this.isLoading = false;
       });
     } else {
-      this.seriesService.getSeriesForTag(this.collectionTagId).subscribe(tags => {
+      this.seriesService.getSeriesForTag(this.collectionTagId, this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage).subscribe(tags => {
         this.series = tags.result;
         this.seriesPagination = tags.pagination;
 

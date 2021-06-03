@@ -131,7 +131,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   typeaheadForm!: FormGroup;
   
 
-  @Input() settings!: TypeaheadSettings;
+  @Input() settings!: TypeaheadSettings<any>;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
 
@@ -143,6 +143,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
+  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
   
   private readonly onDestroy = new Subject<void>();
 
@@ -154,6 +155,11 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+    if (this.settings.compareFn === undefined && this.settings.multiple) {
+      console.error('A compare function must be defined');
+      return;
+    }
 
     if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
       this.typeaheadControl = this.settings.formControl;
@@ -203,6 +209,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
             this.updateShowAddItem(val);
             this.updateHighlight();
           }, 10);
+          setTimeout(() => this.updateHighlight(), 20);
         }),
         shareReplay(),
         takeUntil(this.onDestroy)
@@ -212,10 +219,11 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     if (this.settings.savedData) {
       if (this.settings.multiple) {
         this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
-      } else {
-        this.optionSelection = new SelectionModel<any>(true, this.settings.savedData[0]);
-        this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
       }
+      //  else {
+      //   this.optionSelection = new SelectionModel<any>(true, this.settings.savedData[0]);
+      //   this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
+      // }
     } else {
       this.optionSelection = new SelectionModel<any>();
     }
@@ -250,18 +258,9 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       {
         document.querySelectorAll('.list-group-item').forEach((item, index) => {
           if (item.classList.contains('active')) {
-            const classes = [...item.classList.value.split(' ')];
-            const indexClass = classes.filter(item => item.startsWith('index-'));
-            let focusedIndex = this.focusedIndex;
-            if (indexClass.length > 0) {
-              focusedIndex = parseInt(indexClass[0].split('-')[1], 10); 
-              console.log('index: ', index);
-            }
-
             this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
               // This isn't giving back the filtered array, but everything
-              //console.log(res);
-              const result = res.filter((item: any, index: number) => index === focusedIndex);
+              const result = this.settings.compareFn(res, (item.textContent || '').trim());
               if (result.length === 1) {
                 if (item.classList.contains('add-item')) {
                   this.addNewItem(this.typeaheadControl.value);
@@ -297,18 +296,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggleSingle(opt: any): void {
-    this.optionSelection.toggle(opt);
-    this.selectedData.emit(opt);
-  }
-
-
   toggleSelection(opt: any): void {
     this.optionSelection.toggle(opt);
     this.selectedData.emit(this.optionSelection.selected());
   }
-
-  
 
   removeSelectedOption(opt: any) {
     this.optionSelection.toggle(opt);
@@ -374,12 +365,15 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   // Updates the highlight to focus on the selected item
   updateHighlight() {
+    console.log('updating highlight for index: ', this.focusedIndex);
     document.querySelectorAll('.list-group-item').forEach((item, index) => {
       if (index === this.focusedIndex && !item.classList.contains('no-hover')) {
         // apply active class
+        console.log('Adding to ', item.textContent);
         this.renderer2.addClass(item, 'active');
       } else {
         // remove active class
+        console.log('Removing from ', item.textContent);
         this.renderer2.removeClass(item, 'active');
       }
     });

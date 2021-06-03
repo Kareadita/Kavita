@@ -35,11 +35,11 @@
             <div class="row no-gutters">
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
-            <div class="row no-gutters {{series?.userReview ? '' : 'mt-1'}}">
+            <div class="row no-gutters {{series?.userReview ? '' : 'mt-2'}}">
                 <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
-            <div *ngIf="seriesMetadata">
-                <div class="row no-gutters mt-2" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
+            <div *ngIf="seriesMetadata" class="mt-2">
+                <div class="row no-gutters" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
                     <div class="col-md-4">
                         <h5>Genres</h5>
                     </div>

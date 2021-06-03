@@ -60,6 +60,9 @@
                             <div class="form-group">
                                 <label for="collections">Collections</label>
                                 <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
+                                    <ng-template #badgeItem let-item let-position="idx">
+                                        {{item.title}}
+                                    </ng-template>
                                     <ng-template #optionItem let-item let-position="idx">
                                         {{item.title}}
                                     </ng-template>

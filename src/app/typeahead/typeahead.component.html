@@ -4,8 +4,8 @@
 
       <div class="typeahead-input" (click)="onInputFocus($event)">
         <div>
-          <app-tag-badge *ngFor="let option of optionSelection.selected()">
-            {{ settings.displayFn(option) }}
+          <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
+            <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
             <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
           </app-tag-badge>
 
@@ -18,11 +18,11 @@
       <div class="dropdown" *ngIf="hasFocus">
         <ul class="list-group results" #results>
           <li *ngIf="showAddItem" 
-              class="list-group-item add-item index-0" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+              class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
               Add {{typeaheadControl.value}}...
           </li>
           <li *ngFor="let option of filteredOptions | async; let index = index;" (click)="handleOptionClick(option)"  
-              class="list-group-item index-{{index +  + (showAddItem ? 1 : 0)}}" role="option"
+              class="list-group-item" role="option"
               (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
             <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
           </li>
@@ -32,32 +32,6 @@
         </ul>
       </div>
 
-
-  </ng-container>
-  <ng-container *ngIf="!settings.multiple">
-    <!-- <mat-form-field  style="width:96%;">
-      <input type="text" matInput [matAutocomplete]="auto"  [formControl]="typeaheadControl">
-        <mat-autocomplete #auto="matAutocomplete">
-          <mat-option *ngIf="!typeaheadControl.value" (click)="$event.stopPropagation()" disabled >
-            Type to search
-          </mat-option>
-          <ng-container *ngIf="(filteredOptions | async)?.length > 0; else noResults">
-            <mat-option *ngFor="let option of (filteredOptions | async)" [value]="settings.displayFn(option)" (click)="toggleSingle(option)">
-              <div style="width:100%">
-                <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-              </div>
-            </mat-option>
-          </ng-container>
-          <mat-option *ngIf="isLoadingOptions" disabled> 
-            <mat-spinner diameter="20"></mat-spinner>
-          </mat-option>
-          <ng-template #noResults>
-            <mat-option *ngIf="!isLoadingOptions && typeaheadControl.value && typeaheadControl.value.length > settings.minCharacters && typeaheadControl.dirty" (click)="$event.stopPropagation()" disabled>
-              No Results Found
-            </mat-option>
-          </ng-template>
-        </mat-autocomplete>
-    </mat-form-field> -->
 
   </ng-container>
   </form>
