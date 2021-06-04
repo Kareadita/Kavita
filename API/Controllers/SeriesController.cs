@@ -59,7 +59,7 @@ namespace API.Controllers
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
-
+          
             if (result)
             {
                 _taskScheduler.CleanupChapters(chapterIds);

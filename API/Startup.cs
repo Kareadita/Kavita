@@ -83,6 +83,7 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
+            
             app.UseResponseCompression();
             
             app.UseForwardedHeaders();
@@ -132,9 +133,9 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v" + BuildInfo.Version);
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
-            
+
             // Any services that should be bootstrapped go here
             taskScheduler.ScheduleTasks();
         }

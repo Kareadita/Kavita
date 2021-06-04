@@ -148,9 +148,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BookReaderReadingDirection")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");
 
