@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, ReplaySubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, OnDestroy } from '@angular/core';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
@@ -10,7 +10,7 @@ import * as Sentry from "@sentry/angular";
 @Injectable({
   providedIn: 'root'
 })
-export class AccountService {
+export class AccountService implements OnDestroy {
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -20,7 +20,14 @@ export class AccountService {
   private currentUserSource = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserSource.asObservable();
 
+  private readonly onDestroy = new Subject<void>();
+
   constructor(private httpClient: HttpClient) {}
+  
+  ngOnDestroy(): void {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
 
   hasAdminRole(user: User) {
     return user && user.roles.includes('Admin');
@@ -33,7 +40,8 @@ export class AccountService {
         if (user) {
           this.setCurrentUser(user);
         }
-      })
+      }),
+      takeUntil(this.onDestroy)
     );
   }
 
@@ -69,7 +77,8 @@ export class AccountService {
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
         return user;
-      })
+      }),
+      takeUntil(this.onDestroy)
     );
   }
 
@@ -88,7 +97,7 @@ export class AccountService {
         this.setCurrentUser(this.currentUser);
       }
       return settings;
-    }));
+    }), takeUntil(this.onDestroy));
   }
 
 

@@ -74,9 +74,9 @@
     <hr>
 
 
-    <div >
+    <div>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
-            <li [ngbNavItem]="1" *ngIf="!hasNonSpecialVolumeChapters && hasSpecials"> <!--  *ngIf="hasSpecials" (having this will cause the item to not display despite it being true)-->
+            <li [ngbNavItem]="1" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row">
@@ -88,7 +88,7 @@
                 </div>
               </ng-template>
             </li>
-            <li [ngbNavItem]="2" *ngIf="hasNonSpecialVolumeChapters"> <!--  *ngIf="hasNonSpecialVolumeChapters"-->
+            <li [ngbNavItem]="2" *ngIf="hasNonSpecialVolumeChapters">
               <a ngbNavLink>Volumes/Chapters</a>
               <ng-template ngbNavContent>
                   <div class="row">
