@@ -32,9 +32,7 @@ export class LibraryComponent implements OnInit {
   collectionTags: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService, 
-    private seriesService: SeriesService, private actionFactoryService: ActionFactoryService,
-    private collectionService: CollectionTagService, private router: Router, private modalService: NgbModal) { }
+  constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, private collectionService: CollectionTagService, private router: Router, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.isLoading = true;
@@ -53,8 +51,8 @@ export class LibraryComponent implements OnInit {
   }
 
   reloadSeries() {
-    this.seriesService.getRecentlyAdded().subscribe((series) => {
-      this.recentlyAdded = series;
+    this.seriesService.getRecentlyAdded(0, 0, 20).subscribe(series => {
+      this.recentlyAdded = series.result;
     });
 
     this.seriesService.getInProgress().subscribe((series) => {

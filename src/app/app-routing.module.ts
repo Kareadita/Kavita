@@ -6,6 +6,7 @@ import { LibraryDetailComponent } from './library-detail/library-detail.componen
 import { LibraryComponent } from './library/library.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
@@ -42,8 +43,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-      //{path: 'recently-added', component: RecentlyAddedComponent},
-        
+      {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'collections', component: AllCollectionsComponent},
       {path: 'collections/:id', component: AllCollectionsComponent},
     ]

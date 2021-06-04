@@ -11,7 +11,7 @@ import { CollectionTagService } from '../_services/collection-tag.service';
 import { SeriesService } from '../_services/series.service';
 
 /**
- * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc. 
+ * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc.
  */
 @Component({
   selector: 'app-all-collections',
@@ -28,9 +28,7 @@ export class AllCollectionsComponent implements OnInit {
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
 
-  constructor(private collectionService: CollectionTagService, private router: Router, 
-    private route: ActivatedRoute, private seriesService: SeriesService, private toastr: ToastrService, 
-    private actionFactoryService: ActionFactoryService, private modalService: NgbModal) {
+  constructor(private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, private modalService: NgbModal) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     const routeId = this.route.snapshot.paramMap.get('id');
@@ -70,7 +68,7 @@ export class AllCollectionsComponent implements OnInit {
     // TODO: See if we can move this pagination code into layout code
     const page = this.route.snapshot.queryParamMap.get('page');
     if (page != null) {
-      if (this.seriesPagination == undefined || this.seriesPagination == null) {
+      if (this.seriesPagination === undefined || this.seriesPagination === null) {
         this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
       }
       this.seriesPagination.currentPage = parseInt(page, 10);
@@ -85,8 +83,8 @@ export class AllCollectionsComponent implements OnInit {
       this.seriesService.getSeriesForTag(this.collectionTagId, this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage).subscribe(tags => {
         this.series = tags.result;
         this.seriesPagination = tags.pagination;
-
         this.isLoading = false;
+        window.scrollTo(0, 0);
       });
     }
   }

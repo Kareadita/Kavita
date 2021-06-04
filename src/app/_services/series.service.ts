@@ -90,11 +90,16 @@ export class SeriesService {
     return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
 
-  getRecentlyAdded(libraryId: number = 0) {
-    return this.httpClient.get<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId).pipe(map(series => {
-      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
-      return series;
-    }));
+  getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.get<Series[]>(this.baseUrl + 'series/recently-added', {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
+      })
+    );
   }
 
   getInProgress(libraryId: number = 0) {
