@@ -172,10 +172,11 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Library {LibraryId} is being deleted by {UserName}", libraryId, username);
             var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
+            var seriesIds = series.Select(x => x.Id).ToArray();
             var chapterIds =
-                await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(series.Select(x => x.Id).ToArray());
-            var result = await _unitOfWork.LibraryRepository.DeleteLibrary(libraryId);
-            
+                await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(seriesIds);
+
+            var result = await _unitOfWork.LibraryRepository.DeleteLibrary(libraryId);    
             if (result && chapterIds.Any())
             {
                 _taskScheduler.CleanupChapters(chapterIds);
