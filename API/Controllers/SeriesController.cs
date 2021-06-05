@@ -59,7 +59,7 @@ namespace API.Controllers
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
-
+          
             if (result)
             {
                 _taskScheduler.CleanupChapters(chapterIds);
@@ -148,13 +148,22 @@ namespace API.Controllers
         }
 
         [HttpGet("recently-added")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(int libraryId = 0, int limit = 20)
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded([FromQuery] UserParams userParams, int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user == null) return Ok(Array.Empty<SeriesDto>());
-            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAdded(user.Id, libraryId, limit));
+            var series =
+                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams);
+
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series");
+
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+            return Ok(series);
         }
-        
+
         [HttpGet("in-progress")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(int libraryId = 0, int limit = 20)
         {

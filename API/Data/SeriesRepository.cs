@@ -291,7 +291,7 @@ namespace API.Data
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit)
+        public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams)
         {
             if (libraryId == 0)
             {
@@ -301,25 +301,25 @@ namespace API.Data
                     .AsNoTracking()
                     .Select(library => library.Id)
                     .ToList();
-            
-                return await _context.Series
+
+                var allQuery = _context.Series
                     .Where(s => userLibraries.Contains(s.LibraryId))
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
-                    .Take(limit)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
+                    .AsNoTracking();
+
+                return await PagedList<SeriesDto>.CreateAsync(allQuery, userParams.PageNumber, userParams.PageSize);
             }
             
-            return await _context.Series
+            var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .AsNoTracking()
                 .OrderByDescending(s => s.Created)
-                .Take(limit)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-            
-            
+                .AsNoTracking();
+
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         /// <summary>

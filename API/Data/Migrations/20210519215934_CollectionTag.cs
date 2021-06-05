@@ -65,7 +65,7 @@ namespace API.Data.Migrations
                         column: x => x.SeriesMetadatasId,
                         principalTable: "SeriesMetadata",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
