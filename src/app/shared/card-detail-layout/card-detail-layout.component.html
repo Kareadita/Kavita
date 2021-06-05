@@ -1,6 +1,6 @@
 <div class="container-fluid" style="padding-top: 10px">
     <h2>{{header}}</h2>
-    <div class="d-flex justify-content-center" *ngIf="pagination && items.length !== 0">
+    <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
             [(page)]="pagination.currentPage"
@@ -14,14 +14,16 @@
         <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
-
-        <div class="spinner-border text-secondary" role="status" *ngIf="isLoading">
-            <span class="invisible">Loading...</span>
-        </div>
+        
+        <p *ngIf="items.length === 0 && !isLoading">
+            There is no data
+        </p>
     </div>
 
+    
+
     <!-- TODO: Make this appear only if we have enough scroll-->
-    <div class="d-flex justify-content-center" *ngIf="pagination && items.length !== 0">
+    <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
             [(page)]="pagination.currentPage"
@@ -30,9 +32,5 @@
             [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
             [collectionSize]="pagination.totalItems"></ngb-pagination>
     </div>
-
-    <ng-container *ngIf="items.length === 0 && !isLoading">
-        There is no data
-    </ng-container>
 </div>
 
