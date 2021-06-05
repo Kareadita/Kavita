@@ -42,7 +42,8 @@ input {
     background-color: $dark-bg-color;
 }
 
-::ng-deep .bg-dark .list-group-item.active {
+// Causes bleedover
+::ng-deep .bg-dark .dropdown .list-group-item.active {
     background-color: $dark-hover-color;
 }
 
