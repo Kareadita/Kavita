@@ -12,8 +12,19 @@
     font-size: 1.2rem;
     font-weight: 400;
     margin-left: 10px;
-    text-decoration: none;
     color: black;
+
+    :hover {
+        text-decoration: underline;
+    }
+
+    :active {
+        text-decoration: underline;
+    }
+
+    :focus {
+        text-decoration: underline;
+    }
 }
 
 ::ng-deep .bg-light {
