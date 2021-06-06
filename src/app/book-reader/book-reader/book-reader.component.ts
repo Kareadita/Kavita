@@ -36,7 +36,6 @@ interface HistoryPoint {
   scrollOffset: number;
 }
 
-
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
 
 @Component({
@@ -677,4 +676,3 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 }
-

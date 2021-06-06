@@ -456,7 +456,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       pageNum = this.pageNum + 1;
     }
 
-
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {/* No operation */});
 
     this.isLoading = true;
