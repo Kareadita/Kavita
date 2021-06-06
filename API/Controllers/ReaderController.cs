@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -19,6 +20,7 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
             ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
@@ -32,6 +34,7 @@ namespace API.Controllers
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
+            if (page < 0) return BadRequest("Page cannot be less than 0");
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -58,13 +61,27 @@ namespace API.Controllers
         }
 
         [HttpGet("get-bookmark")]
-        public async Task<ActionResult<int>> GetBookmark(int chapterId)
+        public async Task<ActionResult<BookmarkDto>> GetBookmark(int chapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user.Progresses == null) return Ok(0);
+            var bookmark = new BookmarkDto()
+            {
+                PageNum = 0,
+                ChapterId = chapterId,
+                VolumeId = 0,
+                SeriesId = 0
+            };
+            if (user.Progresses == null) return Ok(bookmark);
             var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
-            return Ok(progress?.PagesRead ?? 0);
+            if (progress != null)
+            {
+                bookmark.SeriesId = progress.SeriesId;
+                bookmark.VolumeId = progress.VolumeId;
+                bookmark.PageNum = progress.PagesRead;
+                bookmark.BookScrollId = progress.BookScrollId;
+            }
+            return Ok(bookmark);
         }
 
         [HttpPost("mark-read")]
@@ -219,6 +236,7 @@ namespace API.Controllers
                     VolumeId = bookmarkDto.VolumeId,
                     SeriesId = bookmarkDto.SeriesId,
                     ChapterId = bookmarkDto.ChapterId,
+                    BookScrollId = bookmarkDto.BookScrollId,
                     LastModified = DateTime.Now
                 });
             }
@@ -227,6 +245,7 @@ namespace API.Controllers
                 userProgress.PagesRead = bookmarkDto.PageNum;
                 userProgress.SeriesId = bookmarkDto.SeriesId;
                 userProgress.VolumeId = bookmarkDto.VolumeId;
+                userProgress.BookScrollId = bookmarkDto.BookScrollId;
                 userProgress.LastModified = DateTime.Now;
             }
             
@@ -241,7 +260,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Returns the next logical volume from the series.
+        /// Returns the next logical chapter from the series.
         /// </summary>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
@@ -253,10 +272,10 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-
-            var next = false;
+            
             if (currentVolume.Number == 0)
             {
+                var next = false;
                 foreach (var chapter in currentVolume.Chapters)
                 {
                     if (next)
@@ -265,20 +284,44 @@ namespace API.Controllers
                     }
                     if (currentChapterId == chapter.Id) next = true;
                 }
+
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                if (chapterId > 0) return Ok(chapterId);
             }
 
             foreach (var volume in volumes)
             {
+                if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
+                { 
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                    if (chapterId > 0) return Ok(chapterId);
+                }
+                
                 if (volume.Number == currentVolume.Number + 1)
                 {
-                    return Ok(volume.Chapters.FirstOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault()?.Id);
                 }
             }
             return Ok(-1);
         }
 
+        private int GetNextChapterId(IEnumerable<Chapter> chapters, int currentChapterId)
+        {
+            var next = false;
+            foreach (var chapter in chapters)
+            {
+                if (next)
+                {
+                    return chapter.Id;
+                }
+                if (currentChapterId == chapter.Id) next = true;
+            }
+
+            return -1;
+        }
+
         /// <summary>
-        /// Returns the previous logical volume from the series.
+        /// Returns the previous logical chapter from the series.
         /// </summary>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
@@ -291,29 +334,27 @@ namespace API.Controllers
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
 
-            var next = false;
+            
             if (currentVolume.Number == 0)
             {
-                var chapters = currentVolume.Chapters.Reverse();
-                foreach (var chapter in chapters)
-                {
-                    if (next)
-                    {
-                        return Ok(chapter.Id);
-                    }
-                    if (currentChapterId == chapter.Id) next = true;
-                }
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                if (chapterId > 0) return Ok(chapterId);
             }
 
             foreach (var volume in volumes.Reverse())
             {
+                if (volume.Number == currentVolume.Number)
+                {
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                    if (chapterId > 0) return Ok(chapterId);
+                }
                 if (volume.Number == currentVolume.Number - 1)
                 {
-                    return Ok(volume.Chapters.LastOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).LastOrDefault()?.Id);
                 }
             }
             return Ok(-1);
         }
-        
+
     }
 }

@@ -58,6 +58,8 @@ namespace API.Interfaces
         Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
         Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit);
-        Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit);
+        Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams);
+        Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
+        Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     }
 }

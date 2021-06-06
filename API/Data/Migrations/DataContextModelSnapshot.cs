@@ -142,6 +142,9 @@ namespace API.Data.Migrations
                     b.Property<int>("BookReaderMargin")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BookReaderReadingDirection")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
@@ -152,6 +155,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ScalingOption")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SiteDarkMode")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -170,6 +176,9 @@ namespace API.Data.Migrations
 
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("BookScrollId")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
@@ -274,6 +283,39 @@ namespace API.Data.Migrations
                     b.HasIndex("VolumeId");
 
                     b.ToTable("Chapter");
+                });
+
+            modelBuilder.Entity("API.Entities.CollectionTag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("CoverImage")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("NormalizedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Promoted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id", "Promoted")
+                        .IsUnique();
+
+                    b.ToTable("CollectionTag");
                 });
 
             modelBuilder.Entity("API.Entities.FolderPath", b =>
@@ -401,6 +443,30 @@ namespace API.Data.Migrations
                     b.ToTable("Series");
                 });
 
+            modelBuilder.Entity("API.Entities.SeriesMetadata", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("RowVersion")
+                        .IsConcurrencyToken()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId")
+                        .IsUnique();
+
+                    b.HasIndex("Id", "SeriesId")
+                        .IsUnique();
+
+                    b.ToTable("SeriesMetadata");
+                });
+
             modelBuilder.Entity("API.Entities.ServerSetting", b =>
                 {
                     b.Property<int>("Key")
@@ -465,6 +531,21 @@ namespace API.Data.Migrations
                     b.HasIndex("LibrariesId");
 
                     b.ToTable("AppUserLibrary");
+                });
+
+            modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
+                {
+                    b.Property<int>("CollectionTagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionTagsId", "SeriesMetadatasId");
+
+                    b.HasIndex("SeriesMetadatasId");
+
+                    b.ToTable("CollectionTagSeriesMetadata");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -647,6 +728,17 @@ namespace API.Data.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("API.Entities.SeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithOne("Metadata")
+                        .HasForeignKey("API.Entities.SeriesMetadata", "SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
+                });
+
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.HasOne("API.Entities.Series", "Series")
@@ -669,6 +761,21 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Library", null)
                         .WithMany()
                         .HasForeignKey("LibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.CollectionTag", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionTagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -739,6 +846,8 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
+                    b.Navigation("Metadata");
+
                     b.Navigation("Volumes");
                 });
 

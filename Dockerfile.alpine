@@ -1,0 +1,28 @@
+#This Dockerfile is for the musl alpine build of Kavita.
+FROM alpine:latest
+
+MAINTAINER Chris P
+
+#Installs the needed dependencies
+RUN apk update && apk add --no-cache wget curl pwgen icu-dev bash
+
+#Downloads Kavita, unzips and moves the folders to where they need to be
+RUN wget https://github.com/Kareadita/Kavita/releases/download/v0.3.7/kavita-linux-musl-x64.tar.gz \
+    && tar -xzf kavita*.tar.gz \
+    && mv Kavita/ /kavita/ \
+    && rm kavita*.gz \
+    && chmod +x /kavita/Kavita
+
+#Creates the needed folders
+RUN mkdir /manga /kavita/data /kavita/temp /kavita/cache
+
+RUN sed -i 's/Data source=kavita.db/Data source=data\/kavita.db/g' /kavita/appsettings.json
+	
+COPY entrypoint.sh /entrypoint.sh
+
+EXPOSE 5000
+
+WORKDIR /kavita
+
+ENTRYPOINT ["/bin/bash"]
+CMD ["/entrypoint.sh"]

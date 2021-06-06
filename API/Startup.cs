@@ -7,6 +7,7 @@ using API.Middleware;
 using API.Services;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -82,6 +83,7 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
+            
             app.UseResponseCompression();
             
             app.UseForwardedHeaders();
@@ -131,19 +133,21 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v0.4.0");
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
-            
+
             // Any services that should be bootstrapped go here
             taskScheduler.ScheduleTasks();
         }
         
         private void OnShutdown()
         {
-            Console.WriteLine("Server is shutting down. Going to dispose Hangfire");
-            //this code is called when the application stops
+            Console.WriteLine("Server is shutting down. Please allow a few seconds to stop any background jobs...");
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
+            Console.WriteLine("You may now close the application window.");
         }
+        
+        
     }
 }
