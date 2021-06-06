@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { AllCollectionsComponent } from './all-collections/all-collections.component';
 import { HomeComponent } from './home/home.component';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { LibraryComponent } from './library/library.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
@@ -29,7 +31,21 @@ const routes: Routes = [
       {
         path: 'library/:libraryId/series/:seriesId/manga',
         loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+      },
+      {
+        path: 'library/:libraryId/series/:seriesId/book',
+        loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
       }
+    ]
+  },
+  {
+    path: '',
+    runGuardsAndResolvers: 'always',
+    canActivate: [AuthGuard],
+    children: [
+      {path: 'recently-added', component: RecentlyAddedComponent},
+      {path: 'collections', component: AllCollectionsComponent},
+      {path: 'collections/:id', component: AllCollectionsComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},

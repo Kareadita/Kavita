@@ -6,7 +6,7 @@ import {
   HttpInterceptor
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { NavigationExtras, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, take } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
@@ -20,15 +20,21 @@ export class ErrorInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError(error => {
         if (error && error.status !== 200) {
-          console.error('error:', error);
           switch (error.status) {
             case 400:
               // IF type of array, this comes from signin handler
               if (Array.isArray(error.error)) {
                 const modalStateErrors: any[] = [];
-                error.error.forEach((issue: {status: string, details: string, message: string}) => {
-                  modalStateErrors.push(issue.details);
-                });
+                if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
+                  error.error.forEach((issue: {status: string, details: string, message: string}) => {
+                    modalStateErrors.push(issue.details);
+                  });
+                } else {
+                  error.error.forEach((issue: {code: string, description: string}) => {
+                    modalStateErrors.push(issue.description);
+                  });
+                }
+                
                 throw modalStateErrors.flat();
               } else if (error.error.errors) {
                 // Validation error
@@ -40,6 +46,7 @@ export class ErrorInterceptor implements HttpInterceptor {
                 }
                 throw modalStateErrors.flat();
               } else {
+                console.error('error:', error);
                 if (error.statusText === 'Bad Request') {
                   this.toastr.error(error.error, error.status);
                 } else {
@@ -58,19 +65,30 @@ export class ErrorInterceptor implements HttpInterceptor {
               });
               break;
             case 404:
+              console.error('error:', error);
               this.toastr.error('That url does not exist.');
               break;
             case 500:
-              this.toastr.error('There was an unknown critical error.');
+              console.error('error:', error);
+              const err = error.error;
+              if (err.hasOwnProperty('message') && err['message'].trim() != '') {
+                this.toastr.error(err.message);
+              } else {
+                this.toastr.error('There was an unknown critical error.');
+              }
               break;
             default:
-              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.')
-              {
+              if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
                 this.toastr.error('Something unexpected went wrong.');
-                // TODO:  We should store information about what URL we are on so that on refresh of no-connection, we can redirect back to original url
+              }
+
+              if (!localStorage.getItem('kavita--no-connection-url')) {
+                localStorage.setItem('kavita--no-connection-url', this.router.url);
+              }
+
+              if (this.router.url !== '/no-connection') {
                 this.router.navigateByUrl('/no-connection');
               }
-              console.error(error);
               break;
           }
         }

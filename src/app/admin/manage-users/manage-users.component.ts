@@ -62,6 +62,11 @@ export class ManageUsersComponent implements OnInit {
   openEditLibraryAccess(member: Member) {
     const modalRef = this.modalService.open(LibraryAccessModalComponent);
     modalRef.componentInstance.member = member;
+    modalRef.closed.subscribe(result => {
+      if (result) {
+        this.loadMembers();
+      }
+    });
   }
 
   async deleteUser(member: Member) {

@@ -18,7 +18,7 @@
         <div class="form-group" *ngIf="this.library === undefined">
             <label for="library-type">Type</label>
             <select class="form-control" id="library-type" formControlName="type">
-                <option [value]="0">Manga</option>
+                <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
             </select>
         </div>
         
@@ -35,6 +35,6 @@
     <div class="modal-footer">
         <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
         <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-        <button type="submit" class="btn btn-primary" (click)="submitLibrary()" [disabled]="!libraryForm.dirty">Save</button>
+        <button type="submit" class="btn btn-primary" (click)="submitLibrary()" [disabled]="!libraryForm.dirty && !madeChanges">Save</button>
     </div>
 </form>

@@ -23,8 +23,8 @@ describe('UserLoginComponent', () => {
     routerMock = {
         navigateByUrl: jest.fn()
     };
-    fixture = new UserLoginComponent(accountServiceMock, routerMock, memberServiceMock);
-    fixture.ngOnInit();
+    //fixture = new UserLoginComponent(accountServiceMock, routerMock, memberServiceMock);
+    //fixture.ngOnInit();
   });
 
   describe('Test: ngOnInit', () => {

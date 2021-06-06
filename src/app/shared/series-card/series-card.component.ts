@@ -20,6 +20,7 @@ import { ConfirmService } from '../confirm.service';
 export class SeriesCardComponent implements OnInit, OnChanges {
   @Input() data: Series | undefined;
   @Input() libraryId = 0;
+  @Input() suppressLibraryLink = false;
   @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<boolean>();
 
@@ -59,6 +60,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case(Action.ScanLibrary):
         this.scanLibrary(series);
         break;
+      case(Action.RefreshMetadata):
+        this.refreshMetdata(series);
+        break;
       case(Action.Delete):
         this.deleteSeries(series);
         break;
@@ -71,7 +75,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   openEditModal(data: Series) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg', scrollable: true });
     modalRef.componentInstance.series = data;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
       window.scrollTo(0, 0);
@@ -84,8 +88,14 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     });
   }
 
+  refreshMetdata(series: Series) {
+    this.seriesService.refreshMetadata(series).subscribe((res: any) => {
+      this.toastr.success('Refresh started for ' + series.name);
+    });
+  }
+
   scanLibrary(series: Series) {
-    this.libraryService.scan(this.libraryId).subscribe((res: any) => {
+    this.libraryService.scan(series.libraryId).subscribe((res: any) => {
       this.toastr.success('Scan started for ' + series.name);
     });
   }

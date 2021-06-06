@@ -30,6 +30,11 @@
               "src/favicon.ico",
               "src/assets"
             ],
+            "sourceMap": {
+              "hidden": false,
+              "scripts": true,
+              "styles": true
+            },
             "styles": [
               "node_modules/ngx-toastr/toastr.css",
               "src/styles.scss",
@@ -47,16 +52,15 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
+              "vendorChunk": true,
               "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumWarning": "1mb",
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -99,7 +103,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
+              "src/styles.scss"
             ],
             "scripts": []
           }

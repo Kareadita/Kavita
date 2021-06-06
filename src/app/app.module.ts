@@ -1,11 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, Injectable, NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
@@ -24,9 +24,64 @@ import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-serie
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
+import * as Sentry from '@sentry/angular';
+import { environment } from 'src/environments/environment';
+import { version } from 'package.json';
+import { Router } from '@angular/router';
+import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations';
+import { Dedupe as DedupeIntegration } from '@sentry/integrations';
+import { PersonBadgeComponent } from './person-badge/person-badge.component';
+import { TypeaheadModule } from './typeahead/typeahead.module';
+import { AllCollectionsComponent } from './all-collections/all-collections.component';
+import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
+import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 
+let sentryProviders: any[] = [];
 
+if (environment.production) {
+  Sentry.init({
+    dsn: 'https://db1a1f6445994b13a6f479512aecdd48@o641015.ingest.sentry.io/5757426',
+    environment: environment.production ? 'prod' : 'dev',
+    release: version,
+    integrations: [
+      new Sentry.Integrations.GlobalHandlers({
+        onunhandledrejection: true,
+        onerror: true
+      }),
+      new DedupeIntegration(),
+      new RewriteFramesIntegration()
+    ],
+    ignoreErrors: [new RegExp(/\/api\/admin/)],
+    tracesSampleRate: 0,
+  });
+
+  Sentry.configureScope(scope => {
+    scope.setUser({
+      username: 'Not authorized'
+    });
+    scope.setTag('production', environment.production);
+    scope.setTag('version', version);
+  });
+
+  sentryProviders = [{
+    provide: ErrorHandler,
+    useValue: Sentry.createErrorHandler({
+      showDialog: false,
+    }),
+  },
+  {
+    provide: Sentry.TraceService,
+    deps: [Router],
+  },
+  {
+    provide: APP_INITIALIZER,
+    useFactory: () => () => {},
+    deps: [Sentry.TraceService],
+    multi: true,
+  }];
+}
 
 @NgModule({
   declarations: [
@@ -38,7 +93,13 @@ import { CarouselModule } from './carousel/carousel.module';
     LibraryDetailComponent, // Move into MangaModule
     SeriesDetailComponent, // Move into MangaModule
     NotConnectedComponent, // Move into ExtrasModule
-    UserPreferencesComponent, EditSeriesModalComponent, ReviewSeriesModalComponent, // Move into SettingsModule
+    UserPreferencesComponent, // Move into SettingsModule
+    EditSeriesModalComponent,
+    ReviewSeriesModalComponent,
+    PersonBadgeComponent,
+    AllCollectionsComponent,
+    EditCollectionTagsComponent,
+    RecentlyAddedComponent,
   ],
   imports: [
     HttpClientModule,
@@ -52,11 +113,14 @@ import { CarouselModule } from './carousel/carousel.module';
     NgbRatingModule, // Series Detail
     NgbCollapseModule, // Series Edit Modal
     NgbNavModule, // Series Edit Modal
-    NgbAccordionModule, // User Preferences 
+    NgbAccordionModule, // User Preferences
+    NgxSliderModule, // User Preference
     NgbPaginationModule,
     LazyLoadImageModule,
     SharedModule,
     CarouselModule,
+    TypeaheadModule,
+    FormsModule, // EditCollection Modal
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right'
     }),
@@ -65,6 +129,7 @@ import { CarouselModule } from './carousel/carousel.module';
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
+    ...sentryProviders
   ],
   entryComponents: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,84 @@
+@import '../../assets/themes/dark.scss';
+
+input {
+    width: 15px;
+    opacity: 1px;
+    position: relative;
+    left: 4px;
+    border: none;
+}
+
+.typeahead-input {
+    border: 1px solid #ccc;
+    padding: 4px 6px;
+    display: inline-block;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    box-shadow: none;
+    border-radius: 4px;
+    cursor: text;
+    background-color: #fff;
+    min-height: 38px;
+
+    input {
+        outline: 0 !important;
+        border-radius: .28571429rem;
+        display: inline-block !important;
+        padding: 0px !important;
+        min-height: 0px !important;
+        max-width: 100% !important;
+        margin: 0px !important;
+        text-indent: 0 !important;
+        line-height: inherit !important;
+        box-shadow: none !important;
+    }
+}
+
+::ng-deep .bg-dark .typeahead-input {
+    color: #efefef;
+    background-color: $dark-bg-color;
+}
+
+// Causes bleedover
+::ng-deep .bg-dark .dropdown .list-group-item.active {
+    background-color: $dark-hover-color;
+}
+
+.dropdown {
+    width: 100%;
+    background: white;
+    z-index:1000;
+    margin: 2px 0 0;
+    border-radius: 4px;
+    margin-top: -7px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    position: absolute;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    .list-group-item {
+        padding: 5px 5px;
+    }
+
+
+    li {
+        list-style: none;
+    }
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+
+.spinner-border {
+    position: absolute;
+    right: 10px;
+    margin: auto;
+    cursor: pointer;
+    top: 30%;
+}

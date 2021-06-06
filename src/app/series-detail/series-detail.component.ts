@@ -4,16 +4,20 @@ import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { LibraryType } from '../_models/library';
 import { Series } from '../_models/series';
+import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
+import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -32,19 +36,26 @@ export class SeriesDetailComponent implements OnInit {
   chapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
+  isLoading = true;
+  showBook = true;
 
-  currentlyReadingVolume: Volume | undefined = undefined;
   currentlyReadingChapter: Chapter | undefined = undefined;
   hasReadingProgress = false;
 
-  testMap: any;
-  showBook = false;
-  isLoading = true;
 
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
 
+  hasSpecials = false;
+  specials: Array<Chapter> = [];
+  activeTabId = 2;
+  hasNonSpecialVolumeChapters = true;
+
+  seriesSummary: string = '';
+  userReview: string = '';
+  libraryType: LibraryType = LibraryType.Manga;
+  seriesMetadata: SeriesMetadata | null = null;
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
@@ -52,14 +63,14 @@ export class SeriesDetailComponent implements OnInit {
               private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService) {
+              private confirmService: ConfirmService, private collectionService: CollectionTagService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
       }
-    })
+    });
   }
 
   ngOnInit(): void {
@@ -77,19 +88,28 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
-    this.loadSeries(seriesId);
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
+      this.seriesMetadata = metadata;
+    });
+    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
+      this.libraryType = type;
+      this.loadSeries(seriesId);
+    });
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
     switch(action) {
       case(Action.MarkAsRead):
-        this.markSeriesAsRead(series); // TODO: I can probably move this into a series completely self-contained
+        this.markSeriesAsRead(series);
         break;
       case(Action.MarkAsUnread):
         this.markSeriesAsUnread(series);
         break;
       case(Action.ScanLibrary):
         this.scanLibrary(series);
+        break;
+      case(Action.RefreshMetadata):
+        this.refreshMetdata(series);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -131,8 +151,14 @@ export class SeriesDetailComponent implements OnInit {
     }
   }
 
+  refreshMetdata(series: Series) {
+    this.seriesService.refreshMetadata(series).subscribe((res: any) => {
+      this.toastr.success('Refresh started for ' + series.name);
+    });
+  }
+
   scanLibrary(series: Series) {
-    this.libraryService.scan(this.libraryId).subscribe((res: any) => {
+    this.libraryService.scan(series.libraryId).subscribe((res: any) => {
       this.toastr.success('Scan started for ' + series.name);
     });
   }
@@ -154,6 +180,7 @@ export class SeriesDetailComponent implements OnInit {
     this.seriesService.markUnread(series.id).subscribe(res => {
       this.toastr.success(series.name + ' is now unread');
       series.pagesRead = 0;
+      this.loadSeries(series.id);
     });
   }
 
@@ -161,57 +188,52 @@ export class SeriesDetailComponent implements OnInit {
     this.seriesService.markRead(series.id).subscribe(res => {
       this.toastr.success(series.name + ' is now read');
       series.pagesRead = series.pages;
+      this.loadSeries(series.id);
     });
   }
 
   loadSeries(seriesId: number) {
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
+      this.seriesMetadata = metadata;
+    });
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
+      this.createHTML();
+      
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => !v.isSpecial && v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
 
         this.setContinuePoint();
+        const vol0 = this.volumes.filter(v => v.number === 0);
+        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
+        if (this.hasSpecials) {
+          this.specials = vol0.map(v => v.chapters || []).flat().filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).map(c => {
+            c.range = c.range.replace(/_/g, ' ');
+            return c;
+          });
+        }
+
+        if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
+          this.activeTabId = 1;
+          this.hasNonSpecialVolumeChapters = false;
+        }
+
         this.isLoading = false;
       });
     });
   }
 
-  setContinuePoint() {
-    this.currentlyReadingVolume = undefined;
-    this.currentlyReadingChapter = undefined;
-    this.hasReadingProgress = false;
-
-    for (let v of this.volumes) {
-      if (v.number === 0) {
-        continue;
-      } else if (v.pagesRead >= v.pages) {
-        continue;
-      } else if (v.pagesRead < v.pages) { // Issue is off by 1 again...
-        this.currentlyReadingVolume = v;
-        this.hasReadingProgress = true;
-        break;
-      }
-    }
-
-    if (this.currentlyReadingVolume === undefined) {
-      // We need to check against chapters
-      this.chapters.forEach(c => {
-        if (c.pagesRead >= c.pages) {
-          return;
-        } else if (this.currentlyReadingChapter === undefined) {
-          this.currentlyReadingChapter = c;
-          this.hasReadingProgress = true;
-        }
-      });
-      if (this.currentlyReadingChapter === undefined) {
-        // Default to first chapter
-        this.currentlyReadingChapter = this.chapters[0];
-      }
-    }
+  createHTML() {
+    this.seriesSummary = (this.series.summary === null ? '' : this.series.summary).replace(/\n/g, '<br>');
+    this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 
+  setContinuePoint() {
+    this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
+    this.currentlyReadingChapter = this.readerService.getCurrentChapter(this.volumes);
+  }
 
   markAsRead(vol: Volume) {
     if (this.series === undefined) {
@@ -247,8 +269,8 @@ export class SeriesDetailComponent implements OnInit {
 
     this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(results => {
       this.toastr.success('Marked as Read');
-      this.setContinuePoint();
       chapter.pagesRead = chapter.pages;
+      this.setContinuePoint();
     });
   }
 
@@ -266,9 +288,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   read() {
-    if (this.currentlyReadingVolume !== undefined) { this.openVolume(this.currentlyReadingVolume); }
-    else if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
-    else { this.openVolume(this.volumes[0]); }
+    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
   }
 
   updateRating(rating: any) {
@@ -276,11 +296,21 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {});
+    this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {
+      this.createHTML();
+    });
   }
 
   openChapter(chapter: Chapter) {
-    this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+    if (chapter.pages === 0) {
+      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+      return;
+    }
+    if (this.libraryType === LibraryType.Book) {
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id]);
+    } else {
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+    }
   }
 
   openVolume(volume: Volume) {
@@ -288,7 +318,19 @@ export class SeriesDetailComponent implements OnInit {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    this.openChapter(volume.chapters[0]);
+    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes 
+    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background 
+    // to help the user make a good choice. 
+
+    // If user has progress on the volume, load them where they left off
+    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+      // Find the continue point chapter and load it
+      this.openChapter(this.readerService.getCurrentChapter([volume]));
+      return;
+    }
+
+    // Sort the chapters, then grab first if no reading progress
+    this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
   }
 
   isNullOrEmpty(val: string) {
@@ -296,15 +338,13 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg', scrollable: true });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
   }
 
   openEditSeriesModal() {
-    // TODO: Some library bug with modal where scorllable isn't working. Leave off to use underlying page scroll
-    //scrollable: true,
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  scrollable: true, size: 'lg', windowClass: 'scrollable-modal' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
       window.scrollTo(0, 0);
@@ -314,9 +354,14 @@ export class SeriesDetailComponent implements OnInit {
     });
   }
 
-  promptToReview() {
+  async promptToReview() {
     const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
-    if (shouldPrompt && confirm('Do you want to write a review?')) {
+    const config = new ConfirmConfig();
+    config.header = 'Confirm';
+    config.content = 'Do you want to write a review?';
+    config.buttons.push({text: 'No', type: 'secondary'});
+    config.buttons.push({text: 'Yes', type: 'primary'});
+    if (shouldPrompt && await this.confirmService.confirm('Do you want to write a review?', config)) {
       this.openReviewModal();
     }
   }
@@ -324,9 +369,11 @@ export class SeriesDetailComponent implements OnInit {
   openReviewModal(force = false) {
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, review: string}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, review: string, rating: number}) => {
       if (closeResult.success && this.series !== undefined) {
         this.series.userReview = closeResult.review;
+        this.series.userRating = closeResult.rating;
+        this.createHTML();
       }
     });
   }

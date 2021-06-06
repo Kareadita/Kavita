@@ -1,33 +1,11 @@
-<div class="container-fluid" style="padding-top: 10px">
-    <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
-        <ngb-pagination
-            [(page)]="pageNumber"
-            [pageSize]="pagination.itemsPerPage"
-            (pageChange)="onPageChange($event)"
-            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-            [collectionSize]="pagination.totalItems"></ngb-pagination>
-    </div>
+<app-card-detail-layout header="{{libraryName}}" 
+    [isLoading]="loadingSeries"
+    [items]="series"
+    [pagination]="pagination"
+    (pageChange)="onPageChange($event)"
+    >
 
-    <div class="row no-gutters">
-        <div class="col-auto" *ngFor="let manga of series; trackBy:trackByIdentity">
-            <app-series-card [data]="manga" [libraryId]="libraryId" (reload)="loadPage()"></app-series-card>
-        </div>
-
-        <div class="spinner-border text-secondary" role="status" *ngIf="loadingSeries">
-            <span class="invisible">Loading...</span>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
-        <ngb-pagination
-            [(page)]="pageNumber"
-            [pageSize]="pagination.itemsPerPage"
-            (pageChange)="onPageChange($event)"
-            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-            [collectionSize]="pagination.totalItems"></ngb-pagination>
-    </div>
-
-    <ng-container *ngIf="series.length === 0 && !loadingSeries">
-        There are no Series.
-    </ng-container>
-</div>
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card>
+        </ng-template>
+</app-card-detail-layout>

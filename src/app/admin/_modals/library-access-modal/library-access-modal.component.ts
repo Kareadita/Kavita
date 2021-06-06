@@ -37,7 +37,7 @@ export class LibraryAccessModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close();
+    this.modal.close(false);
   }
 
   save() {
@@ -47,7 +47,7 @@ export class LibraryAccessModalComponent implements OnInit {
 
     const selectedLibraries = this.selectedLibraries.filter(item => item.selected).map(item => item.data);
     this.libraryService.updateLibrariesForMember(this.member?.username, selectedLibraries).subscribe(() => {
-      this.modal.close();
+      this.modal.close(true);
     });
   }
 

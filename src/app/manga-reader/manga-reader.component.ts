@@ -14,15 +14,12 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
+import { KEY_CODES } from '../shared/_services/utility.service';
+import { CircularArray } from '../shared/data-structures/circular-array';
+import { MemberService } from '../_services/member.service';
+import { Stack } from '../shared/data-structures/stack';
 
 const PREFETCH_PAGES = 3;
-
-enum KEY_CODES {
-  RIGHT_ARROW = 'ArrowRight',
-  LEFT_ARROW = 'ArrowLeft',
-  ESC_KEY = 'Escape',
-  SPACE = ' '
-}
 
 enum FITTING_OPTION {
   HEIGHT = 'full-height',
@@ -41,102 +38,6 @@ enum PAGING_DIRECTION {
   BACKWARDS = -1,
 }
 
-export class CircularArray<T> {
-  arr: T[];
-  currentIndex: number;
-
-  constructor(arr: T[], startIndex: number) {
-    this.arr = arr;
-    this.currentIndex = startIndex || 0;
-  }
-
-  next() {
-    const i = this.currentIndex;
-    const arr = this.arr;
-    this.currentIndex = i < arr.length - 1 ? i + 1 : 0;
-    return this.current();
-  }
-
-  prev() {
-    const i = this.currentIndex;
-    const arr = this.arr;
-    this.currentIndex = i > 0 ? i - 1 : arr.length - 1;
-    return this.current();
-  }
-
-  current() {
-    return this.arr[this.currentIndex];
-  }
-
-  peek(offset: number = 0) {
-    const i = this.currentIndex + 1 + offset;
-    const arr = this.arr;
-    const peekIndex = i < arr.length - 1 ? i + 1 : 0;
-    return this.arr[peekIndex];
-  }
-
-  size() {
-    return this.arr.length;
-  }
-
-  applyUntil(func: (item: T, index: number) => void, index?: number) {
-    index = index || this.currentIndex;
-    /// Applies a func against elements up until index. If index is 1 and size is 3, will apply on [2, 3, 0]
-    for (let offset = 1; offset < this.size(); offset++) {
-      const i = this.currentIndex + offset;
-      const arr = this.arr;
-      const peekIndex = i < arr.length ? i : 0;
-
-      if (peekIndex === index) {
-        break;
-      }
-
-      func(this.arr[peekIndex], peekIndex);
-    }
-
-  }
-
-  /// Applies a func against elements for X times. If limit is 1, size is 3, and index is 2. It will apply on [3]
-  applyFor(func: (item: T, index: number) => void, limit: number) {
-    for (let offset = 1; offset < limit; offset++) {
-      const i = this.currentIndex + offset;
-      const peekIndex = i < this.arr.length ? i : 0;
-
-      func(this.arr[peekIndex], peekIndex);
-    }
-
-  }
-
-
-}
-
-export class Queue<T> {
-  elements: T[];
-
-  constructor() {
-    this.elements = [];
-  }
-
-  enqueue(data: T) {
-    this.elements.push(data);
-  }
-
-  dequeue() {
-    return this.elements.shift();
-  }
-
-  isEmpty() {
-    return this.elements.length === 0;
-  }
-
-  peek() {
-    return !this.isEmpty() ? this.elements[0] : undefined;
-  }
-
-  length = () => {
-    return this.elements.length;
-  }
-}
 
 @Component({
   selector: 'app-manga-reader',
@@ -164,7 +65,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
   menuOpen = false;
-  isLoading = true; // we need to debounce this so it only kicks in longer than 30 ms load time
+  isLoading = true; 
   mangaFileName = '';
 
   @ViewChild('content') canvas: ElementRef | undefined;
@@ -172,14 +73,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private canvasImage = new Image();
 
   cachedImages!: CircularArray<HTMLImageElement>; // This is a circular array of size PREFETCH_PAGES + 2
+  continuousChaptersStack: Stack<number> = new Stack();
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
 
+  prevPageDisabled = false;
+  nextPageDisabled = false;
+
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
-              private formBuilder: FormBuilder, private navService: NavService, private toastr: ToastrService) {
+              private formBuilder: FormBuilder, private navService: NavService, private toastr: ToastrService,
+              private memberService: MemberService) {
                 this.navService.hideNavBar();
   }
 
@@ -192,6 +98,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigateByUrl('/home');
       return;
     }
+
+    this.libraryId = parseInt(libraryId, 10);
+    this.seriesId = parseInt(seriesId, 10);
+    this.chapterId = parseInt(chapterId, 10);
+
+    this.continuousChaptersStack.push(this.chapterId);
 
     this.setOverrideStyles();
 
@@ -207,26 +119,71 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.splitForm = this.formBuilder.group({
           pageSplitOption: this.pageSplitOption + ''
         });
+        // On change of splitting, re-render the page if the page is already split
+        this.splitForm.valueChanges.subscribe(changes => {
+          const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+          if (needsSplitting) {
+            this.loadPage();
+          }
+        });
+        this.memberService.hasReadingProgress(this.libraryId).subscribe(progress => {
+          if (!progress) {
+            this.menuOpen = true;
+            this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+          }
+        });
       }
     });
 
-    this.libraryId = parseInt(libraryId, 10);
-    this.seriesId = parseInt(seriesId, 10);
-    this.chapterId = parseInt(chapterId, 10);
 
+    this.init();
+  }
+
+  ngAfterViewInit() {
+    if (!this.canvas) {
+      return;
+    }
+    this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
+    this.canvasImage.onload = () => this.renderPage();
+  }
+
+  ngOnDestroy() {
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
+      bodyNode.style.background = this.originalBodyColor;
+    }
+    this.navService.showNavBar();
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  handleKeyPress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.RIGHT_ARROW) {
+      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+    } else if (event.key === KEY_CODES.LEFT_ARROW) {
+      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
+    } else if (event.key === KEY_CODES.ESC_KEY) {
+      this.closeReader();
+    } else if (event.key === KEY_CODES.SPACE) {
+      this.toggleMenu();
+    } else if (event.key === KEY_CODES.G) {
+      this.goToPage();
+    }
+  }
+
+  init() {
     forkJoin({
       chapter: this.seriesService.getChapter(this.chapterId),
-      pageNum: this.readerService.getBookmark(this.chapterId),
+      bookmark: this.readerService.getBookmark(this.chapterId),
       chapterPath: this.readerService.getChapterPath(this.chapterId)
     }).subscribe(results => {
       this.chapter = results.chapter;
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
 
-      this.pageNum = results.pageNum;
+      this.pageNum = results.bookmark.pageNum;
 
-      if (this.pageNum > this.maxPages) {
-        this.pageNum = this.maxPages;
+      if (this.pageNum >= this.maxPages) {
+        this.pageNum = this.maxPages - 1;
       }
 
 
@@ -243,52 +200,44 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }, () => {
       setTimeout(() => {
-        this.location.back();
+        this.closeReader();
       }, 200);
     });
   }
 
-  ngAfterViewInit() {
-    if (!this.canvas) {
-      return;
-    }
-    this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => this.renderPage();
-  }
-
-  ngOnDestroy() {
-    const bodyNode = document.querySelector('body');
-    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
-      bodyNode.style.background = this.originalBodyColor;
-      bodyNode.style.height = '100%';
-    }
-    this.navService.showNavBar();
-  }
-
-  @HostListener('window:keyup', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.RIGHT_ARROW) {
-      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-    } else if (event.key === KEY_CODES.LEFT_ARROW) {
-      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
-    } else if (event.key === KEY_CODES.ESC_KEY) {
-      this.location.back();
-    } else if (event.key === KEY_CODES.SPACE) {
-      this.toggleMenu();
-    }
+  closeReader() {
+    this.location.back();
   }
 
   setOverrideStyles() {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
       this.originalBodyColor = bodyNode.style.background;
-      bodyNode.style.background = 'black';
-      bodyNode.style.height = '0%';
+      bodyNode.setAttribute('style', 'background-color: black !important');
     }
   }
 
   translateScalingOption(option: ScalingOption) {
     switch (option) {
+      case (ScalingOption.Automatic):
+      {
+        const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+        const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
+
+        const ratio = windowWidth / windowHeight;
+        if (windowHeight > windowWidth) {
+          return FITTING_OPTION.WIDTH;
+        }
+
+        if (windowWidth >= windowHeight || ratio > 1.0) {
+          return FITTING_OPTION.HEIGHT;
+        }
+        return FITTING_OPTION.WIDTH;
+      }
       case (ScalingOption.FitToHeight):
         return FITTING_OPTION.HEIGHT;
       case (ScalingOption.FitToWidth):
@@ -307,10 +256,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMenu() {
     this.menuOpen = !this.menuOpen;
-  }
-
-  getPageKey(pageNum: number) {
-    return `kavita-page-cache-${this.user.username}-${this.chapterId}--${pageNum}`;
   }
 
   isSplitLeftToRight() {
@@ -334,10 +279,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          const r2lSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : r2lSplittingPart;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.LEFT_PART;
+          const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? l2rSplittingPart : SPLIT_PAGE_PART.LEFT_PART;
           break;
       }
     } else if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
@@ -346,10 +293,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.NO_SPLIT : SPLIT_PAGE_PART.RIGHT_PART;
+          const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? l2rSplittingPart : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT;
+          this.currentImageSplitPart = this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
           break;
       }
     }
@@ -369,12 +317,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    if (this.pageNum + 1 >= this.maxPages || this.isLoading) {
+    const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
+
+    if ((this.pageNum + 1 >= this.maxPages && notInSplit) || this.isLoading) {
+
+      if (this.isLoading) { return; }
+
+      // Move to next volume/chapter automatically
+      if (!this.nextPageDisabled) {
+        this.isLoading = true;
+        this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+          this.loadChapter(chapterId, 'next');
+        });
+      }
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
-    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART)) {
+    if (this.isNoSplit() || notInSplit) {
       this.pageNum++;
       this.canvasImage = this.cachedImages.next();
     }
@@ -387,17 +347,61 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    if (this.pageNum - 1 < 0 || this.isLoading) {
+
+    const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
+
+    if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
+
+      if (this.isLoading) { return; }
+
+      // Move to next volume/chapter automatically
+      if (!this.prevPageDisabled) {
+        this.isLoading = true;
+        this.continuousChaptersStack.pop();
+        const prevChapter = this.continuousChaptersStack.peek();
+        if (prevChapter != this.chapterId) {
+          if (prevChapter !== undefined) {
+            this.chapterId = prevChapter;
+            this.init();
+            return;
+          }
+        }
+        
+        this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).subscribe(chapterId => {
+          this.loadChapter(chapterId, 'prev');
+        });  
+      }
       return;
     }
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
-    if (this.isNoSplit() || this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART)) {
+    if (this.isNoSplit() || notInSplit) {
       this.pageNum--;
       this.canvasImage = this.cachedImages.prev();
     }
 
     this.loadPage();
+  }
+
+  loadChapter(chapterId: number, direction: 'next' | 'prev') {
+    if (chapterId >= 0) {
+      this.chapterId = chapterId;
+      this.continuousChaptersStack.push(chapterId);
+      // Load chapter Id onto route but don't reload
+      const lastSlashIndex = this.router.url.lastIndexOf('/');
+      const newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      window.history.replaceState({}, '', newRoute);
+      this.init();
+    } else {
+      this.toastr.warning('Could not find ' + direction + ' chapter')
+      this.isLoading = false;
+      if (direction === 'prev') {
+        this.prevPageDisabled = true;
+      } else {
+        this.nextPageDisabled = true;
+      }
+      
+    }
   }
 
   renderPage() {
@@ -446,9 +450,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {}, err => {
-      this.toastr.error('Could not save bookmark status. Current page is: ' + this.pageNum);
-    });
+    // Due to the fact that we start at image 0, but page 1, we need the last page to be bookmarked as page + 1 to be completed
+    let pageNum = this.pageNum;
+    if (this.pageNum == this.maxPages - 1) {
+      pageNum = this.pageNum + 1;
+    }
+
+
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {/* No operation */});
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
@@ -470,7 +479,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   promptForPage() {
-    const goToPageNum = window.prompt('What page would you like to go to?', '');
+    const goToPageNum = window.prompt('There are ' + this.maxPages + ' pages. What page would you like to go to?', '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }
@@ -483,12 +492,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       page = parseInt(goToPageNum.trim(), 10);
     }
 
-    if (page === undefined) { return; }
+    if (page === undefined || this.pageNum === page) { return; }
 
-    if (page >= this.maxPages) {
-      page = this.maxPages - 1;
+    if (page > this.maxPages) {
+      page = this.maxPages;
     } else if (page < 0) {
       page = 0;
+    }
+
+    if (!(page === 0 || page === this.maxPages - 1)) {
+      page -= 1;
+    }
+
+    if (page > this.pageNum) {
+      this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    } else {
+      this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     }
 
     this.pageNum = page;

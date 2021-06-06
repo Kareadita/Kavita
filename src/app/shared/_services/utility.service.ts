@@ -3,6 +3,19 @@ import { Chapter } from 'src/app/_models/chapter';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';
 
+export enum KEY_CODES {
+  RIGHT_ARROW = 'ArrowRight',
+  LEFT_ARROW = 'ArrowLeft',
+  DOWN_ARROW = 'ArrowDown',
+  UP_ARROW = 'ArrowUp',
+  ESC_KEY = 'Escape',
+  SPACE = ' ',
+  ENTER = 'Enter',
+  G = 'g',
+  BACKSPACE = 'Backspace',
+  DELETE = 'Delete'
+}
+
 @Injectable({
   providedIn: 'root'
 })

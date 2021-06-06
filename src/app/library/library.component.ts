@@ -1,14 +1,19 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
-import { Chapter } from '../_models/chapter';
+import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
+import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
-import { ImageService } from '../_services/image.service';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
+
 @Component({
   selector: 'app-library',
   templateUrl: './library.component.html',
@@ -24,8 +29,10 @@ export class LibraryComponent implements OnInit {
   recentlyAdded: Series[] = [];
   inProgress: Series[] = [];
   continueReading: InProgressChapter[] = [];
+  collectionTags: CollectionTag[] = [];
+  collectionTagActions: ActionItem<CollectionTag>[] = [];
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private imageService: ImageService) { }
+  constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, private collectionService: CollectionTagService, private router: Router, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.isLoading = true;
@@ -38,24 +45,58 @@ export class LibraryComponent implements OnInit {
       });
     });
 
-    this.seriesService.getRecentlyAdded().subscribe((series) => {
-      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
-      this.recentlyAdded = series;
+    this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+
+    this.reloadSeries();
+  }
+
+  reloadSeries() {
+    this.seriesService.getRecentlyAdded(0, 0, 20).subscribe(series => {
+      this.recentlyAdded = series.result;
     });
 
     this.seriesService.getInProgress().subscribe((series) => {
-      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
       this.inProgress = series;
     });
 
-    // this.seriesService.getContinueReading().subscribe((chapters) => {
-    //   chapters.forEach(s => s.coverImage = this.imageService.getChapterCoverImage(s.id));
-    //   this.continueReading = chapters;
-    // });
+    this.reloadTags();
+  }
+
+  reloadTags() {
+    this.collectionService.allTags().subscribe(tags => {
+      this.collectionTags = tags;
+    });
   }
 
   handleSectionClick(sectionTitle: string) {
-    // TODO: Implement this in future. For now, it is not supported
+    if (sectionTitle.toLowerCase() === 'collections') {
+      this.router.navigate(['collections']);
+    } else if (sectionTitle.toLowerCase() === 'recently added') {
+      this.router.navigate(['recently-added']);
+    } else if (sectionTitle.toLowerCase() === 'in progress') {
+      this.router.navigate(['in-progress']);
+    }
+  }
+
+  loadCollection(item: CollectionTag) {
+    this.router.navigate(['collections', item.id]);
+  }
+
+  handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
+    switch (action) {
+      case(Action.Edit):
+        const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
+        modalRef.componentInstance.tag = collectionTag;
+        modalRef.closed.subscribe((reloadNeeded: boolean) => {
+          if (reloadNeeded) {
+            // Reload tags
+            this.reloadTags();
+          }
+        });
+        break;
+      default:
+        break;
+    }
   }
 
 }
