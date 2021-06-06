@@ -228,6 +228,7 @@ namespace API.Services.Tasks
              
              existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
              existingSeries.OriginalName ??= infos[0].Series;
+             existingSeries.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
           }
 
           // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
@@ -239,6 +240,7 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
                 UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
+                // Test 
              }
              catch (Exception ex)
              {

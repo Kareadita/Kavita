@@ -199,6 +199,8 @@ namespace API.Data
         {
             return await _context.Series
                 .Include(s => s.Volumes)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags)
                 .Where(s => s.Id == seriesId)
                 .SingleOrDefaultAsync();
         }
@@ -289,7 +291,7 @@ namespace API.Data
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="limit">How many series to pick.</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetRecentlyAdded(int userId, int libraryId, int limit)
+        public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams)
         {
             if (libraryId == 0)
             {
@@ -299,25 +301,25 @@ namespace API.Data
                     .AsNoTracking()
                     .Select(library => library.Id)
                     .ToList();
-            
-                return await _context.Series
+
+                var allQuery = _context.Series
                     .Where(s => userLibraries.Contains(s.LibraryId))
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
-                    .Take(limit)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync();
+                    .AsNoTracking();
+
+                return await PagedList<SeriesDto>.CreateAsync(allQuery, userParams.PageNumber, userParams.PageSize);
             }
             
-            return await _context.Series
+            var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .AsNoTracking()
                 .OrderByDescending(s => s.Created)
-                .Take(limit)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-            
-            
+                .AsNoTracking();
+
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         /// <summary>
@@ -365,6 +367,49 @@ namespace API.Data
                 .ToListAsync();
                 
             return retSeries.DistinctBy(s => s.Name).Take(limit);
+        }
+
+        public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
+        {
+            var metadataDto = await _context.SeriesMetadata
+                .Where(metadata => metadata.SeriesId == seriesId)
+                .AsNoTracking()
+                .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+
+            if (metadataDto != null)
+            {
+                metadataDto.Tags = await _context.CollectionTag
+                    .Include(t => t.SeriesMetadatas)
+                    .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
+                    .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            
+            return metadataDto;
+        }
+
+        public async Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams)
+        {
+            var userLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                .AsNoTracking()
+                .Select(library => library.Id)
+                .ToList();
+            
+            var query =  _context.CollectionTag
+                .Where(s => s.Id == collectionId)
+                .Include(c => c.SeriesMetadatas)
+                .ThenInclude(m => m.Series)
+                .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
+                .OrderBy(s => s.LibraryId)
+                .ThenBy(s => s.SortName)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking();
+
+            return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
     }
 }

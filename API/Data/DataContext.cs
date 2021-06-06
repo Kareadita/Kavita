@@ -29,6 +29,8 @@ namespace API.Data
         public DbSet<AppUserRating> AppUserRating { get; set; }
         public DbSet<ServerSetting> ServerSetting { get; set; }
         public DbSet<AppUserPreferences> AppUserPreferences { get; set; }
+        public DbSet<SeriesMetadata> SeriesMetadata { get; set; }
+        public DbSet<CollectionTag> CollectionTag { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -28,6 +28,7 @@ namespace API.Data
         public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
 
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
+        public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
         
         public async Task<bool> Complete()
         {

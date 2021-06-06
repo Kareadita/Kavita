@@ -13,5 +13,7 @@ namespace API.DTOs
         public int BookReaderFontSize { get; set; }
         public string BookReaderFontFamily { get; set; }
         public bool BookReaderTapToPaginate { get; set; }
+        public ReadingDirection BookReaderReadingDirection { get; set; }
+        public bool SiteDarkMode { get; set; }
     }
 }

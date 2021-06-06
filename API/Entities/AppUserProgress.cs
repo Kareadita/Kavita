@@ -14,6 +14,11 @@ namespace API.Entities
         public int VolumeId { get; set; }
         public int SeriesId { get; set; }
         public int ChapterId { get; set; }
+        /// <summary>
+        /// For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point
+        /// on next load
+        /// </summary>
+        public string BookScrollId { get; set; }
         
         // Relationships
         public AppUser AppUser { get; set; }

@@ -45,9 +45,9 @@ namespace API.Controllers
         {
             _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
             var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
 
-            if (resetPasswordDto.UserName != User.GetUsername() && !isAdmin) return Unauthorized("You are not permitted to this operation.");
+            if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
+                return Unauthorized("You are not permitted to this operation.");
             
             // Validate Password
             foreach (var validator in _userManager.PasswordValidators)

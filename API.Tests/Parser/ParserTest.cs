@@ -121,6 +121,8 @@ namespace API.Tests.Parser
         [InlineData("18-04", 4)]
         [InlineData("18-04.5", 4.5)]
         [InlineData("40", 40)]
+        [InlineData("40a-040b", 0)]
+        [InlineData("40.1_a", 0)]
         public void MinimumNumberFromRangeTest(string input, float expected)
         {
             Assert.Equal(expected, MinimumNumberFromRange(input));

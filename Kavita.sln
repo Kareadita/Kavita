@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{1
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Tests", "API.Tests\API.Tests.csproj", "{6F7910F2-1B95-4570-A490-519C8935B9D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Common", "Kavita.Common\Kavita.Common.csproj", "{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{6F7910F2-1B95-4570-A490-519C8935B9D1}.Release|x64.Build.0 = Release|Any CPU
 		{6F7910F2-1B95-4570-A490-519C8935B9D1}.Release|x86.ActiveCfg = Release|Any CPU
 		{6F7910F2-1B95-4570-A490-519C8935B9D1}.Release|x86.Build.0 = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|x64.Build.0 = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|x86.Build.0 = Debug|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x64.ActiveCfg = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x64.Build.0 = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x86.ActiveCfg = Release|Any CPU
+		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

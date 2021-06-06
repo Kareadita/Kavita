@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
@@ -21,7 +22,8 @@ namespace API.Data
                 NormalizedName = Parser.Parser.Normalize(name),
                 SortName = name,
                 Summary = string.Empty,
-                Volumes = new List<Volume>()
+                Volumes = new List<Volume>(),
+                Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
             };
         }
 
@@ -48,6 +50,26 @@ namespace API.Data
                     : specialTitle,
                 Files = new List<MangaFile>(),
                 IsSpecial = specialTreatment,
+            };
+        }
+        
+        public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
+        {
+            return new SeriesMetadata()
+            {
+                CollectionTags = collectionTags
+            };
+        }
+
+        public static CollectionTag CollectionTag(int id, string title, string summary, bool promoted)
+        {
+            return new CollectionTag()
+            {
+                Id = id,
+                NormalizedTitle = API.Parser.Parser.Normalize(title).ToUpper(),
+                Title = title,
+                Summary = summary,
+                Promoted = promoted
             };
         }
     }
