@@ -106,6 +106,8 @@ namespace API.Data
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)
                 .Include(l => l.Series)
+                .ThenInclude(s => s.Metadata)
+                .Include(l => l.Series)
                 .ThenInclude(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
