@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
 using API.Entities.Enums;
 using API.Interfaces;
 using API.Parser;
@@ -69,9 +70,11 @@ namespace API.Services
         public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
         {
             if (anchor.Name != "a") return;
-            var hrefParts = BookService.CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
+            var hrefParts = CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
                 .Split("#");
-            var mappingKey = hrefParts[0];
+            // Some keys get uri encoded when parsed, so replace any of those characters with original
+            var mappingKey = HttpUtility.UrlDecode(hrefParts[0]);
+            
             if (!mappings.ContainsKey(mappingKey))
             {
                 if (HasClickableHrefPart(anchor))
@@ -156,22 +159,31 @@ namespace API.Services
         public string GetSummaryInfo(string filePath)
         {
             if (!IsValidFile(filePath)) return string.Empty;
-            
-            using var epubBook = EpubReader.OpenBook(filePath);
-            return epubBook.Schema.Package.Metadata.Description;
+
+            try
+            {
+                using var epubBook = EpubReader.OpenBook(filePath);
+                return epubBook.Schema.Package.Metadata.Description;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
+            }
+
+            return string.Empty;
         }
 
         private bool IsValidFile(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError("Book {EpubFile} could not be found", filePath);
+                _logger.LogWarning("[BookService] Book {EpubFile} could not be found", filePath);
                 return false;
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
             
-            _logger.LogError("Book {EpubFile} is not a valid EPUB", filePath);
+            _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
             return false; 
         }
 
@@ -186,7 +198,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception getting number of pages, defaulting to 0");
+                _logger.LogWarning(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
             }
 
             return 0;
@@ -238,7 +250,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was an exception when opening epub book: {FileName}", filePath);
+                _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
             }
 
             return null;
@@ -257,7 +269,7 @@ namespace API.Services
                 // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
                 var coverImageContent = epubBook.Content.Cover
                                         ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
-                                        ?? epubBook.Content.Images.Values.First();
+                                        ?? epubBook.Content.Images.Values.FirstOrDefault();
                 
                 if (coverImageContent == null) return Array.Empty<byte>();
 
@@ -273,7 +285,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+                _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
             
             return Array.Empty<byte>();

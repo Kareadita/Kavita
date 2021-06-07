@@ -1,6 +1,7 @@
 ﻿# Kavita
 <div align="center">
-![alt text](https://github.com/Kareadita/kareadita.github.io/blob/main/img/features/seriesdetail.PNG?raw=true)
+
+![Cover Image](https://github.com/Kareadita/kareadita.github.io/blob/main/img/features/seriesdetail.PNG?raw=true)
 
 Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga, 
 and the goal of being a full solution for all your reading needs. Setup your own server and share 
@@ -18,14 +19,15 @@ your reading collection with your friends and family!
 </div>
 
 ## Goals:
-* Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, raw images) and Books (epub, mobi, azw, djvu, pdf)
-* First class responsive readers that work great on any device
-* Provide a dark theme for web app
-* Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
-* Metadata should allow for collections, want to read integration from 3rd party services, genres.
-* Ability to manage users, access, and ratings
-* Ability to sync ratings and reviews to external services
-* And so much [more...](https://github.com/Kareadita/Kavita/projects)
+- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, mobi, azw, djvu, pdf)
+- [x] First class responsive readers that work great on any device
+- [x] Provide a dark theme for web app
+- [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
+- [ ] Metadata should allow for collections, want to read integration from 3rd party services, genres.
+- [x] Ability to manage users, access, and ratings
+- [ ] Ability to sync ratings and reviews to external services
+- [x] Fully Accessible 
+- [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 
 # How to contribute
@@ -40,6 +42,7 @@ your reading collection with your friends and family!
 ## How to install
 - Unzip the archive for your target OS
 - Place in a directory that is writable. If on windows, do not place in Program Files
+- Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
 - Run Kavita
 - If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
 
@@ -69,10 +72,11 @@ services:
         restart: unless-stopped
 ```
 
-Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is :nightly. The :latest tag will be the latest stable release. There is also the :alpine tag if you want a smaller image, but it is only available for x64 systems.
+**Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is :nightly. The :latest tag will be the latest stable release. There is also the :alpine tag if you want a smaller image, but it is only available for x64 systems.**
 
 ## Got an Idea?
 Got a great idea? Throw it up on the FeatHub or vote on another persons. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
+
 [![Feature Requests](https://feathub.com/Kareadita/Kavita?format=svg)](https://feathub.com/Kareadita/Kavita)
 
 ## Want to help?

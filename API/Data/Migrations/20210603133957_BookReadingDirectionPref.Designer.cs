@@ -3,14 +3,16 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210603133957_BookReadingDirectionPref")]
+    partial class BookReadingDirectionPref
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,10 +144,10 @@ namespace API.Data.Migrations
                     b.Property<int>("BookReaderMargin")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BookReaderReadingDirection")
+                    b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("BookReaderTapToPaginate")
+                    b.Property<int>("BookReaderReadingDirection")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -176,9 +178,6 @@ namespace API.Data.Migrations
 
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("BookScrollId")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");

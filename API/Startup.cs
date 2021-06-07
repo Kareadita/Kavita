@@ -24,16 +24,18 @@ namespace API
     public class Startup
     {
         private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration config)
+        public Startup(IConfiguration config, IWebHostEnvironment env)
         {
             _config = config;
+            _env = env;
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationServices(_config);
+            services.AddApplicationServices(_config, _env);
             services.AddControllers();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -83,6 +85,7 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
+            
             app.UseResponseCompression();
             
             app.UseForwardedHeaders();
@@ -132,9 +135,9 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                Console.WriteLine("Kavita - v" + BuildInfo.Version);
+                Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
-            
+
             // Any services that should be bootstrapped go here
             taskScheduler.ScheduleTasks();
         }

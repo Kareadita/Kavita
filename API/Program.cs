@@ -35,11 +35,13 @@ namespace API
         
         public static async Task Main(string[] args)
         {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
+
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet(GetAppSettingFilename()) && Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
             {
                 Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
-                var rBytes = new byte[24];
+                var rBytes = new byte[128];
                 using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
                 Configuration.UpdateJwtToken(GetAppSettingFilename(), base64);
@@ -82,50 +84,56 @@ namespace API
                             options.Protocols = HttpProtocols.Http1AndHttp2;
                         });
                     });
-
-
-                    webBuilder.UseSentry(options =>
+                    
+                    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                    if (environment != Environments.Development)
                     {
-                        options.Dsn = "https://40f4e7b49c094172a6f99d61efb2740f@o641015.ingest.sentry.io/5757423";
-                        options.MaxBreadcrumbs = 200;
-                        options.AttachStacktrace = true;
-                        options.Debug = false;
-                        options.SendDefaultPii = false;
-                        options.DiagnosticLevel = SentryLevel.Debug;
-                        options.ShutdownTimeout = TimeSpan.FromSeconds(5);
-                        options.Release = BuildInfo.Version.ToString();
-                        options.AddExceptionFilterForType<OutOfMemoryException>();
-                        options.AddExceptionFilterForType<NetVips.VipsException>();
-                        options.AddExceptionFilterForType<InvalidDataException>();
-                        
-                        options.BeforeSend = sentryEvent =>
+                        webBuilder.UseSentry(options =>
                         {
-                            if (sentryEvent.Exception != null
-                                && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:"))
-                            {
-                                return null; // Don't send this event to Sentry
-                            }
+                            options.Dsn = "https://40f4e7b49c094172a6f99d61efb2740f@o641015.ingest.sentry.io/5757423";
+                            options.MaxBreadcrumbs = 200;
+                            options.AttachStacktrace = true;
+                            options.Debug = false;
+                            options.SendDefaultPii = false;
+                            options.DiagnosticLevel = SentryLevel.Debug;
+                            options.ShutdownTimeout = TimeSpan.FromSeconds(5);
+                            options.Release = BuildInfo.Version.ToString();
+                            options.AddExceptionFilterForType<OutOfMemoryException>();
+                            options.AddExceptionFilterForType<NetVips.VipsException>();
+                            options.AddExceptionFilterForType<InvalidDataException>();
+                            options.AddExceptionFilterForType<KavitaException>();
 
-                            sentryEvent.ServerName = null; // Never send Server Name to Sentry
-                            return sentryEvent;
-                        };
-                        
-                        options.ConfigureScope(scope =>
-                        {
-                            scope.User = new User()
+                            options.BeforeSend = sentryEvent =>
                             {
-                                Id = HashUtil.AnonymousToken()
+                                if (sentryEvent.Exception != null
+                                    && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:")
+                                    && sentryEvent.Exception.Message.Contains("[BookService] "))
+                                {
+                                    return null; // Don't send this event to Sentry
+                                }
+
+                                sentryEvent.ServerName = null; // Never send Server Name to Sentry
+                                return sentryEvent;
                             };
-                            scope.Contexts.App.Name = BuildInfo.AppName;
-                            scope.Contexts.App.Version = BuildInfo.Version.ToString();
-                            scope.Contexts.App.StartTime = DateTime.UtcNow;
-                            scope.Contexts.App.Hash = HashUtil.AnonymousToken();
-                            scope.Contexts.App.Build = BuildInfo.Release;
-                            scope.SetTag("culture", Thread.CurrentThread.CurrentCulture.Name);
-                            scope.SetTag("branch", BuildInfo.Branch);
-                        });
+                            
+                            options.ConfigureScope(scope =>
+                            {
+                                scope.User = new User()
+                                {
+                                    Id = HashUtil.AnonymousToken()
+                                };
+                                scope.Contexts.App.Name = BuildInfo.AppName;
+                                scope.Contexts.App.Version = BuildInfo.Version.ToString();
+                                scope.Contexts.App.StartTime = DateTime.UtcNow;
+                                scope.Contexts.App.Hash = HashUtil.AnonymousToken();
+                                scope.Contexts.App.Build = BuildInfo.Release;
+                                scope.SetTag("culture", Thread.CurrentThread.CurrentCulture.Name);
+                                scope.SetTag("branch", BuildInfo.Branch);
+                            });
 
-                    });
+                        });
+                    }
+                    
                     webBuilder.UseStartup<Startup>();
                 });
     }

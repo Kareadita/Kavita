@@ -43,6 +43,10 @@ namespace API.Entities
         /// </summary>
         public bool BookReaderTapToPaginate { get; set; } = false;
         /// <summary>
+        /// Book Reader Option: What direction should the next/prev page buttons go
+        /// </summary>
+        public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
+        /// <summary>
         /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
         /// </summary>
         public bool SiteDarkMode { get; set; }
