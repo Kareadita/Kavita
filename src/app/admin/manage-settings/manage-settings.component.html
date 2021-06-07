@@ -1,5 +1,6 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
+        <p class="text-warning pt-2">Port and Logging Level require a manual restart to Kavita to take effect.</p>
         <div class="form-group">
             <label for="settings-cachedir">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
             <ng-template #cacheDirectoryTooltip>Where the server place temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
@@ -14,14 +15,14 @@
             <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
         </div>
 
-        <!-- <div class="form-group">
+        <div class="form-group">
             <label for="logging-level-port">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
             <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
             <span class="sr-only" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>
             <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="loggingLevel">
                 <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
             </select>
-        </div> -->
+        </div>
 
         <h4>Tasks</h4>
         <div class="form-group">
