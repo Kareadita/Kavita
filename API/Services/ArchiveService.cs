@@ -245,13 +245,13 @@ namespace API.Services
         {
             if (!File.Exists(archivePath))
             {
-                _logger.LogError("Archive {ArchivePath} could not be found", archivePath);
+                _logger.LogWarning("Archive {ArchivePath} could not be found", archivePath);
                 return false;
             }
 
             if (Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath)) return true;
             
-            _logger.LogError("Archive {ArchivePath} is not a valid archive", archivePath);
+            _logger.LogWarning("Archive {ArchivePath} is not a valid archive", archivePath);
             return false;
         }
 
