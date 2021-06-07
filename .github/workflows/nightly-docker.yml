@@ -20,11 +20,6 @@ jobs:
         with:
           repository: Kareadita/Kavita-webui
           path: Kavita-webui/
-      - name: Artifact WebUI
-        uses: actions/upload-artifact@v2
-        with:
-          name: Kavita-Webui
-          path: |
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
