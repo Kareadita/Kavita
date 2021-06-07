@@ -243,6 +243,7 @@ export class SeriesDetailComponent implements OnInit {
 
     this.readerService.markVolumeRead(seriesId, vol.id).subscribe(() => {
       vol.pagesRead = vol.pages;
+      vol.chapters?.forEach(c => c.pagesRead = c.pages);
       this.setContinuePoint();
       this.toastr.success('Marked as Read');
     });
@@ -256,6 +257,7 @@ export class SeriesDetailComponent implements OnInit {
 
     forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
       vol.pagesRead = 0;
+      vol.chapters?.forEach(c => c.pagesRead = 0);
       this.setContinuePoint();
       this.toastr.success('Marked as Unread');
     });
