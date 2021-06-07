@@ -15,6 +15,7 @@ ProgressEnd()
 
 UpdateVersionNumber()
 {
+  # TODO: Enhance this to increment version number in KavitaCommon.csproj
     if [ "$KAVITAVERSION" != "" ]; then
         echo "Updating Version Info"
         sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$KAVITAVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
@@ -31,7 +32,7 @@ Build()
 
     slnFile=Kavita.sln
 
-    dotnet clean $slnFile -c Debug
+    #dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
     if [[ -z "$RID" ]];
