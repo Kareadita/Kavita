@@ -105,23 +105,19 @@ namespace Kavita.Common
         }
         public static string GetLogLevel(string filePath)
         {
-            const string defaultLevel = "Information";
             try {
                 var json = File.ReadAllText(filePath);
                 var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-                const string key = "Port";
                 if (jsonObj.TryGetProperty("Logging", out JsonElement tokenElement))
                 {
                     foreach (var property in tokenElement.EnumerateObject())
                     {
-                        if (property.Name.Equals("LogLevel"))
+                        if (!property.Name.Equals("LogLevel")) continue;
+                        foreach (var logProperty in property.Value.EnumerateObject())
                         {
-                            foreach (var logProperty in property.Value.EnumerateObject())
+                            if (logProperty.Name.Equals("Default"))
                             {
-                                if (logProperty.Name.Equals("Default"))
-                                {
-                                    return logProperty.Value.GetString();
-                                }
+                                return logProperty.Value.GetString();
                             }
                         }
                     }
@@ -131,7 +127,7 @@ namespace Kavita.Common
                 Console.WriteLine("Error writing app settings: " + ex.Message);
             }
 
-            return defaultLevel;
+            return "Information";
         }
         #endregion
     }
