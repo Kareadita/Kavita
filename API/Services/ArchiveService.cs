@@ -230,7 +230,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
+                _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
             return Array.Empty<byte>();
@@ -407,7 +407,7 @@ namespace API.Services
             }
             catch (Exception e)
             {
-                _logger.LogWarning(e, "There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+                _logger.LogWarning(e, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
                 return;
             }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
