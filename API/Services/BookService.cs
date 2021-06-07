@@ -167,7 +167,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
+                _logger.LogWarning(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
             }
 
             return string.Empty;
@@ -177,13 +177,13 @@ namespace API.Services
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError("[BookService] Book {EpubFile} could not be found", filePath);
+                _logger.LogWarning("[BookService] Book {EpubFile} could not be found", filePath);
                 return false;
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
             
-            _logger.LogError("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
+            _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
             return false; 
         }
 
@@ -198,7 +198,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
+                _logger.LogWarning(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
             }
 
             return 0;
@@ -250,7 +250,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
+                _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
             }
 
             return null;
@@ -285,7 +285,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+                _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
             
             return Array.Empty<byte>();
