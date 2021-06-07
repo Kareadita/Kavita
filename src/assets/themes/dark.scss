@@ -2,7 +2,7 @@
 
 $dark-bg-color: #343a40;
 $dark-text-color: #efefef;
-$dark-hover-color: #4ac694; // rgba(239, 239, 239, 0.18), icon color: #4ac694,  blue #007bff
+$dark-hover-color: #4ac694;
 $dark-form-background: rgba(1, 4, 9, 0.5);
 $dark-form-placeholder: #efefef;
 $dark-link-color: rgb(88, 166, 255);
@@ -21,7 +21,15 @@ $dark-form-readonly: #434648;
     color: #4ac694;
   }
 
-  .btn-information {
+  .breadcrumb {
+    background-color: #292d32;
+
+    .breadcrumb-item {
+      color: $dark-text-color;
+    }
+  }
+
+  .btn-information, .btn-outline-secondary {
       color: $dark-text-color;
   }
 

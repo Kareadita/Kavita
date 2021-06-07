@@ -51,7 +51,7 @@ if (environment.production) {
         onerror: true
       }),
       new DedupeIntegration(),
-      new RewriteFramesIntegration()
+      new RewriteFramesIntegration(),
     ],
     ignoreErrors: [new RegExp(/\/api\/admin/)],
     tracesSampleRate: 0,
