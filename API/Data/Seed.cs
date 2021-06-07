@@ -41,7 +41,7 @@ namespace API.Data
                 //new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"},
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
-                new () {Key = ServerSettingKey.Port, Value = "5000"},
+                //new () {Key = ServerSettingKey.Port, Value = "5000"}, // TODO: Remove ServerSettingKey
             };
             
             foreach (var defaultSetting in defaultSettings)

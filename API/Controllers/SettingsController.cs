@@ -8,6 +8,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Interfaces;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +35,9 @@ namespace API.Controllers
         [HttpGet("")]
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
-            return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            settingsDto.Port = Configuration.GetPort(Program.GetAppSettingFilename());
+            return Ok(settingsDto);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -76,7 +79,8 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + "" != setting.Value)
                 {
                     setting.Value = updateSettingsDto.Port + "";
-                    Environment.SetEnvironmentVariable("KAVITA_PORT", setting.Value);
+                    // Port is managed in appSetting.json
+                    Configuration.UpdatePort(Program.GetAppSettingFilename(), updateSettingsDto.Port);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
                 

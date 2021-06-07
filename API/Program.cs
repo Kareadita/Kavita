@@ -20,13 +20,13 @@ namespace API
 {
     public class Program
     {
-        private static readonly int HttpPort = 5000;
+        private static int HttpPort;
 
         protected Program()
         {
         }
         
-        private static string GetAppSettingFilename()
+        public static string GetAppSettingFilename()
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
@@ -46,6 +46,9 @@ namespace API
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
                 Configuration.UpdateJwtToken(GetAppSettingFilename(), base64);
             }
+            
+            // Get HttpPort from Config
+            HttpPort = Configuration.GetPort(GetAppSettingFilename());
 
 
             var host = CreateHostBuilder(args).Build();
