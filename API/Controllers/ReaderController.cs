@@ -295,7 +295,7 @@ namespace API.Controllers
             return Ok(-1);
         }
 
-        private int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
+        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
         {
             var next = false;
             foreach (var chapter in chapters)
