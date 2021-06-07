@@ -37,6 +37,7 @@ namespace API.Controllers
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             settingsDto.Port = Configuration.GetPort(Program.GetAppSettingFilename());
+            settingsDto.LoggingLevel = Configuration.GetLogLevel(Program.GetAppSettingFilename());
             return Ok(settingsDto);
         }
 
@@ -87,6 +88,7 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + "" != setting.Value)
                 {
                     setting.Value = updateSettingsDto.LoggingLevel + "";
+                    Configuration.UpdateLogLevel(Program.GetAppSettingFilename(), updateSettingsDto.LoggingLevel);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
             }
@@ -120,7 +122,7 @@ namespace API.Controllers
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {
-            return Ok(new [] {"Trace", "Debug", "Information", "Warning", "Critical", "None"});
+            return Ok(new [] {"Trace", "Debug", "Information", "Warning", "Critical"});
         }
     }
 }
