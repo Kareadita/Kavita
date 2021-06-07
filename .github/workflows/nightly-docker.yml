@@ -13,11 +13,35 @@ jobs:
       - name: Check Out Repo
         uses: actions/checkout@v2
 
+      - name: Check Out WebUI
+        uses: actions/checkout@v2
+        with:
+          repository: Kareadita/Kavita-webui
+          path: ../Kavita-webui
+
+      - name: NodeJS to Compile WebUI
+        uses: actions/setup@v1
+        with:
+          node-version: 14.x
+      - run: cd ../Kavita-webui/ || exit
+      - run: npm install
+      - run: npm run prod
+      - run: cd ../Kavita/ || exit
+
+      - name: Compile dotnet app
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+      - run: ./action-build.sh
+
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
 
       - name: Set up Docker Buildx
         id: buildx
@@ -29,8 +53,9 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly-amd64
+          tags: kizaing/kavita:nightly-test
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
