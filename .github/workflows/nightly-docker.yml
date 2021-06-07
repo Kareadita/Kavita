@@ -25,10 +25,11 @@ jobs:
         uses: actions/setup-node@v2.1.5
         with:
           node-version: '14'
-      - run: cd Kavita-webui/ || exit
-      - run: npm install
-      - run: npm run prod
-      - run: cd ../Kavita/ || exit
+      - run: |
+          cd Kavita-webui/ || exit
+          npm install
+          npm run prod
+          cd ../Kavita/ || exit
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
