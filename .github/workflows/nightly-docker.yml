@@ -38,6 +38,7 @@ jobs:
       - run: |
           ls
           cd Kavita/
+          chmod +x action-build.sh
           ./action-build.sh
 
       - name: Login to Docker Hub
