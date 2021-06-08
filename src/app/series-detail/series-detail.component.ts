@@ -7,6 +7,7 @@ import { take } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
+import { NaturalSortService } from '../shared/_services/natural-sort.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
@@ -57,13 +58,17 @@ export class SeriesDetailComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
 
+  get LibraryType(): typeof LibraryType {
+    return LibraryType;
+  }
+
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private modalService: NgbModal, public readerService: ReaderService,
               private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService, private collectionService: CollectionTagService) {
+              private confirmService: ConfirmService, private naturalSort: NaturalSortService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -212,7 +217,7 @@ export class SeriesDetailComponent implements OnInit {
           this.specials = vol0.map(v => v.chapters || []).flat().filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).map(c => {
             c.range = c.range.replace(/_/g, ' ');
             return c;
-          });
+          }).sort((a, b) => this.naturalSort.compare(a.range, b.range, true));
         }
 
         if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
