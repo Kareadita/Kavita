@@ -12,13 +12,12 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
-        with:
-          path: Kavita/
 
       - name: Check Out WebUI
         uses: actions/checkout@v2
         with:
           repository: Kareadita/Kavita-webui
+          ref: feature/sentry-release
           path: Kavita-webui/
 
       - name: NodeJS to Compile WebUI
@@ -29,23 +28,22 @@ jobs:
           cd Kavita-webui/ || exit
           npm install
           npm run prod
-          cd ../Kavita/ || exit
+          mv dist/ ../wwwroot
+          cd ../ || exit
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x'
       - run: |
-          cd Kavita/
           chmod +x action-build.sh
           ./action-build.sh
-          ls
 
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
           username: kizaing
-          password: 5234c810-ae59-4a73-a5cc-9a0f8bedba80
+          password: 5cff908a-7ef6-47c9-ad97-160df5575f07
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -58,7 +56,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: /home/runner/Kavita
+          context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: kizaing/kavita:nightly-test
