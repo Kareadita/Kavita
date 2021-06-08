@@ -235,7 +235,7 @@ namespace API.Services
             {
                 using var epubBook = EpubReader.OpenBook(filePath);
                 
-                // NOTE: Put a check in here to see if the epub has:
+                // If the epub has the following tags, we can group the books as Volumes
                 // <meta content="5.0" name="calibre:series_index"/>
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
