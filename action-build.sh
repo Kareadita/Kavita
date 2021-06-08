@@ -15,28 +15,18 @@ ProgressEnd()
 
 Build()
 {
-	  local RID="$1"
+	local RID="$1"
 
-    ProgressStart 'Build for $RID'
+    ProgressStart "Build for $RID"
 
     slnFile=Kavita.sln
 
     dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
-	  dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID
-  
-    ProgressEnd 'Build for $RID'
-}
+	dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID
 
-BuildUI()
-{
-    ProgressStart 'Building UI'
-    cd ../Kavita-webui/ || exit
-    npm install
-    npm run prod
-    cd ../Kavita/ || exit
-    ProgressEnd 'Building UI'
+    ProgressEnd "Build for $RID"
 }
 
 Package()
@@ -77,8 +67,6 @@ then
 	rm -r _output/
 fi
 
-BuildUI
-
 #Build for x64
 Build "linux-x64"
 Package "net5.0" "linux-x64"
@@ -93,6 +81,3 @@ cd "$dir"
 Build "linux-arm64"
 Package "net5.0" "linux-arm64"
 cd "$dir"
-
-#Builds Docker images
-docker buildx build -t kizaing/kavita:nightly --platform linux/amd64,linux/arm/v7,linux/arm64 . --push
