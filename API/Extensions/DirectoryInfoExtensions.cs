@@ -52,6 +52,7 @@ namespace API.Extensions
             {
                 var fileIndex = 1;
 
+                // TODO: Maybe go back and implement natural sorting instead of alphanumeric.
                 foreach (FileInfo file in directory.EnumerateFiles().OrderByAlphaNumeric(file => file.FullName))
                 {
                     if (file.Directory == null) continue;
