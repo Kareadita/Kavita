@@ -279,7 +279,7 @@ namespace API.Services
                         };
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Swallow exception
                 }
