@@ -9,6 +9,7 @@ $dark-link-color: rgb(88, 166, 255);
 $dark-icon-color: white;
 $dark-form-border: rgba(239, 239, 239, 0.125);
 $dark-form-readonly: #434648;
+$dark-item-accent-bg: #292d32;
 
 .bg-dark {
   color: $dark-text-color;
@@ -22,7 +23,7 @@ $dark-form-readonly: #434648;
   }
 
   .breadcrumb {
-    background-color: #292d32;
+    background-color: $dark-item-accent-bg;
 
     .breadcrumb-item {
       color: $dark-text-color;

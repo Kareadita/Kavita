@@ -81,7 +81,9 @@
                                 {{chapterGroup.title}}
                             </li>
                             <ul *ngFor="let chapter of chapterGroup.children">
-                                <li><a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a></li>
+                                <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
+                                    <a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a>
+                                </li>
                             </ul>
                         </ul>
                     </ng-template>

@@ -365,15 +365,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   // Updates the highlight to focus on the selected item
   updateHighlight() {
-    console.log('updating highlight for index: ', this.focusedIndex);
     document.querySelectorAll('.list-group-item').forEach((item, index) => {
       if (index === this.focusedIndex && !item.classList.contains('no-hover')) {
         // apply active class
-        console.log('Adding to ', item.textContent);
         this.renderer2.addClass(item, 'active');
       } else {
         // remove active class
-        console.log('Removing from ', item.textContent);
         this.renderer2.removeClass(item, 'active');
       }
     });

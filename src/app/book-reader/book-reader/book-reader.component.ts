@@ -101,7 +101,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scrollbarNeeded = false; // Used for showing/hiding bottom action bar
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   private readonly onDestroy = new Subject<void>();
+
   pageAnchors: {[n: string]: number } = {};
+  currentPageAnchor: string = '';
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -186,6 +188,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(window, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
+        if (Object.keys(this.pageAnchors).length === 0) return;
       
         // get the height of the document so we can capture markers that are halfway on the document viewport
         const verticalOffset = (window.pageYOffset 
@@ -193,10 +196,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
       
         const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
-
         if (alreadyReached.length > 0) {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, Object.keys(this.pageAnchors)[alreadyReached.length - 1]).subscribe(() => {/* Intentionally blank */});
-          console.log('bookmarking part: ', Object.keys(this.pageAnchors)[alreadyReached.length - 1]);
+          this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.currentPageAnchor).subscribe(() => {/* Intentionally blank */});
+        } else {
+          this.currentPageAnchor = '';
         }
     });
   }
@@ -395,6 +399,35 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  cleanIdSelector(id: string) {
+    const tokens = id.split('/');
+    if (tokens.length > 0) {
+      return tokens[0];
+    }
+    return id;
+  }
+
+  getPageMarkers(ids: Array<string>) {
+    try {
+      return document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
+    } catch (Exception) {
+      // Fallback to anchors instead. Some books have ids that are not valid for querySelectors, so anchors should be used instead
+      return document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
+    }
+  }
+
+  setupPageAnchors() {
+    this.pageAnchors = {};
+    this.currentPageAnchor = '';
+    const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
+    if (ids.length > 0) {
+      const elems = this.getPageMarkers(ids);
+      elems.forEach(elem => {
+        this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
+      });
+    }
+  }
+
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
@@ -412,13 +445,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
           // Find all the part ids and their top offset
-          const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part);
-          if (ids.length > 0) {
-            const elems = document.querySelectorAll(ids.map(id => '#' + id).join(', '));
-            elems.forEach(elem => {
-              this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
-            });
-          }
+          this.setupPageAnchors();
           
 
           if (part !== undefined && part !== '') {
