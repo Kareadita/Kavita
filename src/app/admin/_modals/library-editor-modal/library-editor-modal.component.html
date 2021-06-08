@@ -15,9 +15,9 @@
             <input id="library-name" class="form-control" formControlName="name" type="text">
         </div>
         
-        <div class="form-group" *ngIf="this.library === undefined">
+        <div class="form-group">
             <label for="library-type">Type</label>
-            <select class="form-control" id="library-type" formControlName="type">
+            <select class="form-control" id="library-type" formControlName="type" [attr.disabled]="this.library !== undefined">
                 <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
             </select>
         </div>

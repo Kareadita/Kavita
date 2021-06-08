@@ -30,8 +30,16 @@
             <div class="breadcrumb">Select a folder to view breadcrumb</div>
         </ng-template>
     </nav>
+    <ul class="list-group">
+        <div class="list-group-item list-group-item-action">
+            <button (click)="goBack()" class="btn btn-secondary" [disabled]="routeStack.peek() === undefined">
+                <i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>
+                Back
+            </button>
+            <button type="button" class="btn btn-primary float-right" [disabled]="routeStack.peek() === undefined" (click)="shareFolder('', $event)">Share</button>
+        </div>
+    </ul>
     <ul class="list-group scrollable">
-        <button *ngIf="routeStack.peek() !== undefined" (click)="goBack()" class="list-group-item list-group-item-action"><i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>Back</button>
         <button *ngFor="let folder of folders | filter: filterFolder" class="list-group-item list-group-item-action" (click)="selectNode(folder)">
             <span>{{getStem(folder)}}</span>
             <button type="button" class="btn btn-primary float-right" (click)="shareFolder(folder, $event)">Share</button>
