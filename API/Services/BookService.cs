@@ -234,6 +234,55 @@ namespace API.Services
             try
             {
                 using var epubBook = EpubReader.OpenBook(filePath);
+                
+                // If the epub has the following tags, we can group the books as Volumes
+                // <meta content="5.0" name="calibre:series_index"/>
+                // <meta content="The Dark Tower" name="calibre:series"/>
+                // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
+                // If all three are present, we can take that over dc:title and format as:
+                // Series = The Dark Tower, Volume = 5, Filename as "Wolves of the Calla"
+                try
+                {
+                    string seriesIndex = string.Empty;
+                    string series = string.Empty;
+                    string specialName = string.Empty;
+                    
+                    foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
+                    {
+                        switch (metadataItem.Name)
+                        {
+                            case "calibre:series_index":
+                                seriesIndex = metadataItem.Content;
+                                break;
+                            case "calibre:series":
+                                series = metadataItem.Content;
+                                break;
+                            case "calibre:title_sort":
+                                specialName = metadataItem.Content;
+                                break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) && !string.IsNullOrEmpty(specialName))
+                    {
+                        return new ParserInfo()
+                        {
+                            Chapters = "0",
+                            Edition = "",
+                            Format = MangaFormat.Book,
+                            Filename = Path.GetFileName(filePath),
+                            Title = specialName,
+                            FullFilePath = filePath,
+                            IsSpecial = false,
+                            Series = series,
+                            Volumes = seriesIndex.Split(".")[0]
+                        };
+                    }
+                }
+                catch (Exception)
+                {
+                    // Swallow exception
+                }
 
                 return new ParserInfo()
                 {

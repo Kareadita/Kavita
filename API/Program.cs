@@ -64,6 +64,7 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
+                
             }
             catch (Exception ex)
             {
@@ -107,8 +108,16 @@ namespace API
                             options.BeforeSend = sentryEvent =>
                             {
                                 if (sentryEvent.Exception != null
-                                    && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:")
-                                    && sentryEvent.Exception.Message.Contains("[BookService] "))
+                                    && sentryEvent.Exception.Message.StartsWith("[GetCoverImage]")
+                                    && sentryEvent.Exception.Message.StartsWith("[BookService]")
+                                    && sentryEvent.Exception.Message.StartsWith("[ExtractArchive]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetSummaryInfo]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetSummaryInfo]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetNumberOfPagesFromArchive]")
+                                    && sentryEvent.Exception.Message.Contains("EPUB parsing error")
+                                    && sentryEvent.Exception.Message.Contains("Unsupported EPUB version")
+                                    && sentryEvent.Exception.Message.Contains("Incorrect EPUB")
+                                    && sentryEvent.Exception.Message.Contains("Access is Denied"))
                                 {
                                     return null; // Don't send this event to Sentry
                                 }

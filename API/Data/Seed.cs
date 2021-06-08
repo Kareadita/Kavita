@@ -6,6 +6,7 @@ using API.Constants;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 
 namespace API.Data
@@ -38,12 +39,12 @@ namespace API.Data
             {
                 new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
-                //new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"},
+                new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
-                //new () {Key = ServerSettingKey.Port, Value = "5000"}, // TODO: Remove ServerSettingKey
+                new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
             };
-            
+
             foreach (var defaultSetting in defaultSettings)
             {
                 var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
@@ -54,6 +55,16 @@ namespace API.Data
             }
 
             await context.SaveChangesAsync();
+            
+            // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
+            var configFile = Program.GetAppSettingFilename();
+            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.Port).Value =
+                Configuration.GetPort(configFile) + "";
+            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.LoggingLevel).Value =
+                Configuration.GetLogLevel(configFile);
+            
+            await context.SaveChangesAsync();
+            
         }
     }
 }

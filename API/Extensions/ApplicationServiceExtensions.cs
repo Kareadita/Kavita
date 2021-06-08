@@ -1,9 +1,11 @@
-﻿using API.Data;
+﻿using System;
+using API.Data;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
+using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,12 +31,12 @@ namespace API.Extensions
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
-            
 
+            
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
-                options.EnableSensitiveDataLogging(env.IsDevelopment());
+                options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.GetLogLevel(Program.GetAppSettingFilename()).Equals("Debug"));
             });
 
             services.AddLogging(loggingBuilder =>
