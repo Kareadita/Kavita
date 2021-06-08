@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Setup Sentry CLI
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: mathieu-bour/setup-sentry-cli@1.2.0
         with:
