@@ -49,12 +49,13 @@ namespace API.Extensions
             if (!root.FullName.Equals(directory.FullName))
             {
                 var fileIndex = 1;
+                //foreach (var file in directory.EnumerateFiles(folder).OrderByDescending(filename => filename))
                 foreach (var file in directory.EnumerateFiles())
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
                     // We need to rename the files so that after flattening, they are in the order we found them
-                    var newName = $"{paddedIndex}_{fileIndex}.{file.Extension}";
+                    var newName = $"{paddedIndex}_{file.Name}_{Parser.Parser.PadZeros(fileIndex + "")}.{file.Extension}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
                     fileIndex++;
