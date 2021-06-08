@@ -57,12 +57,15 @@ jobs:
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
-        with:
-          context: Kavita/
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
-          push: true
-          tags: kizaing/kavita:nightly-test
+      - run: |
+          cd /home/runner/Kavita
+          docker buildx build -t kizaing/kavita:nightly-test --platform linux/amd64,linux/arm/v7,linux/arm64 --push
+        #with:
+        #  context: Kavita/
+        #  file: ./Dockerfile
+        #  platforms: linux/amd64,linux/arm/v7,linux/arm64
+        #  push: true
+        #  tags: kizaing/kavita:nightly-test
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
