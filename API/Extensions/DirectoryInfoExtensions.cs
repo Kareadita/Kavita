@@ -58,7 +58,7 @@ namespace API.Extensions
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
                     // We need to rename the files so that after flattening, they are in the order we found them
-                    var newName = $"{paddedIndex}_{file.Name}_{Parser.Parser.PadZeros(fileIndex + "")}.{file.Extension}";
+                    var newName = $"{paddedIndex}_{Parser.Parser.PadZeros(fileIndex + "")}.{file.Extension}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
                     fileIndex++;
