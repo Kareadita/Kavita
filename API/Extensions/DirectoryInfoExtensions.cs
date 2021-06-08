@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using API.Services;
+using API.Comparators;
 
 namespace API.Extensions
 {
     public static class DirectoryInfoExtensions
     {
+        private static readonly NaturalSortComparer Comparer = new NaturalSortComparer();
         public static void Empty(this DirectoryInfo directory)
         {
             foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
@@ -51,14 +49,13 @@ namespace API.Extensions
             if (!root.FullName.Equals(directory.FullName))
             {
                 var fileIndex = 1;
-
-                // TODO: Maybe go back and implement natural sorting instead of alphanumeric.
-                foreach (FileInfo file in directory.EnumerateFiles().OrderByAlphaNumeric(file => file.FullName))
+                
+                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, Comparer))
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
                     // We need to rename the files so that after flattening, they are in the order we found them
-                    var newName = $"{paddedIndex}_{Parser.Parser.PadZeros(fileIndex + "")}.{file.Extension}";
+                    var newName = $"{paddedIndex}_{Parser.Parser.PadZeros(fileIndex + "")}{file.Extension}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
                     fileIndex++;
@@ -71,12 +68,6 @@ namespace API.Extensions
             {
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }
-        }
-
-        public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> source, Func<T, string> selector)
-        {
-            int max = source.SelectMany(i => Regex.Matches(selector(i), @"\d+").Cast<Match>().Select(m => (int?)m.Value.Length)).Max() ?? 0;
-            return source.OrderBy(i => Regex.Replace(selector(i), @"\d+", m => m.Value.PadLeft(max, '0')));
         }
     }
 }
