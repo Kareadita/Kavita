@@ -3,7 +3,7 @@ name: CI to Docker Hub
 on:
   push:
     branches:
-      - 'develop'
+      - 'main'
 
 jobs:
   docker:
@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: Kareadita/Kavita-webui
-          ref: develop
+          ref: main
           path: Kavita-webui/
 
       - name: NodeJS to Compile WebUI
@@ -57,16 +57,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly
+          tags: kizaing/kavita:latest
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-        
-      - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-            severity: info
-            description: 
-            details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
-            text: A new nightly build has been released for docker.
-            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
