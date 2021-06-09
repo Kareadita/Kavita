@@ -1,5 +1,9 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Compression;
+using System.Threading.Tasks;
 using API.Archive;
+using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -12,5 +16,6 @@ namespace API.Interfaces.Services
         string GetSummaryInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
+        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
     }
 }

@@ -4,12 +4,14 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Comparators;
 using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using SharpCompress.Archives;
@@ -25,13 +27,15 @@ namespace API.Services
     public class ArchiveService : IArchiveService
     {
         private readonly ILogger<ArchiveService> _logger;
+        private readonly IDirectoryService _directoryService;
         private const int ThumbnailWidth = 320; // 153w x 230h
         private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
 
-        public ArchiveService(ILogger<ArchiveService> logger)
+        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
         {
             _logger = logger;
+            _directoryService = directoryService;
             _comparer = new NaturalSortComparer();
         }
         
@@ -216,7 +220,39 @@ namespace API.Services
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
-        
+
+        public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
+        {
+            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+            var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
+            
+            var tempLocation = Path.Join(tempDirectory, $"{tempFolder}_{dateString}");
+            DirectoryService.ExistOrCreate(tempLocation);
+            if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
+            {
+                throw new KavitaException("Unable to copy files to temp directory archive download.");
+            }
+            
+            var zipPath = Path.Join(tempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            try
+            {
+                ZipFile.CreateFromDirectory(tempLocation, zipPath);
+            }
+            catch (AggregateException ex)
+            {
+                _logger.LogError(ex, "There was an issue creating temp archive");
+                throw new KavitaException("There was an issue creating temp archive");
+            }
+            
+            
+            var fileBytes = await _directoryService.ReadFileAsync(zipPath);
+            
+            DirectoryService.ClearAndDeleteDirectory(tempLocation);
+            (new FileInfo(zipPath)).Delete();
+
+            return Tuple.Create(fileBytes, zipPath);
+        }
+
         private byte[] CreateThumbnail(string entryName, Stream stream, string formatExtension = ".jpg")
         {
             if (!formatExtension.StartsWith("."))
