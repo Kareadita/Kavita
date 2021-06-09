@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: Kareadita/Kavita-webui
-          ref: feature/sentry-release
+          ref: develop
           path: Kavita-webui/
 
       - name: NodeJS to Compile WebUI
