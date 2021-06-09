@@ -7,10 +7,12 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize(Policy = "RequireDownloadRole")]
     public class DownloadController : BaseApiController
     {
         private readonly IDirectoryService _directoryService;
@@ -23,6 +25,7 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
         }
+
         [HttpGet("volume-size")]
         public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
         {
