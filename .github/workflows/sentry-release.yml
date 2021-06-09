@@ -37,6 +37,6 @@ jobs:
       - name: Create Release
         run: sentry-cli releases new ${{ steps.package-version.outputs.current-version }}
       - name: Upload Source Maps
-        run: sentry-cli releases files ${{ steps.package-version.outputs.current-version }} upload-sourcemaps /dist/
+        run: sentry-cli releases files ${{ steps.package-version.outputs.current-version }} upload-sourcemaps ./dist
       - name: Finalize Release
         run: sentry-cli releases finalize ${{ steps.package-version.outputs.current-version }}
