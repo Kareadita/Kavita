@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Entities;
@@ -15,11 +16,13 @@ namespace API.Data
     {
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
-            var roles = new List<AppRole>
-            {
-                new() {Name = PolicyConstants.AdminRole},
-                new() {Name = PolicyConstants.PlebRole}
-            };
+            var roles = typeof(PolicyConstants)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.FieldType == typeof(string))
+                .ToDictionary(f => f.Name,
+                    f => (string) f.GetValue(null)).Values
+                .Select(policyName => new AppRole() {Name = policyName})
+                .ToList();
 
             foreach (var role in roles)
             {
