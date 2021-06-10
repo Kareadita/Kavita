@@ -54,7 +54,7 @@ export class AccountService implements OnDestroy {
   }
 
   setCurrentUser(user: User) {
-    if (user) {
+    if (user !== undefined || user !== null) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
       Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
@@ -100,7 +100,7 @@ export class AccountService implements OnDestroy {
 
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
-      if (this.currentUser !== undefined) {
+      if (this.currentUser !== undefined || this.currentUser != null) {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
       }

@@ -23,8 +23,7 @@
                     </button>
                 </div>
                 <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
-                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series" [disabled]="isDownloading">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" *ngIf="isDownloading"></span>
+                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series">
                         <span>
                             <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                         </span>

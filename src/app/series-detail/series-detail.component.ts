@@ -59,7 +59,6 @@ export class SeriesDetailComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
 
-  isDownloading = false;
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -141,7 +140,7 @@ export class SeriesDetailComponent implements OnInit {
         this.openViewInfo(volume);
         break;
       case(Action.Download):
-      this.downloadService.downloadVolume(volume, this.series.name, this.isDownloading);
+      this.downloadService.downloadVolume(volume, this.series.name);
         break;
       default:
         break;
@@ -160,7 +159,7 @@ export class SeriesDetailComponent implements OnInit {
         this.openViewInfo(chapter);
         break;
       case(Action.Download):
-        this.downloadService.downloadChapter(chapter, this.series.name, this.isDownloading);
+        this.downloadService.downloadChapter(chapter, this.series.name);
         break;
       default:
         break;
@@ -408,6 +407,6 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   downloadSeries() {
-    this.downloadService.downloadSeries(this.series, this.isDownloading);
+    this.downloadService.downloadSeries(this.series);
   }
 }
