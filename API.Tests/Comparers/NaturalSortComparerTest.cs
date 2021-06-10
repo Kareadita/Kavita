@@ -38,6 +38,10 @@ namespace API.Tests.Comparers
             new[] {"Batman - Black white vol 1 #04.cbr", "Batman - Black white vol 1 #03.cbr", "Batman - Black white vol 1 #01.cbr", "Batman - Black white vol 1 #02.cbr"}, 
             new[] {"Batman - Black white vol 1 #01.cbr", "Batman - Black white vol 1 #02.cbr", "Batman - Black white vol 1 #03.cbr", "Batman - Black white vol 1 #04.cbr"}
         )]
+        [InlineData(
+            new[] {"3and4.cbz", "The World God Only Knows - Oneshot.cbz", "5.cbz", "1and2.cbz"}, 
+            new[] {"1and2.cbz", "3and4.cbz", "5.cbz", "The World God Only Knows - Oneshot.cbz"}
+        )]
         public void TestNaturalSortComparer(string[] input, string[] expected)
         {
             Array.Sort(input, _nc);
