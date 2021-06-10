@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
@@ -149,6 +150,46 @@ namespace API.Controllers
                 Token = await _tokenService.CreateToken(user),
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [HttpGet("roles")]
+        public ActionResult<IList<string>> GetRoles()
+        {
+            return typeof(PolicyConstants)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.FieldType == typeof(string))
+                .ToDictionary(f => f.Name,
+                    f => (string) f.GetValue(null)).Values.ToList();
+        }
+
+        [HttpPost("update-rbs")]
+        public async Task<ActionResult> UpdateRoles(UpdateRbsDto updateRbsDto)
+        {
+            var user = await _userManager.Users
+                .Include(u => u.UserPreferences)
+                //.Include(u => u.UserRoles)
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == updateRbsDto.Username.ToUpper());
+            if (updateRbsDto.Roles.Contains(PolicyConstants.AdminRole) ||
+                updateRbsDto.Roles.Contains(PolicyConstants.PlebRole))
+            {
+                return BadRequest("Invalid Roles");
+            }
+
+            var existingRoles = (await _userManager.GetRolesAsync(user))
+                .Where(s => s != PolicyConstants.AdminRole && s != PolicyConstants.PlebRole)
+                .ToList();
+            
+            // Find what needs to be added and what needs to be removed
+            var rolesToRemove = existingRoles.Except(updateRbsDto.Roles);
+            var result = await _userManager.AddToRolesAsync(user, updateRbsDto.Roles);
+
+            if (!result.Succeeded) return BadRequest("Something went wrong, unable to update user's roles");
+            if ((await _userManager.RemoveFromRolesAsync(user, rolesToRemove)).Succeeded)
+            {
+                return Ok();
+            }
+            return BadRequest("Something went wrong, unable to update user's roles");
+
         }
     }
 }

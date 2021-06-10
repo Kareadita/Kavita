@@ -411,5 +411,16 @@ namespace API.Data
 
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
+
+        public async Task<IList<MangaFile>> GetFilesForSeries(int seriesId)
+        {
+            return await _context.Volume
+                .Where(v => v.SeriesId == seriesId)
+                .Include(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .SelectMany(v => v.Chapters.SelectMany(c => c.Files))
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

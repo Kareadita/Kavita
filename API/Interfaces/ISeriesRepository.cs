@@ -61,5 +61,6 @@ namespace API.Interfaces
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams);
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
+        Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
     }
 }

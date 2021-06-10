@@ -103,6 +103,16 @@ namespace API.Services
        }
 
        /// <summary>
+       /// Returns the total number of bytes for a given set of full file paths
+       /// </summary>
+       /// <param name="paths"></param>
+       /// <returns>Total bytes</returns>
+       public static long GetTotalSize(IEnumerable<string> paths)
+       {
+          return paths.Sum(path => new FileInfo(path).Length);
+       }
+
+       /// <summary>
        /// Returns true if the path exists and is a directory. If path does not exist, this will create it. Returns false in all fail cases.
        /// </summary>
        /// <param name="directoryPath"></param>

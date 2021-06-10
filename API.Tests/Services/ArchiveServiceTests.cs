@@ -16,11 +16,12 @@ namespace API.Tests.Services
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly ArchiveService _archiveService;
         private readonly ILogger<ArchiveService> _logger = Substitute.For<ILogger<ArchiveService>>();
+        private readonly ILogger<DirectoryService> _directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
 
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _archiveService = new ArchiveService(_logger);
+            _archiveService = new ArchiveService(_logger, new DirectoryService(_directoryServiceLogger));
         }
 
         [Theory]
@@ -154,7 +155,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger);
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
@@ -174,7 +175,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger);
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             

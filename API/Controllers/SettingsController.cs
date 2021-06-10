@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "RequireAdminRole")]
     public class SettingsController : BaseApiController
     {
         private readonly ILogger<SettingsController> _logger;
@@ -31,7 +31,7 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
             _configuration = configuration;
         }
-
+        
         [HttpGet("")]
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
@@ -40,8 +40,7 @@ namespace API.Controllers
             settingsDto.LoggingLevel = Configuration.GetLogLevel(Program.GetAppSettingFilename());
             return Ok(settingsDto);
         }
-
-        [Authorize(Policy = "RequireAdminRole")]
+        
         [HttpPost("")]
         public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
         {
@@ -103,22 +102,19 @@ namespace API.Controllers
             _taskScheduler.ScheduleTasks();
             return Ok(updateSettingsDto);
         }
-
-        [Authorize(Policy = "RequireAdminRole")]
+        
         [HttpGet("task-frequencies")]
         public ActionResult<IEnumerable<string>> GetTaskFrequencies()
         {
             return Ok(CronConverter.Options);
         }
         
-        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("library-types")]
         public ActionResult<IEnumerable<string>> GetLibraryTypes()
         {
             return Ok(Enum.GetNames(typeof(LibraryType)));
         }
         
-        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {
