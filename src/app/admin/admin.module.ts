@@ -13,6 +13,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { FilterPipe } from './filter.pipe';
+import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 
 
 
@@ -27,7 +28,8 @@ import { FilterPipe } from './filter.pipe';
     DirectoryPickerComponent,
     ResetPasswordModalComponent,
     ManageSettingsComponent,
-    FilterPipe
+    FilterPipe,
+    EditRbsModalComponent
   ],
   imports: [
     CommonModule,

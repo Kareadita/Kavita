@@ -7,6 +7,7 @@ import { take } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
+import { DownloadService } from '../shared/_services/download.service';
 import { NaturalSortService } from '../shared/_services/natural-sort.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
@@ -18,7 +19,6 @@ import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
-import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -37,6 +37,7 @@ export class SeriesDetailComponent implements OnInit {
   chapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
+  hasDownloadingRole = false;
   isLoading = true;
   showBook = true;
 
@@ -58,6 +59,8 @@ export class SeriesDetailComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
 
+  isDownloading = false;
+
   get LibraryType(): typeof LibraryType {
     return LibraryType;
   }
@@ -68,12 +71,14 @@ export class SeriesDetailComponent implements OnInit {
               private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService, private naturalSort: NaturalSortService) {
+              private confirmService: ConfirmService, private naturalSort: NaturalSortService,
+              private downloadService: DownloadService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
       }
     });
   }
@@ -135,6 +140,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Info):
         this.openViewInfo(volume);
         break;
+      case(Action.Download):
+      this.downloadService.downloadVolume(volume, this.series.name, this.isDownloading);
+        break;
       default:
         break;
     }
@@ -150,6 +158,9 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Info):
         this.openViewInfo(chapter);
+        break;
+      case(Action.Download):
+        this.downloadService.downloadChapter(chapter, this.series.name, this.isDownloading);
         break;
       default:
         break;
@@ -394,5 +405,9 @@ export class SeriesDetailComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.series);
     }
+  }
+
+  downloadSeries() {
+    this.downloadService.downloadSeries(this.series, this.isDownloading);
   }
 }
