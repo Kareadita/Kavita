@@ -20,17 +20,15 @@ namespace API.Controllers
         private readonly IHostApplicationLifetime _applicationLifetime;
         private readonly ILogger<ServerController> _logger;
         private readonly IConfiguration _config;
-        private readonly IDirectoryService _directoryService;
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IDirectoryService directoryService, IBackupService backupService, IArchiveService archiveService)
+            IBackupService backupService, IArchiveService archiveService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
-            _directoryService = directoryService;
             _backupService = backupService;
             _archiveService = archiveService;
         }

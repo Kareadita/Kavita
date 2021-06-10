@@ -15,13 +15,11 @@ namespace API.Controllers
     [Authorize(Policy = "RequireDownloadRole")]
     public class DownloadController : BaseApiController
     {
-        private readonly IDirectoryService _directoryService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
 
-        public DownloadController(IDirectoryService directoryService, IUnitOfWork unitOfWork, IArchiveService archiveService)
+        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService)
         {
-            _directoryService = directoryService;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
         }
