@@ -18,12 +18,15 @@ namespace API.Services
         private readonly IMetadataService _metadataService;
         private readonly IBackupService _backupService;
         private readonly ICleanupService _cleanupService;
+        
+        private readonly IStatsService _statsService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
+            ICleanupService cleanupService, IStatsService statsService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -32,6 +35,7 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
+            _statsService = statsService;
         }
 
         public void ScheduleTasks()
@@ -63,6 +67,17 @@ namespace API.Services
             }
             
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
+
+            ScheduleStatsTasks();
+        }
+        
+        private void ScheduleStatsTasks()
+        {
+            _logger.LogDebug("Scheduling Collect usage data from server {Setting}", nameof(Cron.Daily));
+            RecurringJob.AddOrUpdate("finalize-stats", () => _statsService.CollectRelevantData(), Cron.Daily(23, 50));
+            
+            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            RecurringJob.AddOrUpdate("finalize-stats", () => _statsService.FinalizeStats(), Cron.Daily);
         }
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)

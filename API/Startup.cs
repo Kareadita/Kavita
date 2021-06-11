@@ -71,6 +71,8 @@ namespace API
 
             // Add the processing server as IHostedService
             services.AddHangfireServer();
+
+            services.AddStatsClient(_config);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
