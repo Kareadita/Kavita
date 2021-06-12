@@ -53,8 +53,8 @@ export class AccountService implements OnDestroy {
     );
   }
 
-  setCurrentUser(user: User) {
-    if (user !== undefined || user !== null) {
+  setCurrentUser(user?: User) {
+    if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
       Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
@@ -64,9 +64,10 @@ export class AccountService implements OnDestroy {
           username: user.username
         });
       });
+
+      localStorage.setItem(this.userKey, JSON.stringify(user));
     }
 
-    localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUserSource.next(user);
     this.currentUser = user;
   }
@@ -108,5 +109,15 @@ export class AccountService implements OnDestroy {
     }), takeUntil(this.onDestroy));
   }
 
+  getUserFromLocalStorage(): User | undefined {
+
+    const userString = localStorage.getItem(this.userKey);
+    
+    if (userString) {
+      return JSON.parse(userString)
+    };
+
+    return undefined;
+  }
 
 }

@@ -2,8 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { first } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
+import { NavService } from '../_services/nav.service';
 
 @Component({
   selector: 'app-user-login',
@@ -18,7 +20,7 @@ export class UserLoginComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, private toastr: ToastrService) { }
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, private toastr: ToastrService, private navService: NavService) { }
 
   ngOnInit(): void {
     // Validate that there are users so you can refresh to home. This is important for first installs
@@ -42,6 +44,12 @@ export class UserLoginComponent implements OnInit {
     }, err => {
       this.toastr.error(err.error);
     });
+
+    this.accountService.currentUser$
+      .pipe(first(x => (x !== null && x !== undefined && typeof x !== 'undefined')))
+      .subscribe(currentUser => {
+        this.navService.setDarkMode(currentUser.preferences.siteDarkMode);
+      });
   }
 
 }
