@@ -1,6 +1,6 @@
 ﻿using System;
 using API.Interfaces.Services;
-using API.Services;
+using API.Services.Clients;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 

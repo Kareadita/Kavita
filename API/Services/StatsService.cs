@@ -3,54 +3,19 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.Interfaces.Services;
+using API.Services.Clients;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
-    public interface IStatsService
-    {
-        Task PathData(UsageStatisticsDto data);
-        Task PathData(ClientInfo clientInfo);
-
-        Task FinalizeStats();
-
-        // Task CollectRelevantData();
-        Task<UsageStatisticsDto> CollectRelevantData();
-    }
-
-    public class StatsApiClient
-    {
-        private readonly HttpClient _client;
-
-        public StatsApiClient(HttpClient client)
-        {
-            _client = client;
-        }
-
-        public Task SendDataToStatsServer(UsageStatisticsDto data)
-        {
-            return SendDataToStatsServer(JsonSerializer.Serialize(data));
-        }
-
-        public async Task SendDataToStatsServer(string data)
-        {
-            if (string.IsNullOrEmpty(data))
-                throw new InvalidOperationException("The stats file is empty");
-
-            var response = await _client.PostAsync("", new StringContent(data));
-
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
     public class StatsService : IStatsService
     {
         private const string TempFilePath = "kavita_tmp/";
