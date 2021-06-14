@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using API.DTOs;
-using API.Services;
+using API.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -21,35 +21,17 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("client-info")]
-        public async Task<IActionResult> AddClientInfo([FromBody] ClientInfo clientInfo)
+        public async Task<IActionResult> AddClientInfo([FromBody] ClientInfoDto clientInfoDto)
         {
             try
             {
-                await _statsService.PathData(clientInfo);
+                await _statsService.PathData(clientInfoDto);
 
                 return Ok();
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Error updating the usage statistics");
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<IActionResult> CollectData()
-        {
-            try
-            {
-                var result = await _statsService.CollectRelevantData();
-
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Error collecting relevant data statistics");
                 Console.WriteLine(e);
                 throw;
             }

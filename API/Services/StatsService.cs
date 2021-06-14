@@ -24,7 +24,6 @@ namespace API.Services
         private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
 
-
         public StatsService(StatsApiClient client, DataContext dbContext)
         {
             _client = client;
@@ -33,40 +32,56 @@ namespace API.Services
 
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
 
-        public async Task PathData(UsageStatisticsDto data)
-        {
-            data.UpdateTime();
-
-            if (File.Exists(FinalPath))
-            {
-                var existingData = await GetExistingData<UsageStatisticsDto>();
-                //do stuff here
-
-                await SaveFile(existingData);
-            }
-
-            await SaveFile(data);
-        }
-
-        public async Task PathData(ClientInfo clientInfo)
+        public async Task PathData(ClientInfoDto clientInfoDto)
         {
             var statisticsDto = File.Exists(FinalPath)
                 ? await GetExistingData<UsageStatisticsDto>()
-                : new UsageStatisticsDto();
+                : new UsageStatisticsDto {Id = Guid.NewGuid()};
 
-            statisticsDto.AddClientInfo(clientInfo);
+            statisticsDto.AddClientInfo(clientInfoDto);
 
             await SaveFile(statisticsDto);
+        }
+
+        private static async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
+        {
+            var data = File.Exists(FinalPath)
+                ? await GetExistingData<UsageStatisticsDto>()
+                : new UsageStatisticsDto {Id = Guid.NewGuid()};
+
+            data.ServerInfoDto = serverInfoDto;
+            data.UsageInfoDto = usageInfoDto;
+
+            data.MarkAsUpdatedNow();
+
+            await SaveFile(data);
         }
 
         public async Task FinalizeStats()
         {
             await _client.SendDataToStatsServer(await GetExistingData<UsageStatisticsDto>());
+
             DeleteFile(FinalPath);
         }
 
-        // public async Task CollectRelevantData()
-        public async Task<UsageStatisticsDto> CollectRelevantData()
+        private static void DeleteFile(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+
+        public async Task CollectRelevantData()
+        {
+            var usageInfo = await GetUsageInfo();
+
+            var serverInfo = GetServerInfo();
+
+            await PathData(serverInfo, usageInfo);
+        }
+
+        private async Task<UsageInfoDto> GetUsageInfo()
         {
             var usersCount = await _dbContext.Users.CountAsync();
 
@@ -78,17 +93,14 @@ namespace API.Services
 
             var uniqueFileTypes = await GetFileExtensions();
 
-            var serverInfo = GetServerInfo();
-
-            var usageStats = new UsageStatisticsDto
+            var usageInfo = new UsageInfoDto
             {
-                ServerInfo = serverInfo,
-                LibraryTypesCreated = libsCountByType,
                 UsersCount = usersCount,
+                LibraryTypesCreated = libsCountByType,
                 FileTypes = uniqueFileTypes
             };
 
-            return usageStats;
+            return usageInfo;
         }
 
         private async Task<IEnumerable<string?>> GetFileExtensions()
@@ -104,28 +116,23 @@ namespace API.Services
             return uniqueFileTypes;
         }
 
-        private static ServerInfo GetServerInfo()
+        private static ServerInfoDto GetServerInfo()
         {
             var appVersion = Assembly.GetEntryAssembly()
                 ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                 ?.InformationalVersion;
 
-            var serverInfo = new ServerInfo
+            var serverInfo = new ServerInfoDto
             {
                 Os = RuntimeInformation.OSDescription,
                 DotNetVersion = Environment.Version.ToString(),
                 RunTimeVersion = RuntimeInformation.FrameworkDescription,
                 KavitaVersion = appVersion ?? BuildInfo.Version.ToString(),
-                Locale = RegionInfo.CurrentRegion.EnglishName,
+                Culture = CultureInfo.CurrentCulture.Name,
                 BuildBranch = ""
             };
 
             return serverInfo;
-        }
-
-        private static void DeleteFile(string path)
-        {
-            File.Delete(path);
         }
 
         private static async Task<T> GetExistingData<T>()
@@ -144,6 +151,12 @@ namespace API.Services
 
         private static async Task SaveFile(UsageStatisticsDto statisticsDto)
         {
+            var finalDirectory = FinalPath.Replace(TempFileName, string.Empty);
+            if (!Directory.Exists(finalDirectory))
+            {
+                Directory.CreateDirectory(finalDirectory);
+            }
+
             var dataJson = JsonSerializer.Serialize(statisticsDto);
 
             await File.WriteAllTextAsync(FinalPath, dataJson);

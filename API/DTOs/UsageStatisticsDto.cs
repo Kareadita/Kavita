@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.Entities.Enums;
+using System.Linq;
 
 namespace API.DTOs
 {
@@ -8,65 +8,27 @@ namespace API.DTOs
     {
         public UsageStatisticsDto()
         {
-            UpdateTime();
-            ClientsInfo = new List<ClientInfo>();
+            MarkAsUpdatedNow();
+            ClientsInfo = new List<ClientInfoDto>();
         }
-        
+
         public Guid Id { get; set; }
         public DateTime LastUpdate { get; set; }
+        public ServerInfoDto ServerInfoDto { get; set; }
+        public List<ClientInfoDto> ClientsInfo { get; set; }
 
-        public int UsersCount { get; set; }
-        public ServerInfo ServerInfo { get; set; }
-        public List<ClientInfo> ClientsInfo { get; set; }
-        public IEnumerable<string> FileTypes { get; set; }
-        public IEnumerable<LibInfo> LibraryTypesCreated { get; set; }
+        public UsageInfoDto UsageInfoDto { get; set; }
 
-        public void UpdateTime()
+        public void MarkAsUpdatedNow()
         {
             LastUpdate = DateTime.UtcNow;
         }
 
-        public void AddClientInfo(ClientInfo clientInfo)
+        public void AddClientInfo(ClientInfoDto clientInfoDto)
         {
-            ClientsInfo.Add(clientInfo);
+            if (ClientsInfo.Any(x => x.IsTheSameDevice(clientInfoDto))) return;
+
+            ClientsInfo.Add(clientInfoDto);
         }
-    }
-
-    public class LibInfo
-    {
-        public LibraryType Type { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class ClientInfo
-    {
-        public string Os { get; set; }
-        public string Browser { get; set; }
-        public string Device { get; set; }
-        public DeviceType DeviceType { get; set; }
-        public string ScreenSize { get; set; }
-        public string ScreenResolution { get; set; }
-        public string KavitaUiVersion { get; set; }
-        public string BuildBranch { get; set; }
-
-        public DateTime? CollectedAt { get; set; }
-    }
-
-    public class ServerInfo
-    {
-        public string Os { get; set; }
-        public string DotNetVersion { get; set; }
-        public string RunTimeVersion { get; set; }
-        public string KavitaVersion { get; set; }
-        public string BuildBranch { get; set; }
-        public string Locale { get; set; }
-    }
-
-    public enum DeviceType
-    {
-        Desktop = 0,
-        Laptop = 1,
-        Tablet = 2,
-        Mobile = 3
     }
 }
