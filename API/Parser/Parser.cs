@@ -374,6 +374,10 @@ namespace API.Parser
             new Regex(
                 @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|Bonus)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
+            new Regex(
+                @"(?<Special>SP\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
 
