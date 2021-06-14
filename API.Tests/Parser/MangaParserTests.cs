@@ -241,7 +241,7 @@ namespace API.Tests.Parser
         [InlineData("Ani-Hina Art Collection.cbz", true)]
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
         [InlineData("A Town Where You Live - Bonus Chapter.zip", true)]
-        [InlineData("Yuki Merry - 4-Komga Anthology", true)]
+        [InlineData("Yuki Merry - 4-Komga Anthology", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
