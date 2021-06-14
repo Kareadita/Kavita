@@ -224,10 +224,15 @@ export class SeriesDetailComponent implements OnInit {
         const vol0 = this.volumes.filter(v => v.number === 0);
         this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
         if (this.hasSpecials) {
-          this.specials = vol0.map(v => v.chapters || []).flat().filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).map(c => {
-            c.range = c.range.replace(/_/g, ' ');
+          this.specials = vol0.map(v => v.chapters || [])
+          .flat()
+          .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
+          .sort((a, b) => this.naturalSort.compare(a.range, b.range, true))
+          .map(c => {
+            c.title = this.utilityService.cleanSpecialTitle(c.title);
+            c.range = this.utilityService.cleanSpecialTitle(c.range);
             return c;
-          }).sort((a, b) => this.naturalSort.compare(a.range, b.range, true));
+          });
         }
 
         if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {

@@ -49,4 +49,13 @@ export class UtilityService {
     return this.mangaFormatKeys.filter(item => MangaFormat[format] === item)[0];
   }
 
+  cleanSpecialTitle(title: string) {
+    let cleaned = title.replace(/_/g, ' ').replace(/SP\d+/g, '').trim();
+    cleaned = cleaned.substring(0, cleaned.lastIndexOf('.'));
+    if (cleaned.trim() === '') {
+      return title;
+    }
+    return cleaned;
+  }
+
 }
