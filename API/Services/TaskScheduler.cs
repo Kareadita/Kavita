@@ -74,7 +74,7 @@ namespace API.Services
         private void ScheduleStatsTasks()
         {
             _logger.LogDebug("Scheduling Collect usage data from server {Setting}", nameof(Cron.Daily));
-            RecurringJob.AddOrUpdate("finalize-stats", () => _statsService.CollectRelevantData(), Cron.Daily(23, 50));
+            RecurringJob.AddOrUpdate("collect-data", () => _statsService.CollectRelevantData(), Cron.Daily(23, 50));
             
             _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
             RecurringJob.AddOrUpdate("finalize-stats", () => _statsService.FinalizeStats(), Cron.Daily);
