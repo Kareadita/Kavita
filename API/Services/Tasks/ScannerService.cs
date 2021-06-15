@@ -466,7 +466,7 @@ namespace API.Services.Tasks
              return;
           }
           
-          if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != "0")
+          if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
           {
              info = Parser.Parser.Parse(path, rootPath, type);
              var info2 = _bookService.ParseInfo(path);
