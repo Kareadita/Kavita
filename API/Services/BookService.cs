@@ -24,9 +24,6 @@ namespace API.Services
         private const int ThumbnailWidth = 320; // 153w x 230h
         private readonly StylesheetParser _cssParser = new ();
 
-        private static readonly Regex ScriptRegex = new Regex(@"<script(.*)(/>)",
-            RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
-      
         public BookService(ILogger<BookService> logger)
         {
             _logger = logger;
