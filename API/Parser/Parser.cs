@@ -15,7 +15,7 @@ namespace API.Parser
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|.cb7";
         public const string BookFileExtensions = @"\.epub";
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
-        public static readonly Regex FontSrcUrlRegex = new Regex("(src:url\\(\"?'?)([a-z0-9/\\._]+)(\"?'?\\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         private static readonly string XmlRegexExtensions = @"\.xml";
