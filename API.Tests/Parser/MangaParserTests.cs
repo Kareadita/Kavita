@@ -145,6 +145,7 @@ namespace API.Tests.Parser
         [InlineData("X-Men v1 #201 (September 2007).cbz", "X-Men")]
         [InlineData("Kodoja #001 (March 2016)", "Kodoja")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "Boku No Kokoro No Yabai Yatsu")]
+        [InlineData("Kiss x Sis - Ch.36 - A Cold Home Visit.cbz", "Kiss x Sis")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -242,8 +243,8 @@ namespace API.Tests.Parser
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", true)]
         [InlineData("A Town Where You Live - Bonus Chapter.zip", true)]
         [InlineData("Yuki Merry - 4-Komga Anthology", false)]
-        [InlineData("Beastars - SP01", true)]
-        [InlineData("Beastars SP01", true)]
+        [InlineData("Beastars - SP01", false)]
+        [InlineData("Beastars SP01", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
