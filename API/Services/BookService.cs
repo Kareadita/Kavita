@@ -23,6 +23,9 @@ namespace API.Services
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         private readonly StylesheetParser _cssParser = new ();
+
+        private static readonly Regex ScriptRegex = new Regex(@"<script(.*)(/>)",
+            RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
       
         public BookService(ILogger<BookService> logger)
         {
@@ -204,6 +207,13 @@ namespace API.Services
             return 0;
         }
 
+        public static string EscapeTags(string content)
+        {
+            content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
+            content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
+            return content;
+        }
+
         public static string CleanContentKeys(string key)
         {
             return key.Replace("../", string.Empty);
@@ -241,14 +251,23 @@ namespace API.Services
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
                 // If all three are present, we can take that over dc:title and format as:
                 // Series = The Dark Tower, Volume = 5, Filename as "Wolves of the Calla"
+                // In addition, the following can exist and should parse as a series (EPUB 3.2 spec)
+                // <meta property="belongs-to-collection" id="c01">
+                //   The Lord of the Rings
+                // </meta>
+                // <meta refines="#c01" property="collection-type">set</meta>
+                // <meta refines="#c01" property="group-position">2</meta>
                 try
                 {
-                    string seriesIndex = string.Empty;
-                    string series = string.Empty;
-                    string specialName = string.Empty;
+                    var seriesIndex = string.Empty;
+                    var series = string.Empty;
+                    var specialName = string.Empty;
+                    var groupPosition = string.Empty;
+
                     
                     foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
                     {
+                        // EPUB 2 and 3
                         switch (metadataItem.Name)
                         {
                             case "calibre:series_index":
@@ -261,10 +280,29 @@ namespace API.Services
                                 specialName = metadataItem.Content;
                                 break;
                         }
+
+                        // EPUB 3.2+ only
+                        switch (metadataItem.Property)
+                        {
+                            case "group-position":
+                                seriesIndex = metadataItem.Content;
+                                break;
+                            case "belongs-to-collection":
+                                series = metadataItem.Content;
+                                break;
+                            case "collection-type":
+                                groupPosition = metadataItem.Content;
+                                break;
+                        }
                     }
 
-                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) && !string.IsNullOrEmpty(specialName))
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) &&
+                        (!string.IsNullOrEmpty(specialName) || groupPosition.Equals("series") || groupPosition.Equals("set")))
                     {
+                        if (string.IsNullOrEmpty(specialName))
+                        {
+                            specialName = epubBook.Title;
+                        }
                         return new ParserInfo()
                         {
                             Chapters = "0",
