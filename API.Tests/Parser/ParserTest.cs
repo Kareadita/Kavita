@@ -6,6 +6,7 @@ namespace API.Tests.Parser
     public class ParserTests
     {
         
+        [Theory]
         [InlineData("Beastars - SP01", true)]
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]

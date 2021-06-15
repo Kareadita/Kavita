@@ -95,7 +95,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(?<Series>.*) (\b|_|-)v",
+                @"(?<Series>.*) (\b|_|-)(v|ch\.?|c)\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             // due to duplicate version identifiers in file.
