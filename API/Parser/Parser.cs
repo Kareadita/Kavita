@@ -473,8 +473,11 @@ namespace API.Parser
                 ret.Chapters = DefaultChapter;
                 ret.Volumes = DefaultVolume;
             }
-            
-            
+
+            if (string.IsNullOrEmpty(ret.Series))
+            {
+                ret.Series = CleanTitle(fileName);
+            }
 
             return ret.Series == string.Empty ? null : ret;
         }
