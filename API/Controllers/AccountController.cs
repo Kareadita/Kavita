@@ -83,42 +83,55 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
+            try
             {
-                return BadRequest("Username is taken.");
-            }
-
-            var user = _mapper.Map<AppUser>(registerDto);
-            user.UserPreferences ??= new AppUserPreferences();
-            
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
-
-            if (!result.Succeeded) return BadRequest(result.Errors);
-            
-            var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
-            var roleResult = await _userManager.AddToRoleAsync(user, role);
-
-            if (!roleResult.Succeeded) return BadRequest(result.Errors);
-            
-            // When we register an admin, we need to grant them access to all Libraries.
-            if (registerDto.IsAdmin)
-            {
-                _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries", user.UserName);
-                var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-                foreach (var lib in libraries)
+                if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
                 {
-                    lib.AppUsers ??= new List<AppUser>();
-                    lib.AppUsers.Add(user);
+                    return BadRequest("Username is taken.");
                 }
-                if (libraries.Any() && !await _unitOfWork.CommitAsync()) _logger.LogError("There was an issue granting library access. Please do this manually");
+
+                var user = _mapper.Map<AppUser>(registerDto);
+                user.UserPreferences ??= new AppUserPreferences();
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded) return BadRequest(result.Errors);
+
+                var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+
+                if (!roleResult.Succeeded) return BadRequest(result.Errors);
+
+                // When we register an admin, we need to grant them access to all Libraries.
+                if (registerDto.IsAdmin)
+                {
+                    _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+                        user.UserName);
+                    var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+                    foreach (var lib in libraries)
+                    {
+                        lib.AppUsers ??= new List<AppUser>();
+                        lib.AppUsers.Add(user);
+                    }
+
+                    if (libraries.Any() && !await _unitOfWork.CommitAsync())
+                        _logger.LogError("There was an issue granting library access. Please do this manually");
+                }
+
+                return new UserDto
+                {
+                    Username = user.UserName,
+                    Token = await _tokenService.CreateToken(user),
+                    Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Something went wrong when registering user");
+                await _unitOfWork.RollbackAsync();
             }
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-            };
+            return BadRequest("Something went wrong when registering user");
         }
 
         [HttpPost("login")]
