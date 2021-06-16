@@ -51,6 +51,7 @@ BuildUI()
     cd ../Kavita-webui/ || exit
     npm install
     npm run prod
+    cp -r dist/ ../Kavita/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }

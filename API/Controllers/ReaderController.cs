@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -49,15 +50,26 @@ namespace API.Controllers
 
             return File(content, "image/" + format);
         }
-        
-        [HttpGet("chapter-path")]
-        public async Task<ActionResult<string>> GetImagePath(int chapterId)
-        {
-            var chapter = await _cacheService.Ensure(chapterId);
-            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
+        [HttpGet("chapter-info")]
+        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
+        {
+            // TODO: Rewrite this into one DB call
+            var chapter = await _cacheService.Ensure(chapterId);
+            if (chapter == null) return BadRequest("Could not find Chapter");
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+            if (volume == null) return BadRequest("Could not find Volume");
             var (_, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
-            return Ok(mangaFile.FilePath);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+
+            return Ok(new ChapterInfoDto()
+            {
+                ChapterNumber =  chapter.Range,
+                VolumeNumber = volume.Number + string.Empty,
+                FileName = Path.GetFileName(mangaFile.FilePath),
+                SeriesName = series?.Name,
+                IsSpecial = chapter.IsSpecial
+            });
         }
 
         [HttpGet("get-bookmark")]
