@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -33,11 +34,7 @@ namespace API.Controllers
             {
                 return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();    
             }
-            else
-            {
-                return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
-            }
-            
+            return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
         }
         
         [Authorize(Policy = "RequireAdminRole")]
@@ -64,7 +61,7 @@ namespace API.Controllers
 
             if (_unitOfWork.HasChanges())
             {
-                if (await _unitOfWork.Complete())
+                if (await _unitOfWork.CommitAsync())
                 {
                     return Ok("Tag updated successfully");
                 }
@@ -81,38 +78,42 @@ namespace API.Controllers
         [HttpPost("update-series")]
         public async Task<ActionResult> UpdateSeriesForTag(UpdateSeriesForTagDto updateSeriesForTagDto)
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
-            if (tag == null) return BadRequest("Not a valid Tag");
-            tag.SeriesMetadatas ??= new List<SeriesMetadata>();
-            
-            // Check if Tag has updated (Summary)
-            if (tag.Summary == null || !tag.Summary.Equals(updateSeriesForTagDto.Tag.Summary))
+            try
             {
-                tag.Summary = updateSeriesForTagDto.Tag.Summary;
-                _unitOfWork.CollectionTagRepository.Update(tag);
-            }
+                var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
+                if (tag == null) return BadRequest("Not a valid Tag");
+                tag.SeriesMetadatas ??= new List<SeriesMetadata>();
 
-            foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
-            {
-                tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
-            }
-            
+                // Check if Tag has updated (Summary)
+                if (tag.Summary == null || !tag.Summary.Equals(updateSeriesForTagDto.Tag.Summary))
+                {
+                    tag.Summary = updateSeriesForTagDto.Tag.Summary;
+                    _unitOfWork.CollectionTagRepository.Update(tag);
+                }
 
-            if (tag.SeriesMetadatas.Count == 0)
-            {
-                _unitOfWork.CollectionTagRepository.Remove(tag);
-            }
+                foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
+                {
+                    tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
+                }
 
-            if (_unitOfWork.HasChanges() && await _unitOfWork.Complete())
+
+                if (tag.SeriesMetadatas.Count == 0)
+                {
+                    _unitOfWork.CollectionTagRepository.Remove(tag);
+                }
+
+                if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+                {
+                    return Ok("Tag updated");
+                }
+            }
+            catch (Exception)
             {
-                return Ok("Tag updated");
+                await _unitOfWork.RollbackAsync();
             }
             
             
             return BadRequest("Something went wrong. Please try again.");
         }
-        
-        
-        
     }
 }

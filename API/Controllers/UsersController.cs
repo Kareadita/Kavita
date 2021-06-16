@@ -26,7 +26,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             _unitOfWork.UserRepository.Delete(user);
 
-            if (await _unitOfWork.Complete()) return Ok();
+            if (await _unitOfWork.CommitAsync()) return Ok();
 
             return BadRequest("Could not delete the user.");
         }
@@ -71,7 +71,7 @@ namespace API.Controllers
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok(preferencesDto);
             }

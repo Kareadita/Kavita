@@ -110,7 +110,7 @@ namespace API.Controllers
                     lib.AppUsers ??= new List<AppUser>();
                     lib.AppUsers.Add(user);
                 }
-                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogError("There was an issue granting library access. Please do this manually");
+                if (libraries.Any() && !await _unitOfWork.CommitAsync()) _logger.LogError("There was an issue granting library access. Please do this manually");
             }
 
             return new UserDto
@@ -140,7 +140,7 @@ namespace API.Controllers
             user.UserPreferences ??= new AppUserPreferences();
             
             _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CommitAsync();
             
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
@@ -167,7 +167,6 @@ namespace API.Controllers
         {
             var user = await _userManager.Users
                 .Include(u => u.UserPreferences)
-                //.Include(u => u.UserRoles)
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == updateRbsDto.Username.ToUpper());
             if (updateRbsDto.Roles.Contains(PolicyConstants.AdminRole) ||
                 updateRbsDto.Roles.Contains(PolicyConstants.PlebRole))
@@ -178,16 +177,22 @@ namespace API.Controllers
             var existingRoles = (await _userManager.GetRolesAsync(user))
                 .Where(s => s != PolicyConstants.AdminRole && s != PolicyConstants.PlebRole)
                 .ToList();
-            
+        
             // Find what needs to be added and what needs to be removed
             var rolesToRemove = existingRoles.Except(updateRbsDto.Roles);
             var result = await _userManager.AddToRolesAsync(user, updateRbsDto.Roles);
 
-            if (!result.Succeeded) return BadRequest("Something went wrong, unable to update user's roles");
+            if (!result.Succeeded)
+            {
+                await _unitOfWork.RollbackAsync();
+                return BadRequest("Something went wrong, unable to update user's roles");
+            }
             if ((await _userManager.RemoveFromRolesAsync(user, rolesToRemove)).Succeeded)
             {
                 return Ok();
             }
+            
+            await _unitOfWork.RollbackAsync();
             return BadRequest("Something went wrong, unable to update user's roles");
 
         }

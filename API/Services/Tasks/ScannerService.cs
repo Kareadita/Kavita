@@ -89,7 +89,7 @@ namespace API.Services.Tasks
            UpdateLibrary(library, series);
            
            _unitOfWork.LibraryRepository.Update(library);
-           if (Task.Run(() => _unitOfWork.Complete()).Result)
+           if (Task.Run(() => _unitOfWork.CommitAsync()).Result)
            {
               _logger.LogInformation("Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
            }
