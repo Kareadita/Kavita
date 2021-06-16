@@ -1,22 +1,11 @@
-/* Importing Bootstrap SCSS file. */
-
-$theme-colors: (
-  "primary": #4ac694,
-  "danger": #ff4136
-);
-
+// Import colors for overrides of bootstrap theme
+@import './theme/colors';
 
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
 
+@import '~ngx-toastr/toastr-bs4-alert';
 @import '~swiper/swiper.scss';
-
-@font-face {
-  font-family: "EBGarmond";
-  src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
-}
-
-
 
 // Custom animation for ng-lazyload-image
 img.ng-lazyloaded {
@@ -26,8 +15,6 @@ img.ng-lazyloaded {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
-
 
 
 @import './assets/themes/dark.scss';
@@ -45,19 +32,16 @@ label, select, .clickable {
   color: white;
 }
 
-
+@font-face {
+  font-family: "EBGarmond";
+  src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
+}
 
 html, body { height: 100%; }
 body {
   margin: 0; 
   font-family: "EBGaramond", "Helvetica Neue", sans-serif;
 }
-
-// .disabled, :disabled {
-//   cursor: not-allowed !important;
-// }
-
-
 
 // Utiliities
 @include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {

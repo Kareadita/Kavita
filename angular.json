@@ -36,7 +36,6 @@
               "styles": true
             },
             "styles": [
-              "node_modules/ngx-toastr/toastr.css",
               "src/styles.scss",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],

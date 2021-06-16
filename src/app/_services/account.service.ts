@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import * as Sentry from "@sentry/angular";
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class AccountService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private router: Router) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -76,6 +77,8 @@ export class AccountService implements OnDestroy {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
+    // Upon logout, perform redirection
+    this.router.navigateByUrl('/login');
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {

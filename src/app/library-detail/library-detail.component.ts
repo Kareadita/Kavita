@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -18,7 +19,7 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination!: Pagination;
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, private libraryService: LibraryService) {
+  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, private libraryService: LibraryService, private titleService: Title) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/home');
@@ -28,6 +29,7 @@ export class LibraryDetailComponent implements OnInit {
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().subscribe(names => {
       this.libraryName = names[this.libraryId];
+      this.titleService.setTitle('Kavita - ' + this.libraryName);
     })
     this.loadPage();
   }

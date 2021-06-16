@@ -1,8 +1,7 @@
 $primary-color: #4ac694; //#cc7b19;
-//#secondary-color:;
-$error-color: red;
+$error-color: #ff4136; // #bb2929 good color for contrast rating
 
 $theme-colors: (
-  "primary": #4ac694,
-  "danger": #ff4136
+  "primary": $primary-color,
+  "danger": $error-color 
 );
