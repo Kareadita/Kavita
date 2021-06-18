@@ -30,15 +30,6 @@ your reading collection with your friends and family!
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 
-# How to contribute
-- Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui
-- In Kavita-webui, run ng serve. This will start the webserver on localhost:4200
-- Run API project in Kavita, this will start the backend on localhost:5000
-
-
-## Deploy local build
-- Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
-
 ## How to install
 - Unzip the archive for your target OS
 - Place in a directory that is writable. If on windows, do not place in Program Files
@@ -80,9 +71,18 @@ Got a great idea? Throw it up on the FeatHub or vote on another persons. Please 
 [![Feature Requests](https://feathub.com/Kareadita/Kavita?format=svg)](https://feathub.com/Kareadita/Kavita)
 
 ## Want to help?
-I am looking for developers with a passion for building the next Plex for Reading. Developers with C#/ASP.NET, Angular 11 please reach out on [Discord](https://discord.gg/eczRp9eeem).  
+I am looking for developers with a passion for building the next Plex for Reading. Developers with C#/ASP.NET, Angular 11 please reach out on [Discord](https://discord.gg/eczRp9eeem).
+
+# How to contribute
+- Ensure you've cloned Kavita-webui. You should have Projects/Kavita and Projects/Kavita-webui
+- In Kavita-webui, run ng serve. This will start the webserver on localhost:4200
+- Run API project in Kavita, this will start the backend on localhost:5000
+
+
+### Deploy local build
+- Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 ## Donate
-If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will 
-likely go towards beer or hosting.
+If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards 
+expenses related to Kavita.
 [![Donate via Paypal](https://img.shields.io/badge/donate-paypal-blue.svg?style=popout&logo=paypal)](https://paypal.me/majora2007?locale.x=en_US)

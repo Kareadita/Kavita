@@ -42,6 +42,10 @@ namespace API.Tests.Comparers
             new[] {"3and4.cbz", "The World God Only Knows - Oneshot.cbz", "5.cbz", "1and2.cbz"}, 
             new[] {"1and2.cbz", "3and4.cbz", "5.cbz", "The World God Only Knows - Oneshot.cbz"}
         )]
+        [InlineData(
+            new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"}, 
+            new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"}
+        )]
         public void TestNaturalSortComparer(string[] input, string[] expected)
         {
             Array.Sort(input, _nc);
