@@ -70,7 +70,6 @@ if (environment.production) {
     useValue: Sentry.createErrorHandler({
       showDialog: false,
     }),
-    multi: true
   },
   {
     provide: Sentry.TraceService,
@@ -134,8 +133,8 @@ if (environment.production) {
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
-    ...sentryProviders,
     Title,
+    ...sentryProviders,
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
