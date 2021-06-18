@@ -30,7 +30,11 @@ namespace API.Data
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
         
-        public async Task<bool> Complete()
+        public bool Commit()
+        {
+            return _context.SaveChanges() > 0;
+        }
+        public async Task<bool> CommitAsync()
         {
             return await _context.SaveChangesAsync() > 0;
         }
@@ -38,6 +42,17 @@ namespace API.Data
         public bool HasChanges()
         {
             return _context.ChangeTracker.HasChanges();
+        }
+
+        public async Task<bool> RollbackAsync()
+        {
+            await _context.DisposeAsync();
+            return true;
+        }
+        public bool Rollback()
+        {
+            _context.Dispose();
+            return true;
         }
     }
 }

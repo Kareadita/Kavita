@@ -114,7 +114,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical error.");
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical error.");
 
             return Ok();
         }
@@ -139,7 +139,7 @@ namespace API.Controllers
 
             _unitOfWork.SeriesRepository.Update(series);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -190,61 +190,68 @@ namespace API.Controllers
         [HttpPost("metadata")]
         public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
         {
-            var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-            if (series.Metadata == null)
+            try
             {
-                series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
-                    .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
-            }
-            else
-            {
-                series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                var newTags = new List<CollectionTag>();
-                
-                // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-                var existingTags = series.Metadata.CollectionTags.ToList();
-                foreach (var existing in existingTags)
+                var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
+                var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+                if (series.Metadata == null)
                 {
-                    if (updateSeriesMetadataDto.Tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+                    series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
+                        .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
+                }
+                else
+                {
+                    series.Metadata.CollectionTags ??= new List<CollectionTag>();
+                    var newTags = new List<CollectionTag>();
+
+                    // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+                    var existingTags = series.Metadata.CollectionTags.ToList();
+                    foreach (var existing in existingTags)
                     {
-                        // Remove tag
-                        series.Metadata.CollectionTags.Remove(existing);
+                        if (updateSeriesMetadataDto.Tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+                        {
+                            // Remove tag
+                            series.Metadata.CollectionTags.Remove(existing);
+                        }
+                    }
+
+                    // At this point, all tags that aren't in dto have been removed.
+                    foreach (var tag in updateSeriesMetadataDto.Tags)
+                    {
+                        var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
+                        if (existingTag != null)
+                        {
+                            // Update existingTag    
+                            existingTag.Promoted = tag.Promoted;
+                            existingTag.Title = tag.Title;
+                            existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
+                        }
+                        else
+                        {
+                            // Add new tag
+                            newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+                        }
+                    }
+
+                    foreach (var tag in newTags)
+                    {
+                        series.Metadata.CollectionTags.Add(tag);
                     }
                 }
 
-                // At this point, all tags that aren't in dto have been removed.
-                foreach (var tag in updateSeriesMetadataDto.Tags)
+                if (!_unitOfWork.HasChanges())
                 {
-                    var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
-                    if (existingTag != null)
-                    {
-                        // Update existingTag    
-                        existingTag.Promoted = tag.Promoted;
-                        existingTag.Title = tag.Title;
-                        existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
-                    }
-                    else
-                    {
-                        // Add new tag
-                        newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
-                    }
+                    return Ok("No changes to save");
                 }
 
-                foreach (var tag in newTags)
+                if (await _unitOfWork.CommitAsync())
                 {
-                    series.Metadata.CollectionTags.Add(tag);
+                    return Ok("Successfully updated");
                 }
             }
-
-            if (!_unitOfWork.HasChanges())
+            catch (Exception)
             {
-                return Ok("No changes to save");
-            }
-            
-            if (await _unitOfWork.Complete())
-            {
-                return Ok("Successfully updated");
+                await _unitOfWork.RollbackAsync();
             }
 
             return BadRequest("Could not update metadata");

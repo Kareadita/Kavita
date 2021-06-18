@@ -95,7 +95,7 @@ namespace API.Controllers
             _configuration.GetSection("Logging:LogLevel:Default").Value = updateSettingsDto.LoggingLevel + "";
             if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
 
-            if (!_unitOfWork.HasChanges() || !await _unitOfWork.Complete())
+            if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync())
                 return BadRequest("There was a critical issue. Please try again.");
             
             _logger.LogInformation("Server Settings updated");
