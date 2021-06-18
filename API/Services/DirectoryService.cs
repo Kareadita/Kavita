@@ -13,6 +13,9 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
+       private static readonly Regex ExcludeDirectories = new Regex(
+          @"@eaDir|\.DS_Store", 
+          RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -222,6 +225,7 @@ namespace API.Services
        /// <param name="root">Directory to scan</param>
        /// <param name="action">Action to apply on file path</param>
        /// <param name="searchPattern">Regex pattern to search against</param>
+       /// <param name="logger"></param>
        /// <exception cref="ArgumentException"></exception>
        public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
        {
@@ -241,11 +245,11 @@ namespace API.Services
 
             while (dirs.Count > 0) {
                var currentDir = dirs.Pop();
-               string[] subDirs;
+               IEnumerable<string> subDirs;
                string[] files;
 
                try {
-                  subDirs = Directory.GetDirectories(currentDir);
+                  subDirs = Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
@@ -316,7 +320,7 @@ namespace API.Services
 
                // Push the subdirectories onto the stack for traversal.
                // This could also be done before handing the files.
-               foreach (string str in subDirs)
+               foreach (var str in subDirs)
                   dirs.Push(str);
             }
 
