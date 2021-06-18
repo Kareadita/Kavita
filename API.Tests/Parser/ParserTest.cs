@@ -5,6 +5,16 @@ namespace API.Tests.Parser
 {
     public class ParserTests
     {
+        
+        [Theory]
+        [InlineData("Beastars - SP01", true)]
+        [InlineData("Beastars SP01", true)]
+        [InlineData("Beastars Special 01", false)]
+        [InlineData("Beastars Extra 01", false)]
+        public void HasSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected,  HasSpecialMarker(input));
+        }
 
         [Theory]
         [InlineData("0001", "1")]

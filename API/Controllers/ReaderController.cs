@@ -116,7 +116,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -157,7 +157,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -198,7 +198,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -251,7 +251,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
