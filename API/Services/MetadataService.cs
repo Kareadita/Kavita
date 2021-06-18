@@ -158,7 +158,7 @@ namespace API.Services
           }
 
 
-          if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.Complete()).Result)
+          if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.CommitAsync()).Result)
           {
              _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
           }
@@ -191,7 +191,7 @@ namespace API.Services
           _unitOfWork.SeriesRepository.Update(series);
 
 
-          if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.Complete()).Result)
+          if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.CommitAsync()).Result)
           {
              _logger.LogInformation("Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
           }

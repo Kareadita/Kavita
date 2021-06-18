@@ -67,7 +67,7 @@ namespace API.Controllers
             }
             
 
-            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue. Please try again.");
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue. Please try again.");
 
             _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
             _taskScheduler.ScanLibrary(library.Id);
@@ -133,7 +133,7 @@ namespace API.Controllers
                 return Ok(_mapper.Map<MemberDto>(user));
             }
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
                 return Ok(_mapper.Map<MemberDto>(user));
@@ -199,7 +199,7 @@ namespace API.Controllers
 
             _unitOfWork.LibraryRepository.Update(library);
 
-            if (!await _unitOfWork.Complete()) return BadRequest("There was a critical issue updating the library.");
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
             if (differenceBetweenFolders.Any())
             {
                 _taskScheduler.ScanLibrary(library.Id, true);
