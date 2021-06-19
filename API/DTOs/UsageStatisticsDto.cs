@@ -12,12 +12,11 @@ namespace API.DTOs
             ClientsInfo = new List<ClientInfoDto>();
         }
 
-        public string  Id { get; set; }
+        public string InstallId { get; set; }
         public DateTime LastUpdate { get; set; }
-        public ServerInfoDto ServerInfoDto { get; set; }
+        public UsageInfoDto UsageInfo { get; set; }
+        public ServerInfoDto ServerInfo { get; set; }
         public List<ClientInfoDto> ClientsInfo { get; set; }
-
-        public UsageInfoDto UsageInfoDto { get; set; }
 
         public void MarkAsUpdatedNow()
         {

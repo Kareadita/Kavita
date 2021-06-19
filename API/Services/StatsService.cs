@@ -35,6 +35,7 @@ namespace API.Services
         }
 
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
+        private static bool FileExists => File.Exists(FinalPath);
 
         public async Task PathData(ClientInfoDto clientInfoDto)
         {
@@ -62,15 +63,23 @@ namespace API.Services
 
         public async Task FinalizeStats()
         {
-            _logger.LogInformation("Finalizing Stats collection flow");
+            try
+            {
+                _logger.LogInformation("Finalizing Stats collection flow");
 
-            var data = await  GetExistingData<UsageStatisticsDto>();
+                var data = await GetExistingData<UsageStatisticsDto>();
 
-            _logger.LogInformation("Sending data to the Stats server");
-            await _client.SendDataToStatsServer(data);
+                _logger.LogInformation("Sending data to the Stats server");
+                await _client.SendDataToStatsServer(data);
 
-            _logger.LogInformation("Deleting the file from disk");
-            DeleteFile(FinalPath);
+                _logger.LogInformation("Deleting the file from disk");
+                if (FileExists) File.Delete(FinalPath);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error Finalizing Stats collection flow", e);
+                throw;
+            }
         }
 
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
@@ -79,8 +88,8 @@ namespace API.Services
 
             var data = await GetData();
 
-            data.ServerInfoDto = serverInfoDto;
-            data.UsageInfoDto = usageInfoDto;
+            data.ServerInfo = serverInfoDto;
+            data.UsageInfo = usageInfoDto;
 
             data.MarkAsUpdatedNow();
 
@@ -89,18 +98,9 @@ namespace API.Services
 
         private async ValueTask<UsageStatisticsDto> GetData()
         {
-            if (!File.Exists(FinalPath))
-                return new UsageStatisticsDto {Id = HashUtil.AnonymousToken()};
+            if (!FileExists) return new UsageStatisticsDto {InstallId = HashUtil.AnonymousToken()};
 
             return await GetExistingData<UsageStatisticsDto>();
-        }
-
-        private static void DeleteFile(string path)
-        {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
-            }
         }
 
         private async Task<UsageInfoDto> GetUsageInfo()
