@@ -12,7 +12,7 @@ namespace API.DTOs
             ClientsInfo = new List<ClientInfoDto>();
         }
 
-        public Guid Id { get; set; }
+        public string  Id { get; set; }
         public DateTime LastUpdate { get; set; }
         public ServerInfoDto ServerInfoDto { get; set; }
         public List<ClientInfoDto> ClientsInfo { get; set; }

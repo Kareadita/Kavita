@@ -11,8 +11,10 @@ using API.Data;
 using API.DTOs;
 using API.Interfaces.Services;
 using API.Services.Clients;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
@@ -23,31 +25,59 @@ namespace API.Services
 
         private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
+        private readonly ILogger<StatsService> _logger;
 
-        public StatsService(StatsApiClient client, DataContext dbContext)
+        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger)
         {
             _client = client;
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
 
         public async Task PathData(ClientInfoDto clientInfoDto)
         {
-            var statisticsDto = File.Exists(FinalPath)
-                ? await GetExistingData<UsageStatisticsDto>()
-                : new UsageStatisticsDto {Id = Guid.NewGuid()};
+            _logger.LogInformation("Pathing client data to the file");
+
+            var statisticsDto = await GetData();
 
             statisticsDto.AddClientInfo(clientInfoDto);
 
             await SaveFile(statisticsDto);
         }
 
-        private static async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
+        public async Task CollectRelevantData()
         {
-            var data = File.Exists(FinalPath)
-                ? await GetExistingData<UsageStatisticsDto>()
-                : new UsageStatisticsDto {Id = Guid.NewGuid()};
+            _logger.LogInformation("Collecting data from the server and database");
+
+            _logger.LogInformation("Collecting usage info");
+            var usageInfo = await GetUsageInfo();
+
+            _logger.LogInformation("Collecting server info");
+            var serverInfo = GetServerInfo();
+
+            await PathData(serverInfo, usageInfo);
+        }
+
+        public async Task FinalizeStats()
+        {
+            _logger.LogInformation("Finalizing Stats collection flow");
+
+            var data = await  GetExistingData<UsageStatisticsDto>();
+
+            _logger.LogInformation("Sending data to the Stats server");
+            await _client.SendDataToStatsServer(data);
+
+            _logger.LogInformation("Deleting the file from disk");
+            DeleteFile(FinalPath);
+        }
+
+        private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
+        {
+            _logger.LogInformation("Pathing server and usage info to the file");
+
+            var data = await GetData();
 
             data.ServerInfoDto = serverInfoDto;
             data.UsageInfoDto = usageInfoDto;
@@ -57,11 +87,12 @@ namespace API.Services
             await SaveFile(data);
         }
 
-        public async Task FinalizeStats()
+        private async ValueTask<UsageStatisticsDto> GetData()
         {
-            await _client.SendDataToStatsServer(await GetExistingData<UsageStatisticsDto>());
+            if (!File.Exists(FinalPath))
+                return new UsageStatisticsDto {Id = HashUtil.AnonymousToken()};
 
-            DeleteFile(FinalPath);
+            return await GetExistingData<UsageStatisticsDto>();
         }
 
         private static void DeleteFile(string path)
@@ -70,15 +101,6 @@ namespace API.Services
             {
                 File.Delete(path);
             }
-        }
-
-        public async Task CollectRelevantData()
-        {
-            var usageInfo = await GetUsageInfo();
-
-            var serverInfo = GetServerInfo();
-
-            await PathData(serverInfo, usageInfo);
         }
 
         private async Task<UsageInfoDto> GetUsageInfo()
@@ -103,7 +125,7 @@ namespace API.Services
             return usageInfo;
         }
 
-        private async Task<IEnumerable<string?>> GetFileExtensions()
+        private async Task<IEnumerable<string>> GetFileExtensions()
         {
             var fileExtensions = await _dbContext.MangaFile
                 .AsNoTracking()
@@ -111,7 +133,10 @@ namespace API.Services
                 .Distinct()
                 .ToArrayAsync();
 
-            var uniqueFileTypes = fileExtensions.Select(Path.GetExtension).Distinct();
+            var uniqueFileTypes = fileExtensions
+                .Select(Path.GetExtension)
+                .Where(x => x is not null)
+                .Distinct();
 
             return uniqueFileTypes;
         }
@@ -135,30 +160,38 @@ namespace API.Services
             return serverInfo;
         }
 
-        private static async Task<T> GetExistingData<T>()
+        private async Task<T> GetExistingData<T>()
         {
+            _logger.LogInformation("Fetching existing data from file");
             var existingDataJson = await GetFileDataAsString();
 
+            _logger.LogInformation("Deserializing data from file to object");
             var existingData = JsonSerializer.Deserialize<T>(existingDataJson);
 
             return existingData;
         }
 
-        private static async Task<string> GetFileDataAsString()
+        private async Task<string> GetFileDataAsString()
         {
+            _logger.LogInformation("Reading file from disk");
             return await File.ReadAllTextAsync(FinalPath);
         }
 
-        private static async Task SaveFile(UsageStatisticsDto statisticsDto)
+        private async Task SaveFile(UsageStatisticsDto statisticsDto)
         {
+            _logger.LogInformation("Saving file");
+
             var finalDirectory = FinalPath.Replace(TempFileName, string.Empty);
             if (!Directory.Exists(finalDirectory))
             {
+                _logger.LogInformation("Creating tmp directory");
                 Directory.CreateDirectory(finalDirectory);
             }
 
+            _logger.LogInformation("Serializing data to write");
             var dataJson = JsonSerializer.Serialize(statisticsDto);
 
+            _logger.LogInformation("Writing file to the disk");
             await File.WriteAllTextAsync(FinalPath, dataJson);
         }
     }
