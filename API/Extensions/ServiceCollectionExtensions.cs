@@ -1,4 +1,5 @@
 ﻿using System;
+using API.Configurations.CustomOptions;
 using API.Interfaces.Services;
 using API.Services.Clients;
 using Microsoft.Extensions.Configuration;
@@ -12,13 +13,23 @@ namespace API.Extensions
             where T : class, IStartupTask
             => services.AddTransient<IStartupTask, T>();
 
+        public static IServiceCollection AddStatsOptions(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<StatsOptions>(configuration.GetSection(nameof(StatsOptions)));
+
+            return services;
+        }
+
         public static IServiceCollection AddStatsClient(this IServiceCollection services, IConfiguration configuration)
         {
-            var url = configuration["StatsOptions:Url"];
-            
+            var statsOptions = configuration
+                .GetSection(nameof(StatsOptions))
+                .Get<StatsOptions>();
+
             services.AddHttpClient<StatsApiClient>(client =>
             {
-                client.BaseAddress = new Uri(url);
+                client.BaseAddress = new Uri(statsOptions.ServerUrl);
+                client.DefaultRequestHeaders.Add("api-key", statsOptions.ServerSecret);
             });
 
             return services;

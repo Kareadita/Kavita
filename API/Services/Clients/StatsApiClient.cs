@@ -1,33 +1,39 @@
 ﻿using System;
 using System.Net.Http;
-using System.Text.Json;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
+using API.Configurations.CustomOptions;
 using API.DTOs;
+using Microsoft.Extensions.Options;
 
 namespace API.Services.Clients
 {
     public class StatsApiClient
     {
         private readonly HttpClient _client;
+        private readonly StatsOptions _options;
 
-        public StatsApiClient(HttpClient client)
+        public StatsApiClient(HttpClient client, IOptions<StatsOptions> options)
         {
             _client = client;
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public Task SendDataToStatsServer(UsageStatisticsDto data)
+        public async Task SendDataToStatsServer(UsageStatisticsDto data)
         {
-            return SendDataToStatsServer(JsonSerializer.Serialize(data));
-        }
+            try
+            {
+                var response = await _client.PostAsJsonAsync("/api/UsageStatistics", data);
 
-        public async Task SendDataToStatsServer(string data)
-        {
-            if (string.IsNullOrEmpty(data))
-                throw new InvalidOperationException("The stats file is empty");
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-            var response = await _client.PostAsync("", new StringContent(data));
-
-            response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
