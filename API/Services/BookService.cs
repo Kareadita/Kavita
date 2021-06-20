@@ -89,7 +89,8 @@ namespace API.Services
                 }
                 else
                 {
-                    anchor.Attributes.Add("target", "_blank");    
+                    anchor.Attributes.Add("target", "_blank");
+                    anchor.Attributes.Add("rel", "noreferrer noopener");
                 }
 
                 return;
