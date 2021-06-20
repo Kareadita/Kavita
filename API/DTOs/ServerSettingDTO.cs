@@ -7,5 +7,6 @@
         public string LoggingLevel { get; set; }
         public string TaskBackup { get; set; }
         public int Port { get; set; }
+        public bool AllowStatCollection { get; set; }
     }
 }

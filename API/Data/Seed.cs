@@ -46,6 +46,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
+                new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"}, 
             };
 
             foreach (var defaultSetting in defaultSettings)

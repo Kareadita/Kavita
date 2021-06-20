@@ -90,14 +90,31 @@ namespace API.Controllers
                     Configuration.UpdateLogLevel(Program.GetAppSettingFilename(), updateSettingsDto.LoggingLevel);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
+                
+                if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + "" != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.AllowStatCollection + "";
+                    _unitOfWork.SettingsRepository.Update(setting);
+                    if (!updateSettingsDto.AllowStatCollection)
+                    {
+                        _taskScheduler.CancelStatsTasks();
+                    }
+                    else
+                    {
+                        _taskScheduler.ScheduleStatsTasks();
+                    }
+                }
             }
             
             _configuration.GetSection("Logging:LogLevel:Default").Value = updateSettingsDto.LoggingLevel + "";
             if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
 
             if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync())
+            {
+                await _unitOfWork.RollbackAsync();
                 return BadRequest("There was a critical issue. Please try again.");
-            
+            }
+
             _logger.LogInformation("Server Settings updated");
             _taskScheduler.ScheduleTasks();
             return Ok(updateSettingsDto);
