@@ -2,9 +2,9 @@ using System;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
-using API.Interfaces;
 using API.Middleware;
 using API.Services;
+using API.Services.HostedServices;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Kavita.Common.EnvironmentInfo;
@@ -64,6 +64,8 @@ namespace API
             
             services.AddResponseCaching();
             
+            services.AddStatsOptions(_config).AddStatsClient(_config);
+
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
@@ -72,12 +74,14 @@ namespace API
             // Add the processing server as IHostedService
             services.AddHangfireServer();
 
-            services.AddStatsOptions(_config).AddStatsClient(_config);
+            // Add IHostedService for startup tasks
+            // Any services that should be bootstrapped go here
+            services.AddHostedService<StartupTasksHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, 
-            IHostApplicationLifetime applicationLifetime, ITaskScheduler taskScheduler)
+            IHostApplicationLifetime applicationLifetime, IServiceProvider provider)
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
@@ -139,10 +143,6 @@ namespace API
             {
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
-
-            // Any services that should be bootstrapped go here
-            taskScheduler.ScheduleTasks();
-            taskScheduler.ScheduleStatsTasks();
         }
         
         private void OnShutdown()
