@@ -76,7 +76,6 @@ namespace API.Services
 
         #region StatsTasks
 
-        private const string CollectDataTask = "collect-data";
         private const string SendDataTask = "finalize-stats";
         public void ScheduleStatsTasks()
         {
@@ -86,24 +85,23 @@ namespace API.Services
                 _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
-            _logger.LogDebug("Adding StatsTasks");
             
-            _logger.LogDebug("Scheduling Collect usage data from server {Setting}",
-                $"{nameof(Cron.Daily)} at {_statsOptions.SendDataHour}:{0}");
-            RecurringJob.AddOrUpdate(CollectDataTask, () => _statsService.CollectRelevantData(),
-                Cron.Daily(_statsOptions.SendDataHour, 0));
+            _logger.LogDebug("Adding StatsTasks");
 
-            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}",
-                $"{nameof(Cron.Daily)} at {_statsOptions.SendDataAt}");
-            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.FinalizeStats(),
-                Cron.Daily(_statsOptions.SendDataHour, _statsOptions.SendDataMinute));
+            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            RecurringJob.AddOrUpdate(SendDataTask, () => CollectAndSendStatsData(), Cron.Daily);
+        }
+
+        private async Task CollectAndSendStatsData()
+        {
+            await _statsService.CollectRelevantData();
+            await _statsService.FinalizeStats();
         }
 
         public void CancelStatsTasks()
         {
             _logger.LogDebug("Cancelling/Removing StatsTasks");
 
-            RecurringJob.RemoveIfExists(CollectDataTask);
             RecurringJob.RemoveIfExists(SendDataTask);
         }
 
