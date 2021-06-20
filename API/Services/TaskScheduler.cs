@@ -80,6 +80,12 @@ namespace API.Services
         private const string SendDataTask = "finalize-stats";
         public void ScheduleStatsTasks()
         {
+            var allowStatCollection = bool.Parse(Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.AllowStatCollection)).GetAwaiter().GetResult().Value);
+            if (!allowStatCollection)
+            {
+                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
+                return;
+            }
             _logger.LogDebug("Adding StatsTasks");
             
             _logger.LogDebug("Scheduling Collect usage data from server {Setting}",
