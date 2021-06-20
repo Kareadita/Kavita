@@ -30,6 +30,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.Port:
                         destination.Port = int.Parse(row.Value);
                         break;
+                    case ServerSettingKey.AllowStatCollection:
+                        destination.AllowStatCollection = bool.Parse(row.Value);
+                        break;
                 }
             }
 
