@@ -60,6 +60,7 @@ namespace API.Extensions
         private static IServiceCollection ConfigRepositories(this IServiceCollection services)
         {
             services.AddScoped<ISettingsRepository, SettingsRepository>();
+            services.AddScoped<IFileRepository, FileRepository>();
             
             return services;
         }
