@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Clients;
 using Kavita.Common;
@@ -20,18 +19,21 @@ namespace API.Services
 {
     public class StatsService : IStatsService
     {
-        private const string TempFilePath = "kavita_tmp/";
+        private const string TempFilePath = "stats/";
         private const string TempFileName = "app_stats.json";
 
         private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
         private readonly ILogger<StatsService> _logger;
+        private readonly IFileRepository _fileRepository;
 
-        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger)
+        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger,
+            IFileRepository fileRepository)
         {
             _client = client;
             _dbContext = dbContext;
             _logger = logger;
+            _fileRepository = fileRepository;
         }
 
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
@@ -82,6 +84,12 @@ namespace API.Services
             }
         }
 
+        public async Task CollectAndSendStatsData()
+        {
+            await CollectRelevantData();
+            await FinalizeStats();
+        }
+
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
         {
             _logger.LogInformation("Pathing server and usage info to the file");
@@ -113,7 +121,7 @@ namespace API.Services
                 .Select(x => new LibInfo {Type = x.Key, Count = x.Count()})
                 .ToArrayAsync();
 
-            var uniqueFileTypes = await GetFileExtensions();
+            var uniqueFileTypes = await _fileRepository.GetFileExtensions();
 
             var usageInfo = new UsageInfoDto
             {
@@ -125,36 +133,16 @@ namespace API.Services
             return usageInfo;
         }
 
-        private async Task<IEnumerable<string>> GetFileExtensions()
-        {
-            var fileExtensions = await _dbContext.MangaFile
-                .AsNoTracking()
-                .Select(x => x.FilePath)
-                .Distinct()
-                .ToArrayAsync();
-
-            var uniqueFileTypes = fileExtensions
-                .Select(Path.GetExtension)
-                .Where(x => x is not null)
-                .Distinct();
-
-            return uniqueFileTypes;
-        }
-
         private static ServerInfoDto GetServerInfo()
         {
-            var appVersion = Assembly.GetEntryAssembly()
-                ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                ?.InformationalVersion;
-
             var serverInfo = new ServerInfoDto
             {
                 Os = RuntimeInformation.OSDescription,
                 DotNetVersion = Environment.Version.ToString(),
                 RunTimeVersion = RuntimeInformation.FrameworkDescription,
-                KavitaVersion = appVersion ?? BuildInfo.Version.ToString(),
-                Culture = CultureInfo.CurrentCulture.Name,
-                BuildBranch = ""
+                KavitaVersion = BuildInfo.Version.ToString(),
+                Culture = Thread.CurrentThread.CurrentCulture.Name,
+                BuildBranch = BuildInfo.Branch
             };
 
             return serverInfo;

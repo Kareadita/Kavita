@@ -15,6 +15,9 @@ namespace API.Entities.Enums
         [Description("Port")]
         Port = 4,
         [Description("BackupDirectory")]
-        BackupDirectory = 5
+        BackupDirectory = 5,
+        [Description("AllowStatCollection")]
+        AllowStatCollection = 6,
+        
     }
 }

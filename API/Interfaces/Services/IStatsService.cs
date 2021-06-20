@@ -8,5 +8,6 @@ namespace API.Interfaces.Services
         Task PathData(ClientInfoDto clientInfoDto);
         Task FinalizeStats();
         Task CollectRelevantData();
+        Task CollectAndSendStatsData();
     }
 }
