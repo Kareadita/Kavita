@@ -24,6 +24,18 @@
             </select>
         </div>
 
+        <div class="form-group">
+            <label for="stat-collection">Allow Anonymous Usage Collection</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="statTooltip" role="button" tabindex="0"></i>
+            <ng-template #statTooltip>Send anonymous usage and error information to Kavita's servers. This includes information on your browser, error reporting as well as OS and runtime version. We will use this information to prioritize features and bug fixes. Requires restart to take effect.</ng-template>
+            <span class="sr-only" id="logging-level-port-help">Send anonymous usage and error information to Kavita's servers. This includes information on your browser, error reporting as well as OS and runtime version. We will use this information to prioritize features and bug fixes. Requires restart to take effect.</span>
+            <div class="form-check">
+                <input id="stat-collection" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="allowStatCollection">
+                <label for="stat-collection" class="form-check-label">Allow Collection</label>
+            </div>
+        </div>
+
+        
+
         <h4>Tasks</h4>
         <div class="form-group">
             <label for="settings-tasks-scan">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
