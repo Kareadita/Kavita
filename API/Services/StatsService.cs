@@ -20,7 +20,7 @@ namespace API.Services
 {
     public class StatsService : IStatsService
     {
-        private const string TempFilePath = "kavita_tmp/";
+        private const string TempFilePath = "stats/";
         private const string TempFileName = "app_stats.json";
 
         private readonly StatsApiClient _client;
