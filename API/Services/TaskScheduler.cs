@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
-using API.Configurations.CustomOptions;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace API.Services
 {
@@ -22,7 +19,6 @@ namespace API.Services
         private readonly IBackupService _backupService;
         private readonly ICleanupService _cleanupService;
 
-        private readonly StatsOptions _statsOptions;
         private readonly IStatsService _statsService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
@@ -30,7 +26,7 @@ namespace API.Services
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-            ICleanupService cleanupService, IStatsService statsService, IOptions<StatsOptions> options)
+            ICleanupService cleanupService, IStatsService statsService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -40,7 +36,6 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
             _statsService = statsService;
-            _statsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         public void ScheduleTasks()
