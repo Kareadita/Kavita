@@ -81,7 +81,7 @@ namespace API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, 
-            IHostApplicationLifetime applicationLifetime, IServiceProvider provider)
+            IHostApplicationLifetime applicationLifetime)
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
