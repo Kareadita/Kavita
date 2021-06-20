@@ -20,6 +20,7 @@ namespace API.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
         {
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+            services.AddScoped<IStatsService, StatsService>();
             services.AddScoped<ITaskScheduler, TaskScheduler>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ITokenService, TokenService>();

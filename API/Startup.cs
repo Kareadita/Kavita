@@ -71,6 +71,8 @@ namespace API
 
             // Add the processing server as IHostedService
             services.AddHangfireServer();
+
+            services.AddStatsOptions(_config).AddStatsClient(_config);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -140,6 +142,7 @@ namespace API
 
             // Any services that should be bootstrapped go here
             taskScheduler.ScheduleTasks();
+            taskScheduler.ScheduleStatsTasks();
         }
         
         private void OnShutdown()

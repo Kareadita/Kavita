@@ -1,11 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
+using API.Configurations.CustomOptions;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace API.Services
 {
@@ -19,11 +22,15 @@ namespace API.Services
         private readonly IBackupService _backupService;
         private readonly ICleanupService _cleanupService;
 
+        private readonly StatsOptions _statsOptions;
+        private readonly IStatsService _statsService;
+
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
+            ICleanupService cleanupService, IStatsService statsService, IOptions<StatsOptions> options)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -32,6 +39,8 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
+            _statsService = statsService;
+            _statsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         public void ScheduleTasks()
@@ -64,6 +73,35 @@ namespace API.Services
             
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
         }
+
+        #region StatsTasks
+
+        private const string CollectDataTask = "collect-data";
+        private const string SendDataTask = "finalize-stats";
+        public void ScheduleStatsTasks()
+        {
+            _logger.LogDebug("Adding StatsTasks");
+            
+            _logger.LogDebug("Scheduling Collect usage data from server {Setting}",
+                $"{nameof(Cron.Daily)} at {_statsOptions.SendDataHour}:{0}");
+            RecurringJob.AddOrUpdate(CollectDataTask, () => _statsService.CollectRelevantData(),
+                Cron.Daily(_statsOptions.SendDataHour, 0));
+
+            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}",
+                $"{nameof(Cron.Daily)} at {_statsOptions.SendDataAt}");
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.FinalizeStats(),
+                Cron.Daily(_statsOptions.SendDataHour, _statsOptions.SendDataMinute));
+        }
+
+        public void CancelStatsTasks()
+        {
+            _logger.LogDebug("Cancelling/Removing StatsTasks");
+
+            RecurringJob.RemoveIfExists(CollectDataTask);
+            RecurringJob.RemoveIfExists(SendDataTask);
+        }
+
+        #endregion
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
