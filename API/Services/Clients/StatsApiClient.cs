@@ -28,7 +28,7 @@ namespace API.Services.Clients
 
             try
             {
-                var response = await _client.PostAsJsonAsync("/api/InstallationStatistics", data);
+                var response = await _client.PostAsJsonAsync("/api/InstallationStats", data);
 
                 responseContent = await response.Content.ReadAsStringAsync();
 
