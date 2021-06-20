@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -149,18 +148,14 @@ namespace API.Services
 
         private static ServerInfoDto GetServerInfo()
         {
-            var appVersion = Assembly.GetEntryAssembly()
-                ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                ?.InformationalVersion;
-
             var serverInfo = new ServerInfoDto
             {
                 Os = RuntimeInformation.OSDescription,
                 DotNetVersion = Environment.Version.ToString(),
                 RunTimeVersion = RuntimeInformation.FrameworkDescription,
-                KavitaVersion = appVersion ?? BuildInfo.Version.ToString(),
-                Culture = CultureInfo.CurrentCulture.Name,
-                BuildBranch = ""
+                KavitaVersion = BuildInfo.Version.ToString(),
+                Culture = Thread.CurrentThread.CurrentCulture.Name,
+                BuildBranch = BuildInfo.Branch
             };
 
             return serverInfo;
