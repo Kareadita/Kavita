@@ -84,13 +84,7 @@ namespace API.Services
             _logger.LogDebug("Adding StatsTasks");
 
             _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
-            RecurringJob.AddOrUpdate(SendDataTask, () => CollectAndSendStatsData(), Cron.Daily);
-        }
-
-        private async Task CollectAndSendStatsData()
-        {
-            await _statsService.CollectRelevantData();
-            await _statsService.FinalizeStats();
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
         }
 
         public void CancelStatsTasks()

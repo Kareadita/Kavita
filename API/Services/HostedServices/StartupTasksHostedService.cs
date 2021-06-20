@@ -46,8 +46,7 @@ namespace API.Services.HostedServices
 
             var statsService = serviceScope.ServiceProvider.GetRequiredService<IStatsService>();
 
-            await statsService.CollectRelevantData();
-            await statsService.FinalizeStats();
+            await statsService.CollectAndSendStatsData();
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

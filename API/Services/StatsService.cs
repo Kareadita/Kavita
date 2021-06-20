@@ -82,6 +82,12 @@ namespace API.Services
             }
         }
 
+        public async Task CollectAndSendStatsData()
+        {
+            await CollectRelevantData();
+            await FinalizeStats();
+        }
+
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
         {
             _logger.LogInformation("Pathing server and usage info to the file");
