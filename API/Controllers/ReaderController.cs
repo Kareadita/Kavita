@@ -66,9 +66,11 @@ namespace API.Controllers
             {
                 ChapterNumber =  chapter.Range,
                 VolumeNumber = volume.Number + string.Empty,
+                VolumeId = volume.Id,
                 FileName = Path.GetFileName(mangaFile.FilePath),
                 SeriesName = series?.Name,
-                IsSpecial = chapter.IsSpecial
+                IsSpecial = chapter.IsSpecial,
+                Pages = chapter.Pages,
             });
         }
 
