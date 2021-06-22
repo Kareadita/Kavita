@@ -29,7 +29,8 @@ namespace API.Data
 
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
-        
+        public IFileRepository FileRepository => new FileRepository(_context);
+
         public bool Commit()
         {
             return _context.SaveChanges() > 0;

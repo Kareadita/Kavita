@@ -63,10 +63,6 @@ namespace API.Services
             }
 
             new DirectoryInfo(extractPath).Flatten();
-            // if (fileCount > 1)
-            // {
-            //     new DirectoryInfo(extractPath).Flatten();
-            // }
 
             return chapter;
         }

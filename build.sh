@@ -76,8 +76,8 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
     
-    echo "Renaming API -> Kavita"
-    mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+    #echo "Renaming API -> Kavita"
+    #mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

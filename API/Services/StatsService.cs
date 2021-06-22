@@ -25,15 +25,15 @@ namespace API.Services
         private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
         private readonly ILogger<StatsService> _logger;
-        private readonly IFileRepository _fileRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger,
-            IFileRepository fileRepository)
+            IUnitOfWork unitOfWork)
         {
             _client = client;
             _dbContext = dbContext;
             _logger = logger;
-            _fileRepository = fileRepository;
+            _unitOfWork = unitOfWork;
         }
 
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
@@ -77,9 +77,9 @@ namespace API.Services
                 _logger.LogInformation("Deleting the file from disk");
                 if (FileExists) File.Delete(FinalPath);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError("Error Finalizing Stats collection flow", e);
+                _logger.LogError(ex, "Error Finalizing Stats collection flow");
                 throw;
             }
         }
@@ -121,7 +121,7 @@ namespace API.Services
                 .Select(x => new LibInfo {Type = x.Key, Count = x.Count()})
                 .ToArrayAsync();
 
-            var uniqueFileTypes = await _fileRepository.GetFileExtensions();
+            var uniqueFileTypes = await _unitOfWork.FileRepository.GetFileExtensions();
 
             var usageInfo = new UsageInfoDto
             {

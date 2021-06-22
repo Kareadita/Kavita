@@ -28,7 +28,7 @@ namespace API.Services.HostedServices
             {
                 await ManageStartupStatsTasks(scope, taskScheduler);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 //If stats startup fail the user can keep using the app
             }

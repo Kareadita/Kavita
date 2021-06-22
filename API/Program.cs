@@ -20,7 +20,7 @@ namespace API
 {
     public class Program
     {
-        private static int HttpPort;
+        private static int _httpPort;
 
         protected Program()
         {
@@ -48,7 +48,7 @@ namespace API
             }
             
             // Get HttpPort from Config
-            HttpPort = Configuration.GetPort(GetAppSettingFilename());
+            _httpPort = Configuration.GetPort(GetAppSettingFilename());
 
 
             var host = CreateHostBuilder(args).Build();
@@ -81,7 +81,7 @@ namespace API
                 {
                     webBuilder.UseKestrel((opts) =>
                     {
-                        opts.ListenAnyIP(HttpPort, options =>
+                        opts.ListenAnyIP(_httpPort, options =>
                         {
                             options.Protocols = HttpProtocols.Http1AndHttp2;
                         });

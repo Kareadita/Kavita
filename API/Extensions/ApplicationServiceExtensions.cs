@@ -1,5 +1,4 @@
-﻿using System;
-using API.Data;
+﻿using API.Data;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -34,7 +33,6 @@ namespace API.Extensions
             services.AddScoped<IBookService, BookService>();
 
             services.AddSqLite(config, env);
-            services.ConfigRepositories();
 
             services.AddLogging(loggingBuilder =>
             {
@@ -56,17 +54,5 @@ namespace API.Extensions
 
             return services;
         }
-
-        private static IServiceCollection ConfigRepositories(this IServiceCollection services)
-        {
-            services.AddScoped<ISettingsRepository, SettingsRepository>();
-            services.AddScoped<IFileRepository, FileRepository>();
-            
-            return services;
-        }
-
-        public static IServiceCollection AddStartupTask<T>(this IServiceCollection services)
-            where T : class, IStartupTask
-            => services.AddTransient<IStartupTask, T>();
     }
 }
