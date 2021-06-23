@@ -48,9 +48,14 @@ Build()
 BuildUI()
 {
     ProgressStart 'Building UI'
+    echo 'Removing old wwwroot'
+    rm -rf API/wwwroot/*
     cd ../Kavita-webui/ || exit
+    echo 'Installing web dependencies'
     npm install
+    echo 'Building UI'
     npm run prod
+    echo 'Copying back to Kavita wwwroot'
     cp -r dist/* ../Kavita/API/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
@@ -76,8 +81,8 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
     
-    #echo "Renaming API -> Kavita"
-    #mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+    echo "Renaming API -> Kavita"
+    mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
