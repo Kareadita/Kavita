@@ -38,6 +38,7 @@ interface HistoryPoint {
 
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
+const SCROLL_PART_TIMEOUT = 5000;
 
 @Component({
   selector: 'app-book-reader',
@@ -89,7 +90,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
 
 
+  /**
+   * Internal property used to capture all the different css properties to render on all elements
+   */
   pageStyles!: PageStyle;
+  /**
+   * List of all font families user can select from
+   */
   fontFamilies: Array<string> = [];
 
   
@@ -100,10 +107,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   topOffset: number = 0; // Offset for drawer and rendering canvas
   scrollbarNeeded = false; // Used for showing/hiding bottom action bar
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
+
   private readonly onDestroy = new Subject<void>();
 
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
+  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [0.5, 0.75, 1] });
+  /**
+   * A simple debounce to allow bookmarking only after X amount of time
+   */
+  allowScrollPartBookmark: boolean = true;
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -198,7 +211,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
         if (alreadyReached.length > 0) {
           this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.currentPageAnchor).subscribe(() => {/* Intentionally blank */});
         } else {
           this.currentPageAnchor = '';
         }
@@ -228,7 +240,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.onDestroy.next();
-
+    this.onDestroy.complete();
+    this.intersectionObserver.disconnect();
   }
 
   ngOnInit(): void {
@@ -298,9 +311,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  handleIntersection(entries: IntersectionObserverEntry[]) {
+    const intersectingEntries = Array.from(entries).filter(entry => entry.isIntersecting).map(entry => entry.target);
+    intersectingEntries.sort((a: Element, b: Element) => {
+      const aTop = a.getBoundingClientRect().top;
+      const bTop = b.getBoundingClientRect().top;
+      if (aTop < bTop) {
+        return -1;
+      }
+      if (aTop > bTop) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    if (intersectingEntries.length > 0) {
+      let path = this.getXPathTo(intersectingEntries[0]);
+        if (path === '') { return; }
+        if (!path.startsWith('id')) {
+          path = '//html[1]/' + path;
+        }
+
+        if (this.allowScrollPartBookmark) {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, path).subscribe(() => {/* No operation */});
+          this.allowScrollPartBookmark = false;
+          setTimeout(() => {
+            this.allowScrollPartBookmark = true;
+          }, SCROLL_PART_TIMEOUT);
+        }
+    }
+  }
+
   loadChapter(pageNum: number, part: string) {
     this.setPageNum(pageNum);
-    this.loadPage(part);
+    this.loadPage('id("' + part + '")');
   }
 
   closeReader() {
@@ -417,6 +462,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setupPageAnchors() {
+    this.readingSectionElemRef.nativeElement.querySelectorAll('*').forEach(elem => {
+      this.intersectionObserver.observe(elem);
+    });
+
     this.pageAnchors = {};
     this.currentPageAnchor = '';
     const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
@@ -440,7 +489,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateReaderStyles();
         this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
 
-        Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))).then(() => {
+        Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img'))
+        .filter(img => !img.complete)
+        .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+        .then(() => {
           this.isLoading = false;
           this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
@@ -667,7 +719,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       partSelector = partSelector.substr(1, partSelector.length);
     }
 
-    const element = document.querySelector('*[id="' + partSelector + '"]');
+    let element = null;
+    if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
+      // Part selector is a XPATH
+      element = this.getElementFromXPath(partSelector);
+    } else {
+      element = document.querySelector('*[id="' + partSelector + '"]');
+    }
+
     if (element === null) return;
 
     window.scroll({
@@ -701,6 +760,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.clickToPaginateVisualOverlay = false;
     }, 1000);
 
+  }
+
+  getElementFromXPath(path: string) {
+    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (node?.nodeType === Node.ELEMENT_NODE) {
+      return node as Element;
+    }
+    return null;
+  }
+
+  getXPathTo(element: any): string {
+    if (element === null) return '';
+    if (element.id !== '') { return 'id("' + element.id + '")'; }
+    if (element === document.body) { return element.tagName; }
+          
+  
+    let ix = 0;
+    const siblings = element.parentNode?.childNodes || [];
+    for (let sibling of siblings) {
+        if (sibling === element) {
+          return this.getXPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
+        }
+        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+          ix++;
+        }
+            
+    }
+    return '';
   }
 
 }

@@ -62,7 +62,13 @@
                         <button (click)="saveSettings()" class="btn btn-primary col" style="margin-left:10px;">Save</button>
                     </div>
                 </div>
-                <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="warning" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
+                <div class="row no-gutters">
+                    <div class="col-1">{{pageNum}}</div>
+                    <div class="col-10" style="margin-top: 9px">
+                        <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="warning" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
+                    </div>
+                    <div class="col-1">{{maxPages - 1}}</div>
+                </div>
                 <div class="table-of-contents">
                     <h3>Table of Contents</h3>
                     <div *ngIf="chapters.length === 0">
