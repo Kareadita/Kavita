@@ -74,6 +74,9 @@ Package()
     cd API
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
     dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    
+    echo "Recopying wwwroot due to bug"
+    cp -r ./wwwroot/* $lOutputFolder/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
