@@ -54,7 +54,6 @@ namespace API.Controllers
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
-            // TODO: Rewrite this into one DB call
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
