@@ -36,13 +36,14 @@ your reading collection with your friends and family!
 [![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Kareadita/Kavita/issues)
 
 ## Setup
+### Non-Docker
 - Unzip the archive for your target OS
 - Place in a directory that is writable. If on windows, do not place in Program Files
 - Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
 - Run Kavita
 - If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
 
-## Docker
+### Docker
 Running your Kavita server in docker is super easy! Barely an inconvenience. You can run it with this command: 
 
 ```
