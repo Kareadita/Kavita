@@ -1,6 +1,6 @@
 {
   "name": "kavita-webui",
-  "version": "0.4.1",
+  "version": "0.4.2.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -17,7 +17,6 @@
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~11.0.0",
-    "@angular/cdk": "^11.0.2",
     "@angular/common": "~11.0.0",
     "@angular/compiler": "~11.0.0",
     "@angular/core": "~11.0.0",

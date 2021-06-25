@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { take } from 'rxjs/operators';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 
@@ -19,13 +20,13 @@ export class ManageSettingsComponent implements OnInit {
   constructor(private settingsService: SettingsService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
-    this.settingsService.getTaskFrequencies().subscribe(frequencies => {
+    this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
       this.taskFrequencies = frequencies;
     });
-    this.settingsService.getLoggingLevels().subscribe(levels => {
+    this.settingsService.getLoggingLevels().pipe(take(1)).subscribe(levels => {
       this.logLevels = levels;
     });
-    this.settingsService.getServerSettings().subscribe((settings: ServerSettings) => {
+    this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
@@ -48,7 +49,7 @@ export class ManageSettingsComponent implements OnInit {
   saveSettings() {
     const modelSettings = this.settingsForm.value;
 
-    this.settingsService.updateServerSettings(modelSettings).subscribe((settings: ServerSettings) => {
+    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');

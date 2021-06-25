@@ -1,0 +1,11 @@
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+.card {
+    width: 18rem;
+}
+
+@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+    .card {
+      width: 80%;
+    }
+}

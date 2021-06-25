@@ -1,3 +1,5 @@
+@import '../../theme/colors';
+
 $center-width: 50%;
 $side-width: 25%;
 
@@ -40,73 +42,28 @@ canvas {
     z-index: 1;
 }
 
+.title, .subtitle {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.filter-dark {
+    filter: brightness(0.65);
+}
+
+.filter-sepia {
+    filter: sepia(80%) hue-rotate(349deg) saturate(200%) brightness(0.65);
+}
+
+.bottom-menu {
+    padding: 20px 20px;
+}
+
 
 .overlay {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
   background-color: rgba(0,0,0,0.5);
-  z-index: 1;
-  cursor: pointer;
   color: white;
-
-  .right {
-    border-left: $dash-width dashed $secondary-color;
-    cursor: pointer;
-
-    p {
-        font-size: 24px;
-        position: absolute;
-        height: 100%;
-        z-index: 1;
-        top: 65%;
-        right: $pointer-offset;
-        color: $secondary-color;
-    }
-
-    i {
-        font-size: 70px;
-        position: absolute;
-        height: 100%;
-        z-index: 1;
-        top: 50%;
-        right: $pointer-offset;
-        color: $secondary-color;
-      }
-  }
-  .left {
-    border-right: $dash-width dashed $secondary-color;
-    cursor: pointer;
-
-    p {
-        font-size: 24px;
-        position: absolute;
-        height: 100%;
-        z-index: 1;
-        top: 65%;
-        left: $pointer-offset;
-        color: $secondary-color;
-    }
-
-    i {
-        font-size: 70px;
-        position: absolute;
-        height: 100%;
-        z-index: 1;
-        top: 50%;
-        left: $pointer-offset;
-        color: $secondary-color;
-      }
-
-  }
-
-
-
-  
 }
 
 // Fitting Options
@@ -148,12 +105,24 @@ canvas {
     padding-right: 10px;
 }
 
+
 .right {
     position: fixed;
     right: 0px;
     top: 0px;
     width: $side-width;
     height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.top {
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    width: 100%;
+    height: $side-width;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
@@ -169,3 +138,116 @@ canvas {
     z-index: 2;
     cursor: pointer;
 }
+
+.bottom {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: $side-width;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+
+// Splitting Icon
+.split {
+    height: 20px;
+    width: 40px;
+    z-index: 1;
+    top: 0;
+    overflow: hidden;
+    border: 2px solid #ccc;
+
+    &::before {
+        margin-left: 30%;
+    }
+
+    /* Control the left side */
+    .left-side {
+        height: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+    
+    /* Control the right side */
+    .right-side {
+        height: 20px;
+        margin-left: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+
+    .none {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  ::ng-deep {
+    .custom-slider .ngx-slider .ngx-slider-bar {
+      background: #e9ffe2;
+      height: 2px;
+    }
+    .custom-slider .ngx-slider .ngx-slider-selection {
+      background: $primary-color;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer {
+      width: 8px;
+      height: 16px;
+      top: auto; /* to remove the default positioning */
+      bottom: 0;
+      background-color: $primary-color; // #333;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer:after {
+      display: none;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-bubble {
+      bottom: 14px;
+      font-weight: bold;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-limit {
+      font-weight: bold;
+      color: $primary-color;
+    }
+
+  
+    .custom-slider .ngx-slider .ngx-slider-tick {
+      width: 1px;
+      height: 10px;
+      margin-left: 4px;
+      border-radius: 0;
+      background: #ffe4d1;
+      top: -1px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+      background: $primary-color;
+    }
+  }
+
+  .webtoon-images {
+      text-align: center;
+  }
+
+  .highlight {
+      background-color: rgba(65, 105, 225, 0.5) !important;
+      animation: fadein .5s both;
+  }
+  .highlight-2 {
+    background-color: rgba(65, 225, 100, 0.5) !important;
+    animation: fadein .5s both;
+  }
+
+  // DEBUG
+  .active-image {
+      border: 5px solid red;
+  }

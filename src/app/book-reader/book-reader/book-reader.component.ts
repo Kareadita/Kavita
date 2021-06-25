@@ -385,7 +385,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   addLinkClickHandlers() {
     var links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
-      links.forEach(link => {
+      links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
           var page = parseInt(e.target.attributes['kavita-page'].value, 10);
@@ -678,6 +678,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       readingDirection: this.user.preferences.readingDirection, 
       scalingOption: this.user.preferences.scalingOption, 
       pageSplitOption: this.user.preferences.pageSplitOption, 
+      autoCloseMenu: this.user.preferences.autoCloseMenu,
+      readerMode: this.user.preferences.readerMode,
       bookReaderDarkMode: this.darkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),

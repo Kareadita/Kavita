@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Bookmark } from '../_models/bookmark';
 import { Chapter } from '../_models/chapter';
@@ -13,6 +14,9 @@ export class ReaderService {
 
   baseUrl = environment.apiUrl;
 
+  // Override background color for reader and restore it onDestroy
+  private originalBodyColor!: string;
+
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getBookmark(chapterId: number) {
@@ -23,8 +27,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
-  getChapterPath(chapterId: number) {
-    return this.httpClient.get(this.baseUrl + 'reader/chapter-path?chapterId=' + chapterId, {responseType: 'text'});
+  getChapterInfo(chapterId: number) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
@@ -70,5 +74,33 @@ export class ReaderService {
     }
 
     return currentlyReadingChapter;
+  }
+
+  /**
+   * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
+   */
+  setOverrideStyles() {
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null) {
+      this.originalBodyColor = bodyNode.style.background;
+      bodyNode.setAttribute('style', 'background-color: black !important');
+    }
+  }
+
+  resetOverrideStyles() {
+    const bodyNode = document.querySelector('body');
+    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
+      bodyNode.style.background = this.originalBodyColor;
+    }
+  }
+
+  /**
+   * Parses out the page number from a Image src url
+   * @param imageSrc Src attribute of Image
+   * @returns 
+   */
+  imageUrlToPageNum(imageSrc: string) {
+    if (imageSrc === undefined || imageSrc === '') { return -1; }
+    return parseInt(imageSrc.split('&page=')[1], 10);
   }
 }

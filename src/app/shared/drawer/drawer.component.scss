@@ -1,4 +1,5 @@
 :host {
+    --drawer-height: 100vh;
     --drawer-width: 400px;
     --drawer-top-offset: 0px;
     --drawer-background-color: '#fff';
@@ -28,6 +29,28 @@
       left: calc(-1 * var(--drawer-width));
       &.is-open {
         left: 0;
+      }
+    }
+
+    &.position-bottom {
+      //top: calc(-1 * var(--drawer-height));
+      top: 100vh;
+      height: 0px;
+      &.is-open {
+        //bottom: 0;
+        top: 100vh;
+        height: var(--drawer-height);
+      }
+    }
+
+    &.position-top {
+      //bottom: calc(-1 * var(--drawer-height));
+      top: 0px;
+      height: 0px;
+      &.is-open {
+        //bottom: 0;
+        top: 0px;
+        height: var(--drawer-height);
       }
     }
   }

@@ -2,10 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { Preferences } from '../_models/preferences/preferences';
-import { ReadingDirection } from '../_models/preferences/reading-direction';
-import { ScalingOption } from '../_models/preferences/scaling-option';
+import { pageSplitOptions, Preferences, readingDirections, scalingOptions, readingModes } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { Options } from '@angular-slider/ngx-slider';
@@ -19,9 +16,10 @@ import { NavService } from '../_services/nav.service';
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
-  readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];
-  scalingOptions = [{text: 'Automatic', value: ScalingOption.Automatic}, {text: 'Fit to Height', value: ScalingOption.FitToHeight}, {text: 'Fit to Width', value: ScalingOption.FitToWidth}, {text: 'Original', value: ScalingOption.Original}];
-  pageSplitOptions = [{text: 'Right to Left', value: PageSplitOption.SplitRightToLeft}, {text: 'Left to Right', value: PageSplitOption.SplitLeftToRight}, {text: 'No Split', value: PageSplitOption.NoSplit}];
+  readingDirections = readingDirections;
+  scalingOptions = scalingOptions;
+  pageSplitOptions = pageSplitOptions;
+  readingModes = readingModes;
 
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
@@ -61,10 +59,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
           this.user.preferences.bookReaderFontFamily = 'default';
         }
-
+        
         this.settingsForm.addControl('readingDirection', new FormControl(user.preferences.readingDirection, []));
         this.settingsForm.addControl('scalingOption', new FormControl(user.preferences.scalingOption, []));
         this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));
+        this.settingsForm.addControl('autoCloseMenu', new FormControl(user.preferences.autoCloseMenu, []));
+        this.settingsForm.addControl('readerMode', new FormControl(user.preferences.readerMode, []));
         this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []));
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
@@ -97,6 +97,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     if (this.user === undefined) { return; }
     this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection);
     this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption);
+    this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
+    this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
     this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
     this.settingsForm.get('bookReaderDarkMode')?.setValue(this.user.preferences.bookReaderDarkMode);
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
@@ -121,6 +123,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       readingDirection: parseInt(modelSettings.readingDirection, 10), 
       scalingOption: parseInt(modelSettings.scalingOption, 10), 
       pageSplitOption: parseInt(modelSettings.pageSplitOption, 10), 
+      autoCloseMenu: modelSettings.autoCloseMenu, 
+      readerMode: parseInt(modelSettings.readerMode), 
       bookReaderDarkMode: modelSettings.bookReaderDarkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,

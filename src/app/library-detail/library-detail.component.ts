@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { take } from 'rxjs/operators';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { LibraryService } from '../_services/library.service';
@@ -27,7 +28,7 @@ export class LibraryDetailComponent implements OnInit {
     }
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
-    this.libraryService.getLibraryNames().subscribe(names => {
+    this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
     })
@@ -46,7 +47,7 @@ export class LibraryDetailComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingSeries = true;
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;
