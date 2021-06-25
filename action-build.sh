@@ -46,7 +46,7 @@ Package()
     dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
     echo "Integrity check on build API folder"
-    ls -l "$lOutputFolder"
+    ls -l "$lOutputFolder"/wwwroot
 
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
