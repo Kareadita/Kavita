@@ -36,9 +36,9 @@ namespace API.Services.HostedServices
 
         private async Task ManageStartupStatsTasks(IServiceScope serviceScope, ITaskScheduler taskScheduler)
         {
-            var settingsRepository = serviceScope.ServiceProvider.GetRequiredService<ISettingsRepository>();
+            var unitOfWork = serviceScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            var settingsDto = await settingsRepository.GetSettingsDtoAsync();
+            var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
             if (!settingsDto.AllowStatCollection) return;
 

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Services.HostedServices;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -64,7 +65,6 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
-                
             }
             catch (Exception ex)
             {
