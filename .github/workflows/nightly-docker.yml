@@ -33,10 +33,10 @@ jobs:
           echo 'Checking dist folder for compiling integrity'
           ls -l dist
           echo 'Copying back to Kavita wwwroot'
-          mkdir ../API/wwwroot
-          cp -r dist/* ../API/wwwroot
+          mkdir ../Kavita/API/wwwroot
+          cp -r dist/* ../Kavita/API/wwwroot
           echo 'Checking Kavita wwwroot for copying integrity'
-          ls -l ../API/wwwroot
+          ls -l ../Kavita/API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
