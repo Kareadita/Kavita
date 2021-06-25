@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 using API.Configurations.CustomOptions;
@@ -15,6 +16,7 @@ namespace API.Services.Clients
         private readonly HttpClient _client;
         private readonly StatsOptions _options;
         private readonly ILogger<StatsApiClient> _logger;
+        private const string ApiUrl = "http://stats.kavitareader.com";
 
         public StatsApiClient(HttpClient client, IOptions<StatsOptions> options, ILogger<StatsApiClient> logger)
         {
@@ -29,7 +31,7 @@ namespace API.Services.Clients
 
             try
             {
-                var response = await _client.PostAsJsonAsync("/api/InstallationStats", data);
+                using var response = await _client.PostAsJsonAsync(ApiUrl + "/api/InstallationStats", data);
 
                 responseContent = await response.Content.ReadAsStringAsync();
 
