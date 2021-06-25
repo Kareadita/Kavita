@@ -55,7 +55,7 @@ Package()
     cp -r wwwroot/* "$lOutputFolder"/wwwroot/
 
     echo "Integrity check on Kavita wwwroot folder"
-    ls -l "$lOutputFolder"/Kavita/wwwroot
+    ls -l "$lOutputFolder"/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
