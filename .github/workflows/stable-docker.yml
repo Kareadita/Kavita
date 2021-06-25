@@ -28,7 +28,6 @@ jobs:
           cd Kavita-webui/ || exit
           npm install
           npm run prod
-          mv dist/ ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
@@ -61,3 +60,15 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
+        
+      - name: Notify Discord
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+            severity: info
+            description: 
+            details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
+            text: A new stable build has been released for docker.
+            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}

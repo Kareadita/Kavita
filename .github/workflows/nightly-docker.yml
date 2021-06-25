@@ -28,7 +28,6 @@ jobs:
           cd Kavita-webui/ || exit
           npm install
           npm run prod
-          mv dist/ ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app

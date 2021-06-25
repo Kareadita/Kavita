@@ -21,7 +21,6 @@ Build()
 
     slnFile=Kavita.sln
 
-    dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
 	dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID
@@ -48,9 +47,6 @@ Package()
     
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
-    
-    echo "Renaming API -> Kavita"
-    mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
