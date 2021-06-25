@@ -32,8 +32,13 @@ jobs:
           npm install
           echo 'Building UI'
           npm run prod
+          echo 'Checking dist folder for compiling integrity'
+          ls -l dist
           echo 'Copying back to Kavita wwwroot'
+          mkdir ../API/wwwroot
           cp -r dist/* ../API/wwwroot
+          echo 'Checking Kavita wwwroot for copying integrity'
+          ls -l ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app

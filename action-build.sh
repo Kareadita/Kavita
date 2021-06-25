@@ -34,6 +34,9 @@ Package()
     local runtime="$2"
     local lOutputFolder=../_output/"$runtime"/Kavita
 
+    echo "Integrity check on root folder"
+    ls -l
+
     ProgressStart "Creating $runtime Package for $framework"
 
     # TODO: Use no-restore? Because Build should have already done it for us
@@ -42,8 +45,14 @@ Package()
     echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
     dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
+    echo "Integrity check on API wwwroot folder"
+    ls -l "$lOutputFolder"/wwwroot
+
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+
+    echo "Integrity check on Kavita wwwroot folder"
+    ls -l "$lOutputFolder"/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
@@ -69,8 +78,10 @@ BuildUI()
     npm install
     echo 'Building UI'
     npm run prod
+    ls -l dist
     echo 'Copying back to Kavita wwwroot'
     cp -r dist/* ../Kavita/API/wwwroot
+    ls -l ../Kavita/API/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }

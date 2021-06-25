@@ -25,15 +25,24 @@ jobs:
         with:
           node-version: '14'
       - run: |
-          echo 'Removing old wwwroot'
-          rm -rf API/wwwroot/*
+          echo 'Checking folder structure'
+          ls -l
+
           cd Kavita-webui/ || exit
           echo 'Installing web dependencies'
           npm install
+
           echo 'Building UI'
           npm run prod
+
+          echo 'Checking dist folder for compiling integrity'
+          ls -l dist
+
           echo 'Copying back to Kavita wwwroot'
-          cp -r dist/* ../API/wwwroot
+          rsync -a dist/ ../API/wwwroot/
+
+          echo 'Checking Kavita wwwroot for copying integrity'
+          ls -l ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
