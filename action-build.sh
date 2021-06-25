@@ -69,8 +69,10 @@ BuildUI()
     npm install
     echo 'Building UI'
     npm run prod
+    ls -l dist
     echo 'Copying back to Kavita wwwroot'
     cp -r dist/* ../Kavita/API/wwwroot
+    ls -l ../Kavita/API/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }
