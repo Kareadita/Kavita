@@ -16,7 +16,6 @@ namespace API.Extensions
         {
             services.AddHttpClient<StatsApiClient>(client =>
             {
-                client.BaseAddress = new Uri("https://stats.kavitareader.com");
                 client.DefaultRequestHeaders.Add("api-key", "MsnvA2DfQqxSK5jh");
             });
 
