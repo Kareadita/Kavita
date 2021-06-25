@@ -34,6 +34,9 @@ Package()
     local runtime="$2"
     local lOutputFolder=../_output/"$runtime"/Kavita
 
+    echo "Integrity check on root folder"
+    ls -l
+
     ProgressStart "Creating $runtime Package for $framework"
 
     # TODO: Use no-restore? Because Build should have already done it for us
