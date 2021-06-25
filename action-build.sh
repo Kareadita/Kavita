@@ -34,9 +34,6 @@ Package()
     local runtime="$2"
     local lOutputFolder=../_output/"$runtime"/Kavita
 
-    echo "Integrity check on wwwroot folder"
-    ls -l API/wwwroot
-
     ProgressStart "Creating $runtime Package for $framework"
 
     # TODO: Use no-restore? Because Build should have already done it for us
@@ -45,17 +42,11 @@ Package()
     echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
     dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
-    echo "Integrity check on build API folder"
-    ls -l "$lOutputFolder"/wwwroot
-
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
-    echo "Copying wwwroot"
+    echo "Copying webui wwwroot to build"
     cp -r wwwroot/* "$lOutputFolder"/wwwroot/
-
-    echo "Integrity check on Kavita wwwroot folder"
-    ls -l "$lOutputFolder"/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
