@@ -43,7 +43,7 @@ jobs:
           rsync -a dist/ ../API/wwwroot/
 
           echo 'Checking Kavita wwwroot for copying integrity'
-          ls -l ../API/wwwroot
+          ls -l ../Kavita/API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
