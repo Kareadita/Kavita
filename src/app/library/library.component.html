@@ -14,13 +14,13 @@
 
     <app-carousel-reel [items]="inProgress" title="In Progress" (sectionClick)="handleSectionClick($event)">
         <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadSeries()"></app-series-card>
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
         </ng-template>
     </app-carousel-reel>
 
     <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
         <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadSeries()"></app-series-card>
+            <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
         </ng-template>
     </app-carousel-reel>
 

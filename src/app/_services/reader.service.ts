@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+//import * as console.log from 'console.log';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';

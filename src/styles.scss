@@ -1,11 +1,12 @@
+// Import colors for overrides of bootstrap theme
+@import './theme/_colors.scss';
+@import './theme/_toastr.scss';
+
+// Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
 
 @import '~swiper/swiper.scss';
-
-// Import colors for overrides of bootstrap theme
-@import './theme/_colors.scss';
-@import './theme/_toastr.scss';
 
 // Custom animation for ng-lazyload-image
 img.ng-lazyloaded {
