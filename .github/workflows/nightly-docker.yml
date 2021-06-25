@@ -33,7 +33,7 @@ jobs:
           echo 'Building UI'
           npm run prod
           echo 'Copying back to Kavita wwwroot'
-          cp -r dist/* ../Kavita/API/wwwroot
+          cp -r dist/* ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
