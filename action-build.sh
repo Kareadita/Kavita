@@ -52,7 +52,7 @@ Package()
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Copying wwwroot"
-    rsync -a wwwroot/ "$lOutputFolder"/Kavita/wwwroot/
+    cp -r wwwroot/* "$lOutputFolder"/wwwroot/
 
     echo "Integrity check on Kavita wwwroot folder"
     ls -l "$lOutputFolder"/Kavita/wwwroot
