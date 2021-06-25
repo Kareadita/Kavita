@@ -39,11 +39,10 @@ jobs:
           ls -l dist
 
           echo 'Copying back to Kavita wwwroot'
-          mkdir ../API/wwwroot
           rsync -a dist/ ../API/wwwroot/
 
           echo 'Checking Kavita wwwroot for copying integrity'
-          ls -l ../Kavita/API/wwwroot
+          ls -l ../API/wwwroot
           cd ../ || exit
 
       - name: Compile dotnet app
