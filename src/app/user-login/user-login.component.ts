@@ -28,6 +28,7 @@ export class UserLoginComponent implements OnInit {
   }
 
   validateAdmin() {
+    this.navService.hideNavBar();
     this.memberService.adminExists().subscribe(res => {
       if (!res) {
         this.router.navigateByUrl('/home');
@@ -40,6 +41,7 @@ export class UserLoginComponent implements OnInit {
     this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
+      this.navService.showNavBar();
       this.router.navigateByUrl('/library');
     }, err => {
       this.toastr.error(err.error);

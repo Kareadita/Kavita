@@ -57,6 +57,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   logout() {
     this.accountService.logout();
+    this.navService.hideNavBar();
     this.router.navigateByUrl('/home');
   }
 

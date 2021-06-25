@@ -1,11 +1,11 @@
-// Import colors for overrides of bootstrap theme
-@import './theme/colors';
-
 @import '~bootstrap/scss/bootstrap';
 @import '~bootstrap/scss/mixins/_breakpoints.scss';
 
-@import '~ngx-toastr/toastr-bs4-alert';
 @import '~swiper/swiper.scss';
+
+// Import colors for overrides of bootstrap theme
+@import './theme/_colors.scss';
+@import './theme/_toastr.scss';
 
 // Custom animation for ng-lazyload-image
 img.ng-lazyloaded {
@@ -35,6 +35,11 @@ label, select, .clickable {
 @font-face {
   font-family: "EBGarmond";
   src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Spartan";
+  src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
 }
 
 html, body { height: 100%; }
