@@ -1,4 +1,4 @@
-name: CI to Docker Hub
+name: Build Stable Docker
 
 on:
   push:
@@ -57,9 +57,6 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: kizaing/kavita:latest
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

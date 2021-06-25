@@ -1,6 +1,6 @@
 #This Dockerfile creates a build for all architectures
 
-#Production image
+#Image that copies in the files and passes them to the main image
 FROM ubuntu:focal AS copytask
 
 ARG TARGETPLATFORM
@@ -8,12 +8,15 @@ ARG TARGETPLATFORM
 #Move the output files to where they need to be
 RUN mkdir /files
 COPY _output/*.tar.gz /files/
+COPY Kavita-webui/dist /files/wwwroot
 COPY copy_runtime.sh /copy_runtime.sh
 RUN /copy_runtime.sh
 
+#Production image
 FROM ubuntu:focal
 
-COPY --from=copytask /kavita /kavita
+COPY --from=copytask /Kavita /kavita
+COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
