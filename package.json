@@ -1,6 +1,6 @@
 {
   "name": "kavita-webui",
-  "version": "0.4.2.0",
+  "version": "0.4.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
