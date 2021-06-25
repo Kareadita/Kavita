@@ -289,7 +289,7 @@ namespace API.Data
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
-        /// <param name="limit">How many series to pick.</param>
+        /// <param name="userParams">Contains pagination information</param>
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams)
         {

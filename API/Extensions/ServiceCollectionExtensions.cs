@@ -16,7 +16,7 @@ namespace API.Extensions
         {
             services.AddHttpClient<StatsApiClient>(client =>
             {
-                client.BaseAddress = new Uri("http://stats.kavitareader.com");
+                client.BaseAddress = new Uri("https://kavitastats.majora2007.duckdns.org");
                 client.DefaultRequestHeaders.Add("api-key", "MsnvA2DfQqxSK5jh");
             });
 

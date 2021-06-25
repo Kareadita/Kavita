@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Services.HostedServices;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +21,7 @@ namespace API
 {
     public class Program
     {
-        private static int HttpPort;
+        private static int _httpPort;
 
         protected Program()
         {
@@ -48,7 +49,7 @@ namespace API
             }
             
             // Get HttpPort from Config
-            HttpPort = Configuration.GetPort(GetAppSettingFilename());
+            _httpPort = Configuration.GetPort(GetAppSettingFilename());
 
 
             var host = CreateHostBuilder(args).Build();
@@ -64,7 +65,6 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
-                
             }
             catch (Exception ex)
             {
@@ -81,7 +81,7 @@ namespace API
                 {
                     webBuilder.UseKestrel((opts) =>
                     {
-                        opts.ListenAnyIP(HttpPort, options =>
+                        opts.ListenAnyIP(_httpPort, options =>
                         {
                             options.Protocols = HttpProtocols.Http1AndHttp2;
                         });

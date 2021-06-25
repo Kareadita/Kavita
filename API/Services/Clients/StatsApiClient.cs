@@ -2,20 +2,25 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
+
+using API.Configurations.CustomOptions;
 using API.DTOs;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace API.Services.Clients
 {
     public class StatsApiClient
     {
         private readonly HttpClient _client;
+        private readonly StatsOptions _options;
         private readonly ILogger<StatsApiClient> _logger;
 
-        public StatsApiClient(HttpClient client, ILogger<StatsApiClient> logger)
+        public StatsApiClient(HttpClient client, IOptions<StatsOptions> options, ILogger<StatsApiClient> logger)
         {
             _client = client;
             _logger = logger;
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
         public async Task SendDataToStatsServer(UsageStatisticsDto data)

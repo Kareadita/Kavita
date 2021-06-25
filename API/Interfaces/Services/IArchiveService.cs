@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Threading.Tasks;
 using API.Archive;
-using API.Entities;
 
 namespace API.Interfaces.Services
 {

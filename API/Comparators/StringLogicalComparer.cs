@@ -2,7 +2,7 @@
 // Version 2
 // Taken from: https://www.codeproject.com/Articles/11016/Numeric-String-Sort-in-C
 
-using System;
+using static System.Char;
 
 namespace API.Comparators
 {
@@ -20,26 +20,26 @@ namespace API.Comparators
 			if (string.IsNullOrEmpty(s2)) return -1;
 
 			//WE style, special case
-			var sp1 = Char.IsLetterOrDigit(s1, 0);
-			var sp2 = Char.IsLetterOrDigit(s2, 0);
+			var sp1 = IsLetterOrDigit(s1, 0);
+			var sp2 = IsLetterOrDigit(s2, 0);
 			if(sp1 && !sp2) return 1;
 			if(!sp1 && sp2) return -1;
 
 			int i1 = 0, i2 = 0; //current index
 			while(true)
 			{
-				var c1 = Char.IsDigit(s1, i1);
-				var c2 = Char.IsDigit(s2, i2);
+				var c1 = IsDigit(s1, i1);
+				var c2 = IsDigit(s2, i2);
 				int r; // temp result
 				if(!c1 && !c2)
 				{
-					bool letter1 = Char.IsLetter(s1, i1);
-					bool letter2 = Char.IsLetter(s2, i2);
+					bool letter1 = IsLetter(s1, i1);
+					bool letter2 = IsLetter(s2, i2);
 					if((letter1 && letter2) || (!letter1 && !letter2))
 					{
 						if(letter1 && letter2)
 						{
-							r = Char.ToLower(s1[i1]).CompareTo(Char.ToLower(s2[i2]));
+							r = ToLower(s1[i1]).CompareTo(ToLower(s2[i2]));
 						}
 						else
 						{
@@ -114,8 +114,8 @@ namespace API.Comparators
 		{
 			nzStart = start;
 			end = start;
-			bool countZeros = true;
-			while(Char.IsDigit(s, end))
+			var countZeros = true;
+			while(IsDigit(s, end))
 			{
 				if(countZeros && s[end].Equals('0'))
 				{
