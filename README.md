@@ -19,15 +19,16 @@ your reading collection with your friends and family!
 </div>
 
 ## Goals
-- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, mobi, azw, djvu, pdf)
+- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar (RAR5 not supported), 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
-- [x] Provide a dark theme for web app
+- [x] Dark and Light themes
+- [x] Dedicated ebook reader, manga/comic reader, and webtoon reader
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
 - [ ] Metadata should allow for collections, want to read integration from 3rd party services, genres.
-- [x] Ability to manage users, access, and ratings
+- [x] Ability to manage users, access, and ratings/reviews
 - [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
-- [x] Dedicated webtoon reader
+- [x] No requried folder structures
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 ## Support
@@ -80,12 +81,11 @@ Got a great idea? Throw it up on the FeatHub or vote on another idea. Please che
 ## Contributors
 
 This project exists thanks to all the people who contribute. [Contribute](CONTRIBUTING.md).
-<a href="https://github.com/Kareadita/Kavita/graphs/contributors"><img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false" /></a>
-
+<a href="https://github.com/Kareadita/Kavita/graphs/contributors"><img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false"></a>
 
 ## Donate
 If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards 
-expenses related to Kavita. You can back us through OpenCollective.
+expenses related to Kavita. You can back us through [OpenCollective](https://opencollective.com/Kavita#sponsor) and get your name in the README as thanks.
 
 [![Donate via Paypal](https://img.shields.io/badge/donate-paypal-blue.svg?style=popout&logo=paypal)](https://paypal.me/majora2007?locale.x=en_US)
 
