@@ -18,15 +18,7 @@ your reading collection with your friends and family!
 [![Sponsors on Open Collective](https://opencollective.com/kavita/sponsors/badge.svg)](#sponsors)
 </div>
 
-# Demo
-[https://demo.kavitareader.com/](https://demo.kavitareader.com/)
-
-```
-Username: demouser
-Password: Demouser64
-```
-
-## Features
+## Goals
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, mobi, azw, djvu, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Provide a dark theme for web app
@@ -46,8 +38,8 @@ Password: Demouser64
 ## Setup
 ### Non-Docker
 - Unzip the archive for your target OS
-- Place in a directory that is writable. If on windows, do not place in Program Files, this folder is protected by Windows.
-- Linux users must ensure the directory is writable by Kavita (chown +x Kavita)
+- Place in a directory that is writable. If on windows, do not place in Program Files
+- Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
 - Run Kavita
 - If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
 
