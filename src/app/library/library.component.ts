@@ -91,8 +91,6 @@ export class LibraryComponent implements OnInit {
       this.router.navigate(['collections']);
     } else if (sectionTitle.toLowerCase() === 'recently added') {
       this.router.navigate(['recently-added']);
-    } else if (sectionTitle.toLowerCase() === 'in progress') {
-      this.router.navigate(['in-progress']);
     }
   }
 

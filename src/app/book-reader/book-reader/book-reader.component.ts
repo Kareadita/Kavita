@@ -112,11 +112,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [0.5, 0.75, 1] });
+  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [1] });
   /**
-   * A simple debounce to allow bookmarking only after X amount of time
+   * Last seen bookmark part path
    */
-  allowScrollPartBookmark: boolean = true;
+  lastSeenScrollPartPath: string = '';
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -183,7 +183,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
   
-          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.subscribe(changes => {
+          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
             this.updateFontFamily(changes);
           });
         }
@@ -202,7 +202,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
         if (Object.keys(this.pageAnchors).length === 0) return;
-      
         // get the height of the document so we can capture markers that are halfway on the document viewport
         const verticalOffset = (window.pageYOffset 
           || document.documentElement.scrollTop 
@@ -213,6 +212,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
         } else {
           this.currentPageAnchor = '';
+        }
+
+        if (this.lastSeenScrollPartPath !== '') {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
     });
   }
@@ -259,7 +262,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
-    this.memberService.hasReadingProgress(this.libraryId).subscribe(hasProgress => {
+    this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
         this.toggleDrawer();
         this.toastr.info('You can modify book settings, save those settings for all books, and view table of contents from the drawer.');
@@ -271,7 +274,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bookmark: this.readerService.getBookmark(this.chapterId),
       chapters: this.bookService.getBookChapters(this.chapterId),
       info: this.bookService.getBookInfo(this.chapterId)
-    }).subscribe(results => {
+    }).pipe(take(1)).subscribe(results => {
       this.chapter = results.chapter;
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
@@ -282,7 +285,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
-        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
+        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
       }
 
       // Check if user bookmark has part, if so load it so we scroll to it
@@ -332,14 +335,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (!path.startsWith('id')) {
           path = '//html[1]/' + path;
         }
-
-        if (this.allowScrollPartBookmark) {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, path).subscribe(() => {/* No operation */});
-          this.allowScrollPartBookmark = false;
-          setTimeout(() => {
-            this.allowScrollPartBookmark = true;
-          }, SCROLL_PART_TIMEOUT);
-        }
+        this.lastSeenScrollPartPath = path;
     }
   }
 
@@ -462,7 +458,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setupPageAnchors() {
-    this.readingSectionElemRef.nativeElement.querySelectorAll('*').forEach(elem => {
+    this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
       this.intersectionObserver.observe(elem);
     });
 
@@ -480,9 +476,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
 
-    this.bookService.getBookPage(this.chapterId, this.pageNum).subscribe(content => {
+    this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
       setTimeout(() => {
         this.addLinkClickHandlers();
@@ -689,7 +685,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bookReaderReadingDirection: this.readingDirection,
       siteDarkMode: this.user.preferences.siteDarkMode,
     };
-    this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
       this.toastr.success('User settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
