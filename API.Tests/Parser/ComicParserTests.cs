@@ -20,6 +20,8 @@ namespace API.Tests.Parser
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "Scott Pilgrim")]
         [InlineData("Wolverine - Origins 003 (2006) (digital) (Minutemen-PhD)", "Wolverine - Origins")]
         [InlineData("Invincible Vol 01 Family matters (2005) (Digital).cbr", "Invincible")]
+        [InlineData("Amazing Man Comics chapter 25", "Amazing Man Comics")]
+        [InlineData("Amazing Man Comics issue #25", "Amazing Man Comics")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -40,6 +42,7 @@ namespace API.Tests.Parser
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "2")]
         [InlineData("Superman v1 024 (09-10 1943)", "1")]
+        [InlineData("Amazing Man Comics chapter 25", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -61,6 +64,7 @@ namespace API.Tests.Parser
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Superman v1 024 (09-10 1943)", "24")]
         [InlineData("Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr", "70.5")]
+        [InlineData("Amazing Man Comics chapter 25", "25")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

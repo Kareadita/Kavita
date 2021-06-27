@@ -200,6 +200,14 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.*)(?: |_)v\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Amazing Man Comics chapter 25
+            new Regex(
+                @"^(?<Series>.*)(?: |_)c(hapter) \d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Amazing Man Comics issue 25
+            new Regex(
+                @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: \d+)",
@@ -242,11 +250,11 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
-                @"^(?<Series>.*)(?: |_)(?<!of )(?<Volume>\d+)",
+                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?<!of)(?: (?<Volume>\d+))",
+                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Batman & Robin the Teen Wonder #0
             new Regex(
@@ -283,6 +291,14 @@ namespace API.Parser
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
                 @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Amazing Man Comics chapter 25
+            new Regex(
+                @"^(?!Vol)(?<Series>.*)( |_)c(hapter)( |_)(?<Chapter>\d*)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Amazing Man Comics issue #25
+            new Regex(
+                @"^(?!Vol)(?<Series>.*)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
         };
 
