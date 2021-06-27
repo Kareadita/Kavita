@@ -204,7 +204,7 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.*)(?: |_)c(hapter) \d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Amazing Man Comics issue 25
+            // Amazing Man Comics issue #25
             new Regex(
                 @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
