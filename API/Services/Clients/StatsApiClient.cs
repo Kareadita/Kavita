@@ -16,7 +16,7 @@ namespace API.Services.Clients
         private readonly HttpClient _client;
         private readonly StatsOptions _options;
         private readonly ILogger<StatsApiClient> _logger;
-        private const string ApiUrl = "https://stats.kavitareader.com";
+        private const string ApiUrl = "http://stats.kavitareader.com";
 
         public StatsApiClient(HttpClient client, IOptions<StatsOptions> options, ILogger<StatsApiClient> logger)
         {
