@@ -13,7 +13,7 @@ then
 	rm /kavita/appsettings.json
 	ln -s /kavita/data/appsettings.json /kavita/
 else
-	mv /kavita/appsettings.json /kavita/data/
+	mv /kavita/appsettings.json /kavita/data/ || true
 	ln -s /kavita/data/appsettings.json /kavita/
 fi
 
@@ -55,11 +55,11 @@ then
 else
 	if [ -d /kavita/data/logs ]
 	then
-		touch /kavita/data/logs/kavita.log
+		echo "" > /kavita/data/logs/kavita.log || true
 		ln -s /kavita/data/logs/kavita.log /kavita/
 	else
 		mkdir /kavita/data/logs
-		touch /kavita/data/logs/kavita.log
+		echo "" > /kavita/data/logs/kavita.log || true
 		ln -s /kavita/data/logs/kavita.log /kavita/
 	fi
 
