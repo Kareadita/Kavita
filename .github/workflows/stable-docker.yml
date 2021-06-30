@@ -1,4 +1,4 @@
-name: CI to Docker Hub
+name: Build Stable Docker
 
 on:
   push:
@@ -25,20 +25,17 @@ jobs:
         with:
           node-version: '14'
       - run: |
-          echo 'Removing old wwwroot'
-          rm -rf API/wwwroot/*
+
           cd Kavita-webui/ || exit
           echo 'Installing web dependencies'
           npm install
+
           echo 'Building UI'
           npm run prod
-          echo 'Checking dist folder for compiling integrity'
-          ls -l dist
+
           echo 'Copying back to Kavita wwwroot'
-          mkdir ../API/wwwroot
-          cp -r dist/* ../API/wwwroot
-          echo 'Checking Kavita wwwroot for copying integrity'
-          ls -l ../API/wwwroot
+          rsync -a dist/ ../API/wwwroot/
+          
           cd ../ || exit
 
       - name: Compile dotnet app
@@ -68,9 +65,6 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: kizaing/kavita:latest
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
