@@ -37,7 +37,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   tags: CollectionTag[] = [];
   metadata!: SeriesMetadata;
 
-
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
               public utilityService: UtilityService,

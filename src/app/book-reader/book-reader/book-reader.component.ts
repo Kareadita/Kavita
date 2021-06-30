@@ -36,7 +36,6 @@ interface HistoryPoint {
   scrollOffset: number;
 }
 
-
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
 const SCROLL_PART_TIMEOUT = 5000;
 
@@ -789,4 +788,3 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 }
-
