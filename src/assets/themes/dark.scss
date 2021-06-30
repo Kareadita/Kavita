@@ -1,14 +1,16 @@
 // All dark style overrides should live here
 
 $dark-bg-color: #343a40;
+$dark-primary-color: rgba(74, 198, 148, 0.9);
 $dark-text-color: #efefef;
-$dark-hover-color: #4ac694; // rgba(239, 239, 239, 0.18), icon color: #4ac694,  blue #007bff
+$dark-hover-color: #4ac694;
 $dark-form-background: rgba(1, 4, 9, 0.5);
 $dark-form-placeholder: #efefef;
 $dark-link-color: rgb(88, 166, 255);
 $dark-icon-color: white;
 $dark-form-border: rgba(239, 239, 239, 0.125);
 $dark-form-readonly: #434648;
+$dark-item-accent-bg: #292d32;
 
 .bg-dark {
   color: $dark-text-color;
@@ -21,7 +23,15 @@ $dark-form-readonly: #434648;
     color: #4ac694;
   }
 
-  .btn-information {
+  .breadcrumb {
+    background-color: $dark-item-accent-bg;
+
+    .breadcrumb-item {
+      color: $dark-text-color;
+    }
+  }
+
+  .btn-information, .btn-outline-secondary {
       color: $dark-text-color;
   }
 
@@ -89,7 +99,7 @@ $dark-form-readonly: #434648;
   .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link, .tagbadge {
       border-color: $dark-form-border;
       color: $dark-text-color;
-      background-color: $dark-hover-color;
+      background-color: $dark-primary-color;
   }
   .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
     border-color: $dark-hover-color;
@@ -110,6 +120,28 @@ $dark-form-readonly: #434648;
     color: $dark-text-color !important;
   }
 
+  .login {
+
+    &::before {
+      content: "";
+      background-image: url('../../assets/images/login-bg.jpg');
+      background-size: cover;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.05;
+      width: 100%;
+    }
+
+    .card {
+      background-color: $dark-primary-color !important;
+    }
+
+    input {
+      color: #000;
+    }
+  }
   .card { 
     background-color: $dark-bg-color;
     color: $dark-text-color;
@@ -124,4 +156,24 @@ $dark-form-readonly: #434648;
     color: #efefef;
   }
 
+}
+
+
+/*
+// Dark mode Toastr Styles
+*/
+.bg-dark .toast-success {
+  background-color: $dark-primary-color
+}
+
+.bg-dark .toast-error {
+  background-color: #BD362F;
+}
+
+.bg-dark .toast-info {
+  background-color: #2F96B4;
+}
+
+.bg-dark .toast-warning {
+  background-color: #F89406;
 }

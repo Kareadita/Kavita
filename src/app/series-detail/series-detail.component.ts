@@ -7,6 +7,8 @@ import { take } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
+import { DownloadService } from '../shared/_services/download.service';
+import { NaturalSortService } from '../shared/_services/natural-sort.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
@@ -17,7 +19,6 @@ import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
-import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -36,6 +37,7 @@ export class SeriesDetailComponent implements OnInit {
   chapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
+  hasDownloadingRole = false;
   isLoading = true;
   showBook = true;
 
@@ -57,18 +59,25 @@ export class SeriesDetailComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
 
+
+  get LibraryType(): typeof LibraryType {
+    return LibraryType;
+  }
+
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               ratingConfig: NgbRatingConfig, private router: Router,
               private modalService: NgbModal, public readerService: ReaderService,
               private utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService, private collectionService: CollectionTagService) {
+              private confirmService: ConfirmService, private naturalSort: NaturalSortService,
+              private downloadService: DownloadService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
       }
     });
   }
@@ -130,6 +139,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Info):
         this.openViewInfo(volume);
         break;
+      case(Action.Download):
+      this.downloadService.downloadVolume(volume, this.series.name);
+        break;
       default:
         break;
     }
@@ -145,6 +157,9 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Info):
         this.openViewInfo(chapter);
+        break;
+      case(Action.Download):
+        this.downloadService.downloadChapter(chapter, this.series.name);
         break;
       default:
         break;
@@ -209,8 +224,13 @@ export class SeriesDetailComponent implements OnInit {
         const vol0 = this.volumes.filter(v => v.number === 0);
         this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
         if (this.hasSpecials) {
-          this.specials = vol0.map(v => v.chapters || []).flat().filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).map(c => {
-            c.range = c.range.replace(/_/g, ' ');
+          this.specials = vol0.map(v => v.chapters || [])
+          .flat()
+          .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
+          .sort((a, b) => this.naturalSort.compare(a.range, b.range, true))
+          .map(c => {
+            c.title = this.utilityService.cleanSpecialTitle(c.title);
+            c.range = this.utilityService.cleanSpecialTitle(c.range);
             return c;
           });
         }
@@ -243,6 +263,7 @@ export class SeriesDetailComponent implements OnInit {
 
     this.readerService.markVolumeRead(seriesId, vol.id).subscribe(() => {
       vol.pagesRead = vol.pages;
+      vol.chapters?.forEach(c => c.pagesRead = c.pages);
       this.setContinuePoint();
       this.toastr.success('Marked as Read');
     });
@@ -256,6 +277,7 @@ export class SeriesDetailComponent implements OnInit {
 
     forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
       vol.pagesRead = 0;
+      vol.chapters?.forEach(c => c.pagesRead = 0);
       this.setContinuePoint();
       this.toastr.success('Marked as Unread');
     });
@@ -387,5 +409,9 @@ export class SeriesDetailComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.series);
     }
+  }
+
+  downloadSeries() {
+    this.downloadService.downloadSeries(this.series);
   }
 }

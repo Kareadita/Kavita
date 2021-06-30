@@ -23,6 +23,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   @Input() suppressLibraryLink = false;
   @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<boolean>();
+  @Output() dataChanged = new EventEmitter<Series>();
 
   isAdmin = false;
   actions: ActionItem<Series>[] = [];
@@ -83,6 +84,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
           this.reload.emit(true);
+          this.dataChanged.emit(series);
         });
       }
     });
@@ -117,6 +119,11 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     this.seriesService.markUnread(series.id).subscribe(res => {
       this.toastr.success(series.name + ' is now unread');
       series.pagesRead = 0;
+      if (this.data) {
+        this.data.pagesRead = 0;
+      }
+      
+      this.dataChanged.emit(series);
     });
   }
 
@@ -124,6 +131,10 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     this.seriesService.markRead(series.id).subscribe(res => {
       this.toastr.success(series.name + ' is now read');
       series.pagesRead = series.pages;
+      if (this.data) {
+        this.data.pagesRead = series.pages;
+      }
+      this.dataChanged.emit(series);
     });
   }
 

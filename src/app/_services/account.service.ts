@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import * as Sentry from "@sentry/angular";
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,7 @@ export class AccountService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private router: Router) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -31,6 +32,14 @@ export class AccountService implements OnDestroy {
 
   hasAdminRole(user: User) {
     return user && user.roles.includes('Admin');
+  }
+
+  hasDownloadRole(user: User) {
+    return user && user.roles.includes('Download');
+  }
+
+  getRoles() {
+    return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
   login(model: any): Observable<any> {
@@ -45,7 +54,7 @@ export class AccountService implements OnDestroy {
     );
   }
 
-  setCurrentUser(user: User) {
+  setCurrentUser(user?: User) {
     if (user) {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
@@ -56,9 +65,10 @@ export class AccountService implements OnDestroy {
           username: user.username
         });
       });
+
+      localStorage.setItem(this.userKey, JSON.stringify(user));
     }
 
-    localStorage.setItem(this.userKey, JSON.stringify(user));
     this.currentUserSource.next(user);
     this.currentUser = user;
   }
@@ -67,6 +77,8 @@ export class AccountService implements OnDestroy {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
+    // Upon logout, perform redirection
+    this.router.navigateByUrl('/login');
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {
@@ -92,7 +104,7 @@ export class AccountService implements OnDestroy {
 
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
-      if (this.currentUser !== undefined) {
+      if (this.currentUser !== undefined || this.currentUser != null) {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
       }
@@ -100,5 +112,15 @@ export class AccountService implements OnDestroy {
     }), takeUntil(this.onDestroy));
   }
 
+  getUserFromLocalStorage(): User | undefined {
+
+    const userString = localStorage.getItem(this.userKey);
+    
+    if (userString) {
+      return JSON.parse(userString)
+    };
+
+    return undefined;
+  }
 
 }

@@ -9,6 +9,7 @@ import { LibraryAccessModalComponent } from '../_modals/library-access-modal/lib
 import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.component';
 
 @Component({
   selector: 'app-manage-users',
@@ -78,6 +79,11 @@ export class ManageUsersComponent implements OnInit {
     }
   }
 
+  openEditRole(member: Member) {
+    const modalRef = this.modalService.open(EditRbsModalComponent);
+    modalRef.componentInstance.member = member;
+  }
+
   updatePassword(member: Member) {
     const modalRef = this.modalService.open(ResetPasswordModalComponent);
     modalRef.componentInstance.member = member;
@@ -89,5 +95,13 @@ export class ManageUsersComponent implements OnInit {
     }
 
     return member.libraries.map(item => item.name).join(', ');
+  }
+
+  hasAdminRole(member: Member) {
+    return member.roles.indexOf('Admin') >= 0;
+  }
+
+  getRoles(member: Member) {
+    return member.roles.filter(item => item != 'Pleb');
   }
 }

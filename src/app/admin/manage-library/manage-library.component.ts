@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { Library } from 'src/app/_models/library';
+import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
@@ -63,6 +63,17 @@ export class ManageLibraryComponent implements OnInit {
     this.libraryService.scan(library.id).subscribe(() => {
       this.toastr.success('A scan has been queued for ' + library.name);
     });
+  }
+
+  libraryType(libraryType: LibraryType) {
+    switch(libraryType) {
+      case LibraryType.Book:
+        return 'Book';
+      case LibraryType.Comic:
+        return 'Comic';
+      case LibraryType.Manga:
+        return 'Manga'
+    }
   }
 
 }

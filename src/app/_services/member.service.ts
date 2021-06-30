@@ -31,4 +31,8 @@ export class MemberService {
   hasReadingProgress(librayId: number) {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + librayId);
   }
+
+  updateMemberRoles(username: string, roles: string[]) {
+    return this.httpClient.post(this.baseUrl + 'account/update-rbs', {username, roles});
+  }
 }

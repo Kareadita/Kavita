@@ -18,6 +18,16 @@
                 </h4>
                 <div>Last Active: {{member.lastActive | date: 'MM/dd/yyyy'}}</div>
                 <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
+                <div>
+                    Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
+                    <ng-template #showRoles>
+                        <app-tag-badge *ngFor="let role of getRoles(member)">{{role}}</app-tag-badge>
+                    </ng-template>
+                    <button class="btn btn-icon" title="{{hasAdminRole(member) ? 'Admins have all feature permissions' : 'Edit Role'}}" (click)="openEditRole(member)" [disabled]="hasAdminRole(member)">
+                        <i class="fa fa-pen" aria-hidden="true"></i>
+                        <span class="sr-only">Edit Role</span>
+                    </button>
+                </div>
             </div>
         </li>
         <li *ngIf="loadingMembers" class="list-group-item">

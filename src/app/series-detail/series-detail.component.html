@@ -15,10 +15,17 @@
                         <span class="read-btn--text">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
-                <div class="ml-2">
-                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" *ngIf="isAdmin" title="Edit Series information">
+                <div class="ml-2" *ngIf="isAdmin">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" title="Edit Series information">
                         <span>
                             <i class="fa fa-pen" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
+                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series">
+                        <span>
+                            <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                         </span>
                     </button>
                 </div>

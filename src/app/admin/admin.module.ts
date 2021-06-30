@@ -12,6 +12,8 @@ import { DirectoryPickerComponent } from './_modals/directory-picker/directory-p
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
+import { FilterPipe } from './filter.pipe';
+import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 
 
 
@@ -25,7 +27,9 @@ import { ManageSettingsComponent } from './manage-settings/manage-settings.compo
     LibraryAccessModalComponent,
     DirectoryPickerComponent,
     ResetPasswordModalComponent,
-    ManageSettingsComponent
+    ManageSettingsComponent,
+    FilterPipe,
+    EditRbsModalComponent
   ],
   imports: [
     CommonModule,

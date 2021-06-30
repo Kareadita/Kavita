@@ -11,7 +11,7 @@
             [slidesPerView]="'auto'"
             (swiper)="onSwiper($event)"
             [freeMode]="true">
-            <ng-template *ngFor="let item of items; index as i" swiperSlide>
+            <ng-template *ngFor="let item of items; index as i;" swiperSlide>
                 <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
             </ng-template>
         </swiper>

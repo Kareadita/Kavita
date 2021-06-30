@@ -37,6 +37,7 @@ interface HistoryPoint {
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
+const SCROLL_PART_TIMEOUT = 5000;
 
 @Component({
   selector: 'app-book-reader',
@@ -88,7 +89,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
 
 
+  /**
+   * Internal property used to capture all the different css properties to render on all elements
+   */
   pageStyles!: PageStyle;
+  /**
+   * List of all font families user can select from
+   */
   fontFamilies: Array<string> = [];
 
   
@@ -99,8 +106,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   topOffset: number = 0; // Offset for drawer and rendering canvas
   scrollbarNeeded = false; // Used for showing/hiding bottom action bar
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
+
   private readonly onDestroy = new Subject<void>();
+
   pageAnchors: {[n: string]: number } = {};
+  currentPageAnchor: string = '';
+  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [1] });
+  /**
+   * Last seen bookmark part path
+   */
+  lastSeenScrollPartPath: string = '';
 
   // Temp hack: Override background color for reader and restore it onDestroy
   originalBodyColor: string | undefined;
@@ -167,7 +182,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
   
-          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.subscribe(changes => {
+          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
             this.updateFontFamily(changes);
           });
         }
@@ -185,17 +200,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(window, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
-      
+        if (Object.keys(this.pageAnchors).length === 0) return;
         // get the height of the document so we can capture markers that are halfway on the document viewport
         const verticalOffset = (window.pageYOffset 
           || document.documentElement.scrollTop 
           || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
       
         const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
-
         if (alreadyReached.length > 0) {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, Object.keys(this.pageAnchors)[alreadyReached.length - 1]).subscribe(() => {/* Intentionally blank */});
-          console.log('bookmarking part: ', Object.keys(this.pageAnchors)[alreadyReached.length - 1]);
+          this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
+        } else {
+          this.currentPageAnchor = '';
+        }
+
+        if (this.lastSeenScrollPartPath !== '') {
+          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
     });
   }
@@ -223,7 +242,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.onDestroy.next();
-
+    this.onDestroy.complete();
+    this.intersectionObserver.disconnect();
   }
 
   ngOnInit(): void {
@@ -241,7 +261,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
 
-    this.memberService.hasReadingProgress(this.libraryId).subscribe(hasProgress => {
+    this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
         this.toggleDrawer();
         this.toastr.info('You can modify book settings, save those settings for all books, and view table of contents from the drawer.');
@@ -253,7 +273,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bookmark: this.readerService.getBookmark(this.chapterId),
       chapters: this.bookService.getBookChapters(this.chapterId),
       info: this.bookService.getBookInfo(this.chapterId)
-    }).subscribe(results => {
+    }).pipe(take(1)).subscribe(results => {
       this.chapter = results.chapter;
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
@@ -264,7 +284,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
-        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
+        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
       }
 
       // Check if user bookmark has part, if so load it so we scroll to it
@@ -293,9 +313,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  handleIntersection(entries: IntersectionObserverEntry[]) {
+    const intersectingEntries = Array.from(entries).filter(entry => entry.isIntersecting).map(entry => entry.target);
+    intersectingEntries.sort((a: Element, b: Element) => {
+      const aTop = a.getBoundingClientRect().top;
+      const bTop = b.getBoundingClientRect().top;
+      if (aTop < bTop) {
+        return -1;
+      }
+      if (aTop > bTop) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    if (intersectingEntries.length > 0) {
+      let path = this.getXPathTo(intersectingEntries[0]);
+        if (path === '') { return; }
+        if (!path.startsWith('id')) {
+          path = '//html[1]/' + path;
+        }
+        this.lastSeenScrollPartPath = path;
+    }
+  }
+
   loadChapter(pageNum: number, part: string) {
     this.setPageNum(pageNum);
-    this.loadPage(part);
+    this.loadPage('id("' + part + '")');
   }
 
   closeReader() {
@@ -335,7 +380,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   addLinkClickHandlers() {
     var links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
-      links.forEach(link => {
+      links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
           var page = parseInt(e.target.attributes['kavita-page'].value, 10);
@@ -394,30 +439,60 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  cleanIdSelector(id: string) {
+    const tokens = id.split('/');
+    if (tokens.length > 0) {
+      return tokens[0];
+    }
+    return id;
+  }
+
+  getPageMarkers(ids: Array<string>) {
+    try {
+      return document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
+    } catch (Exception) {
+      // Fallback to anchors instead. Some books have ids that are not valid for querySelectors, so anchors should be used instead
+      return document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
+    }
+  }
+
+  setupPageAnchors() {
+    this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
+      this.intersectionObserver.observe(elem);
+    });
+
+    this.pageAnchors = {};
+    this.currentPageAnchor = '';
+    const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
+    if (ids.length > 0) {
+      const elems = this.getPageMarkers(ids);
+      elems.forEach(elem => {
+        this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
+      });
+    }
+  }
+
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).subscribe(() => {/* No operation */});
+    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
 
-    this.bookService.getBookPage(this.chapterId, this.pageNum).subscribe(content => {
+    this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles();
         this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
 
-        Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img')).filter(img => !img.complete).map(img => new Promise(resolve => { img.onload = img.onerror = resolve; }))).then(() => {
+        Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img'))
+        .filter(img => !img.complete)
+        .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+        .then(() => {
           this.isLoading = false;
           this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
           // Find all the part ids and their top offset
-          const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part);
-          if (ids.length > 0) {
-            const elems = document.querySelectorAll(ids.map(id => '#' + id).join(', '));
-            elems.forEach(elem => {
-              this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
-            });
-          }
+          this.setupPageAnchors();
           
 
           if (part !== undefined && part !== '') {
@@ -598,6 +673,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       readingDirection: this.user.preferences.readingDirection, 
       scalingOption: this.user.preferences.scalingOption, 
       pageSplitOption: this.user.preferences.pageSplitOption, 
+      autoCloseMenu: this.user.preferences.autoCloseMenu,
+      readerMode: this.user.preferences.readerMode,
       bookReaderDarkMode: this.darkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
@@ -607,7 +684,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bookReaderReadingDirection: this.readingDirection,
       siteDarkMode: this.user.preferences.siteDarkMode,
     };
-    this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
       this.toastr.success('User settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
@@ -639,7 +716,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       partSelector = partSelector.substr(1, partSelector.length);
     }
 
-    const element = document.querySelector('*[id="' + partSelector + '"]');
+    let element = null;
+    if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
+      // Part selector is a XPATH
+      element = this.getElementFromXPath(partSelector);
+    } else {
+      element = document.querySelector('*[id="' + partSelector + '"]');
+    }
+
     if (element === null) return;
 
     window.scroll({
@@ -673,6 +757,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.clickToPaginateVisualOverlay = false;
     }, 1000);
 
+  }
+
+  getElementFromXPath(path: string) {
+    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (node?.nodeType === Node.ELEMENT_NODE) {
+      return node as Element;
+    }
+    return null;
+  }
+
+  getXPathTo(element: any): string {
+    if (element === null) return '';
+    if (element.id !== '') { return 'id("' + element.id + '")'; }
+    if (element === document.body) { return element.tagName; }
+          
+  
+    let ix = 0;
+    const siblings = element.parentNode?.childNodes || [];
+    for (let sibling of siblings) {
+        if (sibling === element) {
+          return this.getXPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
+        }
+        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+          ix++;
+        }
+            
+    }
+    return '';
   }
 
 }

@@ -31,12 +31,12 @@
             <ngb-panel id="reading-panel" title="Reading">
                 <ng-template ngbPanelContent>
                     <form [formGroup]="settingsForm" *ngIf="user !== undefined">
-                        <h3>Manga</h3>
+                        <h3 id="manga-header">Manga</h3>
                         <div class="form-group">
                             <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                             <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
-                            <select class="form-control" aria-describedby="settings-reading-direction-help" formControlName="readingDirection">
+                            <select class="form-control" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                             </select>
                         </div>
@@ -45,7 +45,7 @@
                             <label for="settings-scaling-option">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
                             <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
                             <span class="sr-only" id="settings-scaling-option-help">How to scale the image to your screen.</span>
-                            <select class="form-control" aria-describedby="settings-scaling-option-help" formControlName="scalingOption">
+                            <select class="form-control" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
                                 <option *ngFor="let opt of scalingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                             </select>
                         </div>
@@ -54,9 +54,28 @@
                             <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
                             <span class="sr-only" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
-                            <select class="form-control" aria-describedby="settings-pagesplit-option-help" formControlName="pageSplitOption">
+                            <select class="form-control" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
                                 <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-readingmode-option">Reading Mode</label>
+                            <select class="form-control" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
+                                <option *ngFor="let opt of readingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="auto-close-label">Auto Close Menu</label>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <label class="custom-control-label" for="auto-close">True</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="not-auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="false" aria-labelledby="auto-close-label">
+                                    <label class="custom-control-label" for="not-auto-close">False</label>
+                                </div>
+                            </div>
                         </div>
                         <hr>
                         <h3>Books</h3>

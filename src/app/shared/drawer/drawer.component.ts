@@ -1,7 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 export class DrawerOptions {
-  topOffset: number = 0; // pixels, only applies when position left/right
+  /**
+   * Pixels to offset from the top of the screen. Only applies to postion left/right
+   */
+  topOffset: number = 0;
 }
 
 @Component({
@@ -14,7 +17,10 @@ export class DrawerComponent {
 
   @Input() isOpen = false;
   @Input() width: number = 400;
-  @Input() position: 'left' | 'right' = 'left';
+  /**
+   * Side of the screen the drawer should animate from
+   */
+  @Input() position: 'left' | 'right' | 'bottom' = 'left';
   @Input() options: Partial<DrawerOptions> = new DrawerOptions();
   @Output() drawerClosed = new EventEmitter();
 

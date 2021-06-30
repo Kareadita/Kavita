@@ -13,6 +13,7 @@ export class CarouselReelComponent implements OnInit {
   @Input() title = '';
   @Output() sectionClick = new EventEmitter<string>();
 
+
   swiper!: Swiper;
 
   constructor() { }

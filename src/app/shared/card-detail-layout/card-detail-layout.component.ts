@@ -1,6 +1,8 @@
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { Pagination } from 'src/app/_models/pagination';
 
+const FILTER_PAG_REGEX = /[^0-9]/g;
+
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
@@ -26,6 +28,15 @@ export class CardDetailLayoutComponent implements OnInit {
 
   onPageChange(page: number) {
     this.pageChange.emit(this.pagination);
+  }
+
+  selectPageStr(page: string) {
+    this.pagination.currentPage = parseInt(page, 10) || 1;
+    this.onPageChange(this.pagination.currentPage);
+  }
+
+  formatInput(input: HTMLInputElement) {
+    input.value = input.value.replace(FILTER_PAG_REGEX, '');
   }
 
 }

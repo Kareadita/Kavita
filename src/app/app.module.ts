@@ -1,5 +1,5 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { APP_INITIALIZER, ErrorHandler, Injectable, NgModule } from '@angular/core';
+import { BrowserModule, Title } from '@angular/platform-browser';
+import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -51,7 +51,7 @@ if (environment.production) {
         onerror: true
       }),
       new DedupeIntegration(),
-      new RewriteFramesIntegration()
+      new RewriteFramesIntegration(),
     ],
     ignoreErrors: [new RegExp(/\/api\/admin/)],
     tracesSampleRate: 0,
@@ -89,9 +89,9 @@ if (environment.production) {
     HomeComponent,
     NavHeaderComponent,
     UserLoginComponent,
-    LibraryComponent, // Move into MangaModule
-    LibraryDetailComponent, // Move into MangaModule
-    SeriesDetailComponent, // Move into MangaModule
+    LibraryComponent, 
+    LibraryDetailComponent, 
+    SeriesDetailComponent, 
     NotConnectedComponent, // Move into ExtrasModule
     UserPreferencesComponent, // Move into SettingsModule
     EditSeriesModalComponent,
@@ -122,14 +122,19 @@ if (environment.production) {
     TypeaheadModule,
     FormsModule, // EditCollection Modal
     ToastrModule.forRoot({
-      positionClass: 'toast-bottom-right'
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true,
+      timeOut: 6000,
+      countDuplicates: true,
+      autoDismiss: true
     }),
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
-    ...sentryProviders
+    Title,
+    ...sentryProviders,
   ],
   entryComponents: [],
   bootstrap: [AppComponent]

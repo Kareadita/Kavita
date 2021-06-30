@@ -13,7 +13,8 @@ export enum Action {
   Delete = 3,
   Edit = 4,
   Info = 5,
-  RefreshMetadata = 6
+  RefreshMetadata = 6,
+  Download = 7
 }
 
 export interface ActionItem<T> {
@@ -39,11 +40,13 @@ export class ActionFactoryService {
   collectionTagActions: Array<ActionItem<CollectionTag>> = [];
 
   isAdmin = false;
+  hasDownloadRole = false;
 
   constructor(private accountService: AccountService) {
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.hasDownloadRole = this.accountService.hasDownloadRole(user);
       } else {
         this._resetActions();
         return; // If user is logged out, we don't need to do anything
@@ -91,6 +94,20 @@ export class ActionFactoryService {
         this.libraryActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Metadata',
+          callback: this.dummyCallback
+        });
+      }
+
+      if (this.hasDownloadRole || this.isAdmin) {
+        this.volumeActions.push({
+          action: Action.Download,
+          title: 'Download',
+          callback: this.dummyCallback
+        });
+
+        this.chapterActions.push({
+          action: Action.Download,
+          title: 'Download',
           callback: this.dummyCallback
         });
       }

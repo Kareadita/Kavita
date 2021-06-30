@@ -1,6 +1,6 @@
 {
   "name": "kavita-webui",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -17,7 +17,6 @@
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~11.0.0",
-    "@angular/cdk": "^11.0.2",
     "@angular/common": "~11.0.0",
     "@angular/compiler": "~11.0.0",
     "@angular/core": "~11.0.0",
@@ -35,10 +34,11 @@
     "@types/file-saver": "^2.0.1",
     "angular-ng-autocomplete": "^2.0.5",
     "bootstrap": "^4.5.0",
+    "bowser": "^2.11.0",
     "file-saver": "^2.0.5",
     "ng-lazyload-image": "^9.1.0",
     "ng-sidebar": "^9.4.2",
-    "ngx-toastr": "^13.2.0",
+    "ngx-toastr": "^13.2.1",
     "rxjs": "~6.6.0",
     "swiper": "^6.5.8",
     "tslib": "^2.0.0",

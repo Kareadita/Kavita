@@ -4,4 +4,5 @@ export interface ServerSettings {
     taskBackup: string;
     loggingLevel: string;
     port: number;
+    allowStatCollection: boolean;
 }

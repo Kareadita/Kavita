@@ -7,6 +7,20 @@ $bg-color: rgb(22, 27, 34);
     background-color: $bg-color;
 }
 
+.navbar-brand {
+    font-family: "Spartan", sans-serif;
+    font-weight: bold;
+
+    .logo {
+        max-height: 28px;
+        vertical-align: top;
+    }
+
+    .phone-hidden {
+        vertical-align: middle;
+    }
+}
+
 .focus-visible:focus {
     visibility: visible;
     color: white;
@@ -32,7 +46,7 @@ $bg-color: rgb(22, 27, 34);
         width: 100%; // 232px
     }
 }
-
+ 
 /* Extra small devices (phones, 300px and down) */
 @media only screen and (max-width: 300px) { //370
     .ng-autocomplete {
