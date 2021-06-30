@@ -21,13 +21,13 @@ your reading collection with your friends and family!
 ## Goals
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, mobi, azw, djvu, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
-- [x] Provide a dark theme for web app
+- [x] Dark and Light themes
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
 - [ ] Metadata should allow for collections, want to read integration from 3rd party services, genres.
 - [x] Ability to manage users, access, and ratings
 - [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
-- [x] Dedicated webtoon reader
+- [x] Dedicated webtoon reader (in beta testing)
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 ## Support

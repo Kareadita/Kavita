@@ -32,7 +32,6 @@ Build()
 
     slnFile=Kavita.sln
 
-    #dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
     if [[ -z "$RID" ]];
@@ -102,8 +101,8 @@ Package()
 
 RID="$1"
 
-Build
 BuildUI
+Build
 
 dir=$PWD
 

@@ -37,6 +37,19 @@ BuildUI()
     npm run prod
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
+    
+    ProgressStart 'Building UI'
+    echo 'Removing old wwwroot'
+    rm -rf API/wwwroot/*
+    cd ../Kavita-webui/ || exit
+    echo 'Installing web dependencies'
+    npm install
+    echo 'Building UI'
+    npm run prod
+    echo 'Copying back to Kavita wwwroot'
+    cp -r dist/* ../Kavita/API/wwwroot
+    cd ../Kavita/ || exit
+    ProgressEnd 'Building UI'
 }
 
 Package()

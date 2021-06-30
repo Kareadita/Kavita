@@ -45,6 +45,9 @@ Package()
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
+    echo "Copying webui wwwroot to build"
+    cp -r wwwroot/* "$lOutputFolder"/wwwroot/
+
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
     
@@ -57,6 +60,24 @@ Package()
     
     ProgressEnd "Creating $runtime Package for $framework"    
 
+}
+
+BuildUI()
+{
+    ProgressStart 'Building UI'
+    echo 'Removing old wwwroot'
+    rm -rf API/wwwroot/*
+    cd ../Kavita-webui/ || exit
+    echo 'Installing web dependencies'
+    npm install
+    echo 'Building UI'
+    npm run prod
+    ls -l dist
+    echo 'Copying back to Kavita wwwroot'
+    cp -r dist/* ../Kavita/API/wwwroot
+    ls -l ../Kavita/API/wwwroot
+    cd ../Kavita/ || exit
+    ProgressEnd 'Building UI'
 }
 
 dir=$PWD
