@@ -211,4 +211,8 @@
     <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
@@ -69,6 +70,22 @@ namespace API.Data
             
             await context.SaveChangesAsync();
             
+        }
+
+        public static async Task SeedSeriesMetadata(DataContext context)
+        {
+            await context.Database.EnsureCreatedAsync();
+            
+            context.Database.EnsureCreated();
+            var series = await context.Series
+                .Include(s => s.Metadata).ToListAsync();
+                
+            foreach (var s in series)
+            {
+                s.Metadata ??= new SeriesMetadata();
+            }
+
+            await context.SaveChangesAsync();
         }
     }
 }
