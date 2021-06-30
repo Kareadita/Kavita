@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace API.DTOs
+﻿namespace API.DTOs
 {
     public class CollectionTagDto
     {

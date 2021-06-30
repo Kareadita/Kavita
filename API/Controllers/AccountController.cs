@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
@@ -82,42 +83,55 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
-            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
+            try
             {
-                return BadRequest("Username is taken.");
-            }
-
-            var user = _mapper.Map<AppUser>(registerDto);
-            user.UserPreferences ??= new AppUserPreferences();
-            
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
-
-            if (!result.Succeeded) return BadRequest(result.Errors);
-            
-            var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
-            var roleResult = await _userManager.AddToRoleAsync(user, role);
-
-            if (!roleResult.Succeeded) return BadRequest(result.Errors);
-            
-            // When we register an admin, we need to grant them access to all Libraries.
-            if (registerDto.IsAdmin)
-            {
-                _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries", user.UserName);
-                var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-                foreach (var lib in libraries)
+                if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
                 {
-                    lib.AppUsers ??= new List<AppUser>();
-                    lib.AppUsers.Add(user);
+                    return BadRequest("Username is taken.");
                 }
-                if (libraries.Any() && !await _unitOfWork.Complete()) _logger.LogError("There was an issue granting library access. Please do this manually");
+
+                var user = _mapper.Map<AppUser>(registerDto);
+                user.UserPreferences ??= new AppUserPreferences();
+
+                var result = await _userManager.CreateAsync(user, registerDto.Password);
+
+                if (!result.Succeeded) return BadRequest(result.Errors);
+
+                var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
+                var roleResult = await _userManager.AddToRoleAsync(user, role);
+
+                if (!roleResult.Succeeded) return BadRequest(result.Errors);
+
+                // When we register an admin, we need to grant them access to all Libraries.
+                if (registerDto.IsAdmin)
+                {
+                    _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+                        user.UserName);
+                    var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+                    foreach (var lib in libraries)
+                    {
+                        lib.AppUsers ??= new List<AppUser>();
+                        lib.AppUsers.Add(user);
+                    }
+
+                    if (libraries.Any() && !await _unitOfWork.CommitAsync())
+                        _logger.LogError("There was an issue granting library access. Please do this manually");
+                }
+
+                return new UserDto
+                {
+                    Username = user.UserName,
+                    Token = await _tokenService.CreateToken(user),
+                    Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Something went wrong when registering user");
+                await _unitOfWork.RollbackAsync();
             }
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Token = await _tokenService.CreateToken(user),
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-            };
+            return BadRequest("Something went wrong when registering user");
         }
 
         [HttpPost("login")]
@@ -139,7 +153,7 @@ namespace API.Controllers
             user.UserPreferences ??= new AppUserPreferences();
             
             _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CommitAsync();
             
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
@@ -149,6 +163,51 @@ namespace API.Controllers
                 Token = await _tokenService.CreateToken(user),
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [HttpGet("roles")]
+        public ActionResult<IList<string>> GetRoles()
+        {
+            return typeof(PolicyConstants)
+                .GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(f => f.FieldType == typeof(string))
+                .ToDictionary(f => f.Name,
+                    f => (string) f.GetValue(null)).Values.ToList();
+        }
+
+        [HttpPost("update-rbs")]
+        public async Task<ActionResult> UpdateRoles(UpdateRbsDto updateRbsDto)
+        {
+            var user = await _userManager.Users
+                .Include(u => u.UserPreferences)
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == updateRbsDto.Username.ToUpper());
+            if (updateRbsDto.Roles.Contains(PolicyConstants.AdminRole) ||
+                updateRbsDto.Roles.Contains(PolicyConstants.PlebRole))
+            {
+                return BadRequest("Invalid Roles");
+            }
+
+            var existingRoles = (await _userManager.GetRolesAsync(user))
+                .Where(s => s != PolicyConstants.AdminRole && s != PolicyConstants.PlebRole)
+                .ToList();
+        
+            // Find what needs to be added and what needs to be removed
+            var rolesToRemove = existingRoles.Except(updateRbsDto.Roles);
+            var result = await _userManager.AddToRolesAsync(user, updateRbsDto.Roles);
+
+            if (!result.Succeeded)
+            {
+                await _unitOfWork.RollbackAsync();
+                return BadRequest("Something went wrong, unable to update user's roles");
+            }
+            if ((await _userManager.RemoveFromRolesAsync(user, rolesToRemove)).Succeeded)
+            {
+                return Ok();
+            }
+            
+            await _unitOfWork.RollbackAsync();
+            return BadRequest("Something went wrong, unable to update user's roles");
+
         }
     }
 }

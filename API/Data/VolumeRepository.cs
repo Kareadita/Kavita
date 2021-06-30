@@ -65,6 +65,8 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
+        
+
 
         public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
         {
@@ -81,6 +83,16 @@ namespace API.Data
         {
             return await _context.MangaFile
                 .Where(c => chapterId == c.Id)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        
+        public async Task<IList<MangaFile>> GetFilesForVolume(int volumeId)
+        {
+            return await _context.Chapter
+                .Where(c => volumeId == c.VolumeId)
+                .Include(c => c.Files)
+                .SelectMany(c => c.Files)
                 .AsNoTracking()
                 .ToListAsync();
         }

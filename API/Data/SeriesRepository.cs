@@ -289,7 +289,7 @@ namespace API.Data
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
-        /// <param name="limit">How many series to pick.</param>
+        /// <param name="userParams">Contains pagination information</param>
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams)
         {
@@ -410,6 +410,17 @@ namespace API.Data
                 .AsNoTracking();
 
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        }
+
+        public async Task<IList<MangaFile>> GetFilesForSeries(int seriesId)
+        {
+            return await _context.Volume
+                .Where(v => v.SeriesId == seriesId)
+                .Include(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .SelectMany(v => v.Chapters.SelectMany(c => c.Files))
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

@@ -15,6 +15,7 @@ ProgressEnd()
 
 UpdateVersionNumber()
 {
+  # TODO: Enhance this to increment version number in KavitaCommon.csproj
     if [ "$KAVITAVERSION" != "" ]; then
         echo "Updating Version Info"
         sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$KAVITAVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
@@ -31,7 +32,6 @@ Build()
 
     slnFile=Kavita.sln
 
-    dotnet clean $slnFile -c Debug
     dotnet clean $slnFile -c Release
 
     if [[ -z "$RID" ]];
@@ -47,9 +47,15 @@ Build()
 BuildUI()
 {
     ProgressStart 'Building UI'
+    echo 'Removing old wwwroot'
+    rm -rf API/wwwroot/*
     cd ../Kavita-webui/ || exit
+    echo 'Installing web dependencies'
     npm install
+    echo 'Building UI'
     npm run prod
+    echo 'Copying back to Kavita wwwroot'
+    cp -r dist/* ../Kavita/API/wwwroot
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
 }
@@ -67,6 +73,9 @@ Package()
     cd API
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
     dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    
+    echo "Recopying wwwroot due to bug"
+    cp -r ./wwwroot/* $lOutputFolder/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
@@ -92,8 +101,8 @@ Package()
 
 RID="$1"
 
-Build
 BuildUI
+Build
 
 dir=$PWD
 

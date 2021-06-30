@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Services.HostedServices;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -20,13 +21,13 @@ namespace API
 {
     public class Program
     {
-        private static readonly int HttpPort = 5000;
+        private static int _httpPort;
 
         protected Program()
         {
         }
         
-        private static string GetAppSettingFilename()
+        public static string GetAppSettingFilename()
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
@@ -46,6 +47,9 @@ namespace API
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
                 Configuration.UpdateJwtToken(GetAppSettingFilename(), base64);
             }
+            
+            // Get HttpPort from Config
+            _httpPort = Configuration.GetPort(GetAppSettingFilename());
 
 
             var host = CreateHostBuilder(args).Build();
@@ -61,8 +65,6 @@ namespace API
                 await context.Database.MigrateAsync();
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context);
-                // TODO: Remove this in v0.4.2
-                await Seed.SeedSeriesMetadata(context);
             }
             catch (Exception ex)
             {
@@ -79,7 +81,7 @@ namespace API
                 {
                     webBuilder.UseKestrel((opts) =>
                     {
-                        opts.ListenAnyIP(HttpPort, options =>
+                        opts.ListenAnyIP(_httpPort, options =>
                         {
                             options.Protocols = HttpProtocols.Http1AndHttp2;
                         });
@@ -106,8 +108,16 @@ namespace API
                             options.BeforeSend = sentryEvent =>
                             {
                                 if (sentryEvent.Exception != null
-                                    && sentryEvent.Exception.Message.Contains("[GetCoverImage] This archive cannot be read:")
-                                    && sentryEvent.Exception.Message.Contains("[BookService] "))
+                                    && sentryEvent.Exception.Message.StartsWith("[GetCoverImage]")
+                                    && sentryEvent.Exception.Message.StartsWith("[BookService]")
+                                    && sentryEvent.Exception.Message.StartsWith("[ExtractArchive]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetSummaryInfo]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetSummaryInfo]")
+                                    && sentryEvent.Exception.Message.StartsWith("[GetNumberOfPagesFromArchive]")
+                                    && sentryEvent.Exception.Message.Contains("EPUB parsing error")
+                                    && sentryEvent.Exception.Message.Contains("Unsupported EPUB version")
+                                    && sentryEvent.Exception.Message.Contains("Incorrect EPUB")
+                                    && sentryEvent.Exception.Message.Contains("Access is Denied"))
                                 {
                                     return null; // Don't send this event to Sentry
                                 }

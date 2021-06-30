@@ -127,6 +127,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AutoCloseMenu")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("BookReaderDarkMode")
                         .HasColumnType("INTEGER");
 
@@ -149,6 +152,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReaderMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ReadingDirection")

@@ -23,7 +23,7 @@ namespace API.Services
 
         private const int ThumbnailWidth = 320; // 153w x 230h
         private readonly StylesheetParser _cssParser = new ();
-      
+
         public BookService(ILogger<BookService> logger)
         {
             _logger = logger;
@@ -89,7 +89,8 @@ namespace API.Services
                 }
                 else
                 {
-                    anchor.Attributes.Add("target", "_blank");    
+                    anchor.Attributes.Add("target", "_blank");
+                    anchor.Attributes.Add("rel", "noreferrer noopener");
                 }
 
                 return;
@@ -167,7 +168,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
+                _logger.LogWarning(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
             }
 
             return string.Empty;
@@ -177,13 +178,13 @@ namespace API.Services
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError("[BookService] Book {EpubFile} could not be found", filePath);
+                _logger.LogWarning("[BookService] Book {EpubFile} could not be found", filePath);
                 return false;
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
             
-            _logger.LogError("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
+            _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
             return false; 
         }
 
@@ -198,10 +199,17 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
+                _logger.LogWarning(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
             }
 
             return 0;
+        }
+
+        public static string EscapeTags(string content)
+        {
+            content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
+            content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
+            return content;
         }
 
         public static string CleanContentKeys(string key)
@@ -234,6 +242,83 @@ namespace API.Services
             try
             {
                 using var epubBook = EpubReader.OpenBook(filePath);
+                
+                // If the epub has the following tags, we can group the books as Volumes
+                // <meta content="5.0" name="calibre:series_index"/>
+                // <meta content="The Dark Tower" name="calibre:series"/>
+                // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
+                // If all three are present, we can take that over dc:title and format as:
+                // Series = The Dark Tower, Volume = 5, Filename as "Wolves of the Calla"
+                // In addition, the following can exist and should parse as a series (EPUB 3.2 spec)
+                // <meta property="belongs-to-collection" id="c01">
+                //   The Lord of the Rings
+                // </meta>
+                // <meta refines="#c01" property="collection-type">set</meta>
+                // <meta refines="#c01" property="group-position">2</meta>
+                try
+                {
+                    var seriesIndex = string.Empty;
+                    var series = string.Empty;
+                    var specialName = string.Empty;
+                    var groupPosition = string.Empty;
+
+                    
+                    foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
+                    {
+                        // EPUB 2 and 3
+                        switch (metadataItem.Name)
+                        {
+                            case "calibre:series_index":
+                                seriesIndex = metadataItem.Content;
+                                break;
+                            case "calibre:series":
+                                series = metadataItem.Content;
+                                break;
+                            case "calibre:title_sort":
+                                specialName = metadataItem.Content;
+                                break;
+                        }
+
+                        // EPUB 3.2+ only
+                        switch (metadataItem.Property)
+                        {
+                            case "group-position":
+                                seriesIndex = metadataItem.Content;
+                                break;
+                            case "belongs-to-collection":
+                                series = metadataItem.Content;
+                                break;
+                            case "collection-type":
+                                groupPosition = metadataItem.Content;
+                                break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) &&
+                        (!string.IsNullOrEmpty(specialName) || groupPosition.Equals("series") || groupPosition.Equals("set")))
+                    {
+                        if (string.IsNullOrEmpty(specialName))
+                        {
+                            specialName = epubBook.Title;
+                        }
+                        return new ParserInfo()
+                        {
+                            Chapters = "0",
+                            Edition = "",
+                            Format = MangaFormat.Book,
+                            Filename = Path.GetFileName(filePath),
+                            Title = specialName,
+                            FullFilePath = filePath,
+                            IsSpecial = false,
+                            Series = series,
+                            Volumes = seriesIndex.Split(".")[0]
+                        };
+                    }
+                }
+                catch (Exception)
+                {
+                    // Swallow exception
+                }
 
                 return new ParserInfo()
                 {
@@ -250,7 +335,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
+                _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
             }
 
             return null;
@@ -285,7 +370,7 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+                _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
             
             return Array.Empty<byte>();

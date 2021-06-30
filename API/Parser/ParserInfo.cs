@@ -3,7 +3,7 @@
 namespace API.Parser
 {
     /// <summary>
-    /// This represents a single file
+    /// This represents all parsed information from a single file
     /// </summary>
     public class ParserInfo
     {

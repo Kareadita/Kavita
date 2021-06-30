@@ -1,35 +1,30 @@
-#This Dockerfile pulls the latest git commit and builds Kavita from source
-FROM mcr.microsoft.com/dotnet/sdk:5.0-focal AS builder
+#This Dockerfile creates a build for all architectures
 
-MAINTAINER Chris P
+#Image that copies in the files and passes them to the main image
+FROM ubuntu:focal AS copytask
 
-ENV DEBIAN_FRONTEND=noninteractive
 ARG TARGETPLATFORM
 
-#Installs nodejs and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_14.x | bash - \
-  && apt-get install -y nodejs \
-  && rm -rf /var/lib/apt/lists/*
-
-#Builds app based on platform
-COPY build_target.sh /build_target.sh
-RUN /build_target.sh
+#Move the output files to where they need to be
+RUN mkdir /files
+COPY _output/*.tar.gz /files/
+COPY Kavita-webui/dist /files/wwwroot
+COPY copy_runtime.sh /copy_runtime.sh
+RUN /copy_runtime.sh
 
 #Production image
 FROM ubuntu:focal
 
-MAINTAINER Chris P
-
-#Move the output files to where they need to be
-COPY --from=builder /Projects/Kavita/_output/build/Kavita /kavita
+COPY --from=copytask /Kavita /kavita
+COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
   && apt-get install -y libicu-dev libssl1.1 pwgen \
   && rm -rf /var/lib/apt/lists/*
 
-#Creates the manga storage directory
-RUN mkdir /manga /kavita/data
+#Creates the data directory
+RUN mkdir /kavita/data
 
 RUN cp /kavita/appsettings.Development.json /kavita/appsettings.json \
   && sed -i 's/Data source=kavita.db/Data source=data\/kavita.db/g' /kavita/appsettings.json

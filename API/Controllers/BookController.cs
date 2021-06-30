@@ -186,6 +186,9 @@ namespace API.Controllers
                     var content = await contentFileRef.ReadContentAsync();
                     if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
                     
+                    // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                    content = BookService.EscapeTags(content);
+                    
                     doc.LoadHtml(content);
                     var body = doc.DocumentNode.SelectSingleNode("//body");
 

@@ -4,18 +4,22 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
+using Kavita.Common;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Extensions
 {
     public static class ApplicationServiceExtensions
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
         {
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
+            services.AddScoped<IStatsService, StatsService>();
             services.AddScoped<ITaskScheduler, TaskScheduler>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ITokenService, TokenService>();
@@ -27,12 +31,8 @@ namespace API.Extensions
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
-            
 
-            services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlite(config.GetConnectionString("DefaultConnection"));
-            });
+            services.AddSqLite(config, env);
 
             services.AddLogging(loggingBuilder =>
             {
@@ -42,9 +42,17 @@ namespace API.Extensions
             
             return services;
         }
-        
-        public static IServiceCollection AddStartupTask<T>(this IServiceCollection services)
-            where T : class, IStartupTask
-            => services.AddTransient<IStartupTask, T>();
+
+        private static IServiceCollection AddSqLite(this IServiceCollection services, IConfiguration config,
+            IWebHostEnvironment env)
+        {
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.GetLogLevel(Program.GetAppSettingFilename()).Equals("Debug"));
+            });
+
+            return services;
+        }
     }
 }

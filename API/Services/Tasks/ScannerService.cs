@@ -89,7 +89,7 @@ namespace API.Services.Tasks
            UpdateLibrary(library, series);
            
            _unitOfWork.LibraryRepository.Update(library);
-           if (Task.Run(() => _unitOfWork.Complete()).Result)
+           if (Task.Run(() => _unitOfWork.CommitAsync()).Result)
            {
               _logger.LogInformation("Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
            }
@@ -466,7 +466,7 @@ namespace API.Services.Tasks
              return;
           }
           
-          if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != "0")
+          if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
           {
              info = Parser.Parser.Parse(path, rootPath, type);
              var info2 = _bookService.ParseInfo(path);

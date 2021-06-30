@@ -11,7 +11,11 @@ namespace API.Interfaces
         ISettingsRepository SettingsRepository { get; }
         IAppUserProgressRepository AppUserProgressRepository { get; }
         ICollectionTagRepository CollectionTagRepository { get; }
-        Task<bool> Complete();
+        IFileRepository FileRepository { get; }
+        bool Commit();
+        Task<bool> CommitAsync();
         bool HasChanges();
+        bool Rollback();
+        Task<bool> RollbackAsync();
     }
 }

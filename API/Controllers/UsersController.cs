@@ -26,7 +26,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             _unitOfWork.UserRepository.Delete(user);
 
-            if (await _unitOfWork.Complete()) return Ok();
+            if (await _unitOfWork.CommitAsync()) return Ok();
 
             return BadRequest("Could not delete the user.");
         }
@@ -61,6 +61,8 @@ namespace API.Controllers
             existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
             existingPreferences.ScalingOption = preferencesDto.ScalingOption;
             existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
+            existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
+            existingPreferences.ReaderMode = preferencesDto.ReaderMode;
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
@@ -71,7 +73,7 @@ namespace API.Controllers
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok(preferencesDto);
             }

@@ -1,12 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using API.Services;
+using API.Comparators;
 
 namespace API.Extensions
 {
     public static class DirectoryInfoExtensions
     {
+        private static readonly NaturalSortComparer Comparer = new NaturalSortComparer();
         public static void Empty(this DirectoryInfo directory)
         {
             foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
@@ -49,12 +49,13 @@ namespace API.Extensions
             if (!root.FullName.Equals(directory.FullName))
             {
                 var fileIndex = 1;
-                foreach (var file in directory.EnumerateFiles())
+                
+                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, Comparer))
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
                     // We need to rename the files so that after flattening, they are in the order we found them
-                    var newName = $"{paddedIndex}_{fileIndex}.{file.Extension}";
+                    var newName = $"{paddedIndex}_{Parser.Parser.PadZeros(fileIndex + "")}{file.Extension}";
                     var newPath = Path.Join(root.FullName, newName);
                     if (!File.Exists(newPath)) file.MoveTo(newPath);
                     fileIndex++;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -49,15 +50,27 @@ namespace API.Controllers
 
             return File(content, "image/" + format);
         }
-        
-        [HttpGet("chapter-path")]
-        public async Task<ActionResult<string>> GetImagePath(int chapterId)
+
+        [HttpGet("chapter-info")]
+        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
             var chapter = await _cacheService.Ensure(chapterId);
-            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-
+            if (chapter == null) return BadRequest("Could not find Chapter");
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+            if (volume == null) return BadRequest("Could not find Volume");
             var (_, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
-            return Ok(mangaFile.FilePath);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+
+            return Ok(new ChapterInfoDto()
+            {
+                ChapterNumber =  chapter.Range,
+                VolumeNumber = volume.Number + string.Empty,
+                VolumeId = volume.Id,
+                FileName = Path.GetFileName(mangaFile.FilePath),
+                SeriesName = series?.Name,
+                IsSpecial = chapter.IsSpecial,
+                Pages = chapter.Pages,
+            });
         }
 
         [HttpGet("get-bookmark")]
@@ -116,7 +129,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -157,7 +170,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -198,7 +211,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -251,7 +264,7 @@ namespace API.Controllers
             
             _unitOfWork.UserRepository.Update(user);
 
-            if (await _unitOfWork.Complete())
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
@@ -272,20 +285,10 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            
+            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
             {
-                var next = false;
-                foreach (var chapter in currentVolume.Chapters)
-                {
-                    if (next)
-                    {
-                        return Ok(chapter.Id);
-                    }
-                    if (currentChapterId == chapter.Id) next = true;
-                }
-
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
 
@@ -293,7 +296,7 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
                 { 
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapterId);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 
@@ -305,7 +308,7 @@ namespace API.Controllers
             return Ok(-1);
         }
 
-        private int GetNextChapterId(IEnumerable<Chapter> chapters, int currentChapterId)
+        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
         {
             var next = false;
             foreach (var chapter in chapters)
@@ -314,7 +317,7 @@ namespace API.Controllers
                 {
                     return chapter.Id;
                 }
-                if (currentChapterId == chapter.Id) next = true;
+                if (currentChapterNumber.Equals(chapter.Number)) next = true;
             }
 
             return -1;
@@ -333,11 +336,11 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-
+            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             
             if (currentVolume.Number == 0)
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
 
@@ -345,7 +348,7 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number)
                 {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapterId);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 if (volume.Number == currentVolume.Number - 1)

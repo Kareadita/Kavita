@@ -19,11 +19,14 @@ namespace API.Services
         private readonly IBackupService _backupService;
         private readonly ICleanupService _cleanupService;
 
+        private readonly IStatsService _statsService;
+
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService)
+            IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
+            ICleanupService cleanupService, IStatsService statsService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -32,6 +35,7 @@ namespace API.Services
             _metadataService = metadataService;
             _backupService = backupService;
             _cleanupService = cleanupService;
+            _statsService = statsService;
         }
 
         public void ScheduleTasks()
@@ -64,6 +68,33 @@ namespace API.Services
             
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
         }
+
+        #region StatsTasks
+
+        private const string SendDataTask = "finalize-stats";
+        public void ScheduleStatsTasks()
+        {
+            var allowStatCollection = bool.Parse(Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.AllowStatCollection)).GetAwaiter().GetResult().Value);
+            if (!allowStatCollection)
+            {
+                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
+                return;
+            }
+            
+            _logger.LogDebug("Adding StatsTasks");
+
+            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
+        }
+
+        public void CancelStatsTasks()
+        {
+            _logger.LogDebug("Cancelling/Removing StatsTasks");
+
+            RecurringJob.RemoveIfExists(SendDataTask);
+        }
+
+        #endregion
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
