@@ -10,6 +10,15 @@ $bg-color: rgb(22, 27, 34);
 .navbar-brand {
     font-family: "Spartan", sans-serif;
     font-weight: bold;
+
+    .logo {
+        max-height: 28px;
+        vertical-align: top;
+    }
+
+    .phone-hidden {
+        vertical-align: middle;
+    }
 }
 
 .focus-visible:focus {
