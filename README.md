@@ -13,7 +13,6 @@ your reading collection with your friends and family!
 [![Docker Pulls](https://img.shields.io/docker/pulls/kizaing/kavita.svg)](https://hub.docker.com/r/kizaing/kavita/)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=security_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
-[![Donate via Paypal](https://img.shields.io/badge/donate-paypal-blue.svg?style=popout&logo=paypal)](https://paypal.me/majora2007?locale.x=en_US)
 [![Backers on Open Collective](https://opencollective.com/kavita/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kavita/sponsors/badge.svg)](#sponsors)
 </div>
@@ -85,9 +84,7 @@ This project exists thanks to all the people who contribute. [Contribute](CONTRI
 
 ## Donate
 If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards 
-expenses related to Kavita. You can back us through OpenCollective.
-
-[![Donate via Paypal](https://img.shields.io/badge/donate-paypal-blue.svg?style=popout&logo=paypal)](https://paypal.me/majora2007?locale.x=en_US)
+expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer).
 
 ## Backers
 
