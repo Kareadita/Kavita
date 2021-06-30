@@ -815,7 +815,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readerMode = READER_MODE.MANGA_UD;
         break;
       case READER_MODE.MANGA_UD:
-        this.readerMode = READER_MODE.WEBTOON;
+        //this.readerMode = READER_MODE.WEBTOON;
+        // Temp disable ability to use webtoon
+        this.readerMode = READER_MODE.MANGA_LR;
         break;
       case READER_MODE.WEBTOON:
         this.readerMode = READER_MODE.MANGA_LR;

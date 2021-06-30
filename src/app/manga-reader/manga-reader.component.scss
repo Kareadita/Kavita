@@ -216,7 +216,8 @@ canvas {
   
     .custom-slider .ngx-slider .ngx-slider-limit {
       font-weight: bold;
-      color: $primary-color;
+      color: white !important;
+
     }
 
   
@@ -239,11 +240,11 @@ canvas {
   }
 
   .highlight {
-      background-color: rgba(65, 105, 225, 0.5) !important;
+      background-color: rgba(65, 225, 100, 0.5) !important;
       animation: fadein .5s both;
   }
   .highlight-2 {
-    background-color: rgba(65, 225, 100, 0.5) !important;
+    background-color: rgba(65, 105, 225, 0.5) !important;
     animation: fadein .5s both;
   }
 
