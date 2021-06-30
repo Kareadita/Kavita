@@ -9,7 +9,7 @@ export class NavService {
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   navbarVisible$ = this.navbarVisibleSource.asObservable();
 
-  private darkMode: boolean = false;
+  private darkMode: boolean = true;
   private darkModeSource = new ReplaySubject<boolean>(1);
   darkMode$ = this.darkModeSource.asObservable();
 

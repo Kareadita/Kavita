@@ -23,6 +23,8 @@ export class AppComponent implements OnInit {
 
     if (user) {
       this.navService.setDarkMode(user.preferences.siteDarkMode);
+    } else {
+      this.navService.setDarkMode(true);
     }
   }
 }

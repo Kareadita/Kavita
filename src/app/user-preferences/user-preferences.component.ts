@@ -73,7 +73,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.siteDarkMode || false, []));
 
-        this.settingsForm.addControl('siteDarkMode', new FormControl(user.preferences.siteDarkMode || false, []));
+        this.settingsForm.addControl('siteDarkMode', new FormControl(user.preferences.siteDarkMode || true, []));
       }
     });
 
