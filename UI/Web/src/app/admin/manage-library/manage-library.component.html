@@ -1,0 +1,33 @@
+<div class="container-fluid">
+    <div class="row mb-2">
+        <div class="col-8"><h3>Libraries</h3></div>
+        <div class="col-4"><button class="btn btn-primary float-right" (click)="addLibrary()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
+    </div>
+    <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
+        <li *ngFor="let library of libraries" class="list-group-item">
+            <div>
+                <h4>
+                    {{library.name | titlecase}}
+                    <div class="float-right">
+                        <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
+                        <button class="btn btn-danger mr-2 btn-sm" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" ngbTooltip="Delete Library" attr.aria-label="Delete {{library.name | titlecase}}"></i></button>
+                        <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{library.name | titlecase}}"></i></button>
+                    </div>
+                </h4>
+            </div>
+            <div>Type: {{libraryType(library.type)}}</div>
+            <div>Shared Folders: {{library.folders.length + ' folders'}}</div>
+        </li>
+        <li *ngIf="loading" class="list-group-item">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="invisible">Loading...</span>
+            </div>
+        </li>
+        <li class="list-group-item" *ngIf="libraries.length === 0 && !loading">
+            There are no libraries. Try creating one.
+        </li>
+    </ul>
+    <ng-template #createLibrary>
+        <app-library-editor-modal></app-library-editor-modal>
+    </ng-template>
+</div>

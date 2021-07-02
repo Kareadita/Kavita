@@ -1,0 +1,40 @@
+
+<form [formGroup]="libraryForm">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">{{this.library !== undefined ? 'Edit' : 'New'}} Library</h4>
+        <button type="button" class="close" aria-label="Close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="alert alert-info" *ngIf="errorMessage !== ''">
+            <strong>Error: </strong> {{errorMessage}}
+        </div>
+        <div class="form-group">
+            <label for="library-name">Name</label>
+            <input id="library-name" class="form-control" formControlName="name" type="text">
+        </div>
+        
+        <div class="form-group">
+            <label for="library-type">Type</label>
+            <select class="form-control" id="library-type" formControlName="type" [attr.disabled]="this.library">
+                <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
+            </select>
+        </div>
+        
+    
+        <h4>Folders <button type="button" class="btn float-right btn-sm" (click)="openDirectoryPicker()"><i class="fa fa-plus" aria-hidden="true"></i></button></h4>
+        
+        <ul class="list-group" style="width: 100%">
+            <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
+                {{folder}}
+                <button class="btn float-right btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+            </li>
+        </ul>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
+        <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+        <button type="submit" class="btn btn-primary" (click)="submitLibrary()" [disabled]="!libraryForm.dirty && !madeChanges">Save</button>
+    </div>
+</form>

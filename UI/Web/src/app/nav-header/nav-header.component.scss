@@ -1,0 +1,68 @@
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+$primary-color: white;
+$bg-color: rgb(22, 27, 34);
+
+.navbar {
+    background-color: $bg-color;
+}
+
+.navbar-brand {
+    font-family: "Spartan", sans-serif;
+    font-weight: bold;
+
+    .logo {
+        max-height: 28px;
+        vertical-align: top;
+    }
+
+    .phone-hidden {
+        vertical-align: middle;
+    }
+}
+
+.focus-visible:focus {
+    visibility: visible;
+    color: white;
+}
+
+.ng-autocomplete {
+    margin-bottom: 0px;
+    max-width: 400px;
+}
+
+.primary-text {
+    color: $primary-color;
+    border: none;
+}
+
+.search-result {
+    width: 24px;
+    margin-top: 5px;
+}
+
+@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+    .ng-autocomplete {
+        width: 100%; // 232px
+    }
+}
+ 
+/* Extra small devices (phones, 300px and down) */
+@media only screen and (max-width: 300px) { //370
+    .ng-autocomplete {
+        max-width: 120px;
+    }
+}
+
+.scroll-to-top:hover {
+    animation: MoveUpDown 1s linear infinite;
+}
+
+@keyframes MoveUpDown {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+}

@@ -1,0 +1,25 @@
+@import '../../../theme/colors';
+
+$bg-color: #c9c9c9;
+$bdr-color: #f2f2f2;
+
+::ng-deep .tagbadge {
+    background-color: $bg-color;
+    transition: all .3s ease-out;
+    margin: 3px 5px 3px 0px;
+    padding: 2px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: 1px solid $bdr-color;
+    display: inline-block;
+    cursor: default;
+
+    i {
+        color: $primary-color;
+        font-size: 14px;
+        font-weight: bold;
+        margin-left: 10px;
+        margin-right: 0px;
+        cursor: pointer;
+    }
+}

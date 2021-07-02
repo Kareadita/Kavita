@@ -1,0 +1,203 @@
+@font-face {
+    font-family: "Fira_Sans";
+    src: url(../../../assets/fonts/Fira_Sans/FiraSans-Regular.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "Lato";
+    src: url(../../../assets/fonts/Lato/Lato-Regular.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "Libre_Baskerville";
+    src: url(../../../assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "Merriweather";
+    src: url(../../../assets/fonts/Merriweather/Merriweather-Regular.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "Nanum_Gothic";
+    src: url(../../../assets/fonts/Nanum_Gothic/NanumGothic-Regular.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: "RocknRoll_One";
+    src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
+}
+
+$primary-color: #0062cc;
+
+.control-container {
+    padding-bottom: 5px;
+}
+
+.table-of-contents li {
+    cursor: pointer;
+
+    &.active {
+        font-weight: bold;
+    }
+}
+
+
+.dark-mode {
+
+    color: #dcdcdc !important;
+    background-image: none !important;
+    background-color: #292929 !important;
+
+    *:not(code), *:not(a) {
+        background-color: #292929;
+        box-shadow: none;
+        text-shadow: none;
+        border-radius: unset;
+        color: #dcdcdc !important;
+    }
+
+    *:not(input), *:not(code), *:not(:link) {
+        color: #dcdcdc !important;
+    }
+
+    code {
+        color: #e83e8c !important;
+    }
+
+    .btn-icon {
+        background-color: transparent;
+    }
+
+    :link, a {
+        color: #8db2e5 !important;
+    }
+
+    // Coppied
+    // html, body {
+    //     color: #dcdcdc !important;
+    //     background-image: none !important;
+    //     background-color: #292929 !important;
+    //   }
+      
+    //   html::before, body::before {
+    //     background-image: none !important;
+    //   }
+      
+    //   html *:not(input) {color: #dcdcdc !important}
+    //   html * {background-color: rgb(41, 41, 41, 0.90) !important}
+      
+    //   html *, html *[id], html *[class] {
+    //     box-shadow: none !important;
+    //     text-shadow: none !important;
+    //     border-radius: unset !important;
+    //     border-color: #555555 !important;
+    //     outline-color: #555555 !important;
+    //   }
+      
+      img, img[src] {
+        z-index: 1;
+        filter: brightness(0.85) !important;
+        background-color: initial !important;
+      }
+      
+    //   video, video[src] {
+    //     z-index: 1;
+    //     background-color: transparent !important;
+    //   }
+      
+    //   input:not([type='button']):not([type='submit']) {
+    //     color: #dcdcdc !important;
+    //     background-image: none !important;
+    //     background-color: #333333 !important;
+    //   }
+      
+    //   textarea, textarea[class], input[type='text'], input[type='text'][class] {
+    //     color: #dcdcdc !important;
+    //     background-color: #555555 !important;
+    //   }
+      
+    //   svg:not([fill]) {fill: #7d7d7d !important}
+    //   li, select {background-image: none !important}
+    //   input[type='text'], input[type='search'] {text-indent: 10px}
+    //   a {background-color: rgba(255, 255, 255, 0.01) !important}
+    //   html cite, html cite *, html cite *[class] {color: #029833 !important}
+    //   svg[fill], button, input[type='button'], input[type='submit'] {opacity: 0.85 !important}
+      
+    //   :before {color: #dcdcdc !important}
+    //   :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
+    //   :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
+    :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
+    :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
+}
+
+.reading-bar {
+    background-color: white;
+    overflow: hidden;
+}
+
+@media(max-width: 875px) {
+    .book-title {
+        display: none;
+    }
+    
+} 
+
+.book-title {
+    margin-top: 10px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.reading-section {
+    height: 100vh;
+    //padding-top: 50px;
+}
+
+.drawer-body {
+    padding-bottom: 20px;
+}
+
+
+
+// Click to Paginate styles
+.icon-primary-color {
+    color: $primary-color;
+}
+
+.dark-mode .overlay {
+    opacity: 0;
+}
+
+.overlay {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    
+
+    .tint {
+        opacity: 0.4;
+        background-color: $primary-color;
+        transition: opacity 4s ease-in-out;
+    }
+  
+    .right {
+      position: absolute;
+      cursor: pointer;
+      width: 20%;
+      height: 100%;
+      right: 0px;
+      top: 0px;
+    }
+
+    .left {
+      cursor: pointer;
+      width: 20%;
+      height: 100%;
+    }
+}

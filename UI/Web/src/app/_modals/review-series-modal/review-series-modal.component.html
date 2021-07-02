@@ -1,0 +1,32 @@
+<div *ngIf="series !== undefined">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">
+            {{series.name}} Review</h4>
+        <button type="button" class="close" aria-label="Close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="reviewGroup">
+            <div class="form-group">
+                <label for="rating">Rating</label>
+                <div>
+                    <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" formControlName="rating"></ngb-rating>
+                    <button class="btn btn-information ml-2" (click)="clearRating()"><i aria-hidden="true" class="fa fa-ban"></i><span class="phone-hidden">&nbsp;Clear</span></button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="review">Review</label>
+                <textarea id="review" class="form-control" formControlName="review" rows="3"></textarea>
+            </div>
+        </form>
+        
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-secondary" (click)="close()">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
+    </div>
+</div>
+
+

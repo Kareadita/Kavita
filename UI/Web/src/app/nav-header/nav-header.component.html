@@ -1,0 +1,80 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
+    <div class="container-fluid">
+      <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+      <a class="navbar-brand" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="phone-hidden"> Kavita</span></a>
+      <ul class="navbar-nav mr-auto">
+        
+        <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
+          <div>
+            <fieldset class="form-inline">
+              <div class="form-group" style="margin-bottom: 0px;">
+                <label for="nav-search" class="sr-only">Search series</label>
+                <div class="ng-autocomplete">
+                  <ng-autocomplete
+                    #search 
+                    id="nav-search"
+                    [classList]="['ng-autocomplete']"
+                    [data]="searchResults"
+                    searchKeyword="name"
+                    placeholder="Search Series"
+                    [initialValue]=""
+                    [focusFirst]="true"
+                    [minQueryLength]="2"
+                    (selected)='clickSearchResult($event)'
+                    (inputChanged)='onChangeSearch($event)'
+                    [isLoading]="isLoading"
+                    [debounceTime]="debounceTime"
+                    [itemTemplate]="itemTemplate"
+                    [notFoundTemplate]="notFoundTemplate">                                 
+                  </ng-autocomplete>
+                  
+                  <ng-template #itemTemplate let-item>
+                    <div style="display: flex;padding: 5px;">
+                      <div style="width: 24px" class="mr-1">
+                        <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
+                      </div>
+                      <div class="ml-1">
+                        <span *ngIf="item.name.toLowerCase().indexOf(searchTerm) >= 0; else localizedName" [innerHTML]="item.name"></span>
+                        <ng-template #localizedName>
+                          <span [innerHTML]="item.localizedName"></span>
+                        </ng-template>
+                        <span class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                  
+                  <ng-template #notFoundTemplate let-notFound>
+                    No results found
+                  </ng-template>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
+      </ul>
+
+      <!-- <div class="back-to-top">
+        <button class="btn btn-icon" (click)="navService?.toggleDarkMode()">
+          <i class="fa {{(navService?.darkMode$ | async) ? 'fa-moon' : 'fa-sun'}}" style="color: white" aria-hidden="true"></i>
+          <span class="sr-only">Dark mode Toggle. Current value {{(navService?.darkMode$ | async) ? 'On' : 'Off'}}</span>
+        </button>
+      </div> -->
+      
+      <div class="back-to-top">
+        <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
+          <i class="fa fa-angle-double-up" style="color: white" aria-hidden="true"></i>
+          <span class="sr-only">Scroll to Top</span>
+        </button>
+      </div>
+      <!-- TODO: Put SignalR notification button dropdown here. -->
+      <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+        <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>{{user.username | titlecase}}</button>
+        <div ngbDropdownMenu >
+          <button ngbDropdownItem routerLink="/preferences">User Settings</button>
+          <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>
+          <button ngbDropdownItem (click)="logout()">Logout</button>
+        </div>
+      </div>
+    </div>
+</nav>
+  

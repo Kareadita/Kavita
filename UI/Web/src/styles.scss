@@ -1,0 +1,116 @@
+// Import colors for overrides of bootstrap theme
+@import './theme/_colors.scss';
+@import './theme/_toastr.scss';
+
+// Bootstrap must be after _colors since we define the colors there
+@import '~bootstrap/scss/bootstrap';
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+@import '~swiper/swiper.scss';
+
+// Custom animation for ng-lazyload-image
+img.ng-lazyloaded {
+  animation: fadein .5s;
+}
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+@import './assets/themes/dark.scss';
+
+// Global Styles
+button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
+  cursor: not-allowed;
+}
+
+label, select, .clickable {
+  cursor: pointer;
+}
+
+.btn-primary {
+  color: white;
+}
+
+@font-face {
+  font-family: "EBGarmond";
+  src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Spartan";
+  src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
+}
+
+html, body { height: 100%; }
+body {
+  margin: 0; 
+  font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+}
+
+// .disabled, :disabled {
+//   cursor: not-allowed !important;
+// }
+
+// Slider handle override
+::ng-deep {
+  .custom-slider .ngx-slider .ngx-slider-bar {
+    background: #ffe4d1;
+    height: 2px;
+  }
+  .custom-slider .ngx-slider .ngx-slider-selection {
+    background: orange;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-pointer {
+    width: 8px;
+    height: 16px;
+    top: auto; /* to remove the default positioning */
+    bottom: 0;
+    background-color: #333;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-pointer:after {
+    display: none;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-bubble {
+    bottom: 14px;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-limit {
+    font-weight: bold;
+    color: orange;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-tick {
+    width: 1px;
+    height: 10px;
+    margin-left: 4px;
+    border-radius: 0;
+    background: #ffe4d1;
+    top: -1px;
+  }
+
+  .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+    background: orange;
+  }
+}
+
+
+
+// Utiliities
+@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+  .phone-hidden {
+    display: none;
+  }
+}
+
+@include media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+  .not-phone-hidden {
+    display: none;
+  }
+}

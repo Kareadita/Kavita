@@ -1,0 +1,62 @@
+<div *ngIf="data !== undefined">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">
+            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}} Details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body scrollable-modal">
+        <h4 *ngIf="isObjectVolume(data)">Information</h4>
+        <ng-container *ngIf="isObjectVolume(data)">
+            <div class="row no-gutters">
+                <div class="col">
+                    Id: {{data.id}}
+                </div>
+                <div class="col">
+                    <!-- Special: {{(data?.isSpecial ? 'Yes' : 'No') || 'N/A'}} -->
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <div class="col">
+                    Added: {{(data.created | date: 'MM/dd/yyyy') || '-'}}
+                </div>
+                <div class="col">
+                    Pages: {{data.pages}}
+                </div>
+            </div>
+        </ng-container>
+
+        <h4 *ngIf="!isObjectChapter(data)">Chapters</h4>
+        <ul class="list-unstyled">
+            <li class="media my-4" *ngFor="let chapter of chapters">
+                <img class="mr-3" style="width: 74px" src="{{imageService.getChapterCoverImage(chapter.id)}}">
+                <div class="media-body">
+                    <h5 class="mt-0 mb-1">
+                        <span *ngIf="chapter.number !== '0'; else specialHeader">Chapter {{formatChapterNumber(chapter)}}</span>
+                        <ng-template #specialHeader>File(s)</ng-template>
+                    </h5>
+                    <ul class="list-group">
+                        <li *ngFor="let file of chapter.files.sort()" class="list-group-item">
+                            <span>{{file.filePath}}</span>
+                            <div class="row no-gutters">
+                                <div class="col">
+                                    Pages: {{file.pages}}
+                                </div>
+                                <div class="col">
+                                    Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
+    </div>
+</div>
+
+

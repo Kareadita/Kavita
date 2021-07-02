@@ -1,0 +1,130 @@
+<div class="reader">
+    <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
+        <div style="display: flex">
+            <button class="btn btn-icon" style="height: 100%" title="Back" (click)="closeReader()">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                <span class="sr-only">Back</span>
+            </button>
+            
+            <div>
+                <div style="font-weight: bold;">{{title}}</div>
+                <div class="subtitle">
+                    {{subtitle}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <ng-container *ngIf="isLoading">
+        <div class="spinner-border text-secondary loading" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </ng-container>
+
+    <div (click)="toggleMenu()" class="reading-area">
+        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}}" 
+                ondragstart="return false;" onselectstart="return false;">
+        </canvas>
+        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
+            <app-infinite-scroller [pageNum]="pageNum" [buffferPages]="5" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"></app-infinite-scroller>
+        </div>
+        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD"> <!--; else webtoonClickArea; TODO: See if people want this mode WEBTOON_WITH_CLICKS-->
+            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'top'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
+            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'bottom'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+        </ng-container>
+        <ng-template #webtoonClickArea>
+            <div class="top {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
+            <div class="right {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
+            <div class="left {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+            <div class="bottom {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+        </ng-template>
+    </div>
+    
+    <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
+        <div class="form-group" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined && pageOptions.ceil > 0">
+            <span class="sr-only" id="slider-info"></span>
+            <div class="row no-gutters">
+                <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+                <div class="col custom-slider">
+                    <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                </div>
+                <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+                <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+            </div>
+            
+            
+        </div>
+        <div class="row pt-4 ml-2 mr-2">
+            <div class="col">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                    <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
+                    <span id="reading-direction" class="sr-only">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
+                </button>
+            </div>
+            <div class="col">
+                <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
+                    <i class="fa {{readerModeIcon}}" aria-hidden="true"></i>
+                    <span class="sr-only">Reading Mode</span>
+                </button>
+            </div>
+            <div class="col">
+                <button class="btn btn-icon {{this.colorMode}}" [disabled]="readerMode === READER_MODE.WEBTOON" title="Color Options: {{colorOptionName}}" (click)="toggleColorMode();resetMenuCloseTimer();">
+                    <i class="fa fa-palette" aria-hidden="true"></i>
+                    <span class="sr-only"></span>
+                </button>
+            </div>
+            <div class="col">
+                <button class="btn btn-icon" title="Settings" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
+                    <i class="fa fa-sliders-h" aria-hidden="true"></i>
+                    <span class="sr-only">Settings</span>
+                </button>
+            </div>
+        </div>
+        <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
+            <form [formGroup]="generalSettingsForm">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="page-splitting">Image Splitting</label>&nbsp;
+                        <div class="split fa fa-image">
+                            <div class="{{splitIconClass}}"></div> 
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
+                                <option [value]="1">Right to Left</option>
+                                <option [value]="0">Left to Right</option>
+                                <option [value]="2">None</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-6">
+                        <label for="page-fitting">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-control" id="page-fitting" formControlName="fittingOption">
+                            <option value="full-height">Height</option>
+                            <option value="full-width">Width</option>
+                            <option value="original">Original</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-6">
+                        <label for="autoCloseMenu" class="form-check-label">Auto Close Menu</label>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-check">
+                            <input id="autoCloseMenu" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="autoCloseMenu">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+</div>

@@ -1,0 +1,45 @@
+
+
+<div class="container-fluid">
+    <div class="row mb-2">
+        <div class="col-8"><h3>Users</h3></div>
+        <div class="col-4"><button class="btn btn-primary float-right" (click)="createMember()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add User</span></button></div>
+    </div>
+    <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
+        <li *ngFor="let member of members" class="list-group-item">
+            <div>
+                <h4>
+                    {{member.username | titlecase}} <span *ngIf="member.isAdmin" class="badge badge-pill badge-secondary">Admin</span>
+                    <div class="float-right" *ngIf="canEditMember(member)">
+                        <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary mr-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
+                        <button class="btn btn-primary" (click)="openEditLibraryAccess(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
+                    </div>
+                </h4>
+                <div>Last Active: {{member.lastActive | date: 'MM/dd/yyyy'}}</div>
+                <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
+                <div>
+                    Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
+                    <ng-template #showRoles>
+                        <app-tag-badge *ngFor="let role of getRoles(member)">{{role}}</app-tag-badge>
+                    </ng-template>
+                    <button class="btn btn-icon" title="{{hasAdminRole(member) ? 'Admins have all feature permissions' : 'Edit Role'}}" (click)="openEditRole(member)" [disabled]="hasAdminRole(member)">
+                        <i class="fa fa-pen" aria-hidden="true"></i>
+                        <span class="sr-only">Edit Role</span>
+                    </button>
+                </div>
+            </div>
+        </li>
+        <li *ngIf="loadingMembers" class="list-group-item">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="invisible">Loading...</span>
+            </div>
+        </li>
+        <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
+            There are no other users.
+        </li>
+    </ul>
+    <ng-template #createUser>
+        <app-register-member (created)="onMemberCreated($event)"></app-register-member>
+    </ng-template>
+</div>

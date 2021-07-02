@@ -1,0 +1,54 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Choose a Directory</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <div class="form-group">
+        <label for="filter">Filter</label>
+        <div class="input-group">
+            <input id="filter" autocomplete="false" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="filterQuery = '';">Clear</button>
+            </div>
+        </div>
+    </div>
+    <nav aria-label="directory breadcrumb">
+        <ol class="breadcrumb" *ngIf="routeStack.peek() !== undefined; else noBreadcrumb">
+          <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}" *ngFor="let route of routeStack.items; let index = index">
+                <ng-container *ngIf="route === routeStack.peek(); else nonActive">
+                    {{route}}
+                </ng-container>  
+                <ng-template #nonActive>
+                    <a href="javascript:void(0);" (click)="navigateTo(index)">{{route}}</a>
+                </ng-template>
+          </li>
+        </ol>
+        <ng-template #noBreadcrumb>
+            <div class="breadcrumb">Select a folder to view breadcrumb</div>
+        </ng-template>
+    </nav>
+    <ul class="list-group">
+        <div class="list-group-item list-group-item-action">
+            <button (click)="goBack()" class="btn btn-secondary" [disabled]="routeStack.peek() === undefined">
+                <i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>
+                Back
+            </button>
+            <button type="button" class="btn btn-primary float-right" [disabled]="routeStack.peek() === undefined" (click)="shareFolder('', $event)">Share</button>
+        </div>
+    </ul>
+    <ul class="list-group scrollable">
+        <button *ngFor="let folder of folders | filter: filterFolder" class="list-group-item list-group-item-action" (click)="selectNode(folder)">
+            <span>{{getStem(folder)}}</span>
+            <button type="button" class="btn btn-primary float-right" (click)="shareFolder(folder, $event)">Share</button>
+        </button>
+        <div class="list-group-item text-center" *ngIf="folders.length === 0">
+            There are no folders here
+        </div>
+    </ul>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+</div>

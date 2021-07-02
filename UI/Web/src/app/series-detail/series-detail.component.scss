@@ -1,0 +1,30 @@
+@import '~bootstrap/scss/mixins/_breakpoints.scss';
+
+
+.user-review {
+  font-style: italic;
+
+}
+
+.poster {
+    width: 100%;
+}
+
+.rating-star {
+  margin-top: 2px;
+  font-size: 1.5rem;
+}
+
+
+// Including breakpoint has issue with resovling variable, so copying gridpoints here
+@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+    .poster {
+      display: none;
+    }
+}
+
+@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+  .read-btn--text {
+    display: none;
+  }
+}

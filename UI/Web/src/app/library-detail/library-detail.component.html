@@ -1,0 +1,11 @@
+<app-card-detail-layout header="{{libraryName}}" 
+    [isLoading]="loadingSeries"
+    [items]="series"
+    [pagination]="pagination"
+    (pageChange)="onPageChange($event)"
+    >
+
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card>
+        </ng-template>
+</app-card-detail-layout>

@@ -1,0 +1,124 @@
+<div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
+    <div class="row mb-3">
+        <div class="col-md-2 col-xs-4 col-sm-6">
+            <img class="poster" [lazyLoad]="imageService.getSeriesCoverImage(series.id)" [defaultImage]="imageService.placeholderImage">
+        </div>
+        <div class="col-md-10 col-xs-8 col-sm-6">
+            <div class="row no-gutters"><h2>{{series?.name}}</h2></div>
+            <div class="row no-gutters">
+                <div>
+                    <button class="btn btn-primary" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;" [disabled]="isLoading">
+                        <span>
+                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
+                        </span>
+                        &nbsp;
+                        <span class="read-btn--text">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+                    </button>
+                </div>
+                <div class="ml-2" *ngIf="isAdmin">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" title="Edit Series information">
+                        <span>
+                            <i class="fa fa-pen" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
+                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series">
+                        <span>
+                            <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <div class="ml-2">
+                    <div class="card-actions">
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                      </div>
+                </div>
+                <div class="ml-2">
+                    <ngb-rating class="rating-star" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
+                    <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
+            </div>
+            <div class="row no-gutters {{series?.userReview ? '' : 'mt-2'}}">
+                <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
+            </div>
+            <div *ngIf="seriesMetadata" class="mt-2">
+                <div class="row no-gutters" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
+                    <div class="col-md-4">
+                        <h5>Genres</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres">{{genre}}</app-tag-badge>
+                    </div>
+                </div>
+                <div class="row no-gutters mt-1" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
+                    <div class="col-md-4">
+                        <h5>Collections</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-tag-badge *ngFor="let tag of seriesMetadata.tags" a11y-click="13,32" class="clickable" routerLink="/collections/{{tag.id}}">
+                            {{tag.title}}
+                        </app-tag-badge>
+                    </div>
+                </div>
+                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.persons && seriesMetadata.persons.length > 0">
+                    <div class="col-md-4">
+                        <h5>People</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-person-badge *ngFor="let person of seriesMetadata.persons">
+                            <div name>{{person.name}}</div>
+                            <div role>{{person.role}}</div>
+                        </app-person-badge>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+
+    <div>
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
+            <li [ngbNavItem]="1" *ngIf="hasSpecials">
+              <a ngbNavLink>Specials</a>
+              <ng-template ngbNavContent>
+                <div class="row">
+                    <div *ngFor="let chapter of specials">
+                        <app-card-item class="col-auto" *ngIf="chapter.isSpecial"  [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
+                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                    </div>
+                </div>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="2" *ngIf="hasNonSpecialVolumeChapters">
+              <a ngbNavLink>Volumes/Chapters</a>
+              <ng-template ngbNavContent>
+                  <div class="row">
+                    <div *ngFor="let volume of volumes">
+                        <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                            [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
+                    </div>
+                    <div *ngFor="let chapter of chapters">
+                        <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                    </div>
+                  </div>
+              </ng-template>
+            </li>
+          </ul>
+          <div [ngbNavOutlet]="nav"></div>
+    </div>
+
+    <div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
+        <div class="spinner-border text-secondary loading" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </div>
+</div>

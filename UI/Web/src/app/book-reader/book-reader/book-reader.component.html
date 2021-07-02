@@ -1,0 +1,138 @@
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}}">
+    <div class="fixed-top" #stickyTop>
+        <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+        <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+        <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="backgroundColor" (drawerClosed)="closeDrawer()">
+            <div header>
+                <h2 style="margin-top: 0.5rem">Book Settings
+                    <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </h2>
+                
+            </div>
+            <div body class="drawer-body">
+                <div class="control-container">
+                    <div class="controls">
+
+                        <form [formGroup]="settingsForm">
+                            <div class="form-group">
+                                <label for="library-type">Font Family</label>
+                                <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
+                                    <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="controls">
+                        <label id="fontsize">Font Size</label>
+                        <button (click)="updateFontSize(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="fontsize"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                        <span>{{pageStyles['font-size']}}</span>
+                        <button (click)="updateFontSize(10)"  class="btn btn-icon" title="Increase" aria-labelledby="fontsize"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="controls">
+                        <label id="linespacing">Line Spacing</label>
+                        <button (click)="updateLineSpacing(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="linespacing"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                        <span>{{pageStyles['line-height']}}</span>
+                        <button (click)="updateLineSpacing(10)"  class="btn btn-icon" title="Increase" aria-labelledby="linespacing"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="controls">
+                        <label id="margin">Margin</label>
+                        <button (click)="updateMargin(-5)" class="btn btn-icon" title="Remove Margin" aria-labelledby="margin"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                        <span>{{pageStyles['margin-right']}}</span>
+                        <button (click)="updateMargin(5)"  class="btn btn-icon" title="Add Margin" aria-labelledby="margin"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="controls">
+                        <label id="readingdirection">Reading Direction</label>
+                        <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
+                    </div>
+                    <div class="controls">
+                        <label id="darkmode">Dark Mode</label>
+                        <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
+                        <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
+                    </div>
+                    <div class="controls">
+                        <label id="tap-pagination">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
+                        <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
+                        <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
+                        <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
+                    </div>
+                    <div class="row no-gutters justify-content-between">
+                        <button (click)="resetSettings()" class="btn btn-secondary col">Reset</button>
+                        <button (click)="saveSettings()" class="btn btn-primary col" style="margin-left:10px;">Save</button>
+                    </div>
+                </div>
+                <div class="row no-gutters">
+                    <div class="col-1">{{pageNum}}</div>
+                    <div class="col-10" style="margin-top: 9px">
+                        <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
+                    </div>
+                    <div class="col-1">{{maxPages - 1}}</div>
+                </div>
+                <div class="table-of-contents">
+                    <h3>Table of Contents</h3>
+                    <div *ngIf="chapters.length === 0">
+                        <em>This book does not have Table of Contents set in the metadata or a toc file</em>
+                    </div>
+                    <div *ngIf="chapters.length === 1; else nestedChildren">
+                        <ul>
+                            <li *ngFor="let chapter of chapters[0].children">
+                                <a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <ng-template #nestedChildren>
+                        <ul *ngFor="let chapterGroup of chapters" style="padding-inline-start: 0px">
+                            <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapter(chapterGroup.page, '')">
+                                {{chapterGroup.title}}
+                            </li>
+                            <ul *ngFor="let chapter of chapterGroup.children">
+                                <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
+                                    <a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a>
+                                </li>
+                            </ul>
+                        </ul>
+                    </ng-template>
+                </div>
+            </div>
+        </app-drawer>
+    </div>
+
+    <!-- This pushes down the page. Need to overlay  
+        <ng-container *ngIf="isLoading">
+        <div class="d-flex justify-content-center m-5">
+            <div class="spinner-border text-secondary loading" role="status">
+                <span class="invisible">Loading...</span>
+            </div>
+        </div>
+    </ng-container> -->
+
+    <div class="overlay" *ngIf="clickToPaginate" >
+        <div class="left {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="prevPage()">
+
+        </div>
+        <div class="right {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="nextPage()">
+
+        </div>
+    </div>
+    
+    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
+        <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
+        
+        <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
+            <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+        </div>
+    </div>
+
+    <ng-template #actionBar>
+        <div class="reading-bar row no-gutters justify-content-between">
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="readingDirection === 0 ? pageNum === 0 : pageNum + 1 >= maxPages - 1" title="{{readingDirection === 0 ? 'Previous' : 'Next'}} Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Previous' : 'Next'}}</span></button>
+            <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
+            <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="readingDirection === 0 ? pageNum + 1 >= maxPages - 1 : pageNum === 0" (click)="nextPage()" title="{{readingDirection === 0 ? 'Next' : 'Previous'}} Page"><span class="phone-hidden">{{readingDirection === 0 ? 'Next' : 'Previous'}}&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+        </div>
+    </ng-template>
+
+</div>

@@ -1,0 +1,62 @@
+<div class="container-fluid" style="padding-top: 10px">
+    <h2>{{header}}</h2>
+    <ng-container [ngTemplateOutlet]="paginationTemplate"  [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
+
+
+    <div class="row no-gutters">
+        <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        </div>
+        
+        <p *ngIf="items.length === 0 && !isLoading">
+            There is no data
+        </p>
+    </div>
+
+    <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
+</div>
+
+<ng-template #paginationTemplate let-id="id">
+    <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
+        <ngb-pagination
+            *ngIf="pagination.totalPages > 1"
+            [maxSize]="10"
+            [rotate]="true"
+            [ellipses]="false"
+            [(page)]="pagination.currentPage"
+            [pageSize]="pagination.itemsPerPage"
+            (pageChange)="onPageChange($event)"
+            [boundaryLinks]="true"
+            [collectionSize]="pagination.totalItems">
+
+            <ng-template ngbPaginationPages let-page let-pages="pages" *ngIf="pagination.totalItems / pagination.itemsPerPage > 20">
+                <li class="ngb-custom-pages-item" *ngIf="pagination.totalPages > 1">
+                    <div class="form-group d-flex flex-nowrap px-2">
+                      <label
+                          id="paginationInputLabel-{{id}}"
+                          for="paginationInput-{{id}}"
+                          class="col-form-label mr-2 ml-1"
+                      >Page</label>
+                      <input #i
+                          type="text"
+                          inputmode="numeric"
+                          pattern="[0-9]*"
+                          class="form-control custom-pages-input"
+                          id="paginationInput-{{id}}"
+                          [value]="page"
+                          (keyup.enter)="selectPageStr(i.value)"
+                          (blur)="selectPageStr(i.value)"
+                          (input)="formatInput($any($event).target)"
+                          attr.aria-labelledby="paginationInputLabel-{{id}} paginationDescription-{{id}}"
+                          [ngStyle]="{width: (0.5 + pagination.currentPage + '').length + 'rem'} "
+                      />
+                      <span id="paginationDescription-{{id}}" class="col-form-label text-nowrap px-2">
+                          of {{pagination.totalPages}}</span>
+                    </div>
+                </li>
+            </ng-template>
+            
+        </ngb-pagination>
+    </div>
+</ng-template>
+

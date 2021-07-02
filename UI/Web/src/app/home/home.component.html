@@ -1,0 +1,11 @@
+<div class="container">
+    <ng-container *ngIf="firstTimeFlow">
+        <p>Please create an admin account for yourself to start your reading journey.</p>
+        <app-register-member (created)="onAdminCreated($event)" [firstTimeFlow]="firstTimeFlow"></app-register-member>
+    </ng-container>
+</div>
+
+
+
+
+
