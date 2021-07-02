@@ -34,6 +34,14 @@ your reading collection with your friends and family!
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
 [![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Kareadita/Kavita/issues)
 
+## Demo
+If you want to try out Kavita, we have a demo up:
+[https://demo.kavitareader.com/](https://demo.kavitareader.com/)
+```
+Username: demouser
+Password: Demouser64
+```
+
 ## Setup
 ### Non-Docker
 - Unzip the archive for your target OS
@@ -108,7 +116,7 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 * [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
 
 ## Sentry
-Thank you to [<img src="/Logo/sentry.svg" alt="" width="32"> Sentry](https://sentry.io/welcome/) for providing us with free license to their software.
+Thank you to [<img src="/Logo/sentry.svg" alt="" width="64">](https://sentry.io/welcome/) for providing us with free license to their software.
 
 ### License
 
