@@ -14,7 +14,7 @@ namespace API.Services
     {
        private readonly ILogger<DirectoryService> _logger;
        private static readonly Regex ExcludeDirectories = new Regex(
-          @"@eaDir|\.DS_Store", 
+          @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
        public DirectoryService(ILogger<DirectoryService> logger)
@@ -23,13 +23,13 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Given a set of regex search criteria, get files in the given path. 
+       /// Given a set of regex search criteria, get files in the given path.
        /// </summary>
        /// <param name="path">Directory to search</param>
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private static IEnumerable<string> GetFilesWithCertainExtensions(string path, 
+       private static IEnumerable<string> GetFilesWithCertainExtensions(string path,
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
@@ -50,20 +50,21 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-          // BUG?: If the rootPath doesn't exist in the fullPath, then infinite loop
-          // if (!fullPath.StartsWith(rootPath))
-          // {
-          //    return Array.Empty<string>();
-          // }
-          var separator = Path.AltDirectorySeparatorChar;
+         var separator = Path.AltDirectorySeparatorChar;
           if (fullPath.Contains(Path.DirectorySeparatorChar))
           {
              fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
-          
+
           if (rootPath.Contains(Path.DirectorySeparatorChar))
           {
              rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+          }
+
+          // If the fullPath doesn't have rootPath in it, return empty array
+          if (!fullPath.StartsWith(rootPath))
+          {
+            return Array.Empty<string>();
           }
 
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
@@ -85,7 +86,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "", 
+       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -96,7 +97,7 @@ namespace API.Services
                 .Where(file =>
                    reSearchPattern.IsMatch(file));
           }
-          
+
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
@@ -106,7 +107,7 @@ namespace API.Services
           {
              return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
           }
-          
+
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
@@ -147,11 +148,11 @@ namespace API.Services
        public static void ClearAndDeleteDirectory(string directoryPath)
        {
           if (!Directory.Exists(directoryPath)) return;
-          
+
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
           ClearDirectory(directoryPath);
-          
+
           di.Delete(true);
        }
 
@@ -167,11 +168,11 @@ namespace API.Services
 
           foreach (var file in di.EnumerateFiles())
           {
-             file.Delete(); 
+             file.Delete();
           }
           foreach (var dir in di.EnumerateDirectories())
           {
-             dir.Delete(true); 
+             dir.Delete(true);
           }
        }
 
@@ -186,13 +187,13 @@ namespace API.Services
                 var fileInfo = new FileInfo(file);
                 if (fileInfo.Exists)
                 {
-                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));   
+                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));
                 }
                 else
                 {
                    _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
                 }
-                
+
              }
           }
           catch (Exception ex)
@@ -207,12 +208,12 @@ namespace API.Services
        public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
-            
+
             var di = new DirectoryInfo(rootPath);
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
                 .Select(d => d.Name).ToImmutableList();
-            
+
             return dirs;
         }
 
@@ -331,6 +332,6 @@ namespace API.Services
 
             return fileCount;
         }
-        
+
     }
 }
