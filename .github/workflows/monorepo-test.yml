@@ -27,7 +27,7 @@ jobs:
           npm run prod
 
           echo 'Copying back to Kavita wwwroot'
-          rsync -a dist/ ../API/wwwroot/
+          rsync -a dist/ ../../API/wwwroot/
           
           cd ../ || exit
 
