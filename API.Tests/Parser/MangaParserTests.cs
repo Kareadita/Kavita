@@ -146,6 +146,9 @@ namespace API.Tests.Parser
         [InlineData("Kodoja #001 (March 2016)", "Kodoja")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "Boku No Kokoro No Yabai Yatsu")]
         [InlineData("Kiss x Sis - Ch.36 - A Cold Home Visit.cbz", "Kiss x Sis")]
+        [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ)", "Seraph of the End - Vampire Reign")]
+        [InlineData("Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz", "Grand Blue Dreaming")]
+        [InlineData("Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz", "Yuusha Ga Shinda!")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -349,6 +352,14 @@ namespace API.Tests.Parser
                 Series = "Goblin Slayer - Brand New Day", Volumes = "0", Edition = "",
                 Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
+            });
+            
+            filepath = @"E:\Manga\Summer Time Rendering\Specials\Record 014 (between chapter 083 and ch084) SP11.cbr";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Summer Time Rendering", Volumes = "0", Edition = "",
+                Chapters = "0", Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
+                FullFilePath = filepath, IsSpecial = true
             });
 
 

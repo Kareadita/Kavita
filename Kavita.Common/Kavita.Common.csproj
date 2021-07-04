@@ -2,9 +2,9 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <Company>kareadita.github.io</Company>
+        <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.4.2.0</AssemblyVersion>
+        <AssemblyVersion>0.4.2.1</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 

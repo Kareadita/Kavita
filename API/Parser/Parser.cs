@@ -60,9 +60,13 @@ namespace API.Parser
 
         private static readonly Regex[] MangaSeriesRegex = new[]
         {
-            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
+            // Grand Blue Dreaming - SP02
             new Regex(
-                @"^(?<Series>.*)( |_)Vol\.?\d+",
+                @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
+            new Regex(
+                @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
@@ -89,9 +93,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz
+            // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
-                @"(?<Series>.*)(\b|_|-|\s)(?:chapter)(\b|_|-|\s)\d",
+                @"(?<Series>.*)(\b|_|-|\s)(?:(chapter(\b|_|-|\s))|sp)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
@@ -444,28 +448,7 @@ namespace API.Parser
             if (ret.Series == string.Empty)
             {
                 // Try to parse information out of each folder all the way to rootPath
-                var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
-                for (var i = 0; i < fallbackFolders.Count; i++)
-                {
-                    var folder = fallbackFolders[i];
-                    if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
-                    if (ParseVolume(folder) != DefaultVolume || ParseChapter(folder) != DefaultChapter) continue;
-
-                    var series = ParseSeries(folder);
-                    
-                    if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
-                    {
-                        ret.Series = CleanTitle(folder);
-                        break;
-                    }
-
-                    if (!string.IsNullOrEmpty(series))
-                    {
-                        ret.Series = series;
-                        break;
-                    }
-                }
-                
+                ParseFromFallbackFolders(filePath, rootPath, ref ret);
             }
 
             var edition = ParseEdition(fileName);
@@ -488,7 +471,11 @@ namespace API.Parser
                 ret.IsSpecial = true;
                 ret.Chapters = DefaultChapter;
                 ret.Volumes = DefaultVolume;
+                
+                ParseFromFallbackFolders(filePath, rootPath, ref ret);
             }
+            // here is the issue. If we are a special with marker, we need to ensure we use the correct series name. 
+            // we can do this by falling back
 
             if (string.IsNullOrEmpty(ret.Series))
             {
@@ -496,6 +483,32 @@ namespace API.Parser
             }
 
             return ret.Series == string.Empty ? null : ret;
+        }
+
+        public static void ParseFromFallbackFolders(string filePath, string rootPath, ref ParserInfo ret)
+        {
+            // TODO: This currently only does series, but we can enhance to do volume/chapter. It will need library type tho
+            var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
+            for (var i = 0; i < fallbackFolders.Count; i++)
+            {
+                var folder = fallbackFolders[i];
+                if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
+                if (ParseVolume(folder) != DefaultVolume || ParseChapter(folder) != DefaultChapter) continue;
+
+                var series = ParseSeries(folder);
+
+                if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+                {
+                    ret.Series = CleanTitle(folder);
+                    break;
+                }
+
+                if (!string.IsNullOrEmpty(series))
+                {
+                    ret.Series = series;
+                    break;
+                }
+            }
         }
 
         public static MangaFormat ParseFormat(string filePath)

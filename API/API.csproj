@@ -16,7 +16,7 @@
   <PropertyGroup>
     <Product>Kavita</Product>
     <Company>kareadita.github.io</Company>
-    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kareadita.github.io (GNU General Public v3)</Copyright>
+    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
 
     <!-- Should be replaced by CI -->
     <AssemblyVersion>0.4.1</AssemblyVersion>
