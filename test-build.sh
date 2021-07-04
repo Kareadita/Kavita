@@ -62,7 +62,6 @@ Package()
     tar -czvf ../kavita-$runtime.tar.gz Kavita
     
     ProgressEnd "Creating $runtime Package for $framework"    
-
 }
 
 dir=$PWD
