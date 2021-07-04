@@ -1,0 +1,38 @@
+name: Monorepo Build Test
+
+on:
+  push:
+    branches:
+      - 'feature/monorepo'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+
+      - name: NodeJS to Compile WebUI
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: '14'
+      - run: |
+
+          cd UI/Web || exit
+          echo 'Installing web dependencies'
+          npm install
+
+          echo 'Building UI'
+          npm run prod
+
+          echo 'Copying back to Kavita wwwroot'
+          rsync -a dist/ ../API/wwwroot/
+          
+          cd ../ || exit
+
+      - name: Compile dotnet app
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+      - run: ./test-build.sh
