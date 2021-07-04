@@ -50,6 +50,11 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
+          // BUG?: If the rootPath doesn't exist in the fullPath, then infinite loop
+          // if (!fullPath.StartsWith(rootPath))
+          // {
+          //    return Array.Empty<string>();
+          // }
           var separator = Path.AltDirectorySeparatorChar;
           if (fullPath.Contains(Path.DirectorySeparatorChar))
           {
