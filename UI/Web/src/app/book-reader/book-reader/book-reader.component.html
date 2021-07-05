@@ -107,7 +107,7 @@
         </div>
     </ng-container> -->
 
-    <div class="overlay" *ngIf="clickToPaginate" >
+    <div class="overlay" *ngIf="clickToPaginate" (click)="handleReaderClick($event)">
         <div class="left {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="prevPage()">
 
         </div>
