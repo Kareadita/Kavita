@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using API.Services;
@@ -26,7 +27,7 @@ namespace API.Tests.Services
             var files = new List<string>();
             var fileCount = DirectoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
                 API.Parser.Parser.ArchiveFileExtensions, _logger);
-            
+
             Assert.Equal(28, fileCount);
         }
 
@@ -37,7 +38,7 @@ namespace API.Tests.Services
             var files = _directoryService.GetFiles(testDirectory, @"file\d*.txt");
             Assert.Equal(2, files.Count());
         }
-        
+
         [Fact]
         public void GetFiles_TopLevel_ShouldBeEmpty_Test()
         {
@@ -45,7 +46,7 @@ namespace API.Tests.Services
             var files = _directoryService.GetFiles(testDirectory);
             Assert.Empty(files);
         }
-        
+
         [Fact]
         public void GetFilesWithExtensions_ShouldBeEmpty_Test()
         {
@@ -53,7 +54,7 @@ namespace API.Tests.Services
             var files = _directoryService.GetFiles(testDirectory, "*.txt");
             Assert.Empty(files);
         }
-        
+
         [Fact]
         public void GetFilesWithExtensions_Test()
         {
@@ -61,7 +62,7 @@ namespace API.Tests.Services
             var files = _directoryService.GetFiles(testDirectory, ".cbz|.rar");
             Assert.Equal(3, files.Count());
         }
-        
+
         [Fact]
         public void GetFilesWithExtensions_BadDirectory_ShouldBeEmpty_Test()
         {
@@ -78,7 +79,7 @@ namespace API.Tests.Services
             Assert.Contains(dirs, s => s.Contains("regex"));
 
         }
-        
+
         [Fact]
         public void ListDirectory_NoSubDirectory_Test()
         {
@@ -93,9 +94,14 @@ namespace API.Tests.Services
         [InlineData("C:/Manga", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
         [InlineData("C:/Manga", @"C:\Manga\Love Hina\Specials\Omake\", "Omake,Specials,Love Hina")]
         [InlineData(@"/manga/", @"/manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
+        [InlineData(@"/manga/", @"/manga2/Love Hina/Specials/Omake/", "")]
         public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
         {
             var expected = expectedArray.Split(",");
+            if (expectedArray.Equals(string.Empty))
+            {
+              expected = Array.Empty<string>();
+            }
             Assert.Equal(expected, DirectoryService.GetFoldersTillRoot(rootPath, fullpath));
         }
     }
