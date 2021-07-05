@@ -106,18 +106,14 @@
             </div>
         </div>
     </ng-container> -->
-
-    <div class="overlay" *ngIf="clickToPaginate" >
-        <div class="left {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="prevPage()">
-
-        </div>
-        <div class="right {{clickToPaginateVisualOverlay ? 'tint' : ''}}" [@fade]="clickToPaginateVisualOverlay" (click)="nextPage()">
-
-        </div>
-    </div>
     
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
         <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
+
+        <div class="left {{clickOverlayClass('left')}}" (click)="prevPage()" *ngIf="clickToPaginate">
+        </div>
+        <div class="right {{clickOverlayClass('right')}}" (click)="nextPage()" *ngIf="clickToPaginate">
+        </div>
         
         <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
