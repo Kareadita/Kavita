@@ -2,9 +2,9 @@ name: .NET Core Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/monorepo ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/monorepo ]
     types: [opened, synchronize, reopened]
 
 jobs:
