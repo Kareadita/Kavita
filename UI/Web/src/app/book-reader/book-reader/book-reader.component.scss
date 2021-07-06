@@ -151,7 +151,6 @@ $primary-color: #0062cc;
 
 .reading-section {
     height: 100vh;
-    //padding-top: 50px;
 }
 
 .drawer-body {
@@ -169,35 +168,36 @@ $primary-color: #0062cc;
     opacity: 0;
 }
 
-.overlay {
+
+.right {
     position: fixed;
-    width: 100%;
+    right: 0px;
+    top: 0px;
+    width: 20%;
     height: 100%;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
-    
+    z-index: 2;
+    cursor: pointer;
+    opacity: 0;
+    background: transparent;
+}
 
-    .tint {
-        opacity: 0.4;
-        background-color: $primary-color;
-        transition: opacity 4s ease-in-out;
-    }
-  
-    .right {
-      position: absolute;
-      cursor: pointer;
-      width: 20%;
-      height: 100%;
-      right: 0px;
-      top: 0px;
-    }
+.left {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 20%;
+    height: 100%;
+    z-index: 2;
+    cursor: pointer;
+    opacity: 0;
+    background: transparent;
+}
 
-    .left {
-      cursor: pointer;
-      width: 20%;
-      height: 100%;
-    }
+.highlight {
+    background-color: rgba(65, 225, 100, 0.5) !important;
+    animation: fadein .5s both;
+}
+.highlight-2 {
+  background-color: rgba(65, 105, 225, 0.5) !important;
+  animation: fadein .5s both;
 }

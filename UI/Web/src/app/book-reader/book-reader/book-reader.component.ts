@@ -51,7 +51,7 @@ const SCROLL_PART_TIMEOUT = 5000;
     ]),
     trigger('fade', [
       state('true', style({opacity: 0})),
-      state('false', style({opacity: 0.4})),
+      state('false', style({opacity: 0.5})),
       transition('false <=> true', animate('4000ms'))
     ])
   ]
@@ -77,6 +77,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookTitle: string = '';
   settingsForm: FormGroup = new FormGroup({});
   clickToPaginate = false;
+
   clickToPaginateVisualOverlay = false;
   clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
   clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
@@ -531,6 +532,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadPage(undefined, page.scrollOffset);
       }
     }
+  }
+
+  clickOverlayClass(side: 'right' | 'left') {
+    if (!this.clickToPaginateVisualOverlay) {
+      return '';
+    }
+
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      return side === 'right' ? 'highlight' : 'highlight-2';
+    }
+    return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
   prevPage() {
