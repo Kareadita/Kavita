@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using API.Parser;
 using VersOne.Epub;
 
-namespace API.Interfaces
+namespace API.Interfaces.Services
 {
     public interface IBookService
     {

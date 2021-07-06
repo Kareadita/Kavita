@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using API.Archive;
 using API.Comparators;
 using API.Extensions;
+using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -28,7 +29,6 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
-        private const int ThumbnailWidth = 320; // 153w x 230h
         private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
 
@@ -38,7 +38,7 @@ namespace API.Services
             _directoryService = directoryService;
             _comparer = new NaturalSortComparer();
         }
-        
+
         /// <summary>
         /// Checks if a File can be opened. Requires up to 2 opens of the filestream.
         /// </summary>
@@ -47,7 +47,7 @@ namespace API.Services
         public virtual ArchiveLibrary CanOpen(string archivePath)
         {
             if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
-            
+
             try
             {
                 using var a2 = ZipFile.OpenRead(archivePath);
@@ -90,7 +90,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return archive.Entries.Count(entry => !entry.IsDirectory && 
+                        return archive.Entries.Count(entry => !entry.IsDirectory &&
                                                               !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                               && Parser.Parser.IsImage(entry.Key));
                     }
@@ -133,10 +133,10 @@ namespace API.Services
             var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
                 .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
                                      && Parser.Parser.IsImage(x));
-            
+
             return string.IsNullOrEmpty(result) ? null : result;
         }
-        
+
 
         /// <summary>
         /// Generates byte array of cover image.
@@ -173,14 +173,14 @@ namespace API.Services
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
-                        
+
                         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
-                        
+
                         using var ms = StreamManager.GetStream();
                         entry.WriteTo(ms);
                         ms.Position = 0;
-                        
+
                         return createThumbnail ? CreateThumbnail(entry.Key, ms, Path.GetExtension(entry.Key)) : ms.ToArray();
                     }
                     case ArchiveLibrary.NotSupported:
@@ -195,7 +195,7 @@ namespace API.Services
             {
                 _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
-            
+
             return Array.Empty<byte>();
         }
 
@@ -206,7 +206,7 @@ namespace API.Services
             stream.CopyTo(ms);
             return ms.ToArray();
         }
-        
+
         /// <summary>
         /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
         /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
@@ -225,14 +225,14 @@ namespace API.Services
         {
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
-            
+
             var tempLocation = Path.Join(tempDirectory, $"{tempFolder}_{dateString}");
             DirectoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
-            
+
             var zipPath = Path.Join(tempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
@@ -243,10 +243,10 @@ namespace API.Services
                 _logger.LogError(ex, "There was an issue creating temp archive");
                 throw new KavitaException("There was an issue creating temp archive");
             }
-            
-            
+
+
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
-            
+
             DirectoryService.ClearAndDeleteDirectory(tempLocation);
             (new FileInfo(zipPath)).Delete();
 
@@ -261,7 +261,7 @@ namespace API.Services
             }
             try
             {
-                using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                 return thumbnail.WriteToBuffer(formatExtension);
             }
             catch (Exception ex)
@@ -286,12 +286,12 @@ namespace API.Services
             }
 
             if (Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath)) return true;
-            
+
             _logger.LogWarning("Archive {ArchivePath} is not a valid archive", archivePath);
             return false;
         }
 
-        
+
         private static ComicInfo FindComicInfoXml(IEnumerable<IArchiveEntry> entries)
         {
             foreach (var entry in entries)
@@ -309,7 +309,7 @@ namespace API.Services
                 }
             }
 
-            
+
             return null;
         }
 
@@ -322,7 +322,7 @@ namespace API.Services
             try
             {
                 if (!File.Exists(archivePath)) return summary;
-                
+
                 var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
@@ -343,7 +343,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory 
+                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                                && Parser.Parser.IsXml(entry.Key)));
                         break;
@@ -365,7 +365,7 @@ namespace API.Services
             {
                 _logger.LogWarning(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
             }
-            
+
             return summary;
         }
 
@@ -386,7 +386,7 @@ namespace API.Services
         {
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
-            
+
             archive.ExtractToDirectory(extractPath, true);
             if (needsFlattening)
             {
@@ -408,7 +408,7 @@ namespace API.Services
             if (!IsValidArchive(archivePath)) return;
 
             if (Directory.Exists(extractPath)) return;
-            
+
             var sw = Stopwatch.StartNew();
 
             try
@@ -427,7 +427,7 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory 
+                        ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
                                                                               && Parser.Parser.IsImage(entry.Key)), extractPath);
                         break;
@@ -439,7 +439,7 @@ namespace API.Services
                         _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
                         return;
                 }
-                
+
             }
             catch (Exception e)
             {

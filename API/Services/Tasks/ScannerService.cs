@@ -28,7 +28,7 @@ namespace API.Services.Tasks
        private ConcurrentDictionary<string, List<ParserInfo>> _scannedSeries;
        private readonly NaturalSortComparer _naturalSort;
 
-       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService, 
+       public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
           IMetadataService metadataService, IBookService bookService)
        {
           _unitOfWork = unitOfWork;
@@ -62,7 +62,7 @@ namespace API.Services.Tasks
           //    skippedFolders += 1;
           //    return true;
           // }
-          
+
           //return false;
        }
 
@@ -83,11 +83,11 @@ namespace API.Services.Tasks
               _logger.LogError(ex, "There was an issue fetching Library {LibraryId}", libraryId);
               return;
            }
-           
-           
+
+
            var series = ScanLibrariesForSeries(forceUpdate, library, sw, out var totalFiles, out var scanElapsedTime);
            UpdateLibrary(library, series);
-           
+
            _unitOfWork.LibraryRepository.Update(library);
            if (Task.Run(() => _unitOfWork.CommitAsync()).Result)
            {
@@ -128,6 +128,9 @@ namespace API.Services.Tasks
              if (library.Type == LibraryType.Book)
              {
                 searchPattern = Parser.Parser.BookFileExtensions;
+             } else if (library.Type is LibraryType.MangaImages or LibraryType.ComicImages)
+             {
+               searchPattern = Parser.Parser.ImageFileExtensions;
              }
 
              try
@@ -165,7 +168,7 @@ namespace API.Services.Tasks
                 totalFiles, sw.ElapsedMilliseconds, library.Name);
              return new Dictionary<string, List<ParserInfo>>();
           }
-          
+
           return SeriesWithInfos(_scannedSeries);
        }
 
@@ -181,7 +184,7 @@ namespace API.Services.Tasks
           return series;
        }
 
-       
+
        private void UpdateLibrary(Library library, Dictionary<string, List<ParserInfo>> parsedSeries)
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
@@ -197,8 +200,8 @@ namespace API.Services.Tasks
                 _logger.LogDebug("Removed {SeriesName}", s.Name);
              }
           }
-          
-          
+
+
           // Add new series that have parsedInfos
           foreach (var (key, infos) in parsedSeries)
           {
@@ -215,7 +218,7 @@ namespace API.Services.Tasks
                 foreach (var series in duplicateSeries)
                 {
                    _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
-                   
+
                 }
 
                 continue;
@@ -225,7 +228,7 @@ namespace API.Services.Tasks
                 existingSeries = DbFactory.Series(infos[0].Series);
                 library.Series.Add(existingSeries);
              }
-             
+
              existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
              existingSeries.OriginalName ??= infos[0].Series;
              existingSeries.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
@@ -240,7 +243,7 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
                 UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
-                // Test 
+                // Test
              }
              catch (Exception ex)
              {
@@ -267,13 +270,13 @@ namespace API.Services.Tasks
        {
           var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
-          
+
           existingSeries = existingSeries.Where(
              s => !missingList.Exists(
                 m => m.NormalizedName.Equals(s.NormalizedName))).ToList();
 
           removeCount = existingCount -  existingSeries.Count;
-          
+
           return existingSeries;
        }
 
@@ -291,15 +294,15 @@ namespace API.Services.Tasks
                 volume = DbFactory.Volume(volumeNumber);
                 series.Volumes.Add(volume);
              }
-             
+
              // NOTE: Instead of creating and adding? Why Not Merge a new volume into an existing, so no matter what, new properties,etc get propagated?
-             
+
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
           }
-          
+
           // Remove existing volumes that aren't in parsedInfos
           var nonDeletedVolumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
           if (series.Volumes.Count != nonDeletedVolumes.Count)
@@ -320,12 +323,12 @@ namespace API.Services.Tasks
              series.Volumes = nonDeletedVolumes;
           }
 
-          _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}", 
+          _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
              series.Name, startingVolumeCount, series.Volumes.Count);
        }
-       
+
        /// <summary>
-       /// 
+       ///
        /// </summary>
        /// <param name="volume"></param>
        /// <param name="parsedInfos"></param>
@@ -346,7 +349,7 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "{FileName} mapped as '{Series} - Vol {Volume} Ch {Chapter}' is a duplicate, skipping", info.FullFilePath, info.Series, info.Volumes, info.Chapters);
                 continue;
              }
-             
+
              if (chapter == null)
              {
                 _logger.LogDebug(
@@ -357,9 +360,9 @@ namespace API.Services.Tasks
              {
                 chapter.UpdateFrom(info);
              }
-             
+
           }
-          
+
           // Add files
           foreach (var info in parsedInfos)
           {
@@ -379,8 +382,8 @@ namespace API.Services.Tasks
              chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
              chapter.Range = specialTreatment ? info.Filename : info.Chapters;
           }
-          
-          
+
+
           // Remove chapters that aren't in parsedInfos or have no files linked
           var existingChapters = volume.Chapters.ToList();
           foreach (var existingChapter in existingChapters)
@@ -408,10 +411,10 @@ namespace API.Services.Tasks
        private void TrackSeries(ParserInfo info)
        {
           if (info.Series == string.Empty) return;
-          
+
           // Check if normalized info.Series already exists and if so, update info to use that name instead
           info.Series = MergeName(_scannedSeries, info);
-          
+
           _scannedSeries.AddOrUpdate(Parser.Parser.Normalize(info.Series), new List<ParserInfo>() {info}, (_, oldValue) =>
           {
              oldValue ??= new List<ParserInfo>();
@@ -430,7 +433,7 @@ namespace API.Services.Tasks
           _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
           var existingName = collectedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
              .Key;
-          // BUG: We are comparing info.Series against a normalized string. They should never match. (This can cause series to not delete or parse correctly after a rename) 
+          // BUG: We are comparing info.Series against a normalized string. They should never match. (This can cause series to not delete or parse correctly after a rename)
           if (!string.IsNullOrEmpty(existingName)) //  && info.Series != existingName
           {
              _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
@@ -450,7 +453,7 @@ namespace API.Services.Tasks
        private void ProcessFile(string path, string rootPath, LibraryType type)
        {
           ParserInfo info;
-          
+
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path))
           {
              info = _bookService.ParseInfo(path);
@@ -465,14 +468,14 @@ namespace API.Services.Tasks
              _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
              return;
           }
-          
+
           if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
           {
              info = Parser.Parser.Parse(path, rootPath, type);
              var info2 = _bookService.ParseInfo(path);
              info.Merge(info2);
           }
-          
+
           TrackSeries(info);
        }
 
@@ -498,6 +501,15 @@ namespace API.Services.Tasks
                    Pages = _bookService.GetNumberOfPages(info.FullFilePath)
                 };
              }
+             case MangaFormat.Image:
+             {
+               return new MangaFile()
+               {
+                 FilePath = info.FullFilePath,
+                 Format = info.Format,
+                 Pages = 1
+               };
+             }
              default:
                 _logger.LogWarning("[Scanner] Ignoring {Filename}. Non-archives are not supported", info.Filename);
                 break;
@@ -505,7 +517,7 @@ namespace API.Services.Tasks
 
           return null;
        }
-  
+
        private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
        {
           chapter.Files ??= new List<MangaFile>();
@@ -515,8 +527,8 @@ namespace API.Services.Tasks
              existingFile.Format = info.Format;
              if (!existingFile.HasFileBeenModified() && existingFile.Pages > 0)
              {
-                existingFile.Pages = existingFile.Format == MangaFormat.Book 
-                   ? _bookService.GetNumberOfPages(info.FullFilePath) 
+                existingFile.Pages = existingFile.Format == MangaFormat.Book
+                   ? _bookService.GetNumberOfPages(info.FullFilePath)
                    : _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
              }
           }

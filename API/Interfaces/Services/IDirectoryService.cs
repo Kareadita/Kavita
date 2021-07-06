@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -25,5 +26,7 @@ namespace API.Interfaces.Services
 
         IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
+        void CopyFileToDirectory(string fullFilePath, string targetDirectory);
     }
 }

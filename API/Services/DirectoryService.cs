@@ -101,6 +101,15 @@ namespace API.Services
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
+       public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
+       {
+         var fileInfo = new FileInfo(fullFilePath);
+         if (fileInfo.Exists)
+         {
+           fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name));
+         }
+       }
+
        public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
