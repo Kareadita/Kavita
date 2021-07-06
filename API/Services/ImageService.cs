@@ -16,24 +16,24 @@ namespace API.Services
       _logger = logger;
     }
 
-    public byte[] GetCoverImage(string imageFile, bool createThumbnail = false)
+    public byte[] GetCoverImage(string path, bool createThumbnail = false)
     {
       try
       {
         if (createThumbnail)
         {
-          using var thumbnail = Image.Thumbnail(imageFile, MetadataService.ThumbnailWidth);
+          using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
           return thumbnail.WriteToBuffer(".jpg");
         }
 
-        using var img = Image.NewFromFile(imageFile);
+        using var img = Image.NewFromFile(path);
         using var stream = new MemoryStream();
         img.JpegsaveStream(stream);
         return stream.ToArray();
       }
       catch (Exception ex)
       {
-        _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", imageFile);
+        _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
       }
 
       return Array.Empty<byte>();
