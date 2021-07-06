@@ -485,33 +485,42 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateReaderStyles();
         this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
 
-        Promise.all(Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('img'))
+        const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
+        if (imgs === null || imgs.length === 0) {
+          this.setupPage(part, scrollTop);
+          return;
+        }
+        Promise.all(Array.from(imgs)
         .filter(img => !img.complete)
         .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
-          this.isLoading = false;
-          this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
-
-          // Find all the part ids and their top offset
-          this.setupPageAnchors();
-          
-
-          if (part !== undefined && part !== '') {
-            this.scrollTo(part);
-          } else if (scrollTop !== undefined && scrollTop !== 0) {
-            window.scroll({
-              top: scrollTop,
-              behavior: 'smooth'
-            });
-          } else {
-            window.scroll({
-              top: 0,
-              behavior: 'smooth'
-            });
-          }
+          this.setupPage(part, scrollTop);
         });
       }, 10);
     });
+  }
+
+  setupPage(part?: string | undefined, scrollTop?: number | undefined) {
+    this.isLoading = false;
+    this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+
+    // Find all the part ids and their top offset
+    this.setupPageAnchors();
+    
+
+    if (part !== undefined && part !== '') {
+      this.scrollTo(part);
+    } else if (scrollTop !== undefined && scrollTop !== 0) {
+      window.scroll({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    } else {
+      window.scroll({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   }
 
   setPageNum(pageNum: number) {
