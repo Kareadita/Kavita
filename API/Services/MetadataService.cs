@@ -49,7 +49,7 @@ namespace API.Services
              return _bookService.GetCoverImage(file.FilePath, createThumbnail);
            case MangaFormat.Image:
              // Get the first file in the folder (image types MUST be within a folder, cannot exist in root directory)
-             var firstFile = _directoryService.GetFiles(Path.GetDirectoryName(file.FilePath))// NOTE: Parser.Parser.ImageFileExtensions doesn't return anything back
+             var firstFile = _directoryService.GetFiles(Path.GetDirectoryName(file.FilePath))
                .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
              if (!string.IsNullOrEmpty(firstFile))
              {

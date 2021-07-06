@@ -268,15 +268,7 @@ namespace API.Parser
 
         private static readonly Regex[] ComicChapterRegex = new[]
         {
-            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            // new Regex(
-            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // // 01 Spider-Man & Wolverine 01.cbr
-            // new Regex(
-            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?", // NOTE: WHy is this here without a capture group
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Batman & Wildcat (1 of 3)
+          // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),

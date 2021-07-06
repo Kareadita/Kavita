@@ -433,8 +433,7 @@ namespace API.Services.Tasks
           _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
           var existingName = collectedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
              .Key;
-          // BUG: We are comparing info.Series against a normalized string. They should never match. (This can cause series to not delete or parse correctly after a rename)
-          if (!string.IsNullOrEmpty(existingName)) //  && info.Series != existingName
+          if (!string.IsNullOrEmpty(existingName))
           {
              _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
              return existingName;
