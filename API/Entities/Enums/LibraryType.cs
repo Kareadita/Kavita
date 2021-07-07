@@ -10,9 +10,9 @@ namespace API.Entities.Enums
         Comic = 1,
         [Description("Book")]
         Book = 2,
-        [Description("Images (Comic)")]
-        MangaImages = 3,
         [Description("Images (Manga)")]
+        MangaImages = 3,
+        [Description("Images (Comic)")]
         ComicImages = 4
     }
 }

@@ -72,7 +72,11 @@ export class ManageLibraryComponent implements OnInit {
       case LibraryType.Comic:
         return 'Comic';
       case LibraryType.Manga:
-        return 'Manga'
+        return 'Manga';
+      case LibraryType.MangaImages:
+        return 'Images (Manga)';
+      case LibraryType.ComicImages:
+        return 'Images (Comic)';
     }
   }
 
