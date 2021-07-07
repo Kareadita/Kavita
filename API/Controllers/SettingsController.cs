@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
@@ -9,6 +10,7 @@ using API.Extensions;
 using API.Helpers.Converters;
 using API.Interfaces;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +33,7 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
             _configuration = configuration;
         }
-        
+
         [HttpGet("")]
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
@@ -40,7 +42,7 @@ namespace API.Controllers
             settingsDto.LoggingLevel = Configuration.GetLogLevel(Program.GetAppSettingFilename());
             return Ok(settingsDto);
         }
-        
+
         [HttpPost("")]
         public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
         {
@@ -58,7 +60,7 @@ namespace API.Controllers
 
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
-            
+
             var logLevelOptions = new LogLevelOptions();
             _configuration.GetSection("Logging:LogLevel").Bind(logLevelOptions);
 
@@ -75,7 +77,7 @@ namespace API.Controllers
                     setting.Value = updateSettingsDto.TaskScan;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
-                
+
                 if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + "" != setting.Value)
                 {
                     setting.Value = updateSettingsDto.Port + "";
@@ -83,14 +85,14 @@ namespace API.Controllers
                     Configuration.UpdatePort(Program.GetAppSettingFilename(), updateSettingsDto.Port);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
-                
+
                 if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + "" != setting.Value)
                 {
                     setting.Value = updateSettingsDto.LoggingLevel + "";
                     Configuration.UpdateLogLevel(Program.GetAppSettingFilename(), updateSettingsDto.LoggingLevel);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
-                
+
                 if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + "" != setting.Value)
                 {
                     setting.Value = updateSettingsDto.AllowStatCollection + "";
@@ -105,7 +107,7 @@ namespace API.Controllers
                     }
                 }
             }
-            
+
             _configuration.GetSection("Logging:LogLevel:Default").Value = updateSettingsDto.LoggingLevel + "";
             if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
 
@@ -119,19 +121,19 @@ namespace API.Controllers
             _taskScheduler.ScheduleTasks();
             return Ok(updateSettingsDto);
         }
-        
+
         [HttpGet("task-frequencies")]
         public ActionResult<IEnumerable<string>> GetTaskFrequencies()
         {
             return Ok(CronConverter.Options);
         }
-        
+
         [HttpGet("library-types")]
         public ActionResult<IEnumerable<string>> GetLibraryTypes()
         {
-            return Ok(Enum.GetNames(typeof(LibraryType)));
+          return Ok(Enum.GetValues<LibraryType>().Select(t => t.ToDescription()));
         }
-        
+
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {

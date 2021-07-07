@@ -12,7 +12,7 @@ namespace API.Parser
         public const string DefaultChapter = "0";
         public const string DefaultVolume = "0";
 
-        public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|.cb7";
+        public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub";
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
