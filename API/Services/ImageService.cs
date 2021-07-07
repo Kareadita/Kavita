@@ -27,22 +27,16 @@ namespace API.Services
     {
       // I think we need to go back until library root if possible
       var directory = Path.GetDirectoryName(file.FilePath);
-      if (!string.IsNullOrEmpty(directory))
+      if (string.IsNullOrEmpty(directory))
       {
         _logger.LogError("Could not find Directory for {File}", file.FilePath);
         return null;
       }
 
-      var files = _directoryService.GetFiles(directory)
-        .OrderBy(f => f, _naturalSortComparer).ToList();
+      var firstImage = _directoryService.GetFiles(directory)
+        .OrderBy(f => f, _naturalSortComparer).FirstOrDefault();
 
-      var coverImage = files.FirstOrDefault(Parser.Parser.IsCoverImage);
-      if (string.IsNullOrEmpty(coverImage))
-      {
-        coverImage = files.FirstOrDefault();
-      }
-
-      return coverImage;
+      return firstImage;
     }
 
     public byte[] GetCoverImage(string path, bool createThumbnail = false)
