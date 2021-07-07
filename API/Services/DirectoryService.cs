@@ -61,11 +61,6 @@ namespace API.Services
              rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
 
-          // If the fullPath doesn't have rootPath in it, return empty array
-          if (!fullPath.StartsWith(rootPath))
-          {
-            return Array.Empty<string>();
-          }
 
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
