@@ -131,15 +131,15 @@ namespace API.Services
          var files = dir.GetFiles();
          foreach (var file in files)
          {
-           string tempPath = Path.Combine(destDirName, file.Name);
+           var tempPath = Path.Combine(destDirName, file.Name);
            file.CopyTo(tempPath, false);
          }
 
          // If copying subdirectories, copy them and their contents to new location.
-         foreach (var subdir in dirs)
+         foreach (var subDir in dirs)
          {
-           string tempPath = Path.Combine(destDirName, subdir.Name);
-           CopyDirectoryToDirectory(subdir.FullName, tempPath);
+           var tempPath = Path.Combine(destDirName, subDir.Name);
+           CopyDirectoryToDirectory(subDir.FullName, tempPath);
          }
 
          return true;
