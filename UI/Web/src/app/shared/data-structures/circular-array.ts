@@ -89,8 +89,7 @@ export class CircularArray<T> {
     applyFor(func: (item: T, index: number) => void, limit: number) {
       for (let offset = 1; offset < limit; offset++) {
         const i = this.currentIndex + offset;
-        const peekIndex = i < this.arr.length ? i : 0;
-  
+        const peekIndex = i < this.arr.length ? i : Math.abs(this.arr.length - i);
         func(this.arr[peekIndex], peekIndex);
       }
   

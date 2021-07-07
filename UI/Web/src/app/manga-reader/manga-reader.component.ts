@@ -675,7 +675,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     let index = 1;
 
-    this.cachedImages.applyFor((item, i) => {
+    this.cachedImages.applyFor((item, internalIndex) => {
       const offsetIndex = this.pageNum + index;
       const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
       if (urlPageNum === offsetIndex) {
