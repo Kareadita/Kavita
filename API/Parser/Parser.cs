@@ -12,7 +12,7 @@ namespace API.Parser
         public const string DefaultChapter = "0";
         public const string DefaultVolume = "0";
 
-        public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|.cb7";
+        public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub";
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -268,15 +268,7 @@ namespace API.Parser
 
         private static readonly Regex[] ComicChapterRegex = new[]
         {
-            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            // new Regex(
-            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // // 01 Spider-Man & Wolverine 01.cbr
-            // new Regex(
-            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?", // NOTE: WHy is this here without a capture group
-            //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // Batman & Wildcat (1 of 3)
+          // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
@@ -449,7 +441,15 @@ namespace API.Parser
                 };
             }
 
-            if (ret.Series == string.Empty)
+            if (type is LibraryType.ComicImages or LibraryType.MangaImages)
+            {
+              // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
+              ret.Volumes = DefaultVolume;
+              ret.Chapters = DefaultChapter;
+              ret.Series = string.Empty;
+            }
+
+            if (ret.Series == string.Empty || (type is LibraryType.ComicImages or LibraryType.MangaImages))
             {
                 // Try to parse information out of each folder all the way to rootPath
                 ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
@@ -498,26 +498,27 @@ namespace API.Parser
         /// <param name="ret">Expects a non-null ParserInfo which this method will populate</param>
         public static void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
         {
-            // TODO: This currently only does series, but we can enhance to do volume/chapter. It will need library type tho
-            var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
+          var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
             for (var i = 0; i < fallbackFolders.Count; i++)
             {
                 var folder = fallbackFolders[i];
                 if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
-                if (ParseVolume(folder) != DefaultVolume || ParseChapter(folder) != DefaultChapter)
+
+                var parsedVolume = (type is LibraryType.Manga or LibraryType.MangaImages) ? ParseVolume(folder) : ParseComicVolume(folder);
+                var parsedChapter = (type is LibraryType.Manga or LibraryType.MangaImages) ? ParseChapter(folder) : ParseComicChapter(folder);
+
+                if (!parsedVolume.Equals(DefaultVolume) || !parsedChapter.Equals(DefaultChapter))
                 {
-                  // New code: take volume or chapter from folder
-                  if ((ret.Volumes.Equals(DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !ParseVolume(folder).Equals(DefaultVolume))
+                  if ((ret.Volumes.Equals(DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !parsedVolume.Equals(DefaultVolume))
                   {
-                    ret.Volumes = ParseVolume(folder);
+                    ret.Volumes = parsedVolume;
                   }
-                  if ((ret.Chapters.Equals(DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !ParseChapter(folder).Equals(DefaultChapter))
+                  if ((ret.Chapters.Equals(DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !parsedChapter.Equals(DefaultChapter))
                   {
-                    ret.Chapters = ParseChapter(folder);
+                    ret.Chapters = parsedChapter;
                   }
 
                   continue;
-                  // Old code: Ignore volume or chapters from folder continue;
                 }
 
                 var series = ParseSeries(folder);

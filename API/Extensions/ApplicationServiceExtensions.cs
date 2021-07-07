@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Extensions
 {
@@ -31,6 +32,7 @@ namespace API.Extensions
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IImageService, ImageService>();
 
             services.AddSqLite(config, env);
 
@@ -39,7 +41,7 @@ namespace API.Extensions
                 var loggingSection = config.GetSection("Logging");
                 loggingBuilder.AddFile(loggingSection);
             });
-            
+
             return services;
         }
 

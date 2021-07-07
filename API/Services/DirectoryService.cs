@@ -61,11 +61,6 @@ namespace API.Services
              rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
 
-          // If the fullPath doesn't have rootPath in it, return empty array
-          if (!fullPath.StartsWith(rootPath))
-          {
-            return Array.Empty<string>();
-          }
 
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
@@ -100,6 +95,57 @@ namespace API.Services
 
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
+
+       public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
+       {
+         var fileInfo = new FileInfo(fullFilePath);
+         if (fileInfo.Exists)
+         {
+           fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name));
+         }
+       }
+
+       public bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName)
+       {
+         if (string.IsNullOrEmpty(sourceDirName)) return false;
+
+         var di = new DirectoryInfo(sourceDirName);
+         if (!di.Exists) return false;
+
+         // Get the subdirectories for the specified directory.
+         DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+
+         if (!dir.Exists)
+         {
+           throw new DirectoryNotFoundException(
+             "Source directory does not exist or could not be found: "
+             + sourceDirName);
+         }
+
+         var dirs = dir.GetDirectories();
+
+         // If the destination directory doesn't exist, create it.
+         Directory.CreateDirectory(destDirName);
+
+         // Get the files in the directory and copy them to the new location.
+         var files = dir.GetFiles();
+         foreach (var file in files)
+         {
+           var tempPath = Path.Combine(destDirName, file.Name);
+           file.CopyTo(tempPath, false);
+         }
+
+         // If copying subdirectories, copy them and their contents to new location.
+         foreach (var subDir in dirs)
+         {
+           var tempPath = Path.Combine(destDirName, subDir.Name);
+           CopyDirectoryToDirectory(subDir.FullName, tempPath);
+         }
+
+         return true;
+       }
+
+
 
        public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
