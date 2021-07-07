@@ -94,7 +94,6 @@ namespace API.Tests.Services
         [InlineData("C:/Manga", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
         [InlineData("C:/Manga", @"C:\Manga\Love Hina\Specials\Omake\", "Omake,Specials,Love Hina")]
         [InlineData(@"/manga/", @"/manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
-        [InlineData(@"/manga/", @"/manga2/Love Hina/Specials/Omake/", "")]
         [InlineData(@"C:\/mount/gdrive/Library/Test Library/Comics/", @"C:\/mount/gdrive/Library/Test Library/Comics\godzilla rivals vs hedorah\vol 1\", "vol 1,godzilla rivals vs hedorah")]
         public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
         {
