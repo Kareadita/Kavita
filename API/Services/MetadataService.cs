@@ -48,15 +48,8 @@ namespace API.Services
            case MangaFormat.Book:
              return _bookService.GetCoverImage(file.FilePath, createThumbnail);
            case MangaFormat.Image:
-             // Get the first file in the folder (image types MUST be within a folder, cannot exist in root directory)
-             var firstFile = _directoryService.GetFiles(Path.GetDirectoryName(file.FilePath))
-               .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
-             if (!string.IsNullOrEmpty(firstFile))
-             {
-               return _imageService.GetCoverImage(firstFile, createThumbnail);
-             }
-
-             return Array.Empty<byte>();
+             var coverImage = _imageService.GetCoverFile(file);
+             return _imageService.GetCoverImage(coverImage, createThumbnail);
            default:
              return _archiveService.GetCoverImage(file.FilePath, createThumbnail);
          }

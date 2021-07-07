@@ -48,25 +48,35 @@ namespace API.Services
             var extractPath = GetCachePath(chapterId);
             var extraPath = "";
 
+            if (Directory.Exists(extractPath))
+            {
+              return chapter;
+            }
+
+            var extractDi = new DirectoryInfo(extractPath);
+
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
               DirectoryService.ExistOrCreate(extractPath);
-              _directoryService.CopyFilesToDirectory(files.Select(f => f.FilePath), extractPath);
+              _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath);
+              extractDi.Flatten();
+              return chapter;
             }
+
             foreach (var file in files)
             {
-                if (fileCount > 1)
-                {
-                    extraPath = file.Id + "";
-                }
+              if (fileCount > 1)
+              {
+                extraPath = file.Id + string.Empty;
+              }
 
-                if (file.Format == MangaFormat.Archive)
-                {
-                    _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
-                }
+              if (file.Format == MangaFormat.Archive)
+              {
+                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+              }
             }
 
-            new DirectoryInfo(extractPath).Flatten();
+            extractDi.Flatten();
 
             return chapter;
         }
@@ -154,7 +164,7 @@ namespace API.Services
                 pagesSoFar += mangaFile.Pages;
             }
 
-            return ("", null);
+            return (string.Empty, null);
         }
     }
 }

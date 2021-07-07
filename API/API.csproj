@@ -62,6 +62,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+  </ItemGroup>
+
+  
+
+  <ItemGroup>
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="wwwroot\**" />
@@ -205,10 +211,6 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
 </Project>
