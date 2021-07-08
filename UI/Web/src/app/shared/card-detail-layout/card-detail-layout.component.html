@@ -1,5 +1,7 @@
 <div class="container-fluid" style="padding-top: 10px">
-    <h2>{{header}}</h2>
+    <h2><span *ngIf="actions.length > 0" class="">
+        <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
+    </span>&nbsp;{{header}}</h2>
     <ng-container [ngTemplateOutlet]="paginationTemplate"  [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 

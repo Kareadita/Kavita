@@ -2,8 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
+import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -19,8 +22,10 @@ export class LibraryDetailComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
   pagination!: Pagination;
+  actions: ActionItem<Library>[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, private libraryService: LibraryService, private titleService: Title) {
+  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
+    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, private actionService: ActionService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/home');
@@ -33,9 +38,27 @@ export class LibraryDetailComponent implements OnInit {
       this.titleService.setTitle('Kavita - ' + this.libraryName);
     })
     this.loadPage();
+    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   }
 
   ngOnInit(): void {
+  }
+
+  handleAction(action: Action, library: Library) {
+    let lib: Partial<Library> = library;
+    if (library === undefined) {
+      lib = {id: this.libraryId, name: this.libraryName};
+    }
+    switch (action) {
+      case(Action.ScanLibrary):
+        this.actionService.scanLibrary(lib);
+        break;
+      case(Action.RefreshMetadata):
+      this.actionService.refreshMetadata(lib);
+        break;
+      default:
+        break;
+    }
   }
 
   loadPage() {

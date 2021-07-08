@@ -48,13 +48,9 @@ export class ErrorInterceptor implements HttpInterceptor {
               this.toastr.error('Something unexpected went wrong.');
             }
 
-            // Write the location the first Something undepected went wrong went off
-            if (!localStorage.getItem('kavita--no-connection-url')) {
-              localStorage.setItem('kavita--no-connection-url', this.router.url);
-            }
-
-            // If we are not on no-connection, redirect there (NOTE: This should do the localStorage update)
+            // If we are not on no-connection, redirect there and save current url so when we refersh, we redirect back there
             if (this.router.url !== '/no-connection') {
+              localStorage.setItem('kavita--no-connection-url', this.router.url);
               this.router.navigateByUrl('/no-connection');
             }
             break;

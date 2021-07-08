@@ -77,6 +77,7 @@ namespace API.Services
             }
 
             extractDi.Flatten();
+            extractDi.RemoveNonImages();
 
             return chapter;
         }

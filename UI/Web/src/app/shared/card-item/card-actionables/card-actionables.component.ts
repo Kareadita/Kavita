@@ -12,6 +12,7 @@ export class CardActionablesComponent implements OnInit {
   @Input() btnClass = '';
   @Input() actions: ActionItem<any>[] = [];
   @Input() labelBy = 'card';
+  @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
   constructor() { }

@@ -19,6 +19,7 @@ import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from '../_services/action-factory.service';
+import { ActionService } from '../_services/action.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { ReaderService } from '../_services/reader.service';
@@ -59,6 +60,11 @@ export class SeriesDetailComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
 
+  /**
+   * If an action is currently being done, don't let the user kick off another action
+   */
+  actionInProgress: boolean = false;
+
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -71,7 +77,7 @@ export class SeriesDetailComponent implements OnInit {
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private naturalSort: NaturalSortService,
-              private downloadService: DownloadService) {
+              private downloadService: DownloadService, private actionService: ActionService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -107,18 +113,25 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
+    this.actionInProgress = true;
     switch(action) {
       case(Action.MarkAsRead):
-        this.markSeriesAsRead(series);
+        this.actionService.markSeriesAsRead(series, (series: Series) => {
+          this.actionInProgress = false;
+          this.loadSeries(series.id);
+        });
         break;
       case(Action.MarkAsUnread):
-        this.markSeriesAsUnread(series);
+        this.actionService.markSeriesAsUnread(series, (series: Series) => {
+          this.actionInProgress = false;
+          this.loadSeries(series.id);
+        });
         break;
       case(Action.ScanLibrary):
-        this.scanLibrary(series);
+        this.actionService.scanSeries(series, (series) => this.actionInProgress = false);
         break;
       case(Action.RefreshMetadata):
-        this.refreshMetdata(series);
+        this.actionService.refreshMetdata(series, (series) => this.actionInProgress = false);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -166,20 +179,10 @@ export class SeriesDetailComponent implements OnInit {
     }
   }
 
-  refreshMetdata(series: Series) {
-    this.seriesService.refreshMetadata(series).subscribe((res: any) => {
-      this.toastr.success('Refresh started for ' + series.name);
-    });
-  }
-
-  scanLibrary(series: Series) {
-    this.libraryService.scan(series.libraryId).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
-    });
-  }
 
   async deleteSeries(series: Series) {
     if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      this.actionInProgress = false;
       return;
     }
 
@@ -188,6 +191,7 @@ export class SeriesDetailComponent implements OnInit {
         this.toastr.success('Series deleted');
         this.router.navigate(['library', this.libraryId]);
       }
+      this.actionInProgress = false;
     });
   }
 
@@ -201,8 +205,8 @@ export class SeriesDetailComponent implements OnInit {
 
   markSeriesAsRead(series: Series) {
     this.seriesService.markRead(series.id).subscribe(res => {
-      this.toastr.success(series.name + ' is now read');
       series.pagesRead = series.pages;
+      this.toastr.success(series.name + ' is now read');
       this.loadSeries(series.id);
     });
   }
@@ -261,11 +265,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.readerService.markVolumeRead(seriesId, vol.id).subscribe(() => {
-      vol.pagesRead = vol.pages;
-      vol.chapters?.forEach(c => c.pagesRead = c.pages);
+    this.actionService.markVolumeAsRead(seriesId, vol, (volume) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Read');
+      this.actionInProgress = false;
     });
   }
 
@@ -275,11 +277,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
-      vol.pagesRead = 0;
-      vol.chapters?.forEach(c => c.pagesRead = 0);
+    this.actionService.markVolumeAsUnread(seriesId, vol, (volume) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Unread');
+      this.actionInProgress = false;
     });
   }
 
@@ -288,11 +288,10 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
     const seriesId = this.series.id;
-
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(results => {
-      this.toastr.success('Marked as Read');
-      chapter.pagesRead = chapter.pages;
+    
+    this.actionService.markChapterAsRead(seriesId, chapter, (chapter) => {
       this.setContinuePoint();
+      this.actionInProgress = false;
     });
   }
 
@@ -302,10 +301,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, 0).subscribe(results => {
-      chapter.pagesRead = 0;
+    this.actionService.markChapterAsUnread(seriesId, chapter, (chapter) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Unread');
+      this.actionInProgress = false;
     });
   }
 

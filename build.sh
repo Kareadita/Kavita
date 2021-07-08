@@ -49,14 +49,14 @@ BuildUI()
     ProgressStart 'Building UI'
     echo 'Removing old wwwroot'
     rm -rf API/wwwroot/*
-    cd ../Kavita-webui/ || exit
+    cd UI/Web/ || exit
     echo 'Installing web dependencies'
     npm install
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    cp -r dist/* ../Kavita/API/wwwroot
-    cd ../Kavita/ || exit
+    cp -r dist/* ../../API/wwwroot
+    cd ../../ || exit
     ProgressEnd 'Building UI'
 }
 
@@ -73,26 +73,26 @@ Package()
     cd API
     echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
     dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    
+
     echo "Recopying wwwroot due to bug"
     cp -r ./wwwroot/* $lOutputFolder/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
-    
+
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
-    
+
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
     tar -czvf ../kavita-$runtime.tar.gz Kavita
-    
+
 
     ProgressEnd "Creating $runtime Package for $framework"
-    
+
 
 }
 

@@ -31,8 +31,8 @@
                 </div>
                 <div class="ml-2">
                     <div class="card-actions">
-                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
-                      </div>
+                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                    </div>
                 </div>
                 <div class="ml-2">
                     <ngb-rating class="rating-star" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>

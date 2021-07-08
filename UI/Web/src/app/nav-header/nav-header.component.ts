@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
@@ -31,7 +32,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
-    this.navService.darkMode$.subscribe(res => {
+    this.navService.darkMode$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
       if (res) {
         this.document.body.classList.remove('bg-light');
         this.document.body.classList.add('bg-dark');
@@ -44,15 +45,17 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   @HostListener("window:scroll", [])
   checkBackToTopNeeded() {
-    if (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop > 100) {
+    const offset = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+    if (offset > 100) {
       this.backToTopNeeded = true;
-    } else if (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop < 40) {
+    } else if (offset < 40) {
         this.backToTopNeeded = false;
     }
   }
 
   ngOnDestroy() {
     this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   logout() {
@@ -68,7 +71,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   onChangeSearch(val: string) {
       this.isLoading = true;
       this.searchTerm = val;
-      this.libraryService.search(val).subscribe(results => {
+      this.libraryService.search(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
       }, err => {
