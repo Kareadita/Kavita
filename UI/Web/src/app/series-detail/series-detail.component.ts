@@ -96,7 +96,6 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    // TODO: Update this to use new actionService
     this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this)).filter(action => action.action !== Action.Edit);
     this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
@@ -266,11 +265,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.readerService.markVolumeRead(seriesId, vol.id).subscribe(() => {
-      vol.pagesRead = vol.pages;
-      vol.chapters?.forEach(c => c.pagesRead = c.pages);
+    this.actionService.markVolumeAsRead(seriesId, vol, (volume) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Read');
+      this.actionInProgress = false;
     });
   }
 
@@ -280,11 +277,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    forkJoin(vol.chapters?.map(chapter => this.readerService.bookmark(seriesId, vol.id, chapter.id, 0))).subscribe(results => {
-      vol.pagesRead = 0;
-      vol.chapters?.forEach(c => c.pagesRead = 0);
+    this.actionService.markVolumeAsUnread(seriesId, vol, (volume) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Unread');
+      this.actionInProgress = false;
     });
   }
 
@@ -293,11 +288,10 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
     const seriesId = this.series.id;
-
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).subscribe(results => {
-      this.toastr.success('Marked as Read');
-      chapter.pagesRead = chapter.pages;
+    
+    this.actionService.markChapterAsRead(seriesId, chapter, (chapter) => {
       this.setContinuePoint();
+      this.actionInProgress = false;
     });
   }
 
@@ -307,10 +301,9 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, 0).subscribe(results => {
-      chapter.pagesRead = 0;
+    this.actionService.markChapterAsUnread(seriesId, chapter, (chapter) => {
       this.setContinuePoint();
-      this.toastr.success('Marked as Unread');
+      this.actionInProgress = false;
     });
   }
 

@@ -96,6 +96,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   setupTypeaheadSettings() {
