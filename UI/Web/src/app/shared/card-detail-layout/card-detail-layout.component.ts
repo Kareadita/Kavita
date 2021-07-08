@@ -1,5 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { Pagination } from 'src/app/_models/pagination';
+import { ActionItem } from 'src/app/_services/action-factory.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
 
@@ -14,6 +15,7 @@ export class CardDetailLayoutComponent implements OnInit {
   @Input() isLoading: boolean = false; 
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
+  @Input() actions: ActionItem<any>[] = [];
   @Input() trackByIdentity!: (index: number, item: any) => string;
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
@@ -37,6 +39,12 @@ export class CardDetailLayoutComponent implements OnInit {
 
   formatInput(input: HTMLInputElement) {
     input.value = input.value.replace(FILTER_PAG_REGEX, '');
+  }
+
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, undefined);
+    }
   }
 
 }

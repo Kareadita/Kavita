@@ -1,11 +1,10 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { Library } from 'src/app/_models/library';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { LibraryService } from 'src/app/_services/library.service';
+import { ActionService } from 'src/app/_services/action.service';
 
 // Represents a library type card.
 @Component({
@@ -22,8 +21,7 @@ export class LibraryCardComponent implements OnInit, OnChanges {
   icon = 'fa-book-open';
 
   constructor(private accountService: AccountService, private router: Router,
-              private libraryService: LibraryService, private toastr: ToastrService,
-              private actionFactoryService: ActionFactoryService) {
+              private actionFactoryService: ActionFactoryService, private actionService: ActionService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -49,27 +47,16 @@ export class LibraryCardComponent implements OnInit, OnChanges {
   handleAction(action: Action, library: Library) {
     switch (action) {
       case(Action.ScanLibrary):
-        this.scanLibrary(library);
+        this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        this.refreshMetadata(library);
+        this.actionService.refreshMetadata(library);
         break;
       default:
         break;
     }
   }
 
-  scanLibrary(library: Library) {
-    this.libraryService.scan(library?.id).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
-    });
-  }
-
-  refreshMetadata(library: Library) {
-    this.libraryService.refreshMetadata(library?.id).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
-    });
-  }
 
   performAction(action: ActionItem<Library>) {
     if (typeof action.callback === 'function') {

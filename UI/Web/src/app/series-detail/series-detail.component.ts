@@ -90,6 +90,7 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
+    // TODO: Update this to use new actionService
     this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this)).filter(action => action.action !== Action.Edit);
     this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));

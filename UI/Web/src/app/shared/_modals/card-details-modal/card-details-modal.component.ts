@@ -3,11 +3,8 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { ImageService } from 'src/app/_services/image.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { MangaFile } from '../../../_models/manga-file';
 import { NaturalSortService } from '../../_services/natural-sort.service';
 import { UtilityService } from '../../_services/utility.service';
 
