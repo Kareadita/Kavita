@@ -44,9 +44,10 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   @HostListener("window:scroll", [])
   checkBackToTopNeeded() {
-    if (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop > 100) {
+    const offset = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+    if (offset > 100) {
       this.backToTopNeeded = true;
-    } else if (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop < 40) {
+    } else if (offset < 40) {
         this.backToTopNeeded = false;
     }
   }
