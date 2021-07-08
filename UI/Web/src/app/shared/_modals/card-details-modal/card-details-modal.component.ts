@@ -7,6 +7,8 @@ import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { ImageService } from 'src/app/_services/image.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import { MangaFile } from '../../../_models/manga-file';
+import { NaturalSortService } from '../../_services/natural-sort.service';
 import { UtilityService } from '../../_services/utility.service';
 
 
@@ -26,9 +28,10 @@ export class CardDetailsModalComponent implements OnInit {
   isLoadingVolumes = false;
 
   formatKeys = Object.keys(MangaFormat);
+  
 
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, public imageService: ImageService) { }
+  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, public imageService: ImageService, public naturalSort: NaturalSortService) { }
 
   ngOnInit(): void {
     this.isChapter = this.isObjectChapter(this.data);
@@ -39,6 +42,9 @@ export class CardDetailsModalComponent implements OnInit {
       this.chapters.push(...this.data?.chapters);
     }
     this.chapters.sort(this.utilityService.sortChapters);
+    this.chapters.forEach((c: Chapter) => {
+      c.files = c.files.sort((a: MangaFile, b: MangaFile) => this.naturalSort.compare(a.filePath, b.filePath, true));
+    });
   }
 
   isObjectChapter(object: any): object is Chapter {
