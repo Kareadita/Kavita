@@ -66,7 +66,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
 
+  /**
+   * The current page. UI will show this number + 1.
+   */
   pageNum = 0;
+  /**
+   * Total pages in the given Chapter
+   */
   maxPages = 1;
   user!: User;
   generalSettingsForm!: FormGroup;
@@ -79,6 +85,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
   colorMode: COLOR_FILTER = COLOR_FILTER.NONE;
   autoCloseMenu: boolean = true;
+  readerMode: READER_MODE = READER_MODE.MANGA_LR;
   
   isLoading = true; 
 
@@ -86,13 +93,29 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private ctx!: CanvasRenderingContext2D;
   private canvasImage = new Image();
 
-  cachedImages!: CircularArray<HTMLImageElement>; // This is a circular array of size PREFETCH_PAGES + 2
+  /**
+   * A circular array of size PREFETCH_PAGES + 2. Maintains prefetched Images around the current page to load from to avoid loading animation.
+   * @see CircularArray
+   */
+  cachedImages!: CircularArray<HTMLImageElement>;
+  /**
+   * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
+   * @see Stack
+   */
   continuousChaptersStack: Stack<number> = new Stack();
   
 
-  // Menu overlay variables
+  /**
+   * If the menu is open/visible.
+   */
   menuOpen = false;
+  /**
+   * If the prev page allows a page change to occur.
+   */
   prevPageDisabled = false;
+  /**
+   * If the next page allows a page change to occur.
+   */
   nextPageDisabled = false;
   pageOptions: Options = {
     floor: 1,
@@ -108,37 +131,59 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     animate: false
   };
 
+  /**
+   * Used to store the Series name for UI
+   */
   title: string = '';
+  /**
+   * Used to store the Volume/Chapter information
+   */
   subtitle: string = '';
   /**
    * Timeout id for auto-closing menu overlay
    */
-   menuTimeout: any;
-
-   /**
-    * Whether the click areas show
-    */
-   showClickOverlay: boolean = false;
-
-  
-
-  // These are not garunteed to be valid ChapterIds. Prefetch them on page load (non-blocking).
+  menuTimeout: any;
+  /**
+   * If the click overlay is rendered on screen
+   */
+  showClickOverlay: boolean = false;
+  /**
+   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   */
   nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
+  /**
+   * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   */
   prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
-  // Used to keep track of if you can move to the next/prev chapter
+  /**
+   * Is there a next chapter. If not, this will disable UI controls.
+   */
   nextChapterDisabled: boolean = false;
+  /**
+   * Is there a previous chapter. If not, this will disable UI controls.
+   */
   prevChapterDisabled: boolean = false;
+  /**
+   * Has the next chapter been prefetched. Prefetched means the backend will cache the files.
+   */
   nextChapterPrefetched: boolean = false;
-
-  // Whether extended settings area is showing
+  /**
+   * Has the previous chapter been prefetched. Prefetched means the backend will cache the files.
+   */
+  prevChapterPrefetched: boolean = false;
+  /**
+   * If extended settings area is visible. Blocks auto-closing of menu.
+   */
   settingsOpen: boolean = false;
 
-  readerMode: READER_MODE = READER_MODE.MANGA_LR;
+  private readonly onDestroy = new Subject<void>();
+
+  
   getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
   
 
-  private readonly onDestroy = new Subject<void>();
+  
 
   get splitIconClass() {
     if (this.isSplitLeftToRight()) {
@@ -687,6 +732,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
+    console.log('prefetched images: ', this.cachedImages.arr.map(item => this.readerService.imageUrlToPageNum(item.src)));
   }
 
   loadPage() {
@@ -761,6 +807,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.nextChapterPrefetched = true;
         });
       }
+    } else if (this.pageNum <= 10) {
+      if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
+        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+          this.prevChapterPrefetched = true;
+        });
+      }
     }
   }
 
@@ -815,9 +867,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readerMode = READER_MODE.MANGA_UD;
         break;
       case READER_MODE.MANGA_UD:
-        //this.readerMode = READER_MODE.WEBTOON;
+        this.readerMode = READER_MODE.WEBTOON;
         // Temp disable ability to use webtoon
-        this.readerMode = READER_MODE.MANGA_LR;
+        //this.readerMode = READER_MODE.MANGA_LR;
         break;
       case READER_MODE.WEBTOON:
         this.readerMode = READER_MODE.MANGA_LR;
