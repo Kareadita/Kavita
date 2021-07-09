@@ -118,15 +118,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   nextPageDisabled = false;
   pageOptions: Options = {
-    floor: 1,
+    floor: 0,
     ceil: 0,
     step: 1,
+    boundPointerLabels: true,
     showSelectionBar: true,
     translate: (value: number, label: LabelType) => {
-      if (value === 1 || value === this.maxPages) {
-        return value + '';
+      if (label == LabelType.Floor) {
+        return 1 + '';
+      } else if (label === LabelType.Ceil) {
+        return this.maxPages + '';
       }
-      return (value + 1) + '';
+
+      return (this.pageNum + 1) + '';
     },
     animate: false
   };
@@ -343,7 +347,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }).pipe(take(1)).subscribe(results => {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
-      this.pageOptions.ceil = this.maxPages;
 
       let page = results.bookmark.pageNum;
       if (page >= this.maxPages) {
@@ -353,8 +356,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       // Due to change detection rules in Angular, we need to re-create the options object to apply the change
       const newOptions: Options = Object.assign({}, this.pageOptions);
-      newOptions.ceil = this.maxPages;
+      newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
       this.pageOptions = newOptions;
+      console.log('page options: ', this.pageOptions);
 
       this.updateTitle(results.chapterInfo);
 
