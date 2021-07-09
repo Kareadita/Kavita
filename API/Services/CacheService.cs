@@ -153,7 +153,7 @@ namespace API.Services
                         return (files.ElementAt(page - 1 - pagesSoFar), mangaFile);
                     }
 
-                    if (page - pagesSoFar == 1)
+                    if (mangaFile.Format == MangaFormat.Image && mangaFile.Pages == 1 && page - pagesSoFar == 1)//  && page - pagesSoFar == 1
                     {
                       // Each file is one page, meaning we should just get element at page - 1
                       return (files.ElementAt(page - 1), mangaFile);
