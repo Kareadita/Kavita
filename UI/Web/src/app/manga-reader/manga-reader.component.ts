@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
@@ -129,11 +129,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else if (label === LabelType.Ceil) {
         return this.maxPages + '';
       }
-
+      console.log('label', label);
+      console.log('value: ', value);
       return (this.pageNum + 1) + '';
     },
     animate: false
   };
+  refreshSlider: EventEmitter<void> = new EventEmitter<void>();
 
   /**
    * Used to store the Series name for UI
@@ -358,7 +360,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newOptions: Options = Object.assign({}, this.pageOptions);
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
       this.pageOptions = newOptions;
-      console.log('page options: ', this.pageOptions);
 
       this.updateTitle(results.chapterInfo);
 
@@ -798,6 +799,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.setPageNum(page);
+    this.refreshSlider.emit();
     this.render();
   }
 
