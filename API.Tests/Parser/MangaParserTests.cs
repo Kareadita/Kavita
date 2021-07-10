@@ -211,7 +211,6 @@ namespace API.Tests.Parser
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
-        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
         [InlineData("Tomogui Kyoushitsu - Chapter 006 Game 005 - Fingernails On Right Hand (Part 002).cbz", "6")]
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "406")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "201")]

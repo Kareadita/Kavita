@@ -20,13 +20,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {
     public class ScannerServiceTests : IDisposable
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
@@ -39,7 +37,7 @@ namespace API.Tests.Services
         private readonly DataContext _context;
 
 
-        public ScannerServiceTests(ITestOutputHelper testOutputHelper)
+        public ScannerServiceTests()
         {
             var contextOptions = new DbContextOptionsBuilder()
                 .UseSqlite(CreateInMemoryDatabase())
@@ -61,7 +59,6 @@ namespace API.Tests.Services
             IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
 
 
-            _testOutputHelper = testOutputHelper;
             IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _directoryService, _imageService);
             _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService);
         }

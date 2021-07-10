@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -28,6 +27,6 @@ namespace API.Interfaces.Services
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         void CopyFileToDirectory(string fullFilePath, string targetDirectory);
-        public bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName);
+        public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName);
     }
 }

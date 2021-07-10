@@ -9,7 +9,6 @@ using System.Xml.Serialization;
 using API.Archive;
 using API.Comparators;
 using API.Extensions;
-using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;

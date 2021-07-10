@@ -88,12 +88,9 @@ namespace API.Services
             _logger.LogInformation("Performing cleanup of Cache directory");
             EnsureCacheDirectory();
 
-            //DirectoryInfo di = new DirectoryInfo(CacheDirectory);
-
             try
             {
                 DirectoryService.ClearDirectory(CacheDirectory);
-                //di.Empty();
             }
             catch (Exception ex)
             {
