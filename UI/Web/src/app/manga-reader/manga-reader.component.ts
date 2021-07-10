@@ -363,13 +363,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST) {
+        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST) {
+        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
         }
       });
@@ -642,7 +642,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadNextChapter() {
     if (this.nextPageDisabled) { return; }
     this.isLoading = true;
-    if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED) {
+    if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'next');
@@ -665,7 +665,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED) {
+    if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         this.loadChapter(chapterId, 'prev');
