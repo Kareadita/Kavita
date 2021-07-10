@@ -128,17 +128,14 @@ namespace API.Services
 
           // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
-          if (firstFile != null &&
-              (forceUpdate || firstFile.HasFileBeenModified())) // !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified)
+          if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+          var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+          if (string.IsNullOrEmpty(series.Summary))
           {
-             var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-             if (string.IsNullOrEmpty(series.Summary))
-             {
-                series.Summary = summary;
-             }
-
-             firstFile.LastModified = DateTime.Now;
+            series.Summary = summary;
           }
+
+          firstFile.LastModified = DateTime.Now;
        }
 
 

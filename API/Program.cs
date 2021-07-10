@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
-using API.Services.HostedServices;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -26,14 +25,14 @@ namespace API
         protected Program()
         {
         }
-        
+
         public static string GetAppSettingFilename()
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
             return "appsettings" + (isDevelopment ? ".Development" : "") + ".json";
         }
-        
+
         public static async Task Main(string[] args)
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -47,7 +46,7 @@ namespace API
                 var base64 = Convert.ToBase64String(rBytes).Replace("/", "");
                 Configuration.UpdateJwtToken(GetAppSettingFilename(), base64);
             }
-            
+
             // Get HttpPort from Config
             _httpPort = Configuration.GetPort(GetAppSettingFilename());
 
@@ -86,7 +85,7 @@ namespace API
                             options.Protocols = HttpProtocols.Http1AndHttp2;
                         });
                     });
-                    
+
                     var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                     if (environment != Environments.Development)
                     {
@@ -125,7 +124,7 @@ namespace API
                                 sentryEvent.ServerName = null; // Never send Server Name to Sentry
                                 return sentryEvent;
                             };
-                            
+
                             options.ConfigureScope(scope =>
                             {
                                 scope.User = new User()
@@ -143,7 +142,7 @@ namespace API
 
                         });
                     }
-                    
+
                     webBuilder.UseStartup<Startup>();
                 });
     }

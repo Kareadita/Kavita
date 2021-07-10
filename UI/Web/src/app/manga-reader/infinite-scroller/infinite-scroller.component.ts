@@ -38,7 +38,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Responsible for calculating current page on screen and uses hooks to trigger prefetching.
-   * Note: threshold will fire differently due to size of images. 1 requires full image on screen.
+   * Note: threshold will fire differently due to size of images. 1 requires full image on screen. 0 means 1px on screen.
    */
   intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [0] });
   /**
@@ -78,7 +78,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information
    */
-  debug: boolean = false;
+  debug: boolean = true;
 
   /**
    * Timer to help detect when a scroll end event has occured  (not used)

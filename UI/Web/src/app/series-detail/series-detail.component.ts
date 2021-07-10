@@ -361,6 +361,7 @@ export class SeriesDetailComponent implements OnInit {
     const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg', scrollable: true });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
+    modalRef.componentInstance.seriesId = this.series?.id;
   }
 
   openEditSeriesModal() {

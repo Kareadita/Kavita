@@ -5,7 +5,7 @@ namespace Kavita.Common
 {
     public static class HashUtil
     {
-        public static string CalculateCrc(string input)
+        private static string CalculateCrc(string input)
         {
             uint mCrc = 0xffffffff;
             byte[] bytes = Encoding.UTF8.GetBytes(input);
@@ -28,10 +28,14 @@ namespace Kavita.Common
             return $"{mCrc:x8}";
         }
 
+        /// <summary>
+        /// Calculates a unique, Anonymous Token that will represent this unique Kavita installation.
+        /// </summary>
+        /// <returns></returns>
         public static string AnonymousToken()
         {
             var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.MachineName}_{Environment.UserName}";
-            return HashUtil.CalculateCrc(seed);
+            return CalculateCrc(seed);
         }
     }
 }

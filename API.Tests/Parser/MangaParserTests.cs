@@ -149,6 +149,8 @@ namespace API.Tests.Parser
         [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ)", "Seraph of the End - Vampire Reign")]
         [InlineData("Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz", "Grand Blue Dreaming")]
         [InlineData("Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz", "Yuusha Ga Shinda!")]
+        [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
+        [InlineData("Getsuyoubi no Tawawa - Ch. 001 - Ai-chan, Part 1", "Getsuyoubi no Tawawa")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -209,7 +211,6 @@ namespace API.Tests.Parser
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
-        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
         [InlineData("Tomogui Kyoushitsu - Chapter 006 Game 005 - Fingernails On Right Hand (Part 002).cbz", "6")]
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "406")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "201")]
@@ -388,6 +389,14 @@ namespace API.Tests.Parser
                 Series = "Summer Time Rendering", Volumes = "0", Edition = "",
                 Chapters = "0", Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
                 FullFilePath = filepath, IsSpecial = true
+            });
+
+            filepath = @"E:\Manga\Seraph of the End\Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
+              Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
             });
 
 

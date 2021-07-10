@@ -51,20 +51,6 @@ namespace API.Services.Tasks
           }
        }
 
-       private bool ShouldSkipFolderScan(FolderPath folder, ref int skippedFolders)
-       {
-          // NOTE: The only way to skip folders is if Directory hasn't been modified, we aren't doing a forcedUpdate and version hasn't changed between scans.
-          return false;
-
-          // if (!_forceUpdate && Directory.GetLastWriteTime(folder.Path) < folder.LastScanned)
-          // {
-          //    _logger.LogDebug("{FolderPath} hasn't been modified since last scan. Skipping", folder.Path);
-          //    skippedFolders += 1;
-          //    return true;
-          // }
-
-          //return false;
-       }
 
        [DisableConcurrentExecution(360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -121,9 +107,7 @@ namespace API.Services.Tasks
           var skippedFolders = 0;
           foreach (var folderPath in library.Folders)
           {
-             if (ShouldSkipFolderScan(folderPath, ref skippedFolders)) continue;
-
-             // NOTE: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
+            // NOTE: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
              var searchPattern = Parser.Parser.ArchiveFileExtensions;
              if (library.Type == LibraryType.Book)
              {

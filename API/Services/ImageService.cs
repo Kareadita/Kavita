@@ -23,9 +23,13 @@ namespace API.Services
       _naturalSortComparer = new NaturalSortComparer();
     }
 
+    /// <summary>
+    /// Finds the first image in the directory of the first file. Does not check for "cover/folder".ext files to override.
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
     public string GetCoverFile(MangaFile file)
     {
-      // I think we need to go back until library root if possible
       var directory = Path.GetDirectoryName(file.FilePath);
       if (string.IsNullOrEmpty(directory))
       {
@@ -33,7 +37,7 @@ namespace API.Services
         return null;
       }
 
-      var firstImage = _directoryService.GetFiles(directory)
+      var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
         .OrderBy(f => f, _naturalSortComparer).FirstOrDefault();
 
       return firstImage;

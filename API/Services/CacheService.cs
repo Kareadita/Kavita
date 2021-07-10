@@ -88,11 +88,9 @@ namespace API.Services
             _logger.LogInformation("Performing cleanup of Cache directory");
             EnsureCacheDirectory();
 
-            DirectoryInfo di = new DirectoryInfo(CacheDirectory);
-
             try
             {
-                di.Empty();
+                DirectoryService.ClearDirectory(CacheDirectory);
             }
             catch (Exception ex)
             {
@@ -153,10 +151,10 @@ namespace API.Services
                         return (files.ElementAt(page - 1 - pagesSoFar), mangaFile);
                     }
 
-                    if (page - pagesSoFar == 1)
+                    if (mangaFile.Format == MangaFormat.Image && mangaFile.Pages == 1)
                     {
-                      // Each file is one page, meaning we should just get element at page - 1
-                      return (files.ElementAt(page - 1), mangaFile);
+                      // Each file is one page, meaning we should just get element at page
+                      return (files.ElementAt(page), mangaFile);
                     }
 
                     return (files.ElementAt(page - pagesSoFar), mangaFile);

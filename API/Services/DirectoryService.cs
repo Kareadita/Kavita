@@ -105,7 +105,7 @@ namespace API.Services
          }
        }
 
-       public bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName)
+       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName)
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -113,7 +113,7 @@ namespace API.Services
          if (!di.Exists) return false;
 
          // Get the subdirectories for the specified directory.
-         DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+         var dir = new DirectoryInfo(sourceDirName);
 
          if (!dir.Exists)
          {

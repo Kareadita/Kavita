@@ -9,8 +9,9 @@ namespace API.Extensions
         private static readonly NaturalSortComparer Comparer = new NaturalSortComparer();
         public static void Empty(this DirectoryInfo directory)
         {
-            foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
-            foreach(DirectoryInfo subDirectory in directory.EnumerateDirectories()) subDirectory.Delete(true);
+          // NOTE: We have this in DirectoryService.Empty(), do we need this here?
+          foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
+          foreach(DirectoryInfo subDirectory in directory.EnumerateDirectories()) subDirectory.Delete(true);
         }
 
         public static void RemoveNonImages(this DirectoryInfo directory)

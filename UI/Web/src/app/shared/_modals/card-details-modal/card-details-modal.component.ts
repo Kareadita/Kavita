@@ -18,17 +18,16 @@ import { UtilityService } from '../../_services/utility.service';
 export class CardDetailsModalComponent implements OnInit {
 
   @Input() parentName = '';
+  @Input() seriesId: number = 0;
   @Input() data!: any; // Volume | Chapter
   isChapter = false;
   chapters: Chapter[] = [];
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
-
   formatKeys = Object.keys(MangaFormat);
-  
 
-
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, public imageService: ImageService, public naturalSort: NaturalSortService) { }
+  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
+    public imageService: ImageService, public naturalSort: NaturalSortService) { }
 
   ngOnInit(): void {
     this.isChapter = this.isObjectChapter(this.data);
@@ -39,8 +38,10 @@ export class CardDetailsModalComponent implements OnInit {
       this.chapters.push(...this.data?.chapters);
     }
     this.chapters.sort(this.utilityService.sortChapters);
+    // Try to show an approximation of the reading order for files
+    var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
     this.chapters.forEach((c: Chapter) => {
-      c.files = c.files.sort((a: MangaFile, b: MangaFile) => this.naturalSort.compare(a.filePath, b.filePath, true));
+      c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
     });
   }
 

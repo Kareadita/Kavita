@@ -7,7 +7,7 @@ namespace API.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        // TODO: MetadataUpdate add ProviderId
+        // MetadataUpdate add ProviderId
 
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
