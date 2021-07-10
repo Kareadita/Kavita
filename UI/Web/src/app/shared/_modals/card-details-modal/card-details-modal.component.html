@@ -8,7 +8,8 @@
     </div>
     <div class="modal-body scrollable-modal">
         <h4 *ngIf="isObjectVolume(data)">Information</h4>
-        <ng-container *ngIf="isObjectVolume(data)">
+
+        <ng-container *ngIf="isObjectVolume(data) || isObjectChapter(data)">
             <div class="row no-gutters">
                 <div class="col">
                     Id: {{data.id}}
@@ -18,7 +19,7 @@
                 </div>
             </div>
             <div class="row no-gutters">
-                <div class="col">
+                <div class="col" *ngIf="isObjectVolume(data)">
                     Added: {{(data.created | date: 'MM/dd/yyyy') || '-'}}
                 </div>
                 <div class="col">
@@ -33,11 +34,13 @@
                 <img class="mr-3" style="width: 74px" src="{{imageService.getChapterCoverImage(chapter.id)}}">
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">
-                        <span *ngIf="chapter.number !== '0'; else specialHeader">Chapter {{formatChapterNumber(chapter)}}</span>
+                        <span *ngIf="chapter.number !== '0'; else specialHeader">
+                            Chapter {{formatChapterNumber(chapter)}}
+                        </span>
                         <ng-template #specialHeader>File(s)</ng-template>
                     </h5>
                     <ul class="list-group">
-                        <li *ngFor="let file of chapter.files.sort()" class="list-group-item">
+                        <li *ngFor="let file of chapter.files" class="list-group-item"> <!-- .sort() -->
                             <span>{{file.filePath}}</span>
                             <div class="row no-gutters">
                                 <div class="col">

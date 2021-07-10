@@ -22,6 +22,7 @@ namespace API.Controllers
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
             ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
@@ -54,6 +55,7 @@ namespace API.Controllers
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
+            // PERF: Write this in one DB call
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -183,7 +185,6 @@ namespace API.Controllers
         public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogDebug("Saving {UserName} progress for Volume {VolumeID} to read", user.UserName, markVolumeReadDto.VolumeId);
 
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
@@ -223,7 +224,6 @@ namespace API.Controllers
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogDebug("Saving {UserName} progress for Chapter {ChapterId} to page {PageNum}", user.UserName, bookmarkDto.ChapterId, bookmarkDto.PageNum);
 
             // Don't let user bookmark past total pages.
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
@@ -275,6 +275,9 @@ namespace API.Controllers
         /// <summary>
         /// Returns the next logical chapter from the series.
         /// </summary>
+        /// <example>
+        /// V1 → V2 → V3 chapter 0 → V3 chapter 10 → SP 01 → SP 02
+        /// </example>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
         /// <param name="currentChapterId"></param>
@@ -288,6 +291,7 @@ namespace API.Controllers
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
             {
+                // Handle specials
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
@@ -296,19 +300,29 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
                 {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
+                    // Handle Chapters within current Volume
+                    // In this case, i need 0 first because 0 represents a full volume file.
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
 
                 if (volume.Number == currentVolume.Number + 1)
                 {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault()?.Id);
+                    // Handle Chapters within next Volume
+                    // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
+                    var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
+                    if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
+                    {
+                        return chapters.Last().Id;
+                    }
+
+                    return Ok(chapters.FirstOrDefault()?.Id);
                 }
             }
             return Ok(-1);
         }
 
-        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber, bool forward = true)
+        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
         {
             var next = false;
             var chaptersList = chapters.ToList();
@@ -318,26 +332,8 @@ namespace API.Controllers
                 {
                     return chapter.Id;
                 }
-                // ! If there is a vol then extra chapters tacked on end, this will never happen, hence the next check
                 if (currentChapterNumber.Equals(chapter.Number)) next = true;
             }
-
-            // Since this is used both for Forward and Backwards, I need to check both First() and Last()
-            if (forward)
-            {
-              if (currentChapterNumber.Equals("0") && chaptersList.Last().Number.Equals("0"))
-              {
-                return chaptersList.First().Id;
-              }
-            }
-            else
-            {
-              if (!currentChapterNumber.Equals("0") && chaptersList.First().Number.Equals("0"))
-              {
-                return chaptersList.First().Id;
-              }
-            }
-
 
             return -1;
         }
@@ -345,6 +341,9 @@ namespace API.Controllers
         /// <summary>
         /// Returns the previous logical chapter from the series.
         /// </summary>
+        /// <example>
+        /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← SP 01 ← SP 02
+        /// </example>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
         /// <param name="currentChapterId"></param>
@@ -367,12 +366,12 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number)
                 {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number, false);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 if (volume.Number == currentVolume.Number - 1)
                 {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).LastOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault()?.Id);
                 }
             }
             return Ok(-1);
