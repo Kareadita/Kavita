@@ -153,7 +153,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1
             new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode ?)\d+-?\d*",
+                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
             // Baketeriya ch01-05.zip
