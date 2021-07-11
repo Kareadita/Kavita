@@ -202,7 +202,6 @@ namespace API.Services.Tasks
                 foreach (var series in duplicateSeries)
                 {
                    _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
-
                 }
 
                 continue;
@@ -227,7 +226,6 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
                 UpdateVolumes(series, parsedSeries[Parser.Parser.Normalize(series.OriginalName)].ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
-                // Test
              }
              catch (Exception ex)
              {
@@ -390,6 +388,7 @@ namespace API.Services.Tasks
 
        /// <summary>
        /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
+       /// This will check if the name matches an existing series name (multiple fields) <see cref="MergeName"/>
        /// </summary>
        /// <param name="info"></param>
        private void TrackSeries(ParserInfo info)
@@ -411,6 +410,13 @@ namespace API.Services.Tasks
           });
        }
 
+       /// <summary>
+       /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
+       /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
+       /// </summary>
+       /// <param name="collectedSeries"></param>
+       /// <param name="info"></param>
+       /// <returns></returns>
        public string MergeName(ConcurrentDictionary<string,List<ParserInfo>> collectedSeries, ParserInfo info)
        {
           var normalizedSeries = Parser.Parser.Normalize(info.Series);
