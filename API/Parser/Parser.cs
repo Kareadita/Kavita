@@ -324,7 +324,7 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Green Worldz - Chapter 027
             new Regex(
-                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-])?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(

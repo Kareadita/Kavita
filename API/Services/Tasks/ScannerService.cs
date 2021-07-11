@@ -39,6 +39,43 @@ namespace API.Services.Tasks
           _naturalSort = new NaturalSortComparer();
        }
 
+       [DisableConcurrentExecution(timeoutInSeconds: 360)]
+       [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+       public async Task ScanSeries(int seriesId)
+       {
+           var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+           var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+           var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+
+           // For each library root, we need to find the corresponding files, then find the highest level parent to scan
+           // highest level can be the root itself
+           var directories = new List<string>(); // make this a hashmap
+           foreach (var folder in library.Folders)
+           {
+               foreach (var file in files)
+               {
+                   // TODO: Validate this on Robbie's filesystem
+                   if (file.FilePath.Contains(folder.Path))
+                   {
+                       var parts = DirectoryService.GetFoldersTillRoot(file.FilePath, folder.Path).ToList();
+                       if (parts.Count == 1 && parts[0].Equals(folder.Path))
+                       {
+                           // Break from all loops, we done, just scan folder.Path
+                           break;
+                       }
+                   }
+
+               }
+           }
+
+
+           // var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
+           // foreach (var lib in libraries)
+           // {
+           //     ScanLibrary(lib.Id, false);
+           // }
+       }
+
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]

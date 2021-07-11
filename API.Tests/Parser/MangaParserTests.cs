@@ -217,6 +217,8 @@ namespace API.Tests.Parser
         [InlineData("Kodoja #001 (March 2016)", "1")]
         [InlineData("Noblesse - Episode 429 (74 Pages).7z", "429")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
+        [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
