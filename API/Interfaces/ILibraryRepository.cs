@@ -10,6 +10,7 @@ namespace API.Interfaces
     {
         void Add(Library library);
         void Update(Library library);
+        void Delete(Library library);
         Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
         Task<bool> LibraryExists(string libraryName);
         Task<Library> GetLibraryForIdAsync(int libraryId);
