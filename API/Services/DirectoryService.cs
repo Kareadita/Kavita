@@ -41,7 +41,7 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Returns a list of folders from end of fullPath to rootPath.
+       /// Returns a list of folders from end of fullPath to rootPath. If a file is passed at the end of the fullPath, it will be ignored.
        ///
        /// Example) (C:/Manga/, C:/Manga/Love Hina/Specials/Omake/) returns [Omake, Specials, Love Hina]
        /// </summary>
@@ -50,7 +50,8 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-         var separator = Path.AltDirectorySeparatorChar;
+
+        var separator = Path.AltDirectorySeparatorChar;
           if (fullPath.Contains(Path.DirectorySeparatorChar))
           {
              fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -62,13 +63,17 @@ namespace API.Services
           }
 
 
+
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
           var paths = new List<string>();
           while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
              var folder = new DirectoryInfo(path).Name;
-             paths.Add(folder);
+             if (Path.GetExtension(folder) == string.Empty)
+             {
+                 paths.Add(folder);
+             }
              path = path.Replace(separator + folder, string.Empty);
           }
 
