@@ -151,6 +151,7 @@ namespace API.Tests.Parser
         [InlineData("Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz", "Yuusha Ga Shinda!")]
         [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         [InlineData("Getsuyoubi no Tawawa - Ch. 001 - Ai-chan, Part 1", "Getsuyoubi no Tawawa")]
+        [InlineData("Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz", "Please Go Home, Akutsu-San!")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

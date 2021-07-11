@@ -70,20 +70,23 @@ namespace API.Parser
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)( |_|-)",
+            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
             RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
-            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
-            new Regex(
-                @"(?<Series>.*) (\b|_|-)(vol)\.?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
-
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
+            new Regex(
+                @"(?<Series>.*)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
+            new Regex(
+                @"(?<Series>.*) (\b|_|-)(vol)\.?",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
             new Regex(
