@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
@@ -41,39 +42,70 @@ namespace API.Services.Tasks
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public async Task ScanSeries(int seriesId)
+       public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token)
        {
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-           var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+           var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
 
            // For each library root, we need to find the corresponding files, then find the highest level parent to scan
            // highest level can be the root itself
-           var directories = new List<string>(); // make this a hashmap
+           var stopLookingForDirectories = false;
+           var dirs = new Dictionary<string, string>();
            foreach (var folder in library.Folders)
            {
+               if (stopLookingForDirectories) break;
                foreach (var file in files)
                {
                    // TODO: Validate this on Robbie's filesystem
                    if (file.FilePath.Contains(folder.Path))
                    {
-                       var parts = DirectoryService.GetFoldersTillRoot(file.FilePath, folder.Path).ToList();
-                       if (parts.Count == 1 && parts[0].Equals(folder.Path))
+                       // This can cause an infinite loop, need a better way
+                       var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
+                       if (parts.Count == 0)
                        {
                            // Break from all loops, we done, just scan folder.Path
+                           dirs.Add(folder.Path, string.Empty);
+                           stopLookingForDirectories = true;
                            break;
+                       }
+
+                       var fullPath = Path.Join(folder.Path, parts.Last());
+                       if (!dirs.ContainsKey(fullPath))
+                       {
+                           dirs.Add(fullPath, string.Empty);
                        }
                    }
 
                }
            }
 
+           // Given a list of directories to scan for files in, perform this action
+           _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
+           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>(); // TODO: We can't have a global variable if multiple scans are taking place
+           var parsedSeries = ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
-           // var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
-           // foreach (var lib in libraries)
-           // {
-           //     ScanLibrary(lib.Id, false);
-           // }
+           // Sweet X Trouble is returning 2 series, but we are only fetching one
+
+           var sw = new Stopwatch();
+            _logger.LogInformation("Found {Count} series", parsedSeries.Keys.Count);
+            UpdateLibrary(library, parsedSeries);
+
+            _unitOfWork.LibraryRepository.Update(library);
+            if (await _unitOfWork.CommitAsync())
+            {
+                _logger.LogInformation(
+                    "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
+                    totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
+                CleanupUserProgress();
+                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+            }
+            else
+            {
+                _logger.LogCritical(
+                    "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+                await _unitOfWork.RollbackAsync();
+            }
        }
 
 
@@ -93,32 +125,41 @@ namespace API.Services.Tasks
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
        {
-          var sw = Stopwatch.StartNew();
-          _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
-          Library library;
+           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
+           Library library;
            try
            {
-              library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
+               library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter()
+                   .GetResult();
            }
            catch (Exception ex)
            {
-              // This usually only fails if user is not authenticated.
-              _logger.LogError(ex, "There was an issue fetching Library {LibraryId}", libraryId);
-              return;
+               // This usually only fails if user is not authenticated.
+               _logger.LogError(ex, "There was an issue fetching Library {LibraryId}", libraryId);
+               return;
            }
 
+           _logger.LogInformation("Beginning file scan on {LibraryName}", library.Name);
+           var series = ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
+           foreach (var folderPath in library.Folders)
+           {
+               folderPath.LastScanned = DateTime.Now;
+           }
+           var sw = Stopwatch.StartNew();
 
-           var series = ScanLibrariesForSeries(forceUpdate, library, sw, out var totalFiles, out var scanElapsedTime);
            UpdateLibrary(library, series);
 
            _unitOfWork.LibraryRepository.Update(library);
            if (Task.Run(() => _unitOfWork.CommitAsync()).Result)
            {
-              _logger.LogInformation("Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}", totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+               _logger.LogInformation(
+                   "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                   totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
            }
            else
            {
-              _logger.LogCritical("There was a critical error that resulted in a failed scan. Please check logs and rescan");
+               _logger.LogCritical(
+                   "There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
 
            CleanupUserProgress();
@@ -135,62 +176,61 @@ namespace API.Services.Tasks
           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
        }
 
-       private Dictionary<string, List<ParserInfo>> ScanLibrariesForSeries(bool forceUpdate, Library library, Stopwatch sw, out int totalFiles,
+       /// <summary>
+       ///
+       /// </summary>
+       /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
+       /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
+       /// <param name="totalFiles">Total files scanned</param>
+       /// <param name="scanElapsedTime">Time it took to scan and parse files</param>
+       /// <returns></returns>
+       private Dictionary<string, List<ParserInfo>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, out int totalFiles,
           out long scanElapsedTime)
        {
-          _logger.LogInformation("Beginning scan on {LibraryName}. Forcing metadata update: {ForceUpdate}", library.Name,
-             forceUpdate);
-          totalFiles = 0;
-          var skippedFolders = 0;
-          foreach (var folderPath in library.Folders)
-          {
-            // NOTE: we can refactor this to allow all filetypes and handle everything in the ProcessFile to allow mixed library types.
-             var searchPattern = Parser.Parser.ArchiveFileExtensions;
-             if (library.Type == LibraryType.Book)
-             {
-                searchPattern = Parser.Parser.BookFileExtensions;
-             } else if (library.Type is LibraryType.MangaImages or LibraryType.ComicImages)
-             {
-               searchPattern = Parser.Parser.ImageFileExtensions;
-             }
-
-             try
-             {
-                totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath.Path, (f) =>
-                {
-                   try
+           var sw = Stopwatch.StartNew();
+           totalFiles = 0;
+           var searchPattern = GetLibrarySearchPattern(libraryType);
+           foreach (var folderPath in folders)
+           {
+               try
+               {
+                   totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath, (f) =>
                    {
-                      ProcessFile(f, folderPath.Path, library.Type);
-                   }
-                   catch (FileNotFoundException exception)
-                   {
-                      _logger.LogError(exception, "The file {Filename} could not be found", f);
-                   }
-                }, searchPattern, _logger);
-             }
-             catch (ArgumentException ex)
-             {
-                _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath.Path);
-             }
+                       try
+                       {
+                           ProcessFile(f, folderPath, libraryType);
+                       }
+                       catch (FileNotFoundException exception)
+                       {
+                           _logger.LogError(exception, "The file {Filename} could not be found", f);
+                       }
+                   }, searchPattern, _logger);
+               }
+               catch (ArgumentException ex)
+               {
+                   _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath);
+               }
 
-             folderPath.LastScanned = DateTime.Now;
-          }
+               //folderPath.LastScanned = DateTime.Now;
+           }
 
-          scanElapsedTime = sw.ElapsedMilliseconds;
-          _logger.LogInformation("Folders Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
-             scanElapsedTime);
-          sw.Restart();
-          if (skippedFolders == library.Folders.Count)
-          {
-             _logger.LogInformation("All Folders were skipped due to no modifications to the directories");
-             _unitOfWork.LibraryRepository.Update(library);
-             _scannedSeries = null;
-             _logger.LogInformation("Processed {TotalFiles} files in {ElapsedScanTime} milliseconds for {LibraryName}",
-                totalFiles, sw.ElapsedMilliseconds, library.Name);
-             return new Dictionary<string, List<ParserInfo>>();
-          }
+           scanElapsedTime = sw.ElapsedMilliseconds;
+           _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
+               scanElapsedTime);
 
-          return SeriesWithInfos(_scannedSeries);
+           return SeriesWithInfos(_scannedSeries);
+       }
+
+       private static string GetLibrarySearchPattern(LibraryType libraryType)
+       {
+           var searchPattern = libraryType switch
+           {
+               LibraryType.Book => Parser.Parser.BookFileExtensions,
+               LibraryType.MangaImages or LibraryType.ComicImages => Parser.Parser.ImageFileExtensions,
+               _ => Parser.Parser.ArchiveFileExtensions
+           };
+
+           return searchPattern;
        }
 
        /// <summary>

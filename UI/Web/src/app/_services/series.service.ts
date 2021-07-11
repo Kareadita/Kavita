@@ -117,6 +117,10 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/refresh-metadata', {libraryId: series.libraryId, seriesId: series.id});
   }
 
+  scan(libraryId: number, seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'series/scan', {libraryId: libraryId, seriesId: seriesId});
+  }
+
   getMetadata(seriesId: number) {
     return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId).pipe(map(items => {
       items?.tags.forEach(tag => tag.coverImage = this.imageService.getCollectionCoverImage(tag.id));

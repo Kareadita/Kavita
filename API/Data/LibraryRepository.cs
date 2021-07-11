@@ -120,6 +120,28 @@ namespace API.Data
                 .SingleAsync();
         }
 
+        /// <summary>
+        /// This is a heavy call, pulls all entities for a Library, except this version only grabs for one series id
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        public async Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId)
+        {
+
+            return await _context.Library
+                .Where(x => x.Id == libraryId)
+                .Include(f => f.Folders)
+                .Include(l => l.Series.Where(s => s.Id == seriesId))
+                .ThenInclude(s => s.Metadata)
+                .Include(l => l.Series.Where(s => s.Id == seriesId))
+                .ThenInclude(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .AsSplitQuery()
+                .SingleAsync();
+        }
+
         public async Task<bool> LibraryExists(string libraryName)
         {
             return await _context.Library
