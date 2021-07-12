@@ -99,22 +99,21 @@ namespace API.Services.Tasks
              foreach (var file in files)
              {
                 // TODO: Validate this on Robbie's filesystem
-                if (file.FilePath.Contains(folder.Path))
-                {
-                   var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
-                   if (parts.Count == 0)
-                   {
-                      // Break from all loops, we done, just scan folder.Path (library root)
-                      dirs.Add(folder.Path, string.Empty);
-                      stopLookingForDirectories = true;
-                      break;
-                   }
+                if (!file.FilePath.Contains(folder.Path)) continue;
 
-                   var fullPath = Path.Join(folder.Path, parts.Last());
-                   if (!dirs.ContainsKey(fullPath))
-                   {
-                      dirs.Add(fullPath, string.Empty);
-                   }
+                var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
+                if (parts.Count == 0)
+                {
+                   // Break from all loops, we done, just scan folder.Path (library root)
+                   dirs.Add(folder.Path, string.Empty);
+                   stopLookingForDirectories = true;
+                   break;
+                }
+
+                var fullPath = Path.Join(folder.Path, parts.Last());
+                if (!dirs.ContainsKey(fullPath))
+                {
+                   dirs.Add(fullPath, string.Empty);
                 }
              }
           }
