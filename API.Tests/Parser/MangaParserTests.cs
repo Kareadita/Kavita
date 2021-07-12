@@ -291,9 +291,7 @@ namespace API.Tests.Parser
         {
           const string rootDirectory = "/manga/";
           var tokens = expectedParseInfo.Split("~");
-          var actual = new ParserInfo();
-          actual.Chapters = "0";
-          actual.Volumes = "0";
+          var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
           API.Parser.Parser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
           Assert.Equal(tokens[0], actual.Series);
           Assert.Equal(tokens[1], actual.Volumes);

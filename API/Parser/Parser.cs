@@ -501,7 +501,7 @@ namespace API.Parser
         /// <param name="ret">Expects a non-null ParserInfo which this method will populate</param>
         public static void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
         {
-          var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, Path.GetDirectoryName(filePath)).ToList();
+          var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, filePath).ToList();
             for (var i = 0; i < fallbackFolders.Count; i++)
             {
                 var folder = fallbackFolders[i];

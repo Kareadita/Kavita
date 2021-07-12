@@ -29,5 +29,21 @@ namespace API.Tests.Extensions
 
             Assert.Equal(expected, series.NameInList(list));
         }
+
+        public void NameInParserInfoTest(string[] seriesInput, string[] list, bool expected)
+        {
+            var series = new Series()
+            {
+                Name = seriesInput[0],
+                LocalizedName = seriesInput[1],
+                OriginalName = seriesInput[2],
+                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Parser.Parser.Normalize(seriesInput[0]),
+                Metadata = new SeriesMetadata()
+            };
+
+            Assert.Equal(expected, series.NameInList(list));
+        }
+
+
     }
 }

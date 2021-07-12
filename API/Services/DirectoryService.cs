@@ -40,6 +40,7 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
+
        /// <summary>
        /// Returns a list of folders from end of fullPath to rootPath. If a file is passed at the end of the fullPath, it will be ignored.
        ///
@@ -50,8 +51,7 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-
-        var separator = Path.AltDirectorySeparatorChar;
+           var separator = Path.AltDirectorySeparatorChar;
           if (fullPath.Contains(Path.DirectorySeparatorChar))
           {
              fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -67,13 +67,15 @@ namespace API.Services
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
           var paths = new List<string>();
+          // If a file is at the end of the path, remove it before we start processing folders
+          if (Path.GetExtension(path) != string.Empty)
+          {
+             path = path.Substring(0, path.LastIndexOf(separator));
+          }
           while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
              var folder = new DirectoryInfo(path).Name;
-             if (Path.GetExtension(folder) == string.Empty)
-             {
-                 paths.Add(folder);
-             }
+             paths.Add(folder);
              path = path.Replace(separator + folder, string.Empty);
           }
 
