@@ -47,40 +47,8 @@ namespace API.Services.Tasks
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
+           var dirs = FindHighestDirectoriesFromFiles(library, files);
 
-           // For each library root, we need to find the corresponding files, then find the highest level parent to scan
-           // highest level can be the root itself
-           var stopLookingForDirectories = false;
-           var dirs = new Dictionary<string, string>();
-           foreach (var folder in library.Folders)
-           {
-               if (stopLookingForDirectories) break;
-               foreach (var file in files)
-               {
-                   // TODO: Validate this on Robbie's filesystem
-                   if (file.FilePath.Contains(folder.Path))
-                   {
-                       // This can cause an infinite loop, need a better way
-                       var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
-                       if (parts.Count == 0)
-                       {
-                           // Break from all loops, we done, just scan folder.Path
-                           dirs.Add(folder.Path, string.Empty);
-                           stopLookingForDirectories = true;
-                           break;
-                       }
-
-                       var fullPath = Path.Join(folder.Path, parts.Last());
-                       if (!dirs.ContainsKey(fullPath))
-                       {
-                           dirs.Add(fullPath, string.Empty);
-                       }
-                   }
-
-               }
-           }
-
-           // Given a list of directories to scan for files in, perform this action
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
            // TODO: We can't have a global variable if multiple scans are taking place. Refactor this.
            _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
@@ -96,8 +64,7 @@ namespace API.Services.Tasks
            }
 
            var sw = new Stopwatch();
-            _logger.LogInformation("Found {Count} series", parsedSeries.Keys.Count);
-            UpdateLibrary(library, parsedSeries);
+           UpdateLibrary(library, parsedSeries);
 
             _unitOfWork.LibraryRepository.Update(library);
             if (await _unitOfWork.CommitAsync())
@@ -114,6 +81,45 @@ namespace API.Services.Tasks
                     "There was a critical error that resulted in a failed scan. Please check logs and rescan");
                 await _unitOfWork.RollbackAsync();
             }
+       }
+
+       /// <summary>
+       /// Finds the highest directories from a set of MangaFiles
+       /// </summary>
+       /// <param name="library"></param>
+       /// <param name="files"></param>
+       /// <returns></returns>
+       private static Dictionary<string, string> FindHighestDirectoriesFromFiles(Library library, IList<MangaFile> files)
+       {
+          var stopLookingForDirectories = false;
+          var dirs = new Dictionary<string, string>();
+          foreach (var folder in library.Folders)
+          {
+             if (stopLookingForDirectories) break;
+             foreach (var file in files)
+             {
+                // TODO: Validate this on Robbie's filesystem
+                if (file.FilePath.Contains(folder.Path))
+                {
+                   var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
+                   if (parts.Count == 0)
+                   {
+                      // Break from all loops, we done, just scan folder.Path (library root)
+                      dirs.Add(folder.Path, string.Empty);
+                      stopLookingForDirectories = true;
+                      break;
+                   }
+
+                   var fullPath = Path.Join(folder.Path, parts.Last());
+                   if (!dirs.ContainsKey(fullPath))
+                   {
+                      dirs.Add(fullPath, string.Empty);
+                   }
+                }
+             }
+          }
+
+          return dirs;
        }
 
 
@@ -218,8 +224,6 @@ namespace API.Services.Tasks
                {
                    _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath);
                }
-
-               //folderPath.LastScanned = DateTime.Now;
            }
 
            scanElapsedTime = sw.ElapsedMilliseconds;

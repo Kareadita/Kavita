@@ -34,6 +34,7 @@ namespace API.Tests.Extensions
         [Theory]
         [InlineData(new [] {"Darker than Black", "Darker Than Black", "Darker than Black"}, "Darker than Black", true)]
         [InlineData(new [] {"Rent-a-Girlfriend", "Rent-a-Girlfriend", "Kanojo, Okarishimasu", "rentagirlfriend"}, "Kanojo, Okarishimasu", true)]
+        [InlineData(new [] {"Rent-a-Girlfriend", "Rent-a-Girlfriend", "Kanojo, Okarishimasu", "rentagirlfriend"}, "Rent", false)]
         public void NameInParserInfoTest(string[] seriesInput, string parserSeries, bool expected)
         {
             var series = new Series()
