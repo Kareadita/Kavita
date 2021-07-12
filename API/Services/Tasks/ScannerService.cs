@@ -82,10 +82,18 @@ namespace API.Services.Tasks
 
            // Given a list of directories to scan for files in, perform this action
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>(); // TODO: We can't have a global variable if multiple scans are taking place
+           // TODO: We can't have a global variable if multiple scans are taking place. Refactor this.
+           _scannedSeries = new ConcurrentDictionary<string, List<ParserInfo>>();
            var parsedSeries = ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
-           // Sweet X Trouble is returning 2 series, but we are only fetching one
+           // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
+           // Hence we clear out anything but what we selected for
+           var firstSeries = library.Series.FirstOrDefault();
+           var keys = parsedSeries.Keys;
+           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault())))
+           {
+               parsedSeries.Remove(key);
+           }
 
            var sw = new Stopwatch();
             _logger.LogInformation("Found {Count} series", parsedSeries.Keys.Count);
