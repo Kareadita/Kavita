@@ -98,7 +98,6 @@ namespace API.Services.Tasks
              if (stopLookingForDirectories) break;
              foreach (var file in files)
              {
-                // TODO: Validate this on Robbie's filesystem
                 if (!file.FilePath.Contains(folder.Path)) continue;
 
                 var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
