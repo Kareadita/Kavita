@@ -151,6 +151,7 @@ namespace API.Tests.Parser
         [InlineData("Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz", "Yuusha Ga Shinda!")]
         [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         [InlineData("Getsuyoubi no Tawawa - Ch. 001 - Ai-chan, Part 1", "Getsuyoubi no Tawawa")]
+        [InlineData("Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz", "Please Go Home, Akutsu-San!")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -217,6 +218,8 @@ namespace API.Tests.Parser
         [InlineData("Kodoja #001 (March 2016)", "1")]
         [InlineData("Noblesse - Episode 429 (74 Pages).7z", "429")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
+        [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -288,9 +291,7 @@ namespace API.Tests.Parser
         {
           const string rootDirectory = "/manga/";
           var tokens = expectedParseInfo.Split("~");
-          var actual = new ParserInfo();
-          actual.Chapters = "0";
-          actual.Volumes = "0";
+          var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
           API.Parser.Parser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
           Assert.Equal(tokens[0], actual.Series);
           Assert.Equal(tokens[1], actual.Volumes);

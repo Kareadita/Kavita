@@ -106,7 +106,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
-    this.libraryService.scan(series.libraryId).pipe(take(1)).subscribe((res: any) => {
+    this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.success('Scan started for ' + series.name);
       if (callback) {
         callback(series);

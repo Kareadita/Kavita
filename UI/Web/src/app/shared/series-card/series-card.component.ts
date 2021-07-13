@@ -97,7 +97,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   scanLibrary(series: Series) {
-    this.libraryService.scan(series.libraryId).subscribe((res: any) => {
+    this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
       this.toastr.success('Scan started for ' + series.name);
     });
   }

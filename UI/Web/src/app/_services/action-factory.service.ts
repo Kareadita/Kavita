@@ -63,7 +63,7 @@ export class ActionFactoryService {
 
         this.seriesActions.push({
           action: Action.ScanLibrary,
-          title: 'Scan Library',
+          title: 'Scan Series',
           callback: this.dummyCallback
         });
 
