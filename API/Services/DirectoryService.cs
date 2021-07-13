@@ -72,11 +72,12 @@ namespace API.Services
           {
              path = path.Substring(0, path.LastIndexOf(separator));
           }
+
           while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
              var folder = new DirectoryInfo(path).Name;
              paths.Add(folder);
-             path = path.Replace(separator + folder, string.Empty);
+             path = path.Substring(0, path.LastIndexOf(separator));
           }
 
           return paths;

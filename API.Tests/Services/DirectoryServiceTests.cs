@@ -98,6 +98,9 @@ namespace API.Tests.Services
         [InlineData(@"E:\test", @"E:\test\Sweet X Trouble\Sweet X Trouble - Chapter 001.cbz", "Sweet X Trouble")]
         [InlineData(@"C:\/mount/gdrive/Library/Test Library/Comics/", @"C:\/mount/gdrive/Library/Test Library/Comics\godzilla rivals vs hedorah\vol 1\", "vol 1,godzilla rivals vs hedorah")]
         [InlineData(@"/manga/", @"/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Vol.1 Chapter 2,Btooom!")]
+        [InlineData(@"C:/", @"C://Btooom!/Vol.1 Chapter 2/1.cbz", "Vol.1 Chapter 2,Btooom!")]
+        [InlineData(@"C:\\", @"C://Btooom!/Vol.1 Chapter 2/1.cbz", "Vol.1 Chapter 2,Btooom!")]
+        [InlineData(@"C://mount/gdrive/Library/Test Library/Comics", @"C://mount/gdrive/Library/Test Library/Comics/Dragon Age/Test", "Test,Dragon Age")]
         public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
         {
             var expected = expectedArray.Split(",");
