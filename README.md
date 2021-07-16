@@ -1,3 +1,4 @@
+[![Board Status](https://dev.azure.com/kavitareader/c54487cb-0170-4c84-aee9-14bbc68554a7/3096c3f6-caee-462e-84a3-6a1478c1fcba/_apis/work/boardbadge/dff82ed3-ce90-4033-9eb2-adaa1cb87be3)](https://dev.azure.com/kavitareader/c54487cb-0170-4c84-aee9-14bbc68554a7/_boards/board/t/3096c3f6-caee-462e-84a3-6a1478c1fcba/Microsoft.RequirementCategory)
 ﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
