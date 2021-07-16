@@ -16,7 +16,8 @@ export class DashboardComponent implements OnInit {
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'General', fragment: ''},
     {title: 'Users', fragment: 'users'},
-    {title: 'Libraries', fragment: 'libraries'}
+    {title: 'Libraries', fragment: 'libraries'},
+    {title: 'System', fragment: 'system'}
   ];
   counter = this.tabs.length + 1;
   active = this.tabs[0];
