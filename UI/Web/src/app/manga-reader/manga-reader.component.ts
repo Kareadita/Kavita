@@ -735,7 +735,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-    console.log('prefetched images: ', this.cachedImages.arr.map(item => this.readerService.imageUrlToPageNum(item.src) + (item.complete ? ' (c)' : '')));
+    //console.log('prefetched images: ', this.cachedImages.arr.map(item => this.readerService.imageUrlToPageNum(item.src) + (item.complete ? ' (c)' : '')));
   }
 
   loadPage() {
@@ -753,7 +753,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
-      console.log('Requesting fresh page ' + this.pageNum, this.cachedImages.currentIndex);
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
       this.canvasImage.onload = () => this.renderPage();
     } else {

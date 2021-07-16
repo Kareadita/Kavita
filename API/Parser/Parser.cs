@@ -80,9 +80,13 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex)
+            new Regex(
+                @"(?<Series>.*)(\s|_|-)(?:Volume(\s|_|-)+\d+)(\s|_|-)+(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
             new Regex(
-                @"(?<Series>.*)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
+                @"(?<Series>.*)(\s|_|-)(?!Vol)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled),
             // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
             new Regex(
