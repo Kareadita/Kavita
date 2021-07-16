@@ -133,7 +133,7 @@ namespace API.Services
             return usageInfo;
         }
 
-        private static ServerInfoDto GetServerInfo()
+        public static ServerInfoDto GetServerInfo()
         {
             var serverInfo = new ServerInfoDto
             {

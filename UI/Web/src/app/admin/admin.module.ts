@@ -14,6 +14,7 @@ import { ResetPasswordModalComponent } from './_modals/reset-password-modal/rese
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { FilterPipe } from './filter.pipe';
 import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
+import { ManageSystemComponent } from './manage-system/manage-system.component';
 
 
 
@@ -29,7 +30,8 @@ import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.c
     ResetPasswordModalComponent,
     ManageSettingsComponent,
     FilterPipe,
-    EditRbsModalComponent
+    EditRbsModalComponent,
+    ManageSystemComponent
   ],
   imports: [
     CommonModule,

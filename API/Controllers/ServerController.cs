@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Extensions;
 using API.Interfaces.Services;
+using API.Services;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -30,14 +33,24 @@ namespace API.Controllers
             _backupService = backupService;
             _archiveService = archiveService;
         }
-        
+
         [HttpPost("restart")]
         public ActionResult RestartServer()
         {
             _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
-            
+
             _applicationLifetime.StopApplication();
             return Ok();
+        }
+
+        /// <summary>
+        /// Returns non-sensitive information about the current system
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("server-info")]
+        public ActionResult<ServerInfoDto> GetVersion()
+        {
+           return Ok(StatsService.GetServerInfo());
         }
 
         [HttpGet("logs")]
@@ -47,14 +60,14 @@ namespace API.Controllers
             try
             {
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files, "logs");
-                return File(fileBytes, "application/zip", Path.GetFileName(zipPath));  
+                return File(fileBytes, "application/zip", Path.GetFileName(zipPath));
             }
             catch (KavitaException ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-        
-        
+
+
     }
 }
