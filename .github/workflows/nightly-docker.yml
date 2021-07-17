@@ -31,12 +31,6 @@ jobs:
           
           cd ../ || exit
 
-      - name: Bump versions
-        uses: SiqiLu/dotnet-bump-version@master
-        with:
-          version_files: "Kavita.Common/Kavita.Common.csproj"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Get csproj Version
         uses: naminodarie/get-net-sdk-project-versions-action@v1
         id: get-version
