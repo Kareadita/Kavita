@@ -1,8 +1,11 @@
 name: Sentry Map Release
 on:
-  push:
-    branches:
-      - 'feature/adding-auto-bump-and-sentry-maps'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "version to update package.json"
+        required: true
+        # No default
 
 jobs:
   build:
