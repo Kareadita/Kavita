@@ -21,7 +21,7 @@ namespace API.Data
             _context = context;
             _mapper = mapper;
         }
-        
+
         public void Add(Library library)
         {
             _context.Library.Add(library);
@@ -30,6 +30,11 @@ namespace API.Data
         public void Update(Library library)
         {
             _context.Entry(library).State = EntityState.Modified;
+        }
+
+        public void Delete(Library library)
+        {
+            _context.Library.Remove(library);
         }
 
         public async Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
@@ -43,7 +48,7 @@ namespace API.Data
                 .AsSingleQuery()
                 .ToListAsync();
         }
-        
+
         public async Task<IEnumerable<Library>> GetLibrariesAsync()
         {
             return await _context.Library
@@ -101,7 +106,7 @@ namespace API.Data
         /// <returns></returns>
         public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
         {
-            
+
             return await _context.Library
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)
@@ -114,7 +119,29 @@ namespace API.Data
                 .AsSplitQuery()
                 .SingleAsync();
         }
-        
+
+        /// <summary>
+        /// This is a heavy call, pulls all entities for a Library, except this version only grabs for one series id
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        public async Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId)
+        {
+
+            return await _context.Library
+                .Where(x => x.Id == libraryId)
+                .Include(f => f.Folders)
+                .Include(l => l.Series.Where(s => s.Id == seriesId))
+                .ThenInclude(s => s.Metadata)
+                .Include(l => l.Series.Where(s => s.Id == seriesId))
+                .ThenInclude(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .AsSplitQuery()
+                .SingleAsync();
+        }
+
         public async Task<bool> LibraryExists(string libraryName)
         {
             return await _context.Library
@@ -131,7 +158,7 @@ namespace API.Data
                 .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
-        
-        
+
+
     }
 }

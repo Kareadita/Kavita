@@ -16,7 +16,7 @@
   <PropertyGroup>
     <Product>Kavita</Product>
     <Company>kareadita.github.io</Company>
-    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kareadita.github.io (GNU General Public v3)</Copyright>
+    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
 
     <!-- Should be replaced by CI -->
     <AssemblyVersion>0.4.1</AssemblyVersion>
@@ -50,9 +50,9 @@
     <PackageReference Include="NetVips" Version="2.0.0" />
     <PackageReference Include="NetVips.Native" Version="8.10.6" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.1" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.3.4" />
-    <PackageReference Include="SharpCompress" Version="0.28.1" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.20.0.28934">
+    <PackageReference Include="Sentry.AspNetCore" Version="3.7.0" />
+    <PackageReference Include="SharpCompress" Version="0.28.3" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.25.0.33663">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -60,6 +60,12 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
     <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+  </ItemGroup>
+
+  
 
   <ItemGroup>
     <None Remove="Hangfire-log.db" />
@@ -205,10 +211,6 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
 </Project>

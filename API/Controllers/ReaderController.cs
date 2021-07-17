@@ -22,6 +22,7 @@ namespace API.Controllers
         private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
             ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
@@ -44,7 +45,7 @@ namespace API.Controllers
 
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path).Replace(".", "");
-            
+
             // Calculates SHA1 Hash for byte[]
             Response.AddCacheHeader(content);
 
@@ -54,6 +55,7 @@ namespace API.Controllers
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
+            // PERF: Write this in one DB call
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -108,7 +110,7 @@ namespace API.Controllers
                 foreach (var chapter in volume.Chapters)
                 {
                     var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-                    if (userProgress == null) // I need to get all chapters and generate new user progresses for them? 
+                    if (userProgress == null) // I need to get all chapters and generate new user progresses for them?
                     {
                         user.Progresses.Add(new AppUserProgress
                         {
@@ -126,18 +128,18 @@ namespace API.Controllers
                     }
                 }
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
-            
-            
+
+
             return BadRequest("There was an issue saving progress");
         }
-        
+
         [HttpPost("mark-unread")]
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
@@ -167,15 +169,15 @@ namespace API.Controllers
                     }
                 }
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
             {
                 return Ok();
             }
-            
-            
+
+
             return BadRequest("There was an issue saving progress");
         }
 
@@ -183,8 +185,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogDebug("Saving {UserName} progress for Volume {VolumeID} to read", user.UserName, markVolumeReadDto.VolumeId);
-            
+
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
             {
@@ -208,7 +209,7 @@ namespace API.Controllers
                     userProgress.VolumeId = markVolumeReadDto.VolumeId;
                 }
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
@@ -217,14 +218,13 @@ namespace API.Controllers
             }
 
             return BadRequest("Could not save progress");
-        }    
+        }
 
         [HttpPost("bookmark")]
         public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            _logger.LogDebug("Saving {UserName} progress for Chapter {ChapterId} to page {PageNum}", user.UserName, bookmarkDto.ChapterId, bookmarkDto.PageNum);
-            
+
             // Don't let user bookmark past total pages.
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
             if (bookmarkDto.PageNum > chapter.Pages)
@@ -236,8 +236,8 @@ namespace API.Controllers
             {
                 return BadRequest("Can't bookmark less than 0");
             }
-            
-            
+
+
             user.Progresses ??= new List<AppUserProgress>();
             var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
 
@@ -261,7 +261,7 @@ namespace API.Controllers
                 userProgress.BookScrollId = bookmarkDto.BookScrollId;
                 userProgress.LastModified = DateTime.Now;
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
@@ -275,6 +275,9 @@ namespace API.Controllers
         /// <summary>
         /// Returns the next logical chapter from the series.
         /// </summary>
+        /// <example>
+        /// V1 → V2 → V3 chapter 0 → V3 chapter 10 → SP 01 → SP 02
+        /// </example>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
         /// <param name="currentChapterId"></param>
@@ -288,6 +291,7 @@ namespace API.Controllers
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
             {
+                // Handle specials
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
@@ -295,14 +299,24 @@ namespace API.Controllers
             foreach (var volume in volumes)
             {
                 if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
-                { 
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
+                {
+                    // Handle Chapters within current Volume
+                    // In this case, i need 0 first because 0 represents a full volume file.
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
-                
+
                 if (volume.Number == currentVolume.Number + 1)
                 {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault()?.Id);
+                    // Handle Chapters within next Volume
+                    // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
+                    var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
+                    if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
+                    {
+                        return chapters.Last().Id;
+                    }
+
+                    return Ok(chapters.FirstOrDefault()?.Id);
                 }
             }
             return Ok(-1);
@@ -311,7 +325,8 @@ namespace API.Controllers
         private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
         {
             var next = false;
-            foreach (var chapter in chapters)
+            var chaptersList = chapters.ToList();
+            foreach (var chapter in chaptersList)
             {
                 if (next)
                 {
@@ -326,6 +341,9 @@ namespace API.Controllers
         /// <summary>
         /// Returns the previous logical chapter from the series.
         /// </summary>
+        /// <example>
+        /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← SP 01 ← SP 02
+        /// </example>
         /// <param name="seriesId"></param>
         /// <param name="volumeId"></param>
         /// <param name="currentChapterId"></param>
@@ -337,7 +355,7 @@ namespace API.Controllers
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
-            
+
             if (currentVolume.Number == 0)
             {
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number);
@@ -348,12 +366,12 @@ namespace API.Controllers
             {
                 if (volume.Number == currentVolume.Number)
                 {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number);
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
                     if (chapterId > 0) return Ok(chapterId);
                 }
                 if (volume.Number == currentVolume.Number - 1)
                 {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).LastOrDefault()?.Id);
+                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault()?.Id);
                 }
             }
             return Ok(-1);

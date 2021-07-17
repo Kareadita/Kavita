@@ -1,0 +1,68 @@
+@import "../../theme/_colors.scss";
+
+.login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh);
+    min-height: 289px;
+    position: relative;
+
+
+    &::before {
+        content: "";
+        background-image: url('../../assets/images/login-bg.jpg');
+        background-size: cover;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        width: 100%;
+    }
+
+    .logo-container {
+        margin: 0 auto 15px;
+
+        .logo {
+            display:inline-block;
+            height: 50px;
+        }
+    }
+
+    .card {
+        background-color: $primary-color;
+        color: #fff;
+
+        .card-title {
+            font-family: 'Spartan', sans-serif;
+            font-weight: bold;
+            display: inline-block;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+
+        .card-text {
+            font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+
+            input {
+                background-color: #fff;
+            }
+        }
+
+        .alt {
+            background-color: #424c72;
+            border-color: #444f75;
+        }
+
+        .alt:hover {
+            background-color: #3b4466;
+        }
+
+        .alt:focus {
+            background-color: #343c59;
+            box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%);
+        }
+    }
+}
+

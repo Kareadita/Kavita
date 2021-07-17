@@ -20,24 +20,24 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace API.Tests.Services
 {
     public class ScannerServiceTests : IDisposable
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly ScannerService _scannerService;
         private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         private readonly IBookService _bookService = Substitute.For<IBookService>();
+        private readonly IImageService _imageService = Substitute.For<IImageService>();
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
+        private readonly IDirectoryService _directoryService = Substitute.For<IDirectoryService>();
 
         private readonly DbConnection _connection;
         private readonly DataContext _context;
-        
 
-        public ScannerServiceTests(ITestOutputHelper testOutputHelper)
+
+        public ScannerServiceTests()
         {
             var contextOptions = new DbContextOptionsBuilder()
                 .UseSqlite(CreateInMemoryDatabase())
@@ -46,21 +46,20 @@ namespace API.Tests.Services
 
             _context = new DataContext(contextOptions);
             Task.Run(SeedDb).GetAwaiter().GetResult();
-            
-            
+
+
             //BackgroundJob.Enqueue is what I need to mock or something (it's static...)
-            // ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService, 
-            //     IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService, 
+            // ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
+            //     IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
             //     IBackgroundJobClient jobClient
             //var taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(), Substitute.For<)
-            
-            
+
+
             // Substitute.For<UserManager<AppUser>>() - Not needed because only for UserService
             IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
-            
-            
-            _testOutputHelper = testOutputHelper;
-            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService);
+
+
+            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _directoryService, _imageService);
             _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService);
         }
 
@@ -90,12 +89,12 @@ namespace API.Tests.Services
         //
         //     var series = _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Result.Series;
         // }
-        
+
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
             var infos = new Dictionary<string, List<ParserInfo>>();
-            
+
             AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black"});
             AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1"});
             AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10"});
@@ -140,7 +139,7 @@ namespace API.Tests.Services
             {
                 Series = parsedInfoName
             });
-            
+
             Assert.Equal(expected, actualName);
         }
 
@@ -158,7 +157,7 @@ namespace API.Tests.Services
                 EntityFactory.CreateSeries("Darker than Black Vol 1"),
             };
             existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
-            
+
             Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
             Assert.Equal(missingSeries.Count, removeCount);
         }
@@ -194,12 +193,12 @@ namespace API.Tests.Services
 
                     collectedSeries[info.Series] = list;
                 }
-                
+
             }
-            
+
         }
-        
-        
+
+
 
         // [Fact]
         // public void ExistingOrDefault_Should_BeFromLibrary()
@@ -257,7 +256,7 @@ namespace API.Tests.Services
             // _testOutputHelper.WriteLine(_libraryMock.ToString());
             Assert.True(true);
         }
-        
+
         private static DbConnection CreateInMemoryDatabase()
         {
             var connection = new SqliteConnection("Filename=:memory:");

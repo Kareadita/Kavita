@@ -1,4 +1,7 @@
 ﻿
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace API.Interfaces.Services
 {
     public interface IScannerService
@@ -11,5 +14,6 @@ namespace API.Interfaces.Services
         /// <param name="forceUpdate">Force overwriting for cover images</param>
         void ScanLibrary(int libraryId, bool forceUpdate);
         void ScanLibraries();
+        Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token);
     }
 }

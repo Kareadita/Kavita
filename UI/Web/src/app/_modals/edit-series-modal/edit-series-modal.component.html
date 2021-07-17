@@ -1,0 +1,169 @@
+<div *ngIf="series !== undefined">
+    <div class="modal-header">
+        <h4 class="modal-title">
+            {{this.series.name}} Details</h4>
+        <button type="button" class="close" aria-label="Close" (click)="close()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body scrollable-modal">
+        <form [formGroup]="editSeriesForm">
+            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+                <li [ngbNavItem]="tabs[0]">
+                  <a ngbNavLink>{{tabs[0]}}</a>
+                  <ng-template ngbNavContent>
+
+                    <div class="row no-gutters">
+                        <div class="form-group" style="width: 100%">
+                            <label for="name">Name</label>
+                            <input id="name" class="form-control" formControlName="name" type="text">
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <div class="form-group" style="width: 100%">
+                            <label for="sort-name">Sort Name</label>
+                            <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <div class="form-group" style="width: 100%">
+                            <label for="localized-name">Localized Name</label>
+                            <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters" *ngIf="metadata">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="author">Author</label>
+                                <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="artist">Artist</label>
+                                <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters" *ngIf="metadata">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="genres">Genres</label>
+                                <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="collections">Collections</label>
+                                <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
+                                    <ng-template #badgeItem let-item let-position="idx">
+                                        {{item.title}}
+                                    </ng-template>
+                                    <ng-template #optionItem let-item let-position="idx">
+                                        {{item.title}}
+                                    </ng-template>
+                                </app-typeahead>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row no-gutters">
+                        <div class="form-group" style="width: 100%">
+                            <label for="summary">Summary</label>
+                            <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                        </div>
+                    </div>
+
+                  </ng-template>
+                </li>
+                <li [ngbNavItem]="tabs[1]">
+                  <a ngbNavLink>{{tabs[1]}}</a>
+                  <ng-template ngbNavContent>
+                    <p>Not Yet implemented</p>
+                  </ng-template>
+                </li>
+                <li [ngbNavItem]="tabs[2]">
+                  <a ngbNavLink>{{tabs[2]}}</a>
+                  <ng-template ngbNavContent>
+                    <p>Not Yet implemented</p>
+                    <img src="{{imageService.getSeriesCoverImage(series.id)}}">
+                  </ng-template>
+                </li>
+                <li [ngbNavItem]="tabs[3]">
+                  <a ngbNavLink>{{tabs[3]}}</a>
+                  <ng-template ngbNavContent>
+                    <h4>Information</h4>
+                    <div class="row no-gutters mb-2">
+                        <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | titlecase}}</div>
+                    </div>
+                      <h4>Volumes</h4>
+                      <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
+                          <span class="invisible">Loading...</span>
+                      </div>
+                      <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
+                          <li class="media my-4" *ngFor="let volume of seriesVolumes">
+                              <img class="mr-3" style="width: 74px;" src="{{imageService.getVolumeCoverImage(volume.id)}}" >
+                              <div class="media-body">
+                                  <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
+                                  <div>
+                                      <div class="row no-gutters">
+                                          <div class="col">
+                                              Created: {{volume.created | date: 'MM/dd/yyyy'}}
+                                          </div>
+                                          <div class="col">
+                                              Last Modified: {{volume.lastModified | date: 'MM/dd/yyyy'}}
+                                          </div>
+                                      </div>
+                                      <div class="row no-gutters">
+                                          <div class="col">
+                                              <!-- Is Special: {{volume.isSpecial}} -->
+                                              <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!volumeCollapsed[volume.name]">
+                                                  View Files
+                                              </button>
+                                          </div>
+                                          <div class="col">
+                                              Pages: {{volume.pages}}
+                                          </div>
+                                      </div>
+                                      
+                                      <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
+                                          <ul class="list-group mt-2">
+                                              <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
+                                                  <span>{{file.filePath}}</span>
+                                                  <div class="row no-gutters">
+                                                      <div class="col">
+                                                          Chapter: {{file.chapter}}
+                                                      </div>
+                                                      <div class="col">
+                                                          Pages: {{file.pages}}
+                                                      </div>
+                                                      <div class="col">
+                                                          Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                                      </div>
+                                                  </div>
+                                              </li>
+                                          </ul>
+                                      </div>
+                                  </div>
+                              </div>
+                          </li>
+                      </ul>
+                  </ng-template>
+                </li>
+            </ul>
+        </form>
+        
+        <div [ngbNavOutlet]="nav" class="mt-3"></div>
+    </div>
+    <div class="modal-footer">
+        <!-- TODO: Replace secondary buttons in modals with btn-light -->
+        <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+        <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
+    </div>
+</div>
+
+

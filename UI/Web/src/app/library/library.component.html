@@ -1,0 +1,33 @@
+
+<div class="container-fluid">
+    <div *ngIf="libraries.length === 0 && !isLoading && isAdmin" class="d-flex justify-content-center">
+        <p>There are no libraries setup yet. Configure some in <a href="/admin/dashboard#libraries">Server settings</a>.</p>
+    </div>
+    <div *ngIf="libraries.length === 0 && !isLoading && !isAdmin" class="d-flex justify-content-center">
+        <p>You haven't been granted access to any libraries.</p>
+    </div>
+    <app-carousel-reel [items]="libraries" title="Libraries">
+        <ng-template #carouselItem let-item let-position="idx">
+            <app-library-card [data]="item"></app-library-card>
+        </ng-template>
+    </app-carousel-reel>
+
+    <app-carousel-reel [items]="inProgress" title="In Progress" (sectionClick)="handleSectionClick($event)">
+        <ng-template #carouselItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+        </ng-template>
+    </app-carousel-reel>
+
+    <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
+        <ng-template #carouselItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId"></app-series-card>
+        </ng-template>
+    </app-carousel-reel>
+
+    <app-carousel-reel [items]="collectionTags" title="Collections" (sectionClick)="handleSectionClick($event)">
+        <ng-template #carouselItem let-item let-position="idx">
+            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="item.coverImage" (clicked)="loadCollection(item)"></app-card-item>
+        </ng-template>
+    </app-carousel-reel>
+    
+</div>

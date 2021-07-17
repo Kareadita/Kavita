@@ -1,0 +1,42 @@
+name: Sentry Release
+on:
+  push:
+    branches: [ main, develop, feature/sentry-release ]
+
+jobs:
+  build:
+    name: Setup Sentry CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mathieu-bour/setup-sentry-cli@1.2.0
+        with:
+          version: latest
+          token: ${{ SECRETS.SENTRY_TOKEN }}
+          organization: kavita-7n
+          project: angular
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install NodeJS
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install Dependencies
+        run: npm install
+      - name: Build Angular
+        run: npm run prod
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Create Release
+        run: sentry-cli releases new ${{ steps.package-version.outputs.current-version }}
+      - name: Upload Source Maps
+        run: sentry-cli releases files ${{ steps.package-version.outputs.current-version }} upload-sourcemaps ./dist
+      - name: Finalize Release
+        run: sentry-cli releases finalize ${{ steps.package-version.outputs.current-version }}

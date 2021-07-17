@@ -1,0 +1,53 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Edit {{tag?.title}} Collection</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <p>
+        This tag is currently {{tag?.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
+        Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.
+    </p>
+
+    <form [formGroup]="collectionTagForm">
+        <div class="form-group">
+            <label for="summary">Summary</label>
+            <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+        </div>
+    </form>
+
+    <div class="list-group" *ngIf="!isLoading">
+        <h6>Applies to Series</h6>
+        <div class="form-check">
+            <input id="selectall" type="checkbox" class="form-check-input" 
+                [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="someSelected">
+            <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
+        </div>
+        <ul>
+            <li class="list-group-item" *ngFor="let item of series; let i = index">
+                <div class="form-check">
+                    <input id="series-{{i}}" type="checkbox" class="form-check-input" 
+                        [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
+                    <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
+        <ngb-pagination
+            *ngIf="pagination.totalPages > 1"
+            [(page)]="pagination.currentPage"
+            [pageSize]="pagination.itemsPerPage"
+            (pageChange)="onPageChange($event)"
+            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+            [collectionSize]="pagination.totalItems"></ngb-pagination>
+    </div>
+
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-info" (click)="togglePromotion()">{{tag?.promoted ? 'Demote' : 'Promote'}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+</div>

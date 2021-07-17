@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;

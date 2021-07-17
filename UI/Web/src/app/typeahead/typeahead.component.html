@@ -1,0 +1,37 @@
+<form [formGroup]="typeaheadForm">
+    <ng-container *ngIf="settings.multiple" >
+
+
+      <div class="typeahead-input" (click)="onInputFocus($event)">
+        <div>
+          <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
+            <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
+            <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
+          </app-tag-badge>
+
+          <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead">
+          <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoadingOptions">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+      </div>
+      <div class="dropdown" *ngIf="hasFocus">
+        <ul class="list-group results" #results>
+          <li *ngIf="showAddItem" 
+              class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+              Add {{typeaheadControl.value}}...
+          </li>
+          <li *ngFor="let option of filteredOptions | async; let index = index;" (click)="handleOptionClick(option)"  
+              class="list-group-item" role="option"
+              (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+            <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+          </li>
+          <li *ngIf="(filteredOptions | async)?.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
+            No data{{this.settings.addIfNonExisting ? ', type to add a custom item.' : '.'}}
+          </li>
+        </ul>
+      </div>
+
+
+  </ng-container>
+  </form>

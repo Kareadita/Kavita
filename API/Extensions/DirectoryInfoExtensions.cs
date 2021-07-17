@@ -9,14 +9,26 @@ namespace API.Extensions
         private static readonly NaturalSortComparer Comparer = new NaturalSortComparer();
         public static void Empty(this DirectoryInfo directory)
         {
-            foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
-            foreach(DirectoryInfo subDirectory in directory.EnumerateDirectories()) subDirectory.Delete(true);
+          // NOTE: We have this in DirectoryService.Empty(), do we need this here?
+          foreach(FileInfo file in directory.EnumerateFiles()) file.Delete();
+          foreach(DirectoryInfo subDirectory in directory.EnumerateDirectories()) subDirectory.Delete(true);
+        }
+
+        public static void RemoveNonImages(this DirectoryInfo directory)
+        {
+          foreach (var file in directory.EnumerateFiles())
+          {
+            if (!Parser.Parser.IsImage(file.FullName))
+            {
+              file.Delete();
+            }
+          }
         }
 
         /// <summary>
         /// Flattens all files in subfolders to the passed directory recursively.
-        /// 
-        /// 
+        ///
+        ///
         /// foo<para />
         /// ├── 1.txt<para />
         /// ├── 2.txt<para />
@@ -26,7 +38,7 @@ namespace API.Extensions
         ///     ├── 1.txt<para />
         ///     ├── 2.txt<para />
         ///     └── 5.txt<para />
-        /// 
+        ///
         /// becomes:<para />
         /// foo<para />
         /// ├── 1.txt<para />
@@ -49,7 +61,7 @@ namespace API.Extensions
             if (!root.FullName.Equals(directory.FullName))
             {
                 var fileIndex = 1;
-                
+
                 foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, Comparer))
                 {
                     if (file.Directory == null) continue;
@@ -63,7 +75,7 @@ namespace API.Extensions
 
                 directoryIndex++;
             }
-            
+
             foreach (var subDirectory in directory.EnumerateDirectories())
             {
                 FlattenDirectory(root, subDirectory, ref directoryIndex);

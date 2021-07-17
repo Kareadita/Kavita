@@ -1,0 +1,15 @@
+
+$breadcrumb-divider: quote(">");
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: $breadcrumb-divider;
+}
+
+.scrollable {
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.btn-outline-secondary {
+    border: 1px solid #ced4da;
+}

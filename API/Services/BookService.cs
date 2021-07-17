@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using API.Entities.Enums;
-using API.Interfaces;
+using API.Interfaces.Services;
 using API.Parser;
 using ExCSS;
 using HtmlAgilityPack;
@@ -20,18 +20,16 @@ namespace API.Services
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
-
-        private const int ThumbnailWidth = 320; // 153w x 230h
         private readonly StylesheetParser _cssParser = new ();
 
         public BookService(ILogger<BookService> logger)
         {
             _logger = logger;
         }
-        
+
         private static bool HasClickableHrefPart(HtmlNode anchor)
         {
-            return anchor.GetAttributeValue("href", string.Empty).Contains("#") 
+            return anchor.GetAttributeValue("href", string.Empty).Contains("#")
                    && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
                    && anchor.GetAttributeValue("role", string.Empty) != "presentation";
         }
@@ -74,7 +72,7 @@ namespace API.Services
                 .Split("#");
             // Some keys get uri encoded when parsed, so replace any of those characters with original
             var mappingKey = HttpUtility.UrlDecode(hrefParts[0]);
-            
+
             if (!mappings.ContainsKey(mappingKey))
             {
                 if (HasClickableHrefPart(anchor))
@@ -95,7 +93,7 @@ namespace API.Services
 
                 return;
             }
-                                
+
             var mappedPage = mappings[mappingKey];
             anchor.Attributes.Add("kavita-page", $"{mappedPage}");
             if (hrefParts.Length > 1)
@@ -103,7 +101,7 @@ namespace API.Services
                 anchor.Attributes.Add("kavita-part",
                     hrefParts[1]);
             }
-                            
+
             anchor.Attributes.Remove("href");
             anchor.Attributes.Add("href", "javascript:void(0)");
         }
@@ -117,7 +115,7 @@ namespace API.Services
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {
                 if (!match.Success) continue;
-                
+
                 var importFile = match.Groups["Filename"].Value;
                 var key = CleanContentKeys(importFile);
                 if (!key.Contains(prepend))
@@ -125,7 +123,7 @@ namespace API.Services
                     key = prepend + key;
                 }
                 if (!book.Content.AllFiles.ContainsKey(key)) continue;
-            
+
                 var bookFile = book.Content.AllFiles[key];
                var content = await bookFile.ReadContentAsBytesAsync();
                importBuilder.Append(Encoding.UTF8.GetString(content));
@@ -134,13 +132,13 @@ namespace API.Services
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
             stylesheetHtml =
                 Parser.Parser.CssImportUrlRegex.Replace(stylesheetHtml, "$1" + apiBase + prepend + "$2" + "$3");
-            
+
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
             styleContent =
                 Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
 
             styleContent = styleContent.Replace("body", ".reading-section");
-            
+
             var stylesheet = await _cssParser.ParseAsync(styleContent);
             foreach (var styleRule in stylesheet.StyleRules)
             {
@@ -183,9 +181,9 @@ namespace API.Services
             }
 
             if (Parser.Parser.IsBook(filePath)) return true;
-            
+
             _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
-            return false; 
+            return false;
         }
 
         public int GetNumberOfPages(string filePath)
@@ -227,7 +225,7 @@ namespace API.Services
                 dict.Add(contentFileRef.FileName, pageCount);
                 pageCount += 1;
             }
-            
+
             return dict;
         }
 
@@ -242,7 +240,7 @@ namespace API.Services
             try
             {
                 using var epubBook = EpubReader.OpenBook(filePath);
-                
+
                 // If the epub has the following tags, we can group the books as Volumes
                 // <meta content="5.0" name="calibre:series_index"/>
                 // <meta content="The Dark Tower" name="calibre:series"/>
@@ -262,7 +260,7 @@ namespace API.Services
                     var specialName = string.Empty;
                     var groupPosition = string.Empty;
 
-                    
+
                     foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
                     {
                         // EPUB 2 and 3
@@ -340,12 +338,12 @@ namespace API.Services
 
             return null;
         }
-        
+
 
         public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
         {
             if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
-            
+
             using var epubBook = EpubReader.OpenBook(fileFilePath);
 
 
@@ -355,14 +353,14 @@ namespace API.Services
                 var coverImageContent = epubBook.Content.Cover
                                         ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
                                         ?? epubBook.Content.Images.Values.FirstOrDefault();
-                
+
                 if (coverImageContent == null) return Array.Empty<byte>();
 
                 if (createThumbnail)
                 {
                     using var stream = new MemoryStream(coverImageContent.ReadContent());
 
-                    using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+                    using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                     return thumbnail.WriteToBuffer(".jpg");
                 }
 
@@ -372,10 +370,10 @@ namespace API.Services
             {
                 _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
-            
+
             return Array.Empty<byte>();
         }
-        
+
         private static string RemoveWhiteSpaceFromStylesheets(string body)
         {
             body = Regex.Replace(body, @"[a-zA-Z]+#", "#");

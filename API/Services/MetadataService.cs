@@ -20,16 +20,22 @@ namespace API.Services
        private readonly ILogger<MetadataService> _logger;
        private readonly IArchiveService _archiveService;
        private readonly IBookService _bookService;
+       private readonly IDirectoryService _directoryService;
+       private readonly IImageService _imageService;
        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+       public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
-       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger, IArchiveService archiveService, IBookService bookService)
+       public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
+         IArchiveService archiveService, IBookService bookService, IDirectoryService directoryService, IImageService imageService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
           _bookService = bookService;
+          _directoryService = directoryService;
+          _imageService = imageService;
        }
-       
+
        private static bool ShouldFindCoverImage(byte[] coverImage, bool forceUpdate = false)
        {
           return forceUpdate || coverImage == null || !coverImage.Any();
@@ -37,23 +43,25 @@ namespace API.Services
 
        private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
        {
-          if (file.Format == MangaFormat.Book)
-          {
+         switch (file.Format)
+         {
+           case MangaFormat.Book:
              return _bookService.GetCoverImage(file.FilePath, createThumbnail);
-          }
-          else
-          {
-             return _archiveService.GetCoverImage(file.FilePath, createThumbnail);   
-          }
+           case MangaFormat.Image:
+             var coverImage = _imageService.GetCoverFile(file);
+             return _imageService.GetCoverImage(coverImage, createThumbnail);
+           default:
+             return _archiveService.GetCoverImage(file.FilePath, createThumbnail);
+         }
        }
 
        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
        {
-          var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
           if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
           {
              chapter.Files ??= new List<MangaFile>();
-             chapter.CoverImage = GetCoverImage(firstFile); 
+             chapter.CoverImage = GetCoverImage(firstFile);
           }
        }
 
@@ -88,10 +96,10 @@ namespace API.Services
           {
              series.Volumes ??= new List<Volume>();
              var firstCover = series.Volumes.GetCoverImage(series.Library.Type);
-             byte[] coverImage = null; 
+             byte[] coverImage = null;
              if (firstCover == null && series.Volumes.Any())
              {
-                // If firstCover is null and one volume, the whole series is Chapters under Vol 0. 
+                // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
                 if (series.Volumes.Count == 1)
                 {
                    coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
@@ -113,24 +121,21 @@ namespace API.Services
        private void UpdateSeriesSummary(Series series, bool forceUpdate)
        {
           if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
-          
+
           var isBook = series.Library.Type == LibraryType.Book;
           var firstVolume = series.Volumes.FirstWithChapters(isBook);
           var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
           // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
-          if (firstFile != null &&
-              (forceUpdate || firstFile.HasFileBeenModified())) // !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified)
+          if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+          var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+          if (string.IsNullOrEmpty(series.Summary))
           {
-             var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-             if (string.IsNullOrEmpty(series.Summary))
-             {
-                series.Summary = summary;
-             }
-
-             firstFile.LastModified = DateTime.Now;
+            series.Summary = summary;
           }
+
+          firstFile.LastModified = DateTime.Now;
        }
 
 
@@ -149,7 +154,7 @@ namespace API.Services
                 {
                    UpdateMetadata(chapter, forceUpdate);
                 }
-                
+
                 UpdateMetadata(volume, forceUpdate);
              }
 
@@ -163,13 +168,13 @@ namespace API.Services
              _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
           }
        }
-       
-       
+
+
        public void RefreshMetadataForSeries(int libraryId, int seriesId)
        {
           var sw = Stopwatch.StartNew();
           var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
-          
+
           var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
           if (series == null)
           {
@@ -183,7 +188,7 @@ namespace API.Services
              {
                 UpdateMetadata(chapter, true);
              }
-                
+
              UpdateMetadata(volume, true);
           }
 

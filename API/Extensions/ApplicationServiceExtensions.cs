@@ -16,7 +16,7 @@ namespace API.Extensions
 {
     public static class ApplicationServiceExtensions
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
+        public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
         {
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<IStatsService, StatsService>();
@@ -31,19 +31,13 @@ namespace API.Extensions
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IImageService, ImageService>();
 
             services.AddSqLite(config, env);
-
-            services.AddLogging(loggingBuilder =>
-            {
-                var loggingSection = config.GetSection("Logging");
-                loggingBuilder.AddFile(loggingSection);
-            });
-            
-            return services;
+            services.AddLogging(config);
         }
 
-        private static IServiceCollection AddSqLite(this IServiceCollection services, IConfiguration config,
+        private static void AddSqLite(this IServiceCollection services, IConfiguration config,
             IWebHostEnvironment env)
         {
             services.AddDbContext<DataContext>(options =>
@@ -51,8 +45,15 @@ namespace API.Extensions
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
                 options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.GetLogLevel(Program.GetAppSettingFilename()).Equals("Debug"));
             });
+        }
 
-            return services;
+        private static void AddLogging(this IServiceCollection services, IConfiguration config)
+        {
+          services.AddLogging(loggingBuilder =>
+          {
+            var loggingSection = config.GetSection("Logging");
+            loggingBuilder.AddFile(loggingSection);
+          });
         }
     }
 }

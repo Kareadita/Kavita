@@ -1,0 +1,5 @@
+<app-nav-header></app-nav-header>
+<div [ngStyle]="(navService?.navbarVisible$ | async) ? {'padding-top': 'calc(56px + 5px)', 'height': '100%'} : {}">
+    <a id="content"></a>
+    <router-outlet></router-outlet>
+</div>

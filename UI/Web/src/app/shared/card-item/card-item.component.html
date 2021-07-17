@@ -1,0 +1,29 @@
+<div class="card">
+    <div class="overlay" (click)="handleClick()">
+      <img *ngIf="total > 0 || supressArchiveWarning" class="card-img-top" [lazyLoad]="imageUrl" [defaultImage]="imageSerivce.placeholderImage" alt="title">
+      <img *ngIf="total === 0 && !supressArchiveWarning" class="card-img-top" [lazyLoad]="imageSerivce.errorImage" alt="title">
+      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
+        <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+      </div>
+      <div class="error-banner" *ngIf="total === 0 && !supressArchiveWarning">
+        Cannot Read Archive
+      </div>
+      
+      <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
+    </div>
+    <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
+      <div>
+        <span class="card-title" placement="top" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
+          <span *ngIf="isPromoted()">
+            <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+          </span>
+          {{title}}
+          <span class="sr-only">(promoted)</span>
+        </span>
+        <span class="card-actions float-right">
+          <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
+        </span>
+      </div>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
+    </div>
+</div>

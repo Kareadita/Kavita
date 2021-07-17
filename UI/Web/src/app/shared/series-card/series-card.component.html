@@ -1,0 +1,3 @@
+<ng-container *ngIf="data !== undefined">
+    <app-card-item [title]="data.name" [actions]="actions" [supressLibraryLink]="suppressLibraryLink" [imageUrl]="imageService.getSeriesCoverImage(data.id)" [entity]="data" [total]="data.pages" [read]="data.pagesRead"  (clicked)="handleClick()"></app-card-item>
+</ng-container>

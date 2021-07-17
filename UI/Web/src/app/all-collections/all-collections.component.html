@@ -1,0 +1,23 @@
+<ng-container *ngIf="collectionTagId === 0; else collectionTagDetail;">
+    <app-card-detail-layout header="Collections" 
+    [isLoading]="isLoading"
+    [items]="collections"
+    (pageChange)="onPageChange($event)"
+    >
+        <ng-template #cardItem let-item let-position="idx">
+            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="item.coverImage" (clicked)="loadCollection(item)"></app-card-item>
+        </ng-template>
+    </app-card-detail-layout>
+</ng-container>
+<ng-template #collectionTagDetail>
+    <app-card-detail-layout header="{{collectionTagName}} Collection" 
+    [isLoading]="isLoading"
+    [items]="series"
+    [pagination]="seriesPagination"
+    (pageChange)="onPageChange($event)"
+    >
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"></app-series-card>
+        </ng-template>
+    </app-card-detail-layout>
+</ng-template>

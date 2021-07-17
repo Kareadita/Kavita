@@ -1,0 +1,254 @@
+@import '../../theme/colors';
+
+$center-width: 50%;
+$side-width: 25%;
+
+$dash-width: 3px;
+$pointer-offset: 5px;
+
+$secondary-color: #CCC;
+
+
+@media(min-width: 600px) {
+    .overlay .left .i {
+        left: 20px;
+    }
+    .overlay .right .i {
+        right: 20px;
+    }
+} 
+
+
+.btn-icon {
+    color: white;
+}
+
+canvas {
+    position: absolute;
+}
+
+.reader {
+    background-color: black;
+
+    img {
+        align-items: center;
+    }
+}
+
+.loading {
+    position: absolute;
+    left: 48%;
+    top: 20%;
+    z-index: 1;
+}
+
+.title, .subtitle {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.filter-dark {
+    filter: brightness(0.65);
+}
+
+.filter-sepia {
+    filter: sepia(80%) hue-rotate(349deg) saturate(200%) brightness(0.65);
+}
+
+.bottom-menu {
+    padding: 20px 20px;
+}
+
+
+.overlay {
+  background-color: rgba(0,0,0,0.5);
+  color: white;
+}
+
+// Fitting Options
+.full-height {
+    position: absolute;
+    margin: auto;
+    top: 0px;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    height: 100%;
+}
+
+.original {
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+    top: 0px;
+    bottom: 0px;
+    left: 0;
+    right: 0;    
+}
+
+.full-width {
+    width: 100%;
+}
+
+
+.center-menu {
+    position: fixed;
+    top: 10px;
+    left: $side-width;
+    width: $center-width;
+    border-bottom: $dash-width dashed $secondary-color;
+    text-align: center;
+    z-index: 2;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+.right {
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    width: $side-width;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.top {
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    width: 100%;
+    height: $side-width;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.left {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: $side-width;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+.bottom {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: $side-width;
+    background: rgba(0, 0, 0, 0);
+    z-index: 2;
+    cursor: pointer;
+}
+
+
+// Splitting Icon
+.split {
+    height: 20px;
+    width: 40px;
+    z-index: 1;
+    top: 0;
+    overflow: hidden;
+    border: 2px solid #ccc;
+
+    &::before {
+        margin-left: 30%;
+    }
+
+    /* Control the left side */
+    .left-side {
+        height: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+    
+    /* Control the right side */
+    .right-side {
+        height: 20px;
+        margin-left: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+
+    .none {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+  
+  ::ng-deep {
+    .custom-slider .ngx-slider .ngx-slider-bar {
+      background: #e9ffe2;
+      height: 2px;
+    }
+    .custom-slider .ngx-slider .ngx-slider-selection {
+      background: $primary-color;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer {
+      width: 8px;
+      height: 16px;
+      top: auto; /* to remove the default positioning */
+      bottom: 0;
+      background-color: $primary-color; // #333;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer:after {
+      display: none;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-bubble {
+      bottom: 14px;
+      font-weight: bold;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-limit {
+      font-weight: bold;
+      color: white !important;
+
+    }
+
+  
+    .custom-slider .ngx-slider .ngx-slider-tick {
+      width: 1px;
+      height: 10px;
+      margin-left: 4px;
+      border-radius: 0;
+      background: #ffe4d1;
+      top: -1px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+      background: $primary-color;
+    }
+  }
+
+  .webtoon-images {
+      text-align: center;
+  }
+
+  .highlight {
+      background-color: rgba(65, 225, 100, 0.5) !important;
+      animation: fadein .5s both;
+  }
+  .highlight-2 {
+    background-color: rgba(65, 105, 225, 0.5) !important;
+    animation: fadein .5s both;
+  }
+
+  // DEBUG
+  .active-image {
+      border: 5px solid red;
+  }

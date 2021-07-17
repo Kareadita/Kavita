@@ -1,0 +1,15 @@
+
+<div class="fixed-top overlay" *ngIf="debug">
+    <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
+    <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
+    <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
+    <strong>Prefetched</strong> {{minPrefetchedWebtoonImage}}-{{maxPrefetchedWebtoonImage}} 
+    <strong>Current Page:</strong>{{pageNum}}
+    <strong>Width:</strong> {{webtoonImageWidth}}
+</div>
+
+
+<ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+    <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+</ng-container>
+

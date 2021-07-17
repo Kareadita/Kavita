@@ -11,6 +11,7 @@
         void RefreshMetadata(int libraryId, bool forceUpdate = true);
         void CleanupTemp();
         void RefreshSeriesMetadata(int libraryId, int seriesId);
+        void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
         void ScheduleStatsTasks();
         void CancelStatsTasks();
     }

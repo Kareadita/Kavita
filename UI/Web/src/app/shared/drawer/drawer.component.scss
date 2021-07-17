@@ -1,0 +1,56 @@
+:host {
+    --drawer-height: 100vh;
+    --drawer-width: 400px;
+    --drawer-top-offset: 0px;
+    --drawer-background-color: '#fff';
+  }
+  
+  .drawer-container {
+    position: absolute;
+    top: var(--drawer-top-offset);
+    right: 0;
+    width: var(--drawer-width);
+    height: 100vh;
+    background: var(--drawer-background-color);
+    transition: all 300ms;
+    box-shadow: -3px 0px 6px 1px #00000026;
+    padding: 10px 10px;
+    z-index: 1021;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &.position-right {
+      right: calc(-1 * var(--drawer-width));
+      &.is-open {
+        right: 0;
+      }
+    }
+    &.position-left {
+      left: calc(-1 * var(--drawer-width));
+      &.is-open {
+        left: 0;
+      }
+    }
+
+    &.position-bottom {
+      //top: calc(-1 * var(--drawer-height));
+      top: 100vh;
+      height: 0px;
+      &.is-open {
+        //bottom: 0;
+        top: 100vh;
+        height: var(--drawer-height);
+      }
+    }
+
+    &.position-top {
+      //bottom: calc(-1 * var(--drawer-height));
+      top: 0px;
+      height: 0px;
+      &.is-open {
+        //bottom: 0;
+        top: 0px;
+        height: var(--drawer-height);
+      }
+    }
+  }

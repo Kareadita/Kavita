@@ -1,0 +1,179 @@
+// All dark style overrides should live here
+
+$dark-bg-color: #343a40;
+$dark-primary-color: rgba(74, 198, 148, 0.9);
+$dark-text-color: #efefef;
+$dark-hover-color: #4ac694;
+$dark-form-background: rgba(1, 4, 9, 0.5);
+$dark-form-placeholder: #efefef;
+$dark-link-color: rgb(88, 166, 255);
+$dark-icon-color: white;
+$dark-form-border: rgba(239, 239, 239, 0.125);
+$dark-form-readonly: #434648;
+$dark-item-accent-bg: #292d32;
+
+.bg-dark {
+  color: $dark-text-color;
+
+  h2, h4 {
+      color: $dark-text-color;
+  }
+
+  a, .btn-link {
+    color: #4ac694;
+  }
+
+  .breadcrumb {
+    background-color: $dark-item-accent-bg;
+
+    .breadcrumb-item {
+      color: $dark-text-color;
+    }
+  }
+
+  .btn-information, .btn-outline-secondary {
+      color: $dark-text-color;
+  }
+
+  .rating-star, .close, i.fa {
+    color: $dark-icon-color;
+  }
+
+  .modal-content {
+    color: $dark-text-color;
+    background-color: $dark-bg-color;
+  }
+
+  input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control, .typeahead-input {
+    color: $dark-text-color;
+    background-color: $dark-bg-color;
+  }
+
+  input:read-only, input:disabled {
+      background-color: $dark-form-readonly;
+  }
+
+  input::placeholder {
+    color: $dark-form-placeholder;
+  }
+
+  .autocomplete-container .input-container .x {
+    color: $dark-text-color;
+  }
+  .autocomplete-container .not-found {
+    color: $dark-text-color;
+    background-color: $dark-bg-color;
+  }
+
+  .autocomplete-container .input-container .x i {
+    color: $dark-icon-color;
+  }
+  .autocomplete-container .suggestions-container, .dropdown-menu, .list-group-item {
+    color: $dark-text-color;
+    background-color: $dark-bg-color;
+    border-color: $dark-form-border;
+  }
+
+  .dropdown .list-group-item:hover {
+    background-color: $dark-hover-color;
+  }
+
+  .ngx-slider .ngx-slider-bubble {
+      color: $dark-text-color !important;
+  }
+
+  .page-link {
+      background-color: $dark-form-background;
+      border-color: $dark-form-border;
+  }
+
+  .page-item.disabled .page-link {
+    background-color: $dark-form-background;
+    border-color: $dark-form-border;
+  }
+
+  .nav-tabs, .tagbadge {
+      border-color: $dark-form-border;
+  }
+
+  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link, .tagbadge {
+      border-color: $dark-form-border;
+      color: $dark-text-color;
+      background-color: $dark-primary-color;
+  }
+  .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+    border-color: $dark-hover-color;
+  }
+  
+
+  .dropdown-menu {
+    .dropdown-item:hover, .dropdown-item:focus {
+        color: $dark-text-color;
+        background-color: $dark-hover-color;
+    }
+    .dropdown-item {
+        color: $dark-text-color;
+    }
+  }
+
+  .read-more-link {
+    color: $dark-text-color !important;
+  }
+
+  .login {
+
+    &::before {
+      content: "";
+      background-image: url('../../assets/images/login-bg.jpg');
+      background-size: cover;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.05;
+      width: 100%;
+    }
+
+    .card {
+      background-color: $dark-primary-color !important;
+    }
+
+    input {
+      color: #000;
+    }
+  }
+  .card { 
+    background-color: $dark-bg-color;
+    color: $dark-text-color;
+    border-color: $dark-form-border; //#343a40
+  }
+
+  .section-title {
+    color: $dark-text-color;
+  }
+
+  .error-banner, .dropdown-toggle {
+    color: #efefef;
+  }
+
+}
+
+
+/*
+// Dark mode Toastr Styles
+*/
+.bg-dark .toast-success {
+  background-color: $dark-primary-color
+}
+
+.bg-dark .toast-error {
+  background-color: #BD362F;
+}
+
+.bg-dark .toast-info {
+  background-color: #2F96B4;
+}
+
+.bg-dark .toast-warning {
+  background-color: #F89406;
+}
