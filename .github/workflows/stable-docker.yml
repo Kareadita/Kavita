@@ -49,7 +49,7 @@ jobs:
       - name: Trigger Sentry workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: Sentry Release
+          workflow: Sentry Map Release
           token: ${{ secrets.REPO_GHA_PAT }}
           inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}" }'
 
