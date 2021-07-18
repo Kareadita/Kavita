@@ -105,44 +105,26 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     let shouldInit = false;
-    console.log('Changes: ', changes);
-
+    
+    // Note: This is likely not needed any longer. Total Pages by default is 1 in the parent component
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].currentValue === 0) {
-      this.debugLog('Swallowing variable change due to totalPages being 0');
+      this.debugLog('[Changes] Swallowing variable change due to totalPages being 0');
       return;
     }
+    //console.log('[Changes] Changes: ', changes);
 
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
       this.totalPages = changes['totalPages'].currentValue;
-      shouldInit = true;
-    }
-
-    // We should be able to remove this block as we have goToPage replay subject now
-    // if (changes.hasOwnProperty('pageNum') && changes['pageNum'].previousValue != changes['pageNum'].currentValue) {
-    //   // Manually update pageNum as we are getting notified from a parent component, hence we shouldn't invoke update
-    //   this.setPageNum(changes['pageNum'].currentValue);
-    //   if (Math.abs(changes['pageNum'].currentValue - changes['pageNum'].previousValue) > 2) {
-    //     // Go to page has occured
-    //     // ! This does not work: Reason: If we jump just one page, the code doesn't trigger. Solution: Move to a special handler and make parent component tell us.
-    //     this.debugLog('GoToPage changes')
-    //     shouldInit = true;
-    //   }
-    // }
-
-    if (shouldInit) {
+      //shouldInit = true;
+      //this.debugLog('[Changes] Triggering init webtoon reader');
       this.initWebtoonReader();
     }
 
-    // This should only execute on initial load or from a gotopage update
-    const currentImage = document.querySelector('img#page-' + this.pageNum);
-    if (currentImage !== null && this.isElementVisible(currentImage)) {
 
-      if ((changes.hasOwnProperty('pageNum') && Math.abs(changes['pageNum'].previousValue - changes['pageNum'].currentValue) <= 0) || !shouldInit) {
-        return;
-      }
-      this.debugLog('Scrolling to page', this.pageNum);
-      this.scrollToCurrentPage();
-    }
+    // if (shouldInit) {
+    //   this.debugLog('[Changes] Triggering init webtoon reader');
+    //   this.initWebtoonReader();
+    // }
   }
 
   ngOnDestroy(): void {
@@ -158,17 +140,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.goToPage) {
       this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
-        this.debugLog('GoToPage jump has occured from ' + this.pageNum + ' to ' + page);
+        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
 
-        this.setPageNum(page);
-
-        const currentImage = document.querySelector('img#page-' + this.pageNum);
-        if (currentImage !== null && this.isElementVisible(currentImage)) {
-          this.debugLog('Scrolling to page', this.pageNum);
-          this.scrollToCurrentPage();
-        }
+        this.setPageNum(page, true);
       });
     }
   }
@@ -259,7 +235,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   onImageLoad(event: any) {
     const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
-    this.debugLog('Image loaded: ', imagePage);
+    this.debugLog('[Image Load] Image loaded: ', imagePage);
 
 
     if (event.target.width < this.webtoonImageWidth) {
@@ -278,10 +254,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         .filter((img: any) => !img.complete)
         .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
-          this.debugLog('! Loaded current page !', this.pageNum);
+          this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
-          console.log('current page elem: ', this.currentPageElem);
-          console.log('visible: ', (this.currentPageElem && this.isElementVisible(this.currentPageElem)));
+          console.log('[Image Load] Page ' + this.pageNum + ' visible: ', (this.currentPageElem && this.isElementVisible(this.currentPageElem)));
           
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
             this.scrollToCurrentPage();
@@ -310,18 +285,34 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  setPageNum(pageNum: number) {
+  /**
+   * Set the page number, invoke prefetching and optionally scroll to the new page.
+   * @param pageNum Page number to set to. Will trigger the pageNumberChange event emitter.
+   * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
+   */
+  setPageNum(pageNum: number, scrollToPage: boolean = false) {
     this.pageNum = pageNum;
     this.pageNumberChange.emit(this.pageNum);
 
     //TODO: Perform check here to see if prefetching or DOM removal is needed
     this.prefetchWebtoonImages();
+
+    if (scrollToPage) {
+      const currentImage = document.querySelector('img#page-' + this.pageNum);
+      if (currentImage !== null && !this.isElementVisible(currentImage)) {
+        this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
+        this.scrollToCurrentPage();
+      }
+    }
   }
 
   isScrollingForwards() {
     return this.scrollingDirection === PAGING_DIRECTION.FORWARD;
   }
 
+  /**
+   * Performs the scroll for the current page element. Updates any state variables needed.
+   */
   scrollToCurrentPage() {
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
