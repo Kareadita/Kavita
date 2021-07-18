@@ -101,7 +101,7 @@ namespace API
             // Ordering is important. Cors, authentication, authorization
             if (env.IsDevelopment())
             {
-                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200").WithExposedHeaders("Content-Disposition"));
             }
 
             app.UseResponseCaching();

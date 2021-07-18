@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -35,15 +35,15 @@ export class DownloadService {
   }
 
   private downloadSeriesAPI(seriesId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + seriesId, {responseType: 'blob' as 'text'});
+    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + seriesId, {observe: 'response', responseType: 'blob' as 'text'});
   }
 
   private downloadVolumeAPI(volumeId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {responseType: 'blob' as 'text'});
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {observe: 'response', responseType: 'blob' as 'text'});
   }
 
   private downloadChapterAPI(chapterId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapterId, {responseType: 'blob' as 'text'});
+    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapterId, {observe: 'response', responseType: 'blob' as 'text'});
   }
 
   downloadSeries(series: Series) {
@@ -51,9 +51,10 @@ export class DownloadService {
       if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The series is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
         return;
       }
-      this.downloadSeriesAPI(series.id).subscribe(res => {
-        const filename = series.name + '.zip';
-        this.preformSave(res, filename);
+      this.downloadSeriesAPI(series.id).subscribe(resp => {
+        //const filename = series.name + '.zip';
+        //this.preformSave(res, filename);
+        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, series.name));
       });
     });
   }
@@ -63,9 +64,8 @@ export class DownloadService {
       if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
         return;
       }
-      this.downloadChapterAPI(chapter.id).subscribe(res => {
-        const filename = seriesName + ' - Chapter ' + chapter.number + '.zip';
-        this.preformSave(res, filename);
+      this.downloadChapterAPI(chapter.id).subscribe((resp: HttpResponse<string>) => {
+        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Chapter ' + chapter.number));
       });
     });
   }
@@ -75,9 +75,8 @@ export class DownloadService {
       if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
         return;
       }
-      this.downloadVolumeAPI(volume.id).subscribe(res => {
-        const filename = seriesName + ' - Volume ' + volume.name + '.zip';
-        this.preformSave(res, filename);
+      this.downloadVolumeAPI(volume.id).subscribe(resp => {
+        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
       });
     });
   }
@@ -86,6 +85,23 @@ export class DownloadService {
     const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
     saveAs(blob, filename);
     this.toastr.success('File downloaded successfully: ' + filename);
+  }
+
+  /**
+   * Attempts to parse out the filename from Content-Disposition header. 
+   * If it fails, will default to defaultName and add the correct extension. If no extension is found in header, will use zip.
+   * @param headers 
+   * @param defaultName 
+   * @returns 
+   */
+  private getFilenameFromHeader(headers: HttpHeaders, defaultName: string) {
+    const tokens = (headers.get('content-disposition') || '').split(';');
+    let filename = tokens[1].replace('filename=', '').replace('"', '').trim();  
+    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
+      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
+      return defaultName + ext;
+    }
+    return filename;
   }
 
   /**
