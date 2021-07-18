@@ -11,7 +11,6 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -19,17 +18,14 @@ namespace API.Controllers
     {
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
-        private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
+        public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
-            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 
@@ -272,7 +268,7 @@ namespace API.Controllers
                   return Ok();
                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                await _unitOfWork.RollbackAsync();
             }
