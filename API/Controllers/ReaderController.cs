@@ -238,35 +238,43 @@ namespace API.Controllers
             }
 
 
-            user.Progresses ??= new List<AppUserProgress>();
-            var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
-
-            if (userProgress == null)
+            try
             {
-                user.Progresses.Add(new AppUserProgress
-                {
-                    PagesRead = bookmarkDto.PageNum,
-                    VolumeId = bookmarkDto.VolumeId,
-                    SeriesId = bookmarkDto.SeriesId,
-                    ChapterId = bookmarkDto.ChapterId,
-                    BookScrollId = bookmarkDto.BookScrollId,
-                    LastModified = DateTime.Now
-                });
+               user.Progresses ??= new List<AppUserProgress>();
+               var userProgress =
+                  user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
+
+               if (userProgress == null)
+               {
+                  user.Progresses.Add(new AppUserProgress
+                  {
+                     PagesRead = bookmarkDto.PageNum,
+                     VolumeId = bookmarkDto.VolumeId,
+                     SeriesId = bookmarkDto.SeriesId,
+                     ChapterId = bookmarkDto.ChapterId,
+                     BookScrollId = bookmarkDto.BookScrollId,
+                     LastModified = DateTime.Now
+                  });
+               }
+               else
+               {
+                  userProgress.PagesRead = bookmarkDto.PageNum;
+                  userProgress.SeriesId = bookmarkDto.SeriesId;
+                  userProgress.VolumeId = bookmarkDto.VolumeId;
+                  userProgress.BookScrollId = bookmarkDto.BookScrollId;
+                  userProgress.LastModified = DateTime.Now;
+               }
+
+               _unitOfWork.UserRepository.Update(user);
+
+               if (await _unitOfWork.CommitAsync())
+               {
+                  return Ok();
+               }
             }
-            else
+            catch (Exception ex)
             {
-                userProgress.PagesRead = bookmarkDto.PageNum;
-                userProgress.SeriesId = bookmarkDto.SeriesId;
-                userProgress.VolumeId = bookmarkDto.VolumeId;
-                userProgress.BookScrollId = bookmarkDto.BookScrollId;
-                userProgress.LastModified = DateTime.Now;
-            }
-
-            _unitOfWork.UserRepository.Update(user);
-
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
+               await _unitOfWork.RollbackAsync();
             }
 
             return BadRequest("Could not save progress");
