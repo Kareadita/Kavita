@@ -144,6 +144,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
 
+        if (this.pageNum < page) {
+          this.scrollingDirection = PAGING_DIRECTION.FORWARD;
+        } else {
+          this.scrollingDirection = PAGING_DIRECTION.BACKWARDS;
+        }
+
         this.setPageNum(page, true);
       });
     }
