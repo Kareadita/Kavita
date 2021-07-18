@@ -19,12 +19,11 @@ Setup guides, FAQ, the more information we have on the [wiki](https://github.com
 
 1. Fork Kavita
 2. Clone the repository into your development machine. [*info*](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github)
-    - Kavita as of v0.4.2 requires Kavita-webui to be cloned next to the Kavita. Fork and clone this as well.
 3. Install the required Node Packages
-    - cd kavita-webui
+    - cd Kavita/UI/Web
     - `npm install`
     - `npm install -g @angular/cli`
-4. Start webui server `ng serve`
+4. Start angular server `ng serve`
 5. Build the project in Visual Studio/Rider, Setting startup project to `API`
 6. Debug the project in Visual Studio/Rider
 7. Open http://localhost:4200
@@ -41,10 +40,10 @@ Setup guides, FAQ, the more information we have on the [wiki](https://github.com
 - Commit with *nix line endings for consistency (We checkout Windows and commit *nix)
 - One feature/bug fix per pull request to keep things clean and easy to understand
 - Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to my knowledge)
-    - Use 2 spaces for Kavita-webui files
+    - Use 2 spaces for UI files
 
 ### Pull Requesting ###
-- Only make pull requests to develop, never master, if you make a PR to master we'll comment on it and close it
+- Only make pull requests to develop, never main, if you make a PR to main we'll comment on it and close it
 - You're probably going to get some comments or questions from us, they will be to ensure consistency and maintainability
 - We'll try to respond to pull requests as soon as possible, if its been a day or two, please reach out to us, we may have missed it
 - Each PR should come from its own [feature branch](http://martinfowler.com/bliki/FeatureBranch.html) not develop in your fork, it should have a meaningful branch name (what is being added/fixed)
@@ -52,5 +51,7 @@ Setup guides, FAQ, the more information we have on the [wiki](https://github.com
     - fix-bug (Good)
     - patch (Bad)
     - develop (Bad)
+    - feature/parser-enhancements (Great)
+    - bugfix/book-issues (Great)
 
 If you have any questions about any of this, please let us know.
