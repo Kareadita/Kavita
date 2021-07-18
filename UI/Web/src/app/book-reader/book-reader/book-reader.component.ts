@@ -196,22 +196,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
+  /**
+   * After the page has loaded, setup the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the 
+   * table of content) then we calculate what has already been reached and grab the last reached one to bookmark. If page anchors aren't setup (toc missing), then try to bookmark 
+   * based on the last seen scroll part (xpath).
+   */
   ngAfterViewInit() {
     // check scroll offset and if offset is after any of the "id" markers, bookmark it
     fromEvent(window, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
-        if (Object.keys(this.pageAnchors).length === 0) return;
-        // get the height of the document so we can capture markers that are halfway on the document viewport
-        const verticalOffset = (window.pageYOffset 
-          || document.documentElement.scrollTop 
-          || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
-      
-        const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
-        if (alreadyReached.length > 0) {
-          this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-        } else {
-          this.currentPageAnchor = '';
+        if (Object.keys(this.pageAnchors).length !== 0) {
+          // get the height of the document so we can capture markers that are halfway on the document viewport
+          const verticalOffset = (window.pageYOffset 
+            || document.documentElement.scrollTop 
+            || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
+        
+          const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
+          if (alreadyReached.length > 0) {
+            this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
+            this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+            return;
+          } else {
+            this.currentPageAnchor = '';
+          }
         }
 
         if (this.lastSeenScrollPartPath !== '') {
