@@ -188,12 +188,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.scrollEndTimer = setTimeout(() => this.handleScrollEnd(), 150);
 
     if (this.debug && this.isScrolling) {
-      this.debugLog('verticalOffset: ', verticalOffset);
-      this.debugLog('scroll to element offset: ', this.currentPageElem?.getBoundingClientRect().top);
+      this.debugLog('[Scroll] verticalOffset: ', verticalOffset);
+      this.debugLog('[Scroll] scroll to element offset: ', this.currentPageElem?.getBoundingClientRect().top);
     }
 
     if (this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
-      this.debugLog('Image is visible from scroll, isScrolling is now false');
+      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
       this.isScrolling = false;
     }
 
@@ -217,20 +217,20 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Is any part of the element visible in the scrollport. Does not take into account 
    * style properites, just scroll port visibility. 
-   * Note: use && to ensure the whole images is visible
    * @param elem 
    * @returns 
    */
   isElementVisible(elem: Element) {
     if (elem === null || elem === undefined) { return false; }
 
-    const docViewTop = window.pageYOffset;
-    const docViewBottom = docViewTop + window.innerHeight;
+    // NOTE: This will say an element is visible if it is 1 px offscreen on top
+    var rect = elem.getBoundingClientRect();
 
-    const elemTop = elem.getBoundingClientRect().top;
-    const elemBottom = elemTop + elem.getBoundingClientRect().height;
-
-    return ((elemBottom <= docViewBottom) || (elemTop >= docViewTop));
+    return (rect.bottom >= 0 && 
+            rect.right >= 0 && 
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.left <= (window.innerWidth || document.documentElement.clientWidth)
+          );
   }
 
 
@@ -280,6 +280,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         .then(() => {
           this.debugLog('! Loaded current page !', this.pageNum);
           this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
+          console.log('current page elem: ', this.currentPageElem);
+          console.log('visible: ', (this.currentPageElem && this.isElementVisible(this.currentPageElem)));
+          
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
             this.scrollToCurrentPage();
           }
@@ -303,7 +306,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
         this.setPageNum(imagePage);
-        //this.prefetchWebtoonImages();
       }
     });
   }
