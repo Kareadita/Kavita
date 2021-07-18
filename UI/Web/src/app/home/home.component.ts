@@ -40,8 +40,14 @@ export class HomeComponent implements OnInit {
         .subscribe(resp => {/* No Operation */});
 
         if (user) {
-          // User is logged in, redirect to libraries
-          this.router.navigateByUrl('/library');
+          // Check if user came here from another url, else send to library route
+          const pageResume = localStorage.getItem('kavita--auth-intersection-url');
+          if (pageResume && pageResume !== '/no-connection') {
+            localStorage.setItem('kavita--auth-intersection-url', '');
+            this.router.navigateByUrl(pageResume);
+          } else {
+            this.router.navigateByUrl('/library');
+          }
         } else {
           this.router.navigateByUrl('/login');
         }
