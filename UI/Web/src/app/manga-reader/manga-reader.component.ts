@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
@@ -103,7 +103,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @see Stack
    */
   continuousChaptersStack: Stack<number> = new Stack();
-  
+
+  /**
+   * An event emiter when a page change occurs. Used soley by the webtoon reader.
+   */
+   goToPageEvent: ReplaySubject<number> = new ReplaySubject<number>();
 
   /**
    * If the menu is open/visible.
@@ -798,6 +802,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.setPageNum(page);
     this.refreshSlider.emit();
+    this.goToPageEvent.next(page);
     this.render();
   }
 

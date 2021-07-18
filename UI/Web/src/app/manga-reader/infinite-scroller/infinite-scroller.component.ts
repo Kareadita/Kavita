@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
+import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { CircularArray } from 'src/app/shared/data-structures/circular-array';
-import { ReaderService } from 'src/app/_services/reader.service';
+import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
 
@@ -20,7 +19,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Number of pages to prefetch ahead of position
    */
-  @Input() buffferPages: number = 5;
+  @Input() bufferPages: number = 5;
   /**
    * Total number of pages
    */
@@ -30,6 +29,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Input() urlProvider!: (page: number) => string;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
+
+  @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
   
   /**
    * Stores and emits all the src urls
@@ -91,7 +92,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   pageHeights:{[key: number]: number} = {};
 
-  buffer: CircularArray<HTMLImageElement> = new CircularArray<HTMLImageElement>([], 0);
+  /**
+   * Not currently used. Use to invesitigate fine grained control of rending image elements.
+   */
+  //buffer: CircularArray<HTMLImageElement> = new CircularArray<HTMLImageElement>([], 0);
 
 
 
@@ -102,6 +106,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     let shouldInit = false;
     console.log('Changes: ', changes);
+
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].currentValue === 0) {
       this.debugLog('Swallowing variable change due to totalPages being 0');
       return;
@@ -111,14 +116,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.totalPages = changes['totalPages'].currentValue;
       shouldInit = true;
     }
-    if (changes.hasOwnProperty('pageNum') && changes['pageNum'].previousValue != changes['pageNum'].currentValue) {
-      // Manually update pageNum as we are getting notified from a parent component, hence we shouldn't invoke update
-      this.setPageNum(changes['pageNum'].currentValue);
-      if (Math.abs(changes['pageNum'].currentValue - changes['pageNum'].previousValue) > 2) {
-        // Go to page has occured
-        shouldInit = true;
-      }
-    }
+
+    // We should be able to remove this block as we have goToPage replay subject now
+    // if (changes.hasOwnProperty('pageNum') && changes['pageNum'].previousValue != changes['pageNum'].currentValue) {
+    //   // Manually update pageNum as we are getting notified from a parent component, hence we shouldn't invoke update
+    //   this.setPageNum(changes['pageNum'].currentValue);
+    //   if (Math.abs(changes['pageNum'].currentValue - changes['pageNum'].previousValue) > 2) {
+    //     // Go to page has occured
+    //     // ! This does not work: Reason: If we jump just one page, the code doesn't trigger. Solution: Move to a special handler and make parent component tell us.
+    //     this.debugLog('GoToPage changes')
+    //     shouldInit = true;
+    //   }
+    // }
 
     if (shouldInit) {
       this.initWebtoonReader();
@@ -146,6 +155,22 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     fromEvent(window, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy))
     .subscribe((event) => this.handleScrollEvent(event));
+
+    if (this.goToPage) {
+      this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+        this.debugLog('GoToPage jump has occured from ' + this.pageNum + ' to ' + page);
+        const isSamePage = this.pageNum === page;
+        if (isSamePage) { return; }
+
+        this.setPageNum(page);
+
+        const currentImage = document.querySelector('img#page-' + this.pageNum);
+        if (currentImage !== null && this.isElementVisible(currentImage)) {
+          this.debugLog('Scrolling to page', this.pageNum);
+          this.scrollToCurrentPage();
+        }
+      });
+    }
   }
 
   handleScrollEvent(event?: any) {
@@ -207,26 +232,23 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.maxPrefetchedWebtoonImage = Number.MIN_SAFE_INTEGER;
     this.webtoonImages.next([]);
 
-    
-
-
-    const prefetchStart = Math.max(this.pageNum - this.buffferPages, 0);
-    const prefetchMax =  Math.min(this.pageNum + this.buffferPages, this.totalPages); 
+    const prefetchStart = Math.max(this.pageNum - this.bufferPages, 0);
+    const prefetchMax =  Math.min(this.pageNum + this.bufferPages, this.totalPages); 
     this.debugLog('[INIT] Prefetching pages ' + prefetchStart + ' to ' + prefetchMax + '. Current page: ', this.pageNum);
     for(let i = prefetchStart; i < prefetchMax; i++) {
       this.prefetchWebtoonImage(i);
     }
 
-    const images = [];
-    for (let i = prefetchStart; i < prefetchMax; i++) {
-      images.push(new Image());
-    }
-    this.buffer = new CircularArray<HTMLImageElement>(images, this.buffferPages);
+    // const images = [];
+    // for (let i = prefetchStart; i < prefetchMax; i++) {
+    //   images.push(new Image());
+    // }
+    //this.buffer = new CircularArray<HTMLImageElement>(images, this.buffferPages);
     
     this.minPrefetchedWebtoonImage = prefetchStart;
     this.maxPrefetchedWebtoonImage = prefetchMax;
 
-    this.debugLog('Buffer: ', this.buffer.arr.map(img => this.readerService.imageUrlToPageNum(img.src)));
+    //this.debugLog('Buffer: ', this.buffer.arr.map(img => this.readerService.imageUrlToPageNum(img.src)));
   }
 
   /**
@@ -328,18 +350,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     let index = 1;
 
-    this.buffer.applyFor((item, i) => {
-      const offsetIndex = this.pageNum + index;
-      const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
-      if (urlPageNum === offsetIndex) {
-        index += 1;
-        return;
-      }
-      if (offsetIndex < this.totalPages - 1) {
-        item.src = this.urlProvider(offsetIndex);
-        index += 1;
-      }
-    }, this.buffer.size() - 3);
+    // this.buffer.applyFor((item, i) => {
+    //   const offsetIndex = this.pageNum + index;
+    //   const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
+    //   if (urlPageNum === offsetIndex) {
+    //     index += 1;
+    //     return;
+    //   }
+    //   if (offsetIndex < this.totalPages - 1) {
+    //     item.src = this.urlProvider(offsetIndex);
+    //     index += 1;
+    //   }
+    // }, this.buffer.size() - 3);
 
 
   }
@@ -358,14 +380,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
       startingIndex = Math.min(this.maxPrefetchedWebtoonImage + 1, this.totalPages);
-      endingIndex = Math.min(this.maxPrefetchedWebtoonImage + 1 + this.buffferPages, this.totalPages); 
+      endingIndex = Math.min(this.maxPrefetchedWebtoonImage + 1 + this.bufferPages, this.totalPages); 
 
       if (startingIndex === this.totalPages) {
         return;
       }
     } else {
       startingIndex = Math.max(this.minPrefetchedWebtoonImage - 1, 0) ;
-      endingIndex = Math.max(this.minPrefetchedWebtoonImage - 1 - this.buffferPages, 0);
+      endingIndex = Math.max(this.minPrefetchedWebtoonImage - 1 - this.bufferPages, 0);
 
       if (startingIndex <= 0) {
         return;
@@ -381,12 +403,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.debugLog('[Prefetch] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
     this.debugLog('     [Prefetch] page num: ', this.pageNum);
     // If a request comes in to prefetch over current page +/- bufferPages (+ 1 due to requesting from next/prev page), then deny it
-    this.debugLog('     [Prefetch] Caps: ' + (this.pageNum - (this.buffferPages + 1)) + ' - ' + (this.pageNum + (this.buffferPages + 1)));
-    if (this.isScrollingForwards() && startingIndex > this.pageNum + (this.buffferPages + 1)) {
+    this.debugLog('     [Prefetch] Caps: ' + (this.pageNum - (this.bufferPages + 1)) + ' - ' + (this.pageNum + (this.bufferPages + 1)));
+    if (this.isScrollingForwards() && startingIndex > this.pageNum + (this.bufferPages + 1)) {
       this.debugLog('[Prefetch] A request that is too far outside buffer range has been declined', this.pageNum);
       return;
     }
-    if (!this.isScrollingForwards() && endingIndex < (this.pageNum - (this.buffferPages + 1))) {
+    if (!this.isScrollingForwards() && endingIndex < (this.pageNum - (this.bufferPages + 1))) {
       this.debugLog('[Prefetch] A request that is too far outside buffer range has been declined', this.pageNum);
       return;
     }
