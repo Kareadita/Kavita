@@ -57,11 +57,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * The min page number that has been prefetched
    */
-  minPrefetchedWebtoonImage: number = Number.MAX_SAFE_INTEGER;
+  //minPrefetchedWebtoonImage: number = Number.MAX_SAFE_INTEGER;
   /**
    * The max page number that has been prefetched
    */
-  maxPrefetchedWebtoonImage: number = Number.MIN_SAFE_INTEGER;
+  //maxPrefetchedWebtoonImage: number = Number.MIN_SAFE_INTEGER;
   /**
    * The minimum width of images in webtoon. On image loading, this is checked and updated. All images will get this assigned to them for rendering.
    */
@@ -77,25 +77,22 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   allImagesLoaded: boolean = false;
 
   /**
+   * Denotes each page that has been loaded or not. If pruning is implemented, the key will be deleted.
+   */
+   imagesLoaded: {[key: number]: number} = {};
+
+  /**
    * Debug mode. Will show extra information
    */
   debug: boolean = true;
 
-  /**
-   * Timer to help detect when a scroll end event has occured  (not used)
-   */
-  //scrollEndTimer: any;
+  get minPageLoaded() {
+    return Math.min(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+  }
 
-
-  /**
-   * Each pages height mapped to page number as key (not used)
-   */
-  //pageHeights:{[key: number]: number} = {};
-
-  /**
-   * Not currently used. Use to invesitigate fine grained control of rending image elements.
-   */
-  //buffer: CircularArray<HTMLImageElement> = new CircularArray<HTMLImageElement>([], 0);
+  get maxPageLoaded() {
+    return Math.max(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+  }
 
 
 
@@ -218,8 +215,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   initWebtoonReader() {
 
-    this.minPrefetchedWebtoonImage = this.pageNum;
-    this.maxPrefetchedWebtoonImage = Number.MIN_SAFE_INTEGER;
+    //this.minPrefetchedWebtoonImage = this.pageNum;
+    //this.maxPrefetchedWebtoonImage = Number.MIN_SAFE_INTEGER;
+    this.imagesLoaded = {};
     this.webtoonImages.next([]);
 
     const prefetchStart = Math.max(this.pageNum - this.bufferPages, 0);
@@ -230,8 +228,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     
-    this.minPrefetchedWebtoonImage = prefetchStart;
-    this.maxPrefetchedWebtoonImage = prefetchMax;
+    //this.minPrefetchedWebtoonImage = prefetchStart;
+    //this.maxPrefetchedWebtoonImage = prefetchMax;
   }
 
   /**
@@ -242,6 +240,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   onImageLoad(event: any) {
     const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
     this.debugLog('[Image Load] Image loaded: ', imagePage);
+
+    if (!this.imagesLoaded.hasOwnProperty(imagePage)) {
+      this.imagesLoaded[imagePage] = imagePage;
+    }
 
 
     if (event.target.width < this.webtoonImageWidth) {
@@ -353,8 +355,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   loadWebtoonImage(page: number) {
     let data = this.webtoonImages.value;
 
-    // These min/max prefetched will need to be tweaked if we implement DOM pruning
-    if (page >= this.minPrefetchedWebtoonImage && page <= this.maxPrefetchedWebtoonImage) {
+    if (this.imagesLoaded.hasOwnProperty(page)) {
       this.debugLog('\t[PREFETCH] Skipping prefetch of ', page);
       return;
     }
@@ -368,12 +369,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       else return 0;
     });
 
-    if (page < this.minPrefetchedWebtoonImage) {
-      this.minPrefetchedWebtoonImage = page;
-    }
-    if (page > this.maxPrefetchedWebtoonImage) {
-      this.maxPrefetchedWebtoonImage = page;
-    }
+    // if (page < this.minPrefetchedWebtoonImage) {
+    //   this.minPrefetchedWebtoonImage = page;
+    // }
+    // if (page > this.maxPrefetchedWebtoonImage) {
+    //   this.maxPrefetchedWebtoonImage = page;
+    // }
     this.allImagesLoaded = false;
 
     this.webtoonImages.next(data);
@@ -392,10 +393,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      //startingIndex = Math.min(this.maxPrefetchedWebtoonImage + 1, this.totalPages);
-      //endingIndex = Math.min(this.maxPrefetchedWebtoonImage + 1 + this.bufferPages, this.totalPages); 
-
-      // About to change prefetching bounds with this code.
       startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
       endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
 
@@ -403,15 +400,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         return [0, 0];
       }
     } else {
-      //startingIndex = Math.max(this.minPrefetchedWebtoonImage - 1, 0) ;
-      //endingIndex = Math.max(this.minPrefetchedWebtoonImage - 1 - this.bufferPages, 0);
-
-      startingIndex = Math.max(this.pageNum - 1, 0);
-      endingIndex = Math.max(this.pageNum - 1 - this.bufferPages, 0);
-
-      if (startingIndex <= 0) {
-        return [0, 0];
-      }
+      startingIndex = Math.max(this.pageNum - this.bufferPages, 0);
+      endingIndex = Math.max(this.pageNum + this.bufferPages, 0);
     }
 
 
@@ -420,8 +410,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       startingIndex = endingIndex;
       endingIndex = temp;
     }
-
-    
 
     return [startingIndex, endingIndex];
   }
@@ -435,20 +423,20 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (startingIndex === 0 && endingIndex === 0) { return; }
     //this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
 
-    
+    // NOTE: This code isn't required now that we buffer around our current page. There will never be a request that is outside our bounds
     // If a request comes in to prefetch over current page +/- bufferPages (+ 1 due to requesting from next/prev page), then deny it
-    if (this.isScrollingForwards() && startingIndex > this.pageNum + (this.bufferPages + 1)) {
-      this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
-      return;
-    }
-    if (!this.isScrollingForwards() && endingIndex < (this.pageNum - (this.bufferPages + 1))) {
-      this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
-      return;
-    }
+    // if (this.isScrollingForwards() && startingIndex > this.pageNum + (this.bufferPages + 1)) {
+    //   this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
+    //   return;
+    // }
+    // if (!this.isScrollingForwards() && endingIndex < (this.pageNum - (this.bufferPages + 1))) {
+    //   this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
+    //   return;
+    // }
 
     this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
     this.debugLog('\t\t[Prefetch] page num: ', this.pageNum);
-    this.debugLog('\t\t[Prefetch] Caps: ' + (this.pageNum - (this.bufferPages + 1)) + ' - ' + (this.pageNum + (this.bufferPages + 1)));
+    //this.debugLog('\t\t[Prefetch] Caps: ' + (this.pageNum - (this.bufferPages + 1)) + ' - ' + (this.pageNum + (this.bufferPages + 1)));
 
     for(let i = startingIndex; i < endingIndex; i++) {
       this.loadWebtoonImage(i);
