@@ -24,6 +24,7 @@ namespace API.Tests.Services
         public void GetFilesTest_Should_Be28()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga");
+            // ReSharper disable once CollectionNeverQueried.Local
             var files = new List<string>();
             var fileCount = DirectoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
                 API.Parser.Parser.ArchiveFileExtensions, _logger);

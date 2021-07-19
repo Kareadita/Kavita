@@ -20,7 +20,7 @@ namespace API.Data
             _context = context;
             _mapper = mapper;
         }
-        
+
         public void Update(Volume volume)
         {
             _context.Entry(volume).State = EntityState.Modified;
@@ -37,8 +37,8 @@ namespace API.Data
                 .Include(c => c.Files)
                 .SingleOrDefaultAsync(c => c.Id == chapterId);
         }
-        
-        
+
+
         /// <summary>
         /// Returns Chapters for a volume id.
         /// </summary>
@@ -65,7 +65,7 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
-        
+
 
 
         public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
@@ -82,11 +82,11 @@ namespace API.Data
         public async Task<IList<MangaFile>> GetFilesForChapter(int chapterId)
         {
             return await _context.MangaFile
-                .Where(c => chapterId == c.Id)
+                .Where(c => chapterId == c.ChapterId)
                 .AsNoTracking()
                 .ToListAsync();
         }
-        
+
         public async Task<IList<MangaFile>> GetFilesForVolume(int volumeId)
         {
             return await _context.Chapter

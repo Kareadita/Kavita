@@ -15,6 +15,7 @@ import { environment } from 'src/environments/environment';
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
+  public urlKey: string = 'kavita--no-connection-url';
   constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
 
 
@@ -50,7 +51,7 @@ export class ErrorInterceptor implements HttpInterceptor {
 
             // If we are not on no-connection, redirect there and save current url so when we refersh, we redirect back there
             if (this.router.url !== '/no-connection') {
-              localStorage.setItem('kavita--no-connection-url', this.router.url);
+              localStorage.setItem(this.urlKey, this.router.url);
               this.router.navigateByUrl('/no-connection');
             }
             break;

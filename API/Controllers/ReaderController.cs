@@ -11,7 +11,6 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -19,17 +18,14 @@ namespace API.Controllers
     {
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
-        private readonly ILogger<ReaderController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
-            ILogger<ReaderController> logger, IUnitOfWork unitOfWork)
+        public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
-            _logger = logger;
             _unitOfWork = unitOfWork;
         }
 
@@ -238,35 +234,43 @@ namespace API.Controllers
             }
 
 
-            user.Progresses ??= new List<AppUserProgress>();
-            var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
-
-            if (userProgress == null)
+            try
             {
-                user.Progresses.Add(new AppUserProgress
-                {
-                    PagesRead = bookmarkDto.PageNum,
-                    VolumeId = bookmarkDto.VolumeId,
-                    SeriesId = bookmarkDto.SeriesId,
-                    ChapterId = bookmarkDto.ChapterId,
-                    BookScrollId = bookmarkDto.BookScrollId,
-                    LastModified = DateTime.Now
-                });
+               user.Progresses ??= new List<AppUserProgress>();
+               var userProgress =
+                  user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
+
+               if (userProgress == null)
+               {
+                  user.Progresses.Add(new AppUserProgress
+                  {
+                     PagesRead = bookmarkDto.PageNum,
+                     VolumeId = bookmarkDto.VolumeId,
+                     SeriesId = bookmarkDto.SeriesId,
+                     ChapterId = bookmarkDto.ChapterId,
+                     BookScrollId = bookmarkDto.BookScrollId,
+                     LastModified = DateTime.Now
+                  });
+               }
+               else
+               {
+                  userProgress.PagesRead = bookmarkDto.PageNum;
+                  userProgress.SeriesId = bookmarkDto.SeriesId;
+                  userProgress.VolumeId = bookmarkDto.VolumeId;
+                  userProgress.BookScrollId = bookmarkDto.BookScrollId;
+                  userProgress.LastModified = DateTime.Now;
+               }
+
+               _unitOfWork.UserRepository.Update(user);
+
+               if (await _unitOfWork.CommitAsync())
+               {
+                  return Ok();
+               }
             }
-            else
+            catch (Exception)
             {
-                userProgress.PagesRead = bookmarkDto.PageNum;
-                userProgress.SeriesId = bookmarkDto.SeriesId;
-                userProgress.VolumeId = bookmarkDto.VolumeId;
-                userProgress.BookScrollId = bookmarkDto.BookScrollId;
-                userProgress.LastModified = DateTime.Now;
-            }
-
-            _unitOfWork.UserRepository.Update(user);
-
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
+               await _unitOfWork.RollbackAsync();
             }
 
             return BadRequest("Could not save progress");

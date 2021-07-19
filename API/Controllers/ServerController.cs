@@ -6,7 +6,6 @@ using API.Extensions;
 using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

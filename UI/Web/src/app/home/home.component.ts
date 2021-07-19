@@ -40,7 +40,6 @@ export class HomeComponent implements OnInit {
         .subscribe(resp => {/* No Operation */});
 
         if (user) {
-          // User is logged in, redirect to libraries
           this.router.navigateByUrl('/library');
         } else {
           this.router.navigateByUrl('/login');

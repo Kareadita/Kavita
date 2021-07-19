@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
@@ -103,7 +103,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @see Stack
    */
   continuousChaptersStack: Stack<number> = new Stack();
-  
+
+  /**
+   * An event emiter when a page change occurs. Used soley by the webtoon reader.
+   */
+   goToPageEvent: ReplaySubject<number> = new ReplaySubject<number>();
 
   /**
    * If the menu is open/visible.
@@ -308,6 +312,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.resetOverrideStyles();
     this.navService.showNavBar();
     this.onDestroy.next();
+    this.onDestroy.complete();
+    this.goToPageEvent.complete();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -798,6 +804,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.setPageNum(page);
     this.refreshSlider.emit();
+    this.goToPageEvent.next(page);
     this.render();
   }
 
@@ -896,19 +903,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
-    console.log('[MangaReader] Handling Page Change');
-
-    this.pageNum = updatedPageNum;
-
+    this.setPageNum(updatedPageNum);
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-    if (this.pageNum >= this.maxPages - 10) {
-      // Tell server to cache the next chapter
-      if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
-          this.nextChapterPrefetched = true;
-        });
-      }
-    }
   }
 
   saveSettings() {

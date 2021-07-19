@@ -10,6 +10,7 @@ import { AccountService } from '../_services/account.service';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
+  public urlKey: string = 'kavita--auth-intersection-url';
   constructor(private accountService: AccountService, private router: Router, private toastr: ToastrService) {}
 
   canActivate(): Observable<boolean> {
@@ -19,6 +20,7 @@ export class AuthGuard implements CanActivate {
           return true;
         }
         this.toastr.error('You are not authorized to view this page.');
+        localStorage.setItem(this.urlKey, window.location.pathname);
         this.router.navigateByUrl('/home');
         return false;
       })

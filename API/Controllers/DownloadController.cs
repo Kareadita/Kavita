@@ -35,21 +35,21 @@ namespace API.Controllers
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
             return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
-        
+
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapter(chapterId);
             return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
-        
+
         [HttpGet("series-size")]
         public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
         {
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
             return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
-        
+
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
@@ -60,9 +60,9 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), 
+                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_v{volumeId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");  
+                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {
@@ -74,7 +74,7 @@ namespace API.Controllers
         {
             var firstFile = files.Select(c => c.FilePath).First();
             var fileProvider = new FileExtensionContentTypeProvider();
-            // Figures out what the content type should be based on the file name.  
+            // Figures out what the content type should be based on the file name.
             if (!fileProvider.TryGetContentType(firstFile, out var contentType))
             {
                 contentType = Path.GetExtension(firstFile).ToLowerInvariant() switch
@@ -89,7 +89,7 @@ namespace API.Controllers
                 };
             }
 
-            return File(await _directoryService.ReadFileAsync(firstFile), contentType, Path.GetFileNameWithoutExtension(firstFile));
+            return File(await _directoryService.ReadFileAsync(firstFile), contentType, Path.GetFileName(firstFile));
         }
 
         [HttpGet("chapter")]
@@ -102,9 +102,9 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), 
+                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_c{chapterId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");  
+                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {
@@ -122,9 +122,9 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), 
+                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_s{seriesId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");  
+                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {
