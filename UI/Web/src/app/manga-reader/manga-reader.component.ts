@@ -903,19 +903,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
-    console.log('[MangaReader] Handling Page Change');
-
-    this.pageNum = updatedPageNum;
-
+    this.setPageNum(updatedPageNum);
     this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-    if (this.pageNum >= this.maxPages - 10) {
-      // Tell server to cache the next chapter
-      if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
-          this.nextChapterPrefetched = true;
-        });
-      }
-    }
   }
 
   saveSettings() {

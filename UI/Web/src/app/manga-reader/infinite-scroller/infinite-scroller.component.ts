@@ -41,7 +41,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * Responsible for calculating current page on screen and uses hooks to trigger prefetching.
    * Note: threshold will fire differently due to size of images. 1 requires full image on screen. 0 means 1px on screen.
    */
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [0] });
+  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { rootMargin: '0px', threshold: 0 });
   /**
    * Direction we are scrolling. Controls calculations for prefetching
    */
@@ -300,6 +300,17 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     this.prefetchWebtoonImages();
     // TODO: We can prune DOM based on our buffer
+    // Note: Can i test if we can put this dom pruning async, so user doesn't feel it?
+    // I can feel a noticable scroll spike from this code (commenting out pruning until rest of the bugs are sorted)
+    // const images = document.querySelectorAll('img').forEach(img => {
+    //   const imagePageNum = this.readerService.imageUrlToPageNum(img.src);
+    //   if (imagePageNum < this.pageNum - this.bufferPages) { // this.minPrefetchedWebtoonImage
+    //     console.log('Image ' + imagePageNum + ' is outside minimum range, pruning from DOM');
+    //   } else if (imagePageNum > this.pageNum + 1 + this.bufferPages) { // this.maxPrefetchedWebtoonImage
+    //     console.log('Image ' + imagePageNum + ' is outside maximum range, pruning from DOM');
+    //   }
+    //   // NOTE: Max and Mins don't update as we scroll!
+    // });
     
 
     if (scrollToPage) {
