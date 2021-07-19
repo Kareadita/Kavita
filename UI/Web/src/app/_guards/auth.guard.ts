@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
           return true;
         }
         this.toastr.error('You are not authorized to view this page.');
-        localStorage.setItem(this.urlKey, this.router.url);
+        localStorage.setItem(this.urlKey, window.location.pathname);
         this.router.navigateByUrl('/home');
         return false;
       })
