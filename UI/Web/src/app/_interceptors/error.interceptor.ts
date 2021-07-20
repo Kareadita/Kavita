@@ -25,10 +25,6 @@ export class ErrorInterceptor implements HttpInterceptor {
         if (error === undefined || error === null) {
           return throwError(error);
         }
-        
-        if (!environment.production) {
-          console.error('error:', error);
-        }
 
         switch (error.status) {
           case 400:
@@ -99,12 +95,15 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleServerException(error: any) {
-    console.error('500 error:', error);
     const err = error.error;
     if (err.hasOwnProperty('message') && err.message.trim() !== '') {
+      if (err.message != 'User is not authenticated') {
+        console.log('500 error: ', error);
+      }
       this.toastr.error(err.message);
     } else {
       this.toastr.error('There was an unknown critical error.');
+      console.error('500 error:', error);
     }
   }
 
