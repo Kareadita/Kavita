@@ -18,12 +18,11 @@ export class StatsService {
 
     constructor(private httpClient: HttpClient, private navService: NavService) { }
 
-    public async sendClientInfo() {
-        const data = await this.getInfo();
-        this.httpClient.post(this.baseUrl + 'stats/client-info', data);
+    public sendClientInfo(data: ClientInfo) {
+        return this.httpClient.post(this.baseUrl + 'stats/client-info', data);
     }
 
-    private async getInfo(): Promise<ClientInfo> {
+    public async getInfo(): Promise<ClientInfo> {
         const screenResolution = `${window.screen.width} x ${window.screen.height}`;
 
         const browser = Bowser.getParser(window.navigator.userAgent);
