@@ -76,11 +76,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   debug: boolean = false;
 
   get minPageLoaded() {
-    return Math.min(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+    return Math.min(...Object.values(this.imagesLoaded));
   }
 
   get maxPageLoaded() {
-    return Math.max(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+    return Math.max(...Object.values(this.imagesLoaded));
   }
 
 
@@ -190,9 +190,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
     this.debugLog('[Image Load] Image loaded: ', imagePage);
 
-    if (!this.imagesLoaded.hasOwnProperty(imagePage)) {
-      this.imagesLoaded[imagePage] = imagePage;
-    }
+    // Note: I think setting the variable here can lead to a race condition in which we request the same image twice
+    // if (!this.imagesLoaded.hasOwnProperty(imagePage)) {
+    //   this.imagesLoaded[imagePage] = imagePage;
+    // }
 
 
     if (event.target.width < this.webtoonImageWidth) {
@@ -339,6 +340,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     this.allImagesLoaded = false;
     this.webtoonImages.next(data);
+
+    if (!this.imagesLoaded.hasOwnProperty(page)) {
+      this.imagesLoaded[page] = page;
+    }
   }
 
   attachIntersectionObserverElem(elem: HTMLImageElement) {
