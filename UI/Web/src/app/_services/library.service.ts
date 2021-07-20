@@ -14,7 +14,8 @@ export class LibraryService {
 
   baseUrl = environment.apiUrl;
 
-  libraryNames: {[key:number]: string} | undefined = undefined;
+  private libraryNames: {[key:number]: string} | undefined = undefined;
+  private libraryTypes: {[key: number]: LibraryType} | undefined = undefined;
 
   constructor(private httpClient: HttpClient) {}
 
@@ -75,8 +76,17 @@ export class LibraryService {
   }
 
   getLibraryType(libraryId: number) {
-    // TODO: Cache this in browser
-    return this.httpClient.get<LibraryType>(this.baseUrl + 'library/type?libraryId=' + libraryId);
+    if (this.libraryTypes != undefined && this.libraryTypes.hasOwnProperty(libraryId)) {
+      return of(this.libraryTypes[libraryId]);
+    }
+    return this.httpClient.get<LibraryType>(this.baseUrl + 'library/type?libraryId=' + libraryId).pipe(map(l => {
+      if (this.libraryTypes === undefined) {
+        this.libraryTypes = {};
+      }
+
+      this.libraryTypes[libraryId] = l;
+      return this.libraryTypes[libraryId];
+    }));
   }
 
   search(term: string) {

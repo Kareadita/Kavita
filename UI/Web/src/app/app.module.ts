@@ -37,6 +37,8 @@ import { TypeaheadModule } from './typeahead/typeahead.module';
 import { AllCollectionsComponent } from './all-collections/all-collections.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
+import { LibraryCardComponent } from './library-card/library-card.component';
+import { SeriesCardComponent } from './series-card/series-card.component';
 
 let sentryProviders: any[] = [];
 
@@ -100,6 +102,8 @@ if (environment.production) {
     AllCollectionsComponent,
     EditCollectionTagsComponent,
     RecentlyAddedComponent,
+    LibraryCardComponent,
+    SeriesCardComponent
   ],
   imports: [
     HttpClientModule,

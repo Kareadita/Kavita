@@ -7,10 +7,9 @@ import { EditSeriesModalComponent } from 'src/app/_modals/edit-series-modal/edit
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
 import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { ConfirmService } from '../confirm.service';
+import { ConfirmService } from '../shared/confirm.service';
 
 @Component({
   selector: 'app-series-card',
@@ -30,9 +29,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
-              private libraryService: LibraryService, private modalService: NgbModal,
-              private confirmService: ConfirmService, public imageService: ImageService,
-              private actionFactoryService: ActionFactoryService) {
+              private modalService: NgbModal, private confirmService: ConfirmService, 
+              public imageService: ImageService, private actionFactoryService: ActionFactoryService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);

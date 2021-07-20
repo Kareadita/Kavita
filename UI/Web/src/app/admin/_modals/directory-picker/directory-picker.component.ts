@@ -42,7 +42,6 @@ export class DirectoryPickerComponent implements OnInit {
   }
 
   goBack() {
-    // BUG: When Going back to initial listing, this code gets stuck on first drive
     this.routeStack.pop();
     const stackPeek = this.routeStack.peek();
     if (stackPeek !== undefined) {
@@ -53,7 +52,6 @@ export class DirectoryPickerComponent implements OnInit {
       this.currentRoot = '';
       this.loadChildren(this.currentRoot);
     }
-    
   }
 
   loadChildren(path: string) {
