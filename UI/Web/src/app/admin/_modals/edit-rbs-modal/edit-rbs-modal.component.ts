@@ -30,7 +30,7 @@ export class EditRbsModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close(false);
+    this.modal.close(undefined);
   }
 
   save() {
@@ -42,8 +42,10 @@ export class EditRbsModalComponent implements OnInit {
     this.memberService.updateMemberRoles(this.member?.username, selectedRoles).subscribe(() => {
       if (this.member) {
         this.member.roles = selectedRoles;
+        this.modal.close(this.member);
+        return;
       }
-      this.modal.close(true);
+      this.modal.close(undefined);
     });
   }
 

@@ -82,6 +82,11 @@ export class ManageUsersComponent implements OnInit {
   openEditRole(member: Member) {
     const modalRef = this.modalService.open(EditRbsModalComponent);
     modalRef.componentInstance.member = member;
+    modalRef.closed.subscribe((updatedMember: Member) => {
+      if (updatedMember !== undefined) {
+        member = updatedMember;
+      }
+    })
   }
 
   updatePassword(member: Member) {
