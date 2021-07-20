@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.Entities.Enums;
 
-namespace API.DTOs
+namespace API.DTOs.Stats
 {
     public class UsageInfoDto
     {

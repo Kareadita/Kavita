@@ -1,10 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Stats;
 using API.Extensions;
 using API.Interfaces.Services;
-using API.Services;
+using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

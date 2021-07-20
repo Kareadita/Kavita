@@ -7,6 +7,7 @@ using API.Services;
 using API.Services.HostedServices;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

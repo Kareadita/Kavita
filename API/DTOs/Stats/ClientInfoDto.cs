@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace API.DTOs
+namespace API.DTOs.Stats
 {
     public class ClientInfoDto
     {
@@ -16,13 +16,14 @@ namespace API.DTOs
         public DetailsVersion Os { get; set; }
 
         public DateTime? CollectedAt { get; set; }
+        public bool UsingDarkTheme { get; set; }
 
         public bool IsTheSameDevice(ClientInfoDto clientInfoDto)
         {
-            return (clientInfoDto.ScreenResolution ?? "").Equals(ScreenResolution) &&
-                   (clientInfoDto.PlatformType ?? "").Equals(PlatformType) &&
-                   (clientInfoDto.Browser?.Name ?? "").Equals(Browser?.Name) &&
-                   (clientInfoDto.Os?.Name ?? "").Equals(Os?.Name) &&
+            return (clientInfoDto.ScreenResolution ?? string.Empty).Equals(ScreenResolution) &&
+                   (clientInfoDto.PlatformType ?? string.Empty).Equals(PlatformType) &&
+                   (clientInfoDto.Browser?.Name ?? string.Empty).Equals(Browser?.Name) &&
+                   (clientInfoDto.Os?.Name ?? string.Empty).Equals(Os?.Name) &&
                    clientInfoDto.CollectedAt.GetValueOrDefault().ToString("yyyy-MM-dd")
                        .Equals(CollectedAt.GetValueOrDefault().ToString("yyyy-MM-dd"));
         }

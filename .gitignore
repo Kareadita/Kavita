@@ -491,11 +491,11 @@ appsettings.json
 /API/kavita.db-wal
 /API/Hangfire.db
 /API/Hangfire-log.db
-cache/
+API/cache/
 /API/wwwroot/
 /API/cache/
 /API/temp/
 _temp/
 _output/
-stats/
+API/stats/
 UI/Web/dist/

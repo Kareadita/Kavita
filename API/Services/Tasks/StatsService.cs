@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
-using API.DTOs;
+using API.DTOs.Stats;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Clients;
@@ -15,7 +15,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Services
+namespace API.Services.Tasks
 {
     public class StatsService : IStatsService
     {
@@ -142,7 +142,9 @@ namespace API.Services
                 RunTimeVersion = RuntimeInformation.FrameworkDescription,
                 KavitaVersion = BuildInfo.Version.ToString(),
                 Culture = Thread.CurrentThread.CurrentCulture.Name,
-                BuildBranch = BuildInfo.Branch
+                BuildBranch = BuildInfo.Branch,
+                IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
+                NumOfCores = Environment.ProcessorCount
             };
 
             return serverInfo;

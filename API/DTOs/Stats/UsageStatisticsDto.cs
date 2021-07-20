@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace API.DTOs
+namespace API.DTOs.Stats
 {
     public class UsageStatisticsDto
     {

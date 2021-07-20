@@ -7,6 +7,7 @@ export interface ClientInfo {
     platformType: string,
     kavitaUiVersion: string,
     screenResolution: string;
+    usingDarkTheme: boolean;
 
     collectedAt?: Date;
 }
