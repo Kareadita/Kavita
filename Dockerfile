@@ -8,7 +8,7 @@ ARG TARGETPLATFORM
 #Move the output files to where they need to be
 RUN mkdir /files
 COPY _output/*.tar.gz /files/
-COPY Kavita-webui/dist /files/wwwroot
+COPY UI/Web/dist /files/wwwroot
 COPY copy_runtime.sh /copy_runtime.sh
 RUN /copy_runtime.sh
 
