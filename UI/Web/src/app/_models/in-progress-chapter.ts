@@ -1,4 +1,3 @@
-//TODO: Refactor this name to something better
 export interface InProgressChapter {
     id: number;
     range: string;
