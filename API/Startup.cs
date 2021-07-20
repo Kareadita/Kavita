@@ -143,8 +143,6 @@ namespace API
             applicationLifetime.ApplicationStarted.Register(() =>
             {
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
-                Console.WriteLine($"Seed: {Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.MachineName}_{Environment.UserName}");
-                Console.WriteLine($"Token: {HashUtil.AnonymousToken()}");
             });
         }
 
