@@ -171,10 +171,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
 
-    const prefetchStart = Math.max(this.pageNum - this.bufferPages, 0);
-    const prefetchMax =  Math.min(this.pageNum + this.bufferPages, this.totalPages); 
-    this.debugLog('[INIT] Prefetching pages ' + prefetchStart + ' to ' + prefetchMax + '. Current page: ', this.pageNum);
-    for(let i = prefetchStart; i < prefetchMax; i++) {
+    //const prefetchStart = Math.max(this.pageNum - this.bufferPages, 0);
+    //const prefetchMax =  Math.min(this.pageNum + this.bufferPages, this.totalPages); 
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+
+    this.debugLog('[INIT] Prefetching pages ' + startingIndex + ' to ' + endingIndex + '. Current page: ', this.pageNum);
+    for(let i = startingIndex; i <= endingIndex; i++) {
       this.loadWebtoonImage(i);
     }
   }
@@ -257,6 +259,33 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     //   }
     //   // NOTE: Max and Mins don't update as we scroll!
     // });
+
+    // const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+    // Object.values(this.imagesLoaded).forEach(pageLoaded => {
+    //   //const page = parseInt(pageLoaded, 10);
+    //   if (pageLoaded > startingIndex && pageLoaded < endingIndex) {
+    //     return;
+    //   }
+    //   this.debugLog('Page ' + pageLoaded + ' needs to be pruned');
+    //   // I don't need to delete here, i need to delete via BehaviourSubject
+    //   //document.querySelector('#page-' + pageLoaded)?.remove();
+    //   let data = this.webtoonImages.value;
+    //   const index = data.indexOf({src: this.urlProvider(pageLoaded), page: pageLoaded})
+    //   data = data.splice(index, 1);
+
+    //   // data.sort((a: WebtoonImage, b: WebtoonImage) => {
+    //   //   if (a.page < b.page) { return -1; }
+    //   //   else if (a.page > b.page) { return 1; }
+    //   //   else return 0;
+    //   // });
+
+    // //this.allImagesLoaded = false;
+    //   this.webtoonImages.next(data);
+
+    //   delete this.imagesLoaded[pageLoaded];
+    // });
+
+
     
 
     if (scrollToPage) {
@@ -332,8 +361,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.max(this.pageNum - this.bufferPages, 0);
-      endingIndex = Math.max(this.pageNum + this.bufferPages, 0);
+      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
+      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
     }
 
 
@@ -351,7 +380,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   prefetchWebtoonImages() {
-    let [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
     if (startingIndex === 0 && endingIndex === 0) { return; }
 
     // NOTE: This code isn't required now that we buffer around our current page. There will never be a request that is outside our bounds
