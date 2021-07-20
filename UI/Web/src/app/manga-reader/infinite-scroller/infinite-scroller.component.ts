@@ -76,11 +76,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   debug: boolean = false;
 
   get minPageLoaded() {
-    return Math.min(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+    return Math.min(...Object.values(this.imagesLoaded));
   }
 
   get maxPageLoaded() {
-    return Math.max(...Object.keys(this.imagesLoaded).map(key => parseInt(key, 10)));
+    return Math.max(...Object.values(this.imagesLoaded));
   }
 
 
@@ -171,10 +171,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
 
-    const prefetchStart = Math.max(this.pageNum - this.bufferPages, 0);
-    const prefetchMax =  Math.min(this.pageNum + this.bufferPages, this.totalPages); 
-    this.debugLog('[INIT] Prefetching pages ' + prefetchStart + ' to ' + prefetchMax + '. Current page: ', this.pageNum);
-    for(let i = prefetchStart; i < prefetchMax; i++) {
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+
+    this.debugLog('[INIT] Prefetching pages ' + startingIndex + ' to ' + endingIndex + '. Current page: ', this.pageNum);
+    for(let i = startingIndex; i <= endingIndex; i++) {
       this.loadWebtoonImage(i);
     }
   }
@@ -187,11 +187,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   onImageLoad(event: any) {
     const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
     this.debugLog('[Image Load] Image loaded: ', imagePage);
-
-    if (!this.imagesLoaded.hasOwnProperty(imagePage)) {
-      this.imagesLoaded[imagePage] = imagePage;
-    }
-
 
     if (event.target.width < this.webtoonImageWidth) {
       this.webtoonImageWidth = event.target.width;
@@ -245,19 +240,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.pageNumberChange.emit(this.pageNum);
 
     this.prefetchWebtoonImages();
-    // TODO: We can prune DOM based on our buffer
-    // Note: Can i test if we can put this dom pruning async, so user doesn't feel it? (don't forget to unobserve image when purging)
-    // I can feel a noticable scroll spike from this code (commenting out pruning until rest of the bugs are sorted)
-    // const images = document.querySelectorAll('img').forEach(img => {
-    //   const imagePageNum = this.readerService.imageUrlToPageNum(img.src);
-    //   if (imagePageNum < this.pageNum - this.bufferPages) { // this.minPrefetchedWebtoonImage
-    //     console.log('Image ' + imagePageNum + ' is outside minimum range, pruning from DOM');
-    //   } else if (imagePageNum > this.pageNum + 1 + this.bufferPages) { // this.maxPrefetchedWebtoonImage
-    //     console.log('Image ' + imagePageNum + ' is outside maximum range, pruning from DOM');
-    //   }
-    //   // NOTE: Max and Mins don't update as we scroll!
-    // });
-    
 
     if (scrollToPage) {
       const currentImage = document.querySelector('img#page-' + this.pageNum);
@@ -278,7 +260,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   scrollToCurrentPage() {
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
-    //if (this.isElementVisible(this.currentPageElem)) { return; }
+    
     // Update prevScrollPosition, so the next scroll event properly calculates direction
     this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
     this.isScrolling = true;
@@ -310,6 +292,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     this.allImagesLoaded = false;
     this.webtoonImages.next(data);
+
+    if (!this.imagesLoaded.hasOwnProperty(page)) {
+      this.imagesLoaded[page] = page;
+    }
   }
 
   attachIntersectionObserverElem(elem: HTMLImageElement) {
@@ -332,8 +318,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.max(this.pageNum - this.bufferPages, 0);
-      endingIndex = Math.max(this.pageNum + this.bufferPages, 0);
+      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
+      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
     }
 
 
@@ -351,22 +337,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   prefetchWebtoonImages() {
-    let [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
     if (startingIndex === 0 && endingIndex === 0) { return; }
 
-    // NOTE: This code isn't required now that we buffer around our current page. There will never be a request that is outside our bounds
-    // If a request comes in to prefetch over current page +/- bufferPages (+ 1 due to requesting from next/prev page), then deny it
-    // if (this.isScrollingForwards() && startingIndex > this.pageNum + (this.bufferPages + 1)) {
-    //   this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
-    //   return;
-    // }
-    // if (!this.isScrollingForwards() && endingIndex < (this.pageNum - (this.bufferPages + 1))) {
-    //   this.debugLog('\t[PREFETCH] A request that is too far outside buffer range has been declined', this.pageNum);
-    //   return;
-    // }
-
     this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
-
     for(let i = startingIndex; i < endingIndex; i++) {
       this.loadWebtoonImage(i);
     }

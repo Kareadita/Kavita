@@ -849,6 +849,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.setPageNum(page);
+    this.goToPageEvent.next(page);
     this.render();
   }
 
