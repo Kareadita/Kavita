@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Stats;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Clients

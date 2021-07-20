@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Stats;
 
 namespace API.Interfaces.Services
 {
