@@ -18,7 +18,7 @@ your reading collection with your friends and family!
 </div>
 
 ## Goals
-- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, mobi, azw, djvu, pdf)
+- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Dark and Light themes
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
@@ -26,7 +26,8 @@ your reading collection with your friends and family!
 - [x] Ability to manage users, access, and ratings
 - [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
-- [x] Dedicated webtoon reader (in beta testing)
+- [x] Dedicated webtoon reader
+- [ ] Dedicated Plugin Support (partial support via API)
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 ## Support
@@ -76,7 +77,7 @@ services:
         restart: unless-stopped
 ```
 
-**Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release. There is also the `:alpine` tag if you want a smaller image, but it is only available for x64 systems.**
+**Note: Kavita is under heavy development and is being updated frequently, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release. There is also the `:alpine` tag if you want a smaller image, but it is only available for x64 systems.**
 
 ## Feature Requests
 Got a great idea? Throw it up on the FeatHub or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
