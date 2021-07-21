@@ -69,7 +69,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
         this.getLibraries();
-        this.toastr.success('Library has been removed'); // BUG: This is not causing a refresh
+        this.toastr.success('Library has been removed');
       });
     }
   }

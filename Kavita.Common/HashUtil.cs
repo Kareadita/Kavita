@@ -34,7 +34,7 @@ namespace Kavita.Common
         /// <returns></returns>
         public static string AnonymousToken()
         {
-            var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.MachineName}_{Environment.UserName}";
+            var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Configuration.JwtToken}_{Environment.UserName}";
             return CalculateCrc(seed);
         }
     }

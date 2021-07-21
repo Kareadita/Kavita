@@ -146,7 +146,7 @@ namespace API
             });
         }
 
-        private void OnShutdown()
+        private static void OnShutdown()
         {
             Console.WriteLine("Server is shutting down. Please allow a few seconds to stop any background jobs...");
             TaskScheduler.Client.Dispose();

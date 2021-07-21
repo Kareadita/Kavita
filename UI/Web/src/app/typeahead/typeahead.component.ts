@@ -27,13 +27,6 @@ export class SelectionModel<T> {
     });
   }
 
-  // __lookupItem(item: T) {
-  //   if (this._propAccessor != '') {
-  //     // TODO: Implement this code to speedup lookups (use a map rather than array)
-  //   }
-  //   const dataItem = this._data.filter(data => data.value == d);
-  // }
-
   /**
    * Will toggle if the data item is selected or not. If data option is not tracked, will add it and set state to true.
    * @param data Item to toggle

@@ -43,7 +43,7 @@ namespace API.Extensions
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
-                options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.GetLogLevel(Program.GetAppSettingFilename()).Equals("Debug"));
+                options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.LogLevel.Equals("Debug"));
             });
         }
 
