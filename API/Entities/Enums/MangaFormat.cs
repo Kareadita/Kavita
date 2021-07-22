@@ -10,7 +10,9 @@ namespace API.Entities.Enums
         Archive = 1,
         [Description("Unknown")]
         Unknown = 2,
-        [Description("Book")]
-        Book = 3,
+        [Description("EPUB")]
+        Epub = 3,
+        [Description("PDF")]
+        Pdf = 4
     }
 }

@@ -12,9 +12,11 @@ namespace API.Parser
         public const string DefaultChapter = "0";
         public const string DefaultVolume = "0";
 
+        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
-        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
+        public const string MangaComicFileExtensions = ArchiveFileExtensions + "|" + ImageFileExtensions + @"|\.pdf";
+
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -448,7 +450,8 @@ namespace API.Parser
                 };
             }
 
-            if (type is LibraryType.ComicImages or LibraryType.MangaImages)
+            //if (type is LibraryType.ComicImages or LibraryType.MangaImages)
+            if (IsImage(filePath))
             {
               // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
               ret.Volumes = DefaultVolume;
@@ -456,7 +459,7 @@ namespace API.Parser
               ret.Series = string.Empty;
             }
 
-            if (ret.Series == string.Empty || (type is LibraryType.ComicImages or LibraryType.MangaImages))
+            if (ret.Series == string.Empty || IsImage(filePath))
             {
                 // Try to parse information out of each folder all the way to rootPath
                 ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
@@ -511,8 +514,8 @@ namespace API.Parser
                 var folder = fallbackFolders[i];
                 if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
 
-                var parsedVolume = (type is LibraryType.Manga or LibraryType.MangaImages) ? ParseVolume(folder) : ParseComicVolume(folder);
-                var parsedChapter = (type is LibraryType.Manga or LibraryType.MangaImages) ? ParseChapter(folder) : ParseComicChapter(folder);
+                var parsedVolume = type is LibraryType.Manga ? ParseVolume(folder) : ParseComicVolume(folder);
+                var parsedChapter = type is LibraryType.Manga ? ParseChapter(folder) : ParseComicChapter(folder);
 
                 if (!parsedVolume.Equals(DefaultVolume) || !parsedChapter.Equals(DefaultChapter))
                 {
@@ -548,7 +551,8 @@ namespace API.Parser
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
             if (IsImage(filePath)) return MangaFormat.Image;
-            if (IsBook(filePath)) return MangaFormat.Book;
+            if (IsEpub(filePath)) return MangaFormat.Epub;
+            if (IsPdf(filePath)) return MangaFormat.Pdf;
             return MangaFormat.Unknown;
         }
 

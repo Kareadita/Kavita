@@ -401,7 +401,7 @@ namespace API.Services
                         {
                             Chapters = Parser.Parser.DefaultChapter,
                             Edition = string.Empty,
-                            Format = MangaFormat.Book,
+                            Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
                             Title = specialName,
                             FullFilePath = filePath,
@@ -420,7 +420,7 @@ namespace API.Services
                 {
                     Chapters = Parser.Parser.DefaultChapter,
                     Edition = string.Empty,
-                    Format = MangaFormat.Book,
+                    Format = MangaFormat.Epub,
                     Filename = Path.GetFileName(filePath),
                     Title = epubBook.Title,
                     FullFilePath = filePath,

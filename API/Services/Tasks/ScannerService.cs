@@ -231,12 +231,17 @@ namespace API.Services.Tasks
            return SeriesWithInfos(_scannedSeries);
        }
 
+       /// <summary>
+       /// Given the Library Type, returns the regex pattern that restricts which files types will be found during a file scan.
+       /// </summary>
+       /// <param name="libraryType"></param>
+       /// <returns></returns>
        private static string GetLibrarySearchPattern(LibraryType libraryType)
        {
            var searchPattern = libraryType switch
            {
                LibraryType.Book => Parser.Parser.BookFileExtensions,
-               LibraryType.MangaImages or LibraryType.ComicImages => Parser.Parser.ImageFileExtensions,
+               LibraryType.Manga or LibraryType.Comic => Parser.Parser.MangaComicFileExtensions,
                _ => Parser.Parser.ArchiveFileExtensions
            };
 
@@ -568,7 +573,8 @@ namespace API.Services.Tasks
                    Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
                 };
              }
-             case MangaFormat.Book:
+             case MangaFormat.Pdf:
+             case MangaFormat.Epub:
              {
                 return new MangaFile()
                 {
@@ -603,7 +609,7 @@ namespace API.Services.Tasks
              existingFile.Format = info.Format;
              if (existingFile.HasFileBeenModified() || existingFile.Pages == 0)
              {
-                existingFile.Pages = existingFile.Format == MangaFormat.Book
+                existingFile.Pages = (existingFile.Format == MangaFormat.Epub || existingFile.Format == MangaFormat.Pdf)
                    ? _bookService.GetNumberOfPages(info.FullFilePath)
                    : _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
              }
