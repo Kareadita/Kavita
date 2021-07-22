@@ -129,6 +129,8 @@ namespace API.Services
           // NOTE: This suffers from code changes not taking effect due to stale data
           var firstFile = firstChapter?.Files.FirstOrDefault();
           if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+          if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
+
           var summary = isBook ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
           if (string.IsNullOrEmpty(series.Summary))
           {

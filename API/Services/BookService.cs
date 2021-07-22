@@ -11,20 +11,109 @@ using API.Interfaces.Services;
 using API.Parser;
 using ExCSS;
 using HtmlAgilityPack;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using iText.Kernel.Pdf.Canvas.Parser.Data;
+using iText.Kernel.Pdf.Canvas.Parser.Listener;
+using iText.Kernel.Pdf.Xobject;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using VersOne.Epub;
 
 namespace API.Services
 {
+
+   public class ImageRenderToByteArrayListener : IEventListener
+   {
+      private readonly string _format;
+      private readonly Dictionary<string, byte[]> _mapping;
+      private int _index = 0;
+
+      public ImageRenderToByteArrayListener(string format, ref Dictionary<string, byte[]> mapping)
+      {
+         _format = format;
+         _mapping = mapping;
+      }
+
+      public void EventOccurred(IEventData data, EventType type)
+      {
+         if (data is ImageRenderInfo imageData)
+         {
+            try
+            {
+               PdfImageXObject imageObject = imageData.GetImage();
+               if (imageObject == null)
+               {
+                  Console.WriteLine("Image could not be read.");
+               }
+               else
+               {
+                  var outputKey = string.Format(_format, _index++, imageObject.IdentifyImageFileExtension());
+                  _mapping.Add(outputKey, imageObject.GetImageBytes());
+                  //File.WriteAllBytes(string.Format(_format, _index++, imageObject.IdentifyImageFileExtension()), imageObject.GetImageBytes());
+               }
+            }
+            catch (Exception ex)
+            {
+               Console.WriteLine("Image could not be read: {0}.", ex.Message);
+            }
+         }
+      }
+
+      public ICollection<EventType> GetSupportedEvents()
+      {
+         return null;
+      }
+   }
+
+   public class ImageRenderToDiskListener : IEventListener
+   {
+      public ImageRenderToDiskListener(string format)
+      {
+         this.format = format;
+      }
+
+      public void EventOccurred(IEventData data, EventType type)
+      {
+         if (data is ImageRenderInfo imageData)
+         {
+            try
+            {
+               PdfImageXObject imageObject = imageData.GetImage();
+               if (imageObject == null)
+               {
+                  Console.WriteLine("Image could not be read.");
+               }
+               else
+               {
+                  File.WriteAllBytes(string.Format(format, index++, imageObject.IdentifyImageFileExtension()), imageObject.GetImageBytes());
+               }
+            }
+            catch (Exception ex)
+            {
+               Console.WriteLine("Image could not be read: {0}.", ex.Message);
+            }
+         }
+      }
+
+      public ICollection<EventType> GetSupportedEvents()
+      {
+         return null;
+      }
+
+      string format;
+      int index = 0;
+   }
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
         private readonly StylesheetParser _cssParser = new ();
+        private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp"); // TODO: Move temp directory into one location for all services
 
         public BookService(ILogger<BookService> logger)
         {
             _logger = logger;
+
         }
 
         private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -157,7 +246,8 @@ namespace API.Services
 
         public string GetSummaryInfo(string filePath)
         {
-            if (!IsValidFile(filePath)) return string.Empty;
+            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return string.Empty;
+
 
             try
             {
@@ -182,18 +272,24 @@ namespace API.Services
 
             if (Parser.Parser.IsBook(filePath)) return true;
 
-            _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB", filePath);
+            _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB/PDF", filePath);
             return false;
         }
 
         public int GetNumberOfPages(string filePath)
         {
-            if (!IsValidFile(filePath) || !Parser.Parser.IsEpub(filePath)) return 0;
+            if (!IsValidFile(filePath)) return 0;
 
             try
             {
-                using var epubBook = EpubReader.OpenBook(filePath);
-                return epubBook.Content.Html.Count;
+               if (Parser.Parser.IsPdf(filePath))
+               {
+                  using var pdfDoc = new PdfDocument(new PdfReader(filePath));
+                  return pdfDoc.GetNumberOfPages();
+               }
+
+               using var epubBook = EpubReader.OpenBook(filePath);
+               return epubBook.Content.Html.Count;
             }
             catch (Exception ex)
             {
@@ -231,14 +327,16 @@ namespace API.Services
 
         /// <summary>
         /// Parses out Title from book. Chapters and Volumes will always be "0". If there is any exception reading book (malformed books)
-        /// then null is returned.
+        /// then null is returned. This expects only an epub file
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
         public ParserInfo ParseInfo(string filePath)
         {
-            try
-            {
+           if (!Parser.Parser.IsEpub(filePath)) return null;
+
+           try
+           {
                 using var epubBook = EpubReader.OpenBook(filePath);
 
                 // If the epub has the following tags, we can group the books as Volumes
@@ -301,8 +399,8 @@ namespace API.Services
                         }
                         return new ParserInfo()
                         {
-                            Chapters = "0",
-                            Edition = "",
+                            Chapters = Parser.Parser.DefaultChapter,
+                            Edition = string.Empty,
                             Format = MangaFormat.Book,
                             Filename = Path.GetFileName(filePath),
                             Title = specialName,
@@ -320,29 +418,34 @@ namespace API.Services
 
                 return new ParserInfo()
                 {
-                    Chapters = "0",
-                    Edition = "",
+                    Chapters = Parser.Parser.DefaultChapter,
+                    Edition = string.Empty,
                     Format = MangaFormat.Book,
                     Filename = Path.GetFileName(filePath),
                     Title = epubBook.Title,
                     FullFilePath = filePath,
                     IsSpecial = false,
                     Series = epubBook.Title,
-                    Volumes = "0"
+                    Volumes = Parser.Parser.DefaultVolume
                 };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
-            }
+           }
+           catch (Exception ex)
+           {
+              _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
+           }
 
-            return null;
+           return null;
         }
 
 
         public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
         {
             if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
+
+            if (Parser.Parser.IsPdf(fileFilePath))
+            {
+               return GetPdfCoverImage(fileFilePath, createThumbnail);
+            }
 
             using var epubBook = EpubReader.OpenBook(fileFilePath);
 
@@ -372,6 +475,58 @@ namespace API.Services
             }
 
             return Array.Empty<byte>();
+        }
+
+        private byte[] GetPdfCoverImage(string fileFilePath, bool createThumbnail)
+        {
+           try
+           {
+              using var pdfDoc = new PdfDocument(new PdfReader(fileFilePath));
+              var numberOfPages = pdfDoc.GetNumberOfPages();
+              if (numberOfPages == 0)
+              {
+                 _logger.LogWarning(
+                    "[BookService] There are no pages in the PDF and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
+                    fileFilePath);
+              }
+
+              var firstPage = pdfDoc.GetFirstPage();
+
+              Dictionary<string, byte[]> mappings = new Dictionary<string, byte[]>();
+              IEventListener strategy = new ImageRenderToByteArrayListener(Path.Join(_tempDirectory, "extract-{0}.{1}"), ref mappings);
+              PdfCanvasProcessor parser = new PdfCanvasProcessor(strategy);
+              parser.ProcessPageContent(firstPage);
+
+              var bytes = Array.Empty<byte>();
+              if (mappings.Count > 0)
+              {
+                 foreach (var mappingKey in mappings.Keys)
+                 {
+                    bytes = mappings[mappingKey];
+                    break;
+                 }
+              }
+
+              if (createThumbnail)
+              {
+                 using var stream = new MemoryStream(bytes);
+
+                 using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                 return thumbnail.WriteToBuffer(".jpg");
+              }
+
+              return bytes;
+
+
+           }
+           catch (Exception ex)
+           {
+              _logger.LogWarning(ex,
+                 "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
+                 fileFilePath);
+           }
+
+           return Array.Empty<byte>();
         }
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)

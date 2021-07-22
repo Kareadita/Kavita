@@ -11,6 +11,6 @@ namespace API.Entities.Enums
         [Description("Unknown")]
         Unknown = 2,
         [Description("Book")]
-        Book = 3
+        Book = 3,
     }
 }

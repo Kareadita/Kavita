@@ -13,7 +13,7 @@ namespace API.Parser
         public const string DefaultVolume = "0";
 
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
-        public const string BookFileExtensions = @"\.epub";
+        public const string BookFileExtensions = @"\.epub|\.pdf";
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -935,6 +935,11 @@ namespace API.Parser
         public static bool IsEpub(string filePath)
         {
             return Path.GetExtension(filePath).ToLower() == ".epub";
+        }
+
+        public static bool IsPdf(string filePath)
+        {
+           return Path.GetExtension(filePath).ToLower() == ".pdf";
         }
     }
 }
