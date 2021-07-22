@@ -14,6 +14,7 @@ import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-seri
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { LibraryType } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
@@ -330,7 +331,8 @@ export class SeriesDetailComponent implements OnInit {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
-    if (this.libraryType === LibraryType.Book) {
+
+    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
       this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id]);
     } else {
       this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);

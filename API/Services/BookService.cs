@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,106 +12,20 @@ using System.Web;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
+using Docnet.Core;
+using Docnet.Core.Models;
 using ExCSS;
 using HtmlAgilityPack;
-using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Data;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
-using iText.Kernel.Pdf.Xobject;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using VersOne.Epub;
+using Image = NetVips.Image;
 
 namespace API.Services
 {
-
-   public class ImageRenderToByteArrayListener : IEventListener
-   {
-      private readonly string _format;
-      private readonly Dictionary<string, byte[]> _mapping;
-      private int _index = 0;
-
-      public ImageRenderToByteArrayListener(string format, ref Dictionary<string, byte[]> mapping)
-      {
-         _format = format;
-         _mapping = mapping;
-      }
-
-      public void EventOccurred(IEventData data, EventType type)
-      {
-         if (data is ImageRenderInfo imageData)
-         {
-            try
-            {
-               PdfImageXObject imageObject = imageData.GetImage();
-               if (imageObject == null)
-               {
-                  Console.WriteLine("Image could not be read.");
-               }
-               else
-               {
-                  var outputKey = string.Format(_format, _index++, imageObject.IdentifyImageFileExtension());
-                  _mapping.Add(outputKey, imageObject.GetImageBytes());
-                  //File.WriteAllBytes(string.Format(_format, _index++, imageObject.IdentifyImageFileExtension()), imageObject.GetImageBytes());
-               }
-            }
-            catch (Exception ex)
-            {
-               Console.WriteLine("Image could not be read: {0}.", ex.Message);
-            }
-         }
-      }
-
-      public ICollection<EventType> GetSupportedEvents()
-      {
-         return null;
-      }
-   }
-
-   public class ImageRenderToDiskListener : IEventListener
-   {
-      public ImageRenderToDiskListener(string format)
-      {
-         this.format = format;
-      }
-
-      public void EventOccurred(IEventData data, EventType type)
-      {
-         if (data is ImageRenderInfo imageData)
-         {
-            try
-            {
-               PdfImageXObject imageObject = imageData.GetImage();
-               if (imageObject == null)
-               {
-                  Console.WriteLine("Image could not be read.");
-               }
-               else
-               {
-                  File.WriteAllBytes(string.Format(format, index++, imageObject.IdentifyImageFileExtension()), imageObject.GetImageBytes());
-               }
-            }
-            catch (Exception ex)
-            {
-               Console.WriteLine("Image could not be read: {0}.", ex.Message);
-            }
-         }
-      }
-
-      public ICollection<EventType> GetSupportedEvents()
-      {
-         return null;
-      }
-
-      string format;
-      int index = 0;
-   }
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
         private readonly StylesheetParser _cssParser = new ();
-        private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp"); // TODO: Move temp directory into one location for all services
 
         public BookService(ILogger<BookService> logger)
         {
@@ -284,8 +201,8 @@ namespace API.Services
             {
                if (Parser.Parser.IsPdf(filePath))
                {
-                  using var pdfDoc = new PdfDocument(new PdfReader(filePath));
-                  return pdfDoc.GetNumberOfPages();
+                   using var docReader = DocLib.Instance.GetDocReader(filePath, new PageDimensions(1080, 1920));
+                   return docReader.GetPageCount();
                }
 
                using var epubBook = EpubReader.OpenBook(filePath);
@@ -437,6 +354,36 @@ namespace API.Services
            return null;
         }
 
+        private static void AddBytesToBitmap(Bitmap bmp, byte[] rawBytes)
+        {
+            var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, bmp.PixelFormat);
+            var pNative = bmpData.Scan0;
+
+            Marshal.Copy(rawBytes, 0, pNative, rawBytes.Length);
+            bmp.UnlockBits(bmpData);
+        }
+
+        public void ExtractPdfImages(string fileFilePath, string targetDirectory)
+        {
+            DirectoryService.ExistOrCreate(targetDirectory);
+
+            using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
+            var pages = docReader.GetPageCount();
+            for (var pageNumber = 0; pageNumber < pages; pageNumber++)
+            {
+                using var pageReader = docReader.GetPageReader(pageNumber);
+                var rawBytes = pageReader.GetImage();
+                using var bmp = new Bitmap(pageReader.GetPageWidth(), pageReader.GetPageHeight(), PixelFormat.Format32bppArgb);
+                AddBytesToBitmap(bmp, rawBytes);
+                using var stream = new MemoryStream();
+                bmp.Save(stream, ImageFormat.Png);
+
+                File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
+            }
+        }
+
 
         public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
         {
@@ -481,43 +428,24 @@ namespace API.Services
         {
            try
            {
-              using var pdfDoc = new PdfDocument(new PdfReader(fileFilePath));
-              var numberOfPages = pdfDoc.GetNumberOfPages();
-              if (numberOfPages == 0)
-              {
-                 _logger.LogWarning(
-                    "[BookService] There are no pages in the PDF and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
-                    fileFilePath);
-              }
+               using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
+               if (docReader.GetPageCount() == 0) return Array.Empty<byte>();
 
-              var firstPage = pdfDoc.GetFirstPage();
+               using var pageReader = docReader.GetPageReader(0);
+               var rawBytes = pageReader.GetImage();
+               using var bmp = new Bitmap(pageReader.GetPageWidth(), pageReader.GetPageHeight(), PixelFormat.Format32bppArgb);
+               AddBytesToBitmap(bmp, rawBytes);
+               using var stream = new MemoryStream();
+               bmp.Save(stream, ImageFormat.Jpeg);
+               stream.Seek(0, SeekOrigin.Begin);
 
-              Dictionary<string, byte[]> mappings = new Dictionary<string, byte[]>();
-              IEventListener strategy = new ImageRenderToByteArrayListener(Path.Join(_tempDirectory, "extract-{0}.{1}"), ref mappings);
-              PdfCanvasProcessor parser = new PdfCanvasProcessor(strategy);
-              parser.ProcessPageContent(firstPage);
+               if (createThumbnail)
+               {
+                   using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                   return thumbnail.WriteToBuffer(".jpg");
+               }
 
-              var bytes = Array.Empty<byte>();
-              if (mappings.Count > 0)
-              {
-                 foreach (var mappingKey in mappings.Keys)
-                 {
-                    bytes = mappings[mappingKey];
-                    break;
-                 }
-              }
-
-              if (createThumbnail)
-              {
-                 using var stream = new MemoryStream(bytes);
-
-                 using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                 return thumbnail.WriteToBuffer(".jpg");
-              }
-
-              return bytes;
-
-
+               return stream.ToArray();
            }
            catch (Exception ex)
            {

@@ -18,16 +18,18 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
-            IDirectoryService directoryService)
+            IDirectoryService directoryService, IBookService bookService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
+            _bookService = bookService;
             _numericComparer = new NumericComparer();
         }
 
@@ -73,6 +75,9 @@ namespace API.Services
               if (file.Format == MangaFormat.Archive)
               {
                 _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+              } else if (file.Format == MangaFormat.Pdf)
+              {
+                  _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
               }
             }
 

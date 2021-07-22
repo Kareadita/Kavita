@@ -31,13 +31,13 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="Docnet.Core" Version="2.3.1" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Hangfire" Version="1.7.20" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.20" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.32" />
-    <PackageReference Include="itext7" Version="7.1.16" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.4" />
@@ -58,6 +58,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
     <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>

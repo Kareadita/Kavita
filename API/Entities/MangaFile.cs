@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using API.Entities.Enums;
-using API.Extensions;
 
 namespace API.Entities
 {
