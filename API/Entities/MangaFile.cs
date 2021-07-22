@@ -26,11 +26,11 @@ namespace API.Entities
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
-        
+
         // Methods
         public bool HasFileBeenModified()
         {
-            return new FileInfo(FilePath).DoesLastWriteMatch(LastModified);
+            return !File.GetLastWriteTime(FilePath).Equals(LastModified);
         }
     }
 }

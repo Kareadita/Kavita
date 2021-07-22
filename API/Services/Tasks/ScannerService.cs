@@ -601,7 +601,7 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             if (!existingFile.HasFileBeenModified() && existingFile.Pages > 0)
+             if (existingFile.HasFileBeenModified() || existingFile.Pages == 0)
              {
                 existingFile.Pages = existingFile.Format == MangaFormat.Book
                    ? _bookService.GetNumberOfPages(info.FullFilePath)
