@@ -238,14 +238,16 @@ namespace API.Services.Tasks
        /// <returns></returns>
        private static string GetLibrarySearchPattern(LibraryType libraryType)
        {
-           var searchPattern = libraryType switch
-           {
-               LibraryType.Book => Parser.Parser.BookFileExtensions,
-               LibraryType.Manga or LibraryType.Comic => Parser.Parser.MangaComicFileExtensions,
-               _ => Parser.Parser.ArchiveFileExtensions
-           };
+           // var searchPattern = libraryType switch
+           // {
+           //     LibraryType.Book => Parser.Parser.BookFileExtensions,
+           //     LibraryType.Manga or LibraryType.Comic => Parser.Parser.MangaComicFileExtensions,
+           //     _ => Parser.Parser.ArchiveFileExtensions
+           // };
 
-           return searchPattern;
+           return Parser.Parser.SupportedExtensions;
+
+           //return searchPattern;
        }
 
        /// <summary>
@@ -535,7 +537,8 @@ namespace API.Services.Tasks
        {
           ParserInfo info;
 
-          if (type == LibraryType.Book && Parser.Parser.IsEpub(path))
+          //type == LibraryType.Book &&
+          if (Parser.Parser.IsEpub(path))
           {
              info = _bookService.ParseInfo(path);
           }
@@ -550,7 +553,8 @@ namespace API.Services.Tasks
              return;
           }
 
-          if (type == LibraryType.Book && Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
+          //type == LibraryType.Book &&
+          if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
           {
              info = Parser.Parser.Parse(path, rootPath, type);
              var info2 = _bookService.ParseInfo(path);

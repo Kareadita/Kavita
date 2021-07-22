@@ -17,6 +17,9 @@ namespace API.Parser
         public const string BookFileExtensions = @"\.epub|\.pdf";
         public const string MangaComicFileExtensions = ArchiveFileExtensions + "|" + ImageFileExtensions + @"|\.pdf";
 
+        public const string SupportedExtensions =
+            ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
+
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
@@ -424,7 +427,8 @@ namespace API.Parser
             var fileName = Path.GetFileName(filePath);
             ParserInfo ret;
 
-            if (type == LibraryType.Book)
+            //if (type == LibraryType.Book)
+            if (IsEpub(filePath))
             {
                 ret = new ParserInfo()
                 {
