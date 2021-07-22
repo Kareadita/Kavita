@@ -450,7 +450,6 @@ namespace API.Parser
                 };
             }
 
-            //if (type is LibraryType.ComicImages or LibraryType.MangaImages)
             if (IsImage(filePath))
             {
               // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
