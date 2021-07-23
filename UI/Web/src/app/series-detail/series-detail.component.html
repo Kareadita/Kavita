@@ -4,7 +4,12 @@
             <img class="poster" [lazyLoad]="imageService.getSeriesCoverImage(series.id)" [defaultImage]="imageService.placeholderImage">
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <div class="row no-gutters"><h2>{{series?.name}}</h2></div>
+            <div class="row no-gutters">
+                
+                <h2>
+                    {{series?.name}}
+                </h2>
+            </div>
             <div class="row no-gutters">
                 <div>
                     <button class="btn btn-primary" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;" [disabled]="isLoading">
@@ -73,6 +78,14 @@
                             <div name>{{person.name}}</div>
                             <div role>{{person.role}}</div>
                         </app-person-badge>
+                    </div>
+                </div>
+                <div class="row no-gutters mt-1" *ngIf="series.format != MangaFormat.UNKNOWN">
+                    <div class="col-md-4">
+                        <h5>Type</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-tag-badge><i class="fa {{utilityService.mangaFormatIcon(series.format)}}" aria-hidden="true" title="{{utilityService.mangaFormat(series.format)}}"></i>&nbsp;{{utilityService.mangaFormat(series.format)}} </app-tag-badge>
                     </div>
                 </div>
             </div>

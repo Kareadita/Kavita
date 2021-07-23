@@ -51,10 +51,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
         if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
           this.libraryId = (this.entity as Series).libraryId;
           this.libraryName = names[this.libraryId];
-          this.format = (this.entity as Series).format;
         }
       });
     }
+    this.format = (this.entity as Series).format;
   }
 
   ngOnDestroy() {

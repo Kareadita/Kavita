@@ -71,10 +71,14 @@ export class SeriesDetailComponent implements OnInit {
     return LibraryType;
   }
 
+  get MangaFormat(): typeof MangaFormat {
+    return MangaFormat;
+  }
+
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              ratingConfig: NgbRatingConfig, private router: Router,
+              private ratingConfig: NgbRatingConfig, private router: Router,
               private modalService: NgbModal, public readerService: ReaderService,
-              private utilityService: UtilityService, private toastr: ToastrService,
+              public utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private naturalSort: NaturalSortService,
