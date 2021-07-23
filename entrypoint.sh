@@ -79,4 +79,6 @@ else
 
 fi
 
+chmod +x ./Kavita
+
 ./Kavita
