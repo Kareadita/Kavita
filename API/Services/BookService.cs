@@ -403,15 +403,12 @@ namespace API.Services
 
                 if (coverImageContent == null) return Array.Empty<byte>();
 
-                if (createThumbnail)
-                {
-                    using var stream = new MemoryStream(coverImageContent.ReadContent());
+                if (!createThumbnail) return coverImageContent.ReadContent();
 
-                    using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                    return thumbnail.WriteToBuffer(".jpg");
-                }
+                using var stream = new MemoryStream(coverImageContent.ReadContent());
+                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                return thumbnail.WriteToBuffer(".jpg");
 
-                return coverImageContent.ReadContent();
             }
             catch (Exception ex)
             {
@@ -431,13 +428,11 @@ namespace API.Services
                using var stream = GetPdfPage(docReader, 0);
                stream.Seek(0, SeekOrigin.Begin);
 
-               if (createThumbnail)
-               {
-                   using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                   return thumbnail.WriteToBuffer(".png");
-               }
+               if (!createThumbnail) return stream.ToArray();
 
-               return stream.ToArray();
+               using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+               return thumbnail.WriteToBuffer(".png");
+
            }
            catch (Exception ex)
            {
