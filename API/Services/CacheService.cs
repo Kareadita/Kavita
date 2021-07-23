@@ -18,16 +18,18 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
-            IDirectoryService directoryService)
+            IDirectoryService directoryService, IBookService bookService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
+            _bookService = bookService;
             _numericComparer = new NumericComparer();
         }
 
@@ -58,7 +60,15 @@ namespace API.Services
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
               DirectoryService.ExistOrCreate(extractPath);
-              _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath);
+              if (files.Count == 1)
+              {
+                  _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+              }
+              else
+              {
+                  _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath, Parser.Parser.ImageFileExtensions);
+              }
+
               extractDi.Flatten();
               return chapter;
             }
@@ -73,6 +83,9 @@ namespace API.Services
               if (file.Format == MangaFormat.Archive)
               {
                 _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+              } else if (file.Format == MangaFormat.Pdf)
+              {
+                  _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
               }
             }
 

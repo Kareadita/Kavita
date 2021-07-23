@@ -45,7 +45,7 @@ namespace API.Data
             {
                 Number = specialTreatment ? "0" : Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
                 Range = specialTreatment ? info.Filename : info.Chapters,
-                Title = (specialTreatment && info.Format == MangaFormat.Book)
+                Title = (specialTreatment && info.Format == MangaFormat.Epub)
                     ? info.Title
                     : specialTitle,
                 Files = new List<MangaFile>(),

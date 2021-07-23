@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { MemberService } from '../_services/member.service';
 import { AccountService } from '../_services/account.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-home',
@@ -19,7 +20,7 @@ export class HomeComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(public accountService: AccountService, private memberService: MemberService, private router: Router) {
+  constructor(public accountService: AccountService, private memberService: MemberService, private router: Router, private titleService: Title) {
   }
 
   ngOnInit(): void {
@@ -31,6 +32,7 @@ export class HomeComponent implements OnInit {
         return;
       }
 
+      this.titleService.setTitle('Kavita');
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.router.navigateByUrl('/library');

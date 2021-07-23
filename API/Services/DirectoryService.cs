@@ -113,7 +113,15 @@ namespace API.Services
          }
        }
 
-       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName)
+       /// <summary>
+       /// Copies a Directory with all files and subdirectories to a target location
+       /// </summary>
+       /// <param name="sourceDirName"></param>
+       /// <param name="destDirName"></param>
+       /// <param name="searchPattern">Defaults to *, meaning all files</param>
+       /// <returns></returns>
+       /// <exception cref="DirectoryNotFoundException"></exception>
+       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -136,7 +144,7 @@ namespace API.Services
          Directory.CreateDirectory(destDirName);
 
          // Get the files in the directory and copy them to the new location.
-         var files = dir.GetFiles();
+         var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => new FileInfo(n));
          foreach (var file in files)
          {
            var tempPath = Path.Combine(destDirName, file.Name);

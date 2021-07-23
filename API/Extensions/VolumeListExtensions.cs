@@ -23,6 +23,7 @@ namespace API.Extensions
         /// <returns></returns>
         public static Volume GetCoverImage(this IList<Volume> volumes, LibraryType libraryType)
         {
+            // TODO: Refactor this to use MangaFormat Epub instead
             if (libraryType == LibraryType.Book)
             {
                 return volumes.OrderBy(x => x.Number).FirstOrDefault();
@@ -30,7 +31,7 @@ namespace API.Extensions
 
             if (volumes.Any(x => x.Number != 0))
             {
-                return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);    
+                return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
             }
             return volumes.OrderBy(x => x.Number).FirstOrDefault();
         }

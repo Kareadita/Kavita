@@ -21,6 +21,7 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+        private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork)
         {
@@ -295,8 +296,8 @@ namespace API.Controllers
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
             {
-                // Handle specials
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer), currentChapter.Number);
+                // Handle specials by sorting on their Filename aka Range
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
 
@@ -362,7 +363,7 @@ namespace API.Controllers
 
             if (currentVolume.Number == 0)
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).Reverse(), currentChapter.Number);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer).Reverse(), currentChapter.Number);
                 if (chapterId > 0) return Ok(chapterId);
             }
 

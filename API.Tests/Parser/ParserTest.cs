@@ -5,7 +5,7 @@ namespace API.Tests.Parser
 {
     public class ParserTests
     {
-        
+
         [Theory]
         [InlineData("Beastars - SP01", true)]
         [InlineData("Beastars SP01", true)]
@@ -44,8 +44,8 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, CleanTitle(input));
         }
-        
-        
+
+
         // [Theory]
         // //[InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "@font-face{font-family:\"PaytoneOne\";src:url(\"PaytoneOne.ttf\")}")]
         // [InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "..\\/Fonts\\/PaytoneOne.ttf")]
@@ -60,7 +60,7 @@ namespace API.Tests.Parser
         //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
         // }
 
-        
+
         [Theory]
         [InlineData("test.cbz", true)]
         [InlineData("test.cbr", true)]
@@ -72,10 +72,10 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, IsArchive(input));
         }
-        
+
         [Theory]
         [InlineData("test.epub", true)]
-        [InlineData("test.pdf", false)]
+        [InlineData("test.pdf", true)]
         [InlineData("test.mobi", false)]
         [InlineData("test.djvu", false)]
         [InlineData("test.zip", false)]
@@ -86,7 +86,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, IsBook(input));
         }
-        
+
         [Theory]
         [InlineData("test.epub", true)]
         [InlineData("test.EPUB", true)]
@@ -111,7 +111,7 @@ namespace API.Tests.Parser
         // {
         //     Assert.Equal(expected, ParseEdition(input));
         // }
-        
+
         // [Theory]
         // [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
         // [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
@@ -124,7 +124,7 @@ namespace API.Tests.Parser
         // {
         //     Assert.Equal(expected, ParseMangaSpecial(input) != "");
         // }
-        
+
         [Theory]
         [InlineData("12-14", 12)]
         [InlineData("24", 24)]
@@ -147,8 +147,8 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, Normalize(input));
         }
-        
-        
+
+
 
         [Theory]
         [InlineData("test.jpg", true)]
@@ -160,7 +160,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, IsImage(filename));
         }
-        
+
         [Theory]
         [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
         [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
@@ -173,10 +173,10 @@ namespace API.Tests.Parser
                 Assert.NotNull(actual);
                 return;
             }
-            
+
             Assert.Equal(expectedSeries, actual.Series);
         }
-        
+
         [Theory]
         [InlineData("Love Hina - Special.jpg", false)]
         [InlineData("folder.jpg", true)]
@@ -190,7 +190,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, IsCoverImage(inputPath));
         }
-        
+
         [Theory]
         [InlineData("__MACOSX/Love Hina - Special.jpg", true)]
         [InlineData("TEST/Love Hina - Special.jpg", false)]

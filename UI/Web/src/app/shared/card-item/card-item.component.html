@@ -17,7 +17,8 @@
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
           </span>
-          {{title}}
+          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
+          &nbsp;{{title}}
           <span class="sr-only">(promoted)</span>
         </span>
         <span class="card-actions float-right">

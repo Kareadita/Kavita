@@ -99,6 +99,7 @@
                     <h4>Information</h4>
                     <div class="row no-gutters mb-2">
                         <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | titlecase}}</div>
+                        <div class="col-md-6">Format: <app-tag-badge>{{utilityService.mangaFormat(series.format)}}</app-tag-badge></div>
                     </div>
                       <h4>Volumes</h4>
                       <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">

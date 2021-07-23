@@ -85,6 +85,7 @@ namespace API.Controllers
                     ".epub" => "application/epub+zip",
                     ".7z" => "application/x-7z-compressed",
                     ".7zip" => "application/x-7z-compressed",
+                    ".pdf" => "application/pdf",
                     _ => contentType
                 };
             }

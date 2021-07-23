@@ -8,6 +8,7 @@ import { AccountService } from '../_services/account.service';
 import { Options } from '@angular-slider/ngx-slider';
 import { BookService } from '../book-reader/book.service';
 import { NavService } from '../_services/nav.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-user-preferences',
@@ -47,11 +48,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   };
   fontFamilies: Array<string> = [];
 
-  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, private navService: NavService) {
+  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, private navService: NavService, private titleService: Title) {
     this.fontFamilies = this.bookService.getFontFamilies();
   }
 
   ngOnInit(): void {
+    this.titleService.setTitle('Kavita - User Preferences');
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       if (user) {
         this.user = user;
@@ -71,9 +73,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
-        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(user.preferences.siteDarkMode || false, []));
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.siteDarkMode, []));
 
-        this.settingsForm.addControl('siteDarkMode', new FormControl(user.preferences.siteDarkMode || true, []));
+        this.settingsForm.addControl('siteDarkMode', new FormControl(!!user.preferences.siteDarkMode, []));
       }
     });
 

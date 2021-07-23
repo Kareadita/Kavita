@@ -27,6 +27,6 @@ namespace API.Interfaces.Services
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         void CopyFileToDirectory(string fullFilePath, string targetDirectory);
-        public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName);
+        public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*");
     }
 }

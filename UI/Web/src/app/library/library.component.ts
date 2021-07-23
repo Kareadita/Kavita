@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
@@ -34,9 +35,13 @@ export class LibraryComponent implements OnInit {
 
   seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService, private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, private collectionService: CollectionTagService, private router: Router, private modalService: NgbModal) { }
+  constructor(public accountService: AccountService, private libraryService: LibraryService, 
+    private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
+    private collectionService: CollectionTagService, private router: Router, 
+    private modalService: NgbModal, private titleService: Title) { }
 
   ngOnInit(): void {
+    this.titleService.setTitle('Kavita - Dashboard');
     this.isLoading = true;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;

@@ -3,11 +3,13 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
+import { MangaFormat } from 'src/app/_models/manga-format';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { UtilityService } from '../_services/utility.service';
 
 @Component({
   selector: 'app-card-item',
@@ -28,10 +30,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
   libraryName: string | undefined = undefined; // Library name item belongs to
   libraryId: number | undefined = undefined; 
   supressArchiveWarning: boolean = false; // This will supress the cannot read archive warning when total pages is 0
+  format: MangaFormat = MangaFormat.UNKNOWN;
+
+  get MangaFormat(): typeof MangaFormat {
+    return MangaFormat;
+  }
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService) {
+  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {
   }
 
   ngOnInit(): void {
@@ -47,6 +54,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
         }
       });
     }
+    this.format = (this.entity as Series).format;
   }
 
   ngOnDestroy() {

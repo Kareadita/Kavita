@@ -26,8 +26,7 @@ your reading collection with your friends and family!
 - [x] Ability to manage users, access, and ratings
 - [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
-- [x] Dedicated webtoon reader
-- [ ] Dedicated Plugin Support (partial support via API)
+- [x] Dedicated webtoon reading mode
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 ## Support
@@ -77,7 +76,7 @@ services:
         restart: unless-stopped
 ```
 
-**Note: Kavita is under heavy development and is being updated frequently, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release. There is also the `:alpine` tag if you want a smaller image, but it is only available for x64 systems.**
+**Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release. There is also the `:alpine` tag if you want a smaller image, but it is only available for x64 systems.**
 
 ## Feature Requests
 Got a great idea? Throw it up on the FeatHub or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
@@ -93,7 +92,7 @@ This project exists thanks to all the people who contribute. [Contribute](CONTRI
 
 ## Donate
 If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards 
-expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer).
+expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
 
 ## Backers
 
@@ -122,4 +121,4 @@ Thank you to [<img src="/Logo/sentry.svg" alt="" width="64">](https://sentry.io/
 ### License
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2010-2021
+* Copyright 2020-2021
