@@ -26,7 +26,7 @@ namespace API.Services.Tasks
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
        private readonly IBookService _bookService;
-       private readonly NaturalSortComparer _naturalSort;
+       private readonly NaturalSortComparer _naturalSort = new ();
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
           IMetadataService metadataService, IBookService bookService)
@@ -36,7 +36,6 @@ namespace API.Services.Tasks
           _archiveService = archiveService;
           _metadataService = metadataService;
           _bookService = bookService;
-          _naturalSort = new NaturalSortComparer();
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
