@@ -25,5 +25,6 @@
         </span>
       </div>
       <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
+      <!-- <i class="fa {{fileType}}" aria-hidden="true"></i><span class="sr-only">fileType</span> -->
     </div>
 </div>

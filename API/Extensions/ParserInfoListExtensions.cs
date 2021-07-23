@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
+using API.Entities.Enums;
 using API.Parser;
 
 namespace API.Extensions
@@ -26,8 +27,19 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool HasInfo(this IList<ParserInfo> infos, Chapter chapter)
         {
-            return chapter.IsSpecial ? infos.Any(v => v.Filename == chapter.Range) 
+            return chapter.IsSpecial ? infos.Any(v => v.Filename == chapter.Range)
                                     : infos.Any(v => v.Chapters == chapter.Range);
+        }
+
+        /// <summary>
+        /// Returns the MangaFormat that is common to all the files. Unknown if files are mixed (should never happen) or no infos
+        /// </summary>
+        /// <param name="infos"></param>
+        /// <returns></returns>
+        public static MangaFormat GetFormat(this IList<ParserInfo> infos)
+        {
+            if (infos.Count == 0) return MangaFormat.Unknown;
+            return infos.DistinctBy(x => x.Format).First().Format;
         }
     }
 }

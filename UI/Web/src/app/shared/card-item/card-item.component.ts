@@ -29,6 +29,14 @@ export class CardItemComponent implements OnInit, OnDestroy {
   libraryId: number | undefined = undefined; 
   supressArchiveWarning: boolean = false; // This will supress the cannot read archive warning when total pages is 0
 
+  get fileType() {
+    //const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
+    return '';
+  }
+  get fileTypeIcon() {
+    return '';
+  }
+
   private readonly onDestroy = new Subject<void>();
 
   constructor(public imageSerivce: ImageService, private libraryService: LibraryService) {
