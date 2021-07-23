@@ -49,7 +49,7 @@ namespace API.Entities
             {
                 Number = "0";
             }
-            Title = (IsSpecial && info.Format == MangaFormat.Book)
+            Title = (IsSpecial && info.Format == MangaFormat.Epub)
                 ? info.Title
                 : Range;
             

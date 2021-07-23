@@ -22,5 +22,11 @@ namespace API.Interfaces.Services
         Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
         string GetSummaryInfo(string filePath);
         ParserInfo ParseInfo(string filePath);
+        /// <summary>
+        /// Extracts a PDF file's pages as images to an target directory
+        /// </summary>
+        /// <param name="fileFilePath"></param>
+        /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
+        void ExtractPdfImages(string fileFilePath, string targetDirectory);
     }
 }

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
-    [Index(nameof(Name), nameof(NormalizedName), nameof(LocalizedName), nameof(LibraryId), IsUnique = true)]
+    [Index(nameof(Name), nameof(NormalizedName), nameof(LocalizedName), nameof(LibraryId), nameof(Format), IsUnique = true)]
     public class Series : IEntityDate
     {
         public int Id { get; set; }
@@ -22,7 +23,7 @@ namespace API.Entities
         /// </summary>
         public string SortName { get; set; }
         /// <summary>
-        /// Name in Japanese. By default, will be same as Name. 
+        /// Name in Japanese. By default, will be same as Name.
         /// </summary>
         public string LocalizedName { get; set; }
         /// <summary>
@@ -40,7 +41,12 @@ namespace API.Entities
         /// Sum of all Volume page counts
         /// </summary>
         public int Pages { get; set; }
-        
+
+        /// <summary>
+        /// The type of all the files attached to this series
+        /// </summary>
+        public MangaFormat Format { get; set; } = MangaFormat.Unknown;
+
         public SeriesMetadata Metadata { get; set; }
 
         // Relationships

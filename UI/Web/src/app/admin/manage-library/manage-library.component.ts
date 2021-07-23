@@ -88,10 +88,6 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
         return 'Comic';
       case LibraryType.Manga:
         return 'Manga';
-      case LibraryType.MangaImages:
-        return 'Images (Manga)';
-      case LibraryType.ComicImages:
-        return 'Images (Comic)';
     }
   }
 
