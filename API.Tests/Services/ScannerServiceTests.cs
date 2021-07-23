@@ -49,15 +49,6 @@ namespace API.Tests.Services
             _context = new DataContext(contextOptions);
             Task.Run(SeedDb).GetAwaiter().GetResult();
 
-
-            //BackgroundJob.Enqueue is what I need to mock or something (it's static...)
-            // ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
-            //     IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService, ICleanupService cleanupService,
-            //     IBackgroundJobClient jobClient
-            //var taskScheduler = new TaskScheduler(Substitute.For<ICacheService>(), Substitute.For<ILogger<TaskScheduler>>(), Substitute.For<)
-
-
-            // Substitute.For<UserManager<AppUser>>() - Not needed because only for UserService
             IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
 
 
@@ -204,75 +195,6 @@ namespace API.Tests.Services
 
             }
 
-        }
-
-        private List<ParserInfo> GetInfosByName(IDictionary<ParsedSeries, List<ParserInfo>>  parsedSeries, string series,MangaFormat format)
-        {
-            return parsedSeries[new ParsedSeries()
-            {
-                Format = format,
-                Name = series,
-                NormalizedName = API.Parser.Parser.Normalize(series)
-            }];
-        }
-
-
-
-        // [Fact]
-        // public void ExistingOrDefault_Should_BeFromLibrary()
-        // {
-        //     var allSeries = new List<Series>()
-        //     {
-        //         new Series() {Id = 2, Name = "Darker Than Black"},
-        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
-        //     };
-        //     Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black").Id);
-        //     Assert.Equal(_libraryMock.Series.ElementAt(0).Id, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker than Black").Id);
-        // }
-        //
-        // [Fact]
-        // public void ExistingOrDefault_Should_BeFromAllSeries()
-        // {
-        //     var allSeries = new List<Series>()
-        //     {
-        //         new Series() {Id = 2, Name = "Darker Than Black"},
-        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
-        //     };
-        //     Assert.Equal(3, ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Darker Than Black - Some Extension").Id);
-        // }
-        //
-        // [Fact]
-        // public void ExistingOrDefault_Should_BeNull()
-        // {
-        //     var allSeries = new List<Series>()
-        //     {
-        //         new Series() {Id = 2, Name = "Darker Than Black"},
-        //         new Series() {Id = 3, Name = "Darker Than Black - Some Extension"},
-        //         new Series() {Id = 4, Name = "Akame Ga Kill"},
-        //     };
-        //     Assert.Null(ScannerService.ExistingOrDefault(_libraryMock, allSeries, "Non existing series"));
-        // }
-
-        [Fact]
-        public void Should_CreateSeries_Test()
-        {
-            // var allSeries = new List<Series>();
-            // var parsedSeries = new Dictionary<string, List<ParserInfo>>();
-            //
-            // parsedSeries.Add("Darker Than Black", new List<ParserInfo>()
-            // {
-            //     new ParserInfo() {Chapters = "0", Filename = "Something.cbz", Format = MangaFormat.Archive, FullFilePath = "E:/Manga/Something.cbz", Series = "Darker Than Black", Volumes = "1"},
-            //     new ParserInfo() {Chapters = "0", Filename = "Something.cbz", Format = MangaFormat.Archive, FullFilePath = "E:/Manga/Something.cbz", Series = "Darker than Black", Volumes = "2"}
-            // });
-            //
-            // _scannerService.UpsertSeries(_libraryMock, parsedSeries, allSeries);
-            //
-            // Assert.Equal(1, _libraryMock.Series.Count);
-            // Assert.Equal(2, _libraryMock.Series.ElementAt(0).Volumes.Count);
-            // _testOutputHelper.WriteLine(_libraryMock.ToString());
-            Assert.True(true);
         }
 
         private static DbConnection CreateInMemoryDatabase()

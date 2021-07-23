@@ -21,7 +21,7 @@ namespace API.Services.Tasks.Scanner
 
     public class ParseScannedFiles
     {
-        private ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
+        private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
         private readonly IBookService _bookService;
         private readonly ILogger _logger;
 

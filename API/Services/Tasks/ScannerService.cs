@@ -257,7 +257,7 @@ namespace API.Services.Tasks
           });
        }
 
-       private IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
+       private static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
        {
            // TODO: Move this into a common place
            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
@@ -420,29 +420,6 @@ namespace API.Services.Tasks
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
              }
           }
-       }
-
-       /// <summary>
-       /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
-       /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
-       /// </summary>
-       /// <param name="collectedSeries"></param>
-       /// <param name="info"></param>
-       /// <returns></returns>
-       public string MergeName(ConcurrentDictionary<string,List<ParserInfo>> collectedSeries, ParserInfo info)
-       {
-          var normalizedSeries = Parser.Parser.Normalize(info.Series);
-          _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
-          // TODO: I need to include Format check here
-          var existingName = collectedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key) == normalizedSeries)
-             .Key;
-          if (!string.IsNullOrEmpty(existingName))
-          {
-             _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName);
-             return existingName;
-          }
-
-          return info.Series;
        }
 
        private MangaFile CreateMangaFile(ParserInfo info)
