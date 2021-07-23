@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -218,11 +217,11 @@ namespace API.Services.Tasks
              }
              catch (Exception e)
              {
-                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key);
+                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key.NormalizedName);
                 var duplicateSeries = library.Series.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
                 foreach (var series in duplicateSeries)
                 {
-                   _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
+                   _logger.LogCritical("{Key} maps with {Series}", key.Name, series.OriginalName);
                 }
 
                 continue;
@@ -247,7 +246,7 @@ namespace API.Services.Tasks
              try
              {
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
-                UpdateVolumes(series, GetInfosByName(parsedSeries, series).ToArray());
+                UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
              }
              catch (Exception ex)
@@ -255,21 +254,6 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
              }
           });
-       }
-
-       private static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
-       {
-           // TODO: Move this into a common place
-           var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-               ps.Format == series.Format && ps.NormalizedName == Parser.Parser.Normalize(series.OriginalName));
-           existingKey ??= new ParsedSeries()
-           {
-               Format = series.Format,
-               Name = series.OriginalName,
-               NormalizedName = Parser.Parser.Normalize(series.OriginalName)
-           };
-
-           return parsedSeries[existingKey];
        }
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)

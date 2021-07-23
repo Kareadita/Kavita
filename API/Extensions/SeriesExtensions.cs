@@ -2,7 +2,6 @@
 using System.Linq;
 using API.Entities;
 using API.Parser;
-using API.Services;
 using API.Services.Tasks.Scanner;
 
 namespace API.Extensions
