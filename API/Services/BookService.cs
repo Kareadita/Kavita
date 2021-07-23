@@ -14,6 +14,7 @@ using API.Interfaces.Services;
 using API.Parser;
 using Docnet.Core;
 using Docnet.Core.Models;
+using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
@@ -375,22 +376,7 @@ namespace API.Services
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
                 using var pageReader = docReader.GetPageReader(pageNumber);
-                var rawBytes = pageReader.GetImage();
-                var width = pageReader.GetPageWidth();
-                var height = pageReader.GetPageHeight();
-                using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-                using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-                AddBytesToBitmap(bmp, rawBytes);
-                for (int y = 0; y < bmp.Height; y++)
-                {
-                    bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
-                }
-                var g = Graphics.FromImage(doc);
-                g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
-                g.DrawImage(bmp, new Point(0, 0));
-                g.Save();
-                using var stream = new MemoryStream();
-                doc.Save(stream, ImageFormat.Jpeg);
+                using var stream = GetPdfPage(docReader, pageNumber);
                 File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
             }
         }
@@ -417,15 +403,12 @@ namespace API.Services
 
                 if (coverImageContent == null) return Array.Empty<byte>();
 
-                if (createThumbnail)
-                {
-                    using var stream = new MemoryStream(coverImageContent.ReadContent());
+                if (!createThumbnail) return coverImageContent.ReadContent();
 
-                    using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                    return thumbnail.WriteToBuffer(".jpg");
-                }
+                using var stream = new MemoryStream(coverImageContent.ReadContent());
+                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                return thumbnail.WriteToBuffer(".jpg");
 
-                return coverImageContent.ReadContent();
             }
             catch (Exception ex)
             {
@@ -442,32 +425,14 @@ namespace API.Services
                using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
                if (docReader.GetPageCount() == 0) return Array.Empty<byte>();
 
-               using var pageReader = docReader.GetPageReader(0);
-               var rawBytes = pageReader.GetImage();
-               var width = pageReader.GetPageWidth();
-               var height = pageReader.GetPageHeight();
-               using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-               using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-               AddBytesToBitmap(bmp, rawBytes);
-               for (int y = 0; y < bmp.Height; y++)
-               {
-                   bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
-               }
-               var g = Graphics.FromImage(doc);
-               g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
-               g.DrawImage(bmp, new Point(0, 0));
-               g.Save();
-               using var stream = new MemoryStream();
-               doc.Save(stream, ImageFormat.Jpeg);
+               using var stream = GetPdfPage(docReader, 0);
                stream.Seek(0, SeekOrigin.Begin);
 
-               if (createThumbnail)
-               {
-                   using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                   return thumbnail.WriteToBuffer(".png");
-               }
+               if (!createThumbnail) return stream.ToArray();
 
-               return stream.ToArray();
+               using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+               return thumbnail.WriteToBuffer(".png");
+
            }
            catch (Exception ex)
            {
@@ -477,6 +442,29 @@ namespace API.Services
            }
 
            return Array.Empty<byte>();
+        }
+
+        private static MemoryStream GetPdfPage(IDocReader docReader, int pageNumber)
+        {
+            using var pageReader = docReader.GetPageReader(pageNumber);
+            var rawBytes = pageReader.GetImage();
+            var width = pageReader.GetPageWidth();
+            var height = pageReader.GetPageHeight();
+            using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            AddBytesToBitmap(bmp, rawBytes);
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
+            }
+
+            using var g = Graphics.FromImage(doc);
+            g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
+            g.DrawImage(bmp, new Point(0, 0));
+            g.Save();
+            var stream = new MemoryStream();
+            doc.Save(stream, ImageFormat.Jpeg);
+            return stream;
         }
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)

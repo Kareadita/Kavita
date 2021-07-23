@@ -96,7 +96,7 @@ export class DownloadService {
    */
   private getFilenameFromHeader(headers: HttpHeaders, defaultName: string) {
     const tokens = (headers.get('content-disposition') || '').split(';');
-    let filename = tokens[1].replace('filename=', '').replace('"', '').trim();  
+    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();  
     if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
       const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
       return defaultName + ext;

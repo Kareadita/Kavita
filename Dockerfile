@@ -20,7 +20,7 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 pwgen \
+  && apt-get install -y libicu-dev libssl1.1 pwgen libgdiplus \
   && rm -rf /var/lib/apt/lists/*
 
 #Creates the data directory
