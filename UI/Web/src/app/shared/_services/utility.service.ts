@@ -70,4 +70,19 @@ export class UtilityService {
     }
   }
 
+  mangaFormatIcon(format: MangaFormat): string {
+    switch (format) {
+      case MangaFormat.EPUB:
+        return 'fa-book';
+      case MangaFormat.ARCHIVE:
+        return 'fa-file-archive';
+      case MangaFormat.IMAGE:
+        return 'fa-image';
+      case MangaFormat.PDF:
+        return 'fa-file-pdf';
+      case MangaFormat.UNKNOWN:
+        return 'fa-question';
+    }
+  }
+
 }

@@ -24,7 +24,13 @@
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
-      <!-- <i class="fa {{fileType}}" aria-hidden="true"></i><span class="sr-only">fileType</span> -->
+      <div class="row no-gutters mt-2">
+        <div class="col">
+          <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
+        </div>
+        <div class="col pull-right">
+          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
+        </div>
+      </div>
     </div>
 </div>
