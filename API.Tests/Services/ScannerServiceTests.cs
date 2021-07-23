@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;
@@ -83,67 +84,64 @@ namespace API.Tests.Services
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // [Fact]
-        // public void Test()
-        // {
-        //     _scannerService.ScanLibrary(1, false);
-        //
-        //     var series = _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1).Result.Series;
-        // }
-
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
             var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
 
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black"});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1"});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10"});
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
+            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
 
-            var existingSeries = new List<Series>();
-            existingSeries.Add(new Series()
+            var existingSeries = new List<Series>
             {
-                Name = "Cage of Eden",
-                LocalizedName = "Cage of Eden",
-                OriginalName = "Cage of Eden",
-                NormalizedName = API.Parser.Parser.Normalize("Cage of Eden"),
-                Metadata = new SeriesMetadata()
-            });
-            existingSeries.Add(new Series()
-            {
-                Name = "Darker Than Black",
-                LocalizedName = "Darker Than Black",
-                OriginalName = "Darker Than Black",
-                NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
-                Metadata = new SeriesMetadata()
-            });
+                new Series()
+                {
+                    Name = "Cage of Eden",
+                    LocalizedName = "Cage of Eden",
+                    OriginalName = "Cage of Eden",
+                    NormalizedName = API.Parser.Parser.Normalize("Cage of Eden"),
+                    Metadata = new SeriesMetadata(),
+                    Format = MangaFormat.Archive
+                },
+                new Series()
+                {
+                    Name = "Darker Than Black",
+                    LocalizedName = "Darker Than Black",
+                    OriginalName = "Darker Than Black",
+                    NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                    Metadata = new SeriesMetadata(),
+                    Format = MangaFormat.Archive
+                }
+            };
 
 
 
             Assert.Empty(_scannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
 
-        [Theory]
-        [InlineData(new [] {"Darker than Black"}, "Darker than Black", "Darker than Black")]
-        [InlineData(new [] {"Darker than Black"}, "Darker Than Black", "Darker than Black")]
-        [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker than Black")]
-        [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
-        public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
-        {
-            var collectedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-            foreach (var seriesName in existingSeriesNames)
-            {
-                AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName});
-            }
-
-            // var actualName = _scannerService.MergeName(collectedSeries, new ParserInfo()
-            // {
-            //     Series = parsedInfoName
-            // });
-            //
-            // Assert.Equal(expected, actualName);
-            Assert.True(false); // TODO: Fix this unit test
-        }
+        // TODO: Figure out how to do this with ParseScannedFiles
+        // [Theory]
+        // [InlineData(new [] {"Darker than Black"}, "Darker than Black", "Darker than Black")]
+        // [InlineData(new [] {"Darker than Black"}, "Darker Than Black", "Darker than Black")]
+        // [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker than Black")]
+        // [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
+        // public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
+        // {
+        //     var collectedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+        //     foreach (var seriesName in existingSeriesNames)
+        //     {
+        //         AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName, Format = MangaFormat.Archive});
+        //     }
+        //
+        //     var actualName = new ParseScannedFiles(_bookService, _logger).MergeName(collectedSeries, new ParserInfo()
+        //     {
+        //         Series = parsedInfoName,
+        //         Format = MangaFormat.Archive
+        //     });
+        //
+        //     Assert.Equal(expected, actualName);
+        // }
 
         [Fact]
         public void RemoveMissingSeries_Should_RemoveSeries()
@@ -166,15 +164,17 @@ namespace API.Tests.Services
 
         private void AddToParsedInfo(IDictionary<ParsedSeries, List<ParserInfo>> collectedSeries, ParserInfo info)
         {
-            var ps = new ParsedSeries()
+            var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
+                ps.Format == info.Format && ps.NormalizedName == API.Parser.Parser.Normalize(info.Series));
+            existingKey ??= new ParsedSeries()
             {
+                Format = info.Format,
                 Name = info.Series,
-                NormalizedName = API.Parser.Parser.Normalize(info.Series),
-                Format = info.Format
+                NormalizedName = API.Parser.Parser.Normalize(info.Series)
             };
             if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
             {
-                ((ConcurrentDictionary<ParsedSeries, List<ParserInfo>>) collectedSeries).AddOrUpdate(ps, new List<ParserInfo>() {info}, (_, oldValue) =>
+                ((ConcurrentDictionary<ParsedSeries, List<ParserInfo>>) collectedSeries).AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
                 {
                     oldValue ??= new List<ParserInfo>();
                     if (!oldValue.Contains(info))
@@ -185,34 +185,34 @@ namespace API.Tests.Services
                     return oldValue;
                 });
             }
-            // else
-            // {
-            //     if (!collectedSeries.ContainsKey(ps))
-            //     {
-            //         collectedSeries.Add(ps, new List<ParserInfo>() {info});
-            //     }
-            //     else
-            //     {
-            //         var list = GetInfosByName(collectedSeries, info.Series);
-            //         if (!list.Contains(info))
-            //         {
-            //             list.Add(info);
-            //         }
-            //
-            //         collectedSeries[info.Series] = list;
-            //     }
-            //
-            // } // TODO: Fix unit tests
+            else
+            {
+                if (!collectedSeries.ContainsKey(existingKey))
+                {
+                    collectedSeries.Add(existingKey, new List<ParserInfo>() {info});
+                }
+                else
+                {
+                    var list = collectedSeries[existingKey];
+                    if (!list.Contains(info))
+                    {
+                        list.Add(info);
+                    }
+
+                    collectedSeries[existingKey] = list;
+                }
+
+            }
 
         }
 
-        private IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>>  parsedSeries, Series series)
+        private List<ParserInfo> GetInfosByName(IDictionary<ParsedSeries, List<ParserInfo>>  parsedSeries, string series,MangaFormat format)
         {
             return parsedSeries[new ParsedSeries()
             {
-                Format = series.Format,
-                Name = series.OriginalName,
-                NormalizedName = API.Parser.Parser.Normalize(series.OriginalName)
+                Format = format,
+                Name = series,
+                NormalizedName = API.Parser.Parser.Normalize(series)
             }];
         }
 
