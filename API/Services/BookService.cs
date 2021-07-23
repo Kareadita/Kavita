@@ -19,6 +19,7 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 using Image = NetVips.Image;
+using Point = System.Drawing.Point;
 
 namespace API.Services
 {
@@ -375,11 +376,21 @@ namespace API.Services
             {
                 using var pageReader = docReader.GetPageReader(pageNumber);
                 var rawBytes = pageReader.GetImage();
-                using var bmp = new Bitmap(pageReader.GetPageWidth(), pageReader.GetPageHeight(), PixelFormat.Format32bppArgb);
+                var width = pageReader.GetPageWidth();
+                var height = pageReader.GetPageHeight();
+                using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
                 AddBytesToBitmap(bmp, rawBytes);
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
+                }
+                var g = Graphics.FromImage(doc);
+                g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
+                g.DrawImage(bmp, new Point(0, 0));
+                g.Save();
                 using var stream = new MemoryStream();
-                bmp.Save(stream, ImageFormat.Png);
-
+                doc.Save(stream, ImageFormat.Jpeg);
                 File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
             }
         }
@@ -433,16 +444,27 @@ namespace API.Services
 
                using var pageReader = docReader.GetPageReader(0);
                var rawBytes = pageReader.GetImage();
-               using var bmp = new Bitmap(pageReader.GetPageWidth(), pageReader.GetPageHeight(), PixelFormat.Format32bppArgb);
+               var width = pageReader.GetPageWidth();
+               var height = pageReader.GetPageHeight();
+               using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+               using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
                AddBytesToBitmap(bmp, rawBytes);
+               for (int y = 0; y < bmp.Height; y++)
+               {
+                   bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
+               }
+               var g = Graphics.FromImage(doc);
+               g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
+               g.DrawImage(bmp, new Point(0, 0));
+               g.Save();
                using var stream = new MemoryStream();
-               bmp.Save(stream, ImageFormat.Jpeg);
+               doc.Save(stream, ImageFormat.Jpeg);
                stream.Seek(0, SeekOrigin.Begin);
 
                if (createThumbnail)
                {
                    using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                   return thumbnail.WriteToBuffer(".jpg");
+                   return thumbnail.WriteToBuffer(".png");
                }
 
                return stream.ToArray();
