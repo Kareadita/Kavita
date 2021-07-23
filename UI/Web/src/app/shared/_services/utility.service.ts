@@ -55,4 +55,19 @@ export class UtilityService {
     return cleaned;
   }
 
+  mangaFormat(format: MangaFormat): string {
+    switch (format) {
+      case MangaFormat.EPUB:
+        return 'EPUB';
+      case MangaFormat.ARCHIVE:
+        return 'Archive';
+      case MangaFormat.IMAGE:
+        return 'Image';
+      case MangaFormat.PDF:
+        return 'PDF';
+      case MangaFormat.UNKNOWN:
+        return 'Unknown';
+    }
+  }
+
 }

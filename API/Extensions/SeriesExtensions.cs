@@ -2,6 +2,8 @@
 using System.Linq;
 using API.Entities;
 using API.Parser;
+using API.Services;
+using API.Services.Tasks.Scanner;
 
 namespace API.Extensions
 {
@@ -17,6 +19,18 @@ namespace API.Extensions
         {
             return list.Any(name => Parser.Parser.Normalize(name) == series.NormalizedName || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.Name)
                 || name == series.Name || name == series.LocalizedName || name == series.OriginalName  || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.OriginalName));
+        }
+
+        /// <summary>
+        /// Checks against all the name variables of the Series if it matches anything in the list. Includes a check against the Format of the Series
+        /// </summary>
+        /// <param name="series"></param>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static bool NameInList(this Series series, IEnumerable<ParsedSeries> list)
+        {
+            return list.Any(name => Parser.Parser.Normalize(name.Name) == series.NormalizedName || Parser.Parser.Normalize(name.Name) == Parser.Parser.Normalize(series.Name)
+                || name.Name == series.Name || name.Name == series.LocalizedName || name.Name == series.OriginalName  || Parser.Parser.Normalize(name.Name) == Parser.Parser.Normalize(series.OriginalName) && series.Format == name.Format);
         }
 
         /// <summary>

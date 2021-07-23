@@ -1,3 +1,4 @@
+import { MangaFormat } from './manga-format';
 import { Volume } from './volume';
 
 export interface Series {
@@ -15,4 +16,5 @@ export interface Series {
     userReview: string; // User review
     libraryId: number;
     created: string; // DateTime when entity was created
+    format: MangaFormat;
 }

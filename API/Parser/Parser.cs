@@ -427,7 +427,6 @@ namespace API.Parser
             var fileName = Path.GetFileName(filePath);
             ParserInfo ret;
 
-            //if (type == LibraryType.Book)
             if (IsEpub(filePath))
             {
                 ret = new ParserInfo()

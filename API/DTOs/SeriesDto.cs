@@ -1,4 +1,5 @@
 ﻿using System;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {
@@ -23,7 +24,8 @@ namespace API.DTOs
         /// Review from logged in user. Calculated at API-time.
         /// </summary>
         public string UserReview { get; set; }
-        
+        public MangaFormat Format { get; set; }
+
         public DateTime Created { get; set; }
 
         public int LibraryId { get; set; }
