@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
@@ -36,6 +37,20 @@ namespace API.Services.Tasks.Scanner
             _bookService = bookService;
             _logger = logger;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+        }
+
+        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
+        {
+            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
+                ps.Format == series.Format && ps.NormalizedName == Parser.Parser.Normalize(series.OriginalName));
+            existingKey ??= new ParsedSeries()
+            {
+                Format = series.Format,
+                Name = series.OriginalName,
+                NormalizedName = Parser.Parser.Normalize(series.OriginalName)
+            };
+
+            return parsedSeries[existingKey];
         }
 
         /// <summary>
@@ -144,7 +159,7 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = GetLibrarySearchPattern(libraryType);
+            var searchPattern = GetLibrarySearchPattern();
             foreach (var folderPath in folders)
             {
                 try
@@ -174,12 +189,7 @@ namespace API.Services.Tasks.Scanner
             return SeriesWithInfos();
         }
 
-        /// <summary>
-        /// Given the Library Type, returns the regex pattern that restricts which files types will be found during a file scan.
-        /// </summary>
-        /// <param name="libraryType"></param>
-        /// <returns></returns>
-        private static string GetLibrarySearchPattern(LibraryType libraryType)
+        private static string GetLibrarySearchPattern()
         {
             return Parser.Parser.SupportedExtensions;
         }

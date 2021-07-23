@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 
 /**
  * Soley repsonsible for performing a "natural" sort. This is the UI counterpart to the BE NaturalSortComparer.
+ * Note: This does not work the same. Better to have the Backend perform the sort before sending to UI.
  */
 @Injectable({
   providedIn: 'root',

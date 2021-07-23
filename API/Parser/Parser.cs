@@ -498,6 +498,12 @@ namespace API.Parser
                 ret.Series = CleanTitle(fileName);
             }
 
+            // Pdfs may have .pdf in the series name, remove that
+            if (IsPdf(fileName) && ret.Series.ToLower().EndsWith(".pdf"))
+            {
+                ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
+            }
+
             return ret.Series == string.Empty ? null : ret;
         }
 

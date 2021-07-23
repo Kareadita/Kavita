@@ -28,7 +28,7 @@ export class LibraryDetailComponent implements OnInit {
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, private actionService: ActionService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl('/libraries');
       return;
     }
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;

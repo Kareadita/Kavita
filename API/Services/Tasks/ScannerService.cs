@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -27,7 +26,7 @@ namespace API.Services.Tasks
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
        private readonly IBookService _bookService;
-       private readonly NaturalSortComparer _naturalSort;
+       private readonly NaturalSortComparer _naturalSort = new ();
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
           IMetadataService metadataService, IBookService bookService)
@@ -37,7 +36,6 @@ namespace API.Services.Tasks
           _archiveService = archiveService;
           _metadataService = metadataService;
           _bookService = bookService;
-          _naturalSort = new NaturalSortComparer();
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -200,8 +198,14 @@ namespace API.Services.Tasks
              _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
              foreach (var s in missingSeries)
              {
-                _logger.LogDebug("Removed {SeriesName}", s.Name);
+                _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
              }
+          }
+
+          if (library.Series.Count == 0)
+          {
+              _logger.LogDebug("Removed all Series, returning without checking reset of files scanned");
+              return;
           }
 
 
@@ -218,11 +222,11 @@ namespace API.Services.Tasks
              }
              catch (Exception e)
              {
-                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key);
+                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key.NormalizedName);
                 var duplicateSeries = library.Series.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
                 foreach (var series in duplicateSeries)
                 {
-                   _logger.LogCritical("{Key} maps with {Series}", key, series.OriginalName);
+                   _logger.LogCritical("{Key} maps with {Series}", key.Name, series.OriginalName);
                 }
 
                 continue;
@@ -247,7 +251,7 @@ namespace API.Services.Tasks
              try
              {
                 _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
-                UpdateVolumes(series, GetInfosByName(parsedSeries, series).ToArray());
+                UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
                 series.Pages = series.Volumes.Sum(v => v.Pages);
              }
              catch (Exception ex)
@@ -257,25 +261,15 @@ namespace API.Services.Tasks
           });
        }
 
-       private static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
-       {
-           // TODO: Move this into a common place
-           var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-               ps.Format == series.Format && ps.NormalizedName == Parser.Parser.Normalize(series.OriginalName));
-           existingKey ??= new ParsedSeries()
-           {
-               Format = series.Format,
-               Name = series.OriginalName,
-               NormalizedName = Parser.Parser.Normalize(series.OriginalName)
-           };
-
-           return parsedSeries[existingKey];
-       }
-
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
-          var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
-          return existingSeries.Where(es => !es.NameInList(foundSeries));
+           // It is safe to check only first since Parser ensures that a Series only has one type
+           var format = MangaFormat.Unknown;
+           var firstPs = parsedSeries.Keys.DistinctBy(ps => ps.Format).FirstOrDefault();
+           if (firstPs != null) format = firstPs.Format;
+
+           var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
+           return existingSeries.Where(es => !es.NameInList(foundSeries) || es.Format != format);
        }
 
        /// <summary>
@@ -293,7 +287,7 @@ namespace API.Services.Tasks
 
           existingSeries = existingSeries.Where(
              s => !missingList.Exists(
-                m => m.NormalizedName.Equals(s.NormalizedName))).ToList();
+                m => m.NormalizedName.Equals(s.NormalizedName) && m.Format == s.Format)).ToList();
 
           removeCount = existingCount -  existingSeries.Count;
 

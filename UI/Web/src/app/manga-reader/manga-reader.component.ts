@@ -245,7 +245,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 

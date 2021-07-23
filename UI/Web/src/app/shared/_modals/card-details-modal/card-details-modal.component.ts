@@ -5,7 +5,6 @@ import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';
 import { ImageService } from 'src/app/_services/image.service';
-import { NaturalSortService } from '../../_services/natural-sort.service';
 import { UtilityService } from '../../_services/utility.service';
 
 
@@ -27,7 +26,7 @@ export class CardDetailsModalComponent implements OnInit {
   formatKeys = Object.keys(MangaFormat);
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
-    public imageService: ImageService, public naturalSort: NaturalSortService) { }
+    public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.isChapter = this.isObjectChapter(this.data);

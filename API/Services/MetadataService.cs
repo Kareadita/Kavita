@@ -20,19 +20,17 @@ namespace API.Services
         private readonly ILogger<MetadataService> _logger;
         private readonly IArchiveService _archiveService;
         private readonly IBookService _bookService;
-        private readonly IDirectoryService _directoryService;
         private readonly IImageService _imageService;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-            IArchiveService archiveService, IBookService bookService, IDirectoryService directoryService, IImageService imageService)
+            IArchiveService archiveService, IBookService bookService, IImageService imageService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _archiveService = archiveService;
             _bookService = bookService;
-            _directoryService = directoryService;
             _imageService = imageService;
         }
 
@@ -71,24 +69,23 @@ namespace API.Services
 
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
-            if (volume != null && ShouldFindCoverImage(volume.CoverImage, forceUpdate))
-            {
-                volume.Chapters ??= new List<Chapter>();
-                var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+            if (volume == null || !ShouldFindCoverImage(volume.CoverImage, forceUpdate)) return;
 
-                // Skip calculating Cover Image (I/O) if the chapter already has it set
-                if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage))
+            volume.Chapters ??= new List<Chapter>();
+            var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+
+            // Skip calculating Cover Image (I/O) if the chapter already has it set
+            if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
+            {
+                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                    var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                    if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
-                    {
-                        volume.CoverImage = GetCoverImage(firstFile);
-                    }
+                    volume.CoverImage = GetCoverImage(firstFile);
                 }
-                else
-                {
-                    volume.CoverImage = firstChapter.CoverImage;
-                }
+            }
+            else
+            {
+                volume.CoverImage = firstChapter.CoverImage;
             }
         }
 

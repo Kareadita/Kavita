@@ -60,8 +60,15 @@ namespace API.Services
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
               DirectoryService.ExistOrCreate(extractPath);
-              var pattern = (files.Count == 1) ? (@"\" + Path.GetExtension(files[0].FilePath)) : Parser.Parser.ImageFileExtensions;
-              _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath, pattern);
+              if (files.Count == 1)
+              {
+                  _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+              }
+              else
+              {
+                  _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath, Parser.Parser.ImageFileExtensions);
+              }
+
               extractDi.Flatten();
               return chapter;
             }

@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { DownloadService } from '../shared/_services/download.service';
-import { NaturalSortService } from '../shared/_services/natural-sort.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
@@ -81,7 +80,7 @@ export class SeriesDetailComponent implements OnInit {
               public utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
-              private confirmService: ConfirmService, private naturalSort: NaturalSortService,
+              private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
@@ -97,7 +96,7 @@ export class SeriesDetailComponent implements OnInit {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null || libraryId == null) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 
@@ -227,6 +226,8 @@ export class SeriesDetailComponent implements OnInit {
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
       this.createHTML();
+
+      this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
@@ -240,7 +241,6 @@ export class SeriesDetailComponent implements OnInit {
           this.specials = vol0.map(v => v.chapters || [])
           .flat()
           .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
-          .sort((a, b) => this.naturalSort.compare(a.range, b.range, true))
           .map(c => {
             c.title = this.utilityService.cleanSpecialTitle(c.title);
             c.range = this.utilityService.cleanSpecialTitle(c.range);
@@ -255,6 +255,8 @@ export class SeriesDetailComponent implements OnInit {
 
         this.isLoading = false;
       });
+    }, err => {
+      this.router.navigateByUrl('/libraries');
     });
   }
 

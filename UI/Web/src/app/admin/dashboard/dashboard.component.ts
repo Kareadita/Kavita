@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
 import { saveAs } from 'file-saver';
+import { Title } from '@angular/platform-browser';
 
 
 
@@ -22,7 +23,7 @@ export class DashboardComponent implements OnInit {
   counter = this.tabs.length + 1;
   active = this.tabs[0];
 
-  constructor(public route: ActivatedRoute, private serverService: ServerService, private toastr: ToastrService) {
+  constructor(public route: ActivatedRoute, private serverService: ServerService, private toastr: ToastrService, private titleService: Title) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -34,7 +35,9 @@ export class DashboardComponent implements OnInit {
 
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.titleService.setTitle('Kavita - Admin Dashboard');
+  }
 
   restartServer() {
     this.serverService.restart().subscribe(() => {
