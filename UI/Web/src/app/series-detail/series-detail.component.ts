@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -82,7 +83,8 @@ export class SeriesDetailComponent implements OnInit {
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private naturalSort: NaturalSortService,
-              private downloadService: DownloadService, private actionService: ActionService) {
+              private downloadService: DownloadService, private actionService: ActionService,
+              private titleService: Title) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -97,7 +99,7 @@ export class SeriesDetailComponent implements OnInit {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null || libraryId == null) {
-      this.router.navigateByUrl('/home');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 
@@ -227,6 +229,8 @@ export class SeriesDetailComponent implements OnInit {
     this.seriesService.getSeries(seriesId).subscribe(series => {
       this.series = series;
       this.createHTML();
+
+      this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
@@ -255,6 +259,8 @@ export class SeriesDetailComponent implements OnInit {
 
         this.isLoading = false;
       });
+    }, err => {
+      this.router.navigateByUrl('/libraries');
     });
   }
 

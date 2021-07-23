@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -28,7 +29,9 @@ export class AllCollectionsComponent implements OnInit {
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
 
-  constructor(private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, private modalService: NgbModal) {
+  constructor(private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
+    private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
+    private modalService: NgbModal, private titleService: Title) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     const routeId = this.route.snapshot.paramMap.get('id');
@@ -43,6 +46,7 @@ export class AllCollectionsComponent implements OnInit {
           return;
         }
         this.collectionTagName = tags.filter(item => item.id === this.collectionTagId)[0].title;
+        this.titleService.setTitle('Kavita - ' + this.collectionTagName + ' Collection');
       });
     }
   }

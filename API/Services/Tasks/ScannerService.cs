@@ -199,8 +199,14 @@ namespace API.Services.Tasks
              _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
              foreach (var s in missingSeries)
              {
-                _logger.LogDebug("Removed {SeriesName}", s.Name);
+                _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
              }
+          }
+
+          if (library.Series.Count == 0)
+          {
+              _logger.LogDebug("Removed all Series, returning without checking reset of files scanned");
+              return;
           }
 
 
@@ -258,8 +264,13 @@ namespace API.Services.Tasks
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
-          var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
-          return existingSeries.Where(es => !es.NameInList(foundSeries));
+           // It is safe to check only first since Parser ensures that a Series only has one type
+           var format = MangaFormat.Unknown;
+           var firstPs = parsedSeries.Keys.DistinctBy(ps => ps.Format).FirstOrDefault();
+           if (firstPs != null) format = firstPs.Format;
+
+           var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
+           return existingSeries.Where(es => !es.NameInList(foundSeries) || es.Format != format);
        }
 
        /// <summary>
@@ -277,7 +288,7 @@ namespace API.Services.Tasks
 
           existingSeries = existingSeries.Where(
              s => !missingList.Exists(
-                m => m.NormalizedName.Equals(s.NormalizedName))).ToList();
+                m => m.NormalizedName.Equals(s.NormalizedName) && m.Format == s.Format)).ToList();
 
           removeCount = existingCount -  existingSeries.Count;
 
