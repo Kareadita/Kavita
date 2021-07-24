@@ -95,7 +95,7 @@ namespace API.Services
             if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
             {
                 series.Volumes ??= new List<Volume>();
-                var firstCover = series.Volumes.GetCoverImage(series.Library.Type);
+                var firstCover = series.Volumes.GetCoverImage(series.Format);
                 byte[] coverImage = null;
                 if (firstCover == null && series.Volumes.Any())
                 {
