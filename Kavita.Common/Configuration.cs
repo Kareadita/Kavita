@@ -33,6 +33,12 @@ namespace Kavita.Common
          set => SetLogLevel(GetAppSettingFilename(), value);
       }
 
+      public static string BaseUrl
+      {
+          get => GetBaseUrl(GetAppSettingFilename());
+          set => SetBaseUrl(GetAppSettingFilename(), value);
+      }
+
       private static string GetAppSettingFilename()
       {
          if (!string.IsNullOrEmpty(AppSettingsFilename))
@@ -119,30 +125,21 @@ namespace Kavita.Common
 
       #region Port
 
-      public static bool SetPort(string filePath, int port)
+      private static void SetPort(string filePath, int port)
       {
          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
          {
-            return true;
+            return;
          }
 
-         try
-         {
-            var currentPort = GetPort(filePath);
-            var json = File.ReadAllText(filePath).Replace("\"Port\": " + currentPort, "\"Port\": " + port);
-            File.WriteAllText(filePath, json);
-            return true;
-         }
-         catch (Exception)
-         {
-            return false;
-         }
+         var currentPort = GetPort(filePath);
+         var json = File.ReadAllText(filePath).Replace("\"Port\": " + currentPort, "\"Port\": " + port);
+         File.WriteAllText(filePath, json);
       }
 
-      public static int GetPort(string filePath)
+      private static int GetPort(string filePath)
       {
-         Console.WriteLine(GetAppSettingFilename());
-         const int defaultPort = 5000;
+          const int defaultPort = 5000;
          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
          {
             return defaultPort;
@@ -161,12 +158,52 @@ namespace Kavita.Common
          }
          catch (Exception ex)
          {
-            Console.WriteLine("Error writing app settings: " + ex.Message);
+            Console.WriteLine("Error reading app settings: " + ex.Message);
          }
 
          return defaultPort;
       }
 
+      #endregion
+
+      #region BaseUrl
+      private static string GetBaseUrl(string filePath)
+      {
+          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+          {
+              return string.Empty;
+          }
+
+          try
+          {
+              var json = File.ReadAllText(filePath);
+              var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+              const string key = "BaseUrl";
+
+              if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+              {
+                  return tokenElement.GetString();
+              }
+          }
+          catch (Exception ex)
+          {
+              Console.WriteLine("Error reading app settings: " + ex.Message);
+          }
+
+          return string.Empty;
+      }
+
+      private static void SetBaseUrl(string filePath, string value)
+      {
+          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+          {
+              return;
+          }
+
+          var currentPort = GetPort(filePath);
+          var json = File.ReadAllText(filePath).Replace("\"BaseUrl\": " + currentPort, "\"BaseUrl\": " + value);
+          File.WriteAllText(filePath, json);
+      }
       #endregion
 
       #region LogLevel
