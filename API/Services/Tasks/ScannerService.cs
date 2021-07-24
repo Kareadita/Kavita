@@ -55,7 +55,7 @@ namespace API.Services.Tasks
            // Hence we clear out anything but what we selected for
            var firstSeries = library.Series.FirstOrDefault();
            var keys = parsedSeries.Keys;
-           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault())))
+           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
            {
                parsedSeries.Remove(key);
            }
@@ -201,13 +201,6 @@ namespace API.Services.Tasks
                 _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
              }
           }
-
-          if (library.Series.Count == 0)
-          {
-              _logger.LogDebug("Removed all Series, returning without checking reset of files scanned");
-              return;
-          }
-
 
           // Add new series that have parsedInfos
           foreach (var (key, infos) in parsedSeries)
