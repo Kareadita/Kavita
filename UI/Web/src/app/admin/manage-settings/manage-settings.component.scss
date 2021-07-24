@@ -1,11 +1,8 @@
-@import '../../../assets/themes/dark.scss';
-
 .accent {
     font-style: italic;
     font-size: 0.7rem;
-    background-color: $dark-form-background;
+    background-color: lightgray;
     padding: 10px;
-    color: lightgray;
+    color: black;
     border-radius: 6px;
-    box-shadow: inset 0px 0px 8px 1px $dark-form-background
 }
