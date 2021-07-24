@@ -1,3 +1,5 @@
+import { MangaFormat } from "./manga-format";
+
 export interface SearchResult {
     seriesId: number;
     libraryId: number;
@@ -6,4 +8,5 @@ export interface SearchResult {
     originalName: string;
     sortName: string;
     coverImage: string; // byte64 encoded
+    format: MangaFormat;
 }

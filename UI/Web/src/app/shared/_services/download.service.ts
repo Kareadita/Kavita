@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -46,14 +46,18 @@ export class DownloadService {
     return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapterId, {observe: 'response', responseType: 'blob' as 'text'});
   }
 
+  downloadLogs() {
+    this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
+      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
+    });
+  }
+
   downloadSeries(series: Series) {
     this.downloadSeriesSize(series.id).subscribe(async size => {
       if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The series is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
         return;
       }
       this.downloadSeriesAPI(series.id).subscribe(resp => {
-        //const filename = series.name + '.zip';
-        //this.preformSave(res, filename);
         this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, series.name));
       });
     });

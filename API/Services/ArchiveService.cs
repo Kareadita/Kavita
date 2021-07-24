@@ -387,11 +387,10 @@ namespace API.Services
             if (!archive.HasFiles() && !needsFlattening) return;
 
             archive.ExtractToDirectory(extractPath, true);
-            if (needsFlattening)
-            {
-                _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
-                new DirectoryInfo(extractPath).Flatten();
-            }
+            if (!needsFlattening) return;
+
+            _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
+            new DirectoryInfo(extractPath).Flatten();
         }
 
         /// <summary>

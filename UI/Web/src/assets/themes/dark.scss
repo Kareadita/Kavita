@@ -23,6 +23,12 @@ $dark-item-accent-bg: #292d32;
     color: #4ac694;
   }
 
+  .accent {
+    background-color: $dark-form-background !important;
+    color: lightgray !important;
+    box-shadow: inset 0px 0px 8px 1px $dark-form-background !important;
+  }
+
   .breadcrumb {
     background-color: $dark-item-accent-bg;
 
