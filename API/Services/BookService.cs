@@ -379,7 +379,6 @@ namespace API.Services
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
-                // IDEA! Move stream out and use the same stream
                 GetPdfPage(docReader, pageNumber, stream);
                 File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
             }
