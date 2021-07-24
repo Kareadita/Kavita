@@ -85,7 +85,7 @@
                         <h5>Type</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-tag-badge><i class="fa {{utilityService.mangaFormatIcon(series.format)}}" aria-hidden="true" title="{{utilityService.mangaFormat(series.format)}}"></i>&nbsp;{{utilityService.mangaFormat(series.format)}} </app-tag-badge>
+                        <app-tag-badge><app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format></app-tag-badge>
                     </div>
                 </div>
             </div>

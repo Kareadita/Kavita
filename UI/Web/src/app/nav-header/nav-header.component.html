@@ -34,6 +34,7 @@
                         <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
                       </div>
                       <div class="ml-1">
+                        <app-series-format [format]="item.format"></app-series-format>
                         <span *ngIf="item.name.toLowerCase().indexOf(searchTerm) >= 0; else localizedName" [innerHTML]="item.name"></span>
                         <ng-template #localizedName>
                           <span [innerHTML]="item.localizedName"></span>
