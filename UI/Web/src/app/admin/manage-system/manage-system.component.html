@@ -1,7 +1,16 @@
 <div class="container-fluid">
 
     <div class="float-right">
-        <button class="btn btn-secondary" (click)="downloadService.downloadLogs()">Download Logs</button>
+        <button class="btn btn-secondary mr-2" (click)="clearCache()" [disabled]="clearCacheInProgress">
+            <ng-container *ngIf="clearCacheInProgress">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="sr-only">Loading...</span>
+            </ng-container>
+            Clear Cache
+        </button>
+        <button class="btn btn-secondary" (click)="downloadService.downloadLogs()">
+            Download Logs
+        </button>
     </div>
 
     <h3>About System</h3>

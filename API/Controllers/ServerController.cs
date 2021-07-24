@@ -22,15 +22,17 @@ namespace API.Controllers
         private readonly IConfiguration _config;
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
+        private readonly ICacheService _cacheService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IBackupService backupService, IArchiveService archiveService)
+            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
             _backupService = backupService;
             _archiveService = archiveService;
+            _cacheService = cacheService;
         }
 
         [HttpPost("restart")]
@@ -39,6 +41,15 @@ namespace API.Controllers
             _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
 
             _applicationLifetime.StopApplication();
+            return Ok();
+        }
+
+        [HttpPost("clear-cache")]
+        public ActionResult ClearCache()
+        {
+            _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
+            _cacheService.Cleanup();
+
             return Ok();
         }
 

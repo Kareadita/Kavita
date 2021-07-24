@@ -20,6 +20,8 @@ export class ManageSystemComponent implements OnInit {
   serverSettings!: ServerSettings;
   serverInfo!: ServerInfo;
 
+  clearCacheInProgress: boolean = false;
+
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private serverService: ServerService, public downloadService: DownloadService) { }
 
@@ -58,6 +60,14 @@ export class ManageSystemComponent implements OnInit {
       this.toastr.success('Server settings updated');
     }, (err: any) => {
       console.error('error: ', err);
+    });
+  }
+
+  clearCache() {
+    this.clearCacheInProgress = true;
+    this.serverService.clearCache().subscribe(res => {
+      this.clearCacheInProgress = false;
+      this.toastr.success('Cache has been cleared');
     });
   }
 

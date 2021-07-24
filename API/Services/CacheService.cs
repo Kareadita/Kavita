@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -113,7 +114,7 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged");
         }
 
-        public void CleanupChapters(int[] chapterIds)
+        public void CleanupChapters(IEnumerable<int> chapterIds)
         {
             _logger.LogInformation("Running Cache cleanup on Volumes");
 
