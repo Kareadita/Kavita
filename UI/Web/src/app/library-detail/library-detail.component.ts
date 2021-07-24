@@ -62,14 +62,11 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   loadPage() {
-    if (this.pagination == undefined || this.pagination == null) {
-      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    }
     const page = this.route.snapshot.queryParamMap.get('page');
     if (page != null) {
-      // if (this.pagination == undefined || this.pagination == null) {
-      //   this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-      // }
+      if (this.pagination == undefined || this.pagination == null) {
+        this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+      }
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingSeries = true;
