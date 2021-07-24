@@ -376,9 +376,11 @@ namespace API.Services
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();
+            using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
-                using var stream = GetPdfPage(docReader, pageNumber);
+                // IDEA! Move stream out and use the same stream
+                GetPdfPage(docReader, pageNumber, stream);
                 File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
             }
         }
@@ -427,8 +429,8 @@ namespace API.Services
                using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
                if (docReader.GetPageCount() == 0) return Array.Empty<byte>();
 
-               using var stream = GetPdfPage(docReader, 0);
-               stream.Seek(0, SeekOrigin.Begin);
+               using var stream = StreamManager.GetStream("BookService.GetPdfPage");
+               GetPdfPage(docReader, 0, stream);
 
                if (!createThumbnail) return stream.ToArray();
 
@@ -446,7 +448,7 @@ namespace API.Services
            return Array.Empty<byte>();
         }
 
-        private static MemoryStream GetPdfPage(IDocReader docReader, int pageNumber)
+        private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
             using var pageReader = docReader.GetPageReader(pageNumber);
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
@@ -459,10 +461,9 @@ namespace API.Services
             {
                 bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
             }
-
-            var stream = StreamManager.GetStream("BookService.GetPdfPage");
+            stream.Seek(0, SeekOrigin.Begin);
             bmp.Save(stream, ImageFormat.Jpeg);
-            return stream;
+            stream.Seek(0, SeekOrigin.Begin);
         }
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)
