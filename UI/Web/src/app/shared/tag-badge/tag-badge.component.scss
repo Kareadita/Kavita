@@ -21,3 +21,15 @@ $bdr-color: #f2f2f2;
         cursor: pointer;
     }
 }
+
+.selectable-cursor {
+    cursor: default !important;
+}
+
+.not-allowed-cursor {
+    cursor: not-allowed !important;
+}
+
+.clickable-cursor {
+    cursor: pointer !important;
+}

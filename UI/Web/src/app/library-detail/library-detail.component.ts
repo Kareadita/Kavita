@@ -62,6 +62,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   loadPage() {
+    // TODO: BUG: This isn't working on develop, but it is on final build
     const page = this.route.snapshot.queryParamMap.get('page');
     if (page != null) {
       if (this.pagination == undefined || this.pagination == null) {

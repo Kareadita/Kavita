@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
+import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { DownloadService } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -72,6 +73,10 @@ export class SeriesDetailComponent implements OnInit {
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
+  }
+
+  get TagBadgeCursor(): typeof TagBadgeCursor {
+    return TagBadgeCursor;
   }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
