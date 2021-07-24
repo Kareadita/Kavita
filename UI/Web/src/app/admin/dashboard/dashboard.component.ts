@@ -2,9 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
-import { saveAs } from 'file-saver';
 import { Title } from '@angular/platform-browser';
-import { DownloadService } from 'src/app/shared/_services/download.service';
 
 
 
@@ -25,7 +23,7 @@ export class DashboardComponent implements OnInit {
   active = this.tabs[0];
 
   constructor(public route: ActivatedRoute, private serverService: ServerService, 
-    private toastr: ToastrService, private titleService: Title, private downloadService: DownloadService) {
+    private toastr: ToastrService, private titleService: Title) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -46,9 +44,4 @@ export class DashboardComponent implements OnInit {
       setTimeout(() => this.toastr.success('Please reload.'), 1000);
     });
   }
-
-  fetchLogs() {
-    this.downloadService.downloadLogs();
-  }
-
 }

@@ -1,5 +1,9 @@
 <div class="container-fluid">
 
+    <div class="float-right">
+        <button class="btn btn-secondary" (click)="downloadService.downloadLogs()">Download Logs</button>
+    </div>
+
     <h3>About System</h3>
     <hr/>
     <div class="form-group" *ngIf="serverInfo">
