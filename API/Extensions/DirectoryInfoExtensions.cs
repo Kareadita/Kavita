@@ -79,7 +79,6 @@ namespace API.Extensions
 
             foreach (var subDirectory in directory.EnumerateDirectories())
             {
-                Console.WriteLine($"Flattening {subDirectory}");
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }
         }

@@ -19,4 +19,8 @@ export class ServerService {
   getServerInfo() {
     return this.httpClient.get<ServerInfo>(this.baseUrl + 'server/server-info');
   }
+
+  clearCache() {
+    return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
+  }
 }

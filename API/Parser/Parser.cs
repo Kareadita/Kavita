@@ -11,7 +11,7 @@ namespace API.Parser
     {
         public const string DefaultChapter = "0";
         public const string DefaultVolume = "0";
-        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(250);
+        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -507,7 +507,8 @@ namespace API.Parser
         // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
         private static readonly Regex SpecialMarkerRegex = new Regex(
             @"(?<Special>SP\d+)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout
         );
 
 

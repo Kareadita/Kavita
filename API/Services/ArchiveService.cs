@@ -301,7 +301,6 @@ namespace API.Services
                     entry.WriteTo(ms);
                     ms.Position = 0;
 
-
                     var serializer = new XmlSerializer(typeof(ComicInfo));
                     var info = (ComicInfo) serializer.Deserialize(ms);
                     return info;

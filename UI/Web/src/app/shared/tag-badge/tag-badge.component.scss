@@ -21,3 +21,27 @@ $bdr-color: #f2f2f2;
         cursor: pointer;
     }
 }
+
+::ng-deep .selectable-cursor {
+    cursor: default !important;
+
+    i {
+        cursor: default !important;
+    }
+}
+
+::ng-deep .not-allowed-cursor {
+    cursor: not-allowed !important;
+
+    i {
+        cursor: not-allowed !important;
+    }
+}
+
+::ng-deep .clickable-cursor {
+    cursor: pointer !important;
+
+    i {
+        cursor: pointer !important;
+    }
+}
