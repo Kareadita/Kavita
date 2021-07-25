@@ -59,12 +59,17 @@ namespace API.Data
             }
 
             await context.SaveChangesAsync();
-            
+
             // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
             context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.Port).Value =
                 Configuration.Port + string.Empty;
             context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
+
+            if (string.IsNullOrEmpty(Configuration.BaseUrl))
+            {
+                Configuration.BaseUrl = "/";
+            }
 
             await context.SaveChangesAsync();
 

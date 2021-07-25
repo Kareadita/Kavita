@@ -201,7 +201,16 @@ namespace Kavita.Common
           }
 
           var currentPort = GetPort(filePath);
-          var json = File.ReadAllText(filePath).Replace("\"BaseUrl\": " + currentPort, "\"BaseUrl\": " + value);
+          var json = File.ReadAllText(filePath);
+          if (!json.Contains("BaseUrl"))
+          {
+              var lastComma = json.LastIndexOf(",");
+              json = json.Substring(0, lastComma) + (",\n  \"BaseUrl\": " + currentPort) + json.Substring(lastComma, json.Length);
+          }
+          else
+          {
+              json = json.Replace("\"BaseUrl\": " + currentPort, "\"BaseUrl\": " + value);
+          }
           File.WriteAllText(filePath, json);
       }
       #endregion

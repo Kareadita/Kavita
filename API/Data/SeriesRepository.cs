@@ -134,6 +134,7 @@ namespace API.Data
                 .Include(vol => vol.Chapters)
                 .ThenInclude(c => c.Files)
                 .OrderBy(vol => vol.Number)
+                .AsSingleQuery()
                 .ToListAsync();
         }
 
