@@ -106,25 +106,7 @@ namespace API.Controllers
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    AppUserProgress userProgress = null;
-                    try
-                    {
-                        userProgress =
-                            user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-                    }
-                    catch (Exception)
-                    {
-                        // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
-                        var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
-                        if (progresses.Count > 1)
-                        {
-                            user.Progresses = new List<AppUserProgress>()
-                            {
-                                user.Progresses.First()
-                            };
-                            userProgress = user.Progresses.First();
-                        }
-                    }
+                    var userProgress = GetUserProgressForChapter(user, chapter);
 
                     if (userProgress == null)
                     {
@@ -156,6 +138,31 @@ namespace API.Controllers
             return BadRequest("There was an issue saving progress");
         }
 
+        private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+        {
+            AppUserProgress userProgress = null;
+            try
+            {
+                userProgress =
+                    user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+            }
+            catch (Exception)
+            {
+                // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
+                var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
+                if (progresses.Count > 1)
+                {
+                    user.Progresses = new List<AppUserProgress>()
+                    {
+                        user.Progresses.First()
+                    };
+                    userProgress = user.Progresses.First();
+                }
+            }
+
+            return userProgress;
+        }
+
         [HttpPost("mark-unread")]
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
@@ -166,25 +173,7 @@ namespace API.Controllers
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    AppUserProgress userProgress = null;
-                    try
-                    {
-                        userProgress =
-                            user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-                    }
-                    catch (Exception)
-                    {
-                        // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
-                        var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
-                        if (progresses.Count > 1)
-                        {
-                            user.Progresses = new List<AppUserProgress>()
-                            {
-                                user.Progresses.First()
-                            };
-                            userProgress = user.Progresses.First();
-                        }
-                    }
+                    var userProgress = GetUserProgressForChapter(user, chapter);
 
                     if (userProgress == null) continue;
                     userProgress.PagesRead = 0;
