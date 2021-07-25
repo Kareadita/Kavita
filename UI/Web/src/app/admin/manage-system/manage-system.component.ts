@@ -21,6 +21,7 @@ export class ManageSystemComponent implements OnInit {
   serverInfo!: ServerInfo;
 
   clearCacheInProgress: boolean = false;
+  backupDBInProgress: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private serverService: ServerService, public downloadService: DownloadService) { }
@@ -68,6 +69,14 @@ export class ManageSystemComponent implements OnInit {
     this.serverService.clearCache().subscribe(res => {
       this.clearCacheInProgress = false;
       this.toastr.success('Cache has been cleared');
+    });
+  }
+
+  backupDB() {
+    this.backupDBInProgress = true;
+    this.serverService.backupDatabase().subscribe(res => {
+      this.backupDBInProgress = false;
+      this.toastr.success('Database has been backed up');
     });
   }
 
