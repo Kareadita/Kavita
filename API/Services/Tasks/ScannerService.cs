@@ -26,16 +26,18 @@ namespace API.Services.Tasks
        private readonly IArchiveService _archiveService;
        private readonly IMetadataService _metadataService;
        private readonly IBookService _bookService;
+       private readonly ICacheService _cacheService;
        private readonly NaturalSortComparer _naturalSort = new ();
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
-          IMetadataService metadataService, IBookService bookService)
+          IMetadataService metadataService, IBookService bookService, ICacheService cacheService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
           _archiveService = archiveService;
           _metadataService = metadataService;
           _bookService = bookService;
+          _cacheService = cacheService;
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -46,6 +48,7 @@ namespace API.Services.Tasks
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
            var dirs = FindHighestDirectoriesFromFiles(library, files);
+           var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{ seriesId });
 
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
            var scanner = new ParseScannedFiles(_bookService, _logger);
@@ -55,7 +58,7 @@ namespace API.Services.Tasks
            // Hence we clear out anything but what we selected for
            var firstSeries = library.Series.FirstOrDefault();
            var keys = parsedSeries.Keys;
-           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault())))
+           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
            {
                parsedSeries.Remove(key);
            }
@@ -71,6 +74,7 @@ namespace API.Services.Tasks
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
                 CleanupUserProgress();
                 BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+                BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             }
             else
             {
@@ -201,13 +205,6 @@ namespace API.Services.Tasks
                 _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
              }
           }
-
-          if (library.Series.Count == 0)
-          {
-              _logger.LogDebug("Removed all Series, returning without checking reset of files scanned");
-              return;
-          }
-
 
           // Add new series that have parsedInfos
           foreach (var (key, infos) in parsedSeries)

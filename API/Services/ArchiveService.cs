@@ -301,7 +301,6 @@ namespace API.Services
                     entry.WriteTo(ms);
                     ms.Position = 0;
 
-
                     var serializer = new XmlSerializer(typeof(ComicInfo));
                     var info = (ComicInfo) serializer.Deserialize(ms);
                     return info;
@@ -383,15 +382,15 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
             archive.ExtractToDirectory(extractPath, true);
-            if (needsFlattening)
-            {
-                _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
-                new DirectoryInfo(extractPath).Flatten();
-            }
+            if (!needsFlattening) return;
+
+            _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
+            new DirectoryInfo(extractPath).Flatten();
         }
 
         /// <summary>

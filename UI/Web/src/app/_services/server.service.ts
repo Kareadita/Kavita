@@ -16,11 +16,11 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/restart', {});
   }
 
-  fetchLogs() {
-    return this.httpClient.get(this.baseUrl + 'server/logs', {responseType: 'blob' as 'text'});
-  }
-
   getServerInfo() {
     return this.httpClient.get<ServerInfo>(this.baseUrl + 'server/server-info');
+  }
+
+  clearCache() {
+    return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
   }
 }

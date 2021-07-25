@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
-using API.Entities.Enums;
 using API.Parser;
 using API.Services.Tasks.Scanner;
 
@@ -43,7 +42,8 @@ namespace API.Extensions
         {
             if (info == null) return false;
             return Parser.Parser.Normalize(info.Series) == series.NormalizedName || Parser.Parser.Normalize(info.Series) == Parser.Parser.Normalize(series.Name)
-                || info.Series == series.Name || info.Series == series.LocalizedName || info.Series == series.OriginalName  || Parser.Parser.Normalize(info.Series) == Parser.Parser.Normalize(series.OriginalName);
+                || info.Series == series.Name || info.Series == series.LocalizedName || info.Series == series.OriginalName
+                || Parser.Parser.Normalize(info.Series) == Parser.Parser.Normalize(series.OriginalName);
         }
     }
 }

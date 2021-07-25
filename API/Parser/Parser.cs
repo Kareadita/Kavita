@@ -11,24 +11,38 @@ namespace API.Parser
     {
         public const string DefaultChapter = "0";
         public const string DefaultVolume = "0";
+        private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
-        public const string MangaComicFileExtensions = ArchiveFileExtensions + "|" + ImageFileExtensions + @"|\.pdf";
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
 
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
 
         private static readonly string XmlRegexExtensions = @"\.xml";
-        private static readonly Regex ImageRegex = new Regex(ImageFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex BookFileRegex = new Regex(BookFileExtensions, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+        private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+        private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+        private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
 
 
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -36,31 +50,38 @@ namespace API.Parser
             // Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
             new Regex(
                 @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
             new Regex(
                 @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Kodomo no Jikan vol. 10
             new Regex(
                 @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
                 @"(vol\.? ?)(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
                 @"(volume )(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] MangaSeriesRegex = new[]
@@ -68,130 +89,161 @@ namespace API.Parser
             // Grand Blue Dreaming - SP02
             new Regex(
                 @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
             new Regex(
                 @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
             @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex)
             new Regex(
                 @"(?<Series>.*)(\s|_|-)(?:Volume(\s|_|-)+\d+)(\s|_|-)+(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
             new Regex(
                 @"(?<Series>.*)(\s|_|-)(?!Vol)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
             new Regex(
                 @"(?<Series>.*) (\b|_|-)(vol)\.?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
             new Regex(
                 @"(?<Series>.*)(\bc\d+\b)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
             new Regex(
                 @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
                 @"(?<Series>.*)(\b|_|-|\s)(?:(chapter(\b|_|-|\s))|sp)\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
                 @"(?<Series>.*) (\b|_|-)(v|ch\.?|c)\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             // due to duplicate version identifiers in file.
             new Regex(
                 @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
                 @"(?<Series>.*)(v|s)\d+(-\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
                 @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Noblesse - Episode 429 (74 Pages).7z
             new Regex(
                 @"(?<Series>.*)(\s|_)(?:Episode|Ep\.?)(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
                 @"(?<Series>.*)\(\d",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
                 @"(?<Series>.*)(\s|_)\((c\s|ch\s|chapter\s)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
                 @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
             new Regex(
                 @"(?<Series>.*)( |_)(vol\d+)?( |_)(?:Chp\.? ?\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
             new Regex(
                 @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
 
             // Fullmetal Alchemist chapters 101-108.cbz
             new Regex(
                 @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
 
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Magi - Ch.252-005.cbz
             new Regex(
                 @"(?<Series>.*)( ?- ?)Ch\.\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [BAA]_Darker_than_Black_Omake-1.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Kodoja #001 (March 2016)
             new Regex(
                 @"(?<Series>.*)(\s|_|-)#",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_|-)(ch?)\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] ComicSeriesRegex = new[]
@@ -199,51 +251,63 @@ namespace API.Parser
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
                 @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
             @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // 01 Spider-Man & Wolverine 01.cbr
             new Regex(
             @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Wildcat (1 of 3)
             new Regex(
             @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled),
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
                 @"^(?<Series>.*)(?: |_)c(hapter) \d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
                 @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: \d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#\d+",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
                 @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
                 @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
             new Regex(
                 @"^(?<Series>.*)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] ComicVolumeRegex = new[]
@@ -251,31 +315,38 @@ namespace API.Parser
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
                 @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // 01 Spider-Man & Wolverine 01.cbr
             new Regex(
                 @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
                 @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
@@ -283,38 +354,46 @@ namespace API.Parser
           // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: (?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
                 @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)c(hapter)( |_)(?<Chapter>\d*)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] ReleaseGroupRegex = new[]
         {
             // [TrinityBAKumA Finella&anon], [BAA]_, [SlowManga&OverloadScans], [batoto]
             new Regex(@"(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // (Shadowcat-Empire),
             // new Regex(@"(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
             //     RegexOptions.IgnoreCase | RegexOptions.Compiled),
@@ -325,62 +404,76 @@ namespace API.Parser
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
             new Regex(
                 @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
             new Regex(
                 @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
             new Regex(
                 @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Green Worldz - Chapter 027
             new Regex(
                 @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-])?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
                 @"^(?!Vol)(?<Series>.*)\s(?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
                 @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
             new Regex(
                 @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<ChapterPart>b)?(\s|_|\[|\()",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Yumekui-Merry_DKThias_Chapter21.zip
             new Regex(
                 @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
             new Regex(
                 @"(?<Series>.*)(\s|_)(vol\d+)?(\s|_)Chp\.? ?(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Vol 1 Chapter 2
             new Regex(
               @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
-              RegexOptions.IgnoreCase | RegexOptions.Compiled),
+              RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
 
         };
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
                 @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
                 @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
                 @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz
             new Regex(
                 @"(\b|_)(?<Edition>Full(?: |_)Color)(\b|_)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] CleanupRegex =
@@ -388,15 +481,18 @@ namespace API.Parser
             // (), {}, []
             new Regex(
                 @"(?<Cleanup>(\{\}|\[\]|\(\)))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // (Complete)
             new Regex(
                 @"(?<Cleanup>(\{Complete\}|\[Complete\]|\(Complete\)))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Anything in parenthesis
             new Regex(
                 @"\(.*\)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] MangaSpecialRegex =
@@ -404,13 +500,15 @@ namespace API.Parser
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
                 @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|Bonus)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
         private static readonly Regex SpecialMarkerRegex = new Regex(
             @"(?<Special>SP\d+)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout
         );
 
 

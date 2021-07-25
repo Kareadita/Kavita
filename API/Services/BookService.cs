@@ -13,11 +13,13 @@ using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
 using Docnet.Core;
+using Docnet.Core.Converters;
 using Docnet.Core.Models;
 using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using VersOne.Epub;
 using Image = NetVips.Image;
 using Point = System.Drawing.Point;
@@ -28,6 +30,7 @@ namespace API.Services
     {
         private readonly ILogger<BookService> _logger;
         private readonly StylesheetParser _cssParser = new ();
+        private static readonly RecyclableMemoryStreamManager StreamManager = new ();
 
         public BookService(ILogger<BookService> logger)
         {
@@ -373,10 +376,10 @@ namespace API.Services
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();
+            using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
-                using var pageReader = docReader.GetPageReader(pageNumber);
-                using var stream = GetPdfPage(docReader, pageNumber);
+                GetPdfPage(docReader, pageNumber, stream);
                 File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
             }
         }
@@ -405,7 +408,7 @@ namespace API.Services
 
                 if (!createThumbnail) return coverImageContent.ReadContent();
 
-                using var stream = new MemoryStream(coverImageContent.ReadContent());
+                using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
                 using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                 return thumbnail.WriteToBuffer(".jpg");
 
@@ -425,8 +428,8 @@ namespace API.Services
                using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
                if (docReader.GetPageCount() == 0) return Array.Empty<byte>();
 
-               using var stream = GetPdfPage(docReader, 0);
-               stream.Seek(0, SeekOrigin.Begin);
+               using var stream = StreamManager.GetStream("BookService.GetPdfPage");
+               GetPdfPage(docReader, 0, stream);
 
                if (!createThumbnail) return stream.ToArray();
 
@@ -444,27 +447,22 @@ namespace API.Services
            return Array.Empty<byte>();
         }
 
-        private static MemoryStream GetPdfPage(IDocReader docReader, int pageNumber)
+        private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
             using var pageReader = docReader.GetPageReader(pageNumber);
-            var rawBytes = pageReader.GetImage();
+            var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();
             var height = pageReader.GetPageHeight();
-            using var doc = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             AddBytesToBitmap(bmp, rawBytes);
-            for (int y = 0; y < bmp.Height; y++)
+            // Removes 1px margin on left/right side after bitmap is copied out
+            for (var y = 0; y < bmp.Height; y++)
             {
                 bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
             }
-
-            using var g = Graphics.FromImage(doc);
-            g.FillRegion(Brushes.White, new Region(new Rectangle(0, 0, width, height)));
-            g.DrawImage(bmp, new Point(0, 0));
-            g.Save();
-            var stream = new MemoryStream();
-            doc.Save(stream, ImageFormat.Jpeg);
-            return stream;
+            stream.Seek(0, SeekOrigin.Begin);
+            bmp.Save(stream, ImageFormat.Jpeg);
+            stream.Seek(0, SeekOrigin.Begin);
         }
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)
