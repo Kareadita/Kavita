@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Title } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerInfo } from '../_models/server-info';
@@ -18,7 +20,10 @@ export class ManageSystemComponent implements OnInit {
   serverSettings!: ServerSettings;
   serverInfo!: ServerInfo;
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, private serverService: ServerService) { }
+  clearCacheInProgress: boolean = false;
+
+  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
+    private serverService: ServerService, public downloadService: DownloadService) { }
 
   ngOnInit(): void {
 
@@ -55,6 +60,14 @@ export class ManageSystemComponent implements OnInit {
       this.toastr.success('Server settings updated');
     }, (err: any) => {
       console.error('error: ', err);
+    });
+  }
+
+  clearCache() {
+    this.clearCacheInProgress = true;
+    this.serverService.clearCache().subscribe(res => {
+      this.clearCacheInProgress = false;
+      this.toastr.success('Cache has been cleared');
     });
   }
 

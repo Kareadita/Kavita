@@ -3,6 +3,7 @@ import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { UtilityService } from '../shared/_services/utility.service';
 import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';

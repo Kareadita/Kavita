@@ -56,7 +56,7 @@
                         <h5>Genres</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres">{{genre}}</app-tag-badge>
+                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres" [selectionMode]="TagBadgeCursor.Clickable">{{genre}}</app-tag-badge>
                     </div>
                 </div>
                 <div class="row no-gutters mt-1" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
@@ -64,7 +64,7 @@
                         <h5>Collections</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-tag-badge *ngFor="let tag of seriesMetadata.tags" a11y-click="13,32" class="clickable" routerLink="/collections/{{tag.id}}">
+                        <app-tag-badge *ngFor="let tag of seriesMetadata.tags" a11y-click="13,32" class="clickable" routerLink="/collections/{{tag.id}}"  [selectionMode]="TagBadgeCursor.Clickable">
                             {{tag.title}}
                         </app-tag-badge>
                     </div>
@@ -85,7 +85,7 @@
                         <h5>Type</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-tag-badge><i class="fa {{utilityService.mangaFormatIcon(series.format)}}" aria-hidden="true" title="{{utilityService.mangaFormat(series.format)}}"></i>&nbsp;{{utilityService.mangaFormat(series.format)}} </app-tag-badge>
+                        <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed"><app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format></app-tag-badge>
                     </div>
                 </div>
             </div>

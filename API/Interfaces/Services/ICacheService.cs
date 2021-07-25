@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using API.Entities;
 
 namespace API.Interfaces.Services
@@ -22,11 +23,11 @@ namespace API.Interfaces.Services
         /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
         /// </summary>
         /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
-        void CleanupChapters(int[] chapterIds);
-        
+        void CleanupChapters(IEnumerable<int> chapterIds);
+
 
         /// <summary>
-        /// Returns the absolute path of a cached page. 
+        /// Returns the absolute path of a cached page.
         /// </summary>
         /// <param name="chapter">Chapter entity with Files populated.</param>
         /// <param name="page">Page number to look for</param>
