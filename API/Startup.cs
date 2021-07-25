@@ -122,7 +122,7 @@ namespace API
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
 
-            if (!string.IsNullOrEmpty(Configuration.BaseUrl))
+            if (!string.IsNullOrEmpty(Configuration.BaseUrl) && env.IsProduction())
             {
                 app.UsePathBase(Configuration.BaseUrl);
             }

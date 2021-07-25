@@ -39,6 +39,14 @@ import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
+import { APP_BASE_HREF } from '@angular/common';
+
+// let appBase = '/';
+// if (window.hasOwnProperty('_app_base')) {
+//   appBase = window[<any>'_app_base'];
+// }
+
+
 
 let sentryProviders: any[] = [];
 
@@ -138,6 +146,7 @@ if (environment.production) {
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
     Title,
+    { provide: APP_BASE_HREF, useValue: ((window as { [key: string]: any })["_app_base"] as string) || '/' },
     ...sentryProviders,
   ],
   entryComponents: [],
