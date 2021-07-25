@@ -106,8 +106,27 @@ namespace API.Controllers
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-                    if (userProgress == null) // I need to get all chapters and generate new user progresses for them?
+                    AppUserProgress userProgress = null;
+                    try
+                    {
+                        userProgress =
+                            user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                    }
+                    catch (Exception)
+                    {
+                        // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
+                        var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
+                        if (progresses.Count > 1)
+                        {
+                            user.Progresses = new List<AppUserProgress>()
+                            {
+                                user.Progresses.First()
+                            };
+                            userProgress = user.Progresses.First();
+                        }
+                    }
+
+                    if (userProgress == null)
                     {
                         user.Progresses.Add(new AppUserProgress
                         {
@@ -147,23 +166,30 @@ namespace API.Controllers
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-                    if (userProgress == null)
+                    AppUserProgress userProgress = null;
+                    try
                     {
-                        user.Progresses.Add(new AppUserProgress
+                        userProgress =
+                            user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                    }
+                    catch (Exception)
+                    {
+                        // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
+                        var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
+                        if (progresses.Count > 1)
                         {
-                            PagesRead = 0,
-                            VolumeId = volume.Id,
-                            SeriesId = markReadDto.SeriesId,
-                            ChapterId = chapter.Id
-                        });
+                            user.Progresses = new List<AppUserProgress>()
+                            {
+                                user.Progresses.First()
+                            };
+                            userProgress = user.Progresses.First();
+                        }
                     }
-                    else
-                    {
-                        userProgress.PagesRead = 0;
-                        userProgress.SeriesId = markReadDto.SeriesId;
-                        userProgress.VolumeId = volume.Id;
-                    }
+
+                    if (userProgress == null) continue;
+                    userProgress.PagesRead = 0;
+                    userProgress.SeriesId = markReadDto.SeriesId;
+                    userProgress.VolumeId = volume.Id;
                 }
             }
 
