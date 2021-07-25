@@ -9,7 +9,7 @@ namespace API.Tests.Parser
     public class MangaParserTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-        
+
         public MangaParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -68,7 +68,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
         }
-        
+
         [Theory]
         [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "Killing Bites")]
         [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "My Girlfriend Is Shobitch")]
@@ -146,11 +146,19 @@ namespace API.Tests.Parser
         [InlineData("Kodoja #001 (March 2016)", "Kodoja")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "Boku No Kokoro No Yabai Yatsu")]
         [InlineData("Kiss x Sis - Ch.36 - A Cold Home Visit.cbz", "Kiss x Sis")]
+        [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ)", "Seraph of the End - Vampire Reign")]
+        [InlineData("Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz", "Grand Blue Dreaming")]
+        [InlineData("Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz", "Yuusha Ga Shinda!")]
+        [InlineData("Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
+        [InlineData("Getsuyoubi no Tawawa - Ch. 001 - Ai-chan, Part 1", "Getsuyoubi no Tawawa")]
+        [InlineData("Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz", "Please Go Home, Akutsu-San!")]
+        [InlineData("Killing Bites - Vol 11 Chapter 050 Save Me, Nunupi!.cbz", "Killing Bites")]
+        [InlineData("Mad Chimera World - Volume 005 - Chapter 026.cbz", "Mad Chimera World")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
         }
-        
+
         [Theory]
         [InlineData("Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)", "1")]
         [InlineData("My Girlfriend Is Shobitch v01 - ch. 09 - pg. 008.png", "9")]
@@ -206,13 +214,14 @@ namespace API.Tests.Parser
         [InlineData("Kiss x Sis - Ch.00 - Let's Start from 0.cbz", "0")]
         [InlineData("[Hidoi]_Amaenaideyo_MS_vol01_chp02.rar", "2")]
         [InlineData("Okusama wa Shougakusei c003 (v01) [bokuwaNEET]", "3")]
-        [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
         [InlineData("Tomogui Kyoushitsu - Chapter 006 Game 005 - Fingernails On Right Hand (Part 002).cbz", "6")]
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "406")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "201")]
         [InlineData("Kodoja #001 (March 2016)", "1")]
         [InlineData("Noblesse - Episode 429 (74 Pages).7z", "429")]
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
+        [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
+        [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -249,7 +258,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
         }
-        
+
         [Theory]
         [InlineData("image.png", MangaFormat.Image)]
         [InlineData("image.cbz", MangaFormat.Archive)]
@@ -266,6 +275,32 @@ namespace API.Tests.Parser
             Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
+        private static ParserInfo CreateParserInfo(string series, string chapter, string volume, bool isSpecial = false)
+        {
+          return new ParserInfo()
+          {
+            Chapters = chapter,
+            Volumes = volume,
+            IsSpecial = isSpecial,
+            Series = series,
+          };
+        }
+
+        [Theory]
+        [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
+        [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
+        public void ParseFromFallbackFoldersTest(string inputFile, string expectedParseInfo)
+        {
+          const string rootDirectory = "/manga/";
+          var tokens = expectedParseInfo.Split("~");
+          var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
+          API.Parser.Parser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
+          Assert.Equal(tokens[0], actual.Series);
+          Assert.Equal(tokens[1], actual.Volumes);
+          Assert.Equal(tokens[2], actual.Chapters);
+
+        }
+
         [Fact]
         public void ParseInfoTest()
         {
@@ -278,7 +313,7 @@ namespace API.Tests.Parser
                 Chapters = "76", Filename = "Mujaki no Rakuen Vol12 ch76.cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:/Manga/Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -286,7 +321,7 @@ namespace API.Tests.Parser
                 Chapters = "0", Filename = "Vol 1.cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\Beelzebub\Beelzebub_01_[Noodles].zip";
             expected.Add(filepath, new ParserInfo
             {
@@ -294,7 +329,7 @@ namespace API.Tests.Parser
                 Chapters = "1", Filename = "Beelzebub_01_[Noodles].zip", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
             expected.Add(filepath, new ParserInfo
             {
@@ -309,8 +344,8 @@ namespace API.Tests.Parser
                 Series = "Tenjo Tenge", Volumes = "1", Edition = "Full Contact Edition",
                 Chapters = "0", Filename = "Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
-            }); 
-            
+            });
+
             filepath = @"E:\Manga\Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)\Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -318,7 +353,7 @@ namespace API.Tests.Parser
                 Chapters = "0", Filename = "Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\Dorohedoro\Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -326,7 +361,7 @@ namespace API.Tests.Parser
                 Chapters = "0", Filename = "Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\APOSIMZ\APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -334,7 +369,7 @@ namespace API.Tests.Parser
                 Chapters = "40", Filename = "APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
             expected.Add(filepath, new ParserInfo
             {
@@ -342,13 +377,29 @@ namespace API.Tests.Parser
                 Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
             });
-            
+
             filepath = @"E:\Manga\Goblin Slayer\Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz";
             expected.Add(filepath, new ParserInfo
             {
                 Series = "Goblin Slayer - Brand New Day", Volumes = "0", Edition = "",
                 Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
                 FullFilePath = filepath
+            });
+
+            filepath = @"E:\Manga\Summer Time Rendering\Specials\Record 014 (between chapter 083 and ch084) SP11.cbr";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Summer Time Rendering", Volumes = "0", Edition = "",
+                Chapters = "0", Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
+                FullFilePath = filepath, IsSpecial = true
+            });
+
+            filepath = @"E:\Manga\Seraph of the End\Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
+              Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
             });
 
 

@@ -1,0 +1,7 @@
+$primary-color: #4ac694; //#cc7b19;
+$error-color: #ff4136; // #bb2929 good color for contrast rating
+
+$theme-colors: (
+  "primary": $primary-color,
+  "danger": $error-color 
+);

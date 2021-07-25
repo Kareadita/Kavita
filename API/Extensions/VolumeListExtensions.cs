@@ -19,18 +19,18 @@ namespace API.Extensions
         /// If there are both specials and non-specials, then the first non-special will be returned.
         /// </summary>
         /// <param name="volumes"></param>
-        /// <param name="libraryType"></param>
+        /// <param name="seriesFormat"></param>
         /// <returns></returns>
-        public static Volume GetCoverImage(this IList<Volume> volumes, LibraryType libraryType)
+        public static Volume GetCoverImage(this IList<Volume> volumes, MangaFormat seriesFormat)
         {
-            if (libraryType == LibraryType.Book)
+            if (seriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
             {
                 return volumes.OrderBy(x => x.Number).FirstOrDefault();
             }
 
             if (volumes.Any(x => x.Number != 0))
             {
-                return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);    
+                return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
             }
             return volumes.OrderBy(x => x.Number).FirstOrDefault();
         }

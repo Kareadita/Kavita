@@ -16,7 +16,7 @@
   <PropertyGroup>
     <Product>Kavita</Product>
     <Company>kareadita.github.io</Company>
-    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kareadita.github.io (GNU General Public v3)</Copyright>
+    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
 
     <!-- Should be replaced by CI -->
     <AssemblyVersion>0.4.1</AssemblyVersion>
@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="Docnet.Core" Version="2.3.1" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Hangfire" Version="1.7.20" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.20" />
@@ -47,19 +48,26 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.0.0" />
-    <PackageReference Include="NetVips" Version="2.0.0" />
-    <PackageReference Include="NetVips.Native" Version="8.10.6" />
+    <PackageReference Include="NetVips" Version="2.0.1" />
+    <PackageReference Include="NetVips.Native" Version="8.11.0" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.1" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.3.4" />
-    <PackageReference Include="SharpCompress" Version="0.28.1" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.20.0.28934">
+    <PackageReference Include="Sentry.AspNetCore" Version="3.8.2" />
+    <PackageReference Include="SharpCompress" Version="0.28.3" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
     <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+  </ItemGroup>
+
+  
 
   <ItemGroup>
     <None Remove="Hangfire-log.db" />
@@ -205,14 +213,6 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
 </Project>

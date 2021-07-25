@@ -9,17 +9,13 @@ namespace API.Entities
     public class SeriesMetadata : IHasConcurrencyToken
     {
         public int Id { get; set; }
-        /// <summary>
-        /// Publisher of book or manga/comic
-        /// </summary>
-        //public string Publisher { get; set; }
-        
+
         public ICollection<CollectionTag> CollectionTags { get; set; }
-        
+
         // Relationship
         public Series Series { get; set; }
         public int SeriesId { get; set; }
-        
+
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
 

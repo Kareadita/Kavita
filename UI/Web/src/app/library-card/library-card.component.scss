@@ -1,0 +1,58 @@
+$primary-color: #cc7b19;
+
+.card {
+    margin: 10px;
+    max-width: 160px;
+    cursor: pointer;
+}
+
+.card-title {
+    margin-top: 5px;
+    line-height: 20px;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: normal;
+    max-width: 150px;
+    height: 52px;
+    padding-top: 10px;
+}
+
+.card-img-top {
+    height: 160px;
+    margin-top: 40% !important;
+    margin: auto;
+    font-size: 52px;
+
+}
+
+.overlay {
+    height: 160px;
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+        visibility: visible;
+
+        .overlay-item {
+            visibility: visible;
+        }
+    }
+    
+    .overlay-item {
+        visibility: hidden;
+    }
+    
+    z-index: 10;
+}
+
+.card-actions {
+    position: absolute;
+    top: 125px;
+    right: -5px;
+}
+
+.card-body {
+    padding: 5px !important;
+}
+
+.dropdown-toggle:after {
+    content: none !important;
+}

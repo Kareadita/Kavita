@@ -1,0 +1,49 @@
+.carousel-container {
+    overflow: hidden;
+    padding-top: 15px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    float: left;
+    flex-direction: column;
+}
+
+.section-title {
+    font-size: 1.6rem;
+    font-weight: 400;
+    margin-left: 10px;
+    color: black;
+
+    :hover {
+        text-decoration: underline;
+    }
+
+    :active {
+        text-decoration: underline;
+    }
+
+    :focus {
+        text-decoration: underline;
+    }
+}
+
+::ng-deep .bg-light {
+    .section-title {
+        color: black !important;
+    }
+    
+}
+// These are needed due to nested css within another component
+::ng-deep .bg-dark {
+    .section-title {
+        color: #efefef !important;
+    }
+}
+
+::ng-deep .swiper-slide {
+    width: auto !important;
+}
+
+::ng-deep .swiper-slide {
+    width: auto !important;
+}

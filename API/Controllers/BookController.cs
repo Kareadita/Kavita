@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
@@ -44,7 +45,7 @@ namespace API.Controllers
 
             var key = BookService.CleanContentKeys(file);
             if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
-            
+
             var bookFile = book.Content.AllFiles[key];
             var content = await bookFile.ReadContentAsBytesAsync();
 
@@ -61,7 +62,7 @@ namespace API.Controllers
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
             using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
-            
+
             var navItems = await book.GetNavigationAsync();
             var chaptersList = new List<BookChapterItem>();
 
@@ -69,9 +70,8 @@ namespace API.Controllers
             {
                 if (navigationItem.NestedItems.Count > 0)
                 {
-                    _logger.LogDebug("Header: {Header}", navigationItem.Title);
-                    var nestedChapters = new List<BookChapterItem>();
-                    
+                   var nestedChapters = new List<BookChapterItem>();
+
                     foreach (var nestedChapter in navigationItem.NestedItems)
                     {
                         if (nestedChapter.Link == null) continue;
@@ -92,7 +92,7 @@ namespace API.Controllers
                     {
                         var item = new BookChapterItem()
                         {
-                            Title = navigationItem.Title, 
+                            Title = navigationItem.Title,
                             Children = nestedChapters
                         };
                         if (nestedChapters.Count > 0)
@@ -109,7 +109,7 @@ namespace API.Controllers
                             chaptersList.Add(new BookChapterItem()
                             {
                                 Title = navigationItem.Title,
-                                Page = mappings[groupKey], 
+                                Page = mappings[groupKey],
                                 Children = nestedChapters
                             });
                         }
@@ -122,14 +122,14 @@ namespace API.Controllers
                 // Generate from TOC
                 var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
                 if (tocPage == null) return Ok(chaptersList);
-                
+
                 // Find all anchor tags, for each anchor we get inner text, to lower then titlecase on UI. Get href and generate page content
                 var doc = new HtmlDocument();
                 var content = await book.Content.Html[tocPage].ReadContentAsync();
                 doc.LoadHtml(content);
                 var anchors = doc.DocumentNode.SelectNodes("//a");
                 if (anchors == null) return Ok(chaptersList);
-                
+
                 foreach (var anchor in anchors)
                 {
                     if (anchor.Attributes.Contains("href"))
@@ -161,11 +161,11 @@ namespace API.Controllers
                         }
                     }
                 }
-                
+
             }
             return Ok(chaptersList);
         }
-        
+
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {
@@ -185,10 +185,10 @@ namespace API.Controllers
                 {
                     var content = await contentFileRef.ReadContentAsync();
                     if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
-                    
+
                     // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
                     content = BookService.EscapeTags(content);
-                    
+
                     doc.LoadHtml(content);
                     var body = doc.DocumentNode.SelectSingleNode("//body");
 
@@ -218,7 +218,7 @@ namespace API.Controllers
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
                     }
-                    
+
                     var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
                     if (styleNodes != null)
                     {
@@ -238,7 +238,7 @@ namespace API.Controllers
 
                                 key = correctedKey;
                             }
-                            
+
                             var styleContent = await _bookService.ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase, book.Content.Css[key].FileName, book);
                             body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
                         }
@@ -252,14 +252,14 @@ namespace API.Controllers
                             BookService.UpdateLinks(anchor, mappings, page);
                         }
                     }
-                    
+
                     var images = doc.DocumentNode.SelectNodes("//img");
                     if (images != null)
                     {
                         foreach (var image in images)
                         {
                             if (image.Name != "img") continue;
-                            
+
                             // Need to do for xlink:href
                             if (image.Attributes["src"] != null)
                             {
@@ -277,14 +277,14 @@ namespace API.Controllers
                             }
                         }
                     }
-                    
+
                     images = doc.DocumentNode.SelectNodes("//image");
                     if (images != null)
                     {
                         foreach (var image in images)
                         {
                             if (image.Name != "image") continue;
-                            
+
                             if (image.Attributes["xlink:href"] != null)
                             {
                                 var imageFile = image.Attributes["xlink:href"].Value;
@@ -301,7 +301,7 @@ namespace API.Controllers
                             }
                         }
                     }
-                    
+
                     // Check if any classes on the html node (some r2l books do this) and move them to body tag for scoping
                     var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
                     if (htmlNode != null && htmlNode.Attributes.Contains("class"))
@@ -312,9 +312,9 @@ namespace API.Controllers
                         // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
                         return Ok($"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>");
                     }
-                    
-                    
-                    return Ok(body.InnerHtml); 
+
+
+                    return Ok(body.InnerHtml);
                 }
 
                 counter++;

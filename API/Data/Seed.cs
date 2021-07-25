@@ -30,7 +30,7 @@ namespace API.Data
                 var exists = await roleManager.RoleExistsAsync(role.Name);
                 if (!exists)
                 {
-                    await roleManager.CreateAsync(role);      
+                    await roleManager.CreateAsync(role);
                 }
             }
         }
@@ -38,7 +38,7 @@ namespace API.Data
         public static async Task SeedSettings(DataContext context)
         {
             await context.Database.EnsureCreatedAsync();
-            
+
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
                 new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
@@ -47,7 +47,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
-                new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"}, 
+                new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
             };
 
             foreach (var defaultSetting in defaultSettings)
@@ -62,14 +62,13 @@ namespace API.Data
             await context.SaveChangesAsync();
             
             // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
-            var configFile = Program.GetAppSettingFilename();
             context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.Port).Value =
-                Configuration.GetPort(configFile) + "";
+                Configuration.Port + string.Empty;
             context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.LoggingLevel).Value =
-                Configuration.GetLogLevel(configFile);
-            
+                Configuration.LogLevel + string.Empty;
+
             await context.SaveChangesAsync();
-            
+
         }
 
         public static async Task SeedSeriesMetadata(DataContext context)

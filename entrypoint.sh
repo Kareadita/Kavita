@@ -46,6 +46,20 @@ else
 	ln -s /kavita/data/cache /kavita/cache
 fi
 
+if [ -d /kavita/data/stats ]
+then
+	if [ -d /kavita/stats ]
+	then
+		unlink /kavita/stats
+		ln -s /kavita/data/stats /kavita/stats
+	else
+		ln -s /kavita/data/stats /kavita/stats
+	fi
+else
+	mkdir /kavita/data/stats
+	ln -s /kavita/data/stats /kavita/stats
+fi
+
 # Checks for the log file
 
 if test -f "/kavita/data/logs/kavita.log"
@@ -64,5 +78,7 @@ else
 	fi
 
 fi
+
+chmod +x ./Kavita
 
 ./Kavita

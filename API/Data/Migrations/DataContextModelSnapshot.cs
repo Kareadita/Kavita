@@ -412,6 +412,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Format")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -443,7 +446,7 @@ namespace API.Data.Migrations
 
                     b.HasIndex("LibraryId");
 
-                    b.HasIndex("Name", "NormalizedName", "LocalizedName", "LibraryId")
+                    b.HasIndex("Name", "NormalizedName", "LocalizedName", "LibraryId", "Format")
                         .IsUnique();
 
                     b.ToTable("Series");

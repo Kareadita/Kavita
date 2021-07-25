@@ -1,0 +1,192 @@
+<div class="container">
+    <h2>User Preferences</h2>
+    <p>
+        These are global settings that are bound to your account. 
+    </p>
+    
+    <ngb-accordion [closeOthers]="true" activeIds="site-panel">
+            <ngb-panel id="site-panel" title="Site">
+                <ng-template ngbPanelContent>
+                    <form [formGroup]="settingsForm" *ngIf="user !== undefined">
+                        <div class="form-group">
+                            <label id="site-dark-mode-label" aria-describedby="site-heading">Dark Mode</label>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="site-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="true" aria-labelledby="site-dark-mode-label">
+                                    <label class="custom-control-label" for="site-dark-mode">True</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="false" aria-labelledby="site-dark-mode-label">
+                                    <label class="custom-control-label" for="site-not-dark-mode">False</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="float-right mb-3">
+                            <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
+                            <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                        </div>
+                    </form>
+                </ng-template>
+            </ngb-panel>
+            <ngb-panel id="reading-panel" title="Reading">
+                <ng-template ngbPanelContent>
+                    <form [formGroup]="settingsForm" *ngIf="user !== undefined">
+                        <h3 id="manga-header">Manga</h3>
+                        <div class="form-group">
+                            <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
+                            <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                            <select class="form-control" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
+                                <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="settings-scaling-option">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
+                            <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
+                            <span class="sr-only" id="settings-scaling-option-help">How to scale the image to your screen.</span>
+                            <select class="form-control" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
+                                <option *ngFor="let opt of scalingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                
+                        <div class="form-group">
+                            <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
+                            <span class="sr-only" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
+                            <select class="form-control" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
+                                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-readingmode-option">Reading Mode</label>
+                            <select class="form-control" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
+                                <option *ngFor="let opt of readingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="auto-close-label">Auto Close Menu</label>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <label class="custom-control-label" for="auto-close">True</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="not-auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="false" aria-labelledby="auto-close-label">
+                                    <label class="custom-control-label" for="not-auto-close">False</label>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <h3>Books</h3>
+                        <div class="form-group">
+                            <label id="dark-mode-label">Dark Mode</label>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="dark-mode" formControlName="bookReaderDarkMode" class="custom-control-input" [value]="true" aria-labelledby="dark-mode-label">
+                                    <label class="custom-control-label" for="dark-mode">True</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="not-dark-mode" formControlName="bookReaderDarkMode" class="custom-control-input" [value]="false" aria-labelledby="dark-mode-label">
+                                    <label class="custom-control-label" for="not-dark-mode">False</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-book-reading-direction">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
+                            <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                            <select class="form-control" aria-describedby="settings-reading-direction-help" formControlName="bookReaderReadingDirection">
+                                <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="taptopaginate-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
+                            <span class="sr-only" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
+                            <div class="form-group">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="custom-control-input" [value]="true" aria-labelledby="taptopaginate-label">
+                                    <label class="custom-control-label" for="taptopaginate">True</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="not-taptopaginate" formControlName="bookReaderTapToPaginate" class="custom-control-input" [value]="false" aria-labelledby="taptopaginate-label">
+                                    <label class="custom-control-label" for="not-taptopaginate">False</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-fontfamily-option">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
+                            <span class="sr-only" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
+                            <select class="form-control" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
+                                <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label id="font-size">Font Size</label>
+                            <ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider>
+                        </div>
+                        <div class="form-group">
+                            <label>Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
+                            <span class="sr-only" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
+                            <ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
+                            <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
+                            <span class="sr-only" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
+                            <ngx-slider [options]="bookReaderMarginOptions" formControlName="bookReaderMargin" aria-describedby="bookmargin"></ngx-slider>
+                        </div>
+
+                        <div class="float-right mb-3">
+                            <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
+                            <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                        </div>
+                    </form>
+                </ng-template>
+            </ngb-panel>
+        
+
+        <ngb-panel id="password-panel" title="Password">
+            <ng-template ngbPanelContent>
+                <p>Change your Password</p>
+                <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
+                    <div *ngFor="let error of resetPasswordErrors">{{error}}</div>
+                </div>
+                <form [formGroup]="passwordChangeForm">
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input class="form-control" type="password" id="new-password" formControlName="password" required>
+                        <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
+                            <div *ngIf="password?.errors?.required">
+                                This field is required
+                              </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input class="form-control" type="password" id="confirm-password" formControlName="confirmPassword" aria-describedby="password-validations" required>
+                        <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
+                            <div *ngIf="!passwordsMatch">
+                                Passwords must match
+                            </div>
+                            <div *ngIf="confirmPassword?.errors?.required">
+                                This field is required
+                              </div>
+                        </div>
+                    </div>
+                    <div class="float-right mb-3">
+                        <button type="button" class="btn btn-secondary mr-2" (click)="resetPasswordForm()">Reset</button>
+                        <button type="submit" class="btn btn-primary" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
+                    </div>
+                </form>
+            </ng-template>
+        </ngb-panel>
+    </ngb-accordion>
+    
+        
+    
+</div>

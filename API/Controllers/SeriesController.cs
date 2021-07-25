@@ -26,24 +26,24 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
                 await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
-            
+
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for library");
 
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            
+
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-            
+
             return Ok(series);
         }
-        
+
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
@@ -59,7 +59,7 @@ namespace API.Controllers
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
-          
+
             if (result)
             {
                 _taskScheduler.CleanupChapters(chapterIds);
@@ -78,22 +78,22 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
         }
-        
+
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
         }
-        
+
         [HttpGet("chapter")]
         public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
         {
             return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
         }
 
-        
-        
+
+
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
@@ -105,13 +105,13 @@ namespace API.Controllers
             userRating.Rating = updateSeriesRatingDto.UserRating;
             userRating.Review = updateSeriesRatingDto.UserReview;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-            
+
             if (userRating.Id == 0)
             {
                 user.Ratings ??= new List<AppUserRating>();
                 user.Ratings.Add(userRating);
             }
-            
+
             _unitOfWork.UserRepository.Update(user);
 
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical error.");
@@ -127,7 +127,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
 
             if (series == null) return BadRequest("Series does not exist");
-            
+
             if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
@@ -143,7 +143,7 @@ namespace API.Controllers
             {
                 return Ok();
             }
-            
+
             return BadRequest("There was an error with updating the series");
         }
 
@@ -180,13 +180,21 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("scan")]
+        public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
+        {
+            _taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            return Ok();
+        }
+
         [HttpGet("metadata")]
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {
             var metadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
             return Ok(metadata);
         }
-        
+
         [HttpPost("metadata")]
         public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
         {
@@ -221,7 +229,7 @@ namespace API.Controllers
                         var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
                         if (existingTag != null)
                         {
-                            // Update existingTag    
+                            // Update existingTag
                             existingTag.Promoted = tag.Promoted;
                             existingTag.Title = tag.Title;
                             existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
@@ -263,17 +271,17 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
                 await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, user.Id, userParams);
-            
+
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for collection");
 
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            
+
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-            
+
             return Ok(series);
         }
-        
-        
+
+
     }
 }

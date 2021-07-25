@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
@@ -16,7 +17,7 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly IMapper _mapper;
-
+        private readonly NaturalSortComparer _naturalSortComparer = new ();
         public SeriesRepository(DataContext context, IMapper mapper)
         {
             _context = context;
@@ -37,7 +38,7 @@ namespace API.Data
         {
             return await _context.SaveChangesAsync() > 0;
         }
-        
+
         public bool SaveAll()
         {
             return _context.SaveChanges() > 0;
@@ -60,12 +61,12 @@ namespace API.Data
                 .Where(s => libraries.Contains(s.LibraryId) && s.Name == name)
                 .CountAsync() > 1;
         }
-        
+
         public Series GetSeriesByName(string name)
         {
             return _context.Series.SingleOrDefault(x => x.Name == name);
         }
-        
+
         public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
         {
             return await _context.Series
@@ -73,7 +74,7 @@ namespace API.Data
                 .OrderBy(s => s.SortName)
                 .ToListAsync();
         }
-        
+
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
         {
             var query =  _context.Series
@@ -84,12 +85,12 @@ namespace API.Data
 
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
-        
+
         public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
         {
             return await _context.Series
                 .Where(s => libraryIds.Contains(s.LibraryId))
-                .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%") 
+                .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                             || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
                             || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
                 .Include(s => s.Library)
@@ -108,10 +109,21 @@ namespace API.Data
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-            
+
             await AddVolumeModifiers(userId, volumes);
+            SortSpecialChapters(volumes);
+
+
 
             return volumes;
+        }
+
+        private void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
+        {
+            foreach (var v in volumes.Where(vdto => vdto.Number == 0))
+            {
+                v.Chapters = v.Chapters.OrderBy(x => x.Range, _naturalSortComparer).ToList();
+            }
         }
 
 
@@ -133,7 +145,7 @@ namespace API.Data
 
             var seriesList = new List<SeriesDto>() {series};
             await AddSeriesModifiers(userId, seriesList);
-            
+
             return seriesList[0];
         }
 
@@ -152,7 +164,7 @@ namespace API.Data
                 .AsNoTracking()
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .SingleAsync();
-            
+
         }
 
         public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
@@ -163,7 +175,7 @@ namespace API.Data
                 .ThenInclude(c => c.Files)
                 .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
                 .SingleAsync(vol => vol.Id == volumeId);
-            
+
             var volumeList = new List<VolumeDto>() {volume};
             await AddVolumeModifiers(userId, volumeList);
 
@@ -186,7 +198,7 @@ namespace API.Data
         {
             var series = await _context.Series.Where(s => s.Id == seriesId).SingleOrDefaultAsync();
             _context.Series.Remove(series);
-            
+
             return await _context.SaveChangesAsync() > 0;
         }
 
@@ -212,7 +224,7 @@ namespace API.Data
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ToListAsync();
-            
+
             IList<int> chapterIds = new List<int>();
             foreach (var s in series)
             {
@@ -266,7 +278,7 @@ namespace API.Data
                 .SingleOrDefaultAsync();
         }
 
-        private async Task AddVolumeModifiers(int userId, List<VolumeDto> volumes)
+        private async Task AddVolumeModifiers(int userId, IReadOnlyCollection<VolumeDto> volumes)
         {
             var userProgress = await _context.AppUserProgresses
                 .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
@@ -279,7 +291,7 @@ namespace API.Data
                 {
                     c.PagesRead = userProgress.Where(p => p.ChapterId == c.Id).Sum(p => p.PagesRead);
                 }
-                
+
                 v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
             }
         }
@@ -311,7 +323,7 @@ namespace API.Data
 
                 return await PagedList<SeriesDto>.CreateAsync(allQuery, userParams.PageNumber, userParams.PageSize);
             }
-            
+
             var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .AsNoTracking()
@@ -356,7 +368,7 @@ namespace API.Data
             {
                 series = series.Where(s => s.AppUserId == userId
                             && s.PagesRead > 0
-                            && s.PagesRead < s.Series.Pages 
+                            && s.PagesRead < s.Series.Pages
                             && s.Series.LibraryId == libraryId);
             }
             var retSeries = await series
@@ -365,7 +377,7 @@ namespace API.Data
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-                
+
             return retSeries.DistinctBy(s => s.Name).Take(limit);
         }
 
@@ -386,7 +398,7 @@ namespace API.Data
                     .AsNoTracking()
                     .ToListAsync();
             }
-            
+
             return metadataDto;
         }
 
@@ -398,7 +410,7 @@ namespace API.Data
                 .AsNoTracking()
                 .Select(library => library.Id)
                 .ToList();
-            
+
             var query =  _context.CollectionTag
                 .Where(s => s.Id == collectionId)
                 .Include(c => c.SeriesMetadatas)

@@ -1,0 +1,63 @@
+name: Sentry Map Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "version to update package.json"
+        required: true
+        # No default
+
+jobs:
+  build:
+    name: Setup Sentry CLI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mathieu-bour/setup-sentry-cli@1.2.0
+        with:
+          version: latest
+          token: ${{ secrets.SENTRY_TOKEN }}
+          organization: kavita-7n
+          project: angular
+
+      - name: Check out repository
+        uses: actions/checkout@v2
+        
+      - name: Parse Version
+        run: |
+          version='${{ github.event.inputs.version }}'
+          newVersion=${version%.*}
+          echo $newVersion
+          echo "::set-output name=VERSION::$newVersion"
+        id: parse-version
+
+      - name: NodeJS to Compile WebUI
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: '14'
+
+      - run: |
+          cd UI/Web || exit
+          echo 'Installing web dependencies'
+          npm install
+
+          npm version --allow-same-version "${{ steps.parse-version.outputs.VERSION }}"
+
+          echo 'Building UI'
+          npm run prod
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Create Release
+        run: sentry-cli releases new ${{ steps.parse-version.outputs.VERSION }}
+
+      - name: Upload Source Maps
+        run: sentry-cli releases files ${{ steps.parse-version.outputs.VERSION }} upload-sourcemaps UI/Web/dist
+
+      - name: Finalize Release
+        run: sentry-cli releases finalize ${{ steps.parse-version.outputs.VERSION }}

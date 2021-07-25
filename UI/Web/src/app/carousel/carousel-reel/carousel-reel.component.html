@@ -1,0 +1,19 @@
+<div class="carousel-container" *ngIf="items.length > 0">
+    <div>
+        <h2 style="display: inline-block;"><a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title">{{title}}</a></h2>
+        <div class="float-right">
+            <button class="btn btn-icon" [disabled]="swiper?.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="sr-only">Previous Items</span></button>
+            <button class="btn btn-icon" [disabled]="swiper?.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="sr-only">Next Items</span></button>
+        </div>
+    </div>
+    <div>
+        <swiper
+            [slidesPerView]="'auto'"
+            (swiper)="onSwiper($event)"
+            [freeMode]="true">
+            <ng-template *ngFor="let item of items; index as i;" swiperSlide>
+                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            </ng-template>
+        </swiper>
+    </div>
+</div>

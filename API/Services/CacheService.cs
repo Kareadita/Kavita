@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,16 +19,18 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
         public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
-        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService, 
-            IDirectoryService directoryService)
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
+            IDirectoryService directoryService, IBookService bookService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
+            _bookService = bookService;
             _numericComparer = new NumericComparer();
         }
 
@@ -47,58 +50,82 @@ namespace API.Services
             var fileCount = files.Count;
             var extractPath = GetCachePath(chapterId);
             var extraPath = "";
-            
-            foreach (var file in files)
+
+            if (Directory.Exists(extractPath))
             {
-                if (fileCount > 1)
-                {
-                    extraPath = file.Id + "";
-                }
-
-                if (file.Format == MangaFormat.Archive)
-                {
-                    _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));    
-                }
-
+              return chapter;
             }
 
-            new DirectoryInfo(extractPath).Flatten();
+            var extractDi = new DirectoryInfo(extractPath);
+
+            if (files.Count > 0 && files[0].Format == MangaFormat.Image)
+            {
+              DirectoryService.ExistOrCreate(extractPath);
+              if (files.Count == 1)
+              {
+                  _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+              }
+              else
+              {
+                  _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath, Parser.Parser.ImageFileExtensions);
+              }
+
+              extractDi.Flatten();
+              return chapter;
+            }
+
+            foreach (var file in files)
+            {
+              if (fileCount > 1)
+              {
+                extraPath = file.Id + string.Empty;
+              }
+
+              if (file.Format == MangaFormat.Archive)
+              {
+                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+              } else if (file.Format == MangaFormat.Pdf)
+              {
+                  _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
+              }
+            }
+
+            extractDi.Flatten();
+            extractDi.RemoveNonImages();
 
             return chapter;
         }
 
-        
+
         public void Cleanup()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
             EnsureCacheDirectory();
 
-            DirectoryInfo di = new DirectoryInfo(CacheDirectory);
-
             try
             {
-                di.Empty();
+                DirectoryService.ClearDirectory(CacheDirectory);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
             }
-            
+
             _logger.LogInformation("Cache directory purged");
         }
-        
-        public void CleanupChapters(int[] chapterIds)
+
+        public void CleanupChapters(IEnumerable<int> chapterIds)
         {
             _logger.LogInformation("Running Cache cleanup on Volumes");
-            
+
             foreach (var chapter in chapterIds)
             {
                 var di = new DirectoryInfo(GetCachePath(chapter));
                 if (di.Exists)
                 {
-                    di.Delete(true);    
+                    di.Delete(true);
                 }
-                
+
             }
             _logger.LogInformation("Cache directory purged");
         }
@@ -124,27 +151,33 @@ namespace API.Services
                 if (page <= (mangaFile.Pages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
-                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions); 
+                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
                     Array.Sort(files, _numericComparer);
 
                     if (files.Length == 0)
                     {
                         return (files.ElementAt(0), mangaFile);
                     }
-                    
+
                     // Since array is 0 based, we need to keep that in account (only affects last image)
                     if (page == files.Length)
                     {
                         return (files.ElementAt(page - 1 - pagesSoFar), mangaFile);
                     }
-                    
+
+                    if (mangaFile.Format == MangaFormat.Image && mangaFile.Pages == 1)
+                    {
+                      // Each file is one page, meaning we should just get element at page
+                      return (files.ElementAt(page), mangaFile);
+                    }
+
                     return (files.ElementAt(page - pagesSoFar), mangaFile);
                 }
-            
+
                 pagesSoFar += mangaFile.Pages;
             }
 
-            return ("", null);
+            return (string.Empty, null);
         }
     }
 }

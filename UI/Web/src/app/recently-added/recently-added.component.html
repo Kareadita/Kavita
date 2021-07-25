@@ -1,0 +1,12 @@
+<ng-container>
+    <app-card-detail-layout header="Recently Added" 
+    [isLoading]="isLoading"
+    [items]="recentlyAdded"
+    [pagination]="pagination"
+    (pageChange)="onPageChange($event)"
+    >
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"></app-series-card>
+        </ng-template>
+    </app-card-detail-layout>
+</ng-container>

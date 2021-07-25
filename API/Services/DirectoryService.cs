@@ -14,7 +14,7 @@ namespace API.Services
     {
        private readonly ILogger<DirectoryService> _logger;
        private static readonly Regex ExcludeDirectories = new Regex(
-          @"@eaDir|\.DS_Store", 
+          @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
        public DirectoryService(ILogger<DirectoryService> logger)
@@ -23,13 +23,13 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Given a set of regex search criteria, get files in the given path. 
+       /// Given a set of regex search criteria, get files in the given path.
        /// </summary>
        /// <param name="path">Directory to search</param>
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private static IEnumerable<string> GetFilesWithCertainExtensions(string path, 
+       private static IEnumerable<string> GetFilesWithCertainExtensions(string path,
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
@@ -40,8 +40,9 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)));
        }
 
+
        /// <summary>
-       /// Returns a list of folders from end of fullPath to rootPath.
+       /// Returns a list of folders from end of fullPath to rootPath. If a file is passed at the end of the fullPath, it will be ignored.
        ///
        /// Example) (C:/Manga/, C:/Manga/Love Hina/Specials/Omake/) returns [Omake, Specials, Love Hina]
        /// </summary>
@@ -50,25 +51,33 @@ namespace API.Services
        /// <returns></returns>
        public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-          var separator = Path.AltDirectorySeparatorChar;
+           var separator = Path.AltDirectorySeparatorChar;
           if (fullPath.Contains(Path.DirectorySeparatorChar))
           {
              fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
-          
+
           if (rootPath.Contains(Path.DirectorySeparatorChar))
           {
              rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
           }
 
+
+
           var path = fullPath.EndsWith(separator) ? fullPath.Substring(0, fullPath.Length - 1) : fullPath;
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
           var paths = new List<string>();
+          // If a file is at the end of the path, remove it before we start processing folders
+          if (Path.GetExtension(path) != string.Empty)
+          {
+             path = path.Substring(0, path.LastIndexOf(separator));
+          }
+
           while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
              var folder = new DirectoryInfo(path).Name;
              paths.Add(folder);
-             path = path.Replace(separator + folder, string.Empty);
+             path = path.Substring(0, path.LastIndexOf(separator));
           }
 
           return paths;
@@ -80,7 +89,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "", 
+       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -91,9 +100,68 @@ namespace API.Services
                 .Where(file =>
                    reSearchPattern.IsMatch(file));
           }
-          
+
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
+
+       public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
+       {
+         var fileInfo = new FileInfo(fullFilePath);
+         if (fileInfo.Exists)
+         {
+           fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name));
+         }
+       }
+
+       /// <summary>
+       /// Copies a Directory with all files and subdirectories to a target location
+       /// </summary>
+       /// <param name="sourceDirName"></param>
+       /// <param name="destDirName"></param>
+       /// <param name="searchPattern">Defaults to *, meaning all files</param>
+       /// <returns></returns>
+       /// <exception cref="DirectoryNotFoundException"></exception>
+       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       {
+         if (string.IsNullOrEmpty(sourceDirName)) return false;
+
+         var di = new DirectoryInfo(sourceDirName);
+         if (!di.Exists) return false;
+
+         // Get the subdirectories for the specified directory.
+         var dir = new DirectoryInfo(sourceDirName);
+
+         if (!dir.Exists)
+         {
+           throw new DirectoryNotFoundException(
+             "Source directory does not exist or could not be found: "
+             + sourceDirName);
+         }
+
+         var dirs = dir.GetDirectories();
+
+         // If the destination directory doesn't exist, create it.
+         Directory.CreateDirectory(destDirName);
+
+         // Get the files in the directory and copy them to the new location.
+         var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => new FileInfo(n));
+         foreach (var file in files)
+         {
+           var tempPath = Path.Combine(destDirName, file.Name);
+           file.CopyTo(tempPath, false);
+         }
+
+         // If copying subdirectories, copy them and their contents to new location.
+         foreach (var subDir in dirs)
+         {
+           var tempPath = Path.Combine(destDirName, subDir.Name);
+           CopyDirectoryToDirectory(subDir.FullName, tempPath);
+         }
+
+         return true;
+       }
+
+
 
        public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
@@ -101,7 +169,7 @@ namespace API.Services
           {
              return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
           }
-          
+
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
        }
 
@@ -142,11 +210,11 @@ namespace API.Services
        public static void ClearAndDeleteDirectory(string directoryPath)
        {
           if (!Directory.Exists(directoryPath)) return;
-          
+
           DirectoryInfo di = new DirectoryInfo(directoryPath);
 
           ClearDirectory(directoryPath);
-          
+
           di.Delete(true);
        }
 
@@ -162,11 +230,11 @@ namespace API.Services
 
           foreach (var file in di.EnumerateFiles())
           {
-             file.Delete(); 
+             file.Delete();
           }
           foreach (var dir in di.EnumerateDirectories())
           {
-             dir.Delete(true); 
+             dir.Delete(true);
           }
        }
 
@@ -181,13 +249,13 @@ namespace API.Services
                 var fileInfo = new FileInfo(file);
                 if (fileInfo.Exists)
                 {
-                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));   
+                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));
                 }
                 else
                 {
                    _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
                 }
-                
+
              }
           }
           catch (Exception ex)
@@ -202,12 +270,12 @@ namespace API.Services
        public IEnumerable<string> ListDirectory(string rootPath)
         {
            if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
-            
+
             var di = new DirectoryInfo(rootPath);
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
                 .Select(d => d.Name).ToImmutableList();
-            
+
             return dirs;
         }
 
@@ -326,6 +394,6 @@ namespace API.Services
 
             return fileCount;
         }
-        
+
     }
 }

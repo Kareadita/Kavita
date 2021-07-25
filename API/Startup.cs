@@ -52,18 +52,18 @@ namespace API
             {
                 options.Providers.Add<BrotliCompressionProvider>();
                 options.Providers.Add<GzipCompressionProvider>();
-                options.MimeTypes = 
+                options.MimeTypes =
                     ResponseCompressionDefaults.MimeTypes.Concat(
                         new[] { "image/jpeg", "image/jpg" });
                 options.EnableForHttps = true;
             });
-            services.Configure<BrotliCompressionProviderOptions>(options => 
+            services.Configure<BrotliCompressionProviderOptions>(options =>
             {
                 options.Level = CompressionLevel.Fastest;
             });
-            
+
             services.AddResponseCaching();
-            
+
             services.AddStatsClient(_config);
 
             services.AddHangfire(configuration => configuration
@@ -80,7 +80,7 @@ namespace API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env, 
+        public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
             IHostApplicationLifetime applicationLifetime)
         {
             app.UseMiddleware<ExceptionMiddleware>();
@@ -91,19 +91,23 @@ namespace API
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
                 app.UseHangfireDashboard();
             }
-            
+
             app.UseResponseCompression();
-            
+
             app.UseForwardedHeaders();
 
             app.UseRouting();
-            
+
             // Ordering is important. Cors, authentication, authorization
             if (env.IsDevelopment())
             {
-                app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:4200"));
+                app.UseCors(policy => policy
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .WithOrigins("http://localhost:4200")
+                    .WithExposedHeaders("Content-Disposition", "Pagination"));
             }
-            
+
             app.UseResponseCaching();
 
             app.UseAuthentication();
@@ -116,18 +120,18 @@ namespace API
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
-            
+
             app.Use(async (context, next) =>
             {
-                context.Response.GetTypedHeaders().CacheControl = 
+                context.Response.GetTypedHeaders().CacheControl =
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
                         Public = false,
                         MaxAge = TimeSpan.FromSeconds(10)
                     };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] = 
+                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
-            
+
                 await next();
             });
 
@@ -137,22 +141,22 @@ namespace API
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });
-            
+
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
         }
-        
-        private void OnShutdown()
+
+        private static void OnShutdown()
         {
             Console.WriteLine("Server is shutting down. Please allow a few seconds to stop any background jobs...");
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
             Console.WriteLine("You may now close the application window.");
         }
-        
-        
+
+
     }
 }

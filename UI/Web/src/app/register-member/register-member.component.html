@@ -1,0 +1,27 @@
+<div class="text-danger" *ngIf="errors.length > 0">
+    <p>Errors:</p>
+    <ul>
+        <li *ngFor="let error of errors">{{error}}</li>
+    </ul>
+</div>
+<form [formGroup]="registerForm" (ngSubmit)="register()">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" class="form-control" formControlName="username" type="text">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" class="form-control" formControlName="password" type="password">
+    </div>
+
+    <div class="form-check" *ngIf="!firstTimeFlow">
+        <input id="admin" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="isAdmin">
+        <label for="admin" class="form-check-label">Admin</label>
+    </div>
+
+    <div class="float-right">
+        <button class="btn btn-secondary mr-2" type="button" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </div>
+</form>

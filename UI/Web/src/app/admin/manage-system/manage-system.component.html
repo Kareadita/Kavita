@@ -1,0 +1,56 @@
+<div class="container-fluid">
+
+    <div class="float-right">
+        <button class="btn btn-secondary mr-2" (click)="clearCache()" [disabled]="clearCacheInProgress">
+            <ng-container *ngIf="clearCacheInProgress">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="sr-only">Loading...</span>
+            </ng-container>
+            Clear Cache
+        </button>
+        <button class="btn btn-secondary" (click)="downloadService.downloadLogs()">
+            Download Logs
+        </button>
+    </div>
+
+    <h3>About System</h3>
+    <hr/>
+    <div class="form-group" *ngIf="serverInfo">
+        <dl>
+            <dt>Version</dt>
+            <dd>{{serverInfo.kavitaVersion}}</dd>
+
+            <dt>.NET Version</dt>
+            <dd>{{serverInfo.dotNetVersion}}</dd>
+        </dl>
+    </div>
+
+    <h3>More Info</h3>
+    <hr/>
+    <div>
+        <div class="row">
+            <div class="col-4">Home page:</div> 
+            <div class="col"><a href="https://kavitareader.com" target="_blank">kavitareader.com</a></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Wiki:</div> 
+            <div class="col"><a href="https://wiki.kavitareader.com" target="_blank">wiki.kavitareader.com</a></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Discord:</div> 
+            <div class="col"><a href="https://discord.gg/b52wT37kt7" target="_blank">discord.gg/b52wT37kt7</a></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Donations:</div> 
+            <div class="col"><a href="https://opencollective.com/kavita" target="_blank">opencollective.com/kavita</a></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Source:</div> 
+            <div class="col"><a href="https://github.com/Kareadita/Kavita" target="_blank">github.com/Kareadita/Kavita</a></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Feature Requests:</div> 
+            <div class="col"><a href="https://feathub.com/Kareadita/Kavita" target="_blank">Feathub</a><br/>
+                <a href="https://github.com/Kareadita/Kavita/issues" target="_blank">Github issues</a></div>
+        </div>      
+</div>
