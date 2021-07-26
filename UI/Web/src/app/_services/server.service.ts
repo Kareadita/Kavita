@@ -23,4 +23,8 @@ export class ServerService {
   clearCache() {
     return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
   }
+
+  backupDatabase() {
+    return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
+  }
 }
