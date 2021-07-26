@@ -8,6 +8,13 @@
             </ng-container>
             Clear Cache
         </button>
+        <button class="btn btn-secondary mr-2" (click)="backupDB()" [disabled]="backupDBInProgress">
+            <ng-container *ngIf="backupDBInProgress">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="sr-only">Loading...</span>
+            </ng-container>
+            Backup Database
+        </button>
         <button class="btn btn-secondary" (click)="downloadService.downloadLogs()">
             Download Logs
         </button>
