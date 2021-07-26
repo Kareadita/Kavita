@@ -148,12 +148,12 @@ namespace API.Controllers
             return BadRequest("There was an error with updating the series");
         }
 
-        [HttpGet("recently-added")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded([FromQuery] UserParams userParams, int libraryId = 0)
+        [HttpPost("recently-added")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams);
+                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series");
@@ -166,11 +166,10 @@ namespace API.Controllers
         }
 
         [HttpPost("in-progress")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] int libraryId = 0, [FromQuery] int limit = 20)
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0, [FromQuery] int limit = 20)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user == null) return Ok(Array.Empty<SeriesDto>()); // this is likely not needed anymore
-            return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit, filterDto));
+            return Ok((await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit, userParams, filterDto)).DistinctBy(s => s.Name));
         }
 
         [Authorize(Policy = "RequireAdminRole")]

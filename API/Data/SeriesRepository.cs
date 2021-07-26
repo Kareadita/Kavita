@@ -304,7 +304,7 @@ namespace API.Data
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="userParams">Contains pagination information</param>
         /// <returns></returns>
-        public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams)
+        public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
             if (libraryId == 0)
             {
@@ -316,7 +316,7 @@ namespace API.Data
                     .ToList();
 
                 var allQuery = _context.Series
-                    .Where(s => userLibraries.Contains(s.LibraryId))
+                    .Where(s => userLibraries.Contains(s.LibraryId) && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -326,7 +326,7 @@ namespace API.Data
             }
 
             var query = _context.Series
-                .Where(s => s.LibraryId == libraryId)
+                .Where(s => s.LibraryId == libraryId && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
                 .AsNoTracking()
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -342,7 +342,7 @@ namespace API.Data
         /// <param name="libraryId"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit, FilterDto filter)
+        public async Task<PagedList<SeriesDto>> GetInProgress(int userId, int libraryId, int limit, UserParams userParams, FilterDto filter)
         {
 
             var series = _context.Series
@@ -374,14 +374,18 @@ namespace API.Data
                             && s.PagesRead < s.Series.Pages
                             && s.Series.LibraryId == libraryId);
             }
-            var retSeries = await series
+
+            var retSeries = series
                 .OrderByDescending(s => s.LastModified)
                 .Select(s => s.Series)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
-                .ToListAsync();
+                //.DistinctBy(s => s.Name)
+                .Take(limit);
+                //.ToListAsync();
 
-            return retSeries.DistinctBy(s => s.Name).Take(limit);
+            //return retSeries.DistinctBy(s => s.Name).Take(limit);
+            return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)

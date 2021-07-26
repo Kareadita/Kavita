@@ -2,9 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
+import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
+import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
@@ -23,6 +25,10 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
+  filters: Array<FilterItem> = mangaFormatFilters;
+  filter: SeriesFilter = {
+    mangaFormat: null
+  };
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, private actionService: ActionService) {
@@ -31,7 +37,7 @@ export class LibraryDetailComponent implements OnInit {
       this.router.navigateByUrl('/libraries');
       return;
     }
-    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => true;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
       this.libraryName = names[this.libraryId];
@@ -59,6 +65,15 @@ export class LibraryDetailComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  updateFilter(data: UpdateFilterEvent) {
+    this.filter.mangaFormat = data.filterItem.value;
+    if (this.pagination !== undefined && this.pagination !== null) {
+      this.pagination.currentPage = 1;
+      this.onPageChange(this.pagination);
+    }
+    this.loadPage();
   }
 
   loadPage() {

@@ -92,33 +92,27 @@ export class SeriesService {
     return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
 
-  getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number) {
+  getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+    const data = this.createSeriesFilter(filter);
     let params = new HttpParams();
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.get<Series[]>(this.baseUrl + 'series/recently-added', {observe: 'response', params}).pipe(
-      map((response: any) => {
-        return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+      map(response => {
+        return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
       })
     );
   }
 
   getInProgress(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
-    const data: SeriesFilter = {
-      mangaFormat: null
-    };
-
-    if (filter) {
-      data.mangaFormat = filter.mangaFormat;
-    }
+    const data = this.createSeriesFilter(filter);
 
     let params = new HttpParams();
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(map(response => {
-      const paginatedResult = this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
-      paginatedResult.result.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
-      return paginatedResult;
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+      map(response => {
+        return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
     }));
   }
 
@@ -172,5 +166,17 @@ export class SeriesService {
       params = params.append('pageSize', itemsPerPage + '');
     }
     return params;
+  }
+
+  createSeriesFilter(filter?: SeriesFilter) {
+    const data: SeriesFilter = {
+      mangaFormat: null
+    };
+
+    if (filter) {
+      data.mangaFormat = filter.mangaFormat;
+    }
+
+    return data;
   }
 }
