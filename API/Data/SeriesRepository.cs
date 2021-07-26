@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
@@ -341,16 +342,18 @@ namespace API.Data
         /// <param name="libraryId"></param>
         /// <param name="limit"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit)
+        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit, FilterDto filter)
         {
+
             var series = _context.Series
+                .Where(s => filter.MangaFormat == null || s.Format == filter.MangaFormat)
                 .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                 {
                     Series = s,
                     PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
                     progress.AppUserId,
                     LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id).Max(p => p.LastModified)
-                });
+                }).AsNoTracking();
             if (libraryId == 0)
             {
                 var userLibraries = _context.Library

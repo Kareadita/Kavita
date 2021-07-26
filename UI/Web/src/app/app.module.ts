@@ -39,6 +39,7 @@ import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
+import { InProgressComponent } from './in-progress/in-progress.component';
 
 let sentryProviders: any[] = [];
 
@@ -103,7 +104,8 @@ if (environment.production) {
     EditCollectionTagsComponent,
     RecentlyAddedComponent,
     LibraryCardComponent,
-    SeriesCardComponent
+    SeriesCardComponent,
+    InProgressComponent
   ],
   imports: [
     HttpClientModule,

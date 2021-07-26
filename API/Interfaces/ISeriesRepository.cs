@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Helpers;
 
@@ -57,7 +58,7 @@ namespace API.Interfaces
 
         Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
         Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
-        Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit);
+        Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, int limit, FilterDto filter);
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams);
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);

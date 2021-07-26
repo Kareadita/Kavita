@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
@@ -164,12 +165,12 @@ namespace API.Controllers
             return Ok(series);
         }
 
-        [HttpGet("in-progress")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(int libraryId = 0, int limit = 20)
+        [HttpPost("in-progress")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] int libraryId = 0, [FromQuery] int limit = 20)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user == null) return Ok(Array.Empty<SeriesDto>());
-            return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
+            if (user == null) return Ok(Array.Empty<SeriesDto>()); // this is likely not needed anymore
+            return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit, filterDto));
         }
 
         [Authorize(Policy = "RequireAdminRole")]

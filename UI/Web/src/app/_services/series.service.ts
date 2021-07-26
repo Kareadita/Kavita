@@ -6,8 +6,10 @@ import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
+import { MangaFormat } from '../_models/manga-format';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
+import { SeriesFilter } from '../_models/series-filter';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
@@ -92,7 +94,6 @@ export class SeriesService {
 
   getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
-
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.get<Series[]>(this.baseUrl + 'series/recently-added', {observe: 'response', params}).pipe(
@@ -102,10 +103,22 @@ export class SeriesService {
     );
   }
 
-  getInProgress(libraryId: number = 0) {
-    return this.httpClient.get<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId).pipe(map(series => {
-      series.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
-      return series;
+  getInProgress(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+    const data: SeriesFilter = {
+      mangaFormat: null
+    };
+
+    if (filter) {
+      data.mangaFormat = filter.mangaFormat;
+    }
+
+    let params = new HttpParams();
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(map(response => {
+      const paginatedResult = this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
+      paginatedResult.result.forEach(s => s.coverImage = this.imageService.getSeriesCoverImage(s.id));
+      return paginatedResult;
     }));
   }
 
