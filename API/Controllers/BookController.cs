@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -18,14 +19,16 @@ namespace API.Controllers
         private readonly ILogger<BookController> _logger;
         private readonly IBookService _bookService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICacheService _cacheService;
         private static readonly string BookApiUrl = "book-resources?file=";
 
 
-        public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork)
+        public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _logger = logger;
             _bookService = bookService;
             _unitOfWork = unitOfWork;
+            _cacheService = cacheService;
         }
 
         [HttpGet("{chapterId}/book-info")]
@@ -169,9 +172,11 @@ namespace API.Controllers
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _cacheService.Ensure(chapterId);
+            var path = _cacheService.GetCachedEpubFile(chapter.Id, chapter);
 
-            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+
+            using var book = await EpubReader.OpenBookAsync(path);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 
             var counter = 0;
@@ -196,12 +201,7 @@ namespace API.Controllers
                     {
                         if (doc.ParseErrors.Any())
                         {
-                            _logger.LogError("{FilePath} has an invalid html file (Page {PageName})", book.FilePath, contentFileRef.FileName);
-                            foreach (var error in doc.ParseErrors)
-                            {
-                                _logger.LogError("Line {LineNumber}, Reason: {Reason}", error.Line, error.Reason);
-                            }
-
+                            LogBookErrors(book, contentFileRef, doc);
                             return BadRequest("The file is malformed! Cannot read.");
                         }
                         _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
@@ -321,6 +321,15 @@ namespace API.Controllers
             }
 
             return BadRequest("Could not find the appropriate html for that page");
+        }
+
+        private void LogBookErrors(EpubBookRef book, EpubTextContentFileRef contentFileRef, HtmlDocument doc)
+        {
+            _logger.LogError("{FilePath} has an invalid html file (Page {PageName})", book.FilePath, contentFileRef.FileName);
+            foreach (var error in doc.ParseErrors)
+            {
+                _logger.LogError("Line {LineNumber}, Reason: {Reason}", error.Line, error.Reason);
+            }
         }
     }
 }
