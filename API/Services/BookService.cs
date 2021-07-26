@@ -21,8 +21,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using VersOne.Epub;
-using Image = NetVips.Image;
-using Point = System.Drawing.Point;
 
 namespace API.Services
 {
@@ -409,7 +407,7 @@ namespace API.Services
                 if (!createThumbnail) return coverImageContent.ReadContent();
 
                 using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
-                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                 return thumbnail.WriteToBuffer(".jpg");
 
             }
@@ -433,7 +431,7 @@ namespace API.Services
 
                if (!createThumbnail) return stream.ToArray();
 
-               using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+               using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                return thumbnail.WriteToBuffer(".png");
 
            }

@@ -106,11 +106,18 @@ namespace API.Services
 
        public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
        {
-         var fileInfo = new FileInfo(fullFilePath);
-         if (fileInfo.Exists)
-         {
-           fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name));
-         }
+           try
+           {
+               var fileInfo = new FileInfo(fullFilePath);
+               if (fileInfo.Exists)
+               {
+                   fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name), true);
+               }
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "There was a critical error when copying {File} to {Directory}", fullFilePath, targetDirectory);
+           }
        }
 
        /// <summary>

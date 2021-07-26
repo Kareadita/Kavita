@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -42,6 +43,23 @@ namespace API.Services
             }
         }
 
+        /// <summary>
+        /// Returns the full path to the cached epub file. If the file does not exist, will fallback to the original.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="chapter"></param>
+        /// <returns></returns>
+        public string GetCachedEpubFile(int chapterId, Chapter chapter)
+        {
+            var extractPath = GetCachePath(chapterId);
+            var path = Path.Join(extractPath, Path.GetFileName(chapter.Files.First().FilePath));
+            if (!(new FileInfo(path).Exists))
+            {
+                path = chapter.Files.First().FilePath;
+            }
+            return path;
+        }
+
         public async Task<Chapter> Ensure(int chapterId)
         {
             EnsureCacheDirectory();
@@ -50,6 +68,7 @@ namespace API.Services
             var fileCount = files.Count;
             var extractPath = GetCachePath(chapterId);
             var extraPath = "";
+            var removeNonImages = true;
 
             if (Directory.Exists(extractPath))
             {
@@ -83,15 +102,24 @@ namespace API.Services
 
               if (file.Format == MangaFormat.Archive)
               {
-                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+                  _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
               } else if (file.Format == MangaFormat.Pdf)
               {
                   _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
+              } else if (file.Format == MangaFormat.Epub)
+              {
+                  removeNonImages = false;
+                  DirectoryService.ExistOrCreate(extractPath);
+                  _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
               }
             }
 
             extractDi.Flatten();
-            extractDi.RemoveNonImages();
+            if (removeNonImages)
+            {
+                extractDi.RemoveNonImages();
+            }
+
 
             return chapter;
         }
