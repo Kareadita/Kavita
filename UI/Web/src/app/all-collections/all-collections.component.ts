@@ -32,7 +32,7 @@ export class AllCollectionsComponent implements OnInit {
   constructor(private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
     private modalService: NgbModal, private titleService: Title) {
-    this.router.routeReuseStrategy.shouldReuseRoute = () => true;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId != null) {

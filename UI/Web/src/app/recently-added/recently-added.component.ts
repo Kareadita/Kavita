@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
@@ -14,7 +14,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './recently-added.component.html',
   styleUrls: ['./recently-added.component.scss']
 })
-export class RecentlyAddedComponent implements OnInit {
+export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = true;
   recentlyAdded: Series[] = [];
@@ -27,11 +27,16 @@ export class RecentlyAddedComponent implements OnInit {
   };
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService) {
-    this.router.routeReuseStrategy.shouldReuseRoute = () => true;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   ngOnInit() {
+    console.log('page loaded');
     this.loadPage();
+  }
+
+  ngOnDestroy() {
+    
   }
 
   seriesClicked(series: Series) {
@@ -39,7 +44,7 @@ export class RecentlyAddedComponent implements OnInit {
   }
 
   onPageChange(pagination: Pagination) {
-    this.router.navigate(['recently-added'], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
+    this.router.navigate(['recently-added'], { replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
   }
 
   updateFilter(data: UpdateFilterEvent) {
@@ -48,7 +53,6 @@ export class RecentlyAddedComponent implements OnInit {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     }
-    this.loadPage();
   }
 
   loadPage() {

@@ -37,7 +37,7 @@ export class LibraryDetailComponent implements OnInit {
       this.router.navigateByUrl('/libraries');
       return;
     }
-    this.router.routeReuseStrategy.shouldReuseRoute = () => true;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
       this.libraryName = names[this.libraryId];
@@ -86,7 +86,7 @@ export class LibraryDetailComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingSeries = true;
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage).pipe(take(1)).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;

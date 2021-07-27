@@ -28,12 +28,12 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
+        [HttpPost]
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for library");
@@ -120,7 +120,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPost("update")]
         public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
         {
             _logger.LogInformation("{UserName} is updating Series {SeriesName}", User.GetUsername(), updateSeries.Name);

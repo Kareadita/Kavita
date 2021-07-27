@@ -23,7 +23,7 @@ export class InProgressComponent implements OnInit {
   };
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService) {
-    this.router.routeReuseStrategy.shouldReuseRoute = () => true;
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
   }
 
   ngOnInit() {
@@ -35,7 +35,7 @@ export class InProgressComponent implements OnInit {
   }
 
   onPageChange(pagination: Pagination) {
-    this.router.navigate(['recently-added'], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
+    this.router.navigate(['in-progress'], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
   }
 
   updateFilter(data: UpdateFilterEvent) {

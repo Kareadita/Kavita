@@ -40,12 +40,12 @@ export class SeriesService {
     return paginatedVariable;
   }
 
-  getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number) {
+  getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
-
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    const data = this.createSeriesFilter(filter);
 
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, {observe: 'response', params}).pipe(
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this._cachePaginatedResults(response, this.paginatedResults);
       })
@@ -81,7 +81,7 @@ export class SeriesService {
   }
 
   updateSeries(model: any) {
-    return this.httpClient.post(this.baseUrl + 'series/', model);
+    return this.httpClient.post(this.baseUrl + 'series/update', model);
   }
 
   markRead(seriesId: number) {

@@ -22,7 +22,7 @@ namespace API.Interfaces
         /// <param name="userId"></param>
         /// <param name="userParams"></param>
         /// <returns></returns>
-        Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams);
+        Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter);
 
         /// <summary>
         /// Does not add user information like progress, ratings, etc.

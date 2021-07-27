@@ -76,10 +76,10 @@ namespace API.Data
                 .ToListAsync();
         }
 
-        public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams)
+        public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
             var query =  _context.Series
-                .Where(s => s.LibraryId == libraryId)
+                .Where(s => s.LibraryId == libraryId && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
@@ -303,7 +303,7 @@ namespace API.Data
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="userParams">Contains pagination information</param>
-        /// <param name="filter">Optional (default null) filter on query</param>
+        /// <param name="filter">Optional filter on query</param>
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
