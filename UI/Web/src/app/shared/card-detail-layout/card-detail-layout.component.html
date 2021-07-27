@@ -8,14 +8,12 @@
             </h2>
         </div>
         
-        <button class="btn btn-secondary btn-small" (click)="filteringExpanded = !filteringExpanded" placement="left" ngbTooltip="{{filteringExpanded ? 'Close' : 'Open'}} Filtering and Sorting" attr.aria-label="{{filteringExpanded ? 'Close' : 'Open'}} Filtering and Sorting">
-            <!-- TODO: Apply aria attributes to note that this is a toggle-->
+        <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
-    <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
-    <div class="row no-gutters" *ngIf="filteringExpanded">
+    <div class="row no-gutters filter-section" #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
         <div class="col">
             <form class="ml-2" [formGroup]="filterForm">
                 <div class="form-group" *ngIf="filters.length > 0">
@@ -27,6 +25,7 @@
             </form>
         </div>
     </div>
+    <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
     <div class="row no-gutters">

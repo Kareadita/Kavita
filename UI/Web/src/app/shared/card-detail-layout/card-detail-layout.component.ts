@@ -1,7 +1,8 @@
+import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterItem } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
@@ -25,6 +26,8 @@ export interface UpdateFilterEvent {
   filterItem: FilterItem;
   action: FilterAction;
 }
+
+const ANIMATION_SPEED = 300;
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -59,7 +62,7 @@ export class CardDetailLayoutComponent implements OnInit {
   /**
    * Controls the visiblity of extended controls that sit below the main header.
    */
-  filteringExpanded: boolean = false;
+  filteringCollapsed: boolean = true;
 
   constructor() { }
 
