@@ -54,6 +54,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     }
+    this.loadPage();
   }
 
   loadPage() {
