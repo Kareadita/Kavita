@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
@@ -20,7 +21,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './library.component.html',
   styleUrls: ['./library.component.scss']
 })
-export class LibraryComponent implements OnInit {
+export class LibraryComponent implements OnInit, OnDestroy {
 
   user: User | undefined;
   libraries: Library[] = [];
@@ -32,6 +33,8 @@ export class LibraryComponent implements OnInit {
   continueReading: InProgressChapter[] = [];
   collectionTags: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
+
+  private readonly onDestroy = new Subject<void>();
 
   seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
 
@@ -57,13 +60,18 @@ export class LibraryComponent implements OnInit {
     this.reloadSeries();
   }
 
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+
   reloadSeries() {
-    this.seriesService.getRecentlyAdded(0, 0, 20).subscribe(updatedSeries => {
+    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyAdded = updatedSeries.result;
     });
 
-    this.seriesService.getInProgress().subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries;
+    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+      this.inProgress = updatedSeries.result;
     });
 
     this.reloadTags();
@@ -78,15 +86,15 @@ export class LibraryComponent implements OnInit {
       return;
     }
 
-    this.seriesService.getInProgress().subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries;
+    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+      this.inProgress = updatedSeries.result;
     });
     
     this.reloadTags();
   }
 
   reloadTags() {
-    this.collectionService.allTags().subscribe(tags => {
+    this.collectionService.allTags().pipe(takeUntil(this.onDestroy)).subscribe(tags => {
       this.collectionTags = tags;
     });
   }
@@ -96,7 +104,9 @@ export class LibraryComponent implements OnInit {
       this.router.navigate(['collections']);
     } else if (sectionTitle.toLowerCase() === 'recently added') {
       this.router.navigate(['recently-added']);
-    }
+    } else if (sectionTitle.toLowerCase() === 'in progress') {
+      this.router.navigate(['in-progress']);
+    } 
   }
 
   loadCollection(item: CollectionTag) {

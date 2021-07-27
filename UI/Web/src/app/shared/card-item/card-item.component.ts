@@ -10,6 +10,8 @@ import { ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UtilityService } from '../_services/utility.service';
+// import 'lazysizes';
+// import 'lazysizes/plugins/attrchange/ls.attrchange';
 
 @Component({
   selector: 'app-card-item',
@@ -38,8 +40,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {
-  }
+  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -59,6 +60,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   handleClick() {

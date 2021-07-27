@@ -10,7 +10,7 @@
 
 // Custom animation for ng-lazyload-image
 img.ng-lazyloaded {
-  animation: fadein .5s;
+  //animation: fadein .5s; // I think it might look better without animation
 }
 @keyframes fadein {
   from { opacity: 0; }

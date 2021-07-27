@@ -38,4 +38,8 @@ export class ImageService {
   getChapterCoverImage(chapterId: number) {
     return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId;
   }
+
+  updateErroredImage(event: any) {
+    event.target.src = this.placeholderImage;
+  }
 }
