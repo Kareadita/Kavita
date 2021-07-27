@@ -303,6 +303,7 @@ namespace API.Data
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="userParams">Contains pagination information</param>
+        /// <param name="filter">Optional (default null) filter on query</param>
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
@@ -339,10 +340,11 @@ namespace API.Data
         /// Returns Series that the user has some partial progress on
         /// </summary>
         /// <param name="userId"></param>
-        /// <param name="libraryId"></param>
-        /// <param name="limit"></param>
+        /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
+        /// <param name="userParams">Pagination information</param>
+        /// <param name="filter">Optional (default null) filter on query</param>
         /// <returns></returns>
-        public async Task<PagedList<SeriesDto>> GetInProgress(int userId, int libraryId, int limit, UserParams userParams, FilterDto filter)
+        public async Task<PagedList<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
         {
 
             var series = _context.Series
@@ -379,9 +381,9 @@ namespace API.Data
                 .OrderByDescending(s => s.LastModified)
                 .Select(s => s.Series)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
+                .AsNoTracking();
                 //.DistinctBy(s => s.Name)
-                .Take(limit);
+                //.Take(userParams.);
                 //.ToListAsync();
 
             //return retSeries.DistinctBy(s => s.Name).Take(limit);

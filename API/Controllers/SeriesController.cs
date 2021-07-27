@@ -166,10 +166,10 @@ namespace API.Controllers
         }
 
         [HttpPost("in-progress")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0, [FromQuery] int limit = 20)
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok((await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit, userParams, filterDto)).DistinctBy(s => s.Name));
+            return Ok((await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto)).DistinctBy(s => s.Name));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
