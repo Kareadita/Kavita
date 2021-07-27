@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
@@ -22,8 +23,9 @@ export class InProgressComponent implements OnInit {
     mangaFormat: null
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService) {
+  constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.titleService.setTitle('Kavita - In Progress');
   }
 
   ngOnInit() {

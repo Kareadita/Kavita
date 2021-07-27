@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
@@ -26,12 +27,12 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     mangaFormat: null
   };
 
-  constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService) {
+  constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+    this.titleService.setTitle('Kavita - Recently Added');
   }
 
   ngOnInit() {
-    console.log('page loaded');
     this.loadPage();
   }
 
@@ -56,19 +57,19 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-      const page = this.route.snapshot.queryParamMap.get('page');
-      if (page != null) {
-        if (this.pagination === undefined || this.pagination === null) {
-          this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-        }
-        this.pagination.currentPage = parseInt(page, 10);
-      }
-      this.isLoading = true;
-      this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).subscribe(series => {
-        this.recentlyAdded = series.result;
-        this.pagination = series.pagination;
-        this.isLoading = false;
-        window.scrollTo(0, 0);
-      });
+    if (this.pagination == undefined || this.pagination == null) {
+      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
+    const page = this.route.snapshot.queryParamMap.get('page');
+    if (page != null) {
+      this.pagination.currentPage = parseInt(page, 10);
+    }
+    this.isLoading = true;
+    this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).subscribe(series => {
+      this.recentlyAdded = series.result;
+      this.pagination = series.pagination;
+      this.isLoading = false;
+      window.scrollTo(0, 0);
+    });
+  }
 }

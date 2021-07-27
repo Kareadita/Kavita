@@ -4,7 +4,7 @@
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
                     <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
-                </span>&nbsp;{{header}}
+                </span>&nbsp;{{header}}&nbsp;<span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
         
@@ -14,7 +14,7 @@
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
-    <ng-container [ngTemplateOutlet]="paginationTemplate"  [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
+    <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
     <div class="row no-gutters" *ngIf="filteringExpanded">
         <div class="col">
             <form class="ml-2" [formGroup]="filterForm">

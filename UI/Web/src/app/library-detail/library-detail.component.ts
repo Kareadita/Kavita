@@ -43,11 +43,11 @@ export class LibraryDetailComponent implements OnInit {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
     })
-    this.loadPage();
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   }
 
   ngOnInit(): void {
+    this.loadPage();
   }
 
   handleAction(action: Action, library: Library) {
