@@ -8,7 +8,7 @@
             </h2>
         </div>
         
-        <button class="btn btn-secondary btn-small" (click)="filteringExpanded = !filteringExpanded">
+        <button class="btn btn-secondary btn-small" (click)="filteringExpanded = !filteringExpanded" placement="left" ngbTooltip="{{filteringExpanded ? 'Close' : 'Open'}} Filtering and Sorting" attr.aria-label="{{filteringExpanded ? 'Close' : 'Open'}} Filtering and Sorting">
             <!-- TODO: Apply aria attributes to note that this is a toggle-->
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
@@ -19,7 +19,7 @@
         <div class="col">
             <form class="ml-2" [formGroup]="filterForm">
                 <div class="form-group" *ngIf="filters.length > 0">
-                    <label for="series-filter" class="sr-only">Apply Filter</label>
+                    <label for="series-filter">Filter</label>
                     <select class="form-control" id="series-filter" formControlName="filter" (ngModelChange)="handleFilterChange($event)" style="max-width: 200px;">
                         <option [value]="i" *ngFor="let opt of filters; let i = index">{{opt.title}}</option>
                     </select>
