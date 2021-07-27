@@ -50,8 +50,6 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('page loaded');
-    
     
   }
 
@@ -73,23 +71,17 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   updateFilter(data: UpdateFilterEvent) {
-    console.log('update filter');
     this.filter.mangaFormat = data.filterItem.value;
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
+    } else {
+      this.loadPage();
     }
-    this.loadPage();
   }
 
   loadPage() {
-    // This is needed because we are constantly reloading the whole page, hence we loose pagination each page action
-    // if (this.pagination == undefined || this.pagination == null) {
-    //   console.log('resetting pagination');
-    //   this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    // }
-
-    const page = this.route.snapshot.queryParamMap.get('page');
+    const page = this.getPage();
     if (page != null) {
       this.pagination.currentPage = parseInt(page, 10);
     }
@@ -104,8 +96,8 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   onPageChange(pagination: Pagination) {
-    //this.router.navigate(['library', this.libraryId], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
-    this.loadPage(); // If i don't reload the page, the lazy load images wont trigger
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    this.loadPage();
   }
 
   seriesClicked(series: Series) {
@@ -113,5 +105,10 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+
+  getPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('page');
+  }
 
 }

@@ -1,6 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
+import { take } from 'rxjs/operators';
 import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -15,7 +16,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './recently-added.component.html',
   styleUrls: ['./recently-added.component.scss']
 })
-export class RecentlyAddedComponent implements OnInit, OnDestroy {
+export class RecentlyAddedComponent implements OnInit {
 
   isLoading: boolean = true;
   recentlyAdded: Series[] = [];
@@ -30,22 +31,21 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - Recently Added');
-  }
-
-  ngOnInit() {
+    if (this.pagination === undefined || this.pagination === null) {
+      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+    }
     this.loadPage();
   }
 
-  ngOnDestroy() {
-    
-  }
+  ngOnInit() {}
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
   onPageChange(pagination: Pagination) {
-    this.router.navigate(['recently-added'], { replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.pagination.currentPage} });
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    this.loadPage();
   }
 
   updateFilter(data: UpdateFilterEvent) {
@@ -53,24 +53,27 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
+    } else {
+      this.loadPage();
     }
-    this.loadPage();
   }
 
   loadPage() {
-    if (this.pagination == undefined || this.pagination == null) {
-      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    }
-    const page = this.route.snapshot.queryParamMap.get('page');
+    const page = this.getPage();
     if (page != null) {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.isLoading = true;
-    this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).subscribe(series => {
+    this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.recentlyAdded = series.result;
       this.pagination = series.pagination;
       this.isLoading = false;
       window.scrollTo(0, 0);
     });
+  }
+
+  getPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('page');
   }
 }

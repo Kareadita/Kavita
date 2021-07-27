@@ -1,4 +1,3 @@
-import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Pagination } from 'src/app/_models/pagination';
@@ -64,16 +63,7 @@ export class CardDetailLayoutComponent implements OnInit {
    */
   filteringCollapsed: boolean = true;
 
-  constructor() { 
-    const collapsedState = localStorage.getItem('kavita--layout-collapse');
-    if (collapsedState) {
-      this.filteringCollapsed = collapsedState === 'true';
-    }
-    const savedItem = localStorage.getItem('kavita--layout-filter');
-    if (savedItem) {
-      this.filterForm.get('filterForm')?.setValue(parseInt(savedItem, 10))
-    }
-  }
+  constructor() { }
 
   ngOnInit(): void {
     this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${index}`;
@@ -103,12 +93,6 @@ export class CardDetailLayoutComponent implements OnInit {
       filterItem: this.filters[parseInt(index, 10)],
       action: FilterAction.Selected
     });
-    localStorage.setItem('kavita--layout-filter', index);
-  }
-
-  updateCollapsedState() {
-    localStorage.setItem('kavita--layout-collapse', this.filteringCollapsed + '');
-    console.log('updated to ', localStorage.getItem('kavita--layout-collapse'));
   }
 
 }

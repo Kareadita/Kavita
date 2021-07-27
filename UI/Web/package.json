@@ -43,7 +43,6 @@
     "rxjs": "~6.6.0",
     "swiper": "^6.5.8",
     "tslib": "^2.0.0",
-    "yall-js": "^3.2.0",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

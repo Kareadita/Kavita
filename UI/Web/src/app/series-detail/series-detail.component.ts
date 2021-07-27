@@ -86,7 +86,8 @@ export class SeriesDetailComponent implements OnInit {
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
-              private downloadService: DownloadService, private actionService: ActionService) {
+              private downloadService: DownloadService, private actionService: ActionService,
+              public imageSerivce: ImageService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
