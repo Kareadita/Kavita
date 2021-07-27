@@ -121,7 +121,7 @@ namespace API.Data
 
         private void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
         {
-            foreach (var v in volumes.Where(vdto => vdto.Number == 0))
+            foreach (var v in volumes.Where(vDto => vDto.Number == 0))
             {
                 v.Chapters = v.Chapters.OrderBy(x => x.Range, _naturalSortComparer).ToList();
             }
@@ -382,11 +382,7 @@ namespace API.Data
                 .Select(s => s.Series)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
-                //.DistinctBy(s => s.Name)
-                //.Take(userParams.);
-                //.ToListAsync();
 
-            //return retSeries.DistinctBy(s => s.Name).Take(limit);
             return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
         }
 
