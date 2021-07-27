@@ -53,8 +53,13 @@ export class CardDetailLayoutComponent implements OnInit {
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   
   filterForm: FormGroup = new FormGroup({
-    filter: new FormControl(0, []), // TODO: Put a NO filter option here
+    filter: new FormControl(0, []),
   });
+
+  /**
+   * Controls the visiblity of extended controls that sit below the main header.
+   */
+  filteringExpanded: boolean = false;
 
   constructor() { }
 

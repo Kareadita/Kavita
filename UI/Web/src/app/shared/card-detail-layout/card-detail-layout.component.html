@@ -1,21 +1,32 @@
 <div class="container-fluid" style="padding-top: 10px">
     <div class="row no-gutters">
-        <h2>
-            <span *ngIf="actions.length > 0" class="">
-                <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
-            </span>&nbsp;{{header}}
-        </h2>
-        <!-- Put this on the right side of page -->
-        <form class="ml-2" [formGroup]="filterForm">
-            <div class="form-group" *ngIf="filters.length > 0">
-                <label for="series-filter" class="sr-only">Apply Filter</label>
-                <select class="form-control" id="series-filter" formControlName="filter" (ngModelChange)="handleFilterChange($event)">
-                    <option [value]="i" *ngFor="let opt of filters; let i = index">{{opt.title}}</option>
-                </select>
-            </div>
-        </form>
+        <div class="col mr-auto">
+            <h2 style="display: inline-block">
+                <span *ngIf="actions.length > 0" class="">
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
+                </span>&nbsp;{{header}}
+            </h2>
+        </div>
+        
+        <button class="btn btn-secondary btn-small" (click)="filteringExpanded = !filteringExpanded">
+            <!-- TODO: Apply aria attributes to note that this is a toggle-->
+            <i class="fa fa-filter" aria-hidden="true"></i>
+            <span class="sr-only">Sort / Filter</span>
+        </button>
     </div>
     <ng-container [ngTemplateOutlet]="paginationTemplate"  [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
+    <div class="row no-gutters" *ngIf="filteringExpanded">
+        <div class="col">
+            <form class="ml-2" [formGroup]="filterForm">
+                <div class="form-group" *ngIf="filters.length > 0">
+                    <label for="series-filter" class="sr-only">Apply Filter</label>
+                    <select class="form-control" id="series-filter" formControlName="filter" (ngModelChange)="handleFilterChange($event)" style="max-width: 200px;">
+                        <option [value]="i" *ngFor="let opt of filters; let i = index">{{opt.title}}</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     <div class="row no-gutters">
