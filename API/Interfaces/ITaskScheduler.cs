@@ -13,6 +13,7 @@
         void RefreshSeriesMetadata(int libraryId, int seriesId);
         void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
         void ScheduleStatsTasks();
+        void ScheduleUpdaterTasks();
         void CancelStatsTasks();
     }
 }

@@ -26,6 +26,7 @@
     "@angular/platform-browser-dynamic": "~11.0.0",
     "@angular/router": "~11.0.0",
     "@fortawesome/fontawesome-free": "^5.15.1",
+    "@microsoft/signalr": "^5.0.8",
     "@ng-bootstrap/ng-bootstrap": "^9.1.0",
     "@ngx-lite/nav-drawer": "^0.4.6",
     "@ngx-lite/util": "0.0.0",

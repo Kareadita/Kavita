@@ -23,6 +23,7 @@ namespace API.Services.HostedServices
 
             var taskScheduler = scope.ServiceProvider.GetRequiredService<ITaskScheduler>();
             taskScheduler.ScheduleTasks();
+            taskScheduler.ScheduleUpdaterTasks();
 
             try
             {
