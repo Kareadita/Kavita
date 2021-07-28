@@ -66,7 +66,7 @@ export class CardDetailLayoutComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${index}`;
+    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.filterForm.get('filter')?.value}_${index}`;
   }
 
   onPageChange(page: number) {

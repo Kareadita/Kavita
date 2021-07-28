@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -78,8 +80,9 @@ namespace API.Data
 
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
+            var formats = filter.GetSqlFilter();
             var query =  _context.Series
-                .Where(s => s.LibraryId == libraryId && s.Format == filter.MangaFormat)
+                .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
@@ -307,6 +310,8 @@ namespace API.Data
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
+            var formats = filter.GetSqlFilter();
+
             if (libraryId == 0)
             {
                 var userLibraries = _context.Library
@@ -317,7 +322,7 @@ namespace API.Data
                     .ToList();
 
                 var allQuery = _context.Series
-                    .Where(s => userLibraries.Contains(s.LibraryId) && s.Format == filter.MangaFormat)
+                    .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -327,7 +332,7 @@ namespace API.Data
             }
 
             var query = _context.Series
-                .Where(s => s.LibraryId == libraryId && s.Format == filter.MangaFormat)
+                .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
                 .AsNoTracking()
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -346,9 +351,9 @@ namespace API.Data
         /// <returns></returns>
         public async Task<PagedList<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
         {
-
+            var formats = filter.GetSqlFilter();
             var series = _context.Series
-                .Where(s => s.Format == filter.MangaFormat)
+                .Where(s => formats.Contains(s.Format))
                 .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                 {
                     Series = s,
@@ -367,14 +372,16 @@ namespace API.Data
                 series = series.Where(s => s.AppUserId == userId
                                            && s.PagesRead > 0
                                            && s.PagesRead < s.Series.Pages
-                                           && userLibraries.Contains(s.Series.LibraryId));
+                                           && userLibraries.Contains(s.Series.LibraryId)
+                                           && formats.Contains(s.Series.Format));
             }
             else
             {
                 series = series.Where(s => s.AppUserId == userId
                             && s.PagesRead > 0
                             && s.PagesRead < s.Series.Pages
-                            && s.Series.LibraryId == libraryId);
+                            && s.Series.LibraryId == libraryId
+                            && formats.Contains(s.Series.Format));
             }
 
             var retSeries = series
