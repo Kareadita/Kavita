@@ -20,6 +20,7 @@ namespace API.Services.Tasks
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
         private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+        private readonly string _logDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
 
         private readonly IList<string> _backupFiles;
 
@@ -28,7 +29,7 @@ namespace API.Services.Tasks
             _unitOfWork = unitOfWork;
             _logger = logger;
             _directoryService = directoryService;
-            
+
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
             var files = LogFiles(maxRollingFiles, loggingSection);
@@ -53,7 +54,7 @@ namespace API.Services.Tasks
             var fi = new FileInfo(logFileName);
 
             var files = maxRollingFiles > 0
-                ? _directoryService.GetFiles(Directory.GetCurrentDirectory(), $@"{fi.Name}{multipleFileRegex}\.log")
+                ? _directoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
                 : new[] {"kavita.log"};
             return files;
         }
@@ -63,17 +64,17 @@ namespace API.Services.Tasks
         {
             _logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
-            
+
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
             if (!DirectoryService.ExistOrCreate(backupDirectory))
             {
                 _logger.LogError("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
                 return;
             }
-            
+
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
             var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
-            
+
             if (File.Exists(zipPath))
             {
                 _logger.LogInformation("{ZipFile} already exists, aborting", zipPath);
@@ -83,7 +84,7 @@ namespace API.Services.Tasks
             var tempDirectory = Path.Join(_tempDirectory, dateString);
             DirectoryService.ExistOrCreate(tempDirectory);
             DirectoryService.ClearDirectory(tempDirectory);
-            
+
             _directoryService.CopyFilesToDirectory(
                 _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
             try
@@ -142,10 +143,10 @@ namespace API.Services.Tasks
                         _logger.LogError(ex, "There was an issue deleting {FileName}", file.Name);
                     }
                 }
-                
+
             }
             _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
         }
-        
+
     }
 }
