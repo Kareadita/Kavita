@@ -323,10 +323,10 @@ namespace API.Services
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
-                            Title = specialName,
+                            Title = specialName.Trim(),
                             FullFilePath = filePath,
                             IsSpecial = false,
-                            Series = series,
+                            Series = series.Trim(),
                             Volumes = seriesIndex.Split(".")[0]
                         };
                     }
@@ -342,10 +342,10 @@ namespace API.Services
                     Edition = string.Empty,
                     Format = MangaFormat.Epub,
                     Filename = Path.GetFileName(filePath),
-                    Title = epubBook.Title,
+                    Title = epubBook.Title.Trim(),
                     FullFilePath = filePath,
                     IsSpecial = false,
-                    Series = epubBook.Title,
+                    Series = epubBook.Title.Trim(),
                     Volumes = Parser.Parser.DefaultVolume
                 };
            }

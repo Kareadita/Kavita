@@ -1,10 +1,12 @@
 <div class="container-fluid" style="padding-top: 10px">
-    <div class="row no-gutters">
+    <div class="row no-gutters pb-2">
         <div class="col mr-auto">
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
                     <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
-                </span>&nbsp;{{header}}&nbsp;<span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                </span>&nbsp;{{header}}&nbsp;
+                <!-- NOTE: On mobile the pill can eat up a lot of space, we can hide it and move to the filter section if user is interested -->
+                <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
         
@@ -24,6 +26,7 @@
                 </div>
             </form>
         </div>
+        
     </div>
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
@@ -45,13 +48,12 @@
     <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
-            [maxSize]="10"
+            [maxSize]="8"
             [rotate]="true"
             [ellipses]="false"
             [(page)]="pagination.currentPage"
             [pageSize]="pagination.itemsPerPage"
             (pageChange)="onPageChange($event)"
-            [boundaryLinks]="true"
             [collectionSize]="pagination.totalItems">
 
             <ng-template ngbPaginationPages let-page let-pages="pages" *ngIf="pagination.totalItems / pagination.itemsPerPage > 20">

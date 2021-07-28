@@ -133,10 +133,10 @@ namespace API.Controllers
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
-            series.Name = updateSeries.Name;
-            series.LocalizedName = updateSeries.LocalizedName;
-            series.SortName = updateSeries.SortName;
-            series.Summary = updateSeries.Summary;
+            series.Name = updateSeries.Name.Trim();
+            series.LocalizedName = updateSeries.LocalizedName.Trim();
+            series.SortName = updateSeries.SortName.Trim();
+            series.Summary = updateSeries.Summary.Trim();
 
             _unitOfWork.SeriesRepository.Update(series);
 
