@@ -8,10 +8,7 @@
 
 @import '~swiper/swiper.scss';
 
-// Custom animation for ng-lazyload-image
-img.ng-lazyloaded {
-  //animation: fadein .5s; // I think it might look better without animation
-}
+
 @keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -113,4 +110,10 @@ body {
   .not-phone-hidden {
     display: none;
   }
+}
+
+// Debug styles
+.redlines * {
+  outline: 1px solid red;
+  outline-offset: -1px;
 }
