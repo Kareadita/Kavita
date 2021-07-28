@@ -79,7 +79,7 @@ namespace API.Data
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
         {
             var query =  _context.Series
-                .Where(s => s.LibraryId == libraryId && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
+                .Where(s => s.LibraryId == libraryId && s.Format == filter.MangaFormat)
                 .OrderBy(s => s.SortName)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
@@ -317,7 +317,7 @@ namespace API.Data
                     .ToList();
 
                 var allQuery = _context.Series
-                    .Where(s => userLibraries.Contains(s.LibraryId) && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
+                    .Where(s => userLibraries.Contains(s.LibraryId) && s.Format == filter.MangaFormat)
                     .AsNoTracking()
                     .OrderByDescending(s => s.Created)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -327,7 +327,7 @@ namespace API.Data
             }
 
             var query = _context.Series
-                .Where(s => s.LibraryId == libraryId && (filter.MangaFormat == null || s.Format == filter.MangaFormat))
+                .Where(s => s.LibraryId == libraryId && s.Format == filter.MangaFormat)
                 .AsNoTracking()
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -348,7 +348,7 @@ namespace API.Data
         {
 
             var series = _context.Series
-                .Where(s => filter.MangaFormat == null || s.Format == filter.MangaFormat)
+                .Where(s => s.Format == filter.MangaFormat)
                 .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                 {
                     Series = s,
