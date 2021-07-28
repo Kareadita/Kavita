@@ -241,17 +241,18 @@ namespace API.Controllers
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
             if (bookmarkDto.PageNum > chapter.Pages)
             {
-                return BadRequest("Can't bookmark past max pages");
+                bookmarkDto.PageNum = chapter.Pages;
             }
 
             if (bookmarkDto.PageNum < 0)
             {
-                return BadRequest("Can't bookmark less than 0");
+                bookmarkDto.PageNum = 0;
             }
 
 
             try
             {
+                // TODO: Look into creating a progress entry when a new item is added to the DB so we can just look it up and modify it
                user.Progresses ??= new List<AppUserProgress>();
                var userProgress =
                   user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
