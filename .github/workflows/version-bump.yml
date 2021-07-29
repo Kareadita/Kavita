@@ -1,4 +1,5 @@
 name: Version Bump
+on:
   push:
     branches: [ 'feature/version-bump' ]
 
