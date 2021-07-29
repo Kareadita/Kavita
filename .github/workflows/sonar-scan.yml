@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: build-artifacts
-          path: *
+          path: ./*
 
   test:
     name: Install Sonar & Test
