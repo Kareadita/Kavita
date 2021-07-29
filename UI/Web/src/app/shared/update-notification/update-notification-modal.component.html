@@ -6,7 +6,7 @@
 </div>
 <div class="modal-body">
     <h5>{{updateData.updateTitle}}</h5>
-    <pre class="update-body">{{updateData.updateBody}}</pre>
+    <pre class="update-body" [innerHtml]="updateData.updateBody | safeHtml"></pre>
 </div>
 
 <div class="modal-footer">
