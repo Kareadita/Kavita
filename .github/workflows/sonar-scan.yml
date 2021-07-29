@@ -127,7 +127,7 @@ jobs:
 
   version:
     name: Bump version
-    needs: [ build, test ]
+    needs: [ bump ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps: 
