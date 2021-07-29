@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build and Scan
+    name: Build .Net
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
@@ -30,6 +30,17 @@ jobs:
         with:
           java-version: 1.11
 
+      - name: Get csproj Version
+        uses: naminodarie/get-net-sdk-project-versions-action@v1
+        id: get-version
+        with:
+          proj-path: Kavita.Common/Kavita.Common.csproj
+
+  dependencies:
+    name: Install Sonar
+    needs: build
+    runs-on: windows-latest
+    steps:
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
@@ -52,7 +63,11 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-      - name: Build and analyze
+  test:
+    name: Test and Scan build
+    needs: dependencies
+    runs-on: windows-latest
+      - name: Sonar Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -64,3 +79,28 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
+
+  bump:
+    name: Version Bump
+    runs-on: ubuntu-latest
+    needs: [ build, dependencies, test ] 
+    if: ${{ github.event_name != 'pull_request' }}
+      steps:
+        - name: Extract branch name
+          shell: bash
+          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+          id: extract_branch
+
+        - name: Create Branch
+          uses: peterjgrainger/action-create-branch@v2.0.1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            branch: "version-bump-${{steps.get-version.outputs.assembly-version}}"
+
+        - name: Trigger version bump workflow
+          uses: benc-uk/workflow-dispatch@v1
+          with:
+            workflow: Version Bump
+            token: ${{ secrets.REPO_GHA_PAT }}
+            inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.extract_branch.outputs.branch }}" }'

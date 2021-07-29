@@ -1,0 +1,43 @@
+name: Version Bump
+  push:
+    branches: [ 'feature/version-bump' ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: version-bump-${{ github.event.inputs.version }}
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Echo PWD
+        run: echo $PWD
+
+      - name: Find csproj
+        run: cat Kavita.Common/Kavita.Common.csproj
+
+      - name: Bump versions
+        uses: SiqiLu/dotnet-bump-version@master
+        with:
+          version_files: Kavita.Common/Kavita.Common.csproj
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge bump -> pr
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          target_branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ github.token }}
