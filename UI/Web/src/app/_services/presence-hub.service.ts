@@ -30,7 +30,6 @@ export class PresenceHubService {
     .catch(err => console.error(err));
 
     this.hubConnection.on('GetOnlineUsers', (usernames: string[]) => {
-      console.log('usernames: ', usernames);
       this.onlineUsersSource.next(usernames);
     });
   }

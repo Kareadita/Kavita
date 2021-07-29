@@ -361,6 +361,7 @@ namespace API.Data
                     progress.AppUserId,
                     LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id).Max(p => p.LastModified)
                 }).AsNoTracking();
+
             if (libraryId == 0)
             {
                 var userLibraries = _context.Library

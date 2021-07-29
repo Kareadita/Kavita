@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
 
 
@@ -13,7 +13,8 @@ export class UpdateNotificationModalComponent implements OnInit {
 
   @Input() updateData!: UpdateVersionEvent;
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal) { }
+
+  constructor(public modal: NgbActiveModal) { }
 
   ngOnInit(): void {
   }
