@@ -67,6 +67,7 @@ jobs:
     name: Test and Scan build
     needs: dependencies
     runs-on: windows-latest
+    steps:
       - name: Sonar Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
