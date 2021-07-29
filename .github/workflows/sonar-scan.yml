@@ -50,6 +50,14 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
 
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100
+
+      - name: Install dependencies
+        run: dotnet restore
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
