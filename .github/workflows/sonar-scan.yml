@@ -36,8 +36,8 @@ jobs:
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
 
-  dependencies:
-    name: Install Sonar
+  test:
+    name: Install Sonar & Test
     needs: build
     runs-on: windows-latest
     steps:
@@ -63,11 +63,6 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-  test:
-    name: Test and Scan build
-    needs: dependencies
-    runs-on: windows-latest
-    steps:
       - name: Sonar Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
