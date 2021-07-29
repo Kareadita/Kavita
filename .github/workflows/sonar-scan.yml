@@ -30,11 +30,10 @@ jobs:
         with:
           java-version: 1.11
 
-      - name: Get csproj Version
-        uses: naminodarie/get-net-sdk-project-versions-action@v1
-        id: get-version
+      - uses: actions/upload-artifact@v2
         with:
-          proj-path: Kavita.Common/Kavita.Common.csproj
+          name: csproj
+          path: Kavita.Common/Kavita.Common.csproj
 
   test:
     name: Install Sonar & Test
@@ -100,6 +99,15 @@ jobs:
     needs: [ build, test ] 
     if: ${{ github.event_name == 'pull_request' }}
     steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+
+      - name: Get csproj Version
+        uses: naminodarie/get-net-sdk-project-versions-action@v1
+        id: get-version
+        with:
+          proj-path: Kavita.Common/Kavita.Common.csproj
+
       - name: Get branch name
         id: branch-name
         uses: tj-actions/branch-names@v4.5
