@@ -8,6 +8,7 @@ using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
@@ -66,10 +67,9 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
                 await SendEvent(update, admins);
             }
-            else
+            else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
             {
                 _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
-                // TODO: Remove this else statement, for debug testing only
                 await SendEvent(update, admins);
             }
         }
