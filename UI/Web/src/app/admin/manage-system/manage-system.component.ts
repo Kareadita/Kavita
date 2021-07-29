@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { DownloadService } from 'src/app/shared/_services/download.service';
+import { MessageHubService, METHODS } from 'src/app/_services/message-hub.service';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerInfo } from '../_models/server-info';
@@ -24,7 +24,7 @@ export class ManageSystemComponent implements OnInit {
   backupDBInProgress: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
-    private serverService: ServerService, public downloadService: DownloadService) { }
+    private serverService: ServerService, public downloadService: DownloadService, private messageHub: MessageHubService) { }
 
   ngOnInit(): void {
 
@@ -77,6 +77,12 @@ export class ManageSystemComponent implements OnInit {
     this.serverService.backupDatabase().subscribe(res => {
       this.backupDBInProgress = false;
       this.toastr.success('Database has been backed up');
+    });
+  }
+
+  checkForUpdates() {
+    this.messageHub.sendMessage(METHODS.CheckForUpdate).then(() => {
+      console.log('message successfully sent');
     });
   }
 

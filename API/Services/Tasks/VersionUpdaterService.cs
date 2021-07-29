@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Interfaces.Services;
 using API.SignalR;
 using API.SignalR.Presence;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
+using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -38,8 +38,7 @@ namespace API.Services.Tasks
         private readonly ILogger<VersionUpdaterService> _logger;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly IPresenceTracker _tracker;
-        private GithubReleaseMetadata _cachedMetadata;
-        private DateTime _lastUpdated;
+        private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 
         public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
         {
@@ -57,23 +56,21 @@ namespace API.Services.Tasks
 
             var update = await GetGithubRelease();
 
-            if (update != null && !string.IsNullOrEmpty(update.Tag_Name))
+            if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return;
+
+            var admins = await _tracker.GetOnlineAdmins();
+            var version = update.Tag_Name.Replace("v", string.Empty);
+            var updateVersion = new Version(version);
+            if (BuildInfo.Version < updateVersion)
             {
-                _cachedMetadata = update;
-                var admins = await _tracker.GetOnlineAdmins();
-                var version = update.Tag_Name.Replace("v", string.Empty);
-                var updateVersion = new Version(version);
-                if (BuildInfo.Version < updateVersion)
-                {
-                    _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
-                    await SendEvent(update, admins);
-                }
-                else
-                {
-                    _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
-                    // This is just for testing
-                    await SendEvent(update, admins);
-                }
+                _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
+                await SendEvent(update, admins);
+            }
+            else
+            {
+                _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
+                // TODO: Remove this else statement, for debug testing only
+                await SendEvent(update, admins);
             }
         }
 
@@ -94,7 +91,7 @@ namespace API.Services.Tasks
                 {
                     CurrentVersion = version,
                     UpdateVersion = updateVersion.ToString(),
-                    UpdateBody =  update.Body.Trim(),
+                    UpdateBody =  _markdown.Transform(update.Body.Trim()),
                     UpdateTitle = update.Name,
                     UpdateUrl = update.Html_Url,
                     IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
@@ -104,20 +101,10 @@ namespace API.Services.Tasks
 
         private async Task<GithubReleaseMetadata> GetGithubRelease()
         {
-            // If it's the same day, send cached data back
-            if (_lastUpdated.Date == DateTime.Now.Date)
-            {
-                return _cachedMetadata;
-            }
             var update = await "https://api.github.com/repos/Kareadita/Kavita/releases/latest"
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .GetJsonAsync<GithubReleaseMetadata>();
-
-            if (update != null)
-            {
-                _lastUpdated = DateTime.Now;
-            }
 
             return update;
         }

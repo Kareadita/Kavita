@@ -9,10 +9,6 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
-    public interface IMessageHub
-    {
-        Task SendUpdateAvailable(Version updateVersion);
-    }
 
     [Authorize]
     public class MessageHub : Hub
@@ -48,6 +44,12 @@ namespace API.SignalR
             }
 
             await base.OnDisconnectedAsync(exception);
+        }
+
+        public Task CheckForUpdate()
+        {
+
+            return Task.CompletedTask;
         }
 
     }

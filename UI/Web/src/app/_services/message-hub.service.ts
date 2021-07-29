@@ -3,10 +3,17 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { ToastrService } from 'ngx-toastr';
+import { env } from 'process';
 import { environment } from 'src/environments/environment';
-import { ConfirmService } from '../shared/confirm.service';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 
+export enum EVENTS {
+  UpdateAvailable = 'UpdateAvailable'
+}
+
+export enum METHODS {
+  CheckForUpdate = 'CheckForUpdate'
+}
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +41,7 @@ export class MessageHubService {
       this.toatsr.info(body.version);
     });
 
-    this.hubConnection.on('UpdateAvailable', resp => {
+    this.hubConnection.on(EVENTS.UpdateAvailable, resp => {
       console.log('[Hub] Body: ', resp);
       this.toatsr.info('Update available: ' + resp.body.currentVersion + ' -> ' + resp.body.updateVersion);
       const modalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
@@ -44,6 +51,10 @@ export class MessageHubService {
 
   stopHubConnection() {
     this.hubConnection.stop().catch(err => console.error(err));
+  }
+
+  sendMessage(methodName: string, body?: any) {
+    return this.hubConnection.invoke(methodName, body);
   }
   
 }
