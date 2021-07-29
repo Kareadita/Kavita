@@ -86,22 +86,22 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build, dependencies, test ] 
     if: ${{ github.event_name != 'pull_request' }}
-      steps:
-        - name: Extract branch name
-          shell: bash
-          run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-          id: extract_branch
+    steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
 
-        - name: Create Branch
-          uses: peterjgrainger/action-create-branch@v2.0.1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            branch: "version-bump-${{steps.get-version.outputs.assembly-version}}"
+      - name: Create Branch
+        uses: peterjgrainger/action-create-branch@v2.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: "version-bump-${{steps.get-version.outputs.assembly-version}}"
 
-        - name: Trigger version bump workflow
-          uses: benc-uk/workflow-dispatch@v1
-          with:
-            workflow: Version Bump
-            token: ${{ secrets.REPO_GHA_PAT }}
-            inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.extract_branch.outputs.branch }}" }'
+      - name: Trigger version bump workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Version Bump
+          token: ${{ secrets.REPO_GHA_PAT }}
+          inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.extract_branch.outputs.branch }}" }'
