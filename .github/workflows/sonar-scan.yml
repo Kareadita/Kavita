@@ -36,19 +36,15 @@ jobs:
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-artifacts
-          path: ./*
-
   test:
     name: Install Sonar & Test
     needs: build
     runs-on: windows-latest
     steps:
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
