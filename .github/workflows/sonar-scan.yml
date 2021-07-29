@@ -129,5 +129,6 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Version Bump
+          ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.REPO_GHA_PAT }}
           inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.branch-name.outputs.current_branch }}" }'
