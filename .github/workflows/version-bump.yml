@@ -32,7 +32,7 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          branch: version-bump-${{ github.event.inputs.version }}
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
