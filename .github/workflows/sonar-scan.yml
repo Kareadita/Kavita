@@ -94,7 +94,7 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
 
   bump:
-    name: Version Bump
+    name: Create bump branch
     runs-on: ubuntu-latest
     needs: [ build, test ] 
     if: ${{ github.event_name == 'pull_request' }}
@@ -125,10 +125,51 @@ jobs:
         with:
           branch: "version-bump-${{steps.get-version.outputs.assembly-version}}"
 
-      - name: Trigger version bump workflow
-        uses: benc-uk/workflow-dispatch@v1
+  version:
+    name: Bump version
+    needs: [ build, test ]
+    runs-on: windows-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps: 
+      - uses: actions/checkout@v2
         with:
-          workflow: Version Bump
-          ref: ${{ github.event.pull_request.head.ref }}
-          token: ${{ secrets.REPO_GHA_PAT }}
-          inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.branch-name.outputs.current_branch }}" }'
+          ref: version-bump-${{ github.event.inputs.version }}
+          fetch-depth: 0
+
+      - name: Create local changes for reference
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull origin version-bump-${{ github.event.inputs.version }}
+          git commit --allow-empty -m "Trigger Build"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: version-bump-${{ github.event.inputs.version }}
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.100
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Bump versions
+        uses: SiqiLu/dotnet-bump-version@master
+        with:
+          version_files: /Kavita.Common/Kavita.Common.csproj
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge bump branch -> pr branch
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          from_branch: version-bump-${{ github.event.inputs.version }}
+          target_branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
