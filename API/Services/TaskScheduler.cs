@@ -150,5 +150,10 @@ namespace API.Services
         {
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
         }
+
+        public void CheckForUpdate()
+        {
+            BackgroundJob.Enqueue(() => _versionUpdaterService.CheckForUpdate());
+        }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.Extensions;
-using API.SignalR.Presence;
-using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -13,7 +10,7 @@ namespace API.SignalR
     [Authorize]
     public class MessageHub : Hub
     {
-        private static HashSet<string> _connections = new HashSet<string>();
+        private static readonly HashSet<string> _connections = new HashSet<string>();
 
         public static bool IsConnected
         {
@@ -44,12 +41,6 @@ namespace API.SignalR
             }
 
             await base.OnDisconnectedAsync(exception);
-        }
-
-        public Task CheckForUpdate()
-        {
-
-            return Task.CompletedTask;
         }
 
     }
