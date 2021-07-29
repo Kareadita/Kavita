@@ -1,7 +1,15 @@
 name: Version Bump
 on:
-  push:
-    branches: [ 'feature/version-bump' ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "version to update package.json"
+        required: true
+        # No default
+      branch:
+        description: "tells us which branch to merge the bump into"
+        required: true
+        # No default
 
 jobs:
   build:
