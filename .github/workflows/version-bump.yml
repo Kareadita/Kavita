@@ -49,4 +49,4 @@ jobs:
         with:
           type: now
           target_branch: ${{ github.event.inputs.branch }}
-          github_token: ${{ github.token }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
