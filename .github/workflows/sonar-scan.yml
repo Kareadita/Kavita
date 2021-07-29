@@ -104,6 +104,12 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v4.5
 
+      - name: Echo branch name
+        run: echo "${{ steps.branch-name.outputs.current_branch }}" 
+
+      - name: Echo csproj version
+        run: echo "${{steps.get-version.outputs.assembly-version}}" 
+        
       - name: Create Branch
         uses: peterjgrainger/action-create-branch@v2.0.1
         env:
