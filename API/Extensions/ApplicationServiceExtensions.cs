@@ -35,7 +35,7 @@ namespace API.Extensions
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
 
-            services.AddSingleton<PresenceTracker>();
+            services.AddScoped<IPresenceTracker, PresenceTracker>();
 
             services.AddSqLite(config, env);
             services.AddLogging(config);

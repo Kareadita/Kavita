@@ -1,12 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Extensions;
+using API.SignalR.Presence;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
+    public interface IMessageHub
+    {
+        Task SendUpdateAvailable(Version updateVersion);
+    }
+
     [Authorize]
     public class MessageHub : Hub
     {
@@ -30,16 +37,6 @@ namespace API.SignalR
                 _connections.Add(Context.ConnectionId);
             }
 
-            var message = new SignalRMessage
-            {
-                Name = "version",
-                Body = new
-                {
-                    Version = BuildInfo.Version.ToString()
-                }
-            };
-
-            await Clients.All.SendAsync("receiveMessage", message);
             await base.OnConnectedAsync();
         }
 
@@ -52,5 +49,6 @@ namespace API.SignalR
 
             await base.OnDisconnectedAsync(exception);
         }
+
     }
 }

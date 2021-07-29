@@ -8,9 +8,9 @@ namespace API.SignalR
 {
     public class PresenceHub : Hub
     {
-        private readonly PresenceTracker _tracker;
+        private readonly IPresenceTracker _tracker;
 
-        public PresenceHub(PresenceTracker tracker)
+        public PresenceHub(IPresenceTracker tracker)
         {
             _tracker = tracker;
         }
@@ -19,7 +19,7 @@ namespace API.SignalR
         {
             await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
 
-            var currentUsers = await _tracker.GetOnlineUsers();
+            var currentUsers = await PresenceTracker.GetOnlineUsers();
             await Clients.All.SendAsync("GetOnlineUsers", currentUsers);
 
 
@@ -29,7 +29,7 @@ namespace API.SignalR
         {
             await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
 
-            var currentUsers = await _tracker.GetOnlineUsers();
+            var currentUsers = await PresenceTracker.GetOnlineUsers();
             await Clients.All.SendAsync("GetOnlineUsers", currentUsers);
 
             await base.OnDisconnectedAsync(exception);

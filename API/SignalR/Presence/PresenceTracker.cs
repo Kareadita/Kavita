@@ -1,12 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Interfaces;
 
 namespace API.SignalR.Presence
 {
-    public class PresenceTracker
+    public interface IPresenceTracker
     {
+        Task UserConnected(string username, string connectionId);
+        Task UserDisconnected(string username, string connectionId);
+        Task<string[]> GetOnlineAdmins();
+        Task<List<string>> GetConnectionsForUser(string username);
+
+    }
+
+    /// <summary>
+    /// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
+    /// </summary>
+    public class PresenceTracker : IPresenceTracker
+    {
+        private readonly IUnitOfWork _unitOfWork;
         private static readonly Dictionary<string, List<string>> OnlineUsers = new Dictionary<string, List<string>>();
+
+        public PresenceTracker(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
         public Task UserConnected(string username, string connectionId)
         {
@@ -41,7 +60,7 @@ namespace API.SignalR.Presence
             return Task.CompletedTask;
         }
 
-        public Task<string[]> GetOnlineUsers()
+        public static Task<string[]> GetOnlineUsers()
         {
             string[] onlineUsers;
             lock (OnlineUsers)
@@ -50,6 +69,31 @@ namespace API.SignalR.Presence
             }
 
             return Task.FromResult(onlineUsers);
+        }
+
+        public async Task<string[]> GetOnlineAdmins()
+        {
+            string[] onlineUsers;
+            lock (OnlineUsers)
+            {
+                onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
+            }
+
+            var admins = await _unitOfWork.UserRepository.GetAdminUsersAsync();
+            var result = admins.Select(a => a.UserName).Intersect(onlineUsers).ToArray();
+
+            return result;
+        }
+
+        public Task<List<string>> GetConnectionsForUser(string username)
+        {
+            List<string> connectionIds;
+            lock (OnlineUsers)
+            {
+                connectionIds = OnlineUsers.GetValueOrDefault(username);
+            }
+
+            return Task.FromResult(connectionIds);
         }
     }
 }

@@ -17,6 +17,7 @@ import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layo
 import { ShowIfScrollbarDirective } from './show-if-scrollbar.directive';
 import { A11yClickDirective } from './a11y-click.directive';
 import { SeriesFormatComponent } from './series-format/series-format.component';
+import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
 
 
 @NgModule({
@@ -33,7 +34,8 @@ import { SeriesFormatComponent } from './series-format/series-format.component';
     CardDetailLayoutComponent,
     ShowIfScrollbarDirective,
     A11yClickDirective,
-    SeriesFormatComponent
+    SeriesFormatComponent,
+    UpdateNotificationModalComponent
   ],
   imports: [
     CommonModule,

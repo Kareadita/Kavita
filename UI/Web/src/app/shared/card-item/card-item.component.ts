@@ -10,8 +10,6 @@ import { ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UtilityService } from '../_services/utility.service';
-// import 'lazysizes';
-// import 'lazysizes/plugins/attrchange/ls.attrchange';
 
 @Component({
   selector: 'app-card-item',
