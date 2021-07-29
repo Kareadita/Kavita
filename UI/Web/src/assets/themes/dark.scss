@@ -19,8 +19,12 @@ $dark-item-accent-bg: #292d32;
       color: $dark-text-color;
   }
 
-  a:not(.btn), .btn-link {
+  a, .btn-link {
     color: #4ac694;
+  }
+
+  a.btn {
+    color: white;
   }
 
 

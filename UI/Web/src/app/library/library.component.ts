@@ -49,7 +49,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
       this.isAdmin = this.accountService.hasAdminRole(this.user);
-      this.libraryService.getLibrariesForMember().subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
         this.libraries = libraries;
         this.isLoading = false;
       });
