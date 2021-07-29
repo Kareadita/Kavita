@@ -79,7 +79,7 @@ jobs:
   bump:
     name: Version Bump
     runs-on: ubuntu-latest
-    needs: [ build, dependencies, test ] 
+    needs: [ build, test ] 
     if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Extract branch name
