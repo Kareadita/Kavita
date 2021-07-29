@@ -100,9 +100,9 @@ jobs:
     needs: [ build, test ] 
     if: ${{ github.event_name == 'pull_request' }}
     steps:
-      - name: Git branch name
-        id: git-branch-name
-        uses: EthanSK/git-branch-name-action@v1
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v4.5
 
       - name: Create Branch
         uses: peterjgrainger/action-create-branch@v2.0.1
@@ -116,4 +116,4 @@ jobs:
         with:
           workflow: Version Bump
           token: ${{ secrets.REPO_GHA_PAT }}
-          inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${GIT_BRANCH_NAME}" }'
+          inputs: '{ "version": "${{steps.get-version.outputs.assembly-version}}", "branch": "${{ steps.branch-name.outputs.current_branch }}" }'
