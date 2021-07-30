@@ -131,23 +131,39 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'pull_request' }}
     steps: 
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: csproj
+
+      - name: Get csproj Version
+        uses: naminodarie/get-net-sdk-project-versions-action@v1
+        id: get-version
+        with:
+          proj-path: Kavita.Common.csproj
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v4.5
+
       - uses: actions/checkout@v2
         with:
-          ref: version-bump-${{ github.event.inputs.version }}
+          ref: version-bump-${{steps.get-version.outputs.assembly-version}}
           fetch-depth: 0
 
       - name: Create local changes for reference
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git pull origin version-bump-${{ github.event.inputs.version }}
+          git pull origin version-bump-${{steps.get-version.outputs.assembly-version}}
           git commit --allow-empty -m "Trigger Build"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: version-bump-${{ github.event.inputs.version }}
+          branch: version-bump-${{steps.get-version.outputs.assembly-version}}
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
