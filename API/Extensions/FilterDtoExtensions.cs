@@ -7,7 +7,7 @@ namespace API.Extensions
 {
     public static class FilterDtoExtensions
     {
-        private static IList<MangaFormat> _allFormats = Enum.GetValues<MangaFormat>();
+        private static readonly IList<MangaFormat> AllFormats = Enum.GetValues<MangaFormat>();
 
         public static IList<MangaFormat> GetSqlFilter(this FilterDto filter)
         {
@@ -19,10 +19,7 @@ namespace API.Extensions
                     (MangaFormat) format
                 };
             }
-            else
-            {
-                return _allFormats;
-            }
+            return AllFormats;
         }
     }
 }
