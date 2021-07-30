@@ -1,28 +1,24 @@
 import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-filter';
+import { FilterItem, SeriesFilter, mangaFormatFilters } from '../_models/series-filter';
 import { SeriesService } from '../_services/series.service';
 
-/**
- * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc.
- */
 @Component({
-  selector: 'app-recently-added',
-  templateUrl: './recently-added.component.html',
-  styleUrls: ['./recently-added.component.scss']
+  selector: 'app-in-progress',
+  templateUrl: './in-progress.component.html',
+  styleUrls: ['./in-progress.component.scss']
 })
-export class RecentlyAddedComponent implements OnInit {
+export class InProgressComponent implements OnInit {
 
   isLoading: boolean = true;
   recentlyAdded: Series[] = [];
   pagination!: Pagination;
   libraryId!: number;
-
   filters: Array<FilterItem> = mangaFormatFilters;
   filter: SeriesFilter = {
     mangaFormat: null
@@ -30,7 +26,7 @@ export class RecentlyAddedComponent implements OnInit {
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.titleService.setTitle('Kavita - Recently Added');
+    this.titleService.setTitle('Kavita - In Progress');
     if (this.pagination === undefined || this.pagination === null) {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
@@ -64,7 +60,7 @@ export class RecentlyAddedComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.isLoading = true;
-    this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getInProgress(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.recentlyAdded = series.result;
       this.pagination = series.pagination;
       this.isLoading = false;
@@ -76,4 +72,5 @@ export class RecentlyAddedComponent implements OnInit {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get('page');
   }
+
 }

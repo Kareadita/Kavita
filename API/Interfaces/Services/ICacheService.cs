@@ -35,5 +35,6 @@ namespace API.Interfaces.Services
         Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page);
 
         void EnsureCacheDirectory();
+        string GetCachedEpubFile(int chapterId, Chapter chapter);
     }
 }

@@ -36,6 +36,7 @@
     "bootstrap": "^4.5.0",
     "bowser": "^2.11.0",
     "file-saver": "^2.0.5",
+    "lazysizes": "^5.3.2",
     "ng-lazyload-image": "^9.1.0",
     "ng-sidebar": "^9.4.2",
     "ngx-toastr": "^13.2.1",

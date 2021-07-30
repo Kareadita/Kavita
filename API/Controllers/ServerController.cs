@@ -35,6 +35,10 @@ namespace API.Controllers
             _cacheService = cacheService;
         }
 
+        /// <summary>
+        /// Attempts to Restart the server. Does not work, will shutdown the instance.
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("restart")]
         public ActionResult RestartServer()
         {
@@ -44,11 +48,28 @@ namespace API.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Performs an ad-hoc cleanup of Cache
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("clear-cache")]
         public ActionResult ClearCache()
         {
             _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
             _cacheService.Cleanup();
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Performs an ad-hoc backup of the Database
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("backup-db")]
+        public ActionResult BackupDatabase()
+        {
+            _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
+            _backupService.BackupDatabase();
 
             return Ok();
         }
@@ -77,6 +98,7 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
 
     }
