@@ -8,6 +8,7 @@ jobs:
   bump:
     name: Version bump
     runs-on: windows-latest
+    steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
