@@ -168,7 +168,7 @@ namespace API.Controllers
         [HttpPost("in-progress")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
-            // NOTE: This has to be done manually like this due to the DisinctBy requirement
+            // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
 

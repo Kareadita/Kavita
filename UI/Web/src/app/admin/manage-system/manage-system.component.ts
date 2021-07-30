@@ -21,6 +21,7 @@ export class ManageSystemComponent implements OnInit {
 
   clearCacheInProgress: boolean = false;
   backupDBInProgress: boolean = false;
+  hasCheckedForUpdate: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private serverService: ServerService, public downloadService: DownloadService) { }
@@ -80,7 +81,10 @@ export class ManageSystemComponent implements OnInit {
   }
 
   checkForUpdates() {
-    this.serverService.checkForUpdate().subscribe(() => { /* No Operation */ });
+    this.hasCheckedForUpdate = true;
+    this.serverService.checkForUpdate().subscribe(() => { 
+      this.toastr.info('If an update is available, server will notify you');
+    });
   }
 
 }

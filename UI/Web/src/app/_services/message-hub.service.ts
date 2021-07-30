@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
@@ -15,6 +15,7 @@ export enum EVENTS {
 export class MessageHubService {
   hubUrl = environment.hubUrl;
   private hubConnection!: HubConnection;
+  private updateNotificationModalRef: NgbModalRef | null = null;
 
   constructor(private modalService: NgbModal) { }
 
@@ -35,8 +36,13 @@ export class MessageHubService {
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {
-      const modalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
-      modalRef.componentInstance.updateData = resp.body;
+      // Ensure only 1 instance of UpdateNotificationModal can be open at once
+      if (this.updateNotificationModalRef != null) { return; }
+      this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+      this.updateNotificationModalRef.componentInstance.updateData = resp.body;
+      this.updateNotificationModalRef.closed.subscribe(() => {
+        this.updateNotificationModalRef = null;
+      });
     });
   }
 

@@ -18,7 +18,7 @@
         <button class="btn btn-secondary mr-2" (click)="downloadService.downloadLogs()">
             Download Logs
         </button>
-        <button class="btn btn-primary" (click)="checkForUpdates()">
+        <button class="btn btn-primary" (click)="checkForUpdates()" [disabled]="hasCheckedForUpdate">
             Check for Updates
         </button>
     </div>

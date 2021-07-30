@@ -67,7 +67,7 @@ namespace API.Services.Tasks
                 _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
                 await SendEvent(update, admins);
             }
-            else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
+            else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development)
             {
                 _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
                 await SendEvent(update, admins);
