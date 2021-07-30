@@ -1,9 +1,7 @@
 name: Build Stable Docker
 
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -12,6 +10,8 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
