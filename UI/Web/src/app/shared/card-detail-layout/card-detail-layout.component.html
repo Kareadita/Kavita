@@ -1,8 +1,34 @@
 <div class="container-fluid" style="padding-top: 10px">
-    <h2><span *ngIf="actions.length > 0" class="">
-        <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
-    </span>&nbsp;{{header}}</h2>
-    <ng-container [ngTemplateOutlet]="paginationTemplate"  [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
+    <div class="row no-gutters pb-2">
+        <div class="col mr-auto">
+            <h2 style="display: inline-block">
+                <span *ngIf="actions.length > 0" class="">
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
+                </span>&nbsp;{{header}}&nbsp;
+                <!-- NOTE: On mobile the pill can eat up a lot of space, we can hide it and move to the filter section if user is interested -->
+                <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+            </h2>
+        </div>
+        
+        <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+            <i class="fa fa-filter" aria-hidden="true"></i>
+            <span class="sr-only">Sort / Filter</span>
+        </button>
+    </div>
+    <div class="row no-gutters filter-section" #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
+        <div class="col">
+            <form class="ml-2" [formGroup]="filterForm">
+                <div class="form-group" *ngIf="filters.length > 0">
+                    <label for="series-filter">Filter</label>
+                    <select class="form-control" id="series-filter" formControlName="filter" (ngModelChange)="handleFilterChange($event)" style="max-width: 200px;">
+                        <option [value]="i" *ngFor="let opt of filters; let i = index">{{opt.title}}</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+    </div>
+    <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
     <div class="row no-gutters">
@@ -22,13 +48,12 @@
     <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
-            [maxSize]="10"
+            [maxSize]="8"
             [rotate]="true"
             [ellipses]="false"
             [(page)]="pagination.currentPage"
             [pageSize]="pagination.itemsPerPage"
             (pageChange)="onPageChange($event)"
-            [boundaryLinks]="true"
             [collectionSize]="pagination.totalItems">
 
             <ng-template ngbPaginationPages let-page let-pages="pages" *ngIf="pagination.totalItems / pagination.itemsPerPage > 20">

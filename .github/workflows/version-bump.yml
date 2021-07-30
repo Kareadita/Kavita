@@ -2,7 +2,7 @@ name: Bump .Net Version
 
 on:
   push:
-    branches:
+    branches: 
       - 'version-bump'
 
 jobs:

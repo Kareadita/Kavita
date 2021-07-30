@@ -25,6 +25,7 @@ namespace API.Services
        /// <summary>
        /// Given a set of regex search criteria, get files in the given path.
        /// </summary>
+       /// <remarks>This will always exclude <see cref="Parser.Parser.MacOsMetadataFileStartsWith"/> patterns</remarks>
        /// <param name="path">Directory to search</param>
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
@@ -35,9 +36,10 @@ namespace API.Services
        {
           if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
           var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+
           return Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
-                reSearchPattern.IsMatch(Path.GetExtension(file)));
+                reSearchPattern.IsMatch(Path.GetExtension(file)) && !Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
        }
 
 
@@ -98,7 +100,7 @@ namespace API.Services
              var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
              return Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
-                   reSearchPattern.IsMatch(file));
+                   reSearchPattern.IsMatch(file) && !file.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
           }
 
           return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
@@ -106,11 +108,18 @@ namespace API.Services
 
        public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
        {
-         var fileInfo = new FileInfo(fullFilePath);
-         if (fileInfo.Exists)
-         {
-           fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name));
-         }
+           try
+           {
+               var fileInfo = new FileInfo(fullFilePath);
+               if (fileInfo.Exists)
+               {
+                   fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name), true);
+               }
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "There was a critical error when copying {File} to {Directory}", fullFilePath, targetDirectory);
+           }
        }
 
        /// <summary>

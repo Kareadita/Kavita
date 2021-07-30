@@ -11,6 +11,7 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
+import { InProgressComponent } from './in-progress/in-progress.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -44,6 +45,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {path: 'recently-added', component: RecentlyAddedComponent},
+      {path: 'in-progress', component: InProgressComponent},
       {path: 'collections', component: AllCollectionsComponent},
       {path: 'collections/:id', component: AllCollectionsComponent},
     ]

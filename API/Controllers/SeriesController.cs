@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
@@ -27,12 +28,12 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams)
+        [HttpPost]
+        public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams);
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for library");
@@ -119,7 +120,7 @@ namespace API.Controllers
             return Ok();
         }
 
-        [HttpPost]
+        [HttpPost("update")]
         public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
         {
             _logger.LogInformation("{UserName} is updating Series {SeriesName}", User.GetUsername(), updateSeries.Name);
@@ -132,10 +133,10 @@ namespace API.Controllers
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
-            series.Name = updateSeries.Name;
-            series.LocalizedName = updateSeries.LocalizedName;
-            series.SortName = updateSeries.SortName;
-            series.Summary = updateSeries.Summary;
+            series.Name = updateSeries.Name.Trim();
+            series.LocalizedName = updateSeries.LocalizedName.Trim();
+            series.SortName = updateSeries.SortName.Trim();
+            series.Summary = updateSeries.Summary.Trim();
 
             _unitOfWork.SeriesRepository.Update(series);
 
@@ -147,12 +148,12 @@ namespace API.Controllers
             return BadRequest("There was an error with updating the series");
         }
 
-        [HttpGet("recently-added")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded([FromQuery] UserParams userParams, int libraryId = 0)
+        [HttpPost("recently-added")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams);
+                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series");
@@ -164,12 +165,20 @@ namespace API.Controllers
             return Ok(series);
         }
 
-        [HttpGet("in-progress")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(int libraryId = 0, int limit = 20)
+        [HttpPost("in-progress")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
+            // NOTE: This has to be done manually like this due to the DisinctBy requirement
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (user == null) return Ok(Array.Empty<SeriesDto>());
-            return Ok(await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, limit));
+            var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
+
+            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
+                .Take(userParams.PageSize).ToList();
+            var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+
+            Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+            return Ok(pagedList);
         }
 
         [Authorize(Policy = "RequireAdminRole")]

@@ -21,8 +21,6 @@ using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using VersOne.Epub;
-using Image = NetVips.Image;
-using Point = System.Drawing.Point;
 
 namespace API.Services
 {
@@ -325,10 +323,10 @@ namespace API.Services
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
-                            Title = specialName,
+                            Title = specialName.Trim(),
                             FullFilePath = filePath,
                             IsSpecial = false,
-                            Series = series,
+                            Series = series.Trim(),
                             Volumes = seriesIndex.Split(".")[0]
                         };
                     }
@@ -344,10 +342,10 @@ namespace API.Services
                     Edition = string.Empty,
                     Format = MangaFormat.Epub,
                     Filename = Path.GetFileName(filePath),
-                    Title = epubBook.Title,
+                    Title = epubBook.Title.Trim(),
                     FullFilePath = filePath,
                     IsSpecial = false,
-                    Series = epubBook.Title,
+                    Series = epubBook.Title.Trim(),
                     Volumes = Parser.Parser.DefaultVolume
                 };
            }
@@ -409,7 +407,7 @@ namespace API.Services
                 if (!createThumbnail) return coverImageContent.ReadContent();
 
                 using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
-                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+                using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                 return thumbnail.WriteToBuffer(".jpg");
 
             }
@@ -433,7 +431,7 @@ namespace API.Services
 
                if (!createThumbnail) return stream.ToArray();
 
-               using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+               using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
                return thumbnail.WriteToBuffer(".png");
 
            }
