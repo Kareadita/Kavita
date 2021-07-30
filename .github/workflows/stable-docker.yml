@@ -99,7 +99,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: 
+            description: ${{ github.event.body }}
             details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
             text: A new stable build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}

@@ -1,0 +1,40 @@
+name: Bump .Net Version
+
+on:
+  push:
+    branches: [ version-bump ]
+
+jobs:
+  bump:
+    name: Version bump
+    runs-on: windows-latest
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+        with:
+            fetch-depth: 0
+            ref: version-bump
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+        dotnet-version: 5.0.100
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Bump versions
+        uses: SiqiLu/dotnet-bump-version@master
+        with:
+          version_files: Kavita.Common/Kavita.Common.csproj
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge bump branch -> pr branch
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          from_branch: version-bump
+          target_branch: ${{ github.event.inputs.branch }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
