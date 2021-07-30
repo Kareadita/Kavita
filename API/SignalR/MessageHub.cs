@@ -42,6 +42,5 @@ namespace API.SignalR
 
             await base.OnDisconnectedAsync(exception);
         }
-
     }
 }
