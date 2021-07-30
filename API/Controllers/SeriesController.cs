@@ -168,8 +168,17 @@ namespace API.Controllers
         [HttpPost("in-progress")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
+            // NOTE: This has to be done manually like this due to the DisinctBy requirement
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok((await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto)).DistinctBy(s => s.Name));
+            var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
+
+            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
+                .Take(userParams.PageSize).ToList();
+            var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+
+            Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+            return Ok(pagedList);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
