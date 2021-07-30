@@ -136,5 +136,6 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git pull origin version-bump
           echo '${{steps.get-version.outputs.assembly-version}}' >> .github/version.txt
-          git commit --allow-empty -m "Trigger Build"
+          git add .github/version.txt
+          git commit -m "Trigger Build"
           git push
