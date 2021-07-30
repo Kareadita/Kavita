@@ -97,7 +97,7 @@ jobs:
     name: Create bump branch
     runs-on: ubuntu-latest
     needs: [ build, test ] 
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
@@ -129,7 +129,7 @@ jobs:
     name: Bump version
     needs: [ bump ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'push' }}
     steps: 
 
       - name: Download a single artifact
@@ -179,7 +179,7 @@ jobs:
       - name: Bump versions
         uses: SiqiLu/dotnet-bump-version@master
         with:
-          version_files: /Kavita.Common/Kavita.Common.csproj
+          version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge bump branch -> pr branch
