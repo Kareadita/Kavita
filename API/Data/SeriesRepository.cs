@@ -370,32 +370,23 @@ namespace API.Data
                 .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
                 {
                     Series = s,
-                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
+                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId).Sum(s1 => s1.PagesRead),
                     progress.AppUserId,
-                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id).Max(p => p.LastModified)
+                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId).Max(p => p.LastModified)
                 })
                 .AsNoTracking();
 
-
-
             var retSeries = series.Where(s => s.AppUserId == userId
                                               && s.PagesRead > 0
-                                              && s.PagesRead < s.Series.Pages
-                    /*&& userLibraries.Contains(s.Series.LibraryId)*/
-                    /* && formats.Contains(s.Series.Format) */)
+                                              && s.PagesRead < s.Series.Pages)
                             .OrderByDescending(s => s.LastModified)
                             .Select(s => s.Series)
                             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                            .AsSplitQuery()
                             .AsNoTracking();
 
-            // var retSeries = series
-            //     .OrderByDescending(s => s.LastModified)
-            //     .Select(s => s.Series)
-            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            //     .AsNoTracking();
-            // BUG: Pagination does not work for this query as when we pull the data back, we get multiple rows of the same series
+            // Pagination does not work for this query as when we pull the data back, we get multiple rows of the same series. See controller for pagination code
             return await retSeries.ToListAsync();
-            //return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
