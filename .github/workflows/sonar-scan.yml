@@ -149,7 +149,7 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
-          ref: version-bump
+          ref: version-bump-${{steps.get-version.outputs.assembly-version}}
           fetch-depth: 0
 
       - name: Create local changes for reference
