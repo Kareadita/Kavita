@@ -94,10 +94,10 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
 
   version:
-    name: Bump version
+    name: Bump version on Develop push
     needs: [ build, test ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (github.ref != 'refs/heads/develop' || github.ref != 'refs/heads/main') }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps: 
 
       - uses: actions/checkout@v2
@@ -123,7 +123,7 @@ jobs:
 
   develop:
     name: Trigger Nightly Docker if Develop push
-    needs: [ build, test ] 
+    needs: [ build, test, version ] 
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
