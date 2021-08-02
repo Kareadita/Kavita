@@ -2,7 +2,7 @@ name: .NET Build Test and Sonar Scan
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ * ]
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened]
@@ -93,77 +93,16 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
-  bump:
-    name: Create branch for bump if Develop push
-    runs-on: ubuntu-latest
-    needs: [ build, test ] 
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-
-      - name: Get csproj Version
-        uses: naminodarie/get-net-sdk-project-versions-action@v1
-        id: get-version
-        with:
-          proj-path: Kavita.Common/Kavita.Common.csproj
-
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v4.5
-
-      - name: Echo branch name
-        run: echo "${{ steps.branch-name.outputs.current_branch }}" 
-
-      - name: Echo csproj version
-        run: echo "${{steps.get-version.outputs.assembly-version}}" 
-        
-      - name: Create Branch
-        uses: peterjgrainger/action-create-branch@v2.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          branch: "version-bump"
-
   version:
-    name: Bump version if Develop push
-    needs: [ bump ]
+    name: Bump version
+    needs: [ build, test ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    if: ${{ github.event_name == 'push' && (github.ref != 'refs/heads/develop' || github.ref != 'refs/heads/main') }}
     steps: 
 
-      - name: Download a single artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: csproj
-
-      - name: Get csproj Version
-        uses: naminodarie/get-net-sdk-project-versions-action@v1
-        id: get-version
-        with:
-          proj-path: Kavita.Common.csproj
-
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v4.5
-
       - uses: actions/checkout@v2
         with:
-          ref: version-bump
           fetch-depth: 0
-
-      - name: Create local changes for reference
-        run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git pull origin version-bump-${{steps.get-version.outputs.assembly-version}}
-          git commit --allow-empty -m "Trigger Build"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: version-bump-${{steps.get-version.outputs.assembly-version}}
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
@@ -180,18 +119,16 @@ jobs:
         uses: SiqiLu/dotnet-bump-version@master
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.REPO_GHA_PAT }}
 
-      - name: Merge bump branch -> pr branch
-        uses: devmasx/merge-branch@v1.3.1
-        with:
-          type: now
-          from_branch: version-bump-${{ github.event.inputs.version }}
-          target_branch: develop
-          github_token: ${{ secrets.GITHUB_TOKEN }} 
+  develop:
+    name: Trigger Nightly Docker if Develop push
+    needs: [ build, test ] 
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    steps:
 
-      - name: Trigger Docker Nightly
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+      - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build Nightly Docker
@@ -201,11 +138,10 @@ jobs:
     name: Trigger Stable Docker if Main push
     needs: [ build, test ] 
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
 
       - name: If Push to Main, Trigger Docker Stable
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build Stable Docker
