@@ -94,10 +94,10 @@ jobs:
         run: dotnet test --no-restore --verbosity normal
 
   version:
-    name: Bump version on Develop push
+    name: Bump version
     needs: [ build, test ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
+    if: ${{ github.event_name == 'push' && (github.ref != 'refs/heads/develop' || github.ref != 'refs/heads/main') }}
     steps: 
 
       - uses: actions/checkout@v2
@@ -119,11 +119,11 @@ jobs:
         uses: SiqiLu/dotnet-bump-version@master
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
-          github_token: ${{ secrets.REPO_GHA_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   develop:
     name: Trigger Nightly Docker if Develop push
-    needs: [ build, test, version ] 
+    needs: [ build, test ] 
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
