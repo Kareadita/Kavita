@@ -99,7 +99,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps: 
-
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
