@@ -1,9 +1,7 @@
 name: Build Stable Docker
 
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -12,6 +10,8 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
@@ -99,7 +99,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: 
+            description: ${{ github.event.body }}
             details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
             text: A new stable build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
