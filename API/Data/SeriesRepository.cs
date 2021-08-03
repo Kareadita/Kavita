@@ -323,7 +323,6 @@ namespace API.Data
 
                 var allQuery = _context.Series
                     .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
-                    .AsNoTracking()
                     .OrderByDescending(s => s.Created)
                     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                     .AsNoTracking();
@@ -333,7 +332,6 @@ namespace API.Data
 
             var query = _context.Series
                 .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
-                .AsNoTracking()
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking();
@@ -349,48 +347,46 @@ namespace API.Data
         /// <param name="userParams">Pagination information</param>
         /// <param name="filter">Optional (default null) filter on query</param>
         /// <returns></returns>
-        public async Task<PagedList<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
+        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
         {
             var formats = filter.GetSqlFilter();
-            var series = _context.Series
-                .Where(s => formats.Contains(s.Format))
-                .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-                {
-                    Series = s,
-                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id).Sum(s1 => s1.PagesRead),
-                    progress.AppUserId,
-                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id).Max(p => p.LastModified)
-                }).AsNoTracking();
+            IList<int> userLibraries;
             if (libraryId == 0)
             {
-                var userLibraries = _context.Library
+                userLibraries = _context.Library
                     .Include(l => l.AppUsers)
                     .Where(library => library.AppUsers.Any(user => user.Id == userId))
                     .AsNoTracking()
                     .Select(library => library.Id)
                     .ToList();
-                series = series.Where(s => s.AppUserId == userId
-                                           && s.PagesRead > 0
-                                           && s.PagesRead < s.Series.Pages
-                                           && userLibraries.Contains(s.Series.LibraryId)
-                                           && formats.Contains(s.Series.Format));
             }
             else
             {
-                series = series.Where(s => s.AppUserId == userId
-                            && s.PagesRead > 0
-                            && s.PagesRead < s.Series.Pages
-                            && s.Series.LibraryId == libraryId
-                            && formats.Contains(s.Series.Format));
+                userLibraries = new List<int>() {libraryId};
             }
 
-            var retSeries = series
-                .OrderByDescending(s => s.LastModified)
-                .Select(s => s.Series)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            var series = _context.Series
+                .Where(s => formats.Contains(s.Format) && userLibraries.Contains(s.LibraryId))
+                .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
+                {
+                    Series = s,
+                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId).Sum(s1 => s1.PagesRead),
+                    progress.AppUserId,
+                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId).Max(p => p.LastModified)
+                })
                 .AsNoTracking();
 
-            return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+            var retSeries = series.Where(s => s.AppUserId == userId
+                                              && s.PagesRead > 0
+                                              && s.PagesRead < s.Series.Pages)
+                            .OrderByDescending(s => s.LastModified)
+                            .Select(s => s.Series)
+                            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                            .AsSplitQuery()
+                            .AsNoTracking();
+
+            // Pagination does not work for this query as when we pull the data back, we get multiple rows of the same series. See controller for pagination code
+            return await retSeries.ToListAsync();
         }
 
         public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
