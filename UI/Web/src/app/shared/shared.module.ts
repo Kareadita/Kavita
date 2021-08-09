@@ -18,6 +18,8 @@ import { ShowIfScrollbarDirective } from './show-if-scrollbar.directive';
 import { A11yClickDirective } from './a11y-click.directive';
 import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
+import { SAVER, getSaver } from './_providers/saver.provider';
+import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 
 
 @NgModule({
@@ -35,7 +37,8 @@ import { UpdateNotificationModalComponent } from './update-notification/update-n
     ShowIfScrollbarDirective,
     A11yClickDirective,
     SeriesFormatComponent,
-    UpdateNotificationModalComponent
+    UpdateNotificationModalComponent,
+    CircularLoaderComponent
   ],
   imports: [
     CommonModule,
@@ -60,6 +63,7 @@ import { UpdateNotificationModalComponent } from './update-notification/update-n
     ShowIfScrollbarDirective,
     A11yClickDirective,
     SeriesFormatComponent
-  ]
+  ],
+  providers: [{provide: SAVER, useFactory: getSaver}]
 })
 export class SharedModule { }

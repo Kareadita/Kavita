@@ -1,14 +1,16 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
-import { ActionItem } from 'src/app/_services/action-factory.service';
+import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { Download } from '../_models/download';
+import { DownloadService } from '../_services/download.service';
 import { UtilityService } from '../_services/utility.service';
 
 @Component({
@@ -32,13 +34,16 @@ export class CardItemComponent implements OnInit, OnDestroy {
   supressArchiveWarning: boolean = false; // This will supress the cannot read archive warning when total pages is 0
   format: MangaFormat = MangaFormat.UNKNOWN;
 
+  showDownloadNotification: boolean = false;
+  download$!: Observable<Download>;
+
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {}
+  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService, private downloadService: DownloadService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -77,6 +82,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.entity);
+    }
+
+    if (action.action == Action.Download) {
+      this.showDownloadNotification = true;
+      if (this.entity.hasOwnProperty('chapters')) {
+        const volume = (this.entity as Volume);
+        this.download$ = this.downloadService.downloadVolume(volume, '');
+      }
+      
     }
   }
 

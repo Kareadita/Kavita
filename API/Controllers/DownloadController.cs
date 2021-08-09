@@ -21,6 +21,7 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private const string DefaultContentType = "application/octet-stream"; // "application/zip"
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
         {
@@ -62,7 +63,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_v{volumeId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {
@@ -105,7 +106,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_c{chapterId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {
@@ -125,7 +126,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_s{seriesId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
             }
             catch (KavitaException ex)
             {

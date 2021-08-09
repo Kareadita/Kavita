@@ -6,10 +6,16 @@
             aria-hidden="true" height="230px" width="158px">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
         <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+
+        <app-circular-loader></app-circular-loader>
+        
+        <p><ngb-progressbar *ngIf="download$ | async as download" type="primary" height="15px" [value]="download.progress" [max]="total" [striped]="download.state == 'PENDING'"></ngb-progressbar></p>
       </div>
       <div class="error-banner" *ngIf="total === 0 && !supressArchiveWarning">
         Cannot Read Archive
       </div>
+
+      
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
     </div>

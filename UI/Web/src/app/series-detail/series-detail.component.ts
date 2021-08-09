@@ -167,7 +167,7 @@ export class SeriesDetailComponent implements OnInit {
         this.openViewInfo(volume);
         break;
       case(Action.Download):
-      this.downloadService.downloadVolume(volume, this.series.name);
+        this.downloadService.downloadVolume(volume, this.series.name);
         break;
       default:
         break;

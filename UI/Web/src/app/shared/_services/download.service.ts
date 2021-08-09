@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../confirm.service';
@@ -7,6 +7,9 @@ import { saveAs } from 'file-saver';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
+import { Observable } from 'rxjs';
+import { SAVER, Saver } from '../_providers/saver.provider';
+import { download, Download } from '../_models/download';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +22,7 @@ export class DownloadService {
    */
   public SIZE_WARNING = 104_857_600;
 
-  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService) { }
+  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService, @Inject(SAVER) private save: Saver) { }
 
 
   private downloadSeriesSize(seriesId: number) {
@@ -39,7 +42,7 @@ export class DownloadService {
   }
 
   private downloadVolumeAPI(volumeId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {observe: 'response', responseType: 'blob' as 'text'});
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {observe: 'events', responseType: 'blob', reportProgress: true});
   }
 
   private downloadChapterAPI(chapterId: number) {
@@ -74,15 +77,31 @@ export class DownloadService {
     });
   }
 
-  downloadVolume(volume: Volume, seriesName: string) {
-    this.downloadVolumeSize(volume.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadVolumeAPI(volume.id).subscribe(resp => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
-      });
-    });
+  downloadVolume(volume: Volume, seriesName: string): Observable<Download> {
+    // this.downloadVolumeSize(volume.id).subscribe(async size => {
+    //   if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
+    //     return;
+    //   }
+    //   this.downloadVolumeAPI(volume.id).subscribe(resp => {
+    //     this.preformSave(resp.body, this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
+    //   });
+    // });
+    // const filename = seriesName + ' - Volume ' + volume.name;
+    // return this.downloadVolumeAPI(volume.id).pipe(download(blob => saveAs(blob, filename)));
+
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+                      )
+            .pipe(download(blob => {
+              this.save(blob, seriesName + ' - Volume ' + volume.name)
+            }));
+
+
+    // return this.downloadVolumeSize(volume.id).pipe(async size => {
+    //   if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The volume is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
+    //     return;
+    //   }
+    // });
   }
 
   private preformSave(res: string, filename: string) {
