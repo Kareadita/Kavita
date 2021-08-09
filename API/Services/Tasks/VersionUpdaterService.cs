@@ -99,7 +99,7 @@ namespace API.Services.Tasks
             });
         }
 
-        private async Task<GithubReleaseMetadata> GetGithubRelease()
+        private static async Task<GithubReleaseMetadata> GetGithubRelease()
         {
             var update = await "https://api.github.com/repos/Kareadita/Kavita/releases/latest"
                 .WithHeader("Accept", "application/json")
