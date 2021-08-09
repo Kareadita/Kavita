@@ -352,13 +352,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum = 1;
 
     forkJoin({
-      bookmark: this.readerService.getBookmark(this.chapterId),
+      progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
 
-      let page = results.bookmark.pageNum;
+      let page = results.progress.pageNum;
       if (page >= this.maxPages) {
         page = this.maxPages - 1;
       }
@@ -751,14 +751,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
-    // Due to the fact that we start at image 0, but page 1, we need the last page to be bookmarked as page + 1 to be completed
+    // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let pageNum = this.pageNum;
     if (this.pageNum == this.maxPages - 1) {
       pageNum = this.pageNum + 1;
     }
 
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
@@ -909,7 +909,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleWebtoonPageChange(updatedPageNum: number) {
     this.setPageNum(updatedPageNum);
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 
   saveSettings() {

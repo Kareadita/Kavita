@@ -153,7 +153,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markVolumeAsUnread(seriesId: number, volume: Volume, callback?: VolumeActionCallback) {
-    forkJoin(volume.chapters?.map(chapter => this.readerService.bookmark(seriesId, volume.id, chapter.id, 0))).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+    forkJoin(volume.chapters?.map(chapter => this.readerService.saveProgress(seriesId, volume.id, chapter.id, 0))).pipe(takeUntil(this.onDestroy)).subscribe(results => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Unread');
@@ -170,7 +170,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsRead(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
       this.toastr.success('Marked as Read');
       if (callback) {
@@ -186,7 +186,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
       this.toastr.success('Marked as unread');
       if (callback) {

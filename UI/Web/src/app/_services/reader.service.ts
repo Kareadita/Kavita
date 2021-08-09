@@ -19,7 +19,7 @@ export class ReaderService {
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
-  getBookmark(chapterId: number) {
+  getProgress(chapterId: number) {
     return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
 
@@ -31,7 +31,7 @@ export class ReaderService {
     return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
+  saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
     return this.httpClient.post(this.baseUrl + 'reader/progress', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
