@@ -9,20 +9,26 @@
     
     <ul class="list-unstyled">
         <li class="media my-4" *ngFor="let bookmark of bookmarks">
-            <img class="mr-3" style="width: 74px" src="{{imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)}}">
+            <!-- <img class="mr-3" style="width: 74px" src="{{imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)}}">
             <div class="media-body">
                 <h5 class="mt-0 mb-1">
-                    <!-- <span *ngIf="chapter.number !== '0'; else specialHeader">
-                        Chapter {{formatChapterNumber(chapter)}}
-                    </span>
-                    <ng-template #specialHeader>File(s)</ng-template> -->
                 </h5>
                 Page {{bookmark.page}}
-            </div>
+            </div> -->
+            Page {{bookmark.page}}
+            <!-- <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="sr-only">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button> -->
         </li>
     </ul>
 
 </div>
 <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="isDownloading || isClearing">
+        <span *ngIf="isClearing" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Clear{{isClearing ? 'ing...' : ''}}</span>
+    </button>
+    <button type="button" class="btn btn-secondary" (click)="downloadBookmarks()" [disabled]="isDownloading || isClearing">
+        <span *ngIf="isDownloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>Download{{isDownloading ? 'ing...' : ''}}</span>
+    </button>
     <button type="button" class="btn btn-primary" (click)="close()">Close</button>
 </div>

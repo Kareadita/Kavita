@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
 import { ChapterInfo } from 'src/app/manga-reader/_models/chapter-info';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
@@ -16,28 +17,36 @@ import { ReaderService } from 'src/app/_services/reader.service';
 })
 export class BookmarksModalComponent implements OnInit {
 
-  @Input() chapterId!: number;
   @Input() type!: 'series' | 'volume' | 'chapter';
   @Input() entity!: Series | Volume | Chapter;
 
   bookmarks: Array<PageBookmark> = [];
   title: string = '';
   subtitle: string = '';
+  isDownloading: boolean = false;
+  isClearing: boolean = false;
 
-  constructor(public imageService: ImageService, private readerService: ReaderService, public modal: NgbActiveModal) { }
+  constructor(public imageService: ImageService, private readerService: ReaderService, public modal: NgbActiveModal, private downloadService: DownloadService) { }
 
   ngOnInit(): void {
-    // TODO: Ensure book is cached (maybe by loading chapterInfo)
     let chapterId = 0;
-    // if (this.type === 'volume') {
-    //   chapterId = (this.entity as Volume).chapters
-    // };
-    // this.readerService.getChapterInfo(this.chapterId).pipe(take(1)).subscribe(chapterInfo => {
-    //   this.updateTitle(chapterInfo);
+    if (this.type === 'volume' && this.entity !== undefined) {
+      const vol = <Volume>this.entity;
+      if (vol.chapters) {
+        chapterId = vol.chapters[0].id;
+      }
+    } else if (this.type == 'chapter') {
+      chapterId = this.entity.id;
+    } else {
+      const series = (this.entity as Series);
+      if (series.volumes.length > 0 && series.volumes[0].chapters) {
+        chapterId = series.volumes[0].chapters[0].id;
+      }
+    }
 
-      
-    // });
-
+    this.readerService.getChapterInfo(chapterId).pipe(take(1)).subscribe(chapterInfo => {
+      this.updateTitle(chapterInfo);
+    });
     switch (this.type) {
       case 'chapter':
       {
@@ -63,6 +72,8 @@ export class BookmarksModalComponent implements OnInit {
       default:
         break;
     }
+
+    
   }
 
   updateTitle(chapterInfo: ChapterInfo) {
@@ -87,6 +98,16 @@ export class BookmarksModalComponent implements OnInit {
 
   close() {
     this.modal.close({success: false, series: undefined});
+  }
+
+  downloadBookmarks() {
+    this.isDownloading = true;
+    //this.downloadService.downloadBookmarks(this.bookmarks.map(bmk => bmk.id)).pipe(take(1)).subscribe(() => {});
+
+  }
+
+  clearBookmarks() {
+    this.isClearing = true;
   }
 
 }
