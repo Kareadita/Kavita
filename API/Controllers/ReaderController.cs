@@ -298,8 +298,25 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            //if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+            return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
+        }
+
+        [HttpGet("get-volume-bookmarks")]
+        public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
-            return Ok(user.Bookmarks.Where(x => x.AppUserId == user.Id && x.ChapterId == chapterId));
+            return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
+        }
+
+        [HttpGet("get-series-bookmarks")]
+        public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+
+            return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
         }
 
         [HttpPost("bookmark")]
@@ -324,7 +341,7 @@ namespace API.Controllers
             {
                 user.Bookmarks ??= new List<AppUserBookmark>();
                var userBookmark =
-                  user.Bookmarks.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
+                  user.Bookmarks.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id && x.Page == bookmarkDto.Page);
 
                if (userBookmark == null)
                {

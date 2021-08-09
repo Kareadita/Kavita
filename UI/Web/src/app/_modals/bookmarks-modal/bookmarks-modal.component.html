@@ -1,0 +1,28 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{title}} Bookmarks</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    
+    <ul class="list-unstyled">
+        <li class="media my-4" *ngFor="let bookmark of bookmarks">
+            <img class="mr-3" style="width: 74px" src="{{imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)}}">
+            <div class="media-body">
+                <h5 class="mt-0 mb-1">
+                    <!-- <span *ngIf="chapter.number !== '0'; else specialHeader">
+                        Chapter {{formatChapterNumber(chapter)}}
+                    </span>
+                    <ng-template #specialHeader>File(s)</ng-template> -->
+                </h5>
+                Page {{bookmark.page}}
+            </div>
+        </li>
+    </ul>
+
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">Close</button>
+</div>

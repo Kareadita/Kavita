@@ -14,7 +14,8 @@ export enum Action {
   Edit = 4,
   Info = 5,
   RefreshMetadata = 6,
-  Download = 7
+  Download = 7,
+  Bookmarks = 8
 }
 
 export interface ActionItem<T> {
@@ -156,6 +157,11 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback
+      }, 
+      {
+        action: Action.Bookmarks,
+        title: 'Bookmarks',
+        callback: this.dummyCallback
       }
     ];
 
@@ -169,6 +175,11 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback
+      }, 
+      {
+        action: Action.Bookmarks,
+        title: 'Bookmarks',
+        callback: this.dummyCallback
       }
     ];
 
@@ -181,6 +192,11 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
+        callback: this.dummyCallback
+      }, 
+      {
+        action: Action.Bookmarks,
+        title: 'Bookmarks',
         callback: this.dummyCallback
       }
     ];

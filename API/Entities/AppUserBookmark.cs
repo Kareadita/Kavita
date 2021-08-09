@@ -1,4 +1,6 @@
-﻿namespace API.Entities
+﻿using System.Text.Json.Serialization;
+
+namespace API.Entities
 {
     /// <summary>
     /// Represents a saved page in a Chapter entity for a given user.
@@ -13,6 +15,7 @@
 
 
         // Relationships
+        [JsonIgnore]
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }
     }

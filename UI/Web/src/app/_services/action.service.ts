@@ -1,7 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
+import { BookmarksModalComponent } from '../_modals/bookmarks-modal/bookmarks-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -24,9 +26,10 @@ export type ChapterActionCallback = (chapter: Chapter) => void;
 export class ActionService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
+  private bookmarkModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
-    private readerService: ReaderService, private toastr: ToastrService) { }
+    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -193,6 +196,37 @@ export class ActionService implements OnDestroy {
         callback(chapter);
       }
     });
+  }
+
+
+  openBookmarkModal(chapter: Chapter, callback?: ChapterActionCallback) {
+    if (this.bookmarkModalRef != null) { return; }
+      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
+      this.bookmarkModalRef.componentInstance.entity = chapter;
+      this.bookmarkModalRef.componentInstance.type = 'chapter';
+      this.bookmarkModalRef.closed.subscribe(() => {
+        this.bookmarkModalRef = null;
+      });
+  }
+
+  openSeriesBookmarkModal(series: Series, callback?: SeriesActionCallback) {
+    if (this.bookmarkModalRef != null) { return; }
+      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
+      this.bookmarkModalRef.componentInstance.entity = series;
+      this.bookmarkModalRef.componentInstance.type = 'series';
+      this.bookmarkModalRef.closed.subscribe(() => {
+        this.bookmarkModalRef = null;
+      });
+  }
+
+  openVolumeBookmarkModal(volume: Volume, callback?: SeriesActionCallback) {
+    if (this.bookmarkModalRef != null) { return; }
+      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
+      this.bookmarkModalRef.componentInstance.entity = volume;
+      this.bookmarkModalRef.componentInstance.type = 'volume';
+      this.bookmarkModalRef.closed.subscribe(() => {
+        this.bookmarkModalRef = null;
+      });
   }
 
   

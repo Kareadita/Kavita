@@ -21,15 +21,23 @@ export class ReaderService {
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page});
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page});
   }
 
   unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, pageNum: page});
+    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
   }
 
   getBookmarks(chapterId: number) {
     return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-bookmarks?chapterId=' + chapterId);
+  }
+
+  getBookmarksForVolume(volumeId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-volume-bookmarks?volumeId=' + volumeId);
+  }
+
+  getBookmarksForSeries(seriesId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-series-bookmarks?seriesId=' + seriesId);
   }
 
   getProgress(chapterId: number) {
