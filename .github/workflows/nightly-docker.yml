@@ -1,9 +1,7 @@
 name: Build Nightly Docker
 
 on:
-  push:
-    branches:
-      - 'develop'
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -13,6 +11,8 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: develop
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
