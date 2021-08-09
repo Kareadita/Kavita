@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { DownloadService } from 'src/app/shared/_services/download.service';
@@ -22,6 +21,7 @@ export class ManageSystemComponent implements OnInit {
 
   clearCacheInProgress: boolean = false;
   backupDBInProgress: boolean = false;
+  hasCheckedForUpdate: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private serverService: ServerService, public downloadService: DownloadService) { }
@@ -77,6 +77,13 @@ export class ManageSystemComponent implements OnInit {
     this.serverService.backupDatabase().subscribe(res => {
       this.backupDBInProgress = false;
       this.toastr.success('Database has been backed up');
+    });
+  }
+
+  checkForUpdates() {
+    this.hasCheckedForUpdate = true;
+    this.serverService.checkForUpdate().subscribe(() => { 
+      this.toastr.info('This might take a few minutes. If an update is available, the server will notify you.');
     });
   }
 

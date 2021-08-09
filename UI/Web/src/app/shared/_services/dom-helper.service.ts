@@ -65,7 +65,7 @@ export class DomHelperService {
 			if (tagName === 'A' || tagName === 'AREA') {
                 return (el.attributes.getNamedItem('href') !== '');
             }
-            return !el.attributes.hasOwnProperty('disabled'); // TODO: check for cases when: disabled="true" and disabled="false"
+            return !el.attributes.hasOwnProperty('disabled'); // check for cases when: disabled="true" and disabled="false"
         }
         return false;
 	}

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { LibraryEditorModalComponent } from './_modals/library-editor-modal/library-editor-modal.component';
@@ -40,6 +40,7 @@ import { ManageSystemComponent } from './manage-system/manage-system.component';
     FormsModule,
     NgbNavModule,
     NgbTooltipModule,
+    NgbDropdownModule,
     SharedModule,
   ],
   providers: []

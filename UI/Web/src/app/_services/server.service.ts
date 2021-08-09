@@ -27,4 +27,8 @@ export class ServerService {
   backupDatabase() {
     return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
   }
+
+  checkForUpdate() {
+    return this.httpClient.post(this.baseUrl + 'server/check-update', {});
+  }
 }

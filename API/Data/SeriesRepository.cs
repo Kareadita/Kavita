@@ -334,6 +334,7 @@ namespace API.Data
                 .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsSplitQuery()
                 .AsNoTracking();
 
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);

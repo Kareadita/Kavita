@@ -1,0 +1,15 @@
+<div class="modal-header">
+    <h4 class="modal-title">New Update Available!</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <h5>{{updateData.updateTitle}}</h5>
+    <pre class="update-body" [innerHtml]="updateData.updateBody | safeHtml"></pre>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">Close</button>
+    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" (click)="close()">Download</a>
+</div>

@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.Extensions;
+using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -23,9 +24,10 @@ namespace API.Controllers
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
         private readonly ICacheService _cacheService;
+        private readonly ITaskScheduler _taskScheduler;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService)
+            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService, ITaskScheduler taskScheduler)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
@@ -33,6 +35,7 @@ namespace API.Controllers
             _backupService = backupService;
             _archiveService = archiveService;
             _cacheService = cacheService;
+            _taskScheduler = taskScheduler;
         }
 
         /// <summary>
@@ -99,7 +102,11 @@ namespace API.Controllers
             }
         }
 
-
-
+        [HttpPost("check-update")]
+        public ActionResult CheckForUpdates()
+        {
+            _taskScheduler.CheckForUpdate();
+            return Ok();
+        }
     }
 }

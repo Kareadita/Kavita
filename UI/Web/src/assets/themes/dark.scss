@@ -23,6 +23,11 @@ $dark-item-accent-bg: #292d32;
     color: #4ac694;
   }
 
+  a.btn {
+    color: white;
+  }
+
+
   .accent {
     background-color: $dark-form-background !important;
     color: lightgray !important;
@@ -37,7 +42,7 @@ $dark-item-accent-bg: #292d32;
     }
   }
 
-  .btn-information, .btn-outline-secondary {
+  .btn-information, .btn-outline-secondary, pre {
       color: $dark-text-color;
   }
 

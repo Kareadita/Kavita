@@ -29,10 +29,9 @@ namespace API.Controllers
 
                 return Ok();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e, "Error updating the usage statistics");
-                Console.WriteLine(e);
+                _logger.LogError(ex, "Error updating the usage statistics");
                 throw;
             }
         }

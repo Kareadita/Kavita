@@ -49,7 +49,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
       this.isAdmin = this.accountService.hasAdminRole(this.user);
-      this.libraryService.getLibrariesForMember().subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
         this.libraries = libraries;
         this.isLoading = false;
       });
@@ -81,8 +81,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
     if (series === true || series === false) {
       if (!series) {return;}
     }
-
-    if ((series as Series).pagesRead !== (series as Series).pages && (series as Series).pagesRead !== 0) {
+    // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request
+    const seriesObj = (series as Series);
+    if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
       return;
     }
 
