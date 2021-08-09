@@ -183,7 +183,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If extended settings area is visible. Blocks auto-closing of menu.
    */
   settingsOpen: boolean = false;
-
+  /**
+   * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
+   */
   bookmarks: {[key: string]: number} = {};
 
   private readonly onDestroy = new Subject<void>();
@@ -965,11 +967,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const pageNum = this.pageNum;
     if (this.pageBookmarked) {
       // Remove bookmark
-      this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {
+      this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
         delete this.bookmarks[pageNum];
       });
     } else {
-      this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {
+      this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
         this.bookmarks[pageNum] = 1;
       });
     }

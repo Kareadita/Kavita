@@ -117,11 +117,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Last seen progress part path
    */
   lastSeenScrollPartPath: string = '';
-
-  // Temp hack: Override background color for reader and restore it onDestroy
+  /**
+   * Hack: Override background color for reader and restore it onDestroy
+   */
   originalBodyColor: string | undefined;
-
-
 
   darkModeStyles = `
     *:not(input), *:not(select), *:not(code), *:not(:link), *:not(.ngx-toastr) {
