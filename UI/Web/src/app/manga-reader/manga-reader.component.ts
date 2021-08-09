@@ -191,6 +191,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   
 
+  get pageBookmarked() {
+    //if (this.bookmarks)
+    return false;
+  }
   
 
   get splitIconClass() {

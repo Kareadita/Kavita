@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
-import { Bookmark } from '../_models/bookmark';
 import { Chapter } from '../_models/chapter';
+import { ProgressBookmark } from '../_models/progress-bookmark';
 import { Volume } from '../_models/volume';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class ReaderService {
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getBookmark(chapterId: number) {
-    return this.httpClient.get<Bookmark>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
+    return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
 
   getPageUrl(chapterId: number, page: number) {
@@ -32,7 +32,7 @@ export class ReaderService {
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
+    return this.httpClient.post(this.baseUrl + 'reader/progress', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

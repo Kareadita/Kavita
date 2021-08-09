@@ -72,29 +72,6 @@ namespace API.Controllers
             });
         }
 
-        [HttpGet("get-bookmark")]
-        public async Task<ActionResult<BookmarkDto>> GetBookmark(int chapterId)
-        {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var bookmark = new BookmarkDto()
-            {
-                PageNum = 0,
-                ChapterId = chapterId,
-                VolumeId = 0,
-                SeriesId = 0
-            };
-            if (user.Progresses == null) return Ok(bookmark);
-            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
-
-            if (progress != null)
-            {
-                bookmark.SeriesId = progress.SeriesId;
-                bookmark.VolumeId = progress.VolumeId;
-                bookmark.PageNum = progress.PagesRead;
-                bookmark.BookScrollId = progress.BookScrollId;
-            }
-            return Ok(bookmark);
-        }
 
         [HttpPost("mark-read")]
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
@@ -232,21 +209,45 @@ namespace API.Controllers
             return BadRequest("Could not save progress");
         }
 
-        [HttpPost("bookmark")]
-        public async Task<ActionResult> Bookmark(BookmarkDto bookmarkDto)
+        [HttpGet("get-progress")]
+        public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var progressBookmark = new ProgressDto()
+            {
+                PageNum = 0,
+                ChapterId = chapterId,
+                VolumeId = 0,
+                SeriesId = 0
+            };
+            if (user.Progresses == null) return Ok(progressBookmark);
+            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
+
+            if (progress != null)
+            {
+                progressBookmark.SeriesId = progress.SeriesId;
+                progressBookmark.VolumeId = progress.VolumeId;
+                progressBookmark.PageNum = progress.PagesRead;
+                progressBookmark.BookScrollId = progress.BookScrollId;
+            }
+            return Ok(progressBookmark);
+        }
+
+        [HttpPost("progress")]
+        public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
-            // Don't let user bookmark past total pages.
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
-            if (bookmarkDto.PageNum > chapter.Pages)
+            // Don't let user save past total pages.
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(progressDto.ChapterId);
+            if (progressDto.PageNum > chapter.Pages)
             {
-                bookmarkDto.PageNum = chapter.Pages;
+                progressDto.PageNum = chapter.Pages;
             }
 
-            if (bookmarkDto.PageNum < 0)
+            if (progressDto.PageNum < 0)
             {
-                bookmarkDto.PageNum = 0;
+                progressDto.PageNum = 0;
             }
 
 
@@ -255,26 +256,26 @@ namespace API.Controllers
                 // TODO: Look into creating a progress entry when a new item is added to the DB so we can just look it up and modify it
                user.Progresses ??= new List<AppUserProgress>();
                var userProgress =
-                  user.Progresses.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
+                  user.Progresses.SingleOrDefault(x => x.ChapterId == progressDto.ChapterId && x.AppUserId == user.Id);
 
                if (userProgress == null)
                {
                   user.Progresses.Add(new AppUserProgress
                   {
-                     PagesRead = bookmarkDto.PageNum,
-                     VolumeId = bookmarkDto.VolumeId,
-                     SeriesId = bookmarkDto.SeriesId,
-                     ChapterId = bookmarkDto.ChapterId,
-                     BookScrollId = bookmarkDto.BookScrollId,
+                     PagesRead = progressDto.PageNum,
+                     VolumeId = progressDto.VolumeId,
+                     SeriesId = progressDto.SeriesId,
+                     ChapterId = progressDto.ChapterId,
+                     BookScrollId = progressDto.BookScrollId,
                      LastModified = DateTime.Now
                   });
                }
                else
                {
-                  userProgress.PagesRead = bookmarkDto.PageNum;
-                  userProgress.SeriesId = bookmarkDto.SeriesId;
-                  userProgress.VolumeId = bookmarkDto.VolumeId;
-                  userProgress.BookScrollId = bookmarkDto.BookScrollId;
+                  userProgress.PagesRead = progressDto.PageNum;
+                  userProgress.SeriesId = progressDto.SeriesId;
+                  userProgress.VolumeId = progressDto.VolumeId;
+                  userProgress.BookScrollId = progressDto.BookScrollId;
                   userProgress.LastModified = DateTime.Now;
                }
 

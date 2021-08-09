@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs
 {
-    public class BookmarkDto
+    public class ProgressDto
     {
         public int VolumeId { get; set; }
         public int ChapterId { get; set; }
