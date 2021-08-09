@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
+import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
 import { Volume } from '../_models/volume';
 
@@ -18,6 +19,18 @@ export class ReaderService {
   private originalBodyColor!: string;
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page});
+  }
+
+  unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, pageNum: page});
+  }
+
+  getBookmarks(chapterId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-bookmarks?chapterId=' + chapterId);
+  }
 
   getProgress(chapterId: number) {
     return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);

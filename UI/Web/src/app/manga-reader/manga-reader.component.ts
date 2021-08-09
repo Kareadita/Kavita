@@ -184,6 +184,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   settingsOpen: boolean = false;
 
+  bookmarks: {[key: string]: number} = {};
+
   private readonly onDestroy = new Subject<void>();
 
   
@@ -192,8 +194,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
 
   get pageBookmarked() {
-    //if (this.bookmarks)
-    return false;
+    return this.bookmarks.hasOwnProperty(this.pageNum);
   }
   
 
@@ -353,7 +354,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
-      chapterInfo: this.readerService.getChapterInfo(this.chapterId)
+      chapterInfo: this.readerService.getChapterInfo(this.chapterId),
+      bookmarks: this.readerService.getBookmarks(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
@@ -370,6 +372,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageOptions = newOptions;
 
       this.updateTitle(results.chapterInfo);
+
+      // From bookmarks, create map of pages to make lookup time O(1)
+      this.bookmarks = {};
+      results.bookmarks.forEach(bookmark => {
+        this.bookmarks[bookmark.page] = 1;
+      });
 
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
@@ -948,5 +956,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.generalSettingsForm.get('autoCloseMenu')?.setValue(this.autoCloseMenu);
 
     this.updateForm();
+  }
+
+  /**
+   * Bookmarks the current page for the chapter
+   */
+  bookmarkPage() {
+    const pageNum = this.pageNum;
+    if (this.pageBookmarked) {
+      // Remove bookmark
+      this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {
+        delete this.bookmarks[pageNum];
+      });
+    } else {
+      this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).subscribe(() => {
+        this.bookmarks[pageNum] = 1;
+      });
+    }
+    
   }
 }

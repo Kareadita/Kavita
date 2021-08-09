@@ -294,6 +294,98 @@ namespace API.Controllers
             return BadRequest("Could not save progress");
         }
 
+        [HttpGet("get-bookmarks")]
+        public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+            return Ok(user.Bookmarks.Where(x => x.AppUserId == user.Id && x.ChapterId == chapterId));
+        }
+
+        [HttpPost("bookmark")]
+        public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            // Don't let user save past total pages.
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
+            if (bookmarkDto.Page > chapter.Pages)
+            {
+                bookmarkDto.Page = chapter.Pages;
+            }
+
+            if (bookmarkDto.Page < 0)
+            {
+                bookmarkDto.Page = 0;
+            }
+
+
+            try
+            {
+                user.Bookmarks ??= new List<AppUserBookmark>();
+               var userBookmark =
+                  user.Bookmarks.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id);
+
+               if (userBookmark == null)
+               {
+                  user.Bookmarks.Add(new AppUserBookmark()
+                  {
+                     Page = bookmarkDto.Page,
+                     VolumeId = bookmarkDto.VolumeId,
+                     SeriesId = bookmarkDto.SeriesId,
+                     ChapterId = bookmarkDto.ChapterId,
+                  });
+               }
+               else
+               {
+                   userBookmark.Page = bookmarkDto.Page;
+                   userBookmark.SeriesId = bookmarkDto.SeriesId;
+                   userBookmark.VolumeId = bookmarkDto.VolumeId;
+               }
+
+               _unitOfWork.UserRepository.Update(user);
+
+               if (await _unitOfWork.CommitAsync())
+               {
+                  return Ok();
+               }
+            }
+            catch (Exception)
+            {
+               await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Could not save bookmark");
+        }
+
+        [HttpPost("unbookmark")]
+        public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            if (user.Bookmarks == null) return Ok();
+            try {
+                user.Bookmarks = user.Bookmarks.Where(x =>
+                    x.ChapterId == bookmarkDto.ChapterId
+                    && x.AppUserId == user.Id
+                    && x.Page != bookmarkDto.Page).ToList();
+
+
+                _unitOfWork.UserRepository.Update(user);
+
+                if (await _unitOfWork.CommitAsync())
+                {
+                    return Ok();
+                }
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Could not remove bookmark");
+        }
+
         /// <summary>
         /// Returns the next logical chapter from the series.
         /// </summary>
