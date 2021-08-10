@@ -260,13 +260,43 @@ namespace API.Services.Tasks
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
-           // It is safe to check only first since Parser ensures that a Series only has one type
-           var format = MangaFormat.Unknown;
-           var firstPs = parsedSeries.Keys.DistinctBy(ps => ps.Format).FirstOrDefault();
-           if (firstPs != null) format = firstPs.Format;
-
            var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
-           return existingSeries.Where(es => !es.NameInList(foundSeries) || es.Format != format);
+           return existingSeries.Where(es => !es.NameInList(foundSeries) && !SeriesHasMatchingParserInfoFormat(es, parsedSeries));
+       }
+
+       /// <summary>
+       /// Checks each parser info to see if there is a name match and if so, checks if the format matches the Series object.
+       /// This accounts for if the Series has an Unknown type and if so, considers it matching.
+       /// </summary>
+       /// <param name="series"></param>
+       /// <param name="parsedSeries"></param>
+       /// <returns></returns>
+       private static bool SeriesHasMatchingParserInfoFormat(Series series,
+           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       {
+           var format = MangaFormat.Unknown;
+           foreach (var pSeries in parsedSeries.Keys)
+           {
+               var name = pSeries.Name;
+               var normalizedName = Parser.Parser.Normalize(name);
+
+               if (normalizedName == series.NormalizedName ||
+                   normalizedName == Parser.Parser.Normalize(series.Name) ||
+                   name == series.Name || name == series.LocalizedName ||
+                   name == series.OriginalName ||
+                   normalizedName == Parser.Parser.Normalize(series.OriginalName))
+               {
+                   format = pSeries.Format;
+                   break;
+               }
+           }
+
+           if (series.Format == MangaFormat.Unknown && format != MangaFormat.Unknown)
+           {
+               return true;
+           }
+
+           return format == series.Format;
        }
 
        /// <summary>
