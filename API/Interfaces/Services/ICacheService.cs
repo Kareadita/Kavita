@@ -36,5 +36,6 @@ namespace API.Interfaces.Services
 
         void EnsureCacheDirectory();
         string GetCachedEpubFile(int chapterId, Chapter chapter);
+        public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
     }
 }

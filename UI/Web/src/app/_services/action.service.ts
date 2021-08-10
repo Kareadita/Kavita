@@ -1,7 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
+import { BookmarksModalComponent } from '../_modals/bookmarks-modal/bookmarks-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -24,9 +26,10 @@ export type ChapterActionCallback = (chapter: Chapter) => void;
 export class ActionService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
+  private bookmarkModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
-    private readerService: ReaderService, private toastr: ToastrService) { }
+    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -153,7 +156,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markVolumeAsUnread(seriesId: number, volume: Volume, callback?: VolumeActionCallback) {
-    forkJoin(volume.chapters?.map(chapter => this.readerService.bookmark(seriesId, volume.id, chapter.id, 0))).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+    forkJoin(volume.chapters?.map(chapter => this.readerService.saveProgress(seriesId, volume.id, chapter.id, 0))).pipe(takeUntil(this.onDestroy)).subscribe(results => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Unread');
@@ -170,7 +173,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsRead(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
       this.toastr.success('Marked as Read');
       if (callback) {
@@ -186,7 +189,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.bookmark(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
       this.toastr.success('Marked as unread');
       if (callback) {
@@ -195,5 +198,23 @@ export class ActionService implements OnDestroy {
     });
   }
 
-  
+
+  openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
+    if (this.bookmarkModalRef != null) { return; }
+      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
+      this.bookmarkModalRef.componentInstance.series = series;
+      this.bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.bookmarkModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+      this.bookmarkModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.bookmarkModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+  }
+
 }
