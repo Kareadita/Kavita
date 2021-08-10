@@ -141,7 +141,10 @@ namespace API.Controllers
             // We know that all bookmarks will be for one single seriesId
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
-            return BadRequest("Not Implemented");
+            var files = new List<string>();
+            var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files,
+                $"download_{series.Id}_bookmarks");
+            return File(fileBytes, "application/zip", $"{series.Name} - Bookmarks.zip");
         }
     }
 }
