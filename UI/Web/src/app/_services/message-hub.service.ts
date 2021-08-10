@@ -43,6 +43,9 @@ export class MessageHubService {
       this.updateNotificationModalRef.closed.subscribe(() => {
         this.updateNotificationModalRef = null;
       });
+      this.updateNotificationModalRef.dismissed.subscribe(() => {
+        this.updateNotificationModalRef = null;
+      });
     });
   }
 
