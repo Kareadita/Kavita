@@ -58,7 +58,7 @@ namespace API.Controllers
 
             var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
             if (volume == null) return BadRequest("Could not find Volume");
-            var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapter(chapterId)).First();
+            var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
 
             return Ok(new ChapterInfoDto()

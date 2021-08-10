@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Downloads;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -23,12 +24,14 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly ICacheService _cacheService;
 
-        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService)
+        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
+            _cacheService = cacheService;
         }
 
         [HttpGet("volume-size")]
@@ -41,7 +44,7 @@ namespace API.Controllers
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapter(chapterId);
+            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
             return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
@@ -98,7 +101,7 @@ namespace API.Controllers
         [HttpGet("chapter")]
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapter(chapterId);
+            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
             try
             {
                 if (files.Count == 1)
@@ -140,10 +143,52 @@ namespace API.Controllers
         {
             // We know that all bookmarks will be for one single seriesId
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
+            var totalFilePaths = new List<string>();
 
-            var files = new List<string>();
-            var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files,
-                $"download_{series.Id}_bookmarks");
+            var tempFolder = $"download_{series.Id}_bookmarks";
+            var fullExtractPath = Path.Join(DirectoryService.TempDirectory, tempFolder);
+            // This is the part where we tell archiveService or BookService to process the extraction to the directory we've given for only a selection of page numbers
+            // TODO: Check if a folder starts with seriesId_bookmark at start of API and return early if so. That means 2 APIs are being hit at the same time.
+            DirectoryService.ExistOrCreate(fullExtractPath);
+
+            // NOTE: I Need to do this for each chapter individually, filter, then combine back to some higher level file list.
+            var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
+
+            foreach (var chapterId in uniqueChapterIds)
+            {
+                var chapterExtractPath = Path.Join(fullExtractPath, $"{series.Id}_bookmark_{chapterId}");
+                var chapterPages = downloadBookmarkDto.Bookmarks.Where(b => b.ChapterId == chapterId)
+                    .Select(b => b.Page).ToList();
+                var mangaFiles = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+                switch (series.Format)
+                {
+                    case MangaFormat.Image:
+                        DirectoryService.ExistOrCreate(chapterExtractPath);
+                        _directoryService.CopyFilesToDirectory(mangaFiles.Select(f => f.FilePath), chapterExtractPath, $"{chapterId}_");
+                        break;
+                    case MangaFormat.Archive:
+                    case MangaFormat.Pdf:
+                        _cacheService.ExtractChapterFiles(chapterExtractPath, mangaFiles.ToList());
+                        var originalFiles = _directoryService.GetFilesWithExtension(chapterExtractPath,
+                            Parser.Parser.ImageFileExtensions);
+                        _directoryService.CopyFilesToDirectory(originalFiles, chapterExtractPath, $"{chapterId}_");
+                        DirectoryService.DeleteFiles(originalFiles);
+                        break;
+                    case MangaFormat.Epub:
+                        return BadRequest("Series is not in a valid format.");
+                    default:
+                        return BadRequest("Series is not in a valid format. Please rescan series and try again.");
+                }
+
+                var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
+                // Filter out images that aren't in bookmarks
+                totalFilePaths.AddRange(files.Where((t, i) => chapterPages.Contains(i)));
+            }
+
+
+            var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(totalFilePaths,
+                tempFolder);
+            DirectoryService.ClearAndDeleteDirectory(fullExtractPath);
             return File(fileBytes, "application/zip", $"{series.Name} - Bookmarks.zip");
         }
     }
