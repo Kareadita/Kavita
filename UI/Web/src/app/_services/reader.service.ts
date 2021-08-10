@@ -40,6 +40,10 @@ export class ReaderService {
     return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-series-bookmarks?seriesId=' + seriesId);
   }
 
+  clearBookmarks(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId});
+  }
+
   getProgress(chapterId: number) {
     return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
@@ -48,8 +52,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
-  getChapterInfo(chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  getChapterInfo(seriesId: number, chapterId: number) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&seriesId=' + seriesId);
   }
 
   saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {

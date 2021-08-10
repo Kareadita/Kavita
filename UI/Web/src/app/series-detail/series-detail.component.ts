@@ -151,7 +151,7 @@ export class SeriesDetailComponent implements OnInit {
         this.deleteSeries(series);
         break;
       case(Action.Bookmarks):
-        this.actionService.openSeriesBookmarkModal(series, (series) => {});
+        this.actionService.openBookmarkModal(series, (series) => this.actionInProgress = false);
         break;
       default:
         break;
@@ -172,9 +172,6 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Download):
       this.downloadService.downloadVolume(volume, this.series.name);
         break;
-      case(Action.Bookmarks):
-        this.actionService.openVolumeBookmarkModal(volume, (volume) => {});
-        break;
       default:
         break;
     }
@@ -193,9 +190,6 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Download):
         this.downloadService.downloadChapter(chapter, this.series.name);
-        break;
-      case(Action.Bookmarks):
-        this.actionService.openBookmarkModal(chapter, (chapter) => {});
         break;
       default:
         break;

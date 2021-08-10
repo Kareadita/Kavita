@@ -50,15 +50,16 @@ namespace API.Controllers
         }
 
         [HttpGet("chapter-info")]
-        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
+        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
         {
             // PERF: Write this in one DB call
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
             if (volume == null) return BadRequest("Could not find Volume");
-            var (_, mangaFile) = await _cacheService.GetCachedPagePath(chapter, 0);
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapter(chapterId)).First();
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
 
             return Ok(new ChapterInfoDto()
             {
@@ -298,8 +299,32 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            //if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+            if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
+        }
+
+        [HttpPost("remove-bookmarks")]
+        public async Task<ActionResult> RemoveBookmarks(int seriesId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user.Bookmarks == null) return Ok("Nothing to remove");
+            try
+            {
+                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId == seriesId).ToList();
+                _unitOfWork.UserRepository.Update(user);
+
+                if (await _unitOfWork.CommitAsync())
+                {
+                    return Ok();
+                }
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Could not clear bookmarks");
+
         }
 
         [HttpGet("get-volume-bookmarks")]

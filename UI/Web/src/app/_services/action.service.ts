@@ -199,44 +199,22 @@ export class ActionService implements OnDestroy {
   }
 
 
-  openBookmarkModal(chapter: Chapter, callback?: ChapterActionCallback) {
+  openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
     if (this.bookmarkModalRef != null) { return; }
       this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-      this.bookmarkModalRef.componentInstance.entity = chapter;
-      this.bookmarkModalRef.componentInstance.type = 'chapter';
+      this.bookmarkModalRef.componentInstance.series = series;
       this.bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
         this.bookmarkModalRef = null;
+        if (callback) {
+          callback(series);
+        }
       });
       this.bookmarkModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.bookmarkModalRef = null;
+        if (callback) {
+          callback(series);
+        }
       });
   }
 
-  openSeriesBookmarkModal(series: Series, callback?: SeriesActionCallback) {
-    if (this.bookmarkModalRef != null) { return; }
-      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-      this.bookmarkModalRef.componentInstance.entity = series;
-      this.bookmarkModalRef.componentInstance.type = 'series';
-      this.bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-      });
-      this.bookmarkModalRef.dismissed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-      });
-  }
-
-  openVolumeBookmarkModal(volume: Volume, callback?: SeriesActionCallback) {
-    if (this.bookmarkModalRef != null) { return; }
-      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-      this.bookmarkModalRef.componentInstance.entity = volume;
-      this.bookmarkModalRef.componentInstance.type = 'volume';
-      this.bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-      });
-      this.bookmarkModalRef.dismissed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-      });
-  }
-
-  
 }

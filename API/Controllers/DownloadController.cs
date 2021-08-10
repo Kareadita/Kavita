@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
+using API.DTOs.Downloads;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -133,10 +135,13 @@ namespace API.Controllers
             }
         }
 
-        // [HttpPost]
-        // public async Task<ActionResult> DownloadBookmarkPages()
-        // {
-        //
-        // }
+        [HttpPost("bookmarks")]
+        public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
+        {
+            // We know that all bookmarks will be for one single seriesId
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
+
+            return BadRequest("Not Implemented");
+        }
     }
 }

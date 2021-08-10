@@ -80,6 +80,7 @@ namespace API.Data
         {
             return await _context.AppUserBookmark
                 .Where(x => x.AppUserId == userId && x.SeriesId == seriesId)
+                .OrderBy(x => x.Page)
                 .AsNoTracking()
                 .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -89,6 +90,7 @@ namespace API.Data
         {
             return await _context.AppUserBookmark
                 .Where(x => x.AppUserId == userId && x.VolumeId == volumeId)
+                .OrderBy(x => x.Page)
                 .AsNoTracking()
                 .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -98,6 +100,7 @@ namespace API.Data
         {
             return await _context.AppUserBookmark
                 .Where(x => x.AppUserId == userId && x.ChapterId == chapterId)
+                .OrderBy(x => x.Page)
                 .AsNoTracking()
                 .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();

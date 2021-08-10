@@ -22,7 +22,7 @@ export interface ActionItem<T> {
   title: string;
   action: Action;
   callback: (action: Action, data: T) => void;
-
+  requiresAdmin: boolean;
 }
 
 @Injectable({
@@ -59,43 +59,50 @@ export class ActionFactoryService {
         this.collectionTagActions.push({
           action: Action.Edit,
           title: 'Edit',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Series',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Metadata',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.Edit,
           title: 'Edit',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.libraryActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Library',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.libraryActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Metadata',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
       }
 
@@ -103,13 +110,15 @@ export class ActionFactoryService {
         this.volumeActions.push({
           action: Action.Download,
           title: 'Download',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: false
         });
 
         this.chapterActions.push({
           action: Action.Download,
           title: 'Download',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: false
         });
       }
     });
@@ -151,17 +160,20 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       }, 
       {
         action: Action.Bookmarks,
         title: 'Bookmarks',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       }
     ];
 
@@ -169,17 +181,14 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
-      }, 
-      {
-        action: Action.Bookmarks,
-        title: 'Bookmarks',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
 
@@ -187,30 +196,29 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
-      }, 
-      {
-        action: Action.Bookmarks,
-        title: 'Bookmarks',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
 
     this.volumeActions.push({
       action: Action.Info,
       title: 'Info',
-      callback: this.dummyCallback
+      callback: this.dummyCallback,
+      requiresAdmin: false
     });
 
     this.chapterActions.push({
       action: Action.Info,
       title: 'Info',
-      callback: this.dummyCallback
+      callback: this.dummyCallback,
+      requiresAdmin: false
     });
 
 

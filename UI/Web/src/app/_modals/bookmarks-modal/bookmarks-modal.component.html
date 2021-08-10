@@ -1,4 +1,3 @@
-
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{title}} Bookmarks</h4>
     <button type="button" class="close" aria-label="Close" (click)="close()">
@@ -8,25 +7,20 @@
 <div class="modal-body">
     
     <ul class="list-unstyled">
-        <li class="list-group-item" *ngFor="let bookmark of bookmarks">
-            <!-- <img class="mr-3" style="width: 74px" src="{{imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)}}">
-            <div class="media-body">
-                <h5 class="mt-0 mb-1">
-                </h5>
-                Page {{bookmark.page}}
-            </div> -->
-            Page {{bookmark.page}}
-            <!-- <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="sr-only">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button> -->
+        <li class="list-group-item">
+            There are {{bookmarks.length}} pages bookmarked over {{uniqueChapters}} files.
+        </li>
+        <li class="list-group-item" *ngIf="bookmarks.length === 0">
+            No bookmarks yet
         </li>
     </ul>
-
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="isDownloading || isClearing">
+    <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="(isDownloading || isClearing) && bookmarks.length > 0">
         <span *ngIf="isClearing" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>Clear{{isClearing ? 'ing...' : ''}}</span>
     </button>
-    <button type="button" class="btn btn-secondary" (click)="downloadBookmarks()" [disabled]="isDownloading || isClearing">
+    <button type="button" class="btn btn-secondary" (click)="downloadBookmarks()" [disabled]="(isDownloading || isClearing) && bookmarks.length > 0">
         <span *ngIf="isDownloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>Download{{isDownloading ? 'ing...' : ''}}</span>
     </button>
