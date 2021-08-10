@@ -77,22 +77,38 @@
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="wwwroot\**" />
+    <None Remove="cache\**" />
+    <None Remove="backups\**" />
+    <None Remove="logs\**" />
+    <None Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Interfaces\IMetadataService.cs" />
     <Compile Remove="obj\**" />
     <Compile Remove="wwwroot\**" />
+    <Compile Remove="cache\**" />
+    <Compile Remove="backups\**" />
+    <Compile Remove="logs\**" />
+    <Compile Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="obj\**" />
     <EmbeddedResource Remove="wwwroot\**" />
+    <EmbeddedResource Remove="cache\**" />
+    <EmbeddedResource Remove="backups\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Remove="obj\**" />
     <Content Remove="wwwroot\**" />
+    <Content Remove="cache\**" />
+    <Content Remove="backups\**" />
+    <Content Remove="logs\**" />
+    <Content Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs;
 using API.DTOs.Downloads;
 using API.Entities;
@@ -25,6 +26,7 @@ namespace API.Controllers
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
+        private readonly NumericComparer _numericComparer;
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService)
         {
@@ -32,6 +34,7 @@ namespace API.Controllers
             _archiveService = archiveService;
             _directoryService = directoryService;
             _cacheService = cacheService;
+            _numericComparer = new NumericComparer();
         }
 
         [HttpGet("volume-size")]
@@ -147,11 +150,13 @@ namespace API.Controllers
 
             var tempFolder = $"download_{series.Id}_bookmarks";
             var fullExtractPath = Path.Join(DirectoryService.TempDirectory, tempFolder);
-            // This is the part where we tell archiveService or BookService to process the extraction to the directory we've given for only a selection of page numbers
-            // TODO: Check if a folder starts with seriesId_bookmark at start of API and return early if so. That means 2 APIs are being hit at the same time.
+            if (new DirectoryInfo(fullExtractPath).Exists)
+            {
+                return BadRequest(
+                    "Server is currently processing this exact download. Please try again in a few minutes.");
+            }
             DirectoryService.ExistOrCreate(fullExtractPath);
 
-            // NOTE: I Need to do this for each chapter individually, filter, then combine back to some higher level file list.
             var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
 
             foreach (var chapterId in uniqueChapterIds)
@@ -182,6 +187,7 @@ namespace API.Controllers
 
                 var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
                 // Filter out images that aren't in bookmarks
+                Array.Sort(files, _numericComparer);
                 totalFilePaths.AddRange(files.Where((t, i) => chapterPages.Contains(i)));
             }
 
