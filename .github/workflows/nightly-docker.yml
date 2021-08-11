@@ -87,9 +87,10 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Notify Discord
-        uses: Sniddl/discord-commits@v1.3
+        uses: rjstone/discord-webhook-notify@v1
         with:
-          webhook: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
-          message: "A new nightly build v${{steps.get-version.outputs.assembly-version}} has been released for docker.\nhttps://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated"
-          embed: '{ "title": "${{ github.event.inputs.title }}", "description": "${{ github.event.inputs.body }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
-
+            severity: info
+            description: ${{steps.get-version.outputs.assembly-version}}
+            details: '${{ github.event.inputs.body }}'
+            text: A new nightly build has been released for docker.
+            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
