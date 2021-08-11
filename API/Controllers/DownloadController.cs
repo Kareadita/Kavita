@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
-using API.DTOs;
 using API.DTOs.Downloads;
 using API.Entities;
 using API.Entities.Enums;
@@ -27,6 +26,7 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly NumericComparer _numericComparer;
+        private const string DefaultContentType = "application/octet-stream"; // "application/zip"
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService)
         {
@@ -62,6 +62,8 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(volumeId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
                 if (files.Count == 1)
@@ -70,7 +72,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_v{volumeId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name} - Volume {volume.Number}.zip");
             }
             catch (KavitaException ex)
             {
@@ -105,6 +107,9 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(chapter.VolumeId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
                 if (files.Count == 1)
@@ -113,7 +118,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_c{chapterId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name} - Chapter {chapter.Number}.zip");
             }
             catch (KavitaException ex)
             {
@@ -125,6 +130,7 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadSeries(int seriesId)
         {
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             try
             {
                 if (files.Count == 1)
@@ -133,7 +139,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_s{seriesId}");
-                return File(fileBytes, "application/zip", Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name}.zip");
             }
             catch (KavitaException ex)
             {
@@ -195,7 +201,7 @@ namespace API.Controllers
             var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(totalFilePaths,
                 tempFolder);
             DirectoryService.ClearAndDeleteDirectory(fullExtractPath);
-            return File(fileBytes, "application/zip", $"{series.Name} - Bookmarks.zip");
+            return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
         }
     }
 }
