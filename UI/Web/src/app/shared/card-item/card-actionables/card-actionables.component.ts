@@ -15,9 +15,15 @@ export class CardActionablesComponent implements OnInit {
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
+  adminActions: ActionItem<any>[] = [];
+  nonAdminActions: ActionItem<any>[] = [];
+
+
   constructor() { }
 
   ngOnInit(): void {
+    this.nonAdminActions = this.actions.filter(item => !item.requiresAdmin);
+    this.adminActions = this.actions.filter(item => item.requiresAdmin);
   }
 
   preventClick(event: any) {
@@ -32,5 +38,8 @@ export class CardActionablesComponent implements OnInit {
       this.actionHandler.emit(action);
     }
   }
+
+  // TODO: Insert hr to separate admin actions
+
 
 }
