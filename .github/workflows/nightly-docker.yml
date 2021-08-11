@@ -78,10 +78,14 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
+      - name: Find Current Pull Request
+        uses: jwalton/gh-find-current-pr@v1.0.2
+        id: findPr
+
       - name: Notify Discord
         uses: Sniddl/discord-commits@v1.3
         with:
           webhook: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
           message: "A new nightly build v${{steps.get-version.outputs.assembly-version}} has been released for docker.\nhttps://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated"
-          embed: '{ "title": "{{ commit.title }}", "description": "{{ commit.description }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
+          embed: '{ "title": "${{ steps.findPr.outputs.title }}", "description": "${{ steps.findPr.outputs.body }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
           last-commit-only: true
