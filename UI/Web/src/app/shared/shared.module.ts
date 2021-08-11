@@ -63,7 +63,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     CardDetailLayoutComponent,
     ShowIfScrollbarDirective,
     A11yClickDirective,
-    SeriesFormatComponent
+    SeriesFormatComponent,
   ],
   providers: [{provide: SAVER, useFactory: getSaver}]
 })
