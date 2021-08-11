@@ -1,5 +1,6 @@
 <div class="card">
-    <div class="overlay" (click)="handleClick()">
+    <div [ngClass]="{'overlay': true, 'with-background': showOverlay}"  (click)="handleClick()">
+      <!-- <span #downloadProgress class="download-overlay"></span> -->
       <img *ngIf="total > 0 || supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
       <img *ngIf="total === 0 && !supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.errorImage" [attr.data-src]="imageUrl" 
@@ -7,9 +8,12 @@
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
         <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
 
-        <app-circular-loader></app-circular-loader>
-        
-        <p><ngb-progressbar *ngIf="download$ | async as download" type="primary" height="15px" [value]="download.progress" [max]="total" [striped]="download.state == 'PENDING'"></ngb-progressbar></p>
+        <span class="download" *ngIf="download$ | async as download">
+          <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
+          <span class="sr-only" role="status">
+            {{download.progress}}% downloaded
+          </span>
+        </span>
       </div>
       <div class="error-banner" *ngIf="total === 0 && !supressArchiveWarning">
         Cannot Read Archive

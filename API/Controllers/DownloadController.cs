@@ -62,6 +62,8 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(volumeId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
                 if (files.Count == 1)
@@ -70,7 +72,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_v{volumeId}");
-                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name} - Volume {volume.Number}.zip");
             }
             catch (KavitaException ex)
             {
@@ -105,6 +107,9 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(chapter.VolumeId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
                 if (files.Count == 1)
@@ -113,7 +118,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_c{chapterId}");
-                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name} - Chapter {chapter.Number}.zip");
             }
             catch (KavitaException ex)
             {
@@ -125,6 +130,7 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadSeries(int seriesId)
         {
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             try
             {
                 if (files.Count == 1)
@@ -133,7 +139,7 @@ namespace API.Controllers
                 }
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_s{seriesId}");
-                return File(fileBytes, DefaultContentType, Path.GetFileNameWithoutExtension(zipPath) + ".zip");
+                return File(fileBytes, DefaultContentType, $"{series.Name}.zip");
             }
             catch (KavitaException ex)
             {

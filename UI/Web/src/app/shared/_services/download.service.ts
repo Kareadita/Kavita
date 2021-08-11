@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { map, take } from 'rxjs/operators';
+import { debounce, debounceTime, map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -27,15 +27,15 @@ export class DownloadService {
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService, @Inject(SAVER) private save: Saver) { }
 
 
-  private downloadSeriesSize(seriesId: number) {
+  public downloadSeriesSize(seriesId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/series-size?seriesId=' + seriesId);
   }
 
-  private downloadVolumeSize(volumeId: number) {
+  public downloadVolumeSize(volumeId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
   }
 
-  private downloadChapterSize(chapterId: number) {
+  public downloadChapterSize(chapterId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
   }
 
@@ -79,31 +79,17 @@ export class DownloadService {
     });
   }
 
-  downloadVolume(volume: Volume, seriesName: string): Observable<Download> {
-    // this.downloadVolumeSize(volume.id).subscribe(async size => {
-    //   if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-    //     return;
-    //   }
-    //   this.downloadVolumeAPI(volume.id).subscribe(resp => {
-    //     this.preformSave(resp.body, this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
-    //   });
-    // });
-    // const filename = seriesName + ' - Volume ' + volume.name;
-    // return this.downloadVolumeAPI(volume.id).pipe(download(blob => saveAs(blob, filename)));
-
+  downloadVolume(volume: Volume): Observable<Download> {
     return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-                      )
-            .pipe(download(blob => {
-              this.save(blob, seriesName + ' - Volume ' + volume.name)
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+              return null;
             }));
+  }
 
-
-    // return this.downloadVolumeSize(volume.id).pipe(async size => {
-    //   if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The volume is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-    //     return;
-    //   }
-    // });
+  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series') {
+    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 
   downloadBookmarks(bookmarks: PageBookmark[], seriesName: string) {
@@ -116,6 +102,16 @@ export class DownloadService {
     const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
     saveAs(blob, filename);
     this.toastr.success('File downloaded successfully: ' + filename);
+  }
+
+  private getFilename(resp: HttpResponse<Blob>, defaultName: string) {
+    const tokens = (resp.headers.get('content-disposition') || '').split(';');
+    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();  
+    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
+      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
+      return defaultName + ext;
+    }
+    return filename;
   }
 
   /**

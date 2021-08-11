@@ -52,6 +52,14 @@ $image-width: 160px;
     }
 }
 
+.download {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 25%;
+    right: 30%;
+}
+
 .not-read-badge {
     position: absolute;
     top: 0px;
@@ -63,10 +71,20 @@ $image-width: 160px;
     border-color: transparent $primary-color transparent transparent;
 }
 
+.download-overlay {
+    max-height: $image-height;
+    height: 0px;
+    background-color: rgba(74,198,148, 0.6);
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 100%;
+}
+
 .overlay {
     height: $image-height;
+    
     &:hover {
-        //background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;
 
         .overlay-item {

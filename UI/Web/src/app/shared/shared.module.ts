@@ -20,7 +20,7 @@ import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
 import { SAVER, getSaver } from './_providers/saver.provider';
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
-
+import { NgCircleProgressModule } from 'ng-circle-progress';
 
 @NgModule({
   declarations: [
@@ -49,7 +49,8 @@ import { CircularLoaderComponent } from './circular-loader/circular-loader.compo
     NgbTooltipModule,
     NgbCollapseModule,
     LazyLoadImageModule,
-    NgbPaginationModule // CardDetailLayoutComponent
+    NgbPaginationModule, // CardDetailLayoutComponent
+    NgCircleProgressModule.forRoot()
   ],
   exports: [
     RegisterMemberComponent,

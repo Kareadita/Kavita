@@ -169,9 +169,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Info):
         this.openViewInfo(volume);
         break;
-      case(Action.Download):
-        this.downloadService.downloadVolume(volume, this.series.name);
-        break;
+      // case(Action.Download):
+      //   this.downloadService.downloadVolume(volume); // Now that this is generic, we can do within card detail
+      //   break;
       default:
         break;
     }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnInit, Renderer2, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-circular-loader',
@@ -10,7 +10,7 @@ export class CircularLoaderComponent implements OnInit {
   @Input() currentValue: number = 0;
   @Input() maxValue: number = 0;
 
-  constructor() { }
+  constructor(private renderer: Renderer2) { }
 
   ngOnInit(): void {
   }
