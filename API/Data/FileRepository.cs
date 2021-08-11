@@ -20,7 +20,7 @@ namespace API.Data
         {
             var fileExtensions = await _dbContext.MangaFile
                 .AsNoTracking()
-                .Select(x => x.FilePath)
+                .Select(x => x.FilePath.ToLower())
                 .Distinct()
                 .ToArrayAsync();
 

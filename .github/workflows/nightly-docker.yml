@@ -2,7 +2,15 @@ name: Build Nightly Docker
 
 on:
   workflow_dispatch:
-
+    inputs:
+      title:
+        description: "PR Title"
+        required: true
+        default: ""
+      body:
+        description: "PR Body"
+        required: true
+        default: ""
 jobs:
   docker:
     name: Building Nightly Docker
@@ -79,10 +87,9 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
+        uses: Sniddl/discord-commits@v1.3
         with:
-            severity: info
-            description: ${{ github.event.body }}
-            details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
-            text: A new nightly build has been released for docker.
-            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
+          webhook: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
+          message: "A new nightly build v${{steps.get-version.outputs.assembly-version}} has been released for docker.\nhttps://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated"
+          embed: '{ "title": "${{ github.event.inputs.title }}", "description": "${{ github.event.inputs.body }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
+          last-commit-only: true

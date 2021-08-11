@@ -4,15 +4,15 @@
         <TargetFramework>net5.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.4.3.11</AssemblyVersion>
+        <AssemblyVersion>0.4.3.17</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-      <PackageReference Include="Sentry" Version="3.8.2" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
+      <PackageReference Include="Sentry" Version="3.8.3" />
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.27.0.35380">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

@@ -150,6 +150,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Delete):
         this.deleteSeries(series);
         break;
+      case(Action.Bookmarks):
+        this.actionService.openBookmarkModal(series, (series) => this.actionInProgress = false);
+        break;
       default:
         break;
     }
