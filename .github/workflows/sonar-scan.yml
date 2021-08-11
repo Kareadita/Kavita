@@ -137,9 +137,9 @@ jobs:
         run: |
           body='${{ steps.findPr.outputs.body }}'
           newBody="${body//$'\n'/}"
-          newBody="${newBody//$'#'/}"
-          echo $newBody
-          echo "::set-output name=BODY::$newBody"
+          newB="${newBody//$'#'/}"
+          echo $newB
+          echo "::set-output name=BODY::$newB"
         id: parse-body      
 
       - name: If Push to Develop, Trigger Docker Stable
