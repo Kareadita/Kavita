@@ -91,4 +91,4 @@ jobs:
         with:
           webhook: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
           message: "A new nightly build v${{steps.get-version.outputs.assembly-version}} has been released for docker.\nhttps://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated"
-          embed: '{ "title": "${{ github.event.inputs.title }}", "description": "${{ github.event.inputs.body }}", "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
+          embed: '{ "title": "{{ commit.title }}", "description": "{{ commit.description }}, "url": "{{ commit.url }}", "author": { "name": "{{ commit.author.name }} ({{ commit.author.username }})", "icon_url": "https://avatars.io/gravatar/{{ commit.author.email }}"} }'
