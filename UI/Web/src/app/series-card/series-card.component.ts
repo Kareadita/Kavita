@@ -10,6 +10,7 @@ import { ImageService } from 'src/app/_services/image.service';
 import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ConfirmService } from '../shared/confirm.service';
+import { ActionService } from '../_services/action.service';
 
 @Component({
   selector: 'app-series-card',
@@ -30,7 +31,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
               private modalService: NgbModal, private confirmService: ConfirmService, 
-              public imageService: ImageService, private actionFactoryService: ActionFactoryService) {
+              public imageService: ImageService, private actionFactoryService: ActionFactoryService,
+              private actionService: ActionService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -67,6 +69,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         break;
       case(Action.Edit):
         this.openEditModal(series);
+        break;
+      case(Action.Bookmarks):
+        this.actionService.openBookmarkModal(series, (series) => {/* No Operation */ });
         break;
       default:
         break;

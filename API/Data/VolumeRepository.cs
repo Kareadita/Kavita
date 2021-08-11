@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Interfaces;
 using AutoMapper;
@@ -37,7 +39,6 @@ namespace API.Data
                 .Include(c => c.Files)
                 .SingleOrDefaultAsync(c => c.Id == chapterId);
         }
-
 
         /// <summary>
         /// Returns Chapters for a volume id.
@@ -79,10 +80,27 @@ namespace API.Data
             return chapter;
         }
 
-        public async Task<IList<MangaFile>> GetFilesForChapter(int chapterId)
+        /// <summary>
+        /// Returns non-tracked files for a given chapterId
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
+        public async Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId)
         {
             return await _context.MangaFile
                 .Where(c => chapterId == c.ChapterId)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        /// <summary>
+        /// Returns non-tracked files for a set of chapterIds
+        /// </summary>
+        /// <param name="chapterIds"></param>
+        /// <returns></returns>
+        public async Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds)
+        {
+            return await _context.MangaFile
+                .Where(c => chapterIds.Contains(c.ChapterId))
                 .AsNoTracking()
                 .ToListAsync();
         }

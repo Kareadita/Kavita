@@ -46,9 +46,10 @@ body {
   font-family: "EBGaramond", "Helvetica Neue", sans-serif;
 }
 
-// .disabled, :disabled {
-//   cursor: not-allowed !important;
-// }
+
+.btn-icon {
+  cursor: pointer;
+}
 
 // Slider handle override
 ::ng-deep {
