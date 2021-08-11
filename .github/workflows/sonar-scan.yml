@@ -136,7 +136,7 @@ jobs:
       - name: Parse PR body
         run: |
           body='${{ steps.findPr.outputs.body }}'
-          newBody=sed '$!s/$/\\n/' body | tr -d '\n'
+          newBody="${body//$'\n'/}"
           echo $newBody
           echo "::set-output name=BODY::$newBody"
         id: parse-body      
