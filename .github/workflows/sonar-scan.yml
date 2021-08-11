@@ -133,12 +133,20 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Parse PR body
+        run: |
+          body='${{ steps.findPr.outputs.body }}'
+          newBody=sed '$!s/$/\\n/' body | tr -d '\n'
+          echo $newBody
+          echo "::set-output name=BODY::$newBody"
+        id: parse-body      
+
       - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build Nightly Docker
           token: ${{ secrets.REPO_GHA_PAT }}
-          inputs: '{ "title": "${{ steps.findPr.outputs.title }}", "body": "${{ steps.findPr.outputs.body }}" }'
+          inputs: '{ "title": "${{ steps.findPr.outputs.title }}", "body": "${{ steps.parse-body.outputs.BODY }}" }'
 
   stable:
     name: Trigger Stable Docker if Main push
