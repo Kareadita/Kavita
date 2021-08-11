@@ -16,11 +16,11 @@ namespace API.Helpers
             CreateMap<Volume, VolumeDto>();
 
             CreateMap<MangaFile, MangaFileDto>();
-            
+
             CreateMap<Chapter, ChapterDto>();
 
             CreateMap<Series, SeriesDto>();
-            
+
             CreateMap<CollectionTag, CollectionTagDto>();
 
             CreateMap<SeriesMetadata, SeriesMetadataDto>();
@@ -29,18 +29,20 @@ namespace API.Helpers
 
             CreateMap<AppUserPreferences, UserPreferencesDto>();
 
+            CreateMap<AppUserBookmark, BookmarkDto>();
+
             CreateMap<Series, SearchResultDto>()
                 .ForMember(dest => dest.SeriesId,
                     opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.LibraryName,
                     opt => opt.MapFrom(src => src.Library.Name));
-            
-            
+
+
             CreateMap<Library, LibraryDto>()
                 .ForMember(dest => dest.Folders,
-                    opt => 
+                    opt =>
                         opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()));
-            
+
             CreateMap<AppUser, MemberDto>()
                 .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
 
