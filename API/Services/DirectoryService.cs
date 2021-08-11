@@ -16,6 +16,9 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
+       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
+       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -247,33 +250,40 @@ namespace API.Services
           }
        }
 
-       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath)
+       /// <summary>
+       /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
+       /// </summary>
+       /// <param name="filePaths"></param>
+       /// <param name="directoryPath"></param>
+       /// <param name="prepend">An optional string to prepend to the target file's name</param>
+       /// <returns></returns>
+       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
        {
-          string currentFile = null;
-          try
-          {
-             foreach (var file in filePaths)
-             {
-                currentFile = file;
-                var fileInfo = new FileInfo(file);
-                if (fileInfo.Exists)
-                {
-                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));
-                }
-                else
-                {
-                   _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
-                }
+           ExistOrCreate(directoryPath);
+           string currentFile = null;
+           try
+           {
+               foreach (var file in filePaths)
+               {
+                   currentFile = file;
+                   var fileInfo = new FileInfo(file);
+                   if (fileInfo.Exists)
+                   {
+                       fileInfo.CopyTo(Path.Join(directoryPath, prepend + fileInfo.Name));
+                   }
+                   else
+                   {
+                       _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
+                   }
+               }
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+               return false;
+           }
 
-             }
-          }
-          catch (Exception ex)
-          {
-             _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
-             return false;
-          }
-
-          return true;
+           return true;
        }
 
        public IEnumerable<string> ListDirectory(string rootPath)
@@ -404,5 +414,23 @@ namespace API.Services
             return fileCount;
         }
 
+       /// <summary>
+       /// Attempts to delete the files passed to it. Swallows exceptions.
+       /// </summary>
+       /// <param name="files">Full path of files to delete</param>
+       public static void DeleteFiles(IEnumerable<string> files)
+       {
+           foreach (var file in files)
+           {
+               try
+               {
+                   new FileInfo(file).Delete();
+               }
+               catch (Exception)
+               {
+                   /* Swallow exception */
+               }
+           }
+       }
     }
 }
