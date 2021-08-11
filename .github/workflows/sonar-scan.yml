@@ -127,11 +127,16 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
 
+      - name: Find Current Pull Request
+        uses: jwalton/gh-find-current-pr@v1.0.2
+        id: findPr
+
       - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build Nightly Docker
           token: ${{ secrets.REPO_GHA_PAT }}
+          inputs: '{ "title": "${{ steps.findPr.outputs.title }}", "body": "${{ steps.findPr.outputs.body }}" }'
 
   stable:
     name: Trigger Stable Docker if Main push
