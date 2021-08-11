@@ -137,6 +137,7 @@ jobs:
         run: |
           body='${{ steps.findPr.outputs.body }}'
           newBody="${body//$'\n'/}"
+          newBody="${body//$'#'/}"
           echo $newBody
           echo "::set-output name=BODY::$newBody"
         id: parse-body      
