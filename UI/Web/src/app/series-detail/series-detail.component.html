@@ -13,12 +13,11 @@
             </div>
             <div class="row no-gutters">
                 <div>
-                    <button class="btn btn-primary" (click)="read()" (mouseover)="showBook = true;" (mouseleave)="showBook = false;" [disabled]="isLoading">
+                    <button class="btn btn-primary" (click)="read()" [disabled]="isLoading">
                         <span>
                             <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
                         </span>
-                        &nbsp;
-                        <span class="read-btn--text">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
                 <div class="ml-2" *ngIf="isAdmin">

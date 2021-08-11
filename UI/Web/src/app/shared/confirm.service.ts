@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { take } from 'rxjs/operators';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { ConfirmConfig } from './confirm-dialog/_models/confirm-config';
 
@@ -36,8 +37,11 @@ export class ConfirmService {
 
       const modalRef = this.modalService.open(ConfirmDialogComponent);
       modalRef.componentInstance.config = config;
-      modalRef.closed.subscribe(result => {
+      modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
+      });
+      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+        return reject(false);
       });
     });
 
@@ -57,8 +61,11 @@ export class ConfirmService {
 
       const modalRef = this.modalService.open(ConfirmDialogComponent);
       modalRef.componentInstance.config = config;
-      modalRef.closed.subscribe(result => {
+      modalRef.closed.pipe(take(1)).subscribe(result => {
         return resolve(result);
+      });
+      modalRef.dismissed.pipe(take(1)).subscribe(() => {
+        return reject(false);
       });
     })
   }
