@@ -130,6 +130,8 @@ jobs:
       - name: Find Current Pull Request
         uses: jwalton/gh-find-current-pr@v1.0.2
         id: findPr
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1
