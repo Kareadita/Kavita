@@ -83,7 +83,7 @@ export class ManageSystemComponent implements OnInit {
   checkForUpdates() {
     this.hasCheckedForUpdate = true;
     this.serverService.checkForUpdate().subscribe(() => { 
-      this.toastr.info('This might take a few minutes. If an update is available, the server will notify you.');
+      this.toastr.info('This might take a few minutes. If an update is available, the server will notify you. You may navigate away from this page.');
     });
   }
 

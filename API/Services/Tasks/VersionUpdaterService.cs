@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using API.Interfaces.Services;
 using API.SignalR;
 using API.SignalR.Presence;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
@@ -32,7 +34,15 @@ namespace API.Services.Tasks
         /// Url of the release on Github
         /// </summary>
         public string Html_Url { get; init; }
+    }
 
+    public class UntrustedCertClientFactory : DefaultHttpClientFactory
+    {
+        public override HttpMessageHandler CreateMessageHandler() {
+            return new HttpClientHandler {
+                ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+            };
+        }
     }
     public class VersionUpdaterService : IVersionUpdaterService
     {
@@ -40,12 +50,16 @@ namespace API.Services.Tasks
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly IPresenceTracker _tracker;
         private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+        public static readonly string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
 
         public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
         {
             _logger = logger;
             _messageHub = messageHub;
             _tracker = tracker;
+
+            FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
         }
 
         /// <summary>
@@ -101,7 +115,7 @@ namespace API.Services.Tasks
 
         private static async Task<GithubReleaseMetadata> GetGithubRelease()
         {
-            var update = await "https://api.github.com/repos/Kareadita/Kavita/releases/latest"
+            var update = await GithubLatestReleasesUrl
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .GetJsonAsync<GithubReleaseMetadata>();
