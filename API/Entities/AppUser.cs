@@ -16,7 +16,8 @@ namespace API.Entities
         public ICollection<AppUserProgress> Progresses { get; set; }
         public ICollection<AppUserRating> Ratings { get; set; }
         public AppUserPreferences UserPreferences { get; set; }
-        
+        public ICollection<AppUserBookmark> Bookmarks { get; set; }
+
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
 

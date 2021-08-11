@@ -39,6 +39,7 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { InProgressComponent } from './in-progress/in-progress.component';
+import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
 
 let sentryProviders: any[] = [];
 
@@ -104,7 +105,8 @@ if (environment.production) {
     RecentlyAddedComponent,
     LibraryCardComponent,
     SeriesCardComponent,
-    InProgressComponent
+    InProgressComponent,
+    BookmarksModalComponent
   ],
   imports: [
     HttpClientModule,
