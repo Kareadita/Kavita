@@ -1,6 +1,5 @@
 <div class="card">
-    <div [ngClass]="{'overlay': true, 'with-background': showOverlay}"  (click)="handleClick()">
-      <!-- <span #downloadProgress class="download-overlay"></span> -->
+    <div class="overlay"  (click)="handleClick()">
       <img *ngIf="total > 0 || supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
       <img *ngIf="total === 0 && !supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.errorImage" [attr.data-src]="imageUrl" 

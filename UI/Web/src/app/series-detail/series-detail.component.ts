@@ -3,7 +3,8 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { asyncScheduler } from 'rxjs';
+import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
@@ -60,6 +61,8 @@ export class SeriesDetailComponent implements OnInit {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
+
+  downloadInProgress: boolean = false;
 
   /**
    * If an action is currently being done, don't let the user kick off another action
@@ -169,9 +172,6 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Info):
         this.openViewInfo(volume);
         break;
-      // case(Action.Download):
-      //   this.downloadService.downloadVolume(volume); // Now that this is generic, we can do within card detail
-      //   break;
       default:
         break;
     }
@@ -187,9 +187,6 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Info):
         this.openViewInfo(chapter);
-        break;
-      case(Action.Download):
-        this.downloadService.downloadChapter(chapter, this.series.name);
         break;
       default:
         break;
@@ -433,6 +430,18 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   downloadSeries() {
-    this.downloadService.downloadSeries(this.series);
+    this.downloadService.downloadSeriesSize(this.series.id).pipe(take(1)).subscribe(async (size) => {
+      const wantToDownload = await this.downloadService.confirmSize(size, 'series');
+      if (!wantToDownload) { return; }
+      this.downloadInProgress = true;
+      this.downloadService.downloadSeries(this.series).pipe(
+        throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
+        takeWhile(val => {
+          return val.state != 'DONE';
+        }),
+        finalize(() => {
+          this.downloadInProgress = false;
+        })).subscribe(() => {/* No Operation */});
+    });
   }
 }

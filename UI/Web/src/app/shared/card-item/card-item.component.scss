@@ -71,16 +71,6 @@ $image-width: 160px;
     border-color: transparent $primary-color transparent transparent;
 }
 
-.download-overlay {
-    max-height: $image-height;
-    height: 0px;
-    background-color: rgba(74,198,148, 0.6);
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    width: 100%;
-}
-
 .overlay {
     height: $image-height;
     

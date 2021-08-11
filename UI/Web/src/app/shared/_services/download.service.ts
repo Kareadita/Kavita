@@ -39,44 +39,33 @@ export class DownloadService {
     return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
   }
 
-  private downloadSeriesAPI(seriesId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + seriesId, {observe: 'response', responseType: 'blob' as 'text'});
-  }
-
-  private downloadVolumeAPI(volumeId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {observe: 'events', responseType: 'blob', reportProgress: true});
-  }
-
-  private downloadChapterAPI(chapterId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapterId, {observe: 'response', responseType: 'blob' as 'text'});
-  }
-
   downloadLogs() {
-    this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
-      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
-    });
+    // this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
+    //   this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
+    // });
+
+    return this.httpClient.get(this.baseUrl + 'server/logs',
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
+
   }
 
   downloadSeries(series: Series) {
-    this.downloadSeriesSize(series.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The series is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadSeriesAPI(series.id).subscribe(resp => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, series.name));
-      });
-    });
+    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
-  downloadChapter(chapter: Chapter, seriesName: string) {
-    this.downloadChapterSize(chapter.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadChapterAPI(chapter.id).subscribe((resp: HttpResponse<string>) => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Chapter ' + chapter.number));
-      });
-    });
+  downloadChapter(chapter: Chapter) {
+    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
   downloadVolume(volume: Volume): Observable<Download> {
@@ -84,7 +73,6 @@ export class DownloadService {
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(debounceTime(300), download((blob, filename) => {
               this.save(blob, filename)
-              return null;
             }));
   }
 
@@ -92,10 +80,12 @@ export class DownloadService {
     return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 
-  downloadBookmarks(bookmarks: PageBookmark[], seriesName: string) {
-    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks}, {observe: 'response', responseType: 'blob' as 'text'}).pipe(take(1), map(resp => {
-      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName));
-    }));
+  downloadBookmarks(bookmarks: PageBookmark[]) {
+    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks},
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
   private preformSave(res: string, filename: string) {
@@ -104,15 +94,6 @@ export class DownloadService {
     this.toastr.success('File downloaded successfully: ' + filename);
   }
 
-  private getFilename(resp: HttpResponse<Blob>, defaultName: string) {
-    const tokens = (resp.headers.get('content-disposition') || '').split(';');
-    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();  
-    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
-      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
-      return defaultName + ext;
-    }
-    return filename;
-  }
 
   /**
    * Attempts to parse out the filename from Content-Disposition header. 

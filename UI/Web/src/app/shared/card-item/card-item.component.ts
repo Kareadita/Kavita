@@ -1,6 +1,7 @@
-import { Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { asyncScheduler, Observable, Subject } from 'rxjs';
-import { debounceTime, finalize, take, takeUntil, takeWhile, tap, throttleTime } from 'rxjs/operators';
+import { finalize, take, takeUntil, takeWhile, throttleTime } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -35,8 +36,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   format: MangaFormat = MangaFormat.UNKNOWN;
 
   download$: Observable<Download> | null = null;
-  showOverlay: boolean = false;
-  //@ViewChild('downloadProgress', {static: false}) downloadElemRef!: ElementRef<HTMLSpanElement>;
+  downloadInProgress: boolean = false;
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -46,7 +46,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageSerivce: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private renderer: Renderer2) {}
+    private toastr: ToastrService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -85,40 +85,69 @@ export class CardItemComponent implements OnInit, OnDestroy {
   }
 
   performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action.action, this.entity);
-    }
-
     if (action.action == Action.Download) {
-      //action.disabled = true;
-      if (this.entity.hasOwnProperty('chapters')) {
-        const volume = (this.entity as Volume);
+      if (this.downloadInProgress === true) {
+        this.toastr.info('Download is already in progress. Please wait.');
+        return;
+      }
+      
+      if (this.utilityService.isVolume(this.entity)) {
+        const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.downloadVolumeSize(volume.id).pipe(take(1)).subscribe(async (size) => {
           const wantToDownload = await this.downloadService.confirmSize(size, 'volume');
           if (!wantToDownload) { return; }
-
-          // Move debounce somewhere so it doesn't affect values in between: debounceTime(300),
+          this.downloadInProgress = true;
           this.download$ = this.downloadService.downloadVolume(volume).pipe(
             throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
             takeWhile(val => {
               return val.state != 'DONE';
             }),
-            tap(val => {
-              console.log(val.progress);
-              this.showOverlay = true;
-              //this.renderer.setStyle(this.downloadElemRef.nativeElement, 'height', val.progress + 'px');
+            finalize(() => {
+              this.download$ = null;
+              this.downloadInProgress = false;
+            }));
+        });
+      } else if (this.utilityService.isChapter(this.entity)) {
+        const chapter = this.utilityService.asChapter(this.entity);
+        this.downloadService.downloadChapterSize(chapter.id).pipe(take(1)).subscribe(async (size) => {
+          const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
+          if (!wantToDownload) { return; }
+          this.downloadInProgress = true;
+          this.download$ = this.downloadService.downloadChapter(chapter).pipe(
+            throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
+            takeWhile(val => {
+              return val.state != 'DONE';
             }),
             finalize(() => {
               this.download$ = null;
-              this.showOverlay = false;
-              //this.renderer.setStyle(this.downloadElemRef.nativeElement, 'height', 0 + 'px');
-            })
-            );
+              this.downloadInProgress = false;
+            }));
+        });
+      } else if (this.utilityService.isSeries(this.entity)) {
+        const series = this.utilityService.asSeries(this.entity);
+        this.downloadService.downloadSeriesSize(series.id).pipe(take(1)).subscribe(async (size) => {
+          const wantToDownload = await this.downloadService.confirmSize(size, 'series');
+          if (!wantToDownload) { return; }
+          this.downloadInProgress = true;
+          this.download$ = this.downloadService.downloadSeries(series).pipe(
+            throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
+            takeWhile(val => {
+              return val.state != 'DONE';
+            }),
+            finalize(() => {
+              this.download$ = null;
+              this.downloadInProgress = false;
+            }));
         });
       }
-      
+      return; // Don't propagate the download from a card
+    }
+
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, this.entity);
     }
   }
+
 
   isPromoted() {
     const tag = this.entity as CollectionTag;
