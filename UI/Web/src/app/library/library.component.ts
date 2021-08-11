@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { take, takeUntil } from 'rxjs/operators';
 import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
@@ -20,7 +21,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './library.component.html',
   styleUrls: ['./library.component.scss']
 })
-export class LibraryComponent implements OnInit {
+export class LibraryComponent implements OnInit, OnDestroy {
 
   user: User | undefined;
   libraries: Library[] = [];
@@ -32,6 +33,8 @@ export class LibraryComponent implements OnInit {
   continueReading: InProgressChapter[] = [];
   collectionTags: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
+
+  private readonly onDestroy = new Subject<void>();
 
   seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
 
@@ -46,7 +49,7 @@ export class LibraryComponent implements OnInit {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
       this.isAdmin = this.accountService.hasAdminRole(this.user);
-      this.libraryService.getLibrariesForMember().subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
         this.libraries = libraries;
         this.isLoading = false;
       });
@@ -57,13 +60,18 @@ export class LibraryComponent implements OnInit {
     this.reloadSeries();
   }
 
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+
   reloadSeries() {
-    this.seriesService.getRecentlyAdded(0, 0, 20).subscribe(updatedSeries => {
+    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyAdded = updatedSeries.result;
     });
 
-    this.seriesService.getInProgress().subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries;
+    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+      this.inProgress = updatedSeries.result;
     });
 
     this.reloadTags();
@@ -73,20 +81,21 @@ export class LibraryComponent implements OnInit {
     if (series === true || series === false) {
       if (!series) {return;}
     }
-
-    if ((series as Series).pagesRead !== (series as Series).pages && (series as Series).pagesRead !== 0) {
+    // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request
+    const seriesObj = (series as Series);
+    if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
       return;
     }
 
-    this.seriesService.getInProgress().subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries;
+    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+      this.inProgress = updatedSeries.result;
     });
     
     this.reloadTags();
   }
 
   reloadTags() {
-    this.collectionService.allTags().subscribe(tags => {
+    this.collectionService.allTags().pipe(takeUntil(this.onDestroy)).subscribe(tags => {
       this.collectionTags = tags;
     });
   }
@@ -96,7 +105,9 @@ export class LibraryComponent implements OnInit {
       this.router.navigate(['collections']);
     } else if (sectionTitle.toLowerCase() === 'recently added') {
       this.router.navigate(['recently-added']);
-    }
+    } else if (sectionTitle.toLowerCase() === 'in progress') {
+      this.router.navigate(['in-progress']);
+    } 
   }
 
   loadCollection(item: CollectionTag) {

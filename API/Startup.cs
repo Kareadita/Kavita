@@ -5,6 +5,7 @@ using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.HostedServices;
+using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Kavita.Common;
@@ -105,6 +106,7 @@ namespace API
                 app.UseCors(policy => policy
                     .AllowAnyHeader()
                     .AllowAnyMethod()
+                    .AllowCredentials() // For SignalR token query param
                     .WithOrigins("http://localhost:4200")
                     .WithExposedHeaders("Content-Disposition", "Pagination"));
             }
@@ -145,6 +147,8 @@ namespace API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<MessageHub>("hubs/messages");
+                endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });

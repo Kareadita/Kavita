@@ -117,7 +117,8 @@ namespace API.Services
         {
             var result = entryFullNames
                 .FirstOrDefault(x => !Path.EndsInDirectorySeparator(x) && !Parser.Parser.HasBlacklistedFolderInPath(x)
-                       && Parser.Parser.IsCoverImage(x));
+                       && Parser.Parser.IsCoverImage(x)
+                       && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -131,7 +132,8 @@ namespace API.Services
         {
             var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
                 .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
-                                     && Parser.Parser.IsImage(x));
+                                     && Parser.Parser.IsImage(x)
+                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -222,17 +224,16 @@ namespace API.Services
 
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
-            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
-            var tempLocation = Path.Join(tempDirectory, $"{tempFolder}_{dateString}");
+            var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
             DirectoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
 
-            var zipPath = Path.Join(tempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            var zipPath = Path.Join(DirectoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
                 ZipFile.CreateFromDirectory(tempLocation, zipPath);
@@ -295,7 +296,11 @@ namespace API.Services
         {
             foreach (var entry in entries)
             {
-                if (Path.GetFileNameWithoutExtension(entry.Key).ToLower().EndsWith("comicinfo") && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key) && Parser.Parser.IsXml(entry.Key))
+                var filename = Path.GetFileNameWithoutExtension(entry.Key).ToLower();
+                if (filename.EndsWith("comicinfo")
+                    && !filename.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
+                    && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key)
+                    && Parser.Parser.IsXml(entry.Key))
                 {
                     using var ms = StreamManager.GetStream();
                     entry.WriteTo(ms);
@@ -328,7 +333,10 @@ namespace API.Services
                     {
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName) &&  Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo" && Parser.Parser.IsXml(x.FullName));
+                        var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
+                                                                         && Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo"
+                                                                         && !Path.GetFileNameWithoutExtension(x.Name).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
+                                                                         && Parser.Parser.IsXml(x.FullName));
                         if (entry != null)
                         {
                             using var stream = entry.Open();
@@ -343,6 +351,7 @@ namespace API.Services
                         using var archive = ArchiveFactory.Open(archivePath);
                         info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
+                                                                               && !Path.GetFileNameWithoutExtension(entry.Key).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
                         break;
                     }

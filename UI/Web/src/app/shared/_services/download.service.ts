@@ -7,6 +7,8 @@ import { saveAs } from 'file-saver';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
+import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -83,6 +85,12 @@ export class DownloadService {
         this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
       });
     });
+  }
+
+  downloadBookmarks(bookmarks: PageBookmark[], seriesName: string) {
+    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks}, {observe: 'response', responseType: 'blob' as 'text'}).pipe(take(1), map(resp => {
+      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName));
+    }));
   }
 
   private preformSave(res: string, filename: string) {

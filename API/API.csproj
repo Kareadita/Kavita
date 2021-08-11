@@ -33,33 +33,37 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="Docnet.Core" Version="2.3.1" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
-    <PackageReference Include="Hangfire" Version="1.7.20" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.20" />
+    <PackageReference Include="Flurl" Version="3.0.2" />
+    <PackageReference Include="Flurl.Http" Version="3.2.0" />
+    <PackageReference Include="Hangfire" Version="1.7.24" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.24" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.32" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.35" />
+    <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.1.3" />
     <PackageReference Include="NetVips" Version="2.0.1" />
     <PackageReference Include="NetVips.Native" Version="8.11.0" />
-    <PackageReference Include="NReco.Logging.File" Version="1.1.1" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.8.2" />
+    <PackageReference Include="NReco.Logging.File" Version="1.1.2" />
+    <PackageReference Include="Sentry.AspNetCore" Version="3.8.3" />
     <PackageReference Include="SharpCompress" Version="0.28.3" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.26.0.34506">
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.27.0.35380">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.0" />
     <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>
 
@@ -73,22 +77,38 @@
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
     <None Remove="wwwroot\**" />
+    <None Remove="cache\**" />
+    <None Remove="backups\**" />
+    <None Remove="logs\**" />
+    <None Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Interfaces\IMetadataService.cs" />
     <Compile Remove="obj\**" />
     <Compile Remove="wwwroot\**" />
+    <Compile Remove="cache\**" />
+    <Compile Remove="backups\**" />
+    <Compile Remove="logs\**" />
+    <Compile Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="obj\**" />
     <EmbeddedResource Remove="wwwroot\**" />
+    <EmbeddedResource Remove="cache\**" />
+    <EmbeddedResource Remove="backups\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Remove="obj\**" />
     <Content Remove="wwwroot\**" />
+    <Content Remove="cache\**" />
+    <Content Remove="backups\**" />
+    <Content Remove="logs\**" />
+    <Content Remove="temp\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -213,6 +233,10 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Drawing.Common" />
   </ItemGroup>
 
 </Project>

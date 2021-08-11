@@ -8,10 +8,7 @@
 
 @import '~swiper/swiper.scss';
 
-// Custom animation for ng-lazyload-image
-img.ng-lazyloaded {
-  animation: fadein .5s;
-}
+
 @keyframes fadein {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -49,9 +46,10 @@ body {
   font-family: "EBGaramond", "Helvetica Neue", sans-serif;
 }
 
-// .disabled, :disabled {
-//   cursor: not-allowed !important;
-// }
+
+.btn-icon {
+  cursor: pointer;
+}
 
 // Slider handle override
 ::ng-deep {
@@ -113,4 +111,10 @@ body {
   .not-phone-hidden {
     display: none;
   }
+}
+
+// Debug styles
+.redlines * {
+  outline: 1px solid red;
+  outline-offset: -1px;
 }

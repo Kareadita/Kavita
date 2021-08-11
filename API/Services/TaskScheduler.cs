@@ -21,13 +21,14 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
 
         private readonly IStatsService _statsService;
+        private readonly IVersionUpdaterService _versionUpdaterService;
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-            ICleanupService cleanupService, IStatsService statsService)
+            ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -37,6 +38,7 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
             _statsService = statsService;
+            _versionUpdaterService = versionUpdaterService;
         }
 
         public void ScheduleTasks()
@@ -97,6 +99,16 @@ namespace API.Services
 
         #endregion
 
+        #region UpdateTasks
+
+        public void ScheduleUpdaterTasks()
+        {
+            _logger.LogInformation("Scheduling Auto-Update tasks");
+            RecurringJob.AddOrUpdate("check-updates", () => _versionUpdaterService.CheckForUpdate(), Cron.Daily);
+
+        }
+        #endregion
+
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
@@ -137,6 +149,11 @@ namespace API.Services
         public void BackupDatabase()
         {
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
+        }
+
+        public void CheckForUpdate()
+        {
+            BackgroundJob.Enqueue(() => _versionUpdaterService.CheckForUpdate());
         }
     }
 }

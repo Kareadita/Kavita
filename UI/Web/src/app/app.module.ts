@@ -22,7 +22,6 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
-import { LazyLoadImageModule} from 'ng-lazyload-image';
 import { CarouselModule } from './carousel/carousel.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
@@ -40,12 +39,13 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { APP_BASE_HREF } from '@angular/common';
+import { InProgressComponent } from './in-progress/in-progress.component';
+import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
 
 // let appBase = '/';
 // if (window.hasOwnProperty('_app_base')) {
 //   appBase = window[<any>'_app_base'];
 // }
-
 
 
 let sentryProviders: any[] = [];
@@ -111,7 +111,9 @@ if (environment.production) {
     EditCollectionTagsComponent,
     RecentlyAddedComponent,
     LibraryCardComponent,
-    SeriesCardComponent
+    SeriesCardComponent,
+    InProgressComponent,
+    BookmarksModalComponent
   ],
   imports: [
     HttpClientModule,
@@ -128,7 +130,6 @@ if (environment.production) {
     NgbAccordionModule, // User Preferences
     NgxSliderModule, // User Preference
     NgbPaginationModule,
-    LazyLoadImageModule,
     SharedModule,
     CarouselModule,
     TypeaheadModule,
@@ -144,7 +145,6 @@ if (environment.production) {
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
-    //{ provide: LAZYLOAD_IMAGE_HOOKS, useClass: ScrollHooks } // Great, but causes flashing after modals close
     Title,
     { provide: APP_BASE_HREF, useValue: ((window as { [key: string]: any })["_app_base"] as string) || '/' },
     ...sentryProviders,

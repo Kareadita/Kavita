@@ -1,9 +1,7 @@
 name: Build Stable Docker
 
 on:
-  push:
-    branches:
-      - 'main'
+  workflow_dispatch:
 
 jobs:
   docker:
@@ -12,6 +10,8 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: main
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
@@ -30,7 +30,7 @@ jobs:
           rsync -a dist/ ../../API/wwwroot/
           
           cd ../ || exit
-
+ 
       - name: Get csproj Version
         uses: naminodarie/get-net-sdk-project-versions-action@v1
         id: get-version
@@ -38,7 +38,15 @@ jobs:
           proj-path: Kavita.Common/Kavita.Common.csproj
 
       - name: Echo csproj version
-        run: echo "${{steps.get-version.outputs.assembly-version}}" 
+        run: echo "${{steps.get-version.outputs.assembly-version}}"
+
+      - name: Parse Version
+        run: |
+          version='${{steps.get-version.outputs.assembly-version}}'
+          newVersion=${version%.*}
+          echo $newVersion
+          echo "::set-output name=VERSION::$newVersion"
+        id: parse-version 
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
@@ -73,7 +81,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:latest
+          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -82,7 +90,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: 
+            description: ${{ github.event.body }}
             details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
             text: A new stable build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}

@@ -38,8 +38,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {
-  }
+  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, public utilityService: UtilityService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -59,6 +58,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   handleClick() {

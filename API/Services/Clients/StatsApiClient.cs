@@ -39,16 +39,12 @@ namespace API.Services.Clients
                     response = responseContent
                 };
 
-                _logger.LogError(e, "The StatsServer did not respond successfully. {Content}", info);
-
-                Console.WriteLine(e);
+                _logger.LogError(e, "KavitaStats did not respond successfully. {Content}", info);
                 throw;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "An error happened during the request to the Stats Server");
-
-                Console.WriteLine(e);
+                _logger.LogError(e, "An error happened during the request to KavitaStats");
                 throw;
             }
         }

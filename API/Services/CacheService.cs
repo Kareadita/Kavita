@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -36,64 +37,107 @@ namespace API.Services
 
         public void EnsureCacheDirectory()
         {
-            if (!DirectoryService.ExistOrCreate(CacheDirectory))
+            if (!DirectoryService.ExistOrCreate(DirectoryService.CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
             }
         }
 
+        /// <summary>
+        /// Returns the full path to the cached epub file. If the file does not exist, will fallback to the original.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="chapter"></param>
+        /// <returns></returns>
+        public string GetCachedEpubFile(int chapterId, Chapter chapter)
+        {
+            var extractPath = GetCachePath(chapterId);
+            var path = Path.Join(extractPath, Path.GetFileName(chapter.Files.First().FilePath));
+            if (!(new FileInfo(path).Exists))
+            {
+                path = chapter.Files.First().FilePath;
+            }
+            return path;
+        }
+
+        /// <summary>
+        /// Caches the files for the given chapter to CacheDirectory
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns>This will always return the Chapter for the chpaterId</returns>
         public async Task<Chapter> Ensure(int chapterId)
         {
             EnsureCacheDirectory();
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            var files = chapter.Files.ToList();
-            var fileCount = files.Count;
             var extractPath = GetCachePath(chapterId);
-            var extraPath = "";
 
-            if (Directory.Exists(extractPath))
+            if (!Directory.Exists(extractPath))
             {
-              return chapter;
+                var files = chapter.Files.ToList();
+                ExtractChapterFiles(extractPath, files);
             }
 
+            return  chapter;
+        }
+
+        /// <summary>
+        /// This is an internal method for cache service for extracting chapter files to disk. The code is structured
+        /// for cache service, but can be re-used (download bookmarks)
+        /// </summary>
+        /// <param name="extractPath"></param>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files)
+        {
+            var removeNonImages = true;
+            var fileCount = files.Count;
+            var extraPath = "";
             var extractDi = new DirectoryInfo(extractPath);
 
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
-              DirectoryService.ExistOrCreate(extractPath);
-              if (files.Count == 1)
-              {
-                  _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
-              }
-              else
-              {
-                  _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath, Parser.Parser.ImageFileExtensions);
-              }
+                DirectoryService.ExistOrCreate(extractPath);
+                if (files.Count == 1)
+                {
+                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                }
+                else
+                {
+                    _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath,
+                        Parser.Parser.ImageFileExtensions);
+                }
 
-              extractDi.Flatten();
-              return chapter;
+                extractDi.Flatten();
             }
 
             foreach (var file in files)
             {
-              if (fileCount > 1)
-              {
-                extraPath = file.Id + string.Empty;
-              }
+                if (fileCount > 1)
+                {
+                    extraPath = file.Id + string.Empty;
+                }
 
-              if (file.Format == MangaFormat.Archive)
-              {
-                _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
-              } else if (file.Format == MangaFormat.Pdf)
-              {
-                  _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
-              }
+                if (file.Format == MangaFormat.Archive)
+                {
+                    _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+                }
+                else if (file.Format == MangaFormat.Pdf)
+                {
+                    _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
+                }
+                else if (file.Format == MangaFormat.Epub)
+                {
+                    removeNonImages = false;
+                    DirectoryService.ExistOrCreate(extractPath);
+                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                }
             }
 
             extractDi.Flatten();
-            extractDi.RemoveNonImages();
-
-            return chapter;
+            if (removeNonImages)
+            {
+                extractDi.RemoveNonImages();
+            }
         }
 
 
@@ -145,7 +189,7 @@ namespace API.Services
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapter(chapter.Id);
+            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapter.Id);
             foreach (var mangaFile in chapterFiles)
             {
                 if (page <= (mangaFile.Pages + pagesSoFar))

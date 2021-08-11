@@ -1,10 +1,16 @@
 name: Build Nightly Docker
 
 on:
-  push:
-    branches:
-      - 'develop'
-
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "PR Title"
+        required: true
+        default: ""
+      body:
+        description: "PR Body"
+        required: true
+        default: ""
 jobs:
   docker:
     name: Building Nightly Docker
@@ -13,6 +19,8 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: develop
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
@@ -28,7 +36,7 @@ jobs:
 
           echo 'Copying back to Kavita wwwroot'
           rsync -a dist/ ../../API/wwwroot/
-          
+
           cd ../ || exit
 
       - name: Get csproj Version
@@ -38,14 +46,14 @@ jobs:
           proj-path: Kavita.Common/Kavita.Common.csproj
 
       - name: Echo csproj version
-        run: echo "${{steps.get-version.outputs.assembly-version}}" 
+        run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x'
       - run: ./monorepo-build.sh
-      
+
       - name: Trigger Sentry workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
@@ -77,12 +85,12 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-        
+
       - name: Notify Discord
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: 
-            details: 'https://hub.docker.com/r/kizaing/kavita/tags?page=1&ordering=last_updated'
+            description: ${{steps.get-version.outputs.assembly-version}}
+            details: '${{ github.event.inputs.body }}'
             text: A new nightly build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
