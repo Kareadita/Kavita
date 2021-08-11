@@ -47,6 +47,10 @@ import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-mod
 //   appBase = window[<any>'_app_base'];
 // }
 
+export function getBaseUrl() {
+  return document.getElementsByTagName('base')[0].href;
+}
+
 
 let sentryProviders: any[] = [];
 
@@ -146,7 +150,7 @@ if (environment.production) {
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
-    { provide: APP_BASE_HREF, useValue: ((window as { [key: string]: any })["_app_base"] as string) || '/' },
+    { provide: APP_BASE_HREF, useFactory: getBaseUrl }, // useValue: ((window as { [key: string]: any })["_app_base"] as string) || '/'
     ...sentryProviders,
   ],
   entryComponents: [],

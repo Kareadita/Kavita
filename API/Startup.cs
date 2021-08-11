@@ -119,15 +119,21 @@ namespace API
 
             app.UseDefaultFiles();
 
+            // && env.IsProduction() removed for testing
+            if (!string.IsNullOrEmpty(Configuration.BaseUrl))
+            {
+                var path = !Configuration.BaseUrl.StartsWith("/")
+                    ? $"/{Configuration.BaseUrl}"
+                    : Configuration.BaseUrl;
+                app.UsePathBase(path);
+            }
+
             app.UseStaticFiles(new StaticFileOptions
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
 
-            if (!string.IsNullOrEmpty(Configuration.BaseUrl) && env.IsProduction())
-            {
-                app.UsePathBase(Configuration.BaseUrl);
-            }
+
 
 
             app.Use(async (context, next) =>
