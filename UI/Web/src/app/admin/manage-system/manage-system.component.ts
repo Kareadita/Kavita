@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { asyncScheduler } from 'rxjs';
+import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
@@ -22,6 +23,7 @@ export class ManageSystemComponent implements OnInit {
   clearCacheInProgress: boolean = false;
   backupDBInProgress: boolean = false;
   hasCheckedForUpdate: boolean = false;
+  downloadLogsInProgress: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private serverService: ServerService, public downloadService: DownloadService) { }
@@ -85,6 +87,18 @@ export class ManageSystemComponent implements OnInit {
     this.serverService.checkForUpdate().subscribe(() => { 
       this.toastr.info('This might take a few minutes. If an update is available, the server will notify you.');
     });
+  }
+
+  downloadLogs() {
+    this.downloadLogsInProgress = true;
+    this.downloadService.downloadLogs().pipe(
+      throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
+      takeWhile(val => {
+        return val.state != 'DONE';
+      }),
+      finalize(() => {
+        this.downloadLogsInProgress = false;
+      })).subscribe(() => {/* No Operation */});
   }
 
 }
