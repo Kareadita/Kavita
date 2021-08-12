@@ -19,29 +19,6 @@ jobs:
         with:
           ref: develop
 
-      - name: Download PR Body
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          workflow: sonar-scan.yml
-          path: .github/
-
-      - name: Get PR body 
-        uses: pCYSl5EDgo/cat@master
-        id: prbody
-        with:
-          path: .github/pr.txt
-
-      - name: Parse PR body
-        run: |
-          body='${{ steps.findPr.outputs.body }}'
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo $body
-          echo "::set-output name=BODY::$body"
-        id: parse-body  
-
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
         with:
