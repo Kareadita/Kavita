@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using API.Extensions;
@@ -47,7 +48,9 @@ namespace API
             services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "API.xml");
+                c.IncludeXmlComments(filePath);
             });
             services.AddResponseCompression(options =>
             {
