@@ -135,7 +135,7 @@ jobs:
 
       - name: Write PR Body
         run: |
-          echo ${{ steps.findPr.outputs.body }} >> .github/pr.txt
+          echo "${{ steps.findPr.outputs.body }}" >> .github/pr.txt
         id: parse-body 
 
       - name: Upload PR Body as Artifact
