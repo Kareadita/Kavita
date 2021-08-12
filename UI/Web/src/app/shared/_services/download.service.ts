@@ -1,5 +1,5 @@
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../confirm.service';
@@ -7,8 +7,11 @@ import { saveAs } from 'file-saver';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
+import { Observable } from 'rxjs';
+import { SAVER, Saver } from '../_providers/saver.provider';
+import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { map, take } from 'rxjs/operators';
+import { debounce, debounceTime, map, take } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -21,76 +24,68 @@ export class DownloadService {
    */
   public SIZE_WARNING = 104_857_600;
 
-  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService) { }
+  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService, @Inject(SAVER) private save: Saver) { }
 
 
-  private downloadSeriesSize(seriesId: number) {
+  public downloadSeriesSize(seriesId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/series-size?seriesId=' + seriesId);
   }
 
-  private downloadVolumeSize(volumeId: number) {
+  public downloadVolumeSize(volumeId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/volume-size?volumeId=' + volumeId);
   }
 
-  private downloadChapterSize(chapterId: number) {
+  public downloadChapterSize(chapterId: number) {
     return this.httpClient.get<number>(this.baseUrl + 'download/chapter-size?chapterId=' + chapterId);
   }
 
-  private downloadSeriesAPI(seriesId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + seriesId, {observe: 'response', responseType: 'blob' as 'text'});
-  }
-
-  private downloadVolumeAPI(volumeId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volumeId, {observe: 'response', responseType: 'blob' as 'text'});
-  }
-
-  private downloadChapterAPI(chapterId: number) {
-    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapterId, {observe: 'response', responseType: 'blob' as 'text'});
-  }
-
   downloadLogs() {
-    this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
-      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
-    });
+    // this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
+    //   this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
+    // });
+
+    return this.httpClient.get(this.baseUrl + 'server/logs',
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
+
   }
 
   downloadSeries(series: Series) {
-    this.downloadSeriesSize(series.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The series is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadSeriesAPI(series.id).subscribe(resp => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, series.name));
-      });
-    });
+    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
-  downloadChapter(chapter: Chapter, seriesName: string) {
-    this.downloadChapterSize(chapter.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadChapterAPI(chapter.id).subscribe((resp: HttpResponse<string>) => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Chapter ' + chapter.number));
-      });
-    });
+  downloadChapter(chapter: Chapter) {
+    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
-  downloadVolume(volume: Volume, seriesName: string) {
-    this.downloadVolumeSize(volume.id).subscribe(async size => {
-      if (size >= this.SIZE_WARNING && !await this.confirmService.confirm('The chapter is ' + this.humanFileSize(size) + '. Are you sure you want to continue?')) {
-        return;
-      }
-      this.downloadVolumeAPI(volume.id).subscribe(resp => {
-        this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName + ' - Volume ' + volume.name));
-      });
-    });
+  downloadVolume(volume: Volume): Observable<Download> {
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
-  downloadBookmarks(bookmarks: PageBookmark[], seriesName: string) {
-    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks}, {observe: 'response', responseType: 'blob' as 'text'}).pipe(take(1), map(resp => {
-      this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, seriesName));
-    }));
+  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series') {
+    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
+  }
+
+  downloadBookmarks(bookmarks: PageBookmark[]) {
+    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks},
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(debounceTime(300), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
   }
 
   private preformSave(res: string, filename: string) {
@@ -98,6 +93,7 @@ export class DownloadService {
     saveAs(blob, filename);
     this.toastr.success('File downloaded successfully: ' + filename);
   }
+
 
   /**
    * Attempts to parse out the filename from Content-Disposition header. 
