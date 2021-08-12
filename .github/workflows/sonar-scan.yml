@@ -135,14 +135,14 @@ jobs:
 
       - name: Write PR Body
         run: |
-          echo "${{ steps.findPr.outputs.body }}" >> .github/pr.txt
+          echo "${{ steps.findPr.outputs.body }}" >> pr.txt
         id: parse-body 
 
       - name: Upload PR Body as Artifact
         uses: actions/upload-artifact@v2
         with:
           name: prbody
-          path: .github/pr.txt
+          path: pr.txt
 
       - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1

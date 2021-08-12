@@ -24,16 +24,16 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: sonar-scan.yml
-          path: .github/
 
       - name: Get PR body 
         uses: pCYSl5EDgo/cat@master
         id: prbody
         with:
-          path: .github/pr.txt
+          path: prbody/pr.txt
 
       - name: Parse PR body
         run: |
+          ls -l
           body='${{ steps.findPr.outputs.body }}'
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
