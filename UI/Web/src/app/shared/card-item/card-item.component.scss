@@ -52,6 +52,14 @@ $image-width: 160px;
     }
 }
 
+.download {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 25%;
+    right: 30%;
+}
+
 .not-read-badge {
     position: absolute;
     top: 0px;
@@ -65,8 +73,8 @@ $image-width: 160px;
 
 .overlay {
     height: $image-height;
+    
     &:hover {
-        //background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;
 
         .overlay-item {

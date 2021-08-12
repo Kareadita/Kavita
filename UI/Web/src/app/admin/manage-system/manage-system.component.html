@@ -16,7 +16,7 @@
               <button ngbDropdownItem (click)="clearCache()" [disabled]="clearCacheInProgress">
                 Clear Cache
               </button>
-              <button ngbDropdownItem (click)="downloadService.downloadLogs()">
+              <button ngbDropdownItem (click)="downloadLogs()" [disabled]="downloadLogsInProgress">
                 Download Logs
               </button>
               <button ngbDropdownItem  (click)="checkForUpdates()" [disabled]="hasCheckedForUpdate">
