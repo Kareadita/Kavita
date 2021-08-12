@@ -133,14 +133,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Write PR body        
-        uses: DamianReeves/write-file-action@v1.0
-        with:
-          path: ${{ env.home }}/.github/pr.txt
-          contents: |
-            body='${{ steps.findPr.outputs.body }}'
-            echo $body
-          write-mode: overwrite
+      - name: Write PR Body
+        run: |
+          echo ${{ steps.findPr.outputs.body }} >> .github/pr.txt
+        id: parse-body 
 
       - name: Upload PR Body as Artifact
         uses: actions/upload-artifact@v2
