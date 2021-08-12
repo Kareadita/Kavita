@@ -25,6 +25,7 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
 import { CarouselModule } from './carousel/carousel.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
+
 import * as Sentry from '@sentry/angular';
 import { environment } from 'src/environments/environment';
 import { version } from 'package.json';
@@ -134,6 +135,7 @@ if (environment.production) {
       countDuplicates: true,
       autoDismiss: true
     }),
+    
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
