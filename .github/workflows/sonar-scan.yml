@@ -134,7 +134,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Write PR body        
-        uses: DamianReeves/write-file-action@latest
+        uses: DamianReeves/write-file-action@v1.0
         with:
           path: ${{ env.home }}/.github/pr.txt
           contents: |
