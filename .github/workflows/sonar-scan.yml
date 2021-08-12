@@ -136,9 +136,12 @@ jobs:
       - name: Parse PR body
         run: |
           body='${{ steps.findPr.outputs.body }}'
-          newBody=$(echo $body | sed ':a;N;$!ba;s/\n/ /g')
-          echo $newBody
-          echo "::set-output name=BODY::$newBody"
+          echo $body
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo $body
+          echo "::set-output name=BODY::$body"
         id: parse-body      
 
       - name: If Push to Develop, Trigger Docker Stable
