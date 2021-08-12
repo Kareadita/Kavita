@@ -7,10 +7,7 @@ on:
         description: "PR Title"
         required: true
         default: ""
-      body:
-        description: "PR Body"
-        required: true
-        default: ""
+
 jobs:
   docker:
     name: Building Nightly Docker
@@ -21,6 +18,29 @@ jobs:
         uses: actions/checkout@v2
         with:
           ref: develop
+
+      - name: Download PR Body
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: sonar-scan.yml
+          path: .github/
+
+      - name: Get PR body 
+        uses: pCYSl5EDgo/cat@master
+        id: prbody
+        with:
+          path: .github/pr.txt
+
+      - name: Parse PR body
+        run: |
+          body='${{ steps.findPr.outputs.body }}'
+          body="${body//'%'/'%25'}"
+          body="${body//$'\n'/'%0A'}"
+          body="${body//$'\r'/'%0D'}"
+          echo $body
+          echo "::set-output name=BODY::$body"
+        id: parse-body  
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
@@ -90,7 +110,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: v${{steps.get-version.outputs.assembly-version}}
-            details: '${{ github.event.inputs.body }}'
+            description: v${{steps.get-version.outputs.assembly-version}} - ${{ github.event.inputs.title }}
+            details: '${{ steps.parse-body.outputs.BODY }}'
             text: A new nightly build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}

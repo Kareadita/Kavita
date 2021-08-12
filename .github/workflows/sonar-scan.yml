@@ -133,23 +133,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Parse PR body
-        run: |
-          body='${{ steps.findPr.outputs.body }}'
-          echo $body
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo $body
-          echo "::set-output name=BODY::$body"
-        id: parse-body      
+      - name: Write PR body        
+        uses: DamianReeves/write-file-action@latest
+        with:
+          path: ${{ env.home }}/.github/pr.txt
+          contents: |
+            body='${{ steps.findPr.outputs.body }}'
+            echo $body
+          write-mode: overwrite
+
+      - name: Upload PR Body as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: prbody
+          path: .github/pr.txt
 
       - name: If Push to Develop, Trigger Docker Stable
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Build Nightly Docker
           token: ${{ secrets.REPO_GHA_PAT }}
-          inputs: '{ "title": "${{ steps.findPr.outputs.title }}", "body": "${{ steps.parse-body.outputs.BODY }}" }'
+          inputs: '{ "title": "${{ steps.findPr.outputs.title }}" }'
 
   stable:
     name: Trigger Stable Docker if Main push
