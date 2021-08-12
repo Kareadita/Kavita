@@ -22,6 +22,9 @@ namespace API.Services
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        /// <summary>
+        /// Width of the Thumbnail generation
+        /// </summary>
         public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
@@ -56,6 +59,11 @@ namespace API.Services
             }
         }
 
+        /// <summary>
+        /// Updates the metadata for a Chapter
+        /// </summary>
+        /// <param name="chapter"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
@@ -66,7 +74,11 @@ namespace API.Services
             }
         }
 
-
+        /// <summary>
+        /// Updates the metadata for a Volume
+        /// </summary>
+        /// <param name="volume"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
             if (volume == null || !ShouldFindCoverImage(volume.CoverImage, forceUpdate)) return;
@@ -89,6 +101,11 @@ namespace API.Services
             }
         }
 
+        /// <summary>
+        /// Updates metadata for Series
+        /// </summary>
+        /// <param name="series"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Series series, bool forceUpdate)
         {
             if (series == null) return;
@@ -140,6 +157,12 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metatdata for a whole library
+        /// </summary>
+        /// <remarks>This can be heavy on memory first run</remarks>
+        /// <param name="libraryId"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
@@ -171,6 +194,11 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metadata for a Series. Will always force updates.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <param name="seriesId"></param>
         public void RefreshMetadataForSeries(int libraryId, int seriesId)
         {
             var sw = Stopwatch.StartNew();

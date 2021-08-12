@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { debounce, debounceTime, map, take } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -40,10 +40,6 @@ export class DownloadService {
   }
 
   downloadLogs() {
-    // this.httpClient.get(this.baseUrl + 'server/logs', {observe: 'response', responseType: 'blob' as 'text'}).subscribe(resp => {
-    //   this.preformSave(resp.body || '', this.getFilenameFromHeader(resp.headers, 'logs'));
-    // });
-
     return this.httpClient.get(this.baseUrl + 'server/logs',
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(debounceTime(300), download((blob, filename) => {
@@ -63,7 +59,7 @@ export class DownloadService {
   downloadChapter(chapter: Chapter) {
     return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => {
+            ).pipe(debounceTime(300), download((blob, filename) => { //NOTE: DO I need debounceTime since I have throttleTime()?
               this.save(blob, filename)
             }));
   }
@@ -86,30 +82,6 @@ export class DownloadService {
             ).pipe(debounceTime(300), download((blob, filename) => {
               this.save(blob, filename)
             }));
-  }
-
-  private preformSave(res: string, filename: string) {
-    const blob = new Blob([res], {type: 'text/plain;charset=utf-8'});
-    saveAs(blob, filename);
-    this.toastr.success('File downloaded successfully: ' + filename);
-  }
-
-
-  /**
-   * Attempts to parse out the filename from Content-Disposition header. 
-   * If it fails, will default to defaultName and add the correct extension. If no extension is found in header, will use zip.
-   * @param headers 
-   * @param defaultName 
-   * @returns 
-   */
-  private getFilenameFromHeader(headers: HttpHeaders, defaultName: string) {
-    const tokens = (headers.get('content-disposition') || '').split(';');
-    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();  
-    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
-      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
-      return defaultName + ext;
-    }
-    return filename;
   }
 
   /**

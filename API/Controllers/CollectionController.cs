@@ -50,6 +50,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="queryString">Search term</param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("search")]
         public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
         {

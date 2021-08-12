@@ -41,6 +41,7 @@
     "ng-circle-progress": "^1.6.0",
     "ng-lazyload-image": "^9.1.0",
     "ng-sidebar": "^9.4.2",
+    "ngx-file-drop": "^11.1.0",
     "ngx-toastr": "^13.2.1",
     "rxjs": "~6.6.0",
     "swiper": "^6.5.8",

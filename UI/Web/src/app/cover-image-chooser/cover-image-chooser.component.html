@@ -1,0 +1,52 @@
+<div class="container-fluid" style="padding-top: 10px">
+    <form [formGroup]="form">
+        <ngx-file-drop (onFileDrop)="dropped($event)" 
+        (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" accept=".png,.jpg,.jpeg" dropZoneClassName="file-upload" contentClassName="file-upload-zone" [directory]="false">
+            <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+
+                <!-- TODO: Figure out how to center this nicely-->
+                <div class="row no-gutters ml-2 mr-2">
+                    <div *ngIf="mode === 'all'">
+                        <a class="col" href="javascript:void(0)" (click)="mode = 'url'">Enter a url</a>
+                        <span class="col">•</span>
+                        <span class="col" href="javascript:void(0)">Drag and drop</span>
+                        <span class="col">•</span>
+                        <a class="col" href="javascript:void(0)" (click)="openFileSelector()">Choose an image</a>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="mode === 'url'">
+                    <div class="row no-gutters">
+                        <div class="input-group col-md-10" style="width: 100%">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="load-image">Add Image</label>
+                            </div>
+                            <input type="text" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';">Load Image</button>
+                            </div>
+                        </div>
+                        <button class="col btn btn-secondary ml-2" href="javascript:void(0)" (click)="mode = 'all'">
+                            <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
+                            Back
+                        </button>
+                    </div>
+                    
+                </ng-container>
+                
+            </ng-template>
+        </ngx-file-drop>
+
+        <ng-template>
+
+        </ng-template>
+    </form>
+
+    <div class="row no-gutters chooser" style="padding-top: 10px">
+        <div class="image-card col-auto {{selectedIndex === idx ? 'selected' : ''}}" *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)">
+            <img crossorigin="anonymous" class="card-img-top" [src]="url.imageUrl" aria-hidden="true" height="230px" width="158px">
+        </div>
+    </div>
+
+</div>
+

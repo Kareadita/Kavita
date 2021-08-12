@@ -24,6 +24,7 @@ import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-serie
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { NgxFileDropModule } from 'ngx-file-drop';
 
 
 import * as Sentry from '@sentry/angular';
@@ -41,6 +42,7 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { SeriesCardComponent } from './series-card/series-card.component';
 import { InProgressComponent } from './in-progress/in-progress.component';
 import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
+import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 
 let sentryProviders: any[] = [];
 
@@ -107,7 +109,8 @@ if (environment.production) {
     LibraryCardComponent,
     SeriesCardComponent,
     InProgressComponent,
-    BookmarksModalComponent
+    BookmarksModalComponent,
+    CoverImageChooserComponent
   ],
   imports: [
     HttpClientModule,
@@ -135,7 +138,7 @@ if (environment.production) {
       countDuplicates: true,
       autoDismiss: true
     }),
-    
+    NgxFileDropModule
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},

@@ -385,7 +385,7 @@ export class SeriesDetailComponent implements OnInit {
   openEditSeriesModal() {
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  scrollable: true, size: 'lg', windowClass: 'scrollable-modal' });
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);

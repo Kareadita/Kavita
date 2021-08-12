@@ -1,0 +1,36 @@
+@import '../../theme/colors';
+$image-height: 230px;
+$image-width: 160px;
+
+.card-img-top {
+    width: $image-width;
+    height: $image-height;
+    max-height: $image-height;
+}
+
+.image-card {
+    margin: 10px;
+    cursor: pointer;
+}
+
+.selected {
+    outline: 5px solid $primary-color;
+    outline-width: medium;
+    outline-offset: -1px;
+}
+
+.file-upload {
+    width: 100%;
+    border: 1px solid $primary-color;
+    //background-image: ; // put a drop zone image down
+    
+}
+
+.file-upload-zone {
+    width: 100%;
+    display: inline-block;
+
+    &:hover {
+        background-color: rgba(74,198,148, 0.6);
+    }
+}
