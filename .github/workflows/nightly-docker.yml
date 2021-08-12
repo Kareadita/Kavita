@@ -90,7 +90,7 @@ jobs:
         uses: rjstone/discord-webhook-notify@v1
         with:
             severity: info
-            description: ${{steps.get-version.outputs.assembly-version}}
+            description: v${{steps.get-version.outputs.assembly-version}}
             details: '${{ github.event.inputs.body }}'
             text: A new nightly build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
