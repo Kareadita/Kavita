@@ -136,11 +136,12 @@ jobs:
       - name: Parse PR body
         run: |
           body='${{ steps.findPr.outputs.body }}'
+          echo $body
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
-          echo -e "$body"
-          echo -e "::set-output name=BODY::$body"
+          echo $body
+          echo "::set-output name=BODY::$body"
         id: parse-body      
 
       - name: If Push to Develop, Trigger Docker Stable
