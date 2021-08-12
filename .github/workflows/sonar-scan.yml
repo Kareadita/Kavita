@@ -137,7 +137,7 @@ jobs:
         uses: DamianReeves/write-file-action@v1.0
         with:
           path: ${{ env.home }}/.github/pr.txt
-            contents: |
+          contents: |
             body='${{ steps.findPr.outputs.body }}'
             echo $body
           write-mode: overwrite
