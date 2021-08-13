@@ -1,7 +1,10 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ImageService } from '../_services/image.service';
 import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 'ngx-file-drop';
+import { KEY_CODES } from '../shared/_services/utility.service';
+import { fromEvent, Subject } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 export interface CoverImage {
   /**
@@ -20,14 +23,20 @@ export interface CoverImage {
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss']
 })
-export class CoverImageChooserComponent implements OnInit {
+export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
   @Input() imageUrls: Array<CoverImage> = [];
   @Output() imageUrlsChange: EventEmitter<Array<CoverImage>> = new EventEmitter<Array<CoverImage>>();
 
+  /**
+   * Should the control give the ability to select an image that emits the reset status for cover image
+   */
   @Input() showReset: boolean = false;
   @Output() resetClicked: EventEmitter<void> = new EventEmitter<void>();
 
+  /**
+   * Emits the selected index. Used usually to check if something other than the default image was selected.
+   */
   @Output() imageSelected: EventEmitter<number> = new EventEmitter<number>();
   /**
    * Emits a base64 encoded image
@@ -41,6 +50,7 @@ export class CoverImageChooserComponent implements OnInit {
   files: NgxFileDropEntry[] = [];
 
   mode: 'file' | 'url' | 'all' = 'all';
+  private readonly onDestroy = new Subject<void>();
 
   constructor(public imageService: ImageService, private fb: FormBuilder) { }
 
@@ -50,6 +60,10 @@ export class CoverImageChooserComponent implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
 
   getBase64Image(img: HTMLImageElement) {
     const canvas = document.createElement("canvas");
@@ -62,7 +76,7 @@ export class CoverImageChooserComponent implements OnInit {
 
     ctx.drawImage(img, 0, 0);
     var dataURL = canvas.toDataURL("image/png");
-    return dataURL; // .split(',')[1] (this can be done in image service)
+    return dataURL;
   }
 
   selectImage(index: number) {
@@ -87,7 +101,6 @@ export class CoverImageChooserComponent implements OnInit {
   }
 
   loadImage() {
-    // TODO: Trigger on pressing enter on input field
     const url = this.form.get('coverImageUrl')?.value.trim();
     if (url && url != '') {
       const img = new Image();
@@ -123,7 +136,6 @@ export class CoverImageChooserComponent implements OnInit {
 
   handleFileImageAdd(e: any) {
     if (e.target == null) return;
-    console.log(e.target.result);
 
     this.imageUrls.push({
       imageUrl: e.target.result,
@@ -137,7 +149,6 @@ export class CoverImageChooserComponent implements OnInit {
 
   handleUrlImageAdd(e: any) {
     if (e.path === null || e.path.length === 0) return;
-    console.log(e.path[0]);
 
     const url = this.getBase64Image(e.path[0]);
     this.imageUrls.push({
@@ -145,9 +156,6 @@ export class CoverImageChooserComponent implements OnInit {
       source: 'Url'
     });
     this.imageUrlsChange.emit(this.imageUrls);
-    //this.selectedIndex += 1;
-    //this.imageSelected.emit(this.selectedIndex); // Auto select newly uploaded image
-    //this.selectedBase64Url.emit(url);
 
     setTimeout(() => {
       // Auto select newly uploaded image and tell parent of new base64 url
@@ -156,16 +164,39 @@ export class CoverImageChooserComponent implements OnInit {
   }
 
   public fileOver(event: any){
-    console.log(event);
   }
 
   public fileLeave(event: any){
-    console.log(event);
   }
 
   reset() {
     this.resetClicked.emit();
     this.selectedIndex = -1;
+  }
+
+  setupEnterHandler() {
+    setTimeout(() => {
+      const elem = document.querySelector('input[id="load-image"]');
+      if (elem == null) return;
+      fromEvent(elem, 'keydown')
+        .pipe(takeWhile(() => this.mode === 'url')).subscribe((event) => {
+          const evt = <KeyboardEvent>event;
+          switch(evt.key) {
+            case KEY_CODES.ENTER:
+            {
+              this.loadImage();
+              break;
+            }
+      
+            case KEY_CODES.ESC_KEY:
+              this.mode = 'all';
+              event.stopPropagation();
+              break;
+            default:
+              break;
+          }
+        });
+    });
   }
 
 }
