@@ -13,7 +13,7 @@ namespace API.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-        
+
         [HttpGet("chapter-cover")]
         public async Task<ActionResult> GetChapterCoverImage(int chapterId)
         {
@@ -22,7 +22,7 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format, $"chapterId");
+            return File(content, "image/" + format, $"{chapterId}");
         }
 
         [HttpGet("volume-cover")]
@@ -33,9 +33,9 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format, $"volumeId");
+            return File(content, "image/" + format, $"{volumeId}");
         }
-        
+
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {
@@ -44,9 +44,9 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format, $"seriesId");
+            return File(content, "image/" + format, $"{seriesId}");
         }
-        
+
         [HttpGet("collection-cover")]
         public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
         {
@@ -55,7 +55,7 @@ namespace API.Controllers
             const string format = "jpeg";
 
             Response.AddCacheHeader(content);
-            return File(content, "image/" + format, $"collectionTagId");
+            return File(content, "image/" + format, $"{collectionTagId}");
         }
     }
 }

@@ -109,6 +109,7 @@ namespace API.Services
         public void UpdateMetadata(Series series, bool forceUpdate)
         {
             if (series == null) return;
+            // BUG: This doesn't always trigger, takes 2 scans to refresh cover image
             if (!series.CoverImageLocked && ShouldFindCoverImage(series.CoverImage, forceUpdate))
             {
                 series.Volumes ??= new List<Volume>();

@@ -154,16 +154,21 @@ namespace API.Controllers
             series.SortName = updateSeries.SortName.Trim();
             series.Summary = updateSeries.Summary.Trim();
 
+            var needsRefreshMetadata = false;
             if (!updateSeries.CoverImageLocked)
             {
                 series.CoverImageLocked = false;
-                _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+                needsRefreshMetadata = true;
             }
 
             _unitOfWork.SeriesRepository.Update(series);
 
             if (await _unitOfWork.CommitAsync())
             {
+                if (needsRefreshMetadata)
+                {
+                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+                }
                 return Ok();
             }
 
