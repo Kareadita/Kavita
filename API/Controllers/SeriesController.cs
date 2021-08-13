@@ -154,6 +154,11 @@ namespace API.Controllers
             series.SortName = updateSeries.SortName.Trim();
             series.Summary = updateSeries.Summary.Trim();
 
+            if (!updateSeries.CoverImageLocked)
+            {
+                series.CoverImageLocked = false;
+            }
+
             _unitOfWork.SeriesRepository.Update(series);
 
             if (await _unitOfWork.CommitAsync())

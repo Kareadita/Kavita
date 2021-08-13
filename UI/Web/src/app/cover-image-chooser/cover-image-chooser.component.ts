@@ -24,6 +24,10 @@ export class CoverImageChooserComponent implements OnInit {
 
   @Input() imageUrls: Array<CoverImage> = [];
   @Output() imageUrlsChange: EventEmitter<Array<CoverImage>> = new EventEmitter<Array<CoverImage>>();
+
+  @Input() showReset: boolean = false;
+  @Output() resetClicked: EventEmitter<void> = new EventEmitter<void>();
+
   @Output() imageSelected: EventEmitter<number> = new EventEmitter<number>();
   /**
    * Emits a base64 encoded image
@@ -34,6 +38,7 @@ export class CoverImageChooserComponent implements OnInit {
 
   selectedIndex: number = 0;
   form!: FormGroup;
+  files: NgxFileDropEntry[] = [];
 
   mode: 'file' | 'url' | 'all' = 'all';
 
@@ -94,7 +99,7 @@ export class CoverImageChooserComponent implements OnInit {
   
 
 
-  public files: NgxFileDropEntry[] = [];
+  
 
   public dropped(files: NgxFileDropEntry[]) {
     this.files = files;
@@ -156,6 +161,11 @@ export class CoverImageChooserComponent implements OnInit {
 
   public fileLeave(event: any){
     console.log(event);
+  }
+
+  reset() {
+    this.resetClicked.emit();
+    this.selectedIndex = -1;
   }
 
 }

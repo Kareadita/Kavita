@@ -46,6 +46,9 @@
         <div class="image-card col-auto {{selectedIndex === idx ? 'selected' : ''}}" *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)">
             <img crossorigin="anonymous" class="card-img-top" [src]="url.imageUrl" aria-hidden="true" height="230px" width="158px">
         </div>
+        <div class="image-card col-auto {{selectedIndex === -1 ? 'selected' : ''}}" *ngIf="showReset" tabindex="0" attr.aria-label="Reset cover image" (click)="reset()">
+            <img crossorigin="anonymous" class="card-img-top" title="Reset Cover Image" [src]="imageService.placeholderImage" aria-hidden="true" height="230px" width="158px">
+        </div>
     </div>
 
 </div>

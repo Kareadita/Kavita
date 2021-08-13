@@ -79,7 +79,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       author: new FormControl('', []),
       artist: new FormControl('', []),
 
-      coverImageIndex: new FormControl(0, [])
+      coverImageIndex: new FormControl(0, []),
+      coverImageLocked: new FormControl(true, []) // We don't care if true, only if false which is triggered by a button
     });
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
@@ -173,7 +174,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   updateSelectedImage(url: string) {
     this.selectedCover = url;
-    console.log(url);
+  }
+
+  handleReset() {
+    this.editSeriesForm.patchValue({
+      coverImageLocked: false
+    });
   }
 
 }
