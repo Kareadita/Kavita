@@ -49,7 +49,7 @@ namespace API.Controllers
                 if (bytes.Length > 0)
                 {
                     series.CoverImage = bytes;
-                    //series.LockedCoverImage = true;
+                    series.CoverImageLocked = true;
                     _unitOfWork.SeriesRepository.Update(series);
                 }
 
