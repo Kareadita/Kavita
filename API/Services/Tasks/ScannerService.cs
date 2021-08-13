@@ -476,7 +476,7 @@ namespace API.Services.Tasks
                };
              }
              default:
-                _logger.LogWarning("[Scanner] Ignoring {Filename}. Non-archives are not supported", info.Filename);
+                _logger.LogWarning("[Scanner] Ignoring {Filename}. File type is not supported", info.Filename);
                 break;
           }
 
