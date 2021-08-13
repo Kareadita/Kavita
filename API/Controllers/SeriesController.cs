@@ -157,6 +157,7 @@ namespace API.Controllers
             if (!updateSeries.CoverImageLocked)
             {
                 series.CoverImageLocked = false;
+                _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
             }
 
             _unitOfWork.SeriesRepository.Update(series);
