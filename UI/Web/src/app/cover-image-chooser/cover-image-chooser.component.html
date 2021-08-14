@@ -1,16 +1,16 @@
-<div class="container-fluid" style="padding-top: 10px">
+<div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
     <form [formGroup]="form">
         <ngx-file-drop (onFileDrop)="dropped($event)" 
         (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" accept=".png,.jpg,.jpeg" [directory]="false" dropZoneClassName="file-upload" contentClassName="file-upload-zone" [directory]="false">
             <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row no-gutters mt-3">
+                <div class="row no-gutters mt-3 pb-3" *ngIf="mode === 'all'">
                     <div class="mx-auto">
                         <div class="row no-gutters mb-3">
                             <i class="fa fa-file-upload mx-auto" style="font-size: 24px;" aria-hidden="true"></i>
                         </div>
                         
-                        <div class="row no-gutters ml-2 mr-2">
-                            <div *ngIf="mode === 'all'" class="mx-auto">
+                        <div class="row no-gutters">
+                            <div class="mx-auto">
                                 <a class="col" style="padding-right:0px" href="javascript:void(0)" (click)="mode = 'url'; setupEnterHandler()"><span class="phone-hidden">Enter a </span>Url</a>
                                 <span class="col" style="padding-right:0px">•</span>
                                 <span class="col" style="padding-right:0px" href="javascript:void(0)">Drag and drop</span>
@@ -23,7 +23,7 @@
                 
 
                 <ng-container *ngIf="mode === 'url'">
-                    <div class="row no-gutters">
+                    <div class="row no-gutters mt-3 pb-3 ml-md-2 mr-md-2">
                         <div class="input-group col-md-10 mr-md-2" style="width: 100%">
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="load-image">Url</label>
@@ -31,7 +31,7 @@
                             <input type="text" autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
-                                    Load<span class="phone-hidden"> Image</span>
+                                    Load
                                 </button>
                             </div>
                         </div>
