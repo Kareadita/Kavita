@@ -7,7 +7,7 @@
 <div class="modal-body">
     
     <ul class="list-unstyled">
-        <li class="list-group-item">
+        <li class="list-group-item" *ngIf="bookmarks.length > 0">
             There are {{bookmarks.length}} pages bookmarked over {{uniqueChapters}} files.
         </li>
         <li class="list-group-item" *ngIf="bookmarks.length === 0">
