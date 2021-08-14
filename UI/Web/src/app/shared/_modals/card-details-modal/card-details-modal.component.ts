@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ChangeCoverImageModalComponent } from 'src/app/shared/_modals/change-cover-image/change-cover-image-modal.component';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -24,6 +25,7 @@ export class CardDetailsModalComponent implements OnInit {
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   formatKeys = Object.keys(MangaFormat);
+
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService) { }
@@ -61,5 +63,17 @@ export class CardDetailsModalComponent implements OnInit {
       return '1';
     }
     return chapter.number;
+  }
+
+  updateCover() {
+    const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
+    modalRef.componentInstance.data = this.data;
+    modalRef.closed.subscribe((closeResult: {success: boolean, coverImageUpdate: boolean}) => {
+      if (closeResult.success) {
+        if (closeResult.coverImageUpdate) {
+          //this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+        }
+      }
+    });
   }
 }

@@ -21,6 +21,7 @@ import { UpdateNotificationModalComponent } from './update-notification/update-n
 import { SAVER, getSaver } from './_providers/saver.provider';
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { ChangeCoverImageModalComponent } from './_modals/change-cover-image/change-cover-image-modal.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     A11yClickDirective,
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
-    CircularLoaderComponent
+    CircularLoaderComponent,
+    ChangeCoverImageModalComponent
   ],
   imports: [
     CommonModule,
@@ -64,6 +66,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     ShowIfScrollbarDirective,
     A11yClickDirective,
     SeriesFormatComponent,
+    ChangeCoverImageModalComponent
   ],
   providers: [{provide: SAVER, useFactory: getSaver}]
 })
