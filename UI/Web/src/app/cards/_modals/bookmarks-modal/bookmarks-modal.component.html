@@ -16,11 +16,11 @@
     </ul>
 </div>
 <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="(isDownloading || isClearing) && bookmarks.length > 0">
+    <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="(isDownloading || isClearing) || bookmarks.length === 0">
         <span *ngIf="isClearing" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>Clear{{isClearing ? 'ing...' : ''}}</span>
     </button>
-    <button type="button" class="btn btn-secondary" (click)="downloadBookmarks()" [disabled]="(isDownloading || isClearing) && bookmarks.length > 0">
+    <button type="button" class="btn btn-secondary" (click)="downloadBookmarks()" [disabled]="(isDownloading || isClearing) || bookmarks.length === 0">
         <span *ngIf="isDownloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>Download{{isDownloading ? 'ing...' : ''}}</span>
     </button>

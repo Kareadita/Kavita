@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
+import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';

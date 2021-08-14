@@ -3,14 +3,14 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { EditSeriesModalComponent } from 'src/app/_modals/edit-series-modal/edit-series-modal.component';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { ConfirmService } from '../shared/confirm.service';
-import { ActionService } from '../_services/action.service';
+import { ConfirmService } from 'src/app/shared/confirm.service';
+import { ActionService } from 'src/app/_services/action.service';
+import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 
 @Component({
   selector: 'app-series-card',

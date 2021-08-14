@@ -7,7 +7,7 @@
         </button>
     </div>
     <div class="modal-body scrollable-modal">
-        <h4 *ngIf="isObjectVolume(data)">Information</h4>
+        <h4 *ngIf="utilityService.isVolume(data)">Information</h4>
 
         <ng-container *ngIf="utilityService.isVolume(data) || utilityService.isChapter(data)">
             <div class="row no-gutters">
@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="row no-gutters">
-                <div class="col" *ngIf="isObjectVolume(data)">
+                <div class="col" *ngIf="utilityService.isVolume(data)">
                     Added: {{(data.created | date: 'MM/dd/yyyy') || '-'}}
                 </div>
                 <div class="col">

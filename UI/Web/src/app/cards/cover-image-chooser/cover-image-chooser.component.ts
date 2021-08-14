@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ImageService } from '../_services/image.service';
-import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 'ngx-file-drop';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { fromEvent, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
+import { ImageService } from 'src/app/_services/image.service';
+import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 
 @Component({
   selector: 'app-cover-image-chooser',

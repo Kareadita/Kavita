@@ -1,12 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ChangeCoverImageModalComponent } from 'src/app/shared/_modals/change-cover-image/change-cover-image-modal.component';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';
 import { ImageService } from 'src/app/_services/image.service';
-import { UtilityService } from '../../_services/utility.service';
+import { ChangeCoverImageModalComponent } from '../change-cover-image/change-cover-image-modal.component';
 
 
 
@@ -31,7 +31,7 @@ export class CardDetailsModalComponent implements OnInit {
     public imageService: ImageService) { }
 
   ngOnInit(): void {
-    this.isChapter = this.isObjectChapter(this.data);
+    this.isChapter = this.utilityService.isChapter(this.data);
 
     if (this.isChapter) {
       this.chapters.push(this.data);
@@ -44,14 +44,6 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapters.forEach((c: Chapter) => {
       c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
     });
-  }
-
-  isObjectChapter(object: any): object is Chapter {
-    return ('files' in object);
-  }
-
-  isObjectVolume(object: any): object is Volume {
-    return !('originalName' in object) && !('files' in object);
   }
 
   close() {
