@@ -19,18 +19,18 @@ $image-width: 160px;
     outline-offset: -1px;
 }
 
-.file-upload {
+ngx-file-drop ::ng-deep > div {
+    // styling for the outer drop box
     width: 100%;
-    border: 1px solid $primary-color;
-    //background-image: ; // put a drop zone image down
-    
-}
+    border: 2px solid $primary-color;
+    border-radius: 20px;
+    height: 100px;
+    margin: auto;
 
-.file-upload-zone {
-    width: 100%;
-    display: inline-block;
+    > div {
+      // styling for the inner box (template)
+      width: 100%;
+      display: inline-block;
 
-    &:hover {
-        background-color: rgba(74,198,148, 0.6);
     }
-}
+  }

@@ -5,6 +5,7 @@ import { NgxFileDropEntry, FileSystemFileEntry, FileSystemDirectoryEntry } from 
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { fromEvent, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 
 export interface CoverImage {
   /**
@@ -52,7 +53,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder) { }
+  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -104,9 +105,14 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     const url = this.form.get('coverImageUrl')?.value.trim();
     if (url && url != '') {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = 'https://upload.wikimedia.org/wikipedia/en/0/0a/Aria_the_Scarlet_Ammo_vol01_Cover.jpg';
+      img.crossOrigin = 'Anonymous';
+      img.src = this.form.get('coverImageUrl')?.value;
       img.onload = (e) => this.handleUrlImageAdd(e);
+      img.onerror = (e) => {
+        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.form.get('coverImageUrl')?.setValue('');  
+      }
+      this.form.get('coverImageUrl')?.setValue('');
     }
   }
   
@@ -148,6 +154,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   }
 
   handleUrlImageAdd(e: any) {
+    console.log(e);
     if (e.path === null || e.path.length === 0) return;
 
     const url = this.getBase64Image(e.path[0]);

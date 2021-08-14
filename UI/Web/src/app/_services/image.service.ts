@@ -10,6 +10,7 @@ export class ImageService {
   baseUrl = environment.apiUrl;
   public placeholderImage = 'assets/images/image-placeholder-min.png';
   public errorImage = 'assets/images/error-placeholder2-min.png';
+  public resetCoverImage = 'assets/images/image-reset-cover-min.png';
 
   constructor(private navSerivce: NavService) {
     this.navSerivce.darkMode$.subscribe(res => {

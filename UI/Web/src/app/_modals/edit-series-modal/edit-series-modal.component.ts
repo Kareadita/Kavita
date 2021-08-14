@@ -80,7 +80,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       artist: new FormControl('', []),
 
       coverImageIndex: new FormControl(0, []),
-      coverImageLocked: new FormControl(true, []) // We don't care if true, only if false which is triggered by a button
+      coverImageLocked: new FormControl(this.series.coverImageLocked, []) // We don't care if true, only if false which is triggered by a button
     });
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
