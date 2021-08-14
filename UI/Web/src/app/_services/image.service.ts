@@ -47,4 +47,17 @@ export class ImageService {
   updateErroredImage(event: any) {
     event.target.src = this.placeholderImage;
   }
+
+  /**
+   * Used to refresh an existing loaded image (lazysizes). If random already attached, will append another number onto it.
+   * @param url Existing request url from ImageService only
+   * @returns Url with a random parameter attached
+   */
+  randomize(url: string) {
+    const r = Math.random() * 100 + 1;
+    if (url.indexOf('&random') >= 0) {
+      return url + 1;
+    }
+    return url + '&random=' + r;
+  }
 }

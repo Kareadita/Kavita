@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChange, SimpleChanges } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler, Observable, Subject } from 'rxjs';
+import { asyncScheduler, Observable, ReplaySubject, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile, throttleTime } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -19,7 +19,7 @@ import { UtilityService } from '../_services/utility.service';
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss']
 })
-export class CardItemComponent implements OnInit, OnDestroy {
+export class CardItemComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() imageUrl = '';
   @Input() title = '';
@@ -62,8 +62,13 @@ export class CardItemComponent implements OnInit, OnDestroy {
       });
     }
     this.format = (this.entity as Series).format;
+  }
 
-
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('changes: ', changes);
+    // if (changes.hasOwnProperty('imageUrl')) {
+    //   //this.imageUrl = this.imageSerivce.randomize(this.imageUrl );
+    // }
   }
 
   ngOnDestroy() {

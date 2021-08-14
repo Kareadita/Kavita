@@ -5,10 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// Responsible for servicing up images stored in the DB
+    /// </summary>
     public class ImageController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
 
+        /// <inheritdoc />
         public ImageController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -36,6 +40,11 @@ namespace API.Controllers
             return File(content, "image/" + format, $"{volumeId}");
         }
 
+        /// <summary>
+        /// Load the cover image for a Series
+        /// </summary>
+        /// <param name="seriesId">Id of Series</param>
+        /// <returns></returns>
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {

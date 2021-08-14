@@ -31,6 +31,7 @@ namespace API.Controllers
         /// <param name="uploadFileDto"></param>
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
+        [DisableRequestSizeLimit]
         [HttpPost("series-url")]
         public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
         {

@@ -61,7 +61,10 @@ export class SeriesDetailComponent implements OnInit {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
-
+  /**
+   * Poster image for the Series
+   */
+  seriesImage: string = '';
   downloadInProgress: boolean = false;
 
   /**
@@ -116,6 +119,7 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
     this.loadSeriesMetadata(seriesId);
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -390,6 +394,10 @@ export class SeriesDetailComponent implements OnInit {
       if (closeResult.success) {
         this.loadSeries(this.series.id);
         this.loadSeriesMetadata(this.series.id);
+        if (closeResult.coverImageUpdate) {
+          // Random triggers a load change without any problems with API
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+        }
       }
     });
   }

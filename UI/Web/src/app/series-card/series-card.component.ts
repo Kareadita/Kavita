@@ -27,6 +27,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   isAdmin = false;
   actions: ActionItem<Series>[] = [];
+  imageUrl: string = '';
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
@@ -42,11 +43,15 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
 
   ngOnInit(): void {
+    if (this.data) {
+      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+    }
   }
 
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
     }
   }
 
@@ -81,9 +86,13 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   openEditModal(data: Series) {
     const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
     modalRef.componentInstance.series = data;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
+        if (closeResult.coverImageUpdate) {
+          this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(closeResult.series.id));
+          console.log('image url: ', this.imageUrl);
+        }
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
           this.reload.emit(true);
