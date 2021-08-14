@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChange, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler, Observable, ReplaySubject, Subject } from 'rxjs';
+import { asyncScheduler, Observable, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile, throttleTime } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -19,7 +19,7 @@ import { UtilityService } from '../_services/utility.service';
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss']
 })
-export class CardItemComponent implements OnInit, OnDestroy, OnChanges {
+export class CardItemComponent implements OnInit, OnDestroy {
 
   @Input() imageUrl = '';
   @Input() title = '';
@@ -44,7 +44,7 @@ export class CardItemComponent implements OnInit, OnDestroy, OnChanges {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, 
+  constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService) {}
 
@@ -62,13 +62,6 @@ export class CardItemComponent implements OnInit, OnDestroy, OnChanges {
       });
     }
     this.format = (this.entity as Series).format;
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    console.log('changes: ', changes);
-    // if (changes.hasOwnProperty('imageUrl')) {
-    //   //this.imageUrl = this.imageSerivce.randomize(this.imageUrl );
-    // }
   }
 
   ngOnDestroy() {

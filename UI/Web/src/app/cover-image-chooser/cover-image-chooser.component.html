@@ -53,7 +53,7 @@
 
     <div class="row no-gutters chooser" style="padding-top: 10px">
         <div class="image-card col-auto {{selectedIndex === idx ? 'selected' : ''}}" *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)">
-            <img class="card-img-top" [src]="url.imageUrl" aria-hidden="true" height="230px" width="158px">
+            <img class="card-img-top" [src]="url" aria-hidden="true" height="230px" width="158px" (error)="imageService.updateErroredImage($event)">
         </div>
         <div class="image-card col-auto {{selectedIndex === -1 ? 'selected' : ''}}" *ngIf="showReset" tabindex="0" attr.aria-label="Reset cover image" (click)="reset()">
             <img class="card-img-top" title="Reset Cover Image" [src]="imageService.resetCoverImage" aria-hidden="true" height="230px" width="158px">

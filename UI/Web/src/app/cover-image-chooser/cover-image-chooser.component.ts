@@ -7,18 +7,6 @@ import { fromEvent, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 
-export interface CoverImage {
-  /**
-   * Url of the image. If source is Url, then this is an external or existing cover image url. If it is File, it is the file handler of the image. 
-   */
-  imageUrl: string;
-  source: 'File' | 'Url';
-  /**
-   * If the source is a File, the processedUrl will be the base64 encoding of the file for rendering to the screen without uploading it first
-   */
-  processedUrl?: string;
-}
-
 @Component({
   selector: 'app-cover-image-chooser',
   templateUrl: './cover-image-chooser.component.html',
@@ -26,8 +14,8 @@ export interface CoverImage {
 })
 export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
-  @Input() imageUrls: Array<CoverImage> = [];
-  @Output() imageUrlsChange: EventEmitter<Array<CoverImage>> = new EventEmitter<Array<CoverImage>>();
+  @Input() imageUrls: Array<string> = [];
+  @Output() imageUrlsChange: EventEmitter<Array<string>> = new EventEmitter<Array<string>>();
 
   /**
    * Should the control give the ability to select an image that emits the reset status for cover image
@@ -84,7 +72,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     if (this.selectedIndex === index) { return; }
     this.selectedIndex = index;
     this.imageSelected.emit(this.selectedIndex);
-    const selector = `.chooser img[src="${this.imageUrls[this.selectedIndex].imageUrl}"]`;
+    const selector = `.chooser img[src="${this.imageUrls[this.selectedIndex]}"]`;
 
     
     const elem = document.querySelector(selector) || document.querySelectorAll('.chooser img.card-img-top')[this.selectedIndex];
@@ -132,10 +120,6 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
           reader.onload = (e) => this.handleFileImageAdd(e);
           reader.readAsDataURL(file);
         });
-      } else {
-        // It was a directory (empty directories are added, otherwise only files)
-        const fileEntry = droppedFile.fileEntry as FileSystemDirectoryEntry;
-        //console.log(droppedFile.relativePath, fileEntry);
       }
     }
   }
@@ -143,10 +127,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   handleFileImageAdd(e: any) {
     if (e.target == null) return;
 
-    this.imageUrls.push({
-      imageUrl: e.target.result,
-      source: 'File'
-    });
+    this.imageUrls.push(e.target.result);
     this.imageUrlsChange.emit(this.imageUrls);
     this.selectedIndex += 1;
     this.imageSelected.emit(this.selectedIndex); // Auto select newly uploaded image
@@ -158,10 +139,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     if (e.path === null || e.path.length === 0) return;
 
     const url = this.getBase64Image(e.path[0]);
-    this.imageUrls.push({
-      imageUrl: url,
-      source: 'Url'
-    });
+    this.imageUrls.push(url);
     this.imageUrlsChange.emit(this.imageUrls);
 
     setTimeout(() => {

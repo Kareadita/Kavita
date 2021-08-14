@@ -3,7 +3,6 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { CoverImage } from 'src/app/cover-image-chooser/cover-image-chooser.component';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
@@ -38,7 +37,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   settings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   tags: CollectionTag[] = [];
   metadata!: SeriesMetadata;
-  imageUrls: Array<CoverImage> = [];
+  imageUrls: Array<string> = [];
   /**
    * Selected Cover for uploading
    */
@@ -54,10 +53,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
               private uploadService: UploadService) { }
 
   ngOnInit(): void {
-    this.imageUrls.push({
-      imageUrl: this.imageService.getSeriesCoverImage(this.series.id),
-      source: 'Url'
-    });
+    // this.imageUrls.push({
+    //   imageUrl: this.imageService.getSeriesCoverImage(this.series.id),
+    //   source: 'Url'
+    // });
+    this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
@@ -80,7 +80,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       artist: new FormControl('', []),
 
       coverImageIndex: new FormControl(0, []),
-      coverImageLocked: new FormControl(this.series.coverImageLocked, []) // We don't care if true, only if false which is triggered by a button
+      coverImageLocked: new FormControl(this.series.coverImageLocked, [])
     });
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
@@ -120,7 +120,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.settings.addIfNonExisting = true;
     this.settings.fetchFn = (filter: string) => this.fetchCollectionTags(filter);
     this.settings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title, promoted: false, coverImage: '', summary: '' };
+      return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.settings.compareFn = (options: CollectionTag[], filter: string) => {
       const f = filter.toLowerCase();
@@ -144,8 +144,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   save() {
-    // TODO: In future (once locking or metadata implemented), do a converstion to updateSeriesDto
-
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
     const apis = [

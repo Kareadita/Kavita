@@ -116,6 +116,13 @@ namespace API.Controllers
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 
+                if (!updateSeriesForTagDto.Tag.CoverImageLocked)
+                {
+                    tag.CoverImageLocked = false;
+                    tag.CoverImage = Array.Empty<byte>();
+                    _unitOfWork.CollectionTagRepository.Update(tag);
+                }
+
                 foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
                 {
                     tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
@@ -127,7 +134,9 @@ namespace API.Controllers
                     _unitOfWork.CollectionTagRepository.Remove(tag);
                 }
 
-                if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+                if (!_unitOfWork.HasChanges()) return Ok("No updates");
+
+                if (await _unitOfWork.CommitAsync())
                 {
                     return Ok("Tag updated");
                 }
