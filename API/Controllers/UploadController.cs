@@ -4,8 +4,8 @@ using API.DTOs.Uploads;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -17,12 +17,14 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IImageService _imageService;
+        private readonly ILogger<UploadController> _logger;
 
         /// <inheritdoc />
-        public UploadController(IUnitOfWork unitOfWork, IImageService imageService)
+        public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -63,6 +65,7 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "There was an issue uploading cover image for Series {Id}", uploadFileDto.Id);
                 await _unitOfWork.RollbackAsync();
             }
 
@@ -107,10 +110,59 @@ namespace API.Controllers
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "There was an issue uploading cover image for Collection Tag {Id}", uploadFileDto.Id);
                 await _unitOfWork.RollbackAsync();
             }
 
-            return BadRequest("Unable to save cover image to Series");
+            return BadRequest("Unable to save cover image to Collection Tag");
+        }
+
+        /// <summary>
+        /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
+        /// </summary>
+        /// <param name="uploadFileDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [DisableRequestSizeLimit]
+        [HttpPost("chapter")]
+        public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
+        {
+            // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+            // See if we can do this all in memory without touching underlying system
+            if (string.IsNullOrEmpty(uploadFileDto.Url))
+            {
+                return BadRequest("You must pass a url to use");
+            }
+
+            try
+            {
+                var bytes = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url);
+
+                if (bytes.Length > 0)
+                {
+                    var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(uploadFileDto.Id);
+                    chapter.CoverImage = bytes;
+                    chapter.CoverImageLocked = true;
+                    _unitOfWork.ChapterRepository.Update(chapter);
+                    var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+                    volume.CoverImage = chapter.CoverImage;
+                    _unitOfWork.VolumeRepository.Update(volume);
+                }
+
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue uploading cover image for Chapter {Id}", uploadFileDto.Id);
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Unable to save cover image to Chapter");
         }
 
     }

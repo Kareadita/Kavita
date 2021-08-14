@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Interfaces.Repositories;
 
 namespace API.Interfaces
 {
@@ -12,6 +13,7 @@ namespace API.Interfaces
         IAppUserProgressRepository AppUserProgressRepository { get; }
         ICollectionTagRepository CollectionTagRepository { get; }
         IFileRepository FileRepository { get; }
+        IChapterRepository ChapterRepository { get; }
         bool Commit();
         Task<bool> CommitAsync();
         bool HasChanges();
