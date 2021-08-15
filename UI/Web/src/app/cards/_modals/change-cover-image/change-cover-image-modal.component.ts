@@ -59,6 +59,7 @@ export class ChangeCoverImageModalComponent implements OnInit {
   handleReset() {
     this.coverImageLocked = false;
     this.chapter.coverImageLocked = false;
+    this.modal.close({success: true, chapter: this.chapter, coverImageUpdate: this.chapter.coverImageLocked});
   }
 
 }
