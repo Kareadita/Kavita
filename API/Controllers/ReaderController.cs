@@ -37,16 +37,24 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
-            var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+            try
+            {
+                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
 
-            var content = await _directoryService.ReadFileAsync(path);
-            var format = Path.GetExtension(path).Replace(".", "");
+                var content = await _directoryService.ReadFileAsync(path);
+                var format = Path.GetExtension(path).Replace(".", "");
 
-            // Calculates SHA1 Hash for byte[]
-            Response.AddCacheHeader(content);
+                // Calculates SHA1 Hash for byte[]
+                Response.AddCacheHeader(content);
 
-            return File(content, "image/" + format);
+                return File(content, "image/" + format);
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupChapters(new []{ chapterId });
+                throw;
+            }
         }
 
         [HttpGet("chapter-info")]

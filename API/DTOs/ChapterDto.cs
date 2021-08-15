@@ -2,6 +2,10 @@
 
 namespace API.DTOs
 {
+    /// <summary>
+    /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
+    /// file (abstracted from type).
+    /// </summary>
     public class ChapterDto
     {
         public int Id { get; init; }
@@ -10,7 +14,7 @@ namespace API.DTOs
         /// </summary>
         public string Range { get; init; }
         /// <summary>
-        /// Smallest number of the Range. 
+        /// Smallest number of the Range.
         /// </summary>
         public string Number { get; init; }
         /// <summary>
@@ -22,7 +26,7 @@ namespace API.DTOs
         /// </summary>
         public bool IsSpecial { get; init; }
         /// <summary>
-        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/> 
+        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
         /// </summary>
         public string Title { get; init; }
         /// <summary>
@@ -33,6 +37,13 @@ namespace API.DTOs
         /// Calculated at API time. Number of pages read for this Chapter for logged in user.
         /// </summary>
         public int PagesRead { get; set; }
+        /// <summary>
+        /// If the Cover Image is locked for this entity
+        /// </summary>
+        public bool CoverImageLocked { get; set; }
+        /// <summary>
+        /// Volume Id this Chapter belongs to
+        /// </summary>
         public int VolumeId { get; init; }
     }
 }

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
+import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
@@ -13,6 +13,7 @@ import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { CollectionTagService } from '../_services/collection-tag.service';
+import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -41,7 +42,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
     private collectionService: CollectionTagService, private router: Router, 
-    private modalService: NgbModal, private titleService: Title) { }
+    private modalService: NgbModal, private titleService: Title, public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -123,6 +124,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
           if (reloadNeeded) {
             // Reload tags
             this.reloadTags();
+            collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
           }
         });
         break;

@@ -158,9 +158,13 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged");
         }
 
+        /// <summary>
+        /// Removes the cached files and folders for a set of chapterIds
+        /// </summary>
+        /// <param name="chapterIds"></param>
         public void CleanupChapters(IEnumerable<int> chapterIds)
         {
-            _logger.LogInformation("Running Cache cleanup on Volumes");
+            _logger.LogInformation("Running Cache cleanup on Chapters");
 
             foreach (var chapter in chapterIds)
             {
@@ -182,7 +186,7 @@ namespace API.Services
         /// <returns></returns>
         private string GetCachePath(int chapterId)
         {
-            return Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
+            return Path.GetFullPath(Path.Join(DirectoryService.CacheDirectory, $"{chapterId}/"));
         }
 
         public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)

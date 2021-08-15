@@ -2,6 +2,9 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { ToastrService } from 'ngx-toastr';
 import { asyncScheduler, Observable, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile, throttleTime } from 'rxjs/operators';
+import { Download } from 'src/app/shared/_models/download';
+import { DownloadService } from 'src/app/shared/_services/download.service';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -10,9 +13,6 @@ import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
-import { Download } from '../_models/download';
-import { DownloadService } from '../_services/download.service';
-import { UtilityService } from '../_services/utility.service';
 
 @Component({
   selector: 'app-card-item',
@@ -44,7 +44,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageSerivce: ImageService, private libraryService: LibraryService, 
+  constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService) {}
 
@@ -62,8 +62,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
       });
     }
     this.format = (this.entity as Series).format;
-
-
   }
 
   ngOnDestroy() {

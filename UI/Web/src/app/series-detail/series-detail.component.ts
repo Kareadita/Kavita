@@ -5,13 +5,13 @@ import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { asyncScheduler } from 'rxjs';
 import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
+import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
+import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
-import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { DownloadService } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
-import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { LibraryType } from '../_models/library';
@@ -61,8 +61,16 @@ export class SeriesDetailComponent implements OnInit {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
-
+  /**
+   * Poster image for the Series
+   */
+  seriesImage: string = '';
   downloadInProgress: boolean = false;
+
+  /**
+   * Tricks the cover images for volume/chapter cards to update after we update one of them
+   */
+  coverImageOffset: number = 0;
 
   /**
    * If an action is currently being done, don't let the user kick off another action
@@ -116,6 +124,7 @@ export class SeriesDetailComponent implements OnInit {
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
     this.loadSeriesMetadata(seriesId);
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -169,7 +178,7 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markAsUnread(volume);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(volume);
         break;
       default:
@@ -185,7 +194,7 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markChapterAsUnread(chapter);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(chapter);
         break;
       default:
@@ -226,6 +235,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   loadSeries(seriesId: number) {
+    this.coverImageOffset = 0;
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
     });
@@ -376,20 +386,29 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg', scrollable: true });
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' }); // , scrollable: true (these don't work well on mobile)
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
+    modalRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
+      if (result.coverImageUpdate) {
+        this.coverImageOffset += 1;
+      }
+    });
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  scrollable: true, size: 'lg', windowClass: 'scrollable-modal' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);
         this.loadSeriesMetadata(this.series.id);
+        if (closeResult.coverImageUpdate) {
+          // Random triggers a load change without any problems with API
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+        }
       }
     });
   }

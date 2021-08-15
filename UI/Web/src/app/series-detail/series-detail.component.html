@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">            
-            <img class="poster lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="imageService.getSeriesCoverImage(series.id)" 
+            <img class="poster lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="seriesImage" 
             (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true">
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
@@ -118,12 +118,12 @@
                   <div class="row">
                     <div *ngFor="let volume of volumes">
                         <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
-                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                            [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                             [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
                     </div>
                     <div *ngFor="let chapter of chapters">
                         <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
-                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                        [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                         [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
                     </div>
                   </div>

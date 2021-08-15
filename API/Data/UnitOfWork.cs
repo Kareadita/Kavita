@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces;
+using API.Interfaces.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 
@@ -30,6 +31,7 @@ namespace API.Data
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
         public IFileRepository FileRepository => new FileRepository(_context);
+        public IChapterRepository ChapterRepository => new ChapterRepository(_context);
 
         public bool Commit()
         {

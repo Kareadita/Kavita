@@ -3,14 +3,14 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { EditSeriesModalComponent } from 'src/app/_modals/edit-series-modal/edit-series-modal.component';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { ConfirmService } from '../shared/confirm.service';
-import { ActionService } from '../_services/action.service';
+import { ConfirmService } from 'src/app/shared/confirm.service';
+import { ActionService } from 'src/app/_services/action.service';
+import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 
 @Component({
   selector: 'app-series-card',
@@ -27,6 +27,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   isAdmin = false;
   actions: ActionItem<Series>[] = [];
+  imageUrl: string = '';
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
@@ -42,11 +43,15 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
 
   ngOnInit(): void {
+    if (this.data) {
+      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+    }
   }
 
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
     }
   }
 
@@ -79,11 +84,15 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   openEditModal(data: Series) {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg', scrollable: true });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' });
     modalRef.componentInstance.series = data;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
+        if (closeResult.coverImageUpdate) {
+          this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(closeResult.series.id));
+          console.log('image url: ', this.imageUrl);
+        }
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
           this.reload.emit(true);

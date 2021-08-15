@@ -9,8 +9,10 @@ import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import { UploadService } from 'src/app/_services/upload.service';
 
 @Component({
   selector: 'app-edit-collection-tags',
@@ -28,11 +30,15 @@ export class EditCollectionTagsComponent implements OnInit {
   selectAll: boolean = true;
   libraryNames!: any;
   collectionTagForm!: FormGroup;
-
+  tabs = ['General', 'Cover Image'];
+  active = this.tabs[0];
+  imageUrls: Array<string> = [];
+  selectedCover: string = '';
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, 
     private collectionService: CollectionTagService, private toastr: ToastrService,
-    private confirmSerivce: ConfirmService, private libraryService: LibraryService) { }
+    private confirmSerivce: ConfirmService, private libraryService: LibraryService,
+    private imageService: ImageService, private uploadService: UploadService) { }
 
   ngOnInit(): void {
     if (this.pagination == undefined) {
@@ -40,7 +46,11 @@ export class EditCollectionTagsComponent implements OnInit {
     }
     this.collectionTagForm = new FormGroup({
       summary: new FormControl(this.tag.summary, []),
+      coverImageLocked: new FormControl(this.tag.coverImageLocked, []),
+      coverImageIndex: new FormControl(0, []),
+
     });
+    this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));
     this.loadSeries();
   }
 
@@ -99,23 +109,49 @@ export class EditCollectionTagsComponent implements OnInit {
   }
 
   async save() {
+    const selectedIndex = this.collectionTagForm.get('coverImageIndex')?.value || 0;
     const unselectedIds = this.selections.unselected().map(s => s.id);
     const tag: CollectionTag = {...this.tag};
     tag.summary = this.collectionTagForm.get('summary')?.value;
+    tag.coverImageLocked = this.collectionTagForm.get('coverImageLocked')?.value;
     
     if (unselectedIds.length == this.series.length && !await this.confirmSerivce.confirm('Warning! No series are selected, saving will delete the tag. Are you sure you want to continue?')) {
       return;
     }
 
-    this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id)).subscribe(() => {
+    const apis = [this.collectionService.updateTag(this.tag),
+      this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
+    ];
+    
+    if (selectedIndex > 0) {
+      apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover))
+    }
+  
+    forkJoin(apis).subscribe(results => {
+      this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
       this.toastr.success('Tag updated');
-      this.modal.close(true);
     });
   }
 
   get someSelected() {
     const selected = this.selections.selected();
     return (selected.length != this.series.length && selected.length != 0);
+  }
+
+  updateSelectedIndex(index: number) {
+    this.collectionTagForm.patchValue({
+      coverImageIndex: index
+    });
+  }
+
+  updateSelectedImage(url: string) {
+    this.selectedCover = url;
+  }
+
+  handleReset() {
+    this.collectionTagForm.patchValue({
+      coverImageLocked: false
+    });
   }
 
 }

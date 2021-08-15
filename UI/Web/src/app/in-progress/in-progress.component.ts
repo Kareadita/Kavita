@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { UpdateFilterEvent } from '../shared/card-detail-layout/card-detail-layout.component';
+import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { FilterItem, SeriesFilter, mangaFormatFilters } from '../_models/series-filter';

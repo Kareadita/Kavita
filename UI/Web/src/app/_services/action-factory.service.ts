@@ -104,6 +104,20 @@ export class ActionFactoryService {
           callback: this.dummyCallback,
           requiresAdmin: true
         });
+
+        this.volumeActions.push({
+          action: Action.Edit,
+          title: 'Edit',
+          callback: this.dummyCallback,
+          requiresAdmin: false
+        });
+    
+        this.chapterActions.push({
+          action: Action.Edit,
+          title: 'Edit',
+          callback: this.dummyCallback,
+          requiresAdmin: false
+        });
       }
 
       if (this.hasDownloadRole || this.isAdmin) {
@@ -206,21 +220,5 @@ export class ActionFactoryService {
         requiresAdmin: false
       }
     ];
-
-    this.volumeActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback,
-      requiresAdmin: false
-    });
-
-    this.chapterActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback,
-      requiresAdmin: false
-    });
-
-
   }
 }

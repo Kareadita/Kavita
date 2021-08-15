@@ -37,7 +37,7 @@ export class LibraryAccessModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close(false);
+    this.modal.dismiss();
   }
 
   save() {

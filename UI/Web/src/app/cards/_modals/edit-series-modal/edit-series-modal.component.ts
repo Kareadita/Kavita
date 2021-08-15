@@ -13,6 +13,7 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import { UploadService } from 'src/app/_services/upload.service';
 
 @Component({
   selector: 'app-edit-series-modal',
@@ -36,6 +37,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   settings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   tags: CollectionTag[] = [];
   metadata!: SeriesMetadata;
+  imageUrls: Array<string> = [];
+  /**
+   * Selected Cover for uploading
+   */
+  selectedCover: string = '';
 
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
@@ -43,9 +49,15 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
               private fb: FormBuilder,
               public imageService: ImageService, 
               private libraryService: LibraryService,
-              private collectionService: CollectionTagService) { }
+              private collectionService: CollectionTagService,
+              private uploadService: UploadService) { }
 
   ngOnInit(): void {
+    // this.imageUrls.push({
+    //   imageUrl: this.imageService.getSeriesCoverImage(this.series.id),
+    //   source: 'Url'
+    // });
+    this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
@@ -67,7 +79,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       author: new FormControl('', []),
       artist: new FormControl('', []),
 
-      coverImageIndex: new FormControl(0, [])
+      coverImageIndex: new FormControl(0, []),
+      coverImageLocked: new FormControl(this.series.coverImageLocked, [])
     });
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
@@ -107,7 +120,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.settings.addIfNonExisting = true;
     this.settings.fetchFn = (filter: string) => this.fetchCollectionTags(filter);
     this.settings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title, promoted: false, coverImage: '', summary: '' };
+      return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.settings.compareFn = (options: CollectionTag[], filter: string) => {
       const f = filter.toLowerCase();
@@ -131,18 +144,40 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   save() {
-    // TODO: In future (once locking or metadata implemented), do a converstion to updateSeriesDto
-
-    forkJoin([
-      this.seriesService.updateSeries(this.editSeriesForm.value),
+    const model = this.editSeriesForm.value;
+    const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
+    const apis = [
+      this.seriesService.updateSeries(model),
       this.seriesService.updateMetadata(this.metadata, this.tags)
-    ]).subscribe(results => {
-      this.modal.close({success: true, series: this.editSeriesForm.value});
+    ];
+
+    if (selectedIndex > 0) {
+      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
+    }
+
+    forkJoin(apis).subscribe(results => {
+      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0});
     });
   }
 
   updateCollections(tags: CollectionTag[]) {
     this.tags = tags;
+  }
+
+  updateSelectedIndex(index: number) {
+    this.editSeriesForm.patchValue({
+      coverImageIndex: index
+    });
+  }
+
+  updateSelectedImage(url: string) {
+    this.selectedCover = url;
+  }
+
+  handleReset() {
+    this.editSeriesForm.patchValue({
+      coverImageLocked: false
+    });
   }
 
 }

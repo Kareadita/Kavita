@@ -1,8 +1,8 @@
 <div class="card">
     <div class="overlay"  (click)="handleClick()">
-      <img *ngIf="total > 0 || supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="imageUrl" 
-            (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
-      <img *ngIf="total === 0 && !supressArchiveWarning" class="card-img-top lazyload" [src]="imageSerivce.errorImage" [attr.data-src]="imageUrl" 
+      <img *ngIf="total > 0 || supressArchiveWarning" class="card-img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
+            (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
+      <img *ngIf="total === 0 && !supressArchiveWarning" class="card-img-top lazyload" [src]="imageService.errorImage" [attr.data-src]="imageUrl" 
             aria-hidden="true" height="230px" width="158px">
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
         <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>

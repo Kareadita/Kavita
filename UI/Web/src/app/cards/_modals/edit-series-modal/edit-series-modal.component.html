@@ -89,8 +89,10 @@
                 <li [ngbNavItem]="tabs[2]">
                   <a ngbNavLink>{{tabs[2]}}</a>
                   <ng-template ngbNavContent>
-                    <p>Not Yet implemented</p>
-                    <img src="{{imageService.getSeriesCoverImage(series.id)}}">
+                    <p class="alert alert-primary" role="alert">
+                        Upload and choose a new cover image. Press Save to upload and override the cover.
+                    </p>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
                   </ng-template>
                 </li>
                 <li [ngbNavItem]="tabs[3]">

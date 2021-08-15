@@ -22,11 +22,12 @@ namespace API.Tests.Parser
         [InlineData("Invincible Vol 01 Family matters (2005) (Digital).cbr", "Invincible")]
         [InlineData("Amazing Man Comics chapter 25", "Amazing Man Comics")]
         [InlineData("Amazing Man Comics issue #25", "Amazing Man Comics")]
+        [InlineData("Teen Titans v1 038 (1972) (c2c).cbr", "Teen Titans")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
         }
-        
+
         [Theory]
         [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "4")]
@@ -47,7 +48,7 @@ namespace API.Tests.Parser
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
         }
-        
+
         [Theory]
         [InlineData("01 Spider-Man & Wolverine 01.cbr", "0")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "0")]

@@ -288,6 +288,9 @@ namespace API.Data.Migrations
                     b.Property<byte[]>("CoverImage")
                         .HasColumnType("BLOB");
 
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
@@ -327,6 +330,9 @@ namespace API.Data.Migrations
 
                     b.Property<byte[]>("CoverImage")
                         .HasColumnType("BLOB");
+
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
@@ -436,6 +442,9 @@ namespace API.Data.Migrations
 
                     b.Property<byte[]>("CoverImage")
                         .HasColumnType("BLOB");
+
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");

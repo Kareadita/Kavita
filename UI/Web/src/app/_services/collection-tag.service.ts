@@ -16,14 +16,14 @@ export class CollectionTagService {
 
   allTags() {
     return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection/').pipe(map(tags => {
-      tags.forEach(s => s.coverImage = this.imageService.getCollectionCoverImage(s.id));
+      tags.forEach(s => s.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(s.id)));
       return tags;
     }));
   }
 
   search(query: string) {
     return this.httpClient.get<CollectionTag[]>(this.baseUrl + 'collection/search?queryString=' + encodeURIComponent(query)).pipe(map(tags => {
-      tags.forEach(s => s.coverImage = this.imageService.getCollectionCoverImage(s.id));
+      tags.forEach(s => s.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(s.id)));
       return tags;
     }));
   }

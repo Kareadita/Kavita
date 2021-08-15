@@ -38,6 +38,10 @@ namespace API.Entities
         public DateTime LastModified { get; set; }
         public byte[] CoverImage { get; set; }
         /// <summary>
+        /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
+        /// </summary>
+        public bool CoverImageLocked { get; set; }
+        /// <summary>
         /// Sum of all Volume page counts
         /// </summary>
         public int Pages { get; set; }

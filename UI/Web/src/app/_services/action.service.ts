@@ -3,7 +3,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { BookmarksModalComponent } from '../_modals/bookmarks-modal/bookmarks-modal.component';
+import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';

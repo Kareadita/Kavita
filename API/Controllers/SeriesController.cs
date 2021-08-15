@@ -9,6 +9,7 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -45,11 +46,26 @@ namespace API.Controllers
             return Ok(series);
         }
 
+        /// <summary>
+        /// Fetches a Series for a given Id
+        /// </summary>
+        /// <param name="seriesId">Series Id to fetch details for</param>
+        /// <returns></returns>
+        /// <exception cref="KavitaException">Throws an exception if the series Id does exist</exception>
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
+            try
+            {
+                return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue fetching {SeriesId}", seriesId);
+                throw new KavitaException("This series does not exist");
+            }
+
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -138,10 +154,21 @@ namespace API.Controllers
             series.SortName = updateSeries.SortName.Trim();
             series.Summary = updateSeries.Summary.Trim();
 
+            var needsRefreshMetadata = false;
+            if (!updateSeries.CoverImageLocked)
+            {
+                series.CoverImageLocked = false;
+                needsRefreshMetadata = true;
+            }
+
             _unitOfWork.SeriesRepository.Update(series);
 
             if (await _unitOfWork.CommitAsync())
             {
+                if (needsRefreshMetadata)
+                {
+                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+                }
                 return Ok();
             }
 
@@ -274,6 +301,12 @@ namespace API.Controllers
             return BadRequest("Could not update metadata");
         }
 
+        /// <summary>
+        /// Returns all Series grouped by the passed Collection Id with Pagination.
+        /// </summary>
+        /// <param name="collectionId">Collection Id to pull series from</param>
+        /// <param name="userParams">Pagination information</param>
+        /// <returns></returns>
         [HttpGet("series-by-collection")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
         {

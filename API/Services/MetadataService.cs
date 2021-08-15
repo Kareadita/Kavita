@@ -22,6 +22,9 @@ namespace API.Services
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        /// <summary>
+        /// Width of the Thumbnail generation
+        /// </summary>
         public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
@@ -56,17 +59,26 @@ namespace API.Services
             }
         }
 
+        /// <summary>
+        /// Updates the metadata for a Chapter
+        /// </summary>
+        /// <param name="chapter"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
+            if (!chapter.CoverImageLocked && ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
             {
                 chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
             }
         }
 
-
+        /// <summary>
+        /// Updates the metadata for a Volume
+        /// </summary>
+        /// <param name="volume"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
             if (volume == null || !ShouldFindCoverImage(volume.CoverImage, forceUpdate)) return;
@@ -74,25 +86,32 @@ namespace API.Services
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
 
+            if (firstChapter == null) return;
+
             // Skip calculating Cover Image (I/O) if the chapter already has it set
-            if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
+            if (!firstChapter.CoverImageLocked && ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
             {
+                // NOTE: Why do I do this? By the time this method gets executed, the chapter has already been calculated for
+                // Plus how can we have a volume without at least 1 chapter?
                 var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                    volume.CoverImage = GetCoverImage(firstFile);
+                    firstChapter.CoverImage = GetCoverImage(firstFile);
                 }
             }
-            else
-            {
-                volume.CoverImage = firstChapter.CoverImage;
-            }
+            volume.CoverImage = firstChapter.CoverImage;
+
         }
 
+        /// <summary>
+        /// Updates metadata for Series
+        /// </summary>
+        /// <param name="series"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Series series, bool forceUpdate)
         {
             if (series == null) return;
-            if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
+            if (!series.CoverImageLocked && ShouldFindCoverImage(series.CoverImage, forceUpdate))
             {
                 series.Volumes ??= new List<Volume>();
                 var firstCover = series.Volumes.GetCoverImage(series.Format);
@@ -140,12 +159,18 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metatdata for a whole library
+        /// </summary>
+        /// <remarks>This can be heavy on memory first run</remarks>
+        /// <param name="libraryId"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
             var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
 
-            // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
+            // PERF: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
             foreach (var series in library.Series)
             {
@@ -171,6 +196,11 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metadata for a Series. Will always force updates.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <param name="seriesId"></param>
         public void RefreshMetadataForSeries(int libraryId, int seriesId)
         {
             var sw = Stopwatch.StartNew();

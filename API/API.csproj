@@ -12,6 +12,10 @@
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\API.xml</DocumentationFile>
+  </PropertyGroup>
+
   <!-- Set the Product and Version info for our own projects -->
   <PropertyGroup>
     <Product>Kavita</Product>
@@ -81,6 +85,8 @@
     <None Remove="backups\**" />
     <None Remove="logs\**" />
     <None Remove="temp\**" />
+    <None Remove="kavita.log" />
+    <None Remove="kavita.db" />
   </ItemGroup>
 
   <ItemGroup>

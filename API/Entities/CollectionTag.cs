@@ -16,12 +16,16 @@ namespace API.Entities
         /// Visible title of the Tag
         /// </summary>
         public string Title { get; set; }
-        
+
         /// <summary>
         /// Cover Image for the collection tag
         /// </summary>
         public byte[] CoverImage { get; set; }
-        
+        /// <summary>
+        /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
+        /// </summary>
+        public bool CoverImageLocked { get; set; }
+
         /// <summary>
         /// A description of the tag
         /// </summary>
@@ -35,9 +39,9 @@ namespace API.Entities
         /// A promoted collection tag will allow all linked seriesMetadata's Series to show for all users.
         /// </summary>
         public bool Promoted { get; set; }
-        
+
         public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
-        
+
 
         [ConcurrencyCheck]
         public uint RowVersion { get; set; }
