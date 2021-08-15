@@ -30,6 +30,10 @@ export class UploadService {
     return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, url: this._cleanBase64Url(url)});
   }
 
+  resetChapterCoverLock(chapterId: number, ) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/reset-chapter-lock', {id: chapterId, url: ''});
+  }
+
   _cleanBase64Url(url: string) {
     if (url.startsWith('data')) {
       url = url.split(',')[1];

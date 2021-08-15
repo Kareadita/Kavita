@@ -32,13 +32,20 @@ export class ChangeCoverImageModalComponent implements OnInit {
   }
   save() {
     this.loading = true;
-    this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover).subscribe(() => {
-      if (this.coverImageIndex > 0) {
-        this.chapter.coverImageLocked = true;
-      }
-      this.modal.close({success: true, coverImageUpdate: this.chapter.coverImageLocked});
-      this.loading = false;
-    }, err => this.loading = false);
+    if (this.coverImageIndex > 0) {
+      this.chapter.coverImageLocked = true;
+      this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover).subscribe(() => {
+        if (this.coverImageIndex > 0) {
+          this.chapter.coverImageLocked = true;
+        }
+        this.modal.close({success: true, chapter: this.chapter, coverImageUpdate: this.chapter.coverImageLocked});
+        this.loading = false;
+      }, err => this.loading = false);
+    } else {
+      this.modal.close({success: true, chapter: this.chapter, coverImageUpdate: this.chapter.coverImageLocked});
+    }
+
+    
   }
 
   updateSelectedIndex(index: number) {

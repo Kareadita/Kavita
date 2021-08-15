@@ -1,11 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Volume } from 'src/app/_models/volume';
 import { ImageService } from 'src/app/_services/image.service';
+import { UploadService } from 'src/app/_services/upload.service';
 import { ChangeCoverImageModalComponent } from '../change-cover-image/change-cover-image-modal.component';
 
 
@@ -32,7 +34,7 @@ export class CardDetailsModalComponent implements OnInit {
 
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
-    public imageService: ImageService) { }
+    public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -76,9 +78,14 @@ export class CardDetailsModalComponent implements OnInit {
       }
     }
     
-    modalRef.closed.subscribe((closeResult: {success: boolean, coverImageUpdate: boolean}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, chapter: Chapter, coverImageUpdate: boolean}) => {
       if (closeResult.success) {
         this.coverImageUpdate = closeResult.coverImageUpdate;
+        if (!this.coverImageUpdate) {
+          this.uploadService.resetChapterCoverLock(closeResult.chapter.id).subscribe(() => {
+            this.toastr.info('Please refresh in a bit for the cover image to be reflected.');
+          });
+        }
       }
     });
   }

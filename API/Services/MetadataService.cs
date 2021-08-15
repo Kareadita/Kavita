@@ -86,19 +86,21 @@ namespace API.Services
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
 
+            if (firstChapter == null) return;
+
             // Skip calculating Cover Image (I/O) if the chapter already has it set
-            if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
+            if (!firstChapter.CoverImageLocked && ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
             {
+                // NOTE: Why do I do this? By the time this method gets executed, the chapter has already been calculated for
+                // Plus how can we have a volume without at least 1 chapter?
                 var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
-                    volume.CoverImage = GetCoverImage(firstFile);
+                    firstChapter.CoverImage = GetCoverImage(firstFile);
                 }
             }
-            else
-            {
-                volume.CoverImage = firstChapter.CoverImage;
-            }
+            volume.CoverImage = firstChapter.CoverImage;
+
         }
 
         /// <summary>
@@ -168,7 +170,7 @@ namespace API.Services
             var sw = Stopwatch.StartNew();
             var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
 
-            // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
+            // PERF: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
             foreach (var series in library.Series)
             {
