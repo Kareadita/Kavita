@@ -33,7 +33,7 @@ namespace API.Controllers
         /// <param name="uploadFileDto"></param>
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
-        [DisableRequestSizeLimit]
+        [RequestSizeLimit(8_000_000)]
         [HttpPost("series")]
         public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
         {
@@ -78,7 +78,7 @@ namespace API.Controllers
         /// <param name="uploadFileDto"></param>
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
-        [DisableRequestSizeLimit]
+        [RequestSizeLimit(8_000_000)]
         [HttpPost("collection")]
         public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
         {
@@ -123,7 +123,7 @@ namespace API.Controllers
         /// <param name="uploadFileDto"></param>
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
-        [DisableRequestSizeLimit]
+        [RequestSizeLimit(8_000_000)]
         [HttpPost("chapter")]
         public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
         {

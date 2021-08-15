@@ -68,6 +68,11 @@ export class SeriesDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
 
   /**
+   * Tricks the cover images for volume/chapter cards to update after we update one of them
+   */
+  coverImageOffset: number = 0;
+
+  /**
    * If an action is currently being done, don't let the user kick off another action
    */
   actionInProgress: boolean = false;
@@ -230,6 +235,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   loadSeries(seriesId: number) {
+    this.coverImageOffset = 0;
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
     });
@@ -384,6 +390,11 @@ export class SeriesDetailComponent implements OnInit {
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
+    modalRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
+      if (result.coverImageUpdate) {
+        this.coverImageOffset += 1;
+      }
+    });
   }
 
   openEditSeriesModal() {

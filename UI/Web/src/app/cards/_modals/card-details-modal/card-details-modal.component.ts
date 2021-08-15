@@ -25,6 +25,10 @@ export class CardDetailsModalComponent implements OnInit {
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   formatKeys = Object.keys(MangaFormat);
+  /**
+   * If a cover image update occured. 
+   */
+  coverImageUpdate: boolean = false; 
 
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
@@ -47,7 +51,7 @@ export class CardDetailsModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close();
+    this.modal.close({coverImageUpdate: this.coverImageUpdate});
   }
 
   formatChapterNumber(chapter: Chapter) {
@@ -74,9 +78,7 @@ export class CardDetailsModalComponent implements OnInit {
     
     modalRef.closed.subscribe((closeResult: {success: boolean, coverImageUpdate: boolean}) => {
       if (closeResult.success) {
-        if (closeResult.coverImageUpdate) {
-          //this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
-        }
+        this.coverImageUpdate = closeResult.coverImageUpdate;
       }
     });
   }

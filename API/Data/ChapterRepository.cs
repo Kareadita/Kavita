@@ -8,12 +8,10 @@ namespace API.Data
     public class ChapterRepository : IChapterRepository
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
 
-        public ChapterRepository(DataContext context, IMapper mapper)
+        public ChapterRepository(DataContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public void Update(Chapter chapter)

@@ -18,6 +18,7 @@ export class ChangeCoverImageModalComponent implements OnInit {
   imageUrls: Array<string> = [];
   coverImageIndex: number = 0;
   coverImageLocked: boolean = false;
+  loading: boolean = false;
 
   constructor(private imageService: ImageService, private uploadService: UploadService, public modal: NgbActiveModal) { }
 
@@ -27,16 +28,17 @@ export class ChangeCoverImageModalComponent implements OnInit {
   }
 
   cancel() {
-    this.modal.close({success: false, updatedCoverImage: false})
+    this.modal.close({success: false, coverImageUpdate: false})
   }
   save() {
+    this.loading = true;
     this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover).subscribe(() => {
-
       if (this.coverImageIndex > 0) {
         this.chapter.coverImageLocked = true;
       }
-      this.modal.close({success: true, updatedCoverImage: this.chapter.coverImageLocked});
-    })
+      this.modal.close({success: true, coverImageUpdate: this.chapter.coverImageLocked});
+      this.loading = false;
+    }, err => this.loading = false);
   }
 
   updateSelectedIndex(index: number) {

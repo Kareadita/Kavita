@@ -31,7 +31,7 @@ namespace API.Data
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
         public IFileRepository FileRepository => new FileRepository(_context);
-        public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
+        public IChapterRepository ChapterRepository => new ChapterRepository(_context);
 
         public bool Commit()
         {
