@@ -5,7 +5,8 @@ export interface Chapter {
     range: string;
     number: string;
     files: Array<MangaFile>;
-    coverImage: string;
+    //coverImage: string;
+    coverImageLocked: boolean;
     pages: number;
     volumeId: number;
     pagesRead: number; // Attached for the given user when requesting from API

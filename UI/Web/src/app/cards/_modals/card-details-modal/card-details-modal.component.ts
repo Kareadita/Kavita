@@ -59,7 +59,19 @@ export class CardDetailsModalComponent implements OnInit {
 
   updateCover() {
     const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
-    modalRef.componentInstance.data = this.data;
+    if (this.utilityService.isChapter(this.data)) {
+      const chapter = this.utilityService.asChapter(this.data)
+      modalRef.componentInstance.chapter = chapter;
+      modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : 'Chapter ') + chapter.range + '\'s Cover';
+    } else {
+      const volume = this.utilityService.asVolume(this.data);
+      const chapters = volume.chapters;
+      if (chapters && chapters.length > 0) {
+        modalRef.componentInstance.chapter = chapters[0];
+        modalRef.componentInstance.title = 'Select Volume ' + volume.number + '\'s Cover';
+      }
+    }
+    
     modalRef.closed.subscribe((closeResult: {success: boolean, coverImageUpdate: boolean}) => {
       if (closeResult.success) {
         if (closeResult.coverImageUpdate) {

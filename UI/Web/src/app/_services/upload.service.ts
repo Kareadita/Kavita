@@ -26,6 +26,10 @@ export class UploadService {
     return this.httpClient.post<number>(this.baseUrl + 'upload/collection', {id: tagId, url: this._cleanBase64Url(url)});
   }
 
+  updateChapterCoverImage(chapterId: number, url: string) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, url: this._cleanBase64Url(url)});
+  }
+
   _cleanBase64Url(url: string) {
     if (url.startsWith('data')) {
       url = url.split(',')[1];
