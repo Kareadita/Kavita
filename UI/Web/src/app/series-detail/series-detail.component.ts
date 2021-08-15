@@ -173,7 +173,7 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markAsUnread(volume);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(volume);
         break;
       default:
@@ -189,7 +189,7 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markChapterAsUnread(chapter);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(chapter);
         break;
       default:
