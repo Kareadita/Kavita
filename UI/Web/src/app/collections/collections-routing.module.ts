@@ -5,13 +5,12 @@ import { AllCollectionsComponent } from './all-collections/all-collections.compo
 import { CollectionDetailComponent } from './collection-detail/collection-detail.component';
 
 const routes: Routes = [
-  {path: '**', component: AllCollectionsComponent, pathMatch: 'full'},
   {
     path: '', 
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-        //{path: '', component: AllCollectionsComponent},
+        {path: '', component: AllCollectionsComponent, pathMatch: 'full'},
         {path: ':id', component: CollectionDetailComponent},
     ]
   }

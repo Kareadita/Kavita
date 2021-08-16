@@ -120,11 +120,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
       case(Action.Edit):
         const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
         modalRef.componentInstance.tag = collectionTag;
-        modalRef.closed.subscribe((reloadNeeded: boolean) => {
-          if (reloadNeeded) {
-            // Reload tags
-            this.reloadTags();
-            collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
+        modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+          this.reloadTags();
+          if (results.coverImageUpdated) {
+            collectionTag.coverImage = this.imageService.randomize(collectionTag.coverImage);
           }
         });
         break;

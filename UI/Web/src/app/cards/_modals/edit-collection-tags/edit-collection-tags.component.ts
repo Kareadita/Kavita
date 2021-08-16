@@ -105,7 +105,7 @@ export class EditCollectionTagsComponent implements OnInit {
   }
 
   close() {
-    this.modal.close(false);
+    this.modal.dismiss();
   }
 
   async save() {
@@ -135,7 +135,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
   get someSelected() {
     const selected = this.selections.selected();
-    return (selected.length != this.series.length && selected.length != 0);
+    return (selected.length !== this.series.length && selected.length !== 0);
   }
 
   updateSelectedIndex(index: number) {

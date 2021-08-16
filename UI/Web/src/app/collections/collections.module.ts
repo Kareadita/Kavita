@@ -15,7 +15,7 @@ import { AllCollectionsComponent } from './all-collections/all-collections.compo
   ],
   imports: [
     CommonModule,
-    //SharedModule,
+    SharedModule,
     CardsModule,
     CollectionsRoutingModule,
   ]

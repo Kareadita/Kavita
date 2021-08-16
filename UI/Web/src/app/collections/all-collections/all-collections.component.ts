@@ -9,6 +9,7 @@ import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import { ImageService } from 'src/app/_services/image.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 
@@ -32,7 +33,7 @@ export class AllCollectionsComponent implements OnInit {
 
   constructor(private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
-    private modalService: NgbModal, private titleService: Title) {
+    private modalService: NgbModal, private titleService: Title, private imageService: ImageService) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     const routeId = this.route.snapshot.paramMap.get('id');
@@ -98,9 +99,10 @@ export class AllCollectionsComponent implements OnInit {
       case(Action.Edit):
         const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
         modalRef.componentInstance.tag = collectionTag;
-        modalRef.closed.subscribe((reloadNeeded: boolean) => {
-          if (reloadNeeded) {
-            this.loadPage();
+        modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+          this.loadPage();
+          if (results.coverImageUpdated) {
+            collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
           }
         });
         break;
