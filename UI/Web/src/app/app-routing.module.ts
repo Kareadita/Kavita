@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AllCollectionsComponent } from './all-collections/all-collections.component';
 import { HomeComponent } from './home/home.component';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { LibraryComponent } from './library/library.component';
@@ -21,6 +20,10 @@ const routes: Routes = [
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
+  {
+    path: 'collections',
+    loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
+  },
   {path: 'library', component: LibraryComponent},
   {
     path: '',
@@ -29,14 +32,6 @@ const routes: Routes = [
     children: [
       {path: 'library/:id', component: LibraryDetailComponent},
       {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
-      {
-        path: 'library/:libraryId/series/:seriesId/manga',
-        loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
-      },
-      {
-        path: 'library/:libraryId/series/:seriesId/book',
-        loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
-      }
     ]
   },
   {
@@ -46,12 +41,10 @@ const routes: Routes = [
     children: [
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
-      {path: 'collections', component: AllCollectionsComponent},
-      {path: 'collections/:id', component: AllCollectionsComponent},
+      {path: 'preferences', component: UserPreferencesComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},
-  {path: 'preferences', component: UserPreferencesComponent},
   {path: 'no-connection', component: NotConnectedComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];

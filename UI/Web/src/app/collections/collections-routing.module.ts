@@ -1,0 +1,25 @@
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from '../_guards/auth.guard';
+import { AllCollectionsComponent } from './all-collections/all-collections.component';
+import { CollectionDetailComponent } from './collection-detail/collection-detail.component';
+
+const routes: Routes = [
+  {path: '**', component: AllCollectionsComponent, pathMatch: 'full'},
+  {
+    path: '', 
+    runGuardsAndResolvers: 'always',
+    canActivate: [AuthGuard],
+    children: [
+        //{path: '', component: AllCollectionsComponent},
+        {path: ':id', component: CollectionDetailComponent},
+    ]
+  }
+];
+
+
+@NgModule({
+  imports: [RouterModule.forChild(routes), ],
+  exports: [RouterModule]
+})
+export class CollectionsRoutingModule { }

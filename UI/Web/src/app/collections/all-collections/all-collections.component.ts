@@ -3,13 +3,14 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import { CollectionTag } from '../_models/collection-tag';
-import { Pagination } from '../_models/pagination';
-import { Series } from '../_models/series';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { CollectionTagService } from '../_services/collection-tag.service';
-import { SeriesService } from '../_services/series.service';
+import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
+import { CollectionTag } from 'src/app/_models/collection-tag';
+import { Pagination } from 'src/app/_models/pagination';
+import { Series } from 'src/app/_models/series';
+import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
+import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import { SeriesService } from 'src/app/_services/series.service';
+
 
 /**
  * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc.

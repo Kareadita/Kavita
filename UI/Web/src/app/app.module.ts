@@ -33,10 +33,10 @@ import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations'
 import { Dedupe as DedupeIntegration } from '@sentry/integrations';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
-import { AllCollectionsComponent } from './all-collections/all-collections.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { InProgressComponent } from './in-progress/in-progress.component';
 import { CardsModule } from './cards/cards.module';
+import { CollectionsModule } from './collections/collections.module';
 
 let sentryProviders: any[] = [];
 
@@ -96,7 +96,6 @@ if (environment.production) {
     UserPreferencesComponent, // Move into SettingsModule
     ReviewSeriesModalComponent,
     PersonBadgeComponent,
-    AllCollectionsComponent,
     RecentlyAddedComponent,
     InProgressComponent,
   ],
@@ -122,6 +121,7 @@ if (environment.production) {
     CarouselModule,
     TypeaheadModule,
     CardsModule,
+    CollectionsModule,
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
