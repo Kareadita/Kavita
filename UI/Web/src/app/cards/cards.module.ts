@@ -38,7 +38,7 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
   ],
   imports: [
     CommonModule,
-    BrowserModule,
+    //BrowserModule,
     RouterModule,
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
@@ -48,7 +48,6 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     
     NgbNavModule,
     NgbTooltipModule, // Card item
-    //NgbAccordionModule,
     NgbCollapseModule,
 
     NgbNavModule, //Series Detail
