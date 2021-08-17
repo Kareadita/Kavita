@@ -24,7 +24,6 @@ const routes: Routes = [
     path: 'collections',
     loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
   },
-  {path: 'library', component: LibraryComponent},
   {
     path: '',
     runGuardsAndResolvers: 'always',
@@ -32,6 +31,14 @@ const routes: Routes = [
     children: [
       {path: 'library/:id', component: LibraryDetailComponent},
       {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
+      {
+        path: 'library/:libraryId/series/:seriesId/manga',
+        loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
+      },
+      {
+        path: 'library/:libraryId/series/:seriesId/book',
+        loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
+      }
     ]
   },
   {
@@ -39,6 +46,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
+      {path: 'library', component: LibraryComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
       {path: 'preferences', component: UserPreferencesComponent},
