@@ -79,6 +79,8 @@ namespace API.Controllers
 
             if (result)
             {
+                await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
             }
             return Ok(result);
