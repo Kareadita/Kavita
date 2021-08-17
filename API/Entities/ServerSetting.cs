@@ -10,8 +10,11 @@ namespace API.Entities
         public ServerSettingKey Key { get; set; }
         public string Value { get; set; }
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
+
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

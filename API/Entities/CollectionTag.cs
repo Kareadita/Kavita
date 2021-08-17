@@ -43,9 +43,11 @@ namespace API.Entities
         public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
 
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

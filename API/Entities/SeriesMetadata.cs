@@ -16,9 +16,11 @@ namespace API.Entities
         public Series Series { get; set; }
         public int SeriesId { get; set; }
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

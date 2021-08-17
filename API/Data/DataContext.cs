@@ -73,15 +73,13 @@ namespace API.Data
 
         private void OnSaveChanges()
         {
-            var concurrentEntries = base.ChangeTracker.Entries()
-                .Where(x => x.Entity is IHasConcurrencyToken && x.State is EntityState.Added or EntityState.Modified);
-
-            foreach (var entityEntry in concurrentEntries)
+            foreach (var saveEntity in ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Modified)
+                .Select(entry => entry.Entity)
+                .OfType<IHasConcurrencyToken>())
             {
-                var e = (IHasConcurrencyToken)entityEntry.Entity;
-                e.OnSavingChanges();
+                saveEntity.OnSavingChanges();
             }
-
         }
 
         #region SaveChanges overrides

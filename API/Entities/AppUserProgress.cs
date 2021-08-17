@@ -57,15 +57,12 @@ namespace API.Entities
         /// </summary>
         public DateTime LastModified { get; set; }
 
-        /// <summary>
-        /// Concurrency check. Ignore.
-        /// </summary>
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
-        /// <summary>
-        /// Concurrency check. Ignore.
-        /// </summary>
+
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;
