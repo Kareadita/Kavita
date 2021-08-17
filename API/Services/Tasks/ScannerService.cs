@@ -72,7 +72,8 @@ namespace API.Services.Tasks
                 _logger.LogInformation(
                     "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
-                CleanupUserProgress();
+
+                CleanupDbEntities();
                 BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             }
@@ -193,6 +194,16 @@ namespace API.Services.Tasks
        {
           var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
+       }
+
+       /// <summary>
+       /// Cleans up any abandoned rows due to removals from Scan loop
+       /// </summary>
+       private void CleanupDbEntities()
+       {
+           CleanupUserProgress();
+           var cleanedUp = Task.Run( () => _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries()).Result;
+           _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
        }
 
        private void UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)

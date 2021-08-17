@@ -80,6 +80,7 @@ namespace API.Controllers
             if (result)
             {
                 await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
             }

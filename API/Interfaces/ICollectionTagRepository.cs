@@ -15,5 +15,6 @@ namespace API.Interfaces
         Task<CollectionTag> GetTagAsync(int tagId);
         Task<CollectionTag> GetFullTagAsync(int tagId);
         void Update(CollectionTag tag);
+        Task<int> RemoveTagsWithoutSeries();
     }
 }
