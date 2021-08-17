@@ -5,7 +5,10 @@ export interface Chapter {
     range: string;
     number: string;
     files: Array<MangaFile>;
-    //coverImage: string;
+    /**
+     * This is used in the UI, it is not updated or sent to Backend
+     */
+    coverImage: string;
     coverImageLocked: boolean;
     pages: number;
     volumeId: number;

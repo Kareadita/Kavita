@@ -53,10 +53,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
               private uploadService: UploadService) { }
 
   ngOnInit(): void {
-    // this.imageUrls.push({
-    //   imageUrl: this.imageService.getSeriesCoverImage(this.series.id),
-    //   source: 'Url'
-    // });
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {

@@ -390,6 +390,7 @@ export class SeriesDetailComponent implements OnInit {
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
+    modalRef.componentInstance.libraryId = this.series?.libraryId;
     modalRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
       if (result.coverImageUpdate) {
         this.coverImageOffset += 1;
