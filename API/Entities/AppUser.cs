@@ -18,9 +18,11 @@ namespace API.Entities
         public AppUserPreferences UserPreferences { get; set; }
         public ICollection<AppUserBookmark> Bookmarks { get; set; }
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

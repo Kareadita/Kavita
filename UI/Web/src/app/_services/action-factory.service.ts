@@ -104,13 +104,6 @@ export class ActionFactoryService {
           callback: this.dummyCallback,
           requiresAdmin: true
         });
-
-        this.volumeActions.push({
-          action: Action.Edit,
-          title: 'Edit',
-          callback: this.dummyCallback,
-          requiresAdmin: false
-        });
     
         this.chapterActions.push({
           action: Action.Edit,
@@ -201,6 +194,12 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.Edit,
+        title: 'Info',
         callback: this.dummyCallback,
         requiresAdmin: false
       }

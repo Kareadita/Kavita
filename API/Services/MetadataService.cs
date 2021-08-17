@@ -93,7 +93,7 @@ namespace API.Services
             {
                 // NOTE: Why do I do this? By the time this method gets executed, the chapter has already been calculated for
                 // Plus how can we have a volume without at least 1 chapter?
-                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                var firstFile = firstChapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
                 if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
                 {
                     firstChapter.CoverImage = GetCoverImage(firstFile);

@@ -5,7 +5,7 @@ on:
     branches: '**'
   pull_request:
     branches: [ main, develop ]
-    types: [opened, synchronize, reopened]
+    types: [synchronize]
 
 jobs:
   build:
@@ -98,7 +98,7 @@ jobs:
     needs: [ build, test ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
-    steps: 
+    steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
@@ -122,7 +122,7 @@ jobs:
 
   develop:
     name: Build Nightly Docker if Develop push
-    needs: [ build, test, version ] 
+    needs: [ build, test, version ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
@@ -222,7 +222,7 @@ jobs:
 
   stable:
     name: Build Stable Docker if Main push
-    needs: [ build, test ] 
+    needs: [ build, test ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
@@ -263,9 +263,9 @@ jobs:
 
           echo 'Copying back to Kavita wwwroot'
           rsync -a dist/ ../../API/wwwroot/
-          
+
           cd ../ || exit
- 
+
       - name: Get csproj Version
         uses: naminodarie/get-net-sdk-project-versions-action@v1
         id: get-version
@@ -281,7 +281,7 @@ jobs:
           newVersion=${version%.*}
           echo $newVersion
           echo "::set-output name=VERSION::$newVersion"
-        id: parse-version 
+        id: parse-version
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
@@ -320,7 +320,7 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-        
+
       - name: Notify Discord
         uses: rjstone/discord-webhook-notify@v1
         with:

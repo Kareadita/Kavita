@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -67,5 +70,48 @@ namespace API.Data
             if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
                 entity.LastModified = DateTime.Now;
         }
+
+        private void OnSaveChanges()
+        {
+            foreach (var saveEntity in ChangeTracker.Entries()
+                .Where(e => e.State == EntityState.Modified)
+                .Select(entry => entry.Entity)
+                .OfType<IHasConcurrencyToken>())
+            {
+                saveEntity.OnSavingChanges();
+            }
+        }
+
+        #region SaveChanges overrides
+
+        public override int SaveChanges()
+        {
+            this.OnSaveChanges();
+
+            return base.SaveChanges();
+        }
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            this.OnSaveChanges();
+
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            this.OnSaveChanges();
+
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            this.OnSaveChanges();
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        #endregion
     }
 }
