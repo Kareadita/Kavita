@@ -21,6 +21,9 @@ namespace API.Services.Tasks
             _backupService = backupService;
         }
 
+        /// <summary>
+        /// Cleans up Temp, cache, and old database backups
+        /// </summary>
         [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
         public void Cleanup()
         {
@@ -31,6 +34,11 @@ namespace API.Services.Tasks
             _cacheService.Cleanup();
             _logger.LogInformation("Cleaning old database backups");
             _backupService.CleanupBackups();
+        }
+
+        [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
+        public void RemoveAbandonedRows()
+        {
 
         }
     }

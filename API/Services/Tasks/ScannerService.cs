@@ -134,6 +134,11 @@ namespace API.Services.Tasks
        }
 
 
+       /// <summary>
+       /// Scans a library for file changes. If force update passed, all entities will be rechecked for new cover images and comicInfo.xml changes.
+       /// </summary>
+       /// <param name="libraryId"></param>
+       /// <param name="forceUpdate"></param>
        [DisableConcurrentExecution(360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)

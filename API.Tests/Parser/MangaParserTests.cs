@@ -275,6 +275,7 @@ namespace API.Tests.Parser
             Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
+/*
         private static ParserInfo CreateParserInfo(string series, string chapter, string volume, bool isSpecial = false)
         {
           return new ParserInfo()
@@ -285,6 +286,7 @@ namespace API.Tests.Parser
             Series = series,
           };
         }
+*/
 
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
