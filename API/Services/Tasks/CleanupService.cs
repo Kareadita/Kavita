@@ -35,11 +35,5 @@ namespace API.Services.Tasks
             _logger.LogInformation("Cleaning old database backups");
             _backupService.CleanupBackups();
         }
-
-        [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-        public void RemoveAbandonedRows()
-        {
-
-        }
     }
 }
