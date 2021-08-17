@@ -141,8 +141,7 @@ namespace Kavita.Common
 
       public static int GetPort(string filePath)
       {
-         Console.WriteLine(GetAppSettingFilename());
-         const int defaultPort = 5000;
+          const int defaultPort = 5000;
          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
          {
             return defaultPort;
