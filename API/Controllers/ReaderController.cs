@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// For all things regarding reading, mainly focusing on non-Book related entities
+    /// </summary>
     public class ReaderController : BaseApiController
     {
         private readonly IDirectoryService _directoryService;
@@ -23,6 +26,7 @@ namespace API.Controllers
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
+        /// <inheritdoc />
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
@@ -30,6 +34,12 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Returns an image for a given chapter. Side effect: This will cache the chapter images for reading.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
@@ -57,6 +67,12 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
         {
@@ -149,6 +165,11 @@ namespace API.Controllers
             return userProgress;
         }
 
+        /// <summary>
+        /// Marks a Chapter as Unread (progress)
+        /// </summary>
+        /// <param name="markReadDto"></param>
+        /// <returns></returns>
         [HttpPost("mark-unread")]
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
@@ -179,6 +200,11 @@ namespace API.Controllers
             return BadRequest("There was an issue saving progress");
         }
 
+        /// <summary>
+        /// Marks all chapters within a volume as Read
+        /// </summary>
+        /// <param name="markVolumeReadDto"></param>
+        /// <returns></returns>
         [HttpPost("mark-volume-read")]
         public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
         {
@@ -218,6 +244,11 @@ namespace API.Controllers
             return BadRequest("Could not save progress");
         }
 
+        /// <summary>
+        /// Returns Progress (page number) for a chapter for the logged in user
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("get-progress")]
         public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
         {
@@ -242,6 +273,11 @@ namespace API.Controllers
             return Ok(progressBookmark);
         }
 
+        /// <summary>
+        /// Save page against Chapter for logged in user
+        /// </summary>
+        /// <param name="progressDto"></param>
+        /// <returns></returns>
         [HttpPost("progress")]
         public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
         {
@@ -259,13 +295,11 @@ namespace API.Controllers
                 progressDto.PageNum = 0;
             }
 
-
             try
             {
-                // TODO: Look into creating a progress entry when a new item is added to the DB so we can just look it up and modify it
-               user.Progresses ??= new List<AppUserProgress>();
+                user.Progresses ??= new List<AppUserProgress>();
                var userProgress =
-                  user.Progresses.SingleOrDefault(x => x.ChapterId == progressDto.ChapterId && x.AppUserId == user.Id);
+                  user.Progresses.FirstOrDefault(x => x.ChapterId == progressDto.ChapterId && x.AppUserId == user.Id);
 
                if (userProgress == null)
                {
@@ -303,6 +337,11 @@ namespace API.Controllers
             return BadRequest("Could not save progress");
         }
 
+        /// <summary>
+        /// Returns a list of bookmarked pages for a given Chapter
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("get-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
         {
@@ -311,6 +350,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
         }
 
+        /// <summary>
+        /// Removes all bookmarks for all chapters linked to a Series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpPost("remove-bookmarks")]
         public async Task<ActionResult> RemoveBookmarks(int seriesId)
         {
@@ -335,6 +379,11 @@ namespace API.Controllers
 
         }
 
+        /// <summary>
+        /// Returns all bookmarked pages for a given volume
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
         [HttpGet("get-volume-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
         {
@@ -343,6 +392,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
         }
 
+        /// <summary>
+        /// Returns all bookmarked pages for a given series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("get-series-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
         {
@@ -352,6 +406,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
         }
 
+        /// <summary>
+        /// Bookmarks a page against a Chapter
+        /// </summary>
+        /// <param name="bookmarkDto"></param>
+        /// <returns></returns>
         [HttpPost("bookmark")]
         public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
         {
@@ -408,6 +467,11 @@ namespace API.Controllers
             return BadRequest("Could not save bookmark");
         }
 
+        /// <summary>
+        /// Removes a bookmarked page for a Chapter
+        /// </summary>
+        /// <param name="bookmarkDto"></param>
+        /// <returns></returns>
         [HttpPost("unbookmark")]
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
