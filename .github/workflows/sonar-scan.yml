@@ -3,6 +3,9 @@ name: .NET Build Test and Sonar Scan
 on:
   push:
     branches: '**'
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
