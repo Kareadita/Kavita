@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler } from 'rxjs';
-import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
@@ -92,7 +91,6 @@ export class ManageSystemComponent implements OnInit {
   downloadLogs() {
     this.downloadLogsInProgress = true;
     this.downloadService.downloadLogs().pipe(
-      throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
       takeWhile(val => {
         return val.state != 'DONE';
       }),

@@ -1,0 +1,32 @@
+<ul class="list-group">
+    <li *ngFor="let series of series" class="list-group-item">
+        <div>
+            <h4>
+                <a href="/library/{{series.libraryId}}/series/{{series.id}}" >{{series.name | titlecase}}</a>
+                &nbsp;<span class="badge badge-primary badge-pill">{{getBookmarkPages(series.id)}}</span>
+                <div class="float-right">
+                    <button class="btn btn-secondary mr-2 btn-sm" (click)="clearBookmarks(series)" [disabled]="isClearing" placement="top" ngbTooltip="Clear Bookmarks" attr.aria-label="Clear Bookmarks">
+                        <ng-container *ngIf="isClearing; else notClearing">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="sr-only">Loading...</span>
+                        </ng-container>
+                        <ng-template #notClearing>
+                            <i class="fa fa-trash-alt" aria-hidden="true"></i>
+                        </ng-template>
+                    </button>
+                    <button class="btn btn-primary mr-2 btn-sm" (click)="viewBookmarks(series)" placement="top" ngbTooltip="View Bookmarks" attr.aria-label="View Bookmarks">
+                        <i class="fa fa-pen" title="View Bookmarks"></i>
+                    </button>
+                </div>
+            </h4>
+        </div>
+    </li>
+    <li *ngIf="loadingBookmarks" class="list-group-item">
+        <div class="spinner-border text-secondary" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </li>
+    <li class="list-group-item" *ngIf="series.length === 0 && !loadingBookmarks">
+        There are no bookmarks. Try creating <a href="https://wiki.kavitareader.com/guides/webreader/bookmarks" target="_blank"><i class="fa fa-external-link-alt" aria-hidden="true"></i>&nbsp;one</a>. <!-- TODO: Put wiki link on how to create a bookmark -->
+    </li>
+</ul>

@@ -2,21 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { pageSplitOptions, Preferences, readingDirections, scalingOptions, readingModes } from '../_models/preferences/preferences';
-import { User } from '../_models/user';
-import { AccountService } from '../_services/account.service';
 import { Options } from '@angular-slider/ngx-slider';
-import { BookService } from '../book-reader/book.service';
-import { NavService } from '../_services/nav.service';
 import { Title } from '@angular/platform-browser';
-import { PageBookmark } from '../_models/page-bookmark';
-import { ReaderService } from '../_services/reader.service';
-import { SeriesService } from '../_services/series.service';
-import { Series } from '../_models/series';
-import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-// TODO: Move to own module and lazy load
+import { BookService } from 'src/app/book-reader/book.service';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences } from 'src/app/_models/preferences/preferences';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
+import { NavService } from 'src/app/_services/nav.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-user-preferences',
@@ -56,16 +49,25 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   };
   fontFamilies: Array<string> = [];
 
-  tabs = ['Preferences', 'Bookmarks'];
+  //tabs = ['Preferences', 'Bookmarks'];
+  tabs: Array<{title: string, fragment: string}> = [
+    {title: 'Preferences', fragment: ''},
+    {title: 'Bookmarks', fragment: 'bookmarks'},
+  ];
   active = this.tabs[0];
-  bookmarks: Array<PageBookmark> = [];
-  series: Array<Series> = [];
-  loadingBookmarks: boolean = false;
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, 
-    private navService: NavService, private titleService: Title, private readerService: ReaderService, private seriesService: SeriesService,
-    private modalService: NgbModal) {
+    private navService: NavService, private titleService: Title, private route: ActivatedRoute) {
     this.fontFamilies = this.bookService.getFontFamilies();
+
+    this.route.fragment.subscribe(frag => {
+      const tab = this.tabs.filter(item => item.fragment === frag);
+      if (tab.length > 0) {
+        this.active = tab[0];
+      } else {
+        this.active = this.tabs[0]; // Default to first tab
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -94,24 +96,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('siteDarkMode', new FormControl(!!user.preferences.siteDarkMode, []));
       }
     });
-
-    
-    this.readerService.getAllBookmarks().pipe(take(1)).subscribe(bookmarks => {
-      this.bookmarks = bookmarks;
-      const seriesIds: {[id: number]: string} = {};
-      this.bookmarks.forEach(bmk => {
-        if (!seriesIds.hasOwnProperty(bmk.seriesId)) {
-          seriesIds[bmk.seriesId] = '';
-        }
-      });
-
-      const ids = Object.keys(seriesIds).map(k => parseInt(k, 10));
-      this.seriesService.getAllSeriesByIds(ids).subscribe(series => {
-        this.series = series;
-      });
-    });
-
-    
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
@@ -193,23 +177,4 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.resetPasswordErrors = err;
     }));
   }
-
-  viewBookmarks(series: Series) {
-    const bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-    bookmarkModalRef.componentInstance.series = series;
-    bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
-      
-    });
-  }
-
-  clearBookmarks(series: Series) {
-    this.readerService.clearBookmarks(series.id).subscribe(() => {
-      const index = this.series.indexOf(series);
-      if (index > -1) {
-        this.series.splice(index, 1);
-      }
-      this.toastr.success(series.name + '\'s bookmarks have been removed');
-    });
-  }
-
 }

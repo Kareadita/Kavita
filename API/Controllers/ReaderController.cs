@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -22,16 +23,18 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ReaderController> _logger;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         /// <inheritdoc />
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork)
+        public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork, ILogger<ReaderController> logger)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         /// <summary>
@@ -374,7 +377,7 @@ namespace API.Controllers
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
-                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId == seriesId).ToList();
+                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != seriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
                 if (await _unitOfWork.CommitAsync())
@@ -382,8 +385,9 @@ namespace API.Controllers
                     return Ok();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "There was an exception when trying to clear bookmarks");
                 await _unitOfWork.RollbackAsync();
             }
 

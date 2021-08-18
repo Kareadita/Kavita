@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler, Observable, Subject } from 'rxjs';
-import { finalize, take, takeUntil, takeWhile, throttleTime } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -96,7 +96,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
           if (!wantToDownload) { return; }
           this.downloadInProgress = true;
           this.download$ = this.downloadService.downloadVolume(volume).pipe(
-            throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
             takeWhile(val => {
               return val.state != 'DONE';
             }),
@@ -112,7 +111,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
           if (!wantToDownload) { return; }
           this.downloadInProgress = true;
           this.download$ = this.downloadService.downloadChapter(chapter).pipe(
-            throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
             takeWhile(val => {
               return val.state != 'DONE';
             }),
@@ -128,7 +126,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
           if (!wantToDownload) { return; }
           this.downloadInProgress = true;
           this.download$ = this.downloadService.downloadSeries(series).pipe(
-            throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
             takeWhile(val => {
               return val.state != 'DONE';
             }),
