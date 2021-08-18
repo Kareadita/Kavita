@@ -19,5 +19,6 @@ namespace API.Interfaces
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
+        Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
     }
 }

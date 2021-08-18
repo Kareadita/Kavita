@@ -443,5 +443,21 @@ namespace API.Data
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId)
+        {
+            var allowedLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(x => x.Id == userId))
+                .Select(l => l.Id);
+
+            return await _context.Series
+                .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
+                .OrderBy(s => s.SortName)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .ToListAsync();
+        }
     }
 }

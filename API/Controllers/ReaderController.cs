@@ -351,6 +351,18 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Returns a list of all bookmarked pages for a User
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("get-all-bookmarks")]
+        public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks()
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+            return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id));
+        }
+
+        /// <summary>
         /// Removes all bookmarks for all chapters linked to a Series
         /// </summary>
         /// <param name="seriesId"></param>

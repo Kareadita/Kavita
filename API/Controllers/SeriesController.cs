@@ -329,6 +329,19 @@ namespace API.Controllers
             return Ok(series);
         }
 
+        /// <summary>
+        /// Fetches Series for a set of Ids. This will check User for permission access and filter out any Ids that don't exist or
+        /// the user does not have access to.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("series-by-ids")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
+        {
+            if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, user.Id));
+        }
+
 
     }
 }
