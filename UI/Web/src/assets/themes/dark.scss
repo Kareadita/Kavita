@@ -20,7 +20,10 @@ $dark-item-accent-bg: #292d32;
   }
 
   a, .btn-link {
-    color: #4ac694;
+    color: $dark-hover-color;
+    > i {
+      color: $dark-hover-color !important;
+    }
   }
 
   a.btn {

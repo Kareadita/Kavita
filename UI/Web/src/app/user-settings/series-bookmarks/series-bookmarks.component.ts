@@ -3,6 +3,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeWhile, finalize } from 'rxjs/operators';
 import { BookmarksModalComponent } from 'src/app/cards/_modals/bookmarks-modal/bookmarks-modal.component';
+import { ConfirmService } from 'src/app/shared/confirm.service';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
@@ -20,11 +21,12 @@ export class SeriesBookmarksComponent implements OnInit {
   series: Array<Series> = [];
   loadingBookmarks: boolean = false;
   seriesIds: {[id: number]: number} = {};
-  isDownloading: boolean = false;
-  isClearing: boolean = false;
+  downloadingSeries: {[id: number]: boolean} = {};
+  clearingSeries: {[id: number]: boolean} = {};
 
   constructor(private readerService: ReaderService, private seriesService: SeriesService,
-    private modalService: NgbModal, private downloadService: DownloadService, private toastr: ToastrService) { }
+    private modalService: NgbModal, private downloadService: DownloadService, private toastr: ToastrService,
+    private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.loadBookmarks();
@@ -37,10 +39,12 @@ export class SeriesBookmarksComponent implements OnInit {
       this.seriesIds = {};
       this.bookmarks.forEach(bmk => {
         if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
-          this.seriesIds[bmk.seriesId] = bmk.page;
+          this.seriesIds[bmk.seriesId] = 1;
         } else {
-          this.seriesIds[bmk.seriesId] += bmk.page;
+          this.seriesIds[bmk.seriesId] += 1;
         }
+        this.downloadingSeries[bmk.seriesId] = false;
+        this.clearingSeries[bmk.seriesId] = false;
       });
 
       const ids = Object.keys(this.seriesIds).map(k => parseInt(k, 10));
@@ -59,14 +63,18 @@ export class SeriesBookmarksComponent implements OnInit {
     });
   }
 
-  clearBookmarks(series: Series) {
-    this.isClearing = true;
+  async clearBookmarks(series: Series) {
+    if (!await this.confirmService.confirm('Are you sure you want to clear all bookmarks for ' + series.name + '? This cannot be undone.')) {
+      return;
+    }
+
+    this.clearingSeries[series.id] = true;
     this.readerService.clearBookmarks(series.id).subscribe(() => {
       const index = this.series.indexOf(series);
       if (index > -1) {
         this.series.splice(index, 1);
       }
-      this.isClearing = false;
+      this.clearingSeries[series.id] = false;
       this.toastr.success(series.name + '\'s bookmarks have been removed');
     });
   }
@@ -75,17 +83,14 @@ export class SeriesBookmarksComponent implements OnInit {
     return this.seriesIds[seriesId];
   }
 
-  downloadBookmarks() {
-    this.isDownloading = true;
-    this.downloadService.downloadBookmarks(this.bookmarks).pipe(
+  downloadBookmarks(series: Series) {
+    this.downloadingSeries[series.id] = true;
+    this.downloadService.downloadBookmarks(this.bookmarks.filter(bmk => bmk.seriesId === series.id)).pipe(
       takeWhile(val => {
         return val.state != 'DONE';
       }),
       finalize(() => {
-        this.isDownloading = false;
+        this.downloadingSeries[series.id] = false;
       })).subscribe(() => {/* No Operation */});
   }
-
-  
-
 }

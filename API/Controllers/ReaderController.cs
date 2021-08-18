@@ -371,13 +371,13 @@ namespace API.Controllers
         /// <param name="seriesId"></param>
         /// <returns></returns>
         [HttpPost("remove-bookmarks")]
-        public async Task<ActionResult> RemoveBookmarks(int seriesId)
+        public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
-                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != seriesId).ToList();
+                user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
                 if (await _unitOfWork.CommitAsync())
