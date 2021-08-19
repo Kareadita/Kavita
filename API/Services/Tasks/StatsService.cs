@@ -41,7 +41,7 @@ namespace API.Services.Tasks
 
         public async Task PathData(ClientInfoDto clientInfoDto)
         {
-            _logger.LogInformation("Pathing client data to the file");
+            _logger.LogDebug("Pathing client data to the file");
 
             var statisticsDto = await GetData();
 
@@ -52,12 +52,12 @@ namespace API.Services.Tasks
 
         public async Task CollectRelevantData()
         {
-            _logger.LogInformation("Collecting data from the server and database");
+            _logger.LogDebug("Collecting data from the server and database");
 
-            _logger.LogInformation("Collecting usage info");
+            _logger.LogDebug("Collecting usage info");
             var usageInfo = await GetUsageInfo();
 
-            _logger.LogInformation("Collecting server info");
+            _logger.LogDebug("Collecting server info");
             var serverInfo = GetServerInfo();
 
             await PathData(serverInfo, usageInfo);
@@ -67,14 +67,14 @@ namespace API.Services.Tasks
         {
             try
             {
-                _logger.LogInformation("Finalizing Stats collection flow");
+                _logger.LogDebug("Finalizing Stats collection flow");
 
                 var data = await GetExistingData<UsageStatisticsDto>();
 
-                _logger.LogInformation("Sending data to the Stats server");
+                _logger.LogDebug("Sending data to the Stats server");
                 await _client.SendDataToStatsServer(data);
 
-                _logger.LogInformation("Deleting the file from disk");
+                _logger.LogDebug("Deleting the file from disk");
                 if (FileExists) File.Delete(FinalPath);
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ namespace API.Services.Tasks
 
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
         {
-            _logger.LogInformation("Pathing server and usage info to the file");
+            _logger.LogDebug("Pathing server and usage info to the file");
 
             var data = await GetData();
 
@@ -169,19 +169,19 @@ namespace API.Services.Tasks
 
         private async Task SaveFile(UsageStatisticsDto statisticsDto)
         {
-            _logger.LogInformation("Saving file");
+            _logger.LogDebug("Saving file");
 
             var finalDirectory = FinalPath.Replace(TempFileName, string.Empty);
             if (!Directory.Exists(finalDirectory))
             {
-                _logger.LogInformation("Creating tmp directory");
+                _logger.LogDebug("Creating tmp directory");
                 Directory.CreateDirectory(finalDirectory);
             }
 
-            _logger.LogInformation("Serializing data to write");
+            _logger.LogDebug("Serializing data to write");
             var dataJson = JsonSerializer.Serialize(statisticsDto);
 
-            _logger.LogInformation("Writing file to the disk");
+            _logger.LogDebug("Writing file to the disk");
             await File.WriteAllTextAsync(FinalPath, dataJson);
         }
     }
