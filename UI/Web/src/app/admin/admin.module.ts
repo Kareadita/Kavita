@@ -15,6 +15,7 @@ import { ManageSettingsComponent } from './manage-settings/manage-settings.compo
 import { FilterPipe } from './filter.pipe';
 import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
+import { ChangelogComponent } from './changelog/changelog.component';
 
 
 
@@ -31,7 +32,8 @@ import { ManageSystemComponent } from './manage-system/manage-system.component';
     ManageSettingsComponent,
     FilterPipe,
     EditRbsModalComponent,
-    ManageSystemComponent
+    ManageSystemComponent,
+    ChangelogComponent
   ],
   imports: [
     CommonModule,

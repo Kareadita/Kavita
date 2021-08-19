@@ -34,6 +34,6 @@ export class ServerService {
   }
 
   getChangelog() {
-    return this.httpClient.get<UpdateVersionEvent>(this.baseUrl + 'server/check-update', {});
+    return this.httpClient.get<UpdateVersionEvent[]>(this.baseUrl + 'server/changelog', {});
   }
 }

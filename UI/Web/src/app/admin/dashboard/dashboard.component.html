@@ -16,6 +16,9 @@
           </ng-container>
           <ng-container *ngIf="tab.fragment === 'system'">
             <app-manage-system></app-manage-system>
+          </ng-container>
+          <ng-container *ngIf="tab.fragment === 'changelog'">
+            <app-changelog></app-changelog>
         </ng-container>
         </ng-template>
       </li>
