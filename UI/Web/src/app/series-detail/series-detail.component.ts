@@ -3,8 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler } from 'rxjs';
-import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
@@ -456,7 +455,6 @@ export class SeriesDetailComponent implements OnInit {
       if (!wantToDownload) { return; }
       this.downloadInProgress = true;
       this.downloadService.downloadSeries(this.series).pipe(
-        throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
         takeWhile(val => {
           return val.state != 'DONE';
         }),

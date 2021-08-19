@@ -28,7 +28,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Fix Match', 'Cover Image', 'Info'];
+  tabs = ['General', 'Cover Image', 'Info'];
   active = this.tabs[0];
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;

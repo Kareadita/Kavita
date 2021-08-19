@@ -18,7 +18,6 @@ import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
-import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
@@ -37,6 +36,8 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { InProgressComponent } from './in-progress/in-progress.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
+import { CommonModule } from '@angular/common';
+import { SAVER, getSaver } from './shared/_providers/saver.provider';
 
 let sentryProviders: any[] = [];
 
@@ -93,7 +94,6 @@ if (environment.production) {
     LibraryDetailComponent, 
     SeriesDetailComponent, 
     NotConnectedComponent, // Move into ExtrasModule
-    UserPreferencesComponent, // Move into SettingsModule
     ReviewSeriesModalComponent,
     PersonBadgeComponent,
     RecentlyAddedComponent,
@@ -109,11 +109,11 @@ if (environment.production) {
 
     NgbDropdownModule, // Nav
     AutocompleteLibModule, // Nav
-    NgbTooltipModule, // Shared & SettingsModule
+    //NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail
     NgbNavModule,
-    NgbAccordionModule, // User Preferences
-    NgxSliderModule, // User Preference
+    //NgbAccordionModule, // User Preferences
+    //NgxSliderModule, // User Preference
     NgbPaginationModule,
 
 
@@ -135,6 +135,7 @@ if (environment.production) {
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
+    {provide: SAVER, useFactory: getSaver},
     ...sentryProviders,
   ],
   entryComponents: [],

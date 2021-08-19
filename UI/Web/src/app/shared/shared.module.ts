@@ -35,11 +35,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    //NgbDropdownModule,
-    //NgbProgressbarModule,
-    //NgbTooltipModule,
     NgbCollapseModule,
-    //LazyLoadImageModule,
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
@@ -55,6 +51,6 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     TagBadgeComponent,
     CircularLoaderComponent,
   ],
-  providers: [{provide: SAVER, useFactory: getSaver}]
+  //providers: [{provide: SAVER, useFactory: getSaver}]
 })
 export class SharedModule { }

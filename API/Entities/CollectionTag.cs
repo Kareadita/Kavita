@@ -9,7 +9,7 @@ namespace API.Entities
     /// Represents a user entered field that is used as a tagging and grouping mechanism
     /// </summary>
     [Index(nameof(Id), nameof(Promoted), IsUnique = true)]
-    public class CollectionTag : IHasConcurrencyToken
+    public class CollectionTag
     {
         public int Id { get; set; }
         /// <summary>
@@ -42,12 +42,14 @@ namespace API.Entities
 
         public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
 
-
-        /// <inheritdoc />
-        [ConcurrencyCheck]
+        /// <summary>
+        /// Not Used due to not using concurrency update
+        /// </summary>
         public uint RowVersion { get; private set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Not Used due to not using concurrency update
+        /// </summary>
         public void OnSavingChanges()
         {
             RowVersion++;

@@ -7,7 +7,6 @@ import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
-import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { InProgressComponent } from './in-progress/in-progress.component';
@@ -23,6 +22,10 @@ const routes: Routes = [
   {
     path: 'collections',
     loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
+  },
+  {
+    path: 'preferences',
+    loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
   },
   {
     path: '',
@@ -49,7 +52,6 @@ const routes: Routes = [
       {path: 'library', component: LibraryComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
-      {path: 'preferences', component: UserPreferencesComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},

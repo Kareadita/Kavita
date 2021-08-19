@@ -57,6 +57,7 @@ namespace API.Services
         using var img = Image.NewFromFile(path);
         using var stream = new MemoryStream();
         img.JpegsaveStream(stream);
+        stream.Position = 0;
         return stream.ToArray();
       }
       catch (Exception ex)

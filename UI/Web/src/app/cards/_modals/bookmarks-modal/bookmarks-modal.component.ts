@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler } from 'rxjs';
-import { finalize, take, takeWhile, throttleTime } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
@@ -55,7 +54,6 @@ export class BookmarksModalComponent implements OnInit {
   downloadBookmarks() {
     this.isDownloading = true;
     this.downloadService.downloadBookmarks(this.bookmarks).pipe(
-      throttleTime(100, asyncScheduler, { leading: true, trailing: true }),
       takeWhile(val => {
         return val.state != 'DONE';
       }),

@@ -2,13 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { pageSplitOptions, Preferences, readingDirections, scalingOptions, readingModes } from '../_models/preferences/preferences';
-import { User } from '../_models/user';
-import { AccountService } from '../_services/account.service';
 import { Options } from '@angular-slider/ngx-slider';
-import { BookService } from '../book-reader/book.service';
-import { NavService } from '../_services/nav.service';
 import { Title } from '@angular/platform-browser';
+import { BookService } from 'src/app/book-reader/book.service';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences } from 'src/app/_models/preferences/preferences';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
+import { NavService } from 'src/app/_services/nav.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-user-preferences',
@@ -48,8 +49,25 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   };
   fontFamilies: Array<string> = [];
 
-  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, private navService: NavService, private titleService: Title) {
+  //tabs = ['Preferences', 'Bookmarks'];
+  tabs: Array<{title: string, fragment: string}> = [
+    {title: 'Preferences', fragment: ''},
+    {title: 'Bookmarks', fragment: 'bookmarks'},
+  ];
+  active = this.tabs[0];
+
+  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, 
+    private navService: NavService, private titleService: Title, private route: ActivatedRoute) {
     this.fontFamilies = this.bookService.getFontFamilies();
+
+    this.route.fragment.subscribe(frag => {
+      const tab = this.tabs.filter(item => item.fragment === frag);
+      if (tab.length > 0) {
+        this.active = tab[0];
+      } else {
+        this.active = this.tabs[0]; // Default to first tab
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -159,5 +177,4 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.resetPasswordErrors = err;
     }));
   }
-
 }

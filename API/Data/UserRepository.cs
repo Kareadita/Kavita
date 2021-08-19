@@ -106,6 +106,17 @@ namespace API.Data
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId)
+        {
+            return await _context.AppUserBookmark
+                .Where(x => x.AppUserId == userId)
+                .OrderBy(x => x.Page)
+                .AsNoTracking()
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
             return await _context.Users

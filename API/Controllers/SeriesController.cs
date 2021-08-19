@@ -12,6 +12,7 @@ using API.Interfaces;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -154,8 +155,8 @@ namespace API.Controllers
             }
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
-            series.SortName = updateSeries.SortName.Trim();
-            series.Summary = updateSeries.Summary.Trim();
+            series.SortName = updateSeries.SortName?.Trim();
+            series.Summary = updateSeries.Summary?.Trim(); // BUG: There was an exceptionSystem.NullReferenceException: Object reference not set to an instance of an object.
 
             var needsRefreshMetadata = false;
             if (!updateSeries.CoverImageLocked)
@@ -296,8 +297,9 @@ namespace API.Controllers
                     return Ok("Successfully updated");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "There was an exception when updating metadata");
                 await _unitOfWork.RollbackAsync();
             }
 
@@ -325,6 +327,19 @@ namespace API.Controllers
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
             return Ok(series);
+        }
+
+        /// <summary>
+        /// Fetches Series for a set of Ids. This will check User for permission access and filter out any Ids that don't exist or
+        /// the user does not have access to.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("series-by-ids")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
+        {
+            if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, user.Id));
         }
 
 

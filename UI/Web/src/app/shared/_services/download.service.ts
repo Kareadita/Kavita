@@ -1,17 +1,18 @@
-import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../confirm.service';
-import { saveAs } from 'file-saver';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
-import { Observable } from 'rxjs';
+import { asyncScheduler, Observable } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { debounceTime } from 'rxjs/operators';
+import { throttleTime } from 'rxjs/operators';
+
+const DEBOUNCE_TIME = 100;
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,7 @@ export class DownloadService {
   downloadLogs() {
     return this.httpClient.get(this.baseUrl + 'server/logs',
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => {
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
               this.save(blob, filename)
             }));
 
@@ -51,7 +52,7 @@ export class DownloadService {
   downloadSeries(series: Series) {
     return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => {
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
               this.save(blob, filename)
             }));
   }
@@ -59,7 +60,7 @@ export class DownloadService {
   downloadChapter(chapter: Chapter) {
     return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => { //NOTE: DO I need debounceTime since I have throttleTime()?
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => { //NOTE: DO I need debounceTime since I have throttleTime()?
               this.save(blob, filename)
             }));
   }
@@ -67,7 +68,7 @@ export class DownloadService {
   downloadVolume(volume: Volume): Observable<Download> {
     return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => {
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
               this.save(blob, filename)
             }));
   }
@@ -79,7 +80,7 @@ export class DownloadService {
   downloadBookmarks(bookmarks: PageBookmark[]) {
     return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks},
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(debounceTime(300), download((blob, filename) => {
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
               this.save(blob, filename)
             }));
   }
