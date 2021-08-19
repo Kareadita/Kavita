@@ -67,13 +67,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   reloadSeries() {
-    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAdded = updatedSeries.result;
-    });
+    this.loadRecentlyAdded();
 
-    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries.result;
-    });
+    this.loadInProgress();
 
     this.reloadTags();
   }
@@ -88,11 +84,21 @@ export class LibraryComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.loadInProgress();
+    
+    this.reloadTags();
+  }
+
+  loadInProgress() {
     this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
     });
-    
-    this.reloadTags();
+  }
+
+  loadRecentlyAdded() {
+    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAdded = updatedSeries.result;
+    });
   }
 
   reloadTags() {
