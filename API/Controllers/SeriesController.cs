@@ -242,6 +242,7 @@ namespace API.Controllers
             {
                 var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
                 var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+                var allTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
                 if (series.Metadata == null)
                 {
                     series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
@@ -266,13 +267,13 @@ namespace API.Controllers
                     // At this point, all tags that aren't in dto have been removed.
                     foreach (var tag in updateSeriesMetadataDto.Tags)
                     {
-                        var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
+                        var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
                         if (existingTag != null)
                         {
-                            // Update existingTag
-                            existingTag.Promoted = tag.Promoted;
-                            existingTag.Title = tag.Title;
-                            existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
+                            if (!series.Metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                            {
+                                newTags.Add(existingTag);
+                            }
                         }
                         else
                         {

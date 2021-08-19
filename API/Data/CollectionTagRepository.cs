@@ -45,6 +45,14 @@ namespace API.Data
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
+        {
+            return await _context.CollectionTag
+                .Select(c => c)
+                .OrderBy(c => c.NormalizedTitle)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
         {
             return await _context.CollectionTag
