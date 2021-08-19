@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScrollService } from '../scroll.service';
-import { UtilityService } from '../shared/_services/utility.service';
 import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
@@ -31,7 +30,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService, 
-    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService) { }
+    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, 
+    private scrollService: ScrollService) { }
 
   ngOnInit(): void {
     this.navService.darkMode$.pipe(takeUntil(this.onDestroy)).subscribe(res => {

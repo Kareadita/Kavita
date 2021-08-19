@@ -70,6 +70,8 @@ namespace API.Services
             }
 
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
+
+            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily);
         }
 
         #region StatsTasks
@@ -104,7 +106,7 @@ namespace API.Services
         public void ScheduleUpdaterTasks()
         {
             _logger.LogInformation("Scheduling Auto-Update tasks");
-            RecurringJob.AddOrUpdate("check-updates", () => _versionUpdaterService.CheckForUpdate(), Cron.Daily);
+            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Weekly);
 
         }
         #endregion
@@ -152,9 +154,13 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
         }
 
-        public void CheckForUpdate()
+        /// <summary>
+        /// Not an external call. Only public so that we can call this for a Task
+        /// </summary>
+        public async Task CheckForUpdate()
         {
-            BackgroundJob.Enqueue(() => _versionUpdaterService.CheckForUpdate());
+            var update = await _versionUpdaterService.CheckForUpdate();
+            await _versionUpdaterService.PushUpdate(update);
         }
     }
 }

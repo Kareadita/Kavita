@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
+    /// <summary>
+    /// Keeps track of who is logged into the app
+    /// </summary>
     public class PresenceHub : Hub
     {
         private readonly IPresenceTracker _tracker;
