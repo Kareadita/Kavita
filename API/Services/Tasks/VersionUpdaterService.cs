@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using API.DTOs.Update;
 using API.Interfaces.Services;
 using API.SignalR;
 using API.SignalR.Presence;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
@@ -32,36 +36,81 @@ namespace API.Services.Tasks
         /// Url of the release on Github
         /// </summary>
         public string Html_Url { get; init; }
-
     }
+
+    public class UntrustedCertClientFactory : DefaultHttpClientFactory
+    {
+        public override HttpMessageHandler CreateMessageHandler() {
+            return new HttpClientHandler {
+                ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+            };
+        }
+    }
+
     public class VersionUpdaterService : IVersionUpdaterService
     {
         private readonly ILogger<VersionUpdaterService> _logger;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly IPresenceTracker _tracker;
         private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+        private static readonly string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
+        private static readonly string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 
         public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
         {
             _logger = logger;
             _messageHub = messageHub;
             _tracker = tracker;
+
+            FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+            FlurlHttp.ConfigureClient(GithubAllReleasesUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
         }
 
         /// <summary>
-        /// Scheduled Task that checks if a newer version is available. If it is, will check if User is currently connected and push
-        /// a message.
+        /// Fetches the latest release from Github
         /// </summary>
-        public async Task CheckForUpdate()
+        public async Task<UpdateNotificationDto> CheckForUpdate()
         {
-
             var update = await GetGithubRelease();
+            return CreateDto(update);
+        }
 
-            if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
+        {
+            var updates = await GetGithubReleases();
+            return updates.Select(CreateDto);
+        }
 
-            var admins = await _tracker.GetOnlineAdmins();
+        private UpdateNotificationDto? CreateDto(GithubReleaseMetadata update)
+        {
+            if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
             var version = update.Tag_Name.Replace("v", string.Empty);
             var updateVersion = new Version(version);
+
+            return new UpdateNotificationDto()
+            {
+                CurrentVersion = version,
+                UpdateVersion = updateVersion.ToString(),
+                UpdateBody = _markdown.Transform(update.Body.Trim()),
+                UpdateTitle = update.Name,
+                UpdateUrl = update.Html_Url,
+                IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
+            };
+        }
+
+        public async Task PushUpdate(UpdateNotificationDto update)
+        {
+            if (update == null) return;
+
+            var admins = await _tracker.GetOnlineAdmins();
+            var updateVersion = new Version(update.CurrentVersion);
+
             if (BuildInfo.Version < updateVersion)
             {
                 _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
@@ -74,10 +123,8 @@ namespace API.Services.Tasks
             }
         }
 
-        private async Task SendEvent(GithubReleaseMetadata update, IReadOnlyList<string> admins)
+        private async Task SendEvent(UpdateNotificationDto update, IReadOnlyList<string> admins)
         {
-            var version = update.Tag_Name.Replace("v", string.Empty);
-            var updateVersion = new Version(version);
             var connections = new List<string>();
             foreach (var admin in admins)
             {
@@ -87,24 +134,27 @@ namespace API.Services.Tasks
             await _messageHub.Clients.Users(admins).SendAsync("UpdateAvailable", new SignalRMessage
             {
                 Name = "UpdateAvailable",
-                Body = new
-                {
-                    CurrentVersion = version,
-                    UpdateVersion = updateVersion.ToString(),
-                    UpdateBody =  _markdown.Transform(update.Body.Trim()),
-                    UpdateTitle = update.Name,
-                    UpdateUrl = update.Html_Url,
-                    IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
-                }
+                Body = update
             });
         }
 
+
         private static async Task<GithubReleaseMetadata> GetGithubRelease()
         {
-            var update = await "https://api.github.com/repos/Kareadita/Kavita/releases/latest"
+            var update = await GithubLatestReleasesUrl
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .GetJsonAsync<GithubReleaseMetadata>();
+
+            return update;
+        }
+
+        private static async Task<IEnumerable<GithubReleaseMetadata>> GetGithubReleases()
+        {
+            var update = await GithubAllReleasesUrl
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .GetJsonAsync<IEnumerable<GithubReleaseMetadata>>();
 
             return update;
         }

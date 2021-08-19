@@ -7,27 +7,30 @@ using Microsoft.AspNetCore.SignalR;
 namespace API.SignalR
 {
 
+    /// <summary>
+    /// Generic hub for sending messages to UI
+    /// </summary>
     [Authorize]
     public class MessageHub : Hub
     {
-        private static readonly HashSet<string> _connections = new HashSet<string>();
+        private static readonly HashSet<string> Connections = new HashSet<string>();
 
         public static bool IsConnected
         {
             get
             {
-                lock (_connections)
+                lock (Connections)
                 {
-                    return _connections.Count != 0;
+                    return Connections.Count != 0;
                 }
             }
         }
 
         public override async Task OnConnectedAsync()
         {
-            lock (_connections)
+            lock (Connections)
             {
-                _connections.Add(Context.ConnectionId);
+                Connections.Add(Context.ConnectionId);
             }
 
             await base.OnConnectedAsync();
@@ -35,9 +38,9 @@ namespace API.SignalR
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            lock (_connections)
+            lock (Connections)
             {
-                _connections.Remove(Context.ConnectionId);
+                Connections.Remove(Context.ConnectionId);
             }
 
             await base.OnDisconnectedAsync(exception);
