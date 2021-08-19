@@ -18,7 +18,7 @@ import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-seri
   styleUrls: ['./series-card.component.scss']
 })
 export class SeriesCardComponent implements OnInit, OnChanges {
-  @Input() data: Series | undefined;
+  @Input() data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
   @Output() clicked = new EventEmitter<Series>();
@@ -50,7 +50,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series)).filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.data));
       this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
     }
   }

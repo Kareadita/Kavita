@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
@@ -154,6 +155,11 @@ export class ActionFactoryService {
   getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
     this.collectionTagActions.forEach(action => action.callback = callback);
     return this.collectionTagActions;
+  }
+
+  filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
+    if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
+    return true;
   }
 
   dummyCallback(action: Action, data: any) {}
