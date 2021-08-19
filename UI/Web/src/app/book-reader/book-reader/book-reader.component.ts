@@ -21,6 +21,7 @@ import { Stack } from 'src/app/shared/data-structures/stack';
 import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
+import { ScrollService } from 'src/app/scroll.service';
 
 
 interface PageStyle {
@@ -149,7 +150,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
-    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService) {
+    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
+    private scrollService: ScrollService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -207,9 +209,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.isLoading) return;
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
-          const verticalOffset = (window.pageYOffset 
-            || document.documentElement.scrollTop 
-            || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
+          const verticalOffset = this.scrollService.scrollPosition + (document.body.offsetHeight / 2);
         
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
@@ -518,15 +518,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
-      window.scroll({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
+      this.scrollService.scrollTo(scrollTop);
     } else {
-      window.scroll({
-        top: 0,
-        behavior: 'smooth'
-      });
+      this.scrollService.scrollTo(0);
     }
   }
 
@@ -754,10 +748,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    window.scroll({
-      top: element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET,
-      behavior: 'smooth' 
-    });
+    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET);
   }
 
   toggleClickToPaginate() {

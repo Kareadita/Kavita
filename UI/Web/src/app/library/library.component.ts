@@ -5,6 +5,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
+import { ScrollService } from '../scroll.service';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
@@ -42,7 +43,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
     private collectionService: CollectionTagService, private router: Router, 
-    private modalService: NgbModal, private titleService: Title, public imageService: ImageService) { }
+    private modalService: NgbModal, private titleService: Title, public imageService: ImageService, 
+    private scrollService: ScrollService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -85,7 +87,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
     }
 
     this.loadInProgress();
-    
     this.reloadTags();
   }
 
