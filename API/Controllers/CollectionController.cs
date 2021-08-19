@@ -116,6 +116,8 @@ namespace API.Controllers
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 
+                tag.CoverImageLocked = updateSeriesForTagDto.Tag.CoverImageLocked;
+
                 if (!updateSeriesForTagDto.Tag.CoverImageLocked)
                 {
                     tag.CoverImageLocked = false;

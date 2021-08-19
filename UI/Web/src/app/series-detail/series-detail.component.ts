@@ -116,11 +116,6 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this)).filter(action => action.action !== Action.Edit);
-    this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
-    this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-
-
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
@@ -243,6 +238,12 @@ export class SeriesDetailComponent implements OnInit {
       this.createHTML();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
+
+      this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
+              .filter(action => action.action !== Action.Edit)
+              .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
+      this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
