@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.Interfaces.Services;
 using API.SignalR;
 using API.SignalR.Presence;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Kavita.Common.EnvironmentInfo;
 using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
@@ -36,18 +38,34 @@ namespace API.Services.Tasks
         public string Html_Url { get; init; }
     }
 
+    public class UntrustedCertClientFactory : DefaultHttpClientFactory
+    {
+        public override HttpMessageHandler CreateMessageHandler() {
+            return new HttpClientHandler {
+                ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+            };
+        }
+    }
+
     public class VersionUpdaterService : IVersionUpdaterService
     {
         private readonly ILogger<VersionUpdaterService> _logger;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly IPresenceTracker _tracker;
         private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+        private static readonly string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
+        private static readonly string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 
         public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
         {
             _logger = logger;
             _messageHub = messageHub;
             _tracker = tracker;
+
+            FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+            FlurlHttp.ConfigureClient(GithubAllReleasesUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
         }
 
         /// <summary>
@@ -123,7 +141,7 @@ namespace API.Services.Tasks
 
         private static async Task<GithubReleaseMetadata> GetGithubRelease()
         {
-            var update = await "https://api.github.com/repos/Kareadita/Kavita/releases/latest"
+            var update = await GithubLatestReleasesUrl
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .GetJsonAsync<GithubReleaseMetadata>();
@@ -133,7 +151,7 @@ namespace API.Services.Tasks
 
         private static async Task<IEnumerable<GithubReleaseMetadata>> GetGithubReleases()
         {
-            var update = await "https://api.github.com/repos/Kareadita/Kavita/releases"
+            var update = await GithubAllReleasesUrl
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .GetJsonAsync<IEnumerable<GithubReleaseMetadata>>();
