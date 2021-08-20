@@ -74,7 +74,7 @@ namespace API.Services.Tasks
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
 
                 CleanupDbEntities();
-                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             }
             else
@@ -132,11 +132,14 @@ namespace API.Services.Tasks
           {
              ScanLibrary(lib.Id, false);
           }
+
        }
 
 
        /// <summary>
-       /// Scans a library for file changes. If force update passed, all entities will be rechecked for new cover images and comicInfo.xml changes.
+       /// Scans a library for file changes.
+       /// Will kick off a scheduled background task to refresh metadata,
+       /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
        /// </summary>
        /// <param name="libraryId"></param>
        /// <param name="forceUpdate"></param>

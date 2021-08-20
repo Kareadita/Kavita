@@ -119,7 +119,6 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _cleanupService.Cleanup());
         }
 
-
         public void CleanupChapters(int[] chapterIds)
         {
             BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
