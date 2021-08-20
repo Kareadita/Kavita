@@ -49,7 +49,7 @@ namespace API
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
-                var filePath = Path.Combine(System.AppContext.BaseDirectory, "API.xml");
+                var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
                 c.IncludeXmlComments(filePath);
             });
             services.AddResponseCompression(options =>

@@ -42,7 +42,7 @@ namespace API.Services.Tasks
     {
         public override HttpMessageHandler CreateMessageHandler() {
             return new HttpClientHandler {
-                ServerCertificateCustomValidationCallback = (a, b, c, d) => true
+                ServerCertificateCustomValidationCallback = (_, _, _, _) => true
             };
         }
     }
@@ -87,7 +87,7 @@ namespace API.Services.Tasks
             return updates.Select(CreateDto);
         }
 
-        private UpdateNotificationDto? CreateDto(GithubReleaseMetadata update)
+        private UpdateNotificationDto CreateDto(GithubReleaseMetadata update)
         {
             if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
             var version = update.Tag_Name.Replace("v", string.Empty);

@@ -320,7 +320,7 @@ namespace API.Services
             var fileCount = 0;
 
             // Determine whether to parallelize file processing on each folder based on processor count.
-            var procCount = Environment.ProcessorCount;
+            //var procCount = Environment.ProcessorCount;
 
             // Data structure to hold names of subfolders to be examined for files.
             var dirs = new Stack<string>();

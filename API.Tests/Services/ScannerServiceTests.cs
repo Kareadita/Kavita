@@ -33,7 +33,6 @@ namespace API.Tests.Services
         private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IImageService _imageService = Substitute.For<IImageService>();
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
-        private readonly IDirectoryService _directoryService = Substitute.For<IDirectoryService>();
         private readonly ICacheService _cacheService = Substitute.For<ICacheService>();
 
         private readonly DbConnection _connection;
