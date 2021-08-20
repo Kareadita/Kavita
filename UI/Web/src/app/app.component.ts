@@ -7,7 +7,7 @@ import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
 import { PresenceHubService } from './_services/presence-hub.service';
 import { StatsService } from './_services/stats.service';
-import 'rxjs/add/operator/filter';
+import { filter } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
     
     // Close any open modals when a route change occurs
     router.events
-      .filter(event => event instanceof NavigationStart)
+      .pipe(filter(event => event instanceof NavigationStart))
       .subscribe((event) => {
         if (this.ngbModal.hasOpenModals()) {
           this.ngbModal.dismissAll();
