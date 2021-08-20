@@ -70,7 +70,7 @@ namespace API.Services
             if (!chapter.CoverImageLocked
                 && ShouldFindCoverImage(chapter.CoverImage, forceUpdate)
                 && firstFile != null
-                && new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))
+                && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified)))
             {
                 chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
@@ -91,19 +91,7 @@ namespace API.Services
 
             if (firstChapter == null) return;
 
-            // Skip calculating Cover Image (I/O) if the chapter already has it set
-            if (!firstChapter.CoverImageLocked && ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
-            {
-                // NOTE: Why do I do this? By the time this method gets executed, the chapter has already been calculated for
-                // Plus how can we have a volume without at least 1 chapter?
-                var firstFile = firstChapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null && new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))
-                {
-                    firstChapter.CoverImage = GetCoverImage(firstFile);
-                }
-            }
             volume.CoverImage = firstChapter.CoverImage;
-
         }
 
         /// <summary>
