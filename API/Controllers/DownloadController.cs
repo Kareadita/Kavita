@@ -70,7 +70,7 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
+                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_v{volumeId}");
                 return File(fileBytes, DefaultContentType, $"{series.Name} - Volume {volume.Number}.zip");
             }
@@ -116,7 +116,7 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
+                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_c{chapterId}");
                 return File(fileBytes, DefaultContentType, $"{series.Name} - Chapter {chapter.Number}.zip");
             }
@@ -137,7 +137,7 @@ namespace API.Controllers
                 {
                     return await GetFirstFileDownload(files);
                 }
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
+                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     $"download_{User.GetUsername()}_s{seriesId}");
                 return File(fileBytes, DefaultContentType, $"{series.Name}.zip");
             }
@@ -194,11 +194,11 @@ namespace API.Controllers
                 var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
                 // Filter out images that aren't in bookmarks
                 Array.Sort(files, _numericComparer);
-                totalFilePaths.AddRange(files.Where((t, i) => chapterPages.Contains(i)));
+                totalFilePaths.AddRange(files.Where((_, i) => chapterPages.Contains(i)));
             }
 
 
-            var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(totalFilePaths,
+            var (fileBytes, _) = await _archiveService.CreateZipForDownload(totalFilePaths,
                 tempFolder);
             DirectoryService.ClearAndDeleteDirectory(fullExtractPath);
             return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");

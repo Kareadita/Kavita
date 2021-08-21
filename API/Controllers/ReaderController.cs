@@ -368,7 +368,7 @@ namespace API.Controllers
         /// <summary>
         /// Removes all bookmarks for all chapters linked to a Series
         /// </summary>
-        /// <param name="seriesId"></param>
+        /// <param name="dto"></param>
         /// <returns></returns>
         [HttpPost("remove-bookmarks")]
         public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)

@@ -5,14 +5,15 @@ namespace API.Extensions
 {
     public static class FileInfoExtensions
     {
-        public static bool DoesLastWriteMatch(this FileInfo fileInfo, DateTime comparison)
+        /// <summary>
+        /// Checks if the last write time of the file is after the passed date
+        /// </summary>
+        /// <param name="fileInfo"></param>
+        /// <param name="comparison"></param>
+        /// <returns></returns>
+        public static bool HasFileBeenModifiedSince(this FileInfo fileInfo, DateTime comparison)
         {
-            return comparison.Equals(fileInfo.LastWriteTime);
-        }
-
-        public static bool IsLastWriteLessThan(this FileInfo fileInfo, DateTime comparison)
-        {
-            return fileInfo.LastWriteTime < comparison;
+            return fileInfo?.LastWriteTime > comparison;
         }
     }
 }

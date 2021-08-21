@@ -9,7 +9,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
-using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services

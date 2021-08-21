@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
-using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -26,11 +25,10 @@ namespace API.Controllers
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
         private readonly ICacheService _cacheService;
-        private readonly ITaskScheduler _taskScheduler;
         private readonly IVersionUpdaterService _versionUpdaterService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService, ITaskScheduler taskScheduler,
+            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
             IVersionUpdaterService versionUpdaterService)
         {
             _applicationLifetime = applicationLifetime;
@@ -39,7 +37,6 @@ namespace API.Controllers
             _backupService = backupService;
             _archiveService = archiveService;
             _cacheService = cacheService;
-            _taskScheduler = taskScheduler;
             _versionUpdaterService = versionUpdaterService;
         }
 
