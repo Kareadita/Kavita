@@ -136,6 +136,7 @@ jobs:
         id: parse-body
         run: |
           body='${{ steps.findPr.outputs.body }}'
+          body=${body//\'/}
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
