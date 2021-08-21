@@ -41,7 +41,7 @@ export class MessageHubService {
     .catch(err => console.error(err));
 
     this.hubConnection.on('receiveMessage', body => {
-      console.log('[Hub] Body: ', body);
+      //console.log('[Hub] Body: ', body);
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

@@ -94,12 +94,12 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     if (url && url != '') {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
-      img.src = this.form.get('coverImageUrl')?.value;
       img.onload = (e) => this.handleUrlImageAdd(e);
       img.onerror = (e) => {
         this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
         this.form.get('coverImageUrl')?.setValue('');  
-      }
+      };
+      img.src = this.form.get('coverImageUrl')?.value;
       this.form.get('coverImageUrl')?.setValue('');
     }
   }
@@ -135,7 +135,6 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   }
 
   handleUrlImageAdd(e: any) {
-    console.log(e);
     if (e.path === null || e.path.length === 0) return;
 
     const url = this.getBase64Image(e.path[0]);
