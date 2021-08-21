@@ -135,11 +135,11 @@ jobs:
       - name: Parse PR body
         id: parse-body
         run: |
-          body='${{ steps.findPr.outputs.body }}'
+          body="${{ steps.findPr.outputs.body }}"
           body=${body//\'/}
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
           echo $body
           echo "::set-output name=BODY::$body"
 
@@ -237,11 +237,11 @@ jobs:
       - name: Parse PR body
         id: parse-body
         run: |
-          body='${{ steps.findPr.outputs.body }}'
+          body="${{ steps.findPr.outputs.body }}"
           body=${body//\'/}
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
           echo $body
           echo "::set-output name=BODY::$body"
 
