@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Parser;
 using Xunit;
@@ -403,6 +403,10 @@ namespace API.Tests.Parser
               Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
               FullFilePath = filepath, IsSpecial = false
             });
+
+            // If an image is cover exclusively, ignore it
+            filepath = @"E:\Manga\Seraph of the End\cover.png";
+            expected.Add(filepath, null);
 
 
             foreach (var file in expected.Keys)
