@@ -461,7 +461,7 @@ export class SeriesDetailComponent implements OnInit {
         }),
         finalize(() => {
           this.downloadInProgress = false;
-        }));
+        })).subscribe(() => {/* No Operation */});;
     });
   }
 }
