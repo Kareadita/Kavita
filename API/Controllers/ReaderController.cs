@@ -217,7 +217,7 @@ namespace API.Controllers
             foreach (var chapter in chapters)
             {
                 user.Progresses ??= new List<AppUserProgress>();
-                var userProgress = user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                var userProgress = user.Progresses.FirstOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
 
                 if (userProgress == null)
                 {
