@@ -56,7 +56,7 @@ namespace API.Services
             if (isCoverLocked) return false;
             if (forceUpdate) return true;
             return (firstFile != null &&
-                    new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified) &&
+                    !new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified) &&
                     (coverImage == null || !coverImage.Any()));
         }
 

@@ -35,5 +35,16 @@ namespace API.Tests.Services
                 LastModified = DateTime.Now
             }, false, false));
         }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnSecondRunFileModified()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = DateTime.Now.AddDays(1)
+            }, false, false));
+        }
     }
 }
