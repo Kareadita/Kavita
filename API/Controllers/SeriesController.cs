@@ -155,14 +155,14 @@ namespace API.Controllers
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
             series.SortName = updateSeries.SortName?.Trim();
-            series.Summary = updateSeries.Summary?.Trim(); // BUG: There was an exceptionSystem.NullReferenceException: Object reference not set to an instance of an object.
+            series.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
-            if (!updateSeries.CoverImageLocked)
+            if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
             {
                 // Trigger a refresh when we are moving from a locked image to a non-locked
-                needsRefreshMetadata = series.CoverImageLocked && !updateSeries.CoverImageLocked;
-                series.CoverImageLocked = false;
+                needsRefreshMetadata = true;
+                series.CoverImageLocked = updateSeries.CoverImageLocked;
             }
 
             _unitOfWork.SeriesRepository.Update(series);
