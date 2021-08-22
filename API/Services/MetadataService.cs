@@ -37,9 +37,27 @@ namespace API.Services
             _imageService = imageService;
         }
 
-        private static bool ShouldFindCoverImage(byte[] coverImage, bool forceUpdate = false)
+        private static bool IsCoverImageSet(byte[] coverImage, bool forceUpdate = false)
         {
-            return forceUpdate || coverImage == null || !coverImage.Any();
+            return coverImage == null || !coverImage.Any();
+        }
+
+        /// <summary>
+        /// Determines whether an entity should regenerate cover image
+        /// </summary>
+        /// <param name="coverImage"></param>
+        /// <param name="firstFile"></param>
+        /// <param name="forceUpdate"></param>
+        /// <param name="isCoverLocked"></param>
+        /// <returns></returns>
+        public static bool ShouldUpdateCoverImage(byte[] coverImage, MangaFile firstFile, bool forceUpdate = false,
+            bool isCoverLocked = false)
+        {
+            if (isCoverLocked) return false;
+            if (forceUpdate) return true;
+            return (firstFile != null &&
+                    new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified) &&
+                    (coverImage == null || !coverImage.Any()));
         }
 
         private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
@@ -67,14 +85,22 @@ namespace API.Services
         public void UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if ((!chapter.CoverImageLocked
-                && ShouldFindCoverImage(chapter.CoverImage, forceUpdate)
-                && firstFile != null)
-                || (!chapter.CoverImageLocked && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))))
+           // if (chapter.CoverImageLocked) return;
+
+            if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
                 chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
             }
+
+            //     if ((!chapter.CoverImageLocked
+            //          && IsCoverImageSet(chapter.CoverImage, forceUpdate)
+            //          && firstFile != null)
+            //         || (!chapter.CoverImageLocked && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))))
+            // {
+            //     chapter.Files ??= new List<MangaFile>();
+            //     chapter.CoverImage = GetCoverImage(firstFile);
+            // }
         }
 
         /// <summary>
@@ -84,7 +110,7 @@ namespace API.Services
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
-            if (volume == null || !ShouldFindCoverImage(volume.CoverImage, forceUpdate)) return;
+            if (volume == null || !IsCoverImageSet(volume.CoverImage, forceUpdate)) return;
 
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
@@ -102,7 +128,7 @@ namespace API.Services
         public void UpdateMetadata(Series series, bool forceUpdate)
         {
             if (series == null) return;
-            if (!series.CoverImageLocked && ShouldFindCoverImage(series.CoverImage, forceUpdate))
+            if (!series.CoverImageLocked && IsCoverImageSet(series.CoverImage, forceUpdate))
             {
                 series.Volumes ??= new List<Volume>();
                 var firstCover = series.Volumes.GetCoverImage(series.Format);
