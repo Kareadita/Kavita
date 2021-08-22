@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -67,10 +67,10 @@ namespace API.Services
         public void UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if (!chapter.CoverImageLocked
+            if ((!chapter.CoverImageLocked
                 && ShouldFindCoverImage(chapter.CoverImage, forceUpdate)
-                && firstFile != null
-                && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified)))
+                && firstFile != null)
+                || (!chapter.CoverImageLocked && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))))
             {
                 chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
