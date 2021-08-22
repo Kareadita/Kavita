@@ -53,7 +53,6 @@ namespace Kavita.Common
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
             const string key = "TokenKey";
-            if (jsonObj == null) return string.Empty;
 
             if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
             {
@@ -136,7 +135,6 @@ namespace Kavita.Common
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
             const string key = "Port";
-            if (jsonObj == null) return defaultPort;
 
             if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
             {
@@ -176,7 +174,6 @@ namespace Kavita.Common
          {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-            if (jsonObj == null) return string.Empty;
 
             if (jsonObj.TryGetProperty("Logging", out JsonElement tokenElement))
             {
@@ -212,7 +209,6 @@ namespace Kavita.Common
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
             const string key = "Branch";
-            if (jsonObj == null) return string.Empty;
 
             if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
             {

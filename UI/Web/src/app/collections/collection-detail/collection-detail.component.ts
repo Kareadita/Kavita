@@ -56,23 +56,27 @@ export class CollectionDetailComponent implements OnInit {
         return;
       }
       const tagId = parseInt(routeId, 10);
-      this.collectionService.allTags().subscribe(tags => {
-        this.collections = tags;
-        const matchingTags = this.collections.filter(t => t.id === tagId);
-        if (matchingTags.length === 0) {
-          this.toastr.error('You don\'t have access to any libraries this tag belongs to or this tag is invalid');
-          
-          return;
-        }
-        this.collectionTag = matchingTags[0];
-        this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
-        this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
-        this.loadPage();
-      });
+      this.updateTag(tagId);
   }
 
   ngOnInit(): void {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+  }
+
+  updateTag(tagId: number) {
+    this.collectionService.allTags().subscribe(tags => {
+      this.collections = tags;
+      const matchingTags = this.collections.filter(t => t.id === tagId);
+      if (matchingTags.length === 0) {
+        this.toastr.error('You don\'t have access to any libraries this tag belongs to or this tag is invalid');
+        
+        return;
+      }
+      this.collectionTag = matchingTags[0];
+      this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
+      this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
+      this.loadPage();
+    });
   }
 
   onPageChange(pagination: Pagination) {
@@ -120,6 +124,7 @@ export class CollectionDetailComponent implements OnInit {
     const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
     modalRef.componentInstance.tag = this.collectionTag;
     modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+      this.updateTag(this.collectionTag.id);
       this.loadPage();
       if (results.coverImageUpdated) {
         this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
