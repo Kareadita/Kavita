@@ -522,13 +522,7 @@ namespace API.Services.Tasks
              if (file != null)
              {
                 chapter.Files.Add(file);
-                existingFile = chapter.Files.Last();
              }
-          }
-
-          if (existingFile != null)
-          {
-             existingFile.LastModified = new FileInfo(existingFile.FilePath).LastWriteTime;
           }
        }
     }

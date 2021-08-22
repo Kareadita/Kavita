@@ -13,7 +13,8 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool HasFileBeenModifiedSince(this FileInfo fileInfo, DateTime comparison)
         {
-            return fileInfo?.LastWriteTime > comparison;
+            return DateTime.Compare(fileInfo.LastWriteTime, comparison) > 0;
+            //return fileInfo?.LastWriteTime > comparison;
         }
     }
 }
