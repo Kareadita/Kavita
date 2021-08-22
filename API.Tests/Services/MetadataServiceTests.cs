@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using API.Entities;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -11,24 +12,26 @@ namespace API.Tests.Services
 {
     public class MetadataServiceTests
     {
-        // private readonly MetadataService _metadataService;
-        // private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
-        // private readonly IImageService _imageService = Substitute.For<IImageService>();
-        // private readonly IBookService _bookService = Substitute.For<IBookService>();
-        // private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
-        // private readonly ILogger<MetadataService> _logger = Substitute.For<ILogger<MetadataService>>();
-        //
-        // public MetadataServiceTests()
-        // {
-        //     _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService);
-        // }
+        private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+        private readonly MetadataService _metadataService;
+        private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
+        private readonly IImageService _imageService = Substitute.For<IImageService>();
+        private readonly IBookService _bookService = Substitute.For<IBookService>();
+        private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
+        private readonly ILogger<MetadataService> _logger = Substitute.For<ILogger<MetadataService>>();
+
+        public MetadataServiceTests()
+        {
+            _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService);
+        }
 
         [Fact]
-        public void ShouldUpdateCoverImage_ShouldReturnFalse()
+        public void ShouldUpdateCoverImage_OnFirstRun()
         {
-            Assert.False(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
             {
-                FilePath = String.Empty,
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = DateTime.Now
             }, false, false));
         }
