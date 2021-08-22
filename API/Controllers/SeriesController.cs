@@ -160,8 +160,9 @@ namespace API.Controllers
             var needsRefreshMetadata = false;
             if (!updateSeries.CoverImageLocked)
             {
+                // Trigger a refresh when we are moving from a locked image to a non-locked
+                needsRefreshMetadata = series.CoverImageLocked && !updateSeries.CoverImageLocked;
                 series.CoverImageLocked = false;
-                needsRefreshMetadata = true;
             }
 
             _unitOfWork.SeriesRepository.Update(series);
