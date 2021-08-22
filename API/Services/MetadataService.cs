@@ -70,7 +70,7 @@ namespace API.Services
             if ((!chapter.CoverImageLocked
                 && ShouldFindCoverImage(chapter.CoverImage, forceUpdate)
                 && firstFile != null)
-                || (!chapter.CoverImageLocked && (forceUpdate || new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified))))
+                || (!chapter.CoverImageLocked && (forceUpdate || (firstFile != null && new FileInfo(firstFile.FilePath).HasFileBeenModifiedSince(firstFile.LastModified)))))
             {
                 chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
