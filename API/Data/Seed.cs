@@ -60,11 +60,11 @@ namespace API.Data
             }
 
             await context.SaveChangesAsync();
-            
+
             // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
-            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.Port).Value =
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
                 Configuration.Port + string.Empty;
-            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.LoggingLevel).Value =
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
 
             await context.SaveChangesAsync();
@@ -74,11 +74,11 @@ namespace API.Data
         public static async Task SeedSeriesMetadata(DataContext context)
         {
             await context.Database.EnsureCreatedAsync();
-            
+
             context.Database.EnsureCreated();
             var series = await context.Series
                 .Include(s => s.Metadata).ToListAsync();
-                
+
             foreach (var s in series)
             {
                 s.Metadata ??= new SeriesMetadata();

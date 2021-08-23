@@ -8,7 +8,8 @@ export interface Series {
     localizedName: string;
     sortName: string;
     summary: string;
-    coverImage: string;
+    coverImage: string; // This is not passed from backend any longer. TODO: Remove this field
+    coverImageLocked: boolean;
     volumes: Volume[];
     pages: number; // Total pages in series
     pagesRead: number; // Total pages the logged in user has read

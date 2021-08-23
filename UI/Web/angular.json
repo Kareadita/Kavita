@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "cli": {
+    "analytics": "6b518972-3ce0-486d-bc55-740bf8308c77"
+  },
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
@@ -39,7 +42,11 @@
               "src/styles.scss",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/lazysizes/lazysizes.min.js",
+              "node_modules/lazysizes/plugins/rias/ls.rias.min.js",
+              "node_modules/lazysizes/plugins/attrchange/ls.attrchange.min.js"
+            ]
           },
           "configurations": {
             "production": {

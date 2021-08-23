@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
@@ -14,14 +15,15 @@ export enum Action {
   Edit = 4,
   Info = 5,
   RefreshMetadata = 6,
-  Download = 7
+  Download = 7,
+  Bookmarks = 8
 }
 
 export interface ActionItem<T> {
   title: string;
   action: Action;
   callback: (action: Action, data: T) => void;
-
+  requiresAdmin: boolean;
 }
 
 @Injectable({
@@ -58,43 +60,57 @@ export class ActionFactoryService {
         this.collectionTagActions.push({
           action: Action.Edit,
           title: 'Edit',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Series',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Metadata',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.seriesActions.push({
           action: Action.Edit,
           title: 'Edit',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.libraryActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Library',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
         });
 
         this.libraryActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Metadata',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: true
+        });
+    
+        this.chapterActions.push({
+          action: Action.Edit,
+          title: 'Edit',
+          callback: this.dummyCallback,
+          requiresAdmin: false
         });
       }
 
@@ -102,13 +118,15 @@ export class ActionFactoryService {
         this.volumeActions.push({
           action: Action.Download,
           title: 'Download',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: false
         });
 
         this.chapterActions.push({
           action: Action.Download,
           title: 'Download',
-          callback: this.dummyCallback
+          callback: this.dummyCallback,
+          requiresAdmin: false
         });
       }
     });
@@ -139,6 +157,11 @@ export class ActionFactoryService {
     return this.collectionTagActions;
   }
 
+  filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
+    if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
+    return true;
+  }
+
   dummyCallback(action: Action, data: any) {}
 
   _resetActions() {
@@ -150,12 +173,20 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
+      }, 
+      {
+        action: Action.Bookmarks,
+        title: 'Bookmarks',
+        callback: this.dummyCallback,
+          requiresAdmin: false
       }
     ];
 
@@ -163,12 +194,20 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+          requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.Edit,
+        title: 'Info',
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
 
@@ -176,27 +215,15 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
-        callback: this.dummyCallback
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
-
-    this.volumeActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback
-    });
-
-    this.chapterActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback
-    });
-
-
   }
 }

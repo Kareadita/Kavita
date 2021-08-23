@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,6 +16,7 @@ namespace API.Parser
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
+        public const string MacOsMetadataFileStartsWith = @"._";
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
@@ -551,6 +552,8 @@ namespace API.Parser
                 };
             }
 
+            if (IsImage(filePath) && IsCoverImage(fileName)) return null;
+
             if (IsImage(filePath))
             {
               // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
@@ -1025,6 +1028,7 @@ namespace API.Parser
         {
             return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
+
 
         /// <summary>
         /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image

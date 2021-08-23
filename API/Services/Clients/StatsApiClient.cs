@@ -11,7 +11,9 @@ namespace API.Services.Clients
     {
         private readonly HttpClient _client;
         private readonly ILogger<StatsApiClient> _logger;
+#pragma warning disable S1075
         private const string ApiUrl = "http://stats.kavitareader.com";
+#pragma warning restore S1075
 
         public StatsApiClient(HttpClient client, ILogger<StatsApiClient> logger)
         {
@@ -39,16 +41,12 @@ namespace API.Services.Clients
                     response = responseContent
                 };
 
-                _logger.LogError(e, "The StatsServer did not respond successfully. {Content}", info);
-
-                Console.WriteLine(e);
+                _logger.LogError(e, "KavitaStats did not respond successfully. {Content}", info);
                 throw;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "An error happened during the request to the Stats Server");
-
-                Console.WriteLine(e);
+                _logger.LogError(e, "An error happened during the request to KavitaStats");
                 throw;
             }
         }

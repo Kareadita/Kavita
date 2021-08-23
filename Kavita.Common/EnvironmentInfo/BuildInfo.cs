@@ -20,7 +20,7 @@ namespace Kavita.Common.EnvironmentInfo
             var config = attributes.OfType<AssemblyConfigurationAttribute>().FirstOrDefault();
             if (config != null)
             {
-                Branch = config.Configuration; // TODO: This is not helpful, better to have main/develop branch
+                Branch = config.Configuration; // NOTE: This is not helpful, better to have main/develop branch
             }
 
             Release = $"{Version}-{Branch}";

@@ -5,6 +5,8 @@ using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,18 +16,20 @@ namespace API.Data
     {
         private readonly DataContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IMapper _mapper;
 
-        public UserRepository(DataContext context, UserManager<AppUser> userManager)
+        public UserRepository(DataContext context, UserManager<AppUser> userManager, IMapper mapper)
         {
             _context = context;
             _userManager = userManager;
+            _mapper = mapper;
         }
 
         public void Update(AppUser user)
         {
             _context.Entry(user).State = EntityState.Modified;
         }
-        
+
         public void Update(AppUserPreferences preferences)
         {
             _context.Entry(preferences).State = EntityState.Modified;
@@ -45,6 +49,7 @@ namespace API.Data
         {
             return await _context.Users
                 .Include(u => u.Progresses)
+                .Include(u => u.Bookmarks)
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
@@ -70,6 +75,47 @@ namespace API.Data
                 .Include(p => p.AppUser)
                 .SingleOrDefaultAsync(p => p.AppUser.UserName == username);
         }
+
+        public async Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId)
+        {
+            return await _context.AppUserBookmark
+                .Where(x => x.AppUserId == userId && x.SeriesId == seriesId)
+                .OrderBy(x => x.Page)
+                .AsNoTracking()
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId)
+        {
+            return await _context.AppUserBookmark
+                .Where(x => x.AppUserId == userId && x.VolumeId == volumeId)
+                .OrderBy(x => x.Page)
+                .AsNoTracking()
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId)
+        {
+            return await _context.AppUserBookmark
+                .Where(x => x.AppUserId == userId && x.ChapterId == chapterId)
+                .OrderBy(x => x.Page)
+                .AsNoTracking()
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId)
+        {
+            return await _context.AppUserBookmark
+                .Where(x => x.AppUserId == userId)
+                .OrderBy(x => x.Page)
+                .AsNoTracking()
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {

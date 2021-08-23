@@ -9,9 +9,11 @@ namespace API.Entities
         public string Name { get; set; }
         // MetadataUpdate add ProviderId
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

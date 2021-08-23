@@ -1,7 +1,7 @@
 ﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
-![Cover Image](https://github.com/Kareadita/kareadita.github.io/blob/main/img/features/seriesdetail.PNG?raw=true)
+!![high level view](https://user-images.githubusercontent.com/735851/129777364-2c82d01e-5c03-4daf-b203-92b1d48e5b7b.gif)
 
 Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga, 
 and the goal of being a full solution for all your reading needs. Setup your own server and share 
@@ -122,3 +122,4 @@ Thank you to [<img src="/Logo/sentry.svg" alt="" width="64">](https://sentry.io/
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2020-2021
+
