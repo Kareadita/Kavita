@@ -6,6 +6,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
@@ -88,7 +89,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
-            var feed = CreateFeed(series.Name + " - Volumes", $"{Prefix}/series/{series.Id}");
+            var feed = CreateFeed(series.Name + " - Volumes", $"series/{series.Id}");
             feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
             {
@@ -99,7 +100,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/volume-cover?seriesId={volumeDto.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/volume-cover?volumeId={volumeDto.Id}")
                     }
                 });
             }
@@ -121,7 +122,7 @@ namespace API.Controllers
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId);
 
-            var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{Prefix}/series/{seriesId}/volume/{volumeId}");
+            var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"series/{seriesId}/volume/{volumeId}");
             foreach (var chapter in chapters)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -131,7 +132,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeId}/chapter/{chapter.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?seriesId={chapter.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?chapterId={chapter.Id}")
                     }
                 });
             }
@@ -155,7 +156,7 @@ namespace API.Controllers
             var chapter = await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId);
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
 
-            var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{Prefix}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}");
+            var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"series/{seriesId}/volume/{volumeId}/chapter/{chapterId}");
             foreach (var mangaFile in files)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -164,7 +165,13 @@ namespace API.Controllers
                     Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
                     Links = new List<FeedLink>()
                     {
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?seriesId={chapter.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?chapterId={chapter.Id}"),
+
+                    },
+                    Content = new FeedEntryContent()
+                    {
+                        Text = Path.GetFileNameWithoutExtension(mangaFile.FilePath),
+                        Type = mangaFile.Format.ToString()
                     }
                 });
             }
