@@ -50,6 +50,5 @@ namespace API.DTOs.OPDS
 
         // [XmlElement("category")]
         // public List<FeedCategory> Categories = new List<FeedCategory>();
-
     }
 }

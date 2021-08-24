@@ -21,7 +21,10 @@ namespace API.Controllers
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
         private const string Prefix = "/api/opds/";
-        private const string DefaultContentType = "application/octet-stream";
+        private readonly FilterDto _filterDto = new FilterDto()
+        {
+            MangaFormat = null
+        };
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService)
         {
@@ -76,7 +79,7 @@ namespace API.Controllers
             var user = GetUser();
             var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id);
 
-            var feed = CreateFeed("Recently Added", "recently-added");
+            var feed = CreateFeed("All Libraries", "libraries");
 
             foreach (var library in libraries)
             {
@@ -102,12 +105,25 @@ namespace API.Controllers
 
         [HttpGet("libraries/{libraryId}")]
         [Produces("application/xml")]
-        public async Task<IActionResult> GetSeriesForLibrary(int libraryId)
+        public async Task<IActionResult> GetSeriesForLibrary(int libraryId, [FromQuery] int pageNumber = 1)
         {
             var user = await GetUser();
-            var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId); // GetSeriesDtoForLibraryIdAsync
+            var library =
+                (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).SingleOrDefault(l =>
+                    l.Id == libraryId);
+            if (library == null)
+            {
+                return BadRequest("User does not have access to this library");
+            }
 
-            var feed = CreateFeed("Recently Added", "recently-added");
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, new UserParams()
+            {
+                PageNumber = pageNumber,
+                PageSize = 20
+            }, _filterDto);
+
+            var feed = CreateFeed(library.Name, $"libraries/{libraryId}");
+            AddPagination(feed, series, $"{Prefix}libraries/{libraryId}");
 
             foreach (var seriesDto in series)
             {
@@ -122,6 +138,8 @@ namespace API.Controllers
                     }
                 });
             }
+
+
 
 
             return new ContentResult
@@ -141,10 +159,7 @@ namespace API.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = 20
-            }, new FilterDto()
-            {
-                MangaFormat = null
-            });
+            }, _filterDto);
 
             var feed = CreateFeed("Recently Added", "recently-added");
             AddPagination(feed, recentlyAdded, $"{Prefix}recently-added");

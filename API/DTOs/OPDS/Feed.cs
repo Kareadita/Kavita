@@ -43,5 +43,20 @@ namespace API.DTOs.OPDS
 
         [XmlElement("entry")]
         public List<FeedEntry> Entries { get; set; } = new List<FeedEntry>();
+
+        public bool ShouldSerializeTotal()
+        {
+            return Total.HasValue;
+        }
+
+        public bool ShouldSerializeItemsPerPage()
+        {
+            return ItemsPerPage.HasValue;
+        }
+
+        public bool ShouldSerializeStartIndex()
+        {
+            return StartIndex.HasValue;
+        }
     }
 }
