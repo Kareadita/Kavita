@@ -5,25 +5,26 @@ using System.Xml.Serialization;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
-using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Sentry;
 
 namespace API.Controllers
 {
     public class OpdsController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDownloadService _downloadService;
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
         private const string Prefix = "/api/opds/";
         private const string DefaultContentType = "application/octet-stream";
 
-        public OpdsController(IUnitOfWork unitOfWork)
+        public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService)
         {
             _unitOfWork = unitOfWork;
+            _downloadService = downloadService;
         }
 
         [HttpGet]
@@ -150,7 +151,7 @@ namespace API.Controllers
                 feed.Entries.Add(new FeedEntry()
                 {
                     Id = seriesDto.Id.ToString(),
-                    Title = seriesDto.Name,
+                    Title = $"{{seriesDto.Name}} ({seriesDto.Format})",
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesDto.Id}"),
@@ -207,7 +208,7 @@ namespace API.Controllers
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId);
+            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId); // TODO: Sort these numerically
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"series/{seriesId}/volume/{volumeId}");
             foreach (var chapter in chapters)
@@ -248,17 +249,17 @@ namespace API.Controllers
             {
                 feed.Entries.Add(new FeedEntry()
                 {
-                    Id = chapter.Id.ToString(),
+                    Id = mangaFile.Id.ToString(),
                     Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
-                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, $"download/chapter?chapterId={chapter.Id}")
+                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")
                     },
                     Content = new FeedEntryContent()
                     {
                         Text = Path.GetFileNameWithoutExtension(mangaFile.FilePath),
-                        Type = mangaFile.Format.ToString()
+                        Type = mangaFile.Format.ToString() // TODO: Should this be the underlying CBZ or CBR or just Archive?
                     }
                 });
             }
@@ -269,6 +270,14 @@ namespace API.Controllers
                 Content = SerializeXml(feed),
                 StatusCode = 200
             };
+        }
+
+        [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")]
+        public async Task<ActionResult> DownloadFile(int seriesId, int volumeId, int chapterId)
+        {
+            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
+            return File(bytes, contentType, fileDownloadName);
         }
 
         /// <summary>

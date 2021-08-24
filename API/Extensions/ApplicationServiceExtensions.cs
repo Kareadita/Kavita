@@ -34,6 +34,7 @@ namespace API.Extensions
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
+            services.AddScoped<IDownloadService, DownloadService>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 

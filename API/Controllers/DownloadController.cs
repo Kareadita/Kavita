@@ -25,15 +25,17 @@ namespace API.Controllers
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
+        private readonly IDownloadService _downloadService;
         private readonly NumericComparer _numericComparer;
         private const string DefaultContentType = "application/octet-stream";
 
-        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService)
+        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService, IDownloadService downloadService)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
             _cacheService = cacheService;
+            _downloadService = downloadService;
             _numericComparer = new NumericComparer();
         }
 
@@ -82,25 +84,8 @@ namespace API.Controllers
 
         private async Task<ActionResult> GetFirstFileDownload(IEnumerable<MangaFile> files)
         {
-            var firstFile = files.Select(c => c.FilePath).First();
-            var fileProvider = new FileExtensionContentTypeProvider();
-            // Figures out what the content type should be based on the file name.
-            if (!fileProvider.TryGetContentType(firstFile, out var contentType))
-            {
-                contentType = Path.GetExtension(firstFile).ToLowerInvariant() switch
-                {
-                    ".cbz" => "application/zip",
-                    ".cbr" => "application/vnd.rar",
-                    ".cb7" => "application/x-compressed",
-                    ".epub" => "application/epub+zip",
-                    ".7z" => "application/x-7z-compressed",
-                    ".7zip" => "application/x-7z-compressed",
-                    ".pdf" => "application/pdf",
-                    _ => contentType
-                };
-            }
-
-            return File(await _directoryService.ReadFileAsync(firstFile), contentType, Path.GetFileName(firstFile));
+            var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
+            return File(bytes, contentType, fileDownloadName);
         }
 
         [HttpGet("chapter")]
