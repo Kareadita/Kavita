@@ -13,6 +13,9 @@
         public const string Related = "related";
         public const string Image = "http://opds-spec.org/image";
         public const string Thumbnail = "http://opds-spec.org/image/thumbnail";
+        /// <summary>
+        /// This will allow for a download to occur
+        /// </summary>
         public const string Acquisition = "http://opds-spec.org/acquisition/open-access";
         public const string Stream = "http://vaemendis.net/opds-pse/stream";
     }

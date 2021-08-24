@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
@@ -145,19 +147,11 @@ namespace API.Controllers
             });
 
             var feed = CreateFeed("Recently Added", "recently-added");
+            AddPagination(feed, recentlyAdded, $"{Prefix}recently-added");
 
             foreach (var seriesDto in recentlyAdded)
             {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = seriesDto.Id.ToString(),
-                    Title = $"{{seriesDto.Name}} ({seriesDto.Format})",
-                    Links = new List<FeedLink>()
-                    {
-                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
-                    }
-                });
+                feed.Entries.Add(CreateSeries(seriesDto));
             }
 
 
@@ -168,7 +162,6 @@ namespace API.Controllers
                 StatusCode = 200
             };
         }
-
 
         [HttpGet("series/{seriesId}")]
         [Produces("application/xml")]
@@ -181,16 +174,7 @@ namespace API.Controllers
             feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
             {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = volumeDto.Id.ToString(),
-                    Title = "Volume " + volumeDto.Name,
-                    Links = new List<FeedLink>()
-                    {
-                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}")
-                    }
-                });
+                feed.Entries.Add(CreateVolume(volumeDto, seriesId));
             }
 
             return new ContentResult
@@ -200,6 +184,8 @@ namespace API.Controllers
                 StatusCode = 200
             };
         }
+
+
 
         [HttpGet("series/{seriesId}/volume/{volumeId}")]
         [Produces("application/xml")]
@@ -247,21 +233,7 @@ namespace API.Controllers
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"series/{seriesId}/volume/{volumeId}/chapter/{chapterId}");
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = mangaFile.Id.ToString(),
-                    Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
-                    Links = new List<FeedLink>()
-                    {
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
-                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")
-                    },
-                    Content = new FeedEntryContent()
-                    {
-                        Text = Path.GetFileNameWithoutExtension(mangaFile.FilePath),
-                        Type = mangaFile.Format.ToString() // TODO: Should this be the underlying CBZ or CBR or just Archive?
-                    }
-                });
+                feed.Entries.Add(CreateChapter(seriesId, volumeId, chapterId, mangaFile, series, volume, chapter));
             }
 
             return new ContentResult
@@ -278,6 +250,105 @@ namespace API.Controllers
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
             var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
             return File(bytes, contentType, fileDownloadName);
+        }
+
+        private void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
+        {
+            var url = href;
+            if (href.Contains("?"))
+            {
+                url += "&amp;";
+            }
+            else
+            {
+                url += "?";
+            }
+
+            if (list.CurrentPage > 1)
+            {
+                feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (list.CurrentPage - 1)));
+            }
+
+            if (list.CurrentPage + 1 < list.TotalPages)
+            {
+                feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (list.CurrentPage + 1)));
+            }
+
+            // Update self to point to current page
+            var selfLink = feed.Links.SingleOrDefault(l => l.Rel == FeedLinkRelation.Self);
+            if (selfLink != null)
+            {
+                selfLink.Href = url + "pageNumber=" + list.CurrentPage;
+            }
+
+
+            feed.Total = list.TotalPages * list.PageSize;
+            feed.ItemsPerPage = list.PageSize;
+            feed.StartIndex = (list.CurrentPage - 1) * list.PageSize;
+            if (feed.StartIndex == 0)
+            {
+                feed.StartIndex = 1;
+            }
+
+            //<link rel="next" title="Next" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="https://catalog.feedbooks.com/recent.atom?lang=en&amp;page=2"/>
+            // <opensearch:totalResults>349108</opensearch:totalResults>
+            //     <opensearch:itemsPerPage>50</opensearch:itemsPerPage>
+            //     <opensearch:startIndex>1</opensearch:startIndex>
+            // Prev only when applicable
+            // <link rel="previous" title="Previous" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="https://catalog.feedbooks.com/recent.atom?lang=en&amp;page=1"/>
+        }
+
+        private FeedEntry CreateSeries(SeriesDto seriesDto)
+        {
+            return new FeedEntry()
+            {
+                Id = seriesDto.Id.ToString(),
+                Title = $"{seriesDto.Name} ({seriesDto.Format})",
+                Summary = seriesDto.Summary,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
+                }
+            };
+        }
+
+        private FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId)
+        {
+            return new FeedEntry()
+            {
+                Id = volumeDto.Id.ToString(),
+                Title = "Volume " + volumeDto.Name,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}")
+                }
+            };
+        }
+
+        private FeedEntry CreateChapter(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, Volume volume, ChapterDto chapter)
+        {
+            return new FeedEntry()
+            {
+                Id = mangaFile.Id.ToString(),
+                Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
+                Extent = DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>() { mangaFile.FilePath })),
+                Format = mangaFile.Format.ToString(),
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
+                    CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")
+                },
+                Content = new FeedEntryContent()
+                {
+                    Text = Path.GetFileNameWithoutExtension(mangaFile.FilePath),
+                    Type = _downloadService.GetContentTypeFromFile(mangaFile.FilePath)
+                }
+            };
         }
 
         /// <summary>

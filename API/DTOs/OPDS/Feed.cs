@@ -29,11 +29,14 @@ namespace API.DTOs.OPDS
             Uri = "https://kavitareader.com"
         };
 
-        // [XmlElement("totalResults", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-        // public int? Total { get; set; }
-        //
-        // [XmlElement("itemsPerPage", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-        // public int ItemsPerPage { get; set; } = 20;
+        [XmlElement("totalResults", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+        public int? Total { get; set; } = null;
+
+        [XmlElement("itemsPerPage", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+        public int? ItemsPerPage { get; set; } = null;
+
+        [XmlElement("startIndex", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+        public int? StartIndex { get; set; } = null;
 
         [XmlElement("link")]
         public List<FeedLink> Links { get; set; } = new List<FeedLink>() ;
