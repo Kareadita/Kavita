@@ -101,7 +101,6 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetSeriesForLibrary(int libraryId)
         {
-            //var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId); // GetSeriesDtoForLibraryIdAsync
 
@@ -116,7 +115,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{Prefix}/series/{seriesDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/series-cover?seriesId={seriesDto.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
                     }
                 });
             }
@@ -155,7 +154,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/series-cover?seriesId={seriesDto.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
                     }
                 });
             }
@@ -178,7 +177,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var feed = CreateFeed(series.Name + " - Volumes", $"series/{series.Id}");
-            feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/series-cover?seriesId={seriesId}"));
+            feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -188,7 +187,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/volume-cover?volumeId={volumeDto.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}")
                     }
                 });
             }
@@ -220,7 +219,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{seriesId}/volume/{volumeId}/chapter/{chapter.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?chapterId={chapter.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}")
                     }
                 });
             }
@@ -253,8 +252,8 @@ namespace API.Controllers
                     Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
                     Links = new List<FeedLink>()
                     {
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?chapterId={chapter.Id}"),
-                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, "../download/")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
+                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, $"download/chapter?chapterId={chapter.Id}")
                     },
                     Content = new FeedEntryContent()
                     {
