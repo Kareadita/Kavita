@@ -4,10 +4,12 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
+using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Sentry;
 
 namespace API.Controllers
 {
@@ -16,7 +18,7 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
-        private const string Prefix = "/opds/";
+        private const string Prefix = "/api/opds/";
         private const string DefaultContentType = "application/octet-stream";
 
         public OpdsController(IUnitOfWork unitOfWork)
@@ -30,7 +32,6 @@ namespace API.Controllers
         {
             var feed = CreateFeed("Kavita", string.Empty);
             feed.Id = "root";
-            //feed.Links.Add(CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added"));
             feed.Entries.Add(new FeedEntry()
             {
                 Id = "recentlyAdded",
@@ -41,7 +42,20 @@ namespace API.Controllers
                 },
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added")
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added"),
+                }
+            });
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = "allLibraries",
+                Title = "All Libraries",
+                Content = new FeedEntryContent()
+                {
+                    Text = "Browse by Libraries"
+                },
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "libraries"),
                 }
             });
             return new ContentResult
@@ -56,7 +70,7 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetLibraries()
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = GetUser();
             var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id);
 
             var feed = CreateFeed("Recently Added", "recently-added");
@@ -88,6 +102,7 @@ namespace API.Controllers
         public async Task<IActionResult> GetSeriesForLibrary(int libraryId)
         {
             //var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId); // GetSeriesDtoForLibraryIdAsync
 
             var feed = CreateFeed("Recently Added", "recently-added");
@@ -119,7 +134,7 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetRecentlyAdded([FromQuery] int pageNumber = 1)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await GetUser();
             var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, user.Id, new UserParams()
             {
                 PageNumber = pageNumber,
@@ -159,7 +174,7 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<ContentResult> GetSeries(int seriesId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var feed = CreateFeed(series.Name + " - Volumes", $"series/{series.Id}");
@@ -190,7 +205,7 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<ContentResult> GetVolume(int seriesId, int volumeId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId);
@@ -223,7 +238,7 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<ContentResult> GetChapter(int seriesId, int volumeId, int chapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var chapter = await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId);
@@ -255,6 +270,16 @@ namespace API.Controllers
                 Content = SerializeXml(feed),
                 StatusCode = 200
             };
+        }
+
+        /// <summary>
+        /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claimshandle
+        /// </summary>
+        /// <returns></returns>
+        private async Task<AppUser> GetUser()
+        {
+            return await _unitOfWork.UserRepository.GetUserByIdAsync(1);
+            //return await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         }
 
         private FeedLink CreateLink(string rel, string type, string href)

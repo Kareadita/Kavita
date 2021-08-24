@@ -53,6 +53,19 @@ namespace API.Data
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 
+        /// <summary>
+        /// Gets an AppUser by id. Returns back Progress information.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task<AppUser> GetUserByIdAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Progresses)
+                .Include(u => u.Bookmarks)
+                .SingleOrDefaultAsync(x => x.Id == id);
+        }
+
         public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
         {
             return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);

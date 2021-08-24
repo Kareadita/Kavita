@@ -11,6 +11,7 @@ namespace API.Interfaces
         void Update(AppUserPreferences preferences);
         public void Delete(AppUser user);
         Task<AppUser> GetUserByUsernameAsync(string username);
+        Task<AppUser> GetUserByIdAsync(int id);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
         Task<IEnumerable<AppUser>> GetAdminUsersAsync();
         Task<AppUserRating> GetUserRating(int seriesId, int userId);
