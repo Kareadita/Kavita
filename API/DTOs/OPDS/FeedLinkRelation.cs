@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.OPDS
 {
-    public class FeedLinkRelation
+    public static class FeedLinkRelation
     {
         public const string Debug = "debug";
         public const string Search = "search";
@@ -17,6 +17,8 @@
         /// This will allow for a download to occur
         /// </summary>
         public const string Acquisition = "http://opds-spec.org/acquisition/open-access";
+#pragma warning disable S1075
         public const string Stream = "http://vaemendis.net/opds-pse/stream";
+#pragma warning restore S1075
     }
 }

@@ -178,6 +178,55 @@ namespace API.Controllers
             };
         }
 
+        [HttpGet("series")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> SearchSeries([FromQuery] string query)
+        {
+            var user = await GetUser();
+            if (string.IsNullOrEmpty(query))
+            {
+                return BadRequest("You must pass a query parameter");
+            }
+            query = query.Replace(@"%", "");
+            // Get libraries user has access to
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
+
+            if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+
+            var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), query);
+
+            var feed = CreateFeed(query, "series?query=" + query);
+
+            foreach (var seriesDto in series)
+            {
+                feed.Entries.Add(CreateSeries(seriesDto));
+            }
+
+
+            return new ContentResult
+            {
+                ContentType = "application/xml",
+                Content = SerializeXml(feed),
+                StatusCode = 200
+            };
+        }
+
+        [HttpGet("search")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetSearchDescriptor()
+        {
+            var feed = CreateFeed("Search", "search");
+
+
+
+            return new ContentResult
+            {
+                ContentType = "application/xml",
+                Content = SerializeXml(feed),
+                StatusCode = 200
+            };
+        }
+
         [HttpGet("series/{seriesId}")]
         [Produces("application/xml")]
         public async Task<ContentResult> GetSeries(int seriesId)
@@ -199,8 +248,6 @@ namespace API.Controllers
                 StatusCode = 200
             };
         }
-
-
 
         [HttpGet("series/{seriesId}/volume/{volumeId}")]
         [Produces("application/xml")]
@@ -233,7 +280,6 @@ namespace API.Controllers
                 StatusCode = 200
             };
         }
-
 
         [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
         [Produces("application/xml")]
@@ -329,6 +375,22 @@ namespace API.Controllers
             };
         }
 
+        private FeedEntry CreateSeries(SearchResultDto searchResultDto)
+        {
+            return new FeedEntry()
+            {
+                Id = searchResultDto.SeriesId.ToString(),
+                Title = $"{searchResultDto.Name} ({searchResultDto.Format})",
+                //Summary = searchResultDto.Summary,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{searchResultDto.SeriesId}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={searchResultDto.SeriesId}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/series-cover?seriesId={searchResultDto.SeriesId}")
+                }
+            };
+        }
+
         private FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId)
         {
             return new FeedEntry()
@@ -356,7 +418,8 @@ namespace API.Controllers
                 {
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
-                    CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")
+                    CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download"),
+                    CreatePageStreamLink(chapter.Id, mangaFile)
                 },
                 Content = new FeedEntryContent()
                 {
@@ -374,6 +437,13 @@ namespace API.Controllers
         {
             return await _unitOfWork.UserRepository.GetUserByIdAsync(1);
             //return await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        }
+
+        private FeedLink CreatePageStreamLink(int chapterId, MangaFile mangaFile)
+        {
+            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"reader/image?chapterId={chapterId}&page=" + "{pageNumber}");
+            link.TotalPages = mangaFile.Pages;
+            return link;
         }
 
         private FeedLink CreateLink(string rel, string type, string href)
