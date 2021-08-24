@@ -26,7 +26,7 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly NumericComparer _numericComparer;
-        private const string DefaultContentType = "application/octet-stream"; // "application/zip"
+        private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService)
         {

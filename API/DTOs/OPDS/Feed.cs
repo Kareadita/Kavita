@@ -11,7 +11,7 @@ namespace API.DTOs.OPDS
     public class Feed
     {
         [XmlElement("updated")]
-        private string Updated { get; } = DateTime.UtcNow.ToString("s");
+        public string Updated { get; init; } = DateTime.UtcNow.ToString("s");
 
         [XmlElement("id")]
         public string Id { get; set; }

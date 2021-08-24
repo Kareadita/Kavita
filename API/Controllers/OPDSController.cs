@@ -1,13 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Net.Mime;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
-using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -21,6 +17,7 @@ namespace API.Controllers
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
         private const string Prefix = "/opds/";
+        private const string DefaultContentType = "application/octet-stream";
 
         public OpdsController(IUnitOfWork unitOfWork)
         {
@@ -32,7 +29,83 @@ namespace API.Controllers
         public IActionResult Get()
         {
             var feed = CreateFeed("Kavita", string.Empty);
-            feed.Links.Add(CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added"));
+            feed.Id = "root";
+            //feed.Links.Add(CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added"));
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = "recentlyAdded",
+                Title = "Recently Added",
+                Content = new FeedEntryContent()
+                {
+                    Text = "Browse by Recently Added"
+                },
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "recently-added")
+                }
+            });
+            return new ContentResult
+            {
+                ContentType = "application/xml",
+                Content = SerializeXml(feed),
+                StatusCode = 200
+            };
+        }
+
+        [HttpGet("libraries")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetLibraries()
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id);
+
+            var feed = CreateFeed("Recently Added", "recently-added");
+
+            foreach (var library in libraries)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Id = library.Id.ToString(),
+                    Title = library.Name,
+                    Links = new List<FeedLink>()
+                    {
+                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"libraries/{library.Id}"),
+                    }
+                });
+            }
+
+
+            return new ContentResult
+            {
+                ContentType = "application/xml",
+                Content = SerializeXml(feed),
+                StatusCode = 200
+            };
+        }
+
+        [HttpGet("libraries/{libraryId}")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetSeriesForLibrary(int libraryId)
+        {
+            //var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var series = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId); // GetSeriesDtoForLibraryIdAsync
+
+            var feed = CreateFeed("Recently Added", "recently-added");
+
+            foreach (var seriesDto in series)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Id = seriesDto.Id.ToString(),
+                    Title = seriesDto.Name,
+                    Links = new List<FeedLink>()
+                    {
+                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{Prefix}/series/{seriesDto.Id}"),
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/series-cover?seriesId={seriesDto.Id}")
+                    }
+                });
+            }
+
 
             return new ContentResult
             {
@@ -166,7 +239,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"../image/chapter-cover?chapterId={chapter.Id}"),
-
+                        CreateLink(DefaultContentType, FeedLinkType.AtomAcquisition, "../download/")
                     },
                     Content = new FeedEntryContent()
                     {
@@ -196,12 +269,22 @@ namespace API.Controllers
 
         private Feed CreateFeed(string title, string href)
         {
+            FeedLink link = null;
+            if (string.IsNullOrEmpty(href))
+            {
+                link = CreateLink(FeedLinkRelation.Self, FeedLinkType.AtomNavigation, Prefix + href);
+            }
+            else
+            {
+                link = CreateLink(FeedLinkRelation.Self, FeedLinkType.AtomAcquisition, Prefix + href);
+            }
+
             return new Feed()
             {
                 Title = title,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.Self, FeedLinkType.AtomAcquisition, Prefix + href),
+                    link,
                     CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, Prefix),
                 },
             };
