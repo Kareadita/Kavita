@@ -416,7 +416,7 @@ namespace API.Controllers
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download"),
-                    CreatePageStreamLink(chapter.Id, mangaFile)
+                    //CreatePageStreamLink(chapter.Id, mangaFile);
                 },
                 Content = new FeedEntryContent()
                 {
@@ -454,7 +454,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claimshandle
+        /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claims handle
         /// </summary>
         /// <returns></returns>
         private async Task<AppUser> GetUser()
@@ -466,7 +466,7 @@ namespace API.Controllers
         private FeedLink CreatePageStreamLink(int chapterId, MangaFile mangaFile)
         {
             var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}image?chapterId={chapterId}&page=" + "{pageNumber}");
-            link.TotalPages = mangaFile.Pages;
+            //link.TotalPages = mangaFile.Pages;
             return link;
         }
 
