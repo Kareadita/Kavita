@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,8 +8,10 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using API.Interfaces.Services;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,18 +21,23 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDownloadService _downloadService;
+        private readonly IDirectoryService _directoryService;
+        private readonly ICacheService _cacheService;
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
+        private readonly XmlSerializer _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescriptor));
         private const string Prefix = "/api/opds/";
         private readonly FilterDto _filterDto = new FilterDto()
         {
             MangaFormat = null
         };
 
-        public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService)
+        public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService, IDirectoryService directoryService, ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
+            _directoryService = directoryService;
+            _cacheService = cacheService;
         }
 
         [HttpGet]
@@ -127,20 +135,8 @@ namespace API.Controllers
 
             foreach (var seriesDto in series)
             {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = seriesDto.Id.ToString(),
-                    Title = seriesDto.Name,
-                    Links = new List<FeedLink>()
-                    {
-                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{Prefix}/series/{seriesDto.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
-                    }
-                });
+                feed.Entries.Add(CreateSeries(seriesDto));
             }
-
-
-
 
             return new ContentResult
             {
@@ -215,14 +211,17 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetSearchDescriptor()
         {
-            var feed = CreateFeed("Search", "search");
-
-
+            // var feed = CreateFeed("Search", "search");
+            //
+            // if (feed == null) return string.Empty;
+            //
+            // using var sm = new StringWriter();
+            // _xmlOpenSearchSerializer.Serialize(sm, feed);
 
             return new ContentResult
             {
                 ContentType = "application/xml",
-                Content = SerializeXml(feed),
+                Content = "",
                 StatusCode = 200
             };
         }
@@ -345,18 +344,7 @@ namespace API.Controllers
 
             feed.Total = list.TotalPages * list.PageSize;
             feed.ItemsPerPage = list.PageSize;
-            feed.StartIndex = (list.CurrentPage - 1) * list.PageSize;
-            if (feed.StartIndex == 0)
-            {
-                feed.StartIndex = 1;
-            }
-
-            //<link rel="next" title="Next" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="https://catalog.feedbooks.com/recent.atom?lang=en&amp;page=2"/>
-            // <opensearch:totalResults>349108</opensearch:totalResults>
-            //     <opensearch:itemsPerPage>50</opensearch:itemsPerPage>
-            //     <opensearch:startIndex>1</opensearch:startIndex>
-            // Prev only when applicable
-            // <link rel="previous" title="Previous" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="https://catalog.feedbooks.com/recent.atom?lang=en&amp;page=1"/>
+            feed.StartIndex = ((list.CurrentPage - 1) * list.PageSize) + 1;
         }
 
         private FeedEntry CreateSeries(SeriesDto seriesDto)
@@ -381,7 +369,6 @@ namespace API.Controllers
             {
                 Id = searchResultDto.SeriesId.ToString(),
                 Title = $"{searchResultDto.Name} ({searchResultDto.Format})",
-                //Summary = searchResultDto.Summary,
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"series/{searchResultDto.SeriesId}"),
@@ -429,6 +416,33 @@ namespace API.Controllers
             };
         }
 
+        [HttpGet("image")]
+        public async Task<ActionResult> GetImage(int chapterId, int page)
+        {
+            if (page < 0) return BadRequest("Page cannot be less than 0");
+            var chapter = await _cacheService.Ensure(chapterId);
+            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+
+            try
+            {
+                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+
+                var content = await _directoryService.ReadFileAsync(path);
+                var format = Path.GetExtension(path).Replace(".", "");
+
+                // Calculates SHA1 Hash for byte[]
+                Response.AddCacheHeader(content);
+
+                return File(content, "image/" + format);
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupChapters(new []{ chapterId });
+                throw;
+            }
+        }
+
         /// <summary>
         /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claimshandle
         /// </summary>
@@ -441,7 +455,7 @@ namespace API.Controllers
 
         private FeedLink CreatePageStreamLink(int chapterId, MangaFile mangaFile)
         {
-            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"reader/image?chapterId={chapterId}&page=" + "{pageNumber}");
+            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}image?chapterId={chapterId}&page=" + "{pageNumber}");
             link.TotalPages = mangaFile.Pages;
             return link;
         }
