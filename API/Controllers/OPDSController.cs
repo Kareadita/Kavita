@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using API.Comparators;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
@@ -31,6 +32,7 @@ namespace API.Controllers
         {
             MangaFormat = null
         };
+        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService, IDirectoryService directoryService, ICacheService cacheService)
         {
@@ -255,7 +257,9 @@ namespace API.Controllers
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId); // TODO: Sort these numerically
+            var chapters =
+                (await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
+                    _chapterSortComparer);
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"series/{seriesId}/volume/{volumeId}");
             foreach (var chapter in chapters)
