@@ -50,6 +50,19 @@ namespace API.Controllers
             feed.Id = "root";
             feed.Entries.Add(new FeedEntry()
             {
+                Id = "inProgress",
+                Title = "In Progress",
+                Content = new FeedEntryContent()
+                {
+                    Text = "Browse by In Progress"
+                },
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + "in-progress"),
+                }
+            });
+            feed.Entries.Add(new FeedEntry()
+            {
                 Id = "recentlyAdded",
                 Title = "Recently Added",
                 Content = new FeedEntryContent()
@@ -167,6 +180,39 @@ namespace API.Controllers
                 feed.Entries.Add(CreateSeries(seriesDto));
             }
 
+
+            return new ContentResult
+            {
+                ContentType = "application/xml",
+                Content = SerializeXml(feed),
+                StatusCode = 200
+            };
+        }
+
+        [HttpGet("in-progress")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetInProgress([FromQuery] int pageNumber = 1)
+        {
+            var user = await GetUser();
+            var userParams = new UserParams()
+            {
+                PageNumber = pageNumber,
+                PageSize = 20
+            };
+            var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, 0, userParams, _filterDto);
+            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
+                .Take(userParams.PageSize).ToList();
+            var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+
+            Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+            var feed = CreateFeed("In Progress", "in-progress");
+            AddPagination(feed, pagedList, $"{Prefix}in-progress");
+
+            foreach (var seriesDto in pagedList)
+            {
+                feed.Entries.Add(CreateSeries(seriesDto));
+            }
 
             return new ContentResult
             {
@@ -416,7 +462,6 @@ namespace API.Controllers
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download"),
-                    //CreatePageStreamLink(chapter.Id, mangaFile);
                 },
                 Content = new FeedEntryContent()
                 {
@@ -457,7 +502,7 @@ namespace API.Controllers
         /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claims handle
         /// </summary>
         /// <returns></returns>
-        private async Task<AppUser> GetUser()
+        private async Task<AppUser> GetUser(string apiKey = "")
         {
             return await _unitOfWork.UserRepository.GetUserByIdAsync(1);
             //return await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
@@ -499,6 +544,7 @@ namespace API.Controllers
                 {
                     link,
                     CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, Prefix),
+                    CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, Prefix + "search")
                 },
             };
         }
