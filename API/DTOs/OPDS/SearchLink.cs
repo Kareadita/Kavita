@@ -6,8 +6,10 @@ namespace API.DTOs.OPDS
     {
         [XmlAttribute("type")]
         public string Type { get; set; }
+
         [XmlAttribute("rel")]
-        public string Rel { get; set; }
+        public string Rel { get; set; } = "results";
+
         [XmlAttribute("template")]
         public string Template { get; set; }
     }

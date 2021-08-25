@@ -213,17 +213,23 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetSearchDescriptor()
         {
-            // var feed = CreateFeed("Search", "search");
-            //
-            // if (feed == null) return string.Empty;
-            //
-            // using var sm = new StringWriter();
-            // _xmlOpenSearchSerializer.Serialize(sm, feed);
+
+            var feed = new OpenSearchDescriptor()
+            {
+                Url = new SearchLink()
+                {
+                    Type = FeedLinkType.AtomAcquisition,
+                    Template = $"{Prefix}series?query=" + "{searchTerms}"
+                }
+            };
+
+            await using var sm = new StringWriter();
+            _xmlOpenSearchSerializer.Serialize(sm, feed);
 
             return new ContentResult
             {
                 ContentType = "application/xml",
-                Content = "",
+                Content = sm.ToString(),
                 StatusCode = 200
             };
         }
