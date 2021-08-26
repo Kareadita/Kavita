@@ -238,7 +238,7 @@ namespace API.Controllers
 
         [HttpGet("libraries/{libraryId}")]
         [Produces("application/xml")]
-        public async Task<IActionResult> GetSeriesForLibrary(int libraryId, [FromQuery] int pageNumber = 1)
+        public async Task<IActionResult> GetSeriesForLibrary(int libraryId, [FromQuery] int pageNumber = 0)
         {
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
@@ -499,7 +499,7 @@ namespace API.Controllers
 
             feed.Total = list.TotalPages * list.PageSize;
             feed.ItemsPerPage = list.PageSize;
-            feed.StartIndex = ((list.CurrentPage - 1) * list.PageSize) + 1;
+            feed.StartIndex = (Math.Max(list.CurrentPage - 1, 0) * list.PageSize) + 1;
         }
 
         private FeedEntry CreateSeries(SeriesDto seriesDto)
