@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.Constants;
@@ -11,7 +10,6 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -47,6 +45,8 @@ namespace API.Controllers
             _directoryService = directoryService;
             _cacheService = cacheService;
             _userManager = userManager;
+
+
 
             _xmlSerializer = new XmlSerializer(typeof(Feed));
             _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -210,13 +210,6 @@ namespace API.Controllers
             {
                 return BadRequest("Collection does not exist or you don't have access");
             }
-            //
-            // // Apply progress/rating information (I can't work out how to do this in initial query)
-            // if (series == null) return BadRequest("Could not get series for collection");
-            //
-            // await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            //
-            // Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, user.Id, new UserParams()
             {
@@ -651,19 +644,9 @@ namespace API.Controllers
         private string SerializeXml(Feed feed)
         {
             if (feed == null) return string.Empty;
-            // var settings = new XmlWriterSettings
-            // {
-            //     OmitXmlDeclaration = true,
-            //     Indent = true
-            // };
             using var sm = new StringWriter();
-
-            //using var xmlWriter = XmlWriter.Create(sm, settings);
-
-
-            using var xmlWriter = new XmlTextWriter(sm);
             _xmlSerializer.Serialize(sm, feed);
-            return sm.ToString();
+            return sm.ToString().Replace("utf-16", "utf-8"); // Chunky cannot accept UTF-16 feeds
         }
     }
 }
