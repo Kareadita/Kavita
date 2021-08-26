@@ -86,6 +86,12 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.EnableOpds && updateSettingsDto.EnableOpds + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.EnableOpds + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
                 if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.AllowStatCollection + string.Empty;

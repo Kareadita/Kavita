@@ -9,6 +9,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -26,7 +27,7 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
 
         private readonly XmlSerializer _xmlSerializer = new XmlSerializer(typeof(Feed));
-        private readonly XmlSerializer _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescriptor));
+        private readonly XmlSerializer _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
         private const string Prefix = "/api/opds/";
         private readonly FilterDto _filterDto = new FilterDto()
         {
@@ -42,10 +43,13 @@ namespace API.Controllers
             _cacheService = cacheService;
         }
 
+        [HttpPost]
         [HttpGet]
         [Produces("application/xml")]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var feed = CreateFeed("Kavita", string.Empty);
             feed.Id = "root";
             feed.Entries.Add(new FeedEntry()
@@ -99,6 +103,8 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetLibraries()
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = GetUser();
             var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id);
 
@@ -130,6 +136,8 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetSeriesForLibrary(int libraryId, [FromQuery] int pageNumber = 1)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var library =
                 (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).SingleOrDefault(l =>
@@ -165,6 +173,8 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetRecentlyAdded([FromQuery] int pageNumber = 1)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, user.Id, new UserParams()
             {
@@ -193,6 +203,8 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetInProgress([FromQuery] int pageNumber = 1)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var userParams = new UserParams()
             {
@@ -226,6 +238,8 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> SearchSeries([FromQuery] string query)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             if (string.IsNullOrEmpty(query))
             {
@@ -259,9 +273,12 @@ namespace API.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> GetSearchDescriptor()
         {
-
-            var feed = new OpenSearchDescriptor()
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
+            var feed = new OpenSearchDescription()
             {
+                ShortName = "Search",
+                Description = "Search for Series",
                 Url = new SearchLink()
                 {
                     Type = FeedLinkType.AtomAcquisition,
@@ -282,8 +299,10 @@ namespace API.Controllers
 
         [HttpGet("series/{seriesId}")]
         [Produces("application/xml")]
-        public async Task<ContentResult> GetSeries(int seriesId)
+        public async Task<IActionResult> GetSeries(int seriesId)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
@@ -304,8 +323,10 @@ namespace API.Controllers
 
         [HttpGet("series/{seriesId}/volume/{volumeId}")]
         [Produces("application/xml")]
-        public async Task<ContentResult> GetVolume(int seriesId, int volumeId)
+        public async Task<IActionResult> GetVolume(int seriesId, int volumeId)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
@@ -338,8 +359,10 @@ namespace API.Controllers
 
         [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}")]
         [Produces("application/xml")]
-        public async Task<ContentResult> GetChapter(int seriesId, int volumeId, int chapterId)
+        public async Task<IActionResult> GetChapter(int seriesId, int volumeId, int chapterId)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var user = await GetUser();
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
@@ -363,6 +386,8 @@ namespace API.Controllers
         [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")]
         public async Task<ActionResult> DownloadFile(int seriesId, int volumeId, int chapterId)
         {
+            if ((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableOpds)).Value.Equals("False"))
+                return BadRequest("OPDS is not enabled on this server");
             var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
             var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
             return File(bytes, contentType, fileDownloadName);

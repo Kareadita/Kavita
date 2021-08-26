@@ -2,8 +2,8 @@
 
 namespace API.DTOs.OPDS
 {
-    [XmlRoot("OpenSearchDescriptor", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-    public class OpenSearchDescriptor
+    [XmlRoot("OpenSearchDescription", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+    public class OpenSearchDescription
     {
         /// <summary>
         /// Contains a brief human-readable title that identifies this search engine.
