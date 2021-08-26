@@ -543,22 +543,29 @@ namespace API.Controllers
 
         private FeedEntry CreateChapter(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, Volume volume, ChapterDto chapter)
         {
+            var fileSize =
+                DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>()
+                    {mangaFile.FilePath}));
+            var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
+
             return new FeedEntry()
             {
                 Id = mangaFile.Id.ToString(),
                 Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
-                Extent = DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>() { mangaFile.FilePath })),
+                Extent = fileSize,
+                Summary = $"{fileType.Split("/")[1]} - {fileSize}",
                 Format = mangaFile.Format.ToString(),
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
-                    CreateLink(FeedLinkRelation.Acquisition, _downloadService.GetContentTypeFromFile(mangaFile.FilePath), $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download"),
+                    // Chunky requires a file at the end. Our API ignores this
+                    CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download?file={Uri.EscapeUriString(mangaFile.FilePath)}"),
                 },
                 Content = new FeedEntryContent()
                 {
-                    Text = Path.GetFileNameWithoutExtension(mangaFile.FilePath),
-                    Type = _downloadService.GetContentTypeFromFile(mangaFile.FilePath)
+                    Text = fileType,
+                    Type = "text"
                 }
             };
         }
