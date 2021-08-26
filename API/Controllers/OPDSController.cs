@@ -440,8 +440,16 @@ namespace API.Controllers
             return CreateXmlResult(SerializeXml(feed));
         }
 
-        [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download")]
-        public async Task<ActionResult> DownloadFile(int seriesId, int volumeId, int chapterId)
+        /// <summary>
+        /// Downloads a file
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <param name="chapterId"></param>
+        /// <param name="filename">Not used. Only for Chunky to allow download links</param>
+        /// <returns></returns>
+        [HttpGet("series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
+        public async Task<ActionResult> DownloadFile(int seriesId, int volumeId, int chapterId, string filename)
         {
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
@@ -547,7 +555,7 @@ namespace API.Controllers
                 DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>()
                     {mangaFile.FilePath}));
             var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
-
+            var filename = Uri.EscapeUriString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
             return new FeedEntry()
             {
                 Id = mangaFile.Id.ToString(),
@@ -560,7 +568,7 @@ namespace API.Controllers
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}"),
                     // Chunky requires a file at the end. Our API ignores this
-                    CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download?file={Uri.EscapeUriString(mangaFile.FilePath)}"),
+                    CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}"),
                 },
                 Content = new FeedEntryContent()
                 {
