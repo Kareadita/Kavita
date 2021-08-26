@@ -5,5 +5,5 @@ export interface ServerSettings {
     loggingLevel: string;
     port: number;
     allowStatCollection: boolean;
-    enableOPDS: boolean;
+    enableOpds: boolean;
 }
