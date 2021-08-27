@@ -28,7 +28,7 @@ namespace API.DTOs.OPDS
 
         /// <summary>
         /// Format of the file
-        /// <see cref="https://dublincore.org/specifications/dublin-core/dcmi-terms/"/>
+        /// https://dublincore.org/specifications/dublin-core/dcmi-terms/
         /// </summary>
         [XmlElement("format", Namespace = "http://purl.org/dc/terms/format")]
         public string Format { get; set; }
@@ -37,10 +37,7 @@ namespace API.DTOs.OPDS
         public string Language { get; set; }
 
         [XmlElement("content")]
-         public FeedEntryContent Content { get; set; }
-
-        // [XmlElement("series", Namespace = "urn:dotopds:v1.0")]
-        // public FeedEntrySeries Series { get; set; }
+        public FeedEntryContent Content { get; set; }
 
         [XmlElement("link")]
         public List<FeedLink> Links = new List<FeedLink>();

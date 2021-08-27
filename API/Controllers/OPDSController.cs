@@ -26,7 +26,6 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDownloadService _downloadService;
         private readonly IDirectoryService _directoryService;
-        private readonly ICacheService _cacheService;
         private readonly UserManager<AppUser> _userManager;
 
 
@@ -39,12 +38,12 @@ namespace API.Controllers
         };
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
-        public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService, IDirectoryService directoryService, ICacheService cacheService, UserManager<AppUser> userManager)
+        public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
+            IDirectoryService directoryService, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
             _directoryService = directoryService;
-            _cacheService = cacheService;
             _userManager = userManager;
 
 
@@ -61,7 +60,7 @@ namespace API.Controllers
         {
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
-            var feed = CreateFeed("Kavita OPDS Catalog", string.Empty, apiKey);
+            var feed = CreateFeed("Kavita", string.Empty, apiKey);
             feed.Id = "root";
             feed.Entries.Add(new FeedEntry()
             {
@@ -155,7 +154,7 @@ namespace API.Controllers
             var user = await GetUser(apiKey);
             var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
 
-            IEnumerable <CollectionTagDto> tags = null;
+            IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
             {
                 tags = await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
@@ -178,8 +177,8 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/collections/{tag.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/collection-cover?collectionId={tag.Id}"),
-                        CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/collection-cover?collectionId={tag.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}"),
+                        CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}")
                     }
                 });
             }
@@ -196,7 +195,7 @@ namespace API.Controllers
             var user = await GetUser(apiKey);
             var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
 
-            IEnumerable <CollectionTagDto> tags = null;
+            IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
             {
                 tags = await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
@@ -379,7 +378,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
             var feed = CreateFeed(series.Name + " - Volumes", $"{apiKey}/series/{series.Id}", apiKey);
-            feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesId}"));
+            feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
             {
                 feed.Entries.Add(CreateVolume(volumeDto, seriesId, apiKey));
@@ -411,7 +410,7 @@ namespace API.Controllers
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapter.Id}"),
-                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapter.Id}")
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapter.Id}")
                     }
                 });
             }
@@ -513,8 +512,8 @@ namespace API.Controllers
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesDto.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/series-cover?seriesId={seriesDto.Id}")
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesDto.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesDto.Id}")
                 }
             };
         }
@@ -528,8 +527,8 @@ namespace API.Controllers
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{searchResultDto.SeriesId}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/series-cover?seriesId={searchResultDto.SeriesId}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/series-cover?seriesId={searchResultDto.SeriesId}")
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}")
                 }
             };
         }
@@ -543,8 +542,8 @@ namespace API.Controllers
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/volume-cover?volumeId={volumeDto.Id}")
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}")
                 }
             };
         }
@@ -565,8 +564,8 @@ namespace API.Controllers
                 Format = mangaFile.Format.ToString(),
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapterId}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"image/chapter-cover?chapterId={chapterId}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                     // Chunky requires a file at the end. Our API ignores this
                     CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}"),
                 },
@@ -579,31 +578,31 @@ namespace API.Controllers
         }
 
         [HttpGet("{apiKey}/image")]
-        public async Task<ActionResult> GetPageStreamedImage(string apiKey, int chapterId, int page)
+        public ActionResult GetPageStreamedImage(string apiKey, int chapterId, int page)
         {
             return BadRequest("Not Implemented");
-            if (page < 0) return BadRequest("Page cannot be less than 0");
-            var chapter = await _cacheService.Ensure(chapterId);
-            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-
-            try
-            {
-                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
-                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-
-                var content = await _directoryService.ReadFileAsync(path);
-                var format = Path.GetExtension(path).Replace(".", "");
-
-                // Calculates SHA1 Hash for byte[]
-                Response.AddCacheHeader(content);
-
-                return File(content, "image/" + format);
-            }
-            catch (Exception)
-            {
-                _cacheService.CleanupChapters(new []{ chapterId });
-                throw;
-            }
+            // if (page < 0) return BadRequest("Page cannot be less than 0");
+            // var chapter = await _cacheService.Ensure(chapterId);
+            // if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+            //
+            // try
+            // {
+            //     var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+            //     if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+            //
+            //     var content = await _directoryService.ReadFileAsync(path);
+            //     var format = Path.GetExtension(path).Replace(".", "");
+            //
+            //     // Calculates SHA1 Hash for byte[]
+            //     Response.AddCacheHeader(content);
+            //
+            //     return File(content, "image/" + format);
+            // }
+            // catch (Exception)
+            // {
+            //     _cacheService.CleanupChapters(new []{ chapterId });
+            //     throw;
+            // }
         }
 
         [HttpGet("{apiKey}/favicon")]
