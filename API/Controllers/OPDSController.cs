@@ -606,6 +606,21 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("{apiKey}/favicon")]
+        public async Task<ActionResult> GetFavicon(string apiKey)
+        {
+            var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
+            if (files.Length == 0) return BadRequest("Cannot find icon");
+            var path = files[0];
+            var content = await _directoryService.ReadFileAsync(path);
+            var format = Path.GetExtension(path).Replace(".", "");
+
+            // Calculates SHA1 Hash for byte[]
+            Response.AddCacheHeader(content);
+
+            return File(content, "image/" + format);
+        }
+
         /// <summary>
         /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claims handle
         /// </summary>
@@ -640,14 +655,14 @@ namespace API.Controllers
 
         private Feed CreateFeed(string title, string href, string apiKey)
         {
-            FeedLink link = null;
-            link = CreateLink(FeedLinkRelation.Self, string.IsNullOrEmpty(href) ?
+            var link = CreateLink(FeedLinkRelation.Self, string.IsNullOrEmpty(href) ?
                 FeedLinkType.AtomNavigation :
                 FeedLinkType.AtomAcquisition, Prefix + href);
 
             return new Feed()
             {
                 Title = title,
+                Icon = Prefix + $"{apiKey}/favicon",
                 Links = new List<FeedLink>()
                 {
                     link,

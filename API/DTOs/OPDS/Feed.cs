@@ -20,7 +20,7 @@ namespace API.DTOs.OPDS
         public string Title { get; set; }
 
         [XmlElement("icon")]
-        public string Icon { get; } = "/theme/favicon.ico";
+        public string Icon { get; set; } = "/favicon.ico";
 
         [XmlElement("author")]
         public Author Author { get; set; } = new Author()
