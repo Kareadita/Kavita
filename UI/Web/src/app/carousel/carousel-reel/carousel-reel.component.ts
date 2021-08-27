@@ -15,8 +15,11 @@ export class CarouselReelComponent implements OnInit {
 
 
   swiper!: Swiper;
+  trackByIdentity: (index: number, item: any) => string;
 
-  constructor() { }
+  constructor() { 
+    this.trackByIdentity = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
+  }
 
   ngOnInit(): void {}
 

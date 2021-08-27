@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Parser;
 using Xunit;
@@ -64,6 +64,7 @@ namespace API.Tests.Parser
         [InlineData("Sword Art Online Vol 10 - Alicization Running [Yen Press] [LuCaZ] {r2}.epub", "10")]
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "0")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -154,6 +155,7 @@ namespace API.Tests.Parser
         [InlineData("Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz", "Please Go Home, Akutsu-San!")]
         [InlineData("Killing Bites - Vol 11 Chapter 050 Save Me, Nunupi!.cbz", "Killing Bites")]
         [InlineData("Mad Chimera World - Volume 005 - Chapter 026.cbz", "Mad Chimera World")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "Hentai Ouji to Warawanai Neko.")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -222,6 +224,7 @@ namespace API.Tests.Parser
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
         [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "34.5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -275,6 +278,7 @@ namespace API.Tests.Parser
             Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
+/*
         private static ParserInfo CreateParserInfo(string series, string chapter, string volume, bool isSpecial = false)
         {
           return new ParserInfo()
@@ -285,6 +289,7 @@ namespace API.Tests.Parser
             Series = series,
           };
         }
+*/
 
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
@@ -401,6 +406,10 @@ namespace API.Tests.Parser
               Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
               FullFilePath = filepath, IsSpecial = false
             });
+
+            // If an image is cover exclusively, ignore it
+            filepath = @"E:\Manga\Seraph of the End\cover.png";
+            expected.Add(filepath, null);
 
 
             foreach (var file in expected.Keys)

@@ -1,0 +1,56 @@
+<div class="container-fluid" *ngIf="collectionTag !== undefined" style="padding-top: 10px">
+    <div class="row mb-3">
+        <div class="col-md-2 col-xs-4 col-sm-6">            
+            <img class="poster lazyload" [src]="imageService.placeholderImage" [attr.data-src]="tagImage" 
+            (error)="imageService.updateErroredImage($event)" aria-hidden="true">
+        </div>
+        <div class="col-md-10 col-xs-8 col-sm-6">
+            <div class="row no-gutters">
+                <h2>
+                    {{collectionTag.title}}
+                </h2>
+            </div>
+            <div class="row no-gutters mt-2 mb-2">
+                <!-- <div>
+                    <button class="btn btn-primary" (click)="read()" [disabled]="isLoading">
+                        <span>
+                            <i class="fa fa-book-open"></i>
+                        </span>
+                        <span class="read-btn--text">&nbsp;Read</span>
+                    </button>
+                </div> -->
+                <div class="ml-2" *ngIf="isAdmin">
+                    <button class="btn btn-secondary" (click)="openEditCollectionTagModal(collectionTag)" title="Edit Series information">
+                        <span>
+                            <i class="fa fa-pen" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <app-read-more [text]="collectionTag.summary" [maxLength]="250"></app-read-more>
+            </div>
+        </div>
+    </div>
+    <hr>
+
+    <app-card-detail-layout
+    header="Series"
+    [isLoading]="isLoading"
+    [items]="series"
+    [pagination]="seriesPagination"
+    (pageChange)="onPageChange($event)"
+    [filters]="filters"
+    (applyFilter)="updateFilter($event)"
+    >
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"></app-series-card>
+        </ng-template>
+    </app-card-detail-layout>
+
+    <div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
+        <div class="spinner-border text-secondary loading" role="status">
+            <span class="invisible">Loading...</span>
+        </div>
+    </div>
+</div>

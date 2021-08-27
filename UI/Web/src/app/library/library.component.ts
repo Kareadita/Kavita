@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { EditCollectionTagsComponent } from '../_modals/edit-collection-tags/edit-collection-tags.component';
+import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
+import { ScrollService } from '../scroll.service';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
@@ -13,6 +14,7 @@ import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { CollectionTagService } from '../_services/collection-tag.service';
+import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -41,7 +43,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
     private collectionService: CollectionTagService, private router: Router, 
-    private modalService: NgbModal, private titleService: Title) { }
+    private modalService: NgbModal, private titleService: Title, public imageService: ImageService, 
+    private scrollService: ScrollService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -49,7 +52,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
       this.isAdmin = this.accountService.hasAdminRole(this.user);
-      this.libraryService.getLibrariesForMember().subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
         this.libraries = libraries;
         this.isLoading = false;
       });
@@ -66,13 +69,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   reloadSeries() {
-    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAdded = updatedSeries.result;
-    });
+    this.loadRecentlyAdded();
 
-    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries.result;
-    });
+    this.loadInProgress();
 
     this.reloadTags();
   }
@@ -81,16 +80,26 @@ export class LibraryComponent implements OnInit, OnDestroy {
     if (series === true || series === false) {
       if (!series) {return;}
     }
-
-    if ((series as Series).pagesRead !== (series as Series).pages && (series as Series).pagesRead !== 0) {
+    // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request
+    const seriesObj = (series as Series);
+    if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
       return;
     }
 
+    this.loadInProgress();
+    this.reloadTags();
+  }
+
+  loadInProgress() {
     this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
     });
-    
-    this.reloadTags();
+  }
+
+  loadRecentlyAdded() {
+    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAdded = updatedSeries.result;
+    });
   }
 
   reloadTags() {
@@ -118,10 +127,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
       case(Action.Edit):
         const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
         modalRef.componentInstance.tag = collectionTag;
-        modalRef.closed.subscribe((reloadNeeded: boolean) => {
-          if (reloadNeeded) {
-            // Reload tags
-            this.reloadTags();
+        modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+          this.reloadTags();
+          if (results.coverImageUpdated) {
+            collectionTag.coverImage = this.imageService.randomize(collectionTag.coverImage);
           }
         });
         break;

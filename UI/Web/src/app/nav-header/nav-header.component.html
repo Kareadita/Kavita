@@ -54,26 +54,21 @@
         </div>
       </ul>
 
-      <!-- <div class="back-to-top">
-        <button class="btn btn-icon" (click)="navService?.toggleDarkMode()">
-          <i class="fa {{(navService?.darkMode$ | async) ? 'fa-moon' : 'fa-sun'}}" style="color: white" aria-hidden="true"></i>
-          <span class="sr-only">Dark mode Toggle. Current value {{(navService?.darkMode$ | async) ? 'On' : 'Off'}}</span>
-        </button>
-      </div> -->
-      
       <div class="back-to-top">
         <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
           <i class="fa fa-angle-double-up" style="color: white" aria-hidden="true"></i>
           <span class="sr-only">Scroll to Top</span>
         </button>
       </div>
-      <!-- TODO: Put SignalR notification button dropdown here. -->
+
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-        <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>{{user.username | titlecase}}</button>
-        <div ngbDropdownMenu >
-          <button ngbDropdownItem routerLink="/preferences">User Settings</button>
-          <button ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</button>
-          <button ngbDropdownItem (click)="logout()">Logout</button>
+        <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+          {{user.username | titlecase}}
+        </button>
+        <div ngbDropdownMenu>
+          <a ngbDropdownItem routerLink="/preferences/">User Settings</a>
+          <a ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
+          <a ngbDropdownItem (click)="logout()">Logout</a>
         </div>
       </div>
     </div>

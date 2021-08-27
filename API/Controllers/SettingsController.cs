@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "RequireAdminRole")]
     public class SettingsController : BaseApiController
     {
         private readonly ILogger<SettingsController> _logger;
@@ -30,6 +29,7 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet]
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
@@ -39,6 +39,7 @@ namespace API.Controllers
             return Ok(settingsDto);
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPost]
         public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
         {
@@ -86,6 +87,12 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.EnableOpds && updateSettingsDto.EnableOpds + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.EnableOpds + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
                 if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.AllowStatCollection + string.Empty;
@@ -114,22 +121,32 @@ namespace API.Controllers
             return Ok(updateSettingsDto);
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("task-frequencies")]
         public ActionResult<IEnumerable<string>> GetTaskFrequencies()
         {
             return Ok(CronConverter.Options);
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("library-types")]
         public ActionResult<IEnumerable<string>> GetLibraryTypes()
         {
           return Ok(Enum.GetValues<LibraryType>().Select(t => t.ToDescription()));
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("log-levels")]
         public ActionResult<IEnumerable<string>> GetLogLevels()
         {
             return Ok(new [] {"Trace", "Debug", "Information", "Warning", "Critical"});
+        }
+
+        [HttpGet("opds-enabled")]
+        public async Task<ActionResult<bool>> GetOpdsEnabled()
+        {
+            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            return Ok(settingsDto.EnableOpds);
         }
     }
 }

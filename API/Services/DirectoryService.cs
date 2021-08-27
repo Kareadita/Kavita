@@ -16,6 +16,9 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
+       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
+       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -247,33 +250,40 @@ namespace API.Services
           }
        }
 
-       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath)
+       /// <summary>
+       /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
+       /// </summary>
+       /// <param name="filePaths"></param>
+       /// <param name="directoryPath"></param>
+       /// <param name="prepend">An optional string to prepend to the target file's name</param>
+       /// <returns></returns>
+       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
        {
-          string currentFile = null;
-          try
-          {
-             foreach (var file in filePaths)
-             {
-                currentFile = file;
-                var fileInfo = new FileInfo(file);
-                if (fileInfo.Exists)
-                {
-                   fileInfo.CopyTo(Path.Join(directoryPath, fileInfo.Name));
-                }
-                else
-                {
-                   _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
-                }
+           ExistOrCreate(directoryPath);
+           string currentFile = null;
+           try
+           {
+               foreach (var file in filePaths)
+               {
+                   currentFile = file;
+                   var fileInfo = new FileInfo(file);
+                   if (fileInfo.Exists)
+                   {
+                       fileInfo.CopyTo(Path.Join(directoryPath, prepend + fileInfo.Name));
+                   }
+                   else
+                   {
+                       _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
+                   }
+               }
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+               return false;
+           }
 
-             }
-          }
-          catch (Exception ex)
-          {
-             _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
-             return false;
-          }
-
-          return true;
+           return true;
        }
 
        public IEnumerable<string> ListDirectory(string rootPath)
@@ -310,7 +320,7 @@ namespace API.Services
             var fileCount = 0;
 
             // Determine whether to parallelize file processing on each folder based on processor count.
-            var procCount = Environment.ProcessorCount;
+            //var procCount = Environment.ProcessorCount;
 
             // Data structure to hold names of subfolders to be examined for files.
             var dirs = new Stack<string>();
@@ -404,5 +414,78 @@ namespace API.Services
             return fileCount;
         }
 
+       /// <summary>
+       /// Attempts to delete the files passed to it. Swallows exceptions.
+       /// </summary>
+       /// <param name="files">Full path of files to delete</param>
+       public static void DeleteFiles(IEnumerable<string> files)
+       {
+           foreach (var file in files)
+           {
+               try
+               {
+                   new FileInfo(file).Delete();
+               }
+               catch (Exception)
+               {
+                   /* Swallow exception */
+               }
+           }
+       }
+
+        /// <summary>
+        /// Returns the human-readable file size for an arbitrary, 64-bit file size
+        /// <remarks>The default format is "0.## XB", e.g. "4.2 KB" or "1.43 GB"</remarks>
+        /// </summary>
+        /// https://www.somacon.com/p576.php
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+       public static string GetHumanReadableBytes(long bytes)
+       {
+           // Get absolute value
+           var absoluteBytes = (bytes < 0 ? -bytes : bytes);
+           // Determine the suffix and readable value
+           string suffix;
+           double readable;
+           switch (absoluteBytes)
+           {
+               // Exabyte
+               case >= 0x1000000000000000:
+                   suffix = "EB";
+                   readable = (bytes >> 50);
+                   break;
+               // Petabyte
+               case >= 0x4000000000000:
+                   suffix = "PB";
+                   readable = (bytes >> 40);
+                   break;
+               // Terabyte
+               case >= 0x10000000000:
+                   suffix = "TB";
+                   readable = (bytes >> 30);
+                   break;
+               // Gigabyte
+               case >= 0x40000000:
+                   suffix = "GB";
+                   readable = (bytes >> 20);
+                   break;
+               // Megabyte
+               case >= 0x100000:
+                   suffix = "MB";
+                   readable = (bytes >> 10);
+                   break;
+               // Kilobyte
+               case >= 0x400:
+                   suffix = "KB";
+                   readable = bytes;
+                   break;
+               default:
+                   return bytes.ToString("0 B"); // Byte
+           }
+           // Divide by 1024 to get fractional value
+           readable = (readable / 1024);
+           // Return formatted number with suffix
+           return readable.ToString("0.## ") + suffix;
+       }
     }
 }

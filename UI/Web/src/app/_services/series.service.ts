@@ -52,6 +52,10 @@ export class SeriesService {
     );
   }
 
+  getAllSeriesByIds(seriesIds: Array<number>) {
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/series-by-ids', {seriesIds: seriesIds});
+  }
+
   getSeries(seriesId: number) {
     return this.httpClient.get<Series>(this.baseUrl + 'series/' + seriesId);
   }

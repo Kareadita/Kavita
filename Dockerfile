@@ -26,8 +26,7 @@ RUN apt-get update \
 #Creates the data directory
 RUN mkdir /kavita/data
 
-RUN cp /kavita/appsettings.Development.json /kavita/appsettings.json \
-  && sed -i 's/Data source=kavita.db/Data source=data\/kavita.db/g' /kavita/appsettings.json
+RUN sed -i 's/Data source=kavita.db/Data source=data\/kavita.db/g' /kavita/appsettings.json
 
 COPY entrypoint.sh /entrypoint.sh
 

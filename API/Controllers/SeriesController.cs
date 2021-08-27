@@ -9,6 +9,7 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -45,11 +46,26 @@ namespace API.Controllers
             return Ok(series);
         }
 
+        /// <summary>
+        /// Fetches a Series for a given Id
+        /// </summary>
+        /// <param name="seriesId">Series Id to fetch details for</param>
+        /// <returns></returns>
+        /// <exception cref="KavitaException">Throws an exception if the series Id does exist</exception>
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
+            try
+            {
+                return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue fetching {SeriesId}", seriesId);
+                throw new KavitaException("This series does not exist");
+            }
+
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -63,6 +79,9 @@ namespace API.Controllers
 
             if (result)
             {
+                await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+                await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
             }
             return Ok(result);
@@ -135,13 +154,25 @@ namespace API.Controllers
             }
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
-            series.SortName = updateSeries.SortName.Trim();
-            series.Summary = updateSeries.Summary.Trim();
+            series.SortName = updateSeries.SortName?.Trim();
+            series.Summary = updateSeries.Summary?.Trim();
+
+            var needsRefreshMetadata = false;
+            if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
+            {
+                // Trigger a refresh when we are moving from a locked image to a non-locked
+                needsRefreshMetadata = true;
+                series.CoverImageLocked = updateSeries.CoverImageLocked;
+            }
 
             _unitOfWork.SeriesRepository.Update(series);
 
             if (await _unitOfWork.CommitAsync())
             {
+                if (needsRefreshMetadata)
+                {
+                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+                }
                 return Ok();
             }
 
@@ -168,7 +199,7 @@ namespace API.Controllers
         [HttpPost("in-progress")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
-            // NOTE: This has to be done manually like this due to the DisinctBy requirement
+            // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
 
@@ -211,6 +242,7 @@ namespace API.Controllers
             {
                 var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
                 var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+                var allTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
                 if (series.Metadata == null)
                 {
                     series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
@@ -235,13 +267,13 @@ namespace API.Controllers
                     // At this point, all tags that aren't in dto have been removed.
                     foreach (var tag in updateSeriesMetadataDto.Tags)
                     {
-                        var existingTag = series.Metadata.CollectionTags.SingleOrDefault(t => t.Title == tag.Title);
+                        var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
                         if (existingTag != null)
                         {
-                            // Update existingTag
-                            existingTag.Promoted = tag.Promoted;
-                            existingTag.Title = tag.Title;
-                            existingTag.NormalizedTitle = Parser.Parser.Normalize(tag.Title).ToUpper();
+                            if (!series.Metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                            {
+                                newTags.Add(existingTag);
+                            }
                         }
                         else
                         {
@@ -266,14 +298,21 @@ namespace API.Controllers
                     return Ok("Successfully updated");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "There was an exception when updating metadata");
                 await _unitOfWork.RollbackAsync();
             }
 
             return BadRequest("Could not update metadata");
         }
 
+        /// <summary>
+        /// Returns all Series grouped by the passed Collection Id with Pagination.
+        /// </summary>
+        /// <param name="collectionId">Collection Id to pull series from</param>
+        /// <param name="userParams">Pagination information</param>
+        /// <returns></returns>
         [HttpGet("series-by-collection")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
         {
@@ -289,6 +328,19 @@ namespace API.Controllers
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
             return Ok(series);
+        }
+
+        /// <summary>
+        /// Fetches Series for a set of Ids. This will check User for permission access and filter out any Ids that don't exist or
+        /// the user does not have access to.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("series-by-ids")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
+        {
+            if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, user.Id));
         }
 
 

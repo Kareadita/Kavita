@@ -5,6 +5,9 @@ using API.Entities.Enums;
 
 namespace API.Entities
 {
+    /// <summary>
+    /// Represents a wrapper to the underlying file. This provides information around file, like number of pages, format, etc.
+    /// </summary>
     public class MangaFile
     {
         public int Id { get; set; }

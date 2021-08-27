@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -334,6 +332,7 @@ namespace API.Data
                 .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
                 .OrderByDescending(s => s.Created)
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsSplitQuery()
                 .AsNoTracking();
 
             return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
@@ -440,6 +439,22 @@ namespace API.Data
                 .ThenInclude(c => c.Files)
                 .SelectMany(v => v.Chapters.SelectMany(c => c.Files))
                 .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId)
+        {
+            var allowedLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(x => x.Id == userId))
+                .Select(l => l.Id);
+
+            return await _context.Series
+                .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
+                .OrderBy(s => s.SortName)
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
     }

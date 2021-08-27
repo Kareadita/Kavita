@@ -21,6 +21,7 @@ import { Stack } from 'src/app/shared/data-structures/stack';
 import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
+import { ScrollService } from 'src/app/scroll.service';
 
 
 interface PageStyle {
@@ -114,14 +115,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPageAnchor: string = '';
   intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [1] });
   /**
-   * Last seen bookmark part path
+   * Last seen progress part path
    */
   lastSeenScrollPartPath: string = '';
-
-  // Temp hack: Override background color for reader and restore it onDestroy
+  /**
+   * Hack: Override background color for reader and restore it onDestroy
+   */
   originalBodyColor: string | undefined;
-
-
 
   darkModeStyles = `
     *:not(input), *:not(select), *:not(code), *:not(:link), *:not(.ngx-toastr) {
@@ -150,7 +150,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
-    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService) {
+    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
+    private scrollService: ScrollService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -198,24 +199,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * After the page has loaded, setup the scroll handler. The scroll handler has 2 parts. One is if there are page anchors setup (aka page anchor elements linked with the 
-   * table of content) then we calculate what has already been reached and grab the last reached one to bookmark. If page anchors aren't setup (toc missing), then try to bookmark 
+   * table of content) then we calculate what has already been reached and grab the last reached one to save progress. If page anchors aren't setup (toc missing), then try to save progress 
    * based on the last seen scroll part (xpath).
    */
   ngAfterViewInit() {
-    // check scroll offset and if offset is after any of the "id" markers, bookmark it
+    // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(window, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
-          const verticalOffset = (window.pageYOffset 
-            || document.documentElement.scrollTop 
-            || document.body.scrollTop || 0) + (document.body.offsetHeight / 2);
+          const verticalOffset = this.scrollService.scrollPosition + (document.body.offsetHeight / 2);
         
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
             this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-            this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
             return;
           } else {
             this.currentPageAnchor = '';
@@ -223,7 +222,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         if (this.lastSeenScrollPartPath !== '') {
-          this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+          this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
     });
   }
@@ -279,7 +278,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     forkJoin({
       chapter: this.seriesService.getChapter(this.chapterId),
-      bookmark: this.readerService.getBookmark(this.chapterId),
+      progress: this.readerService.getProgress(this.chapterId),
       chapters: this.bookService.getBookChapters(this.chapterId),
       info: this.bookService.getBookInfo(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
@@ -287,17 +286,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.volumeId = results.chapter.volumeId;
       this.maxPages = results.chapter.pages;
       this.chapters = results.chapters;
-      this.pageNum = results.bookmark.pageNum;
+      this.pageNum = results.progress.pageNum;
       this.bookTitle = results.info;
 
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
-        this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+        this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
       }
 
-      // Check if user bookmark has part, if so load it so we scroll to it
-      this.loadPage(results.bookmark.bookScrollId || undefined);
+      // Check if user progress has part, if so load it so we scroll to it
+      this.loadPage(results.progress.bookScrollId || undefined);
     }, () => {
       setTimeout(() => {
         this.closeReader();
@@ -484,7 +483,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
@@ -519,15 +518,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
-      window.scroll({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
+      this.scrollService.scrollTo(scrollTop);
     } else {
-      window.scroll({
-        top: 0,
-        behavior: 'smooth'
-      });
+      this.scrollService.scrollTo(0);
     }
   }
 
@@ -755,10 +748,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    window.scroll({
-      top: element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET,
-      behavior: 'smooth' 
-    });
+    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET);
   }
 
   toggleClickToPaginate() {

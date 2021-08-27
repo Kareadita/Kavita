@@ -25,10 +25,32 @@ namespace API.Data
         {
             _context.CollectionTag.Remove(tag);
         }
-        
+
         public void Update(CollectionTag tag)
         {
             _context.Entry(tag).State = EntityState.Modified;
+        }
+
+        /// <summary>
+        /// Removes any collection tags without any series
+        /// </summary>
+        public async Task<int> RemoveTagsWithoutSeries()
+        {
+            var tagsToDelete = await _context.CollectionTag
+                .Include(c => c.SeriesMetadatas)
+                .Where(c => c.SeriesMetadatas.Count == 0)
+                .ToListAsync();
+            _context.RemoveRange(tagsToDelete);
+
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
+        {
+            return await _context.CollectionTag
+                .Select(c => c)
+                .OrderBy(c => c.NormalizedTitle)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
@@ -40,7 +62,7 @@ namespace API.Data
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
-        
+
         public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync()
         {
             return await _context.CollectionTag
@@ -57,7 +79,7 @@ namespace API.Data
                 .Where(c => c.Id == tagId)
                 .SingleOrDefaultAsync();
         }
-        
+
         public async Task<CollectionTag> GetFullTagAsync(int tagId)
         {
             return await _context.CollectionTag
@@ -69,7 +91,7 @@ namespace API.Data
         public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
         {
             return await _context.CollectionTag
-                .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%") 
+                .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                             || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
                 .OrderBy(s => s.Title)
                 .AsNoTracking()

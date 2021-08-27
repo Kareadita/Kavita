@@ -30,6 +30,7 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
+        private const string ComicInfoFilename = "comicinfo";
 
         public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
         {
@@ -224,17 +225,16 @@ namespace API.Services
 
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
-            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
-            var tempLocation = Path.Join(tempDirectory, $"{tempFolder}_{dateString}");
+            var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
             DirectoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
 
-            var zipPath = Path.Join(tempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            var zipPath = Path.Join(DirectoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
                 ZipFile.CreateFromDirectory(tempLocation, zipPath);
@@ -298,7 +298,7 @@ namespace API.Services
             foreach (var entry in entries)
             {
                 var filename = Path.GetFileNameWithoutExtension(entry.Key).ToLower();
-                if (filename.EndsWith("comicinfo")
+                if (filename.EndsWith(ComicInfoFilename)
                     && !filename.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
                     && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key)
                     && Parser.Parser.IsXml(entry.Key))
@@ -335,7 +335,7 @@ namespace API.Services
                         _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
-                                                                         && Path.GetFileNameWithoutExtension(x.Name).ToLower() == "comicinfo"
+                                                                         && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
                                                                          && !Path.GetFileNameWithoutExtension(x.Name).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
                                                                          && Parser.Parser.IsXml(x.FullName));
                         if (entry != null)

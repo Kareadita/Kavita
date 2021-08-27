@@ -51,13 +51,13 @@ namespace API.Services
       {
         if (createThumbnail)
         {
-          using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
-          return thumbnail.WriteToBuffer(".jpg");
+            return CreateThumbnail(path);
         }
 
         using var img = Image.NewFromFile(path);
         using var stream = new MemoryStream();
         img.JpegsaveStream(stream);
+        stream.Position = 0;
         return stream.ToArray();
       }
       catch (Exception ex)
@@ -66,6 +66,40 @@ namespace API.Services
       }
 
       return Array.Empty<byte>();
+    }
+
+
+    /// <inheritdoc />
+    public byte[] CreateThumbnail(string path)
+    {
+        try
+        {
+            using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
+            return thumbnail.WriteToBuffer(".jpg");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error creating thumbnail from url");
+        }
+
+        return Array.Empty<byte>();
+    }
+
+
+    /// <inheritdoc />
+    public byte[] CreateThumbnailFromBase64(string encodedImage)
+    {
+        try
+        {
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), MetadataService.ThumbnailWidth);
+            return thumbnail.WriteToBuffer(".jpg");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error creating thumbnail from url");
+        }
+
+        return Array.Empty<byte>();
     }
   }
 }

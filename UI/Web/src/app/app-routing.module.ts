@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AllCollectionsComponent } from './all-collections/all-collections.component';
 import { HomeComponent } from './home/home.component';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { LibraryComponent } from './library/library.component';
@@ -8,7 +7,6 @@ import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
-import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { InProgressComponent } from './in-progress/in-progress.component';
@@ -21,7 +19,14 @@ const routes: Routes = [
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
-  {path: 'library', component: LibraryComponent},
+  {
+    path: 'collections',
+    loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
+  },
+  {
+    path: 'preferences',
+    loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
+  },
   {
     path: '',
     runGuardsAndResolvers: 'always',
@@ -44,14 +49,12 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
+      {path: 'library', component: LibraryComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
-      {path: 'collections', component: AllCollectionsComponent},
-      {path: 'collections/:id', component: AllCollectionsComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},
-  {path: 'preferences', component: UserPreferencesComponent},
   {path: 'no-connection', component: NotConnectedComponent},
   {path: '**', component: HomeComponent, pathMatch: 'full'}
 ];

@@ -7,6 +7,8 @@ import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import * as Sentry from "@sentry/angular";
 import { Router } from '@angular/router';
+import { MessageHubService } from './message-hub.service';
+import { PresenceHubService } from './presence-hub.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,8 @@ export class AccountService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private httpClient: HttpClient, private router: Router) {}
+  constructor(private httpClient: HttpClient, private router: Router, 
+    private messageHub: MessageHubService, private presenceHub: PresenceHubService) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -48,6 +51,8 @@ export class AccountService implements OnDestroy {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.messageHub.createHubConnection(user);
+          this.presenceHub.createHubConnection(user);
         }
       }),
       takeUntil(this.onDestroy)
@@ -79,6 +84,8 @@ export class AccountService implements OnDestroy {
     this.currentUser = undefined;
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
+    this.messageHub.stopHubConnection();
+    this.presenceHub.stopHubConnection();
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {
@@ -121,6 +128,23 @@ export class AccountService implements OnDestroy {
     };
 
     return undefined;
+  }
+
+  resetApiKey() {
+    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, {responseType: 'text' as 'json'}).pipe(map(key => {
+      const user = this.getUserFromLocalStorage();
+      if (user) {
+        user.apiKey = key;
+
+        localStorage.setItem(this.userKey, JSON.stringify(user));
+    
+        this.currentUserSource.next(user);
+        this.currentUser = user;
+      }
+      return key;
+    }));
+
+    
   }
 
 }
