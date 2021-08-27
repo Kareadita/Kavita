@@ -22,7 +22,12 @@ namespace API.DTOs.OPDS
         [XmlAttribute("title")]
         public string Title { get; set; }
 
-        // [XmlAttribute("count", Namespace = "http://vaemendis.net/opds-pse/ns")]
-        // public int TotalPages { get; set; } = 0;
+        [XmlAttribute("count", Namespace = "http://vaemendis.net/opds-pse/ns")]
+        public int TotalPages { get; set; } = 0;
+
+        public bool ShouldSerializeTotalPages()
+        {
+            return TotalPages > 0;
+        }
     }
 }

@@ -73,6 +73,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+    <Content Condition=" '$(Configuration)' == 'Release' " Include="appsettings.json" />
   </ItemGroup>
 
   

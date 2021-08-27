@@ -27,6 +27,7 @@ namespace API.Controllers
         private readonly IDownloadService _downloadService;
         private readonly IDirectoryService _directoryService;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ICacheService _cacheService;
 
 
         private readonly XmlSerializer _xmlSerializer;
@@ -39,13 +40,14 @@ namespace API.Controllers
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
-            IDirectoryService directoryService, UserManager<AppUser> userManager)
+            IDirectoryService directoryService, UserManager<AppUser> userManager,
+            ICacheService cacheService)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
             _directoryService = directoryService;
             _userManager = userManager;
-
+            _cacheService = cacheService;
 
 
             _xmlSerializer = new XmlSerializer(typeof(Feed));
@@ -457,7 +459,7 @@ namespace API.Controllers
             return File(bytes, contentType, fileDownloadName);
         }
 
-        private ContentResult CreateXmlResult(string xml)
+        private static ContentResult CreateXmlResult(string xml)
         {
             return new ContentResult
             {
@@ -479,21 +481,23 @@ namespace API.Controllers
                 url += "?";
             }
 
-            if (list.CurrentPage > 1)
+            var pageNumber = Math.Max(list.CurrentPage, 1);
+
+            if (pageNumber > 1)
             {
-                feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (list.CurrentPage - 1)));
+                feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
             }
 
-            if (list.CurrentPage + 1 < list.TotalPages)
+            if (pageNumber + 1 < list.TotalPages)
             {
-                feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (list.CurrentPage + 1)));
+                feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber + 1)));
             }
 
             // Update self to point to current page
             var selfLink = feed.Links.SingleOrDefault(l => l.Rel == FeedLinkRelation.Self);
             if (selfLink != null)
             {
-                selfLink.Href = url + "pageNumber=" + list.CurrentPage;
+                selfLink.Href = url + "pageNumber=" + pageNumber;
             }
 
 
@@ -568,6 +572,7 @@ namespace API.Controllers
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                     // Chunky requires a file at the end. Our API ignores this
                     CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}"),
+                    CreatePageStreamLink(chapterId, mangaFile, apiKey)
                 },
                 Content = new FeedEntryContent()
                 {
@@ -578,31 +583,30 @@ namespace API.Controllers
         }
 
         [HttpGet("{apiKey}/image")]
-        public ActionResult GetPageStreamedImage(string apiKey, int chapterId, int page)
+        public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int chapterId, [FromQuery] int pageNumber)
         {
-            return BadRequest("Not Implemented");
-            // if (page < 0) return BadRequest("Page cannot be less than 0");
-            // var chapter = await _cacheService.Ensure(chapterId);
-            // if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-            //
-            // try
-            // {
-            //     var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
-            //     if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-            //
-            //     var content = await _directoryService.ReadFileAsync(path);
-            //     var format = Path.GetExtension(path).Replace(".", "");
-            //
-            //     // Calculates SHA1 Hash for byte[]
-            //     Response.AddCacheHeader(content);
-            //
-            //     return File(content, "image/" + format);
-            // }
-            // catch (Exception)
-            // {
-            //     _cacheService.CleanupChapters(new []{ chapterId });
-            //     throw;
-            // }
+            if (pageNumber < 0) return BadRequest("Page cannot be less than 0");
+            var chapter = await _cacheService.Ensure(chapterId);
+            if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+
+            try
+            {
+                var (path, _) = await _cacheService.GetCachedPagePath(chapter, pageNumber);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
+
+                var content = await _directoryService.ReadFileAsync(path);
+                var format = Path.GetExtension(path).Replace(".", "");
+
+                // Calculates SHA1 Hash for byte[]
+                Response.AddCacheHeader(content);
+
+                return File(content, "image/" + format);
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupChapters(new []{ chapterId });
+                throw;
+            }
         }
 
         [HttpGet("{apiKey}/favicon")]
@@ -621,7 +625,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// This is temporary code to avoid any authentication on OPDS feeds. After debugging, setup a proper claims handle
+        /// Gets the user from the API key
         /// </summary>
         /// <returns></returns>
         private async Task<AppUser> GetUser(string apiKey)
@@ -637,12 +641,12 @@ namespace API.Controllers
 
         private FeedLink CreatePageStreamLink(int chapterId, MangaFile mangaFile, string apiKey)
         {
-            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?chapterId={chapterId}&page=" + "{pageNumber}");
-            //link.TotalPages = mangaFile.Pages;
+            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?chapterId={chapterId}&pageNumber=" + "{pageNumber}");
+            link.TotalPages = mangaFile.Pages;
             return link;
         }
 
-        private FeedLink CreateLink(string rel, string type, string href)
+        private static FeedLink CreateLink(string rel, string type, string href)
         {
             return new FeedLink()
             {
