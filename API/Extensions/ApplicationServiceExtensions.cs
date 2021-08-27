@@ -35,6 +35,7 @@ namespace API.Extensions
             services.AddScoped<IImageService, ImageService>();
             services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
             services.AddScoped<IDownloadService, DownloadService>();
+            services.AddScoped<IReaderService, ReaderService>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 

@@ -28,6 +28,7 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly UserManager<AppUser> _userManager;
         private readonly ICacheService _cacheService;
+        private readonly IReaderService _readerService;
 
 
         private readonly XmlSerializer _xmlSerializer;
@@ -41,13 +42,14 @@ namespace API.Controllers
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
             IDirectoryService directoryService, UserManager<AppUser> userManager,
-            ICacheService cacheService)
+            ICacheService cacheService, IReaderService readerService)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
             _directoryService = directoryService;
             _userManager = userManager;
             _cacheService = cacheService;
+            _readerService = readerService;
 
 
             _xmlSerializer = new XmlSerializer(typeof(Feed));
@@ -469,7 +471,7 @@ namespace API.Controllers
             };
         }
 
-        private void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
+        private static void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
         {
             var url = href;
             if (href.Contains("?"))
@@ -506,7 +508,7 @@ namespace API.Controllers
             feed.StartIndex = (Math.Max(list.CurrentPage - 1, 0) * list.PageSize) + 1;
         }
 
-        private FeedEntry CreateSeries(SeriesDto seriesDto, string apiKey)
+        private static FeedEntry CreateSeries(SeriesDto seriesDto, string apiKey)
         {
             return new FeedEntry()
             {
@@ -522,7 +524,7 @@ namespace API.Controllers
             };
         }
 
-        private FeedEntry CreateSeries(SearchResultDto searchResultDto, string apiKey)
+        private static FeedEntry CreateSeries(SearchResultDto searchResultDto, string apiKey)
         {
             return new FeedEntry()
             {
@@ -537,7 +539,7 @@ namespace API.Controllers
             };
         }
 
-        private FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId, string apiKey)
+        private static FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId, string apiKey)
         {
             return new FeedEntry()
             {
@@ -572,7 +574,7 @@ namespace API.Controllers
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                     // Chunky requires a file at the end. Our API ignores this
                     CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}"),
-                    CreatePageStreamLink(chapterId, mangaFile, apiKey)
+                    CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
                 },
                 Content = new FeedEntryContent()
                 {
@@ -583,7 +585,7 @@ namespace API.Controllers
         }
 
         [HttpGet("{apiKey}/image")]
-        public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int chapterId, [FromQuery] int pageNumber)
+        public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
         {
             if (pageNumber < 0) return BadRequest("Page cannot be less than 0");
             var chapter = await _cacheService.Ensure(chapterId);
@@ -599,6 +601,15 @@ namespace API.Controllers
 
                 // Calculates SHA1 Hash for byte[]
                 Response.AddCacheHeader(content);
+
+                // Save progress for the user
+                await _readerService.SaveReadingProgress(new ProgressDto()
+                {
+                    ChapterId = chapterId,
+                    PageNum = pageNumber,
+                    SeriesId = seriesId,
+                    VolumeId = volumeId
+                }, await GetUser(apiKey));
 
                 return File(content, "image/" + format);
             }
@@ -639,9 +650,9 @@ namespace API.Controllers
             return user;
         }
 
-        private FeedLink CreatePageStreamLink(int chapterId, MangaFile mangaFile, string apiKey)
+        private static FeedLink CreatePageStreamLink(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
         {
-            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?chapterId={chapterId}&pageNumber=" + "{pageNumber}");
+            var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
             link.TotalPages = mangaFile.Pages;
             return link;
         }
@@ -656,7 +667,7 @@ namespace API.Controllers
             };
         }
 
-        private Feed CreateFeed(string title, string href, string apiKey)
+        private static Feed CreateFeed(string title, string href, string apiKey)
         {
             var link = CreateLink(FeedLinkRelation.Self, string.IsNullOrEmpty(href) ?
                 FeedLinkType.AtomNavigation :

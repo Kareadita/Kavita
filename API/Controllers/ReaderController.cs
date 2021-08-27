@@ -24,17 +24,20 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
+        private readonly IReaderService _readerService;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         /// <inheritdoc />
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService, IUnitOfWork unitOfWork, ILogger<ReaderController> logger)
+        public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
         {
             _directoryService = directoryService;
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _readerService = readerService;
         }
 
         /// <summary>
@@ -285,57 +288,7 @@ namespace API.Controllers
         public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
-            // Don't let user save past total pages.
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(progressDto.ChapterId);
-            if (progressDto.PageNum > chapter.Pages)
-            {
-                progressDto.PageNum = chapter.Pages;
-            }
-
-            if (progressDto.PageNum < 0)
-            {
-                progressDto.PageNum = 0;
-            }
-
-            try
-            {
-                user.Progresses ??= new List<AppUserProgress>();
-               var userProgress =
-                  user.Progresses.FirstOrDefault(x => x.ChapterId == progressDto.ChapterId && x.AppUserId == user.Id);
-
-               if (userProgress == null)
-               {
-                  user.Progresses.Add(new AppUserProgress
-                  {
-                     PagesRead = progressDto.PageNum,
-                     VolumeId = progressDto.VolumeId,
-                     SeriesId = progressDto.SeriesId,
-                     ChapterId = progressDto.ChapterId,
-                     BookScrollId = progressDto.BookScrollId,
-                     LastModified = DateTime.Now
-                  });
-               }
-               else
-               {
-                  userProgress.PagesRead = progressDto.PageNum;
-                  userProgress.SeriesId = progressDto.SeriesId;
-                  userProgress.VolumeId = progressDto.VolumeId;
-                  userProgress.BookScrollId = progressDto.BookScrollId;
-                  userProgress.LastModified = DateTime.Now;
-               }
-
-               _unitOfWork.UserRepository.Update(user);
-
-               if (await _unitOfWork.CommitAsync())
-               {
-                  return Ok();
-               }
-            }
-            catch (Exception)
-            {
-               await _unitOfWork.RollbackAsync();
-            }
+            if (await _readerService.SaveReadingProgress(progressDto, user)) return Ok(true);
 
             return BadRequest("Could not save progress");
         }
