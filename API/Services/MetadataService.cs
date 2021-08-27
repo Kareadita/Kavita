@@ -36,11 +36,6 @@ namespace API.Services
             _imageService = imageService;
         }
 
-        private static bool IsCoverImageSet(byte[] coverImage, bool forceUpdate = false)
-        {
-            return forceUpdate || HasCoverImage(coverImage);
-        }
-
         /// <summary>
         /// Determines whether an entity should regenerate cover image
         /// </summary>
