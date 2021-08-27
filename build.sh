@@ -1,7 +1,19 @@
-﻿#! /bin/bash
+#! /bin/bash
 set -e
 
 outputFolder='_output'
+
+CheckRequirements()
+{
+    if ! command -v npm &> /dev/null
+    then
+        echo "Warning!!! npm not found, it is required for building Kavita!"
+    fi
+    if ! command -v dotnet &> /dev/null
+    then
+        echo "Warning!!! dotnet not found, it is required for building Kavita!"
+    fi
+}
 
 ProgressStart()
 {
@@ -55,7 +67,8 @@ BuildUI()
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
-    cp -r dist/* ../../API/wwwroot
+    mkdir -p ../../API/wwwroot
+    cp -R dist/* ../../API/wwwroot
     cd ../../ || exit
     ProgressEnd 'Building UI'
 }
@@ -75,7 +88,7 @@ Package()
     dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
 
     echo "Recopying wwwroot due to bug"
-    cp -r ./wwwroot/* $lOutputFolder/wwwroot
+    cp -R ./wwwroot/* $lOutputFolder/wwwroot
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
@@ -101,6 +114,7 @@ Package()
 
 RID="$1"
 
+CheckRequirements
 BuildUI
 Build
 
