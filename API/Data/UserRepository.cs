@@ -129,6 +129,12 @@ namespace API.Data
                 .ToListAsync();
         }
 
+        public async Task<AppUser> GetUserByApiKeyAsync(string apiKey)
+        {
+            return await _context.AppUser
+                .SingleOrDefaultAsync(u => u.ApiKey.Equals(apiKey));
+        }
+
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {

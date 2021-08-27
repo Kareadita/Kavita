@@ -72,19 +72,18 @@ namespace API.Data
 
         }
 
-        public static async Task SeedSeriesMetadata(DataContext context)
+        public static async Task SeedUserApiKeys(DataContext context)
         {
             await context.Database.EnsureCreatedAsync();
 
-            context.Database.EnsureCreated();
-            var series = await context.Series
-                .Include(s => s.Metadata).ToListAsync();
-
-            foreach (var s in series)
+            var users = await context.AppUser.ToListAsync();
+            foreach (var user in users)
             {
-                s.Metadata ??= new SeriesMetadata();
+                if (string.IsNullOrEmpty(user.ApiKey))
+                {
+                    user.ApiKey = HashUtil.ApiKey();
+                }
             }
-
             await context.SaveChangesAsync();
         }
     }

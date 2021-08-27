@@ -190,6 +190,17 @@
                             </form>
                         </ng-template>
                     </ngb-panel>
+                    <ngb-panel id="api-panel" title="OPDS">
+                        <ng-template ngbPanelContent>
+                            <p class="alert alert-danger" role="alert" *ngIf="!opdsEnabled">
+                                OPDS is not enabled on this server!
+                            </p>
+                            <ng-container *ngIf="opdsEnabled">
+                                <app-api-key tooltipText="The API key is like a password. Keep it secret, Keep it safe."></app-api-key>
+                                <app-api-key title="OPDS URL" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
+                            </ng-container>
+                        </ng-template>
+                    </ngb-panel>
                 </ngb-accordion>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'bookmarks'">

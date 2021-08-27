@@ -16,7 +16,6 @@ import { FilterPipe } from './filter.pipe';
 import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
 import { ChangelogComponent } from './changelog/changelog.component';
-import { ApiKeyComponent } from './api-key/api-key.component';
 
 
 
@@ -35,7 +34,6 @@ import { ApiKeyComponent } from './api-key/api-key.component';
     EditRbsModalComponent,
     ManageSystemComponent,
     ChangelogComponent,
-    ApiKeyComponent
   ],
   imports: [
     CommonModule,

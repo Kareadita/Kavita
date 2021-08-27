@@ -17,6 +17,11 @@ namespace API.Entities
         public ICollection<AppUserRating> Ratings { get; set; }
         public AppUserPreferences UserPreferences { get; set; }
         public ICollection<AppUserBookmark> Bookmarks { get; set; }
+        /// <summary>
+        /// An API Key to interact with external services, like OPDS
+        /// </summary>
+        public string ApiKey { get; set; }
+
 
         /// <inheritdoc />
         [ConcurrencyCheck]

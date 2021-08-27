@@ -10,6 +10,9 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute } from '@angular/router';
+import { SettingsService } from 'src/app/admin/settings.service';
+import { keyframes } from '@angular/animations';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-user-preferences',
@@ -49,15 +52,16 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   };
   fontFamilies: Array<string> = [];
 
-  //tabs = ['Preferences', 'Bookmarks'];
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'Preferences', fragment: ''},
     {title: 'Bookmarks', fragment: 'bookmarks'},
   ];
   active = this.tabs[0];
+  opdsEnabled: boolean = false;
+  makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, 
-    private navService: NavService, private titleService: Title, private route: ActivatedRoute) {
+    private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService) {
     this.fontFamilies = this.bookService.getFontFamilies();
 
     this.route.fragment.subscribe(frag => {
@@ -68,6 +72,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.active = this.tabs[0]; // Default to first tab
       }
     });
+
+    this.settingsService.getOpdsEnabled().subscribe(res => {
+      this.opdsEnabled = res;
+    })
   }
 
   ngOnInit(): void {
@@ -176,5 +184,16 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     }, err => {
       this.resetPasswordErrors = err;
     }));
+  }
+
+  transformKeyToOpdsUrl(key: string) {
+    let apiUrl = environment.apiUrl;
+    if (environment.production) {
+      apiUrl = `${location.protocol}//${location.origin}`;
+      if (location.port != '80') {
+        apiUrl += ':' + location.port;
+      }
+    }
+    return `${apiUrl}opds/${key}`;
   }
 }
