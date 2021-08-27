@@ -142,7 +142,6 @@ namespace API.Services
                             .FirstOrDefault()?.CoverImage;
                     }
                 }
-                // BUG: This is null on first scan.
                 series.CoverImage = firstCover?.CoverImage ?? coverImage;
             }
 
