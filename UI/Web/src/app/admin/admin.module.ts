@@ -33,7 +33,7 @@ import { ChangelogComponent } from './changelog/changelog.component';
     FilterPipe,
     EditRbsModalComponent,
     ManageSystemComponent,
-    ChangelogComponent
+    ChangelogComponent,
   ],
   imports: [
     CommonModule,

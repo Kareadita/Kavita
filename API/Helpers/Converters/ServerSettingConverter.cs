@@ -33,6 +33,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.AllowStatCollection:
                         destination.AllowStatCollection = bool.Parse(row.Value);
                         break;
+                    case ServerSettingKey.EnableOpds:
+                        destination.EnableOpds = bool.Parse(row.Value);
+                        break;
                 }
             }
 
