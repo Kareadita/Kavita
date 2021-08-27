@@ -56,6 +56,9 @@ Package()
 
     echo "Show API structure"
     find
+	
+	echo "Copying appsettings.json"
+    cp appsettings.Development.json $lOutputFolder/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
