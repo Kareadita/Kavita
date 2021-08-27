@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -21,7 +20,7 @@ namespace API.Services
         private readonly IArchiveService _archiveService;
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
-        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         /// <summary>
         /// Width of the Thumbnail generation
         /// </summary>
@@ -35,11 +34,6 @@ namespace API.Services
             _archiveService = archiveService;
             _bookService = bookService;
             _imageService = imageService;
-        }
-
-        private static bool IsCoverImageSet(byte[] coverImage, bool forceUpdate = false)
-        {
-            return forceUpdate || HasCoverImage(coverImage);
         }
 
         /// <summary>
@@ -104,10 +98,11 @@ namespace API.Services
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
-            if (volume == null || !IsCoverImageSet(volume.CoverImage, forceUpdate)) return;
+            if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, forceUpdate
+                , false)) return;
 
             volume.Chapters ??= new List<Chapter>();
-            var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+            var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
 
             if (firstChapter == null) return;
 
@@ -132,13 +127,13 @@ namespace API.Services
                     // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
                     if (series.Volumes.Count == 1)
                     {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
+                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
                     }
 
                     if (!HasCoverImage(coverImage))
                     {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
+                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault()?.CoverImage;
                     }
                 }
