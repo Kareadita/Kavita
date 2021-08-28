@@ -50,7 +50,7 @@ namespace API.Services.Tasks
             await SaveFile(statisticsDto);
         }
 
-        public async Task CollectRelevantData()
+        private async Task CollectRelevantData()
         {
             _logger.LogDebug("Collecting data from the server and database");
 
@@ -63,7 +63,7 @@ namespace API.Services.Tasks
             await PathData(serverInfo, usageInfo);
         }
 
-        public async Task FinalizeStats()
+        private async Task FinalizeStats()
         {
             try
             {
@@ -86,6 +86,12 @@ namespace API.Services.Tasks
 
         public async Task CollectAndSendStatsData()
         {
+            var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
+            if (!allowStatCollection)
+            {
+                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
+                return;
+            }
             await CollectRelevantData();
             await FinalizeStats();
         }
