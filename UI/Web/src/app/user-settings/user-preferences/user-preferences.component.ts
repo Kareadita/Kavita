@@ -187,13 +187,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   }
 
   transformKeyToOpdsUrl(key: string) {
-    let apiUrl = environment.apiUrl;
-    if (environment.production) {
-      apiUrl = `${location.protocol}//${location.origin}`;
-      if (location.port != '80') {
-        apiUrl += ':' + location.port;
-      }
-    }
-    return `${apiUrl}opds/${key}`;
+    return `${location.origin}/api/opds/${key}`;
   }
 }
