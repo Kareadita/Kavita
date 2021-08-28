@@ -117,6 +117,9 @@
     <Content Remove="temp\**" />
     <Content Remove="stats\**" />
     <Content Condition=" '$(Configuration)' == 'Release' " Remove="appsettings.Development.json" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
