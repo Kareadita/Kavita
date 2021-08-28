@@ -183,6 +183,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user == null) return BadRequest("Could not access user");
             var series =
                 await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams, filterDto);
 
@@ -201,6 +202,7 @@ namespace API.Controllers
         {
             // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (user == null) return BadRequest("Could not access user");
             var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
 
             var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)

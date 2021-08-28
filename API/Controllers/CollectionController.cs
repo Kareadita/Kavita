@@ -36,10 +36,13 @@ namespace API.Controllers
         public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
-            if (isAdmin)
+            if (user != null)
             {
-                return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+                var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+                if (isAdmin)
+                {
+                    return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+                }
             }
             return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
         }
