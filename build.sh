@@ -97,7 +97,15 @@ Package()
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
     echo "Renaming API -> Kavita"
-    mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+    if [ $runtime == "win-x64" ] || [ $runtime == "win-x86" ]
+    then
+        mv "$lOutputFolder"/API.exe "$lOutputFolder"/Kavita.exe
+    else
+        mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
+    fi
+
+    echo "Copying appsettings.json"
+    cp appsettings.Development.json $lOutputFolder/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
