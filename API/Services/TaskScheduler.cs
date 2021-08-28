@@ -22,6 +22,7 @@ namespace API.Services
 
         private readonly IStatsService _statsService;
         private readonly IVersionUpdaterService _versionUpdaterService;
+        private const string SendDataTask = "finalize-stats";
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
@@ -76,19 +77,17 @@ namespace API.Services
 
         #region StatsTasks
 
-        private const string SendDataTask = "finalize-stats";
-        public void ScheduleStatsTasks()
+
+        public async Task ScheduleStatsTasks()
         {
-            var allowStatCollection = bool.Parse(Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.AllowStatCollection)).GetAwaiter().GetResult().Value);
+            var allowStatCollection  = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
             if (!allowStatCollection)
             {
                 _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
 
-            _logger.LogDebug("Adding StatsTasks");
-
-            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            _logger.LogDebug("Scheduling stat collection daily");
             RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
         }
 
@@ -97,6 +96,12 @@ namespace API.Services
             _logger.LogDebug("Cancelling/Removing StatsTasks");
 
             RecurringJob.RemoveIfExists(SendDataTask);
+        }
+
+        public void RunStatCollection()
+        {
+            _logger.LogInformation("Enqueuing stat collection");
+            BackgroundJob.Enqueue(() => _statsService.CollectAndSendStatsData());
         }
 
         #endregion
