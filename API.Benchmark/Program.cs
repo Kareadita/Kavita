@@ -8,7 +8,7 @@ namespace API.Benchmark
     /// then copy the outputted dll
     /// dotnet copied_string\API.Benchmark.dll
     /// </summary>
-    public class Program
+    public static class Program
     {
         static void Main(string[] args)
         {
