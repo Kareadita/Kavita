@@ -392,7 +392,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // NOTE: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
