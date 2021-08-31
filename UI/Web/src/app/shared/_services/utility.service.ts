@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 
 export enum KEY_CODES {
@@ -83,6 +84,30 @@ export class UtilityService {
       case MangaFormat.UNKNOWN:
         return 'fa-question';
     }
+  }
+
+  isVolume(d: any) {
+    return d != null && d.hasOwnProperty('chapters');
+  }
+
+  isChapter(d: any) {
+    return d != null && d.hasOwnProperty('volumeId');
+  }
+
+  isSeries(d: any) {
+    return d != null && d.hasOwnProperty('originalName');
+  }
+
+  asVolume(d: any) {
+    return <Volume>d;
+  }
+
+  asChapter(d: any) {
+    return <Chapter>d;
+  }
+
+  asSeries(d: any) {
+    return <Series>d;
   }
 
 }

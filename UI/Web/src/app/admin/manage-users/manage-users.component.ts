@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
@@ -10,13 +10,15 @@ import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.component';
+import { PresenceHubService } from 'src/app/_services/presence-hub.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-manage-users',
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.scss']
 })
-export class ManageUsersComponent implements OnInit {
+export class ManageUsersComponent implements OnInit, OnDestroy {
 
   members: Member[] = [];
   loggedInUsername = '';
@@ -25,18 +27,27 @@ export class ManageUsersComponent implements OnInit {
   createMemberToggle = false;
   loadingMembers = false;
 
+  private onDestroy = new Subject<void>();
+
   constructor(private memberService: MemberService,
               private accountService: AccountService,
               private modalService: NgbModal,
               private toastr: ToastrService,
-              private confirmService: ConfirmService) {
+              private confirmService: ConfirmService,
+              public presence: PresenceHubService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
+
   }
 
   ngOnInit(): void {
     this.loadMembers();
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   loadMembers() {
@@ -63,10 +74,8 @@ export class ManageUsersComponent implements OnInit {
   openEditLibraryAccess(member: Member) {
     const modalRef = this.modalService.open(LibraryAccessModalComponent);
     modalRef.componentInstance.member = member;
-    modalRef.closed.subscribe(result => {
-      if (result) {
-        this.loadMembers();
-      }
+    modalRef.closed.subscribe(() => {
+      this.loadMembers();
     });
   }
 

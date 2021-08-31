@@ -21,13 +21,15 @@ namespace API.Services
         private readonly ICleanupService _cleanupService;
 
         private readonly IStatsService _statsService;
+        private readonly IVersionUpdaterService _versionUpdaterService;
+        private const string SendDataTask = "finalize-stats";
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
             IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-            ICleanupService cleanupService, IStatsService statsService)
+            ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService)
         {
             _cacheService = cacheService;
             _logger = logger;
@@ -37,6 +39,7 @@ namespace API.Services
             _backupService = backupService;
             _cleanupService = cleanupService;
             _statsService = statsService;
+            _versionUpdaterService = versionUpdaterService;
         }
 
         public void ScheduleTasks()
@@ -68,23 +71,23 @@ namespace API.Services
             }
 
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
+
+            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily);
         }
 
         #region StatsTasks
 
-        private const string SendDataTask = "finalize-stats";
-        public void ScheduleStatsTasks()
+
+        public async Task ScheduleStatsTasks()
         {
-            var allowStatCollection = bool.Parse(Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.AllowStatCollection)).GetAwaiter().GetResult().Value);
+            var allowStatCollection  = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
             if (!allowStatCollection)
             {
                 _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
 
-            _logger.LogDebug("Adding StatsTasks");
-
-            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            _logger.LogDebug("Scheduling stat collection daily");
             RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
         }
 
@@ -95,6 +98,22 @@ namespace API.Services
             RecurringJob.RemoveIfExists(SendDataTask);
         }
 
+        public void RunStatCollection()
+        {
+            _logger.LogInformation("Enqueuing stat collection");
+            BackgroundJob.Enqueue(() => _statsService.CollectAndSendStatsData());
+        }
+
+        #endregion
+
+        #region UpdateTasks
+
+        public void ScheduleUpdaterTasks()
+        {
+            _logger.LogInformation("Scheduling Auto-Update tasks");
+            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Weekly);
+
+        }
         #endregion
 
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
@@ -137,6 +156,15 @@ namespace API.Services
         public void BackupDatabase()
         {
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
+        }
+
+        /// <summary>
+        /// Not an external call. Only public so that we can call this for a Task
+        /// </summary>
+        public async Task CheckForUpdate()
+        {
+            var update = await _versionUpdaterService.CheckForUpdate();
+            await _versionUpdaterService.PushUpdate(update);
         }
     }
 }

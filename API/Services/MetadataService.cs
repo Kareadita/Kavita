@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -21,7 +20,10 @@ namespace API.Services
         private readonly IArchiveService _archiveService;
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
-        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+        /// <summary>
+        /// Width of the Thumbnail generation
+        /// </summary>
         public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
@@ -34,13 +36,30 @@ namespace API.Services
             _imageService = imageService;
         }
 
-        private static bool ShouldFindCoverImage(byte[] coverImage, bool forceUpdate = false)
+        /// <summary>
+        /// Determines whether an entity should regenerate cover image
+        /// </summary>
+        /// <param name="coverImage"></param>
+        /// <param name="firstFile"></param>
+        /// <param name="forceUpdate"></param>
+        /// <param name="isCoverLocked"></param>
+        /// <returns></returns>
+        public static bool ShouldUpdateCoverImage(byte[] coverImage, MangaFile firstFile, bool forceUpdate = false,
+            bool isCoverLocked = false)
         {
-            return forceUpdate || coverImage == null || !coverImage.Any();
+            if (isCoverLocked) return false;
+            if (forceUpdate) return true;
+            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage);
+        }
+
+        private static bool HasCoverImage(byte[] coverImage)
+        {
+            return coverImage != null && coverImage.Any();
         }
 
         private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
         {
+            file.LastModified = DateTime.Now;
             switch (file.Format)
             {
                 case MangaFormat.Pdf:
@@ -54,45 +73,51 @@ namespace API.Services
                 default:
                     return Array.Empty<byte>();
             }
+
         }
 
+        /// <summary>
+        /// Updates the metadata for a Chapter
+        /// </summary>
+        /// <param name="chapter"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if (ShouldFindCoverImage(chapter.CoverImage, forceUpdate) && firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
+
+            if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
-                chapter.Files ??= new List<MangaFile>();
                 chapter.CoverImage = GetCoverImage(firstFile);
             }
         }
 
-
+        /// <summary>
+        /// Updates the metadata for a Volume
+        /// </summary>
+        /// <param name="volume"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Volume volume, bool forceUpdate)
         {
-            if (volume == null || !ShouldFindCoverImage(volume.CoverImage, forceUpdate)) return;
+            if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, forceUpdate
+                , false)) return;
 
             volume.Chapters ??= new List<Chapter>();
-            var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+            var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
 
-            // Skip calculating Cover Image (I/O) if the chapter already has it set
-            if (firstChapter == null || ShouldFindCoverImage(firstChapter.CoverImage, forceUpdate))
-            {
-                var firstFile = firstChapter?.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-                if (firstFile != null && !new FileInfo(firstFile.FilePath).IsLastWriteLessThan(firstFile.LastModified))
-                {
-                    volume.CoverImage = GetCoverImage(firstFile);
-                }
-            }
-            else
-            {
-                volume.CoverImage = firstChapter.CoverImage;
-            }
+            if (firstChapter == null) return;
+
+            volume.CoverImage = firstChapter.CoverImage;
         }
 
+        /// <summary>
+        /// Updates metadata for Series
+        /// </summary>
+        /// <param name="series"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void UpdateMetadata(Series series, bool forceUpdate)
         {
             if (series == null) return;
-            if (ShouldFindCoverImage(series.CoverImage, forceUpdate))
+            if (ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
             {
                 series.Volumes ??= new List<Volume>();
                 var firstCover = series.Volumes.GetCoverImage(series.Format);
@@ -102,13 +127,13 @@ namespace API.Services
                     // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
                     if (series.Volumes.Count == 1)
                     {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
+                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
                     }
 
-                    if (coverImage == null)
+                    if (!HasCoverImage(coverImage))
                     {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
+                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault()?.CoverImage;
                     }
                 }
@@ -140,12 +165,18 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metadata for a whole library
+        /// </summary>
+        /// <remarks>This can be heavy on memory first run</remarks>
+        /// <param name="libraryId"></param>
+        /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public void RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
             var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
 
-            // TODO: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
+            // PERF: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
             foreach (var series in library.Series)
             {
@@ -171,6 +202,11 @@ namespace API.Services
         }
 
 
+        /// <summary>
+        /// Refreshes Metadata for a Series. Will always force updates.
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <param name="seriesId"></param>
         public void RefreshMetadataForSeries(int libraryId, int seriesId)
         {
             var sw = Stopwatch.StartNew();

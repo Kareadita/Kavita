@@ -185,6 +185,8 @@ namespace API.Controllers
 
                 if (chapterIds.Any())
                 {
+                    await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                    await _unitOfWork.CommitAsync();
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
                 return Ok(true);
@@ -203,8 +205,7 @@ namespace API.Controllers
         {
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id);
 
-            var originalFolders = library.Folders.Select(x => x.Path);
-            var differenceBetweenFolders = originalFolders.Except(libraryForUserDto.Folders);
+            var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
             library.Name = libraryForUserDto.Name;
             library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
@@ -212,9 +213,9 @@ namespace API.Controllers
             _unitOfWork.LibraryRepository.Update(library);
 
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
-            if (differenceBetweenFolders.Any())
+            if (originalFolders.Count != libraryForUserDto.Folders.Count())
             {
-                _taskScheduler.ScanLibrary(library.Id, true);
+                _taskScheduler.ScanLibrary(library.Id);
             }
 
             return Ok();

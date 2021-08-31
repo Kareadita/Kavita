@@ -52,7 +52,7 @@ namespace API.Data
                 IsSpecial = specialTreatment,
             };
         }
-        
+
         public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
         {
             return new SeriesMetadata()
@@ -66,9 +66,9 @@ namespace API.Data
             return new CollectionTag()
             {
                 Id = id,
-                NormalizedTitle = API.Parser.Parser.Normalize(title).ToUpper(),
-                Title = title,
-                Summary = summary,
+                NormalizedTitle = API.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+                Title = title?.Trim(),
+                Summary = summary?.Trim(),
                 Promoted = promoted
             };
         }

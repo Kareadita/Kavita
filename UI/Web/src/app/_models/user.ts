@@ -6,4 +6,5 @@ export interface User {
     token: string;
     roles: string[];
     preferences: Preferences;
+    apiKey: string;
 }

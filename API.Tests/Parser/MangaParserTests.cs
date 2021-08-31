@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Parser;
 using Xunit;
@@ -26,6 +26,7 @@ namespace API.Tests.Parser
         [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
         [InlineData("Vol 1", "1")]
+        [InlineData("vol_356-1", "356")] // Mangapy syntax
         [InlineData("No Volume", "0")]
         [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
@@ -64,6 +65,7 @@ namespace API.Tests.Parser
         [InlineData("Sword Art Online Vol 10 - Alicization Running [Yen Press] [LuCaZ] {r2}.epub", "10")]
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "0")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -154,6 +156,7 @@ namespace API.Tests.Parser
         [InlineData("Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz", "Please Go Home, Akutsu-San!")]
         [InlineData("Killing Bites - Vol 11 Chapter 050 Save Me, Nunupi!.cbz", "Killing Bites")]
         [InlineData("Mad Chimera World - Volume 005 - Chapter 026.cbz", "Mad Chimera World")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "Hentai Ouji to Warawanai Neko.")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -222,6 +225,7 @@ namespace API.Tests.Parser
         [InlineData("Boku No Kokoro No Yabai Yatsu - Chapter 054 I Prayed At The Shrine (V0).cbz", "54")]
         [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
+        [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "34.5")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -275,6 +279,7 @@ namespace API.Tests.Parser
             Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
+/*
         private static ParserInfo CreateParserInfo(string series, string chapter, string volume, bool isSpecial = false)
         {
           return new ParserInfo()
@@ -285,6 +290,7 @@ namespace API.Tests.Parser
             Series = series,
           };
         }
+*/
 
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
@@ -307,14 +313,14 @@ namespace API.Tests.Parser
             const string rootPath = @"E:/Manga/";
             var expected = new Dictionary<string, ParserInfo>();
             var filepath = @"E:/Manga/Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Mujaki no Rakuen", Volumes = "12",
-                Chapters = "76", Filename = "Mujaki no Rakuen Vol12 ch76.cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Mujaki no Rakuen", Volumes = "12",
+                 Chapters = "76", Filename = "Mujaki no Rakuen Vol12 ch76.cbz", Format = MangaFormat.Archive,
+                 FullFilePath = filepath
+             });
 
-            filepath = @"E:/Manga/Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz";
+             filepath = @"E:/Manga/Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz";
             expected.Add(filepath, new ParserInfo
             {
                 Series = "Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen", Volumes = "1",
@@ -402,6 +408,10 @@ namespace API.Tests.Parser
               FullFilePath = filepath, IsSpecial = false
             });
 
+            // If an image is cover exclusively, ignore it
+            filepath = @"E:\Manga\Seraph of the End\cover.png";
+            expected.Add(filepath, null);
+
 
             foreach (var file in expected.Keys)
             {
@@ -414,20 +424,20 @@ namespace API.Tests.Parser
                 }
                 Assert.NotNull(actual);
                 _testOutputHelper.WriteLine($"Validating {file}");
-                _testOutputHelper.WriteLine("Format");
                 Assert.Equal(expectedInfo.Format, actual.Format);
-                _testOutputHelper.WriteLine("Series");
+                _testOutputHelper.WriteLine("Format ✓");
                 Assert.Equal(expectedInfo.Series, actual.Series);
-                _testOutputHelper.WriteLine("Chapters");
+                _testOutputHelper.WriteLine("Series ✓");
                 Assert.Equal(expectedInfo.Chapters, actual.Chapters);
-                _testOutputHelper.WriteLine("Volumes");
+                _testOutputHelper.WriteLine("Chapters ✓");
                 Assert.Equal(expectedInfo.Volumes, actual.Volumes);
-                _testOutputHelper.WriteLine("Edition");
+                _testOutputHelper.WriteLine("Volumes ✓");
                 Assert.Equal(expectedInfo.Edition, actual.Edition);
-                _testOutputHelper.WriteLine("Filename");
+                _testOutputHelper.WriteLine("Edition ✓");
                 Assert.Equal(expectedInfo.Filename, actual.Filename);
-                _testOutputHelper.WriteLine("FullFilePath");
+                _testOutputHelper.WriteLine("Filename ✓");
                 Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
+                _testOutputHelper.WriteLine("FullFilePath ✓");
             }
         }
     }

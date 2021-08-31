@@ -20,7 +20,7 @@ namespace API.Interfaces.Services
         /// <returns></returns>
         string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
         Task<byte[]> ReadFileAsync(string path);
-        bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath);
+        bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "");
         bool Exists(string directory);
 
         IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",

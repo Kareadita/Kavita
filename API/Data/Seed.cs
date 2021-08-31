@@ -48,6 +48,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
+                new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
             };
 
             foreach (var defaultSetting in defaultSettings)
@@ -60,30 +61,29 @@ namespace API.Data
             }
 
             await context.SaveChangesAsync();
-            
+
             // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
-            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.Port).Value =
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
                 Configuration.Port + string.Empty;
-            context.ServerSetting.FirstOrDefault(s => s.Key == ServerSettingKey.LoggingLevel).Value =
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
 
             await context.SaveChangesAsync();
 
         }
 
-        public static async Task SeedSeriesMetadata(DataContext context)
+        public static async Task SeedUserApiKeys(DataContext context)
         {
             await context.Database.EnsureCreatedAsync();
-            
-            context.Database.EnsureCreated();
-            var series = await context.Series
-                .Include(s => s.Metadata).ToListAsync();
-                
-            foreach (var s in series)
-            {
-                s.Metadata ??= new SeriesMetadata();
-            }
 
+            var users = await context.AppUser.ToListAsync();
+            foreach (var user in users)
+            {
+                if (string.IsNullOrEmpty(user.ApiKey))
+                {
+                    user.ApiKey = HashUtil.ApiKey();
+                }
+            }
             await context.SaveChangesAsync();
         }
     }

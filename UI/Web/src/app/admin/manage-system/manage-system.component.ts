@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
+import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
@@ -21,9 +22,13 @@ export class ManageSystemComponent implements OnInit {
   serverInfo!: ServerInfo;
 
   clearCacheInProgress: boolean = false;
+  backupDBInProgress: boolean = false;
+  isCheckingForUpdate: boolean = false;
+  downloadLogsInProgress: boolean = false;
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
-    private serverService: ServerService, public downloadService: DownloadService) { }
+    private serverService: ServerService, public downloadService: DownloadService, 
+    private modalService: NgbModal) { }
 
   ngOnInit(): void {
 
@@ -69,6 +74,38 @@ export class ManageSystemComponent implements OnInit {
       this.clearCacheInProgress = false;
       this.toastr.success('Cache has been cleared');
     });
+  }
+
+  backupDB() {
+    this.backupDBInProgress = true;
+    this.serverService.backupDatabase().subscribe(res => {
+      this.backupDBInProgress = false;
+      this.toastr.success('Database has been backed up');
+    });
+  }
+
+  checkForUpdates() {
+    this.isCheckingForUpdate = true;
+    this.serverService.checkForUpdate().subscribe((update) => { 
+      this.isCheckingForUpdate = false;
+      if (update === null) {
+        this.toastr.info('No updates available');
+        return;
+      }
+      const modalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+      modalRef.componentInstance.updateData = update;
+    });
+  }
+
+  downloadLogs() {
+    this.downloadLogsInProgress = true;
+    this.downloadService.downloadLogs().pipe(
+      takeWhile(val => {
+        return val.state != 'DONE';
+      }),
+      finalize(() => {
+        this.downloadLogsInProgress = false;
+      })).subscribe(() => {/* No Operation */});
   }
 
 }

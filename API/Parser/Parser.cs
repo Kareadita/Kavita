@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -16,6 +16,7 @@ namespace API.Parser
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
+        public const string MacOsMetadataFileStartsWith = @"._";
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
@@ -80,6 +81,11 @@ namespace API.Parser
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
+            // vol_001-1.cbz for MangaPy default naming convention
+            new Regex(
+                @"(vol_)(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
         };
@@ -550,6 +556,8 @@ namespace API.Parser
                     FullFilePath = filePath
                 };
             }
+
+            if (IsImage(filePath) && IsCoverImage(fileName)) return null;
 
             if (IsImage(filePath))
             {
@@ -1025,6 +1033,7 @@ namespace API.Parser
         {
             return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
+
 
         /// <summary>
         /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image

@@ -3,14 +3,14 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
+import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
+import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
-import { CardDetailsModalComponent } from '../shared/_modals/card-details-modal/card-details-modal.component';
 import { DownloadService } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
-import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { LibraryType } from '../_models/library';
@@ -60,6 +60,16 @@ export class SeriesDetailComponent implements OnInit {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
+  /**
+   * Poster image for the Series
+   */
+  seriesImage: string = '';
+  downloadInProgress: boolean = false;
+
+  /**
+   * Tricks the cover images for volume/chapter cards to update after we update one of them
+   */
+  coverImageOffset: number = 0;
 
   /**
    * If an action is currently being done, don't let the user kick off another action
@@ -86,7 +96,8 @@ export class SeriesDetailComponent implements OnInit {
               private accountService: AccountService, public imageService: ImageService,
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
-              private downloadService: DownloadService, private actionService: ActionService) {
+              private downloadService: DownloadService, private actionService: ActionService,
+              public imageSerivce: ImageService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -105,13 +116,9 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
-    this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this)).filter(action => action.action !== Action.Edit);
-    this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
-    this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-
-
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
+    this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
     this.loadSeriesMetadata(seriesId);
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -141,13 +148,16 @@ export class SeriesDetailComponent implements OnInit {
         });
         break;
       case(Action.ScanLibrary):
-        this.actionService.scanSeries(series, (series) => this.actionInProgress = false);
+        this.actionService.scanSeries(series, () => this.actionInProgress = false);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetdata(series, (series) => this.actionInProgress = false);
+        this.actionService.refreshMetdata(series, () => this.actionInProgress = false);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
+        break;
+      case(Action.Bookmarks):
+        this.actionService.openBookmarkModal(series, () => this.actionInProgress = false);
         break;
       default:
         break;
@@ -162,11 +172,8 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markAsUnread(volume);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(volume);
-        break;
-      case(Action.Download):
-      this.downloadService.downloadVolume(volume, this.series.name);
         break;
       default:
         break;
@@ -181,11 +188,8 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markChapterAsUnread(chapter);
         break;
-      case(Action.Info):
+      case(Action.Edit):
         this.openViewInfo(chapter);
-        break;
-      case(Action.Download):
-        this.downloadService.downloadChapter(chapter, this.series.name);
         break;
       default:
         break;
@@ -225,6 +229,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   loadSeries(seriesId: number) {
+    this.coverImageOffset = 0;
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
     });
@@ -233,6 +238,12 @@ export class SeriesDetailComponent implements OnInit {
       this.createHTML();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
+
+      this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
+              .filter(action => action.action !== Action.Edit)
+              .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
+      this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
+      this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
@@ -281,7 +292,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.actionService.markVolumeAsRead(seriesId, vol, (volume) => {
+    this.actionService.markVolumeAsRead(seriesId, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -293,7 +304,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.actionService.markVolumeAsUnread(seriesId, vol, (volume) => {
+    this.actionService.markVolumeAsUnread(seriesId, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -305,7 +316,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
     
-    this.actionService.markChapterAsRead(seriesId, chapter, (chapter) => {
+    this.actionService.markChapterAsRead(seriesId, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -317,7 +328,7 @@ export class SeriesDetailComponent implements OnInit {
     }
     const seriesId = this.series.id;
 
-    this.actionService.markChapterAsUnread(seriesId, chapter, (chapter) => {
+    this.actionService.markChapterAsUnread(seriesId, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -375,20 +386,30 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg', scrollable: true });
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' }); // , scrollable: true (these don't work well on mobile)
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
+    modalRef.componentInstance.libraryId = this.series?.libraryId;
+    modalRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
+      if (result.coverImageUpdate) {
+        this.coverImageOffset += 1;
+      }
+    });
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  scrollable: true, size: 'lg', windowClass: 'scrollable-modal' });
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series}) => {
+    modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);
         this.loadSeriesMetadata(this.series.id);
+        if (closeResult.coverImageUpdate) {
+          // Random triggers a load change without any problems with API
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+        }
       }
     });
   }
@@ -429,6 +450,18 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   downloadSeries() {
-    this.downloadService.downloadSeries(this.series);
+    
+    this.downloadService.downloadSeriesSize(this.series.id).pipe(take(1)).subscribe(async (size) => {
+      const wantToDownload = await this.downloadService.confirmSize(size, 'series');
+      if (!wantToDownload) { return; }
+      this.downloadInProgress = true;
+      this.downloadService.downloadSeries(this.series).pipe(
+        takeWhile(val => {
+          return val.state != 'DONE';
+        }),
+        finalize(() => {
+          this.downloadInProgress = false;
+        })).subscribe(() => {/* No Operation */});;
+    });
   }
 }

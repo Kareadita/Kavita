@@ -4,6 +4,7 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
+using API.SignalR.Presence;
 using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -32,9 +33,15 @@ namespace API.Extensions
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IImageService, ImageService>();
+            services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
+            services.AddScoped<IDownloadService, DownloadService>();
+            services.AddScoped<IReaderService, ReaderService>();
+
+            services.AddScoped<IPresenceTracker, PresenceTracker>();
 
             services.AddSqLite(config, env);
             services.AddLogging(config);
+            services.AddSignalR();
         }
 
         private static void AddSqLite(this IServiceCollection services, IConfiguration config,

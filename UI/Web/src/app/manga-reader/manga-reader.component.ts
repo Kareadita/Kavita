@@ -183,6 +183,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If extended settings area is visible. Blocks auto-closing of menu.
    */
   settingsOpen: boolean = false;
+  /**
+   * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
+   */
+  bookmarks: {[key: string]: number} = {};
 
   private readonly onDestroy = new Subject<void>();
 
@@ -191,6 +195,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   
 
+  get pageBookmarked() {
+    return this.bookmarks.hasOwnProperty(this.pageNum);
+  }
   
 
   get splitIconClass() {
@@ -348,13 +355,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum = 1;
 
     forkJoin({
-      bookmark: this.readerService.getBookmark(this.chapterId),
-      chapterInfo: this.readerService.getChapterInfo(this.chapterId)
+      progress: this.readerService.getProgress(this.chapterId),
+      chapterInfo: this.readerService.getChapterInfo(this.seriesId, this.chapterId),
+      bookmarks: this.readerService.getBookmarks(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
 
-      let page = results.bookmark.pageNum;
+      let page = results.progress.pageNum;
       if (page >= this.maxPages) {
         page = this.maxPages - 1;
       }
@@ -366,6 +374,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageOptions = newOptions;
 
       this.updateTitle(results.chapterInfo);
+
+      // From bookmarks, create map of pages to make lookup time O(1)
+      this.bookmarks = {};
+      results.bookmarks.forEach(bookmark => {
+        this.bookmarks[bookmark.page] = 1;
+      });
 
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
@@ -468,11 +482,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getFittingIcon() {
-    let value = FITTING_OPTION.HEIGHT;
-    const formControl = this.generalSettingsForm.get('fittingOption');
-    if (formControl !== undefined) {
-      value = formControl?.value;
-    }
+    const value = this.getFit();
     
     switch(value) {
       case FITTING_OPTION.HEIGHT:
@@ -482,6 +492,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case FITTING_OPTION.ORIGINAL:
         return 'fa-expand-arrows-alt';
     }
+  }
+
+  getFit() {
+    let value = FITTING_OPTION.HEIGHT;
+    const formControl = this.generalSettingsForm.get('fittingOption');
+    if (formControl !== undefined) {
+      value = formControl?.value;
+    }
+    return value;
   }
 
   cancelMenuCloseTimer() {
@@ -721,6 +740,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
+      // Reset scroll on non HEIGHT Fits
+      if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+        window.scrollTo(0, 0);
+      }
+
     }
     this.isLoading = false;
   }
@@ -747,14 +771,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
-    // Due to the fact that we start at image 0, but page 1, we need the last page to be bookmarked as page + 1 to be completed
+    // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let pageNum = this.pageNum;
     if (this.pageNum == this.maxPages - 1) {
       pageNum = this.pageNum + 1;
     }
 
 
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
@@ -814,13 +838,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.seriesId, this.nextChapterId).pipe(take(1)).subscribe(res => {
           this.nextChapterPrefetched = true;
         });
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
-        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+        this.readerService.getChapterInfo(this.seriesId, this.prevChapterId).pipe(take(1)).subscribe(res => {
           this.prevChapterPrefetched = true;
         });
       }
@@ -905,7 +929,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleWebtoonPageChange(updatedPageNum: number) {
     this.setPageNum(updatedPageNum);
-    this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 
   saveSettings() {
@@ -944,5 +968,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.generalSettingsForm.get('autoCloseMenu')?.setValue(this.autoCloseMenu);
 
     this.updateForm();
+  }
+
+  /**
+   * Bookmarks the current page for the chapter
+   */
+  bookmarkPage() {
+    const pageNum = this.pageNum;
+    if (this.pageBookmarked) {
+      // Remove bookmark
+      this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
+        delete this.bookmarks[pageNum];
+      });
+    } else {
+      this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
+        this.bookmarks[pageNum] = 1;
+      });
+    }
+    
   }
 }

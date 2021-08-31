@@ -10,5 +10,6 @@
         public byte[] CoverImage { get; init; }
         public int UserRating { get; set; }
         public string UserReview { get; set; }
+        public bool CoverImageLocked { get; set; }
     }
 }

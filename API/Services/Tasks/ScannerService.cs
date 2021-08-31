@@ -72,8 +72,9 @@ namespace API.Services.Tasks
                 _logger.LogInformation(
                     "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
-                CleanupUserProgress();
-                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+
+                CleanupDbEntities();
+                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
             }
             else
@@ -131,9 +132,17 @@ namespace API.Services.Tasks
           {
              ScanLibrary(lib.Id, false);
           }
+
        }
 
 
+       /// <summary>
+       /// Scans a library for file changes.
+       /// Will kick off a scheduled background task to refresh metadata,
+       /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
+       /// </summary>
+       /// <param name="libraryId"></param>
+       /// <param name="forceUpdate"></param>
        [DisableConcurrentExecution(360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public void ScanLibrary(int libraryId, bool forceUpdate)
@@ -188,6 +197,16 @@ namespace API.Services.Tasks
        {
           var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
+       }
+
+       /// <summary>
+       /// Cleans up any abandoned rows due to removals from Scan loop
+       /// </summary>
+       private void CleanupDbEntities()
+       {
+           CleanupUserProgress();
+           var cleanedUp = Task.Run( () => _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries()).Result;
+           _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
        }
 
        private void UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
@@ -260,13 +279,43 @@ namespace API.Services.Tasks
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
-           // It is safe to check only first since Parser ensures that a Series only has one type
-           var format = MangaFormat.Unknown;
-           var firstPs = parsedSeries.Keys.DistinctBy(ps => ps.Format).FirstOrDefault();
-           if (firstPs != null) format = firstPs.Format;
-
            var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
-           return existingSeries.Where(es => !es.NameInList(foundSeries) || es.Format != format);
+           return existingSeries.Where(es => !es.NameInList(foundSeries) && !SeriesHasMatchingParserInfoFormat(es, parsedSeries));
+       }
+
+       /// <summary>
+       /// Checks each parser info to see if there is a name match and if so, checks if the format matches the Series object.
+       /// This accounts for if the Series has an Unknown type and if so, considers it matching.
+       /// </summary>
+       /// <param name="series"></param>
+       /// <param name="parsedSeries"></param>
+       /// <returns></returns>
+       private static bool SeriesHasMatchingParserInfoFormat(Series series,
+           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       {
+           var format = MangaFormat.Unknown;
+           foreach (var pSeries in parsedSeries.Keys)
+           {
+               var name = pSeries.Name;
+               var normalizedName = Parser.Parser.Normalize(name);
+
+               if (normalizedName == series.NormalizedName ||
+                   normalizedName == Parser.Parser.Normalize(series.Name) ||
+                   name == series.Name || name == series.LocalizedName ||
+                   name == series.OriginalName ||
+                   normalizedName == Parser.Parser.Normalize(series.OriginalName))
+               {
+                   format = pSeries.Format;
+                   break;
+               }
+           }
+
+           if (series.Format == MangaFormat.Unknown && format != MangaFormat.Unknown)
+           {
+               return true;
+           }
+
+           return format == series.Format;
        }
 
        /// <summary>
@@ -446,7 +495,7 @@ namespace API.Services.Tasks
                };
              }
              default:
-                _logger.LogWarning("[Scanner] Ignoring {Filename}. Non-archives are not supported", info.Filename);
+                _logger.LogWarning("[Scanner] Ignoring {Filename}. File type is not supported", info.Filename);
                 break;
           }
 
@@ -473,13 +522,7 @@ namespace API.Services.Tasks
              if (file != null)
              {
                 chapter.Files.Add(file);
-                existingFile = chapter.Files.Last();
              }
-          }
-
-          if (existingFile != null)
-          {
-             existingFile.LastModified = new FileInfo(existingFile.FilePath).LastWriteTime;
           }
        }
     }

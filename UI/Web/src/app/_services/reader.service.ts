@@ -3,8 +3,9 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
-import { Bookmark } from '../_models/bookmark';
 import { Chapter } from '../_models/chapter';
+import { PageBookmark } from '../_models/page-bookmark';
+import { ProgressBookmark } from '../_models/progress-bookmark';
 import { Volume } from '../_models/volume';
 
 @Injectable({
@@ -19,20 +20,48 @@ export class ReaderService {
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
-  getBookmark(chapterId: number) {
-    return this.httpClient.get<Bookmark>(this.baseUrl + 'reader/get-bookmark?chapterId=' + chapterId);
+  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page});
+  }
+
+  unbookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
+  }
+
+  getAllBookmarks() {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-all-bookmarks');
+  }
+
+  getBookmarks(chapterId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-bookmarks?chapterId=' + chapterId);
+  }
+
+  getBookmarksForVolume(volumeId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-volume-bookmarks?volumeId=' + volumeId);
+  }
+
+  getBookmarksForSeries(seriesId: number) {
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-series-bookmarks?seriesId=' + seriesId);
+  }
+
+  clearBookmarks(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId});
+  }
+
+  getProgress(chapterId: number) {
+    return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
 
   getPageUrl(chapterId: number, page: number) {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
-  getChapterInfo(chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  getChapterInfo(seriesId: number, chapterId: number) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&seriesId=' + seriesId);
   }
 
-  bookmark(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
-    return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
+  saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/progress', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

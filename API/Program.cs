@@ -53,6 +53,7 @@ namespace API
             await context.Database.MigrateAsync();
             await Seed.SeedRoles(roleManager);
             await Seed.SeedSettings(context);
+            await Seed.SeedUserApiKeys(context);
          }
          catch (Exception ex)
          {
