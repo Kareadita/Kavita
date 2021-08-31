@@ -188,6 +188,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   `;
 
+  get ReadingDirection(): typeof ReadingDirection {
+    return ReadingDirection;
+  }
+
+  get IsPrevDisabled() {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      return this.prevPageDisabled && this.pageNum === 0;
+    } 
+    return this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+  }
+
+  get IsNextDisabled() {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+    }
+    return this.prevPageDisabled && this.pageNum === 0;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
@@ -686,13 +704,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum + 1);
     }
 
-    if (this.pageNum === 0) {
+    if (oldPageNum === 0) {
       // Move to next volume/chapter automatically
       this.loadPrevChapter();
       return;
     }
 
     if (oldPageNum === this.pageNum) { return; }
+
     this.loadPage();
   }
 
@@ -713,7 +732,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
     }
-    
+
     if (oldPageNum === this.pageNum) { return; }
 
     this.loadPage();
