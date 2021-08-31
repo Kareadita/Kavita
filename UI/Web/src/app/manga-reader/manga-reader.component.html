@@ -28,10 +28,10 @@
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
-            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"></app-infinite-scroller>
+            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" [direction] = "0" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"></app-infinite-scroller>
         </div>
-        <div class="horizon-images" *ngIf="(readerMode === READER_MODE.HORIZON) && !isLoading">
-            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"> </app-infinite-scroller>
+        <div class="horizon-images" *ngIf="readerMode === READER_MODE.HORIZON && !isLoading">
+            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" [direction] = "1" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"> </app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD"> <!--; else webtoonClickArea; See if people want this mode WEBTOON_WITH_CLICKS-->
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'top'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>

@@ -1,3 +1,13 @@
+<head>
+    <style>
+        .horizon {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            display: flex;
+            overflow-x: scroll;
+        }
+    </style>
+</head>
 
 <div class="fixed-top overlay" *ngIf="debug">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
@@ -9,7 +19,8 @@
 </div>
 
 
-<ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-    <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
-</ng-container>
-
+<div [ngClass]= "direction ? 'horizon' : 'vertical'" >
+    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+        <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+    </ng-container>
+</div>

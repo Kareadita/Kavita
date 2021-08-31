@@ -7,6 +7,7 @@ import { WebtoonImage } from '../_models/webtoon-image';
 
 @Component({
   selector: 'app-infinite-scroller',
+  inputs: ['direction'],
   templateUrl: './infinite-scroller.component.html',
   styleUrls: ['./infinite-scroller.component.scss']
 })
@@ -31,6 +32,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  
+  @Input() direction: number = 0;
   
   /**
    * Stores and emits all the src urls
