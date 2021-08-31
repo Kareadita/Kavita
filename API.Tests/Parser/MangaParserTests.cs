@@ -26,6 +26,7 @@ namespace API.Tests.Parser
         [InlineData("Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", "1")]
         [InlineData("v001", "1")]
         [InlineData("Vol 1", "1")]
+        [InlineData("vol_356-1", "356")] // Mangapy syntax
         [InlineData("No Volume", "0")]
         [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
