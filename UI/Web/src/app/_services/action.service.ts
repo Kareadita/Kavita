@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
-import { AddToListModalComponent } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
+import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -222,7 +222,13 @@ export class ActionService implements OnDestroy {
   addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
-      this.readingListModalRef.componentInstance.series = series; // TODO: Decide on what to pass in
+      this.readingListModalRef.componentInstance.seriesId = series.id; 
+      this.readingListModalRef.componentInstance.title = series.name;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
+
+      console.log('series: ', series);
+
+
       this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {

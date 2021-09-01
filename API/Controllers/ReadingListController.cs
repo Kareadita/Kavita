@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
+using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,9 +22,11 @@ namespace API.Controllers
         /// <param name="includePromoted">Defaults to true</param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult<IEnumerable<ReadingListDto>> GetListForUser(bool includePromoted = true)
+        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListForUser(bool includePromoted = true)
         {
-            return Ok(new ReadingListDto[] {});
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListsForUser(user.Id, includePromoted));
         }
 
         [HttpPost("add-to-list")]

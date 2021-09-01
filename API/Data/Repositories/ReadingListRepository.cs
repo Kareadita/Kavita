@@ -1,6 +1,12 @@
-﻿using API.Interfaces;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using API.DTOs.ReadingLists;
+using API.Interfaces;
 using API.Interfaces.Repositories;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories
 {
@@ -16,7 +22,14 @@ namespace API.Data.Repositories
         }
 
 
-
-
+        public async Task<IEnumerable<ReadingListDto>> GetReadingListsForUser(int userId, bool includePromoted)
+        {
+            return await _context.ReadingList
+                .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
+                .OrderBy(l => l.LastModified)
+                .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

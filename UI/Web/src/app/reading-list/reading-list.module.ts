@@ -5,6 +5,7 @@ import { ReadingListDetailComponent } from './reading-list-detail/reading-list-d
 import { ReadingListRoutingModule } from './reading-list.router.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list-modal.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -17,6 +18,7 @@ import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list
   imports: [
     CommonModule,
     ReadingListRoutingModule,
+    ReactiveFormsModule,
     DragDropModule,
   ],
   exports: [

@@ -35,6 +35,7 @@ namespace API.Data
         public DbSet<SeriesMetadata> SeriesMetadata { get; set; }
         public DbSet<CollectionTag> CollectionTag { get; set; }
         public DbSet<AppUserBookmark> AppUserBookmark { get; set; }
+        public DbSet<ReadingList> ReadingList { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
