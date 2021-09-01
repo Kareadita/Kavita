@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
+using API.Entities;
 using API.Interfaces;
 using API.Interfaces.Repositories;
 using AutoMapper;
@@ -22,7 +23,7 @@ namespace API.Data.Repositories
         }
 
 
-        public async Task<IEnumerable<ReadingListDto>> GetReadingListsForUser(int userId, bool includePromoted)
+        public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted)
         {
             return await _context.ReadingList
                 .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
@@ -30,6 +31,14 @@ namespace API.Data.Repositories
                 .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        public async Task<ReadingList> GetReadingListByIdAsync(int readingListId)
+        {
+            return await _context.ReadingList
+                .Where(r => r.Id == readingListId)
+                .Include(r => r.Items)
+                .SingleOrDefaultAsync();
         }
     }
 }

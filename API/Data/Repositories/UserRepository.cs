@@ -55,6 +55,18 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
+        /// Gets an AppUser by username. Returns back Progress information.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .Include(u => u.ReadingLists)
+                .SingleOrDefaultAsync(x => x.UserName == username);
+        }
+
+        /// <summary>
         /// Gets an AppUser by id. Returns back Progress information.
         /// </summary>
         /// <param name="username"></param>

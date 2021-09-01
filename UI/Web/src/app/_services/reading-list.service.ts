@@ -15,4 +15,12 @@ export class ReadingListService {
   getReadingLists(includePromoted: boolean = true) {
     return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist?includePromoted=' + includePromoted);
   }
+
+  createList(title: string) {
+    return this.httpClient.post<ReadingList>(this.baseUrl + 'readinglist/create', {title});
+  }
+
+  updateBySeries(readingListId: number, seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
+  }
 }

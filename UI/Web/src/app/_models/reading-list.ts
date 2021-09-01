@@ -2,10 +2,10 @@ import { Chapter } from "./chapter";
 
 export interface ReadingListItem {
     libraryId: number;
-    seriesId: number;
     volumeId: number;
+    
+    seriesId: number;
     chapterId: number;
-    //chapter: Chapter; // maybe?
     order: number;
 }
 

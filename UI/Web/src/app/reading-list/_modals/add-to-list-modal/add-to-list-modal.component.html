@@ -10,7 +10,7 @@
     <ul class="list-group">
         <li class="list-group-item" *ngFor="let readingList of lists; let i = index" (click)="addToList(readingList)">
             <!-- Think about using radio buttons maybe for screen reader-->
-            {{readingList.title}}
+            {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" title="Promoted"></i>
         </li>
         <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
         <li class="list-group-item" *ngIf="loading">

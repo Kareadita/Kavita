@@ -63,12 +63,18 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   }
 
   create() {
-
-    this.modal.close();
+    this.readingListService.createList(this.listForm.value.title).subscribe(list => {
+      this.addToList(list);
+    });
   }
 
   addToList(readingList: ReadingList) {
-    this.modal.close();
+    if (this.type === ADD_FLOW.Series && this.seriesId != undefined) {
+      this.readingListService.updateBySeries(readingList.id, this.seriesId).subscribe(() => {
+        this.modal.close();
+      });
+    }
+    
   }
 
 }
