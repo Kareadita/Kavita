@@ -1,3 +1,21 @@
+<head>
+    <style>
+        .horizon {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            display: flex;
+            overflow-x: scroll;
+
+            position: absolute;
+            margin: auto;
+            top: 0px;
+            left: 0;
+            right: 0;
+            bottom: 0px;
+            height: 100%;
+        }
+    </style>
+</head>
 
 <div class="fixed-top overlay" *ngIf="debug">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
@@ -8,8 +26,8 @@
     <strong>Width:</strong> {{webtoonImageWidth}}
 </div>
 
-
-<ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-    <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
-</ng-container>
-
+<div [ngClass]= "direction ? 'horizon' : 'vertical'" (wheel)='h_scroll($event)'>
+    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+        <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+    </ng-container>
+</div>

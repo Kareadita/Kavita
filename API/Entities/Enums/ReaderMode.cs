@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace API.Entities.Enums
 {
@@ -12,6 +12,9 @@ namespace API.Entities.Enums
         MANGA_UP = 1,
         [Description("Webtoon")]
         // ReSharper disable once InconsistentNaming
-        WEBTOON = 2
+        WEBTOON = 2,
+        [Description("HORIZON")]
+        // ReSharper disable once InconsistentNaming
+        HORIZON = 3
     }
 }

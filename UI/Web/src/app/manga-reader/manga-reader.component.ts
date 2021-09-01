@@ -217,6 +217,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return 'fa-exchange-alt fa-rotate-90';
       case READER_MODE.WEBTOON:
         return 'fa-arrows-alt-v';
+      case READER_MODE.HORIZON:
+        return 'fa-arrows-alt-v fa-rotate-90';
     }
   }
 
@@ -241,7 +243,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
-              private formBuilder: FormBuilder, private navService: NavService, 
+              private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService) {
                 this.navService.hideNavBar();
   }
@@ -413,6 +415,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   render() {
     if (this.readerMode === READER_MODE.WEBTOON) {
+      this.isLoading = false;
+    } else if (this.readerMode === READER_MODE.HORIZON) {
       this.isLoading = false;
     } else {
       this.loadPage();
@@ -586,7 +590,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handlePageChange(event: any, direction: string) {
-    if (this.readerMode === READER_MODE.WEBTOON) {
+    if ((this.readerMode === READER_MODE.WEBTOON)
+      || (this.readerMode === READER_MODE.HORIZON)) {
       if (direction === 'right') {
         this.nextPage(event);
       } else {
@@ -621,12 +626,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
-      if (this.readerMode !== READER_MODE.WEBTOON) {
+      if ((this.readerMode !== READER_MODE.WEBTOON)
+        && (this.readerMode !== READER_MODE.HORIZON)) {
         this.canvasImage = this.cachedImages.next();
       }
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if ((this.readerMode !== READER_MODE.WEBTOON)
+      && (this.readerMode !== READER_MODE.HORIZON)) {
       this.loadPage();
     }    
   }
@@ -654,7 +661,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImage = this.cachedImages.prev();
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if ((this.readerMode !== READER_MODE.WEBTOON)
+      && (this.readerMode !== READER_MODE.HORIZON)) {
       this.loadPage();
     }  
   }
@@ -898,6 +906,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //this.readerMode = READER_MODE.MANGA_LR;
         break;
       case READER_MODE.WEBTOON:
+        this.readerMode = READER_MODE.HORIZON;
+        break;
+      case READER_MODE.HORIZON:
         this.readerMode = READER_MODE.MANGA_LR;
         break;
     }
@@ -908,7 +919,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateForm() {
-    if ( this.readerMode === READER_MODE.WEBTOON) {
+    if ((this.readerMode === READER_MODE.WEBTOON)
+      || (this.readerMode === READER_MODE.HORIZON)) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
     } else {

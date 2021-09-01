@@ -7,6 +7,7 @@ import { WebtoonImage } from '../_models/webtoon-image';
 
 @Component({
   selector: 'app-infinite-scroller',
+  inputs: ['direction'],
   templateUrl: './infinite-scroller.component.html',
   styleUrls: ['./infinite-scroller.component.scss']
 })
@@ -31,6 +32,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  
+  @Input() direction: number = 0;
   
   /**
    * Stores and emits all the src urls
@@ -130,9 +133,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param event Scroll Event
    */
   handleScrollEvent(event?: any) {
-    const verticalOffset = (window.pageYOffset 
-      || document.documentElement.scrollTop 
-      || document.body.scrollTop || 0);
+    const verticalOffset = this.direction
+    ? (window.pageXOffset || document.documentElement.scrollLeft|| document.body.scrollLeft || 0)
+    : (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
 
     if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
@@ -360,6 +363,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       console.log(message, extraData);  
     } else {
       console.log(message);
+    }
+  }
+
+  h_scroll(event: WheelEvent): void {
+    if (this.direction) {
+      (<Element>event.target).parentElement!.scrollLeft -= event.deltaY;
+      event.preventDefault();
     }
   }
 }
