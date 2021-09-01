@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Entities.Enums;
 
-namespace API.Interfaces
+namespace API.Interfaces.Repositories
 {
     public interface IAppUserProgressRepository
     {

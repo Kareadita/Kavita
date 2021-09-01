@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Interfaces;
+using API.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data
+namespace API.Data.Repositories
 {
     public class VolumeRepository : IVolumeRepository
     {

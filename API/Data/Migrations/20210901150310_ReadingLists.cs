@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace API.Data.Migrations
 {
@@ -15,6 +16,8 @@ namespace API.Data.Migrations
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Summary = table.Column<string>(type: "TEXT", nullable: true),
                     Promoted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastModified = table.Column<DateTime>(type: "TEXT", nullable: false),
                     AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -61,6 +64,12 @@ namespace API.Data.Migrations
                 name: "IX_ReadingListItem_ReadingListId",
                 table: "ReadingListItem",
                 column: "ReadingListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReadingListItem_SeriesId_VolumeId_ChapterId_LibraryId",
+                table: "ReadingListItem",
+                columns: new[] { "SeriesId", "VolumeId", "ChapterId", "LibraryId" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

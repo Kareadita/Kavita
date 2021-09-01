@@ -159,6 +159,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Bookmarks):
         this.actionService.openBookmarkModal(series, () => this.actionInProgress = false);
         break;
+      case(Action.AddToReadingList):
+        this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
+        break;
       default:
         break;
     }
@@ -175,6 +178,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Edit):
         this.openViewInfo(volume);
         break;
+      case(Action.AddToReadingList):
+        this.actionService.addVolumeToReadingList(volume, () => {/* No Operation */ });
+        break;
       default:
         break;
     }
@@ -190,6 +196,9 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Edit):
         this.openViewInfo(chapter);
+        break;
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, () => {/* No Operation */ });
         break;
       default:
         break;

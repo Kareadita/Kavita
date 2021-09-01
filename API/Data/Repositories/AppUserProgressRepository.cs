@@ -2,9 +2,10 @@
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Interfaces;
+using API.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data
+namespace API.Data.Repositories
 {
     public class AppUserProgressRepository : IAppUserProgressRepository
     {
@@ -25,7 +26,7 @@ namespace API.Data
             var rowsToRemove = await _context.AppUserProgresses
                 .Where(progress => !chapterIds.Contains(progress.ChapterId))
                 .ToListAsync();
-            
+
             _context.RemoveRange(rowsToRemove);
             return await _context.SaveChangesAsync() > 0 ? rowsToRemove.Count : 0;
         }
@@ -45,7 +46,7 @@ namespace API.Data
                 .ToListAsync();
 
             if (seriesIds.Count == 0) return false;
-            
+
             return await _context.Series
                 .Include(s => s.Library)
                 .Where(s => seriesIds.Contains(s.Id) && s.Library.Type == libraryType)

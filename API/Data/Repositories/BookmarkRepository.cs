@@ -1,7 +1,7 @@
-﻿namespace API.Data
+﻿namespace API.Data.Repositories
 {
     public class BookmarkRepository
     {
-        
+
     }
 }

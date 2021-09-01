@@ -5,7 +5,7 @@ using API.DTOs.Filtering;
 using API.Entities;
 using API.Helpers;
 
-namespace API.Interfaces
+namespace API.Interfaces.Repositories
 {
     public interface ISeriesRepository
     {

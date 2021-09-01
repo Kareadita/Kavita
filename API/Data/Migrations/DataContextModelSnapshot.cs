@@ -449,6 +449,12 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("Promoted")
                         .HasColumnType("INTEGER");
 
@@ -492,6 +498,9 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ReadingListId");
+
+                    b.HasIndex("SeriesId", "VolumeId", "ChapterId", "LibraryId")
+                        .IsUnique();
 
                     b.ToTable("ReadingListItem");
                 });

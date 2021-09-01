@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20210901020400_ReadingLists")]
+    [Migration("20210901150310_ReadingLists")]
     partial class ReadingLists
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -451,6 +451,12 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("Promoted")
                         .HasColumnType("INTEGER");
 
@@ -494,6 +500,9 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ReadingListId");
+
+                    b.HasIndex("SeriesId", "VolumeId", "ChapterId", "LibraryId")
+                        .IsUnique();
 
                     b.ToTable("ReadingListItem");
                 });

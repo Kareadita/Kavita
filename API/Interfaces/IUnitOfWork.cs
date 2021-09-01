@@ -14,6 +14,7 @@ namespace API.Interfaces
         ICollectionTagRepository CollectionTagRepository { get; }
         IFileRepository FileRepository { get; }
         IChapterRepository ChapterRepository { get; }
+        IReadingListRepository ReadingListRepository { get; }
         bool Commit();
         Task<bool> CommitAsync();
         bool HasChanges();

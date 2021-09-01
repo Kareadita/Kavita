@@ -5,10 +5,11 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces;
+using API.Interfaces.Repositories;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data
+namespace API.Data.Repositories
 {
     public class SettingsRepository : ISettingsRepository
     {

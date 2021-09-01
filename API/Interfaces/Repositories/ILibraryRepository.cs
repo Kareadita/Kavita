@@ -4,7 +4,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 
-namespace API.Interfaces
+namespace API.Interfaces.Repositories
 {
     public interface ILibraryRepository
     {

@@ -16,7 +16,8 @@ export enum Action {
   Info = 5,
   RefreshMetadata = 6,
   Download = 7,
-  Bookmarks = 8
+  Bookmarks = 8,
+  AddToReadingList = 9
 }
 
 export interface ActionItem<T> {
@@ -187,7 +188,13 @@ export class ActionFactoryService {
         title: 'Bookmarks',
         callback: this.dummyCallback,
           requiresAdmin: false
-      }
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
     ];
 
     this.volumeActions = [
@@ -200,6 +207,12 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
         callback: this.dummyCallback,
         requiresAdmin: false
       },
@@ -223,7 +236,13 @@ export class ActionFactoryService {
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false
-      }
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
     ];
   }
 }

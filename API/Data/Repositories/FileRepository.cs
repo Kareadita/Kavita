@@ -3,9 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Interfaces;
+using API.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Data
+namespace API.Data.Repositories
 {
     public class FileRepository : IFileRepository
     {

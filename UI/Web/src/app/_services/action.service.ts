@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
+import { AddToListModalComponent } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -27,6 +28,7 @@ export class ActionService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
   private bookmarkModalRef: NgbModalRef | null = null;
+  private readingListModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal) { }
@@ -215,6 +217,32 @@ export class ActionService implements OnDestroy {
           callback(series);
         }
       });
+  }
+
+  addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'sm' });
+      this.readingListModalRef.componentInstance.series = series;
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+  }
+
+  addVolumeToReadingList(volume: Volume, callback?: VolumeActionCallback) {
+    //TODO
+  }
+
+  addChapterToReadingList(chapter: Chapter, callback?: ChapterActionCallback) {
+    //TODO
   }
 
 }

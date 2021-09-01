@@ -1,5 +1,8 @@
-﻿namespace API.Entities
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace API.Entities
 {
+    [Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), nameof(LibraryId), IsUnique = true)]
     public class ReadingListItem
     {
         public int Id { get; init; }

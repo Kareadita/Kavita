@@ -1,0 +1,19 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Add to Reading List</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <ul class="list-group">
+        <li class="list-group-item" *ngFor="let readingList of lists; let i = index">
+            
+        </li>
+    </ul>
+</div>
+<div class="modal-footer">
+    <label class="sr-only" for="add-rlist">Reading List</label>
+    <input width="100%" type="text" id="add-rlist">
+    <button type="button" class="btn btn-primary" (click)="close()">Add</button>
+</div>
