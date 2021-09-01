@@ -1,0 +1,16 @@
+<div class="container-fluid">
+    <h2>Reading List (name here)</h2>
+    <p>Informaation about how to use controls?</p>
+
+    <app-dragable-ordered-list [items]="chapters">
+        <ng-template #draggableItem let-item let-position="idx">
+            <div class="media">
+                <div class="media-body">
+                  <h5 class="mt-0 mb-1">Chapter {{item.chapterNumber}}</h5>
+                  <a href="javascript:void(0)">{{item.seriesName}}</a>
+                </div>
+                <div *ngIf="item.read"><i class="fa fa-check-square" aria-label="Read"></i></div>
+              </div>
+        </ng-template> 
+    </app-dragable-ordered-list>
+</div>

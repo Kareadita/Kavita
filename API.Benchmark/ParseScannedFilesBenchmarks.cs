@@ -36,5 +36,13 @@ namespace API.Benchmark
                 out var totalFiles, out var scanElapsedTime);
         }
 
+        // [Benchmark]
+        // public void MergeName()
+        // {
+        //     var parsedSeries =_parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new string[] {@"M:\"}, out var totalFiles,
+        //         out var scanElapsedTime);
+        //     //_parseScannedFiles.MergeName()
+        // }
+
     }
 }

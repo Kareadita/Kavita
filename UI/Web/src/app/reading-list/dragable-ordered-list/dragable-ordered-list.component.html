@@ -1,0 +1,12 @@
+<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    <div class="example-box" *ngFor="let item of items; index as i" cdkDrag [cdkDragData]="item" cdkDragBoundary=".example-list">
+        <div>
+            <i class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
+            <label for="reorder-{{i}}" class="sr-only">Reorder</label>
+            <input id="reorder-{{i}}" type="number" [value]="i" style="width: 40px" (keydown.enter)="updateIndex(i)">
+        </div>
+
+        <ng-container  style="display: inline-block" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+    </div>
+</div>
+  

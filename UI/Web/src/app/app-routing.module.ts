@@ -28,6 +28,10 @@ const routes: Routes = [
     loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
   },
   {
+    path: 'lists',
+    loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
+  },
+  {
     path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
