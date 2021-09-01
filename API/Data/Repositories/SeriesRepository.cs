@@ -222,21 +222,17 @@ namespace API.Data.Repositories
 
         public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
         {
-            var series = await _context.Series
-                .Where(s => seriesIds.Contains(s.Id))
-                .Include(s => s.Volumes)
-                .ThenInclude(v => v.Chapters)
+            var volumes = await _context.Volume
+                .Where(v => seriesIds.Contains(v.SeriesId))
+                .Include(v => v.Chapters)
                 .ToListAsync();
 
             IList<int> chapterIds = new List<int>();
-            foreach (var s in series)
+            foreach (var v in volumes)
             {
-                foreach (var v in s.Volumes)
+                foreach (var c in v.Chapters)
                 {
-                    foreach (var c in v.Chapters)
-                    {
-                        chapterIds.Add(c.Id);
-                    }
+                    chapterIds.Add(c.Id);
                 }
             }
 
