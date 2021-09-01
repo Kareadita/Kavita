@@ -6,14 +6,31 @@
     </button>
 </div>
 <div class="modal-body">
+
     <ul class="list-group">
-        <li class="list-group-item" *ngFor="let readingList of lists; let i = index">
+        <li class="list-group-item" *ngFor="let readingList of lists; let i = index" (click)="addToList(readingList)">
             
+        </li>
+        <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
+        <li class="list-group-item" *ngIf="loading">
+            <div class="spinner-border text-secondary" role="status">
+                <span>Loading...</span>
+            </div>
         </li>
     </ul>
 </div>
-<div class="modal-footer">
-    <label class="sr-only" for="add-rlist">Reading List</label>
-    <input width="100%" type="text" id="add-rlist">
-    <button type="button" class="btn btn-primary" (click)="close()">Add</button>
+<div class="modal-footer" style="justify-content: normal">
+    <form style="width: 100%">
+        <div class="form-row">
+          <div class="col-md-10">
+            <label class="sr-only" for="add-rlist">Reading List</label>
+            <input width="100%" type="text" class="form-control mb-2" id="add-rlist">
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary" (click)="close()">Create</button>
+          </div>
+        </div>
+    </form>
 </div>
+
+

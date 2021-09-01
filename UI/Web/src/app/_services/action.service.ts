@@ -221,8 +221,8 @@ export class ActionService implements OnDestroy {
 
   addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
     if (this.readingListModalRef != null) { return; }
-      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'sm' });
-      this.readingListModalRef.componentInstance.series = series;
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.series = series; // TODO: Decide on what to pass in
       this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {

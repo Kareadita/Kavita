@@ -1,4 +1,6 @@
-﻿using API.Interfaces;
+﻿using System.Collections.Generic;
+using API.DTOs.ReadingLists;
+using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -18,9 +20,9 @@ namespace API.Controllers
         /// <param name="includePromoted">Defaults to true</param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult GetListForUser(bool includePromoted = true)
+        public ActionResult<IEnumerable<ReadingListDto>> GetListForUser(bool includePromoted = true)
         {
-            return Ok();
+            return Ok(new ReadingListDto[] {});
         }
 
         [HttpPost("add-to-list")]

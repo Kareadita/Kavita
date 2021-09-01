@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { ReadingList } from 'src/app/_models/reading-list';
+import { ReadingListService } from 'src/app/_services/reading-list.service';
 
 @Component({
   selector: 'app-add-to-list-modal',
@@ -11,13 +13,23 @@ export class AddToListModalComponent implements OnInit {
    * All existing reading lists sorted by recent use date
    */
   lists: Array<any> = [];
+  loading: boolean = false;
 
-  constructor() { }
+  constructor(private readingListService: ReadingListService) { }
 
   ngOnInit(): void {
+    this.loading = true;
+    this.readingListService.getReadingLists(false).subscribe(lists => {
+      this.lists = lists;
+      this.loading = false;
+    });
   }
 
   close() {
+
+  }
+
+  addToList(readingList: ReadingList) {
 
   }
 
