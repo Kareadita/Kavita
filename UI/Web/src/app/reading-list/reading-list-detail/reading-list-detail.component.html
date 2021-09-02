@@ -46,7 +46,8 @@
             <div class="media">
                 <div class="media-body">
                   <h5 class="mt-0 mb-1">{{formatTitle(item)}}</h5>
-                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;<a href="javascript:void(0)">{{item.seriesName}}</a>
+                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
+                  <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
                   <span *ngIf="item.promoted">
                     <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                   </span>

@@ -54,6 +54,7 @@ namespace API.Data.Repositories
                 {
                     SeriesName = s.Name,
                     SeriesFormat = s.Format,
+                    LibraryId = s.LibraryId,
                     readingListItem
                 })
                 .Join(_context.Chapter, s => s.readingListItem.ChapterId, chapter => chapter.Id, (data, chapter) => new
@@ -61,6 +62,7 @@ namespace API.Data.Repositories
                     SeriesName = data.SeriesName,
                     SeriesFormat = data.SeriesFormat,
                     readingListItem = data.readingListItem,
+                    LibraryId = data.LibraryId,
                     TotalPages = chapter.Pages,
                     ChapterNumber = chapter.Range,
                 })
@@ -72,6 +74,7 @@ namespace API.Data.Repositories
                     TotalPages = data.TotalPages,
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = volume.Name,
+                    LibraryId = data.LibraryId,
                 })
                 .Select(data => new ReadingListItemDto()
                 {
@@ -82,7 +85,8 @@ namespace API.Data.Repositories
                     SeriesFormat = data.SeriesFormat,
                     PagesTotal = data.TotalPages,
                     ChapterNumber = data.ChapterNumber,
-                    VolumeNumber = data.VolumeNumber
+                    VolumeNumber = data.VolumeNumber,
+                    LibraryId = data.LibraryId
                 })
                 .OrderBy(rli => rli.Order)
                 .AsNoTracking();

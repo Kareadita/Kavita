@@ -10,6 +10,7 @@ export interface ReadingListItem {
     order: number;
     chapterNumber: string;
     volumeNumber: string;
+    libraryId: number;
 }
 
 export interface ReadingList {
