@@ -3,6 +3,7 @@ import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
@@ -41,6 +42,8 @@ export class ActionFactoryService {
   chapterActions: Array<ActionItem<Chapter>> = [];
 
   collectionTagActions: Array<ActionItem<CollectionTag>> = [];
+
+  readingListActions: Array<ActionItem<ReadingList>> = [];
 
   isAdmin = false;
   hasDownloadRole = false;
@@ -113,6 +116,13 @@ export class ActionFactoryService {
           callback: this.dummyCallback,
           requiresAdmin: false
         });
+
+        // this.readingListActions.push({
+        //   action: Action.Promote, // Should I just use CollectionTag modal-like instead?
+        //   title: 'Delete',
+        //   callback: this.dummyCallback,
+        //   requiresAdmin: true
+        // });
       }
 
       if (this.hasDownloadRole || this.isAdmin) {
@@ -156,6 +166,11 @@ export class ActionFactoryService {
   getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
     this.collectionTagActions.forEach(action => action.callback = callback);
     return this.collectionTagActions;
+  }
+
+  getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
+    this.readingListActions.forEach(action => action.callback = callback);
+    return this.readingListActions;
   }
 
   filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
@@ -243,6 +258,15 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false
       },
+    ];
+
+    this.readingListActions = [
+      {
+        action: Action.Delete,
+        title: 'Delete',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      }
     ];
   }
 }

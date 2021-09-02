@@ -1,15 +1,58 @@
-<div class="container-fluid">
-    <h2>Reading List (name here)</h2>
-    <p>Informaation about how to use controls?</p>
+<div class="container-fluid mt-2" *ngIf="readingList">
+  <div class="row mb-3">
+        <div class="col-md-10 col-xs-8 col-sm-6">
+            <div class="row no-gutters">
+                
+              <h2 style="display: inline-block">
+                <span *ngIf="actions.length > 0">
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>
+                </span>
+                &nbsp;{{readingList.title}}&nbsp;
+                <span class="badge badge-primary badge-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
+              </h2>
+            </div>
+            <div class="row no-gutters">
+                <div>
+                    <button class="btn btn-primary">
+                        <span>
+                            <i class="fa fa-book"></i>
+                        </span>
+                        <span class="read-btn--text">&nbsp;</span>
+                    </button>
+                </div>
+                <div class="ml-2">
+                    <button class="btn btn-secondary" title="Edit Series information">
+                        <span>
+                            <i class="fa fa-pen" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
+                <!-- <div class="ml-2">
+                    <div class="card-actions">
+                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                    </div>
+                </div> -->
+            </div>
+            <p>{{readingList.summary}}</p>
+        </div>
+    </div>
 
-    <app-dragable-ordered-list [items]="chapters">
+    <div *ngIf="items.length === 0">
+      No chapters added
+    </div>    
+
+    <app-dragable-ordered-list [items]="items">
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media">
                 <div class="media-body">
-                  <h5 class="mt-0 mb-1">Chapter {{item.chapterNumber}}</h5>
-                  <a href="javascript:void(0)">{{item.seriesName}}</a>
+                  <h5 class="mt-0 mb-1">{{formatTitle(item)}}</h5>
+                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;<a href="javascript:void(0)">{{item.seriesName}}</a>
+                  <span *ngIf="item.promoted">
+                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                  </span>
+                  
                 </div>
-                <div *ngIf="item.read"><i class="fa fa-check-square" aria-label="Read"></i></div>
+                <div *ngIf="item.pagesRead === item.totalPages"><i class="fa fa-check-square" aria-label="Read"></i></div>
               </div>
         </ng-template> 
     </app-dragable-ordered-list>

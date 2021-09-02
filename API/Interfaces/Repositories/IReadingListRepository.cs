@@ -9,5 +9,8 @@ namespace API.Interfaces.Repositories
     {
         Task<IEnumerable<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted);
         Task<ReadingList> GetReadingListByIdAsync(int readingListId);
+        Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
+        Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId);
+        Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     }
 }

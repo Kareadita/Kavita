@@ -7,9 +7,10 @@ const routes: Routes = [
   {
     path: '', 
     runGuardsAndResolvers: 'always',
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard], // TODO: Add a guard if they have access to said :id
     children: [
         {path: '', component: ReadingListDetailComponent, pathMatch: 'full'},
+        {path: ':id', component: ReadingListDetailComponent, pathMatch: 'full'},
         // {path: ':id', component: CollectionDetailComponent},
     ]
   }
@@ -17,7 +18,7 @@ const routes: Routes = [
 
 
 @NgModule({
-  imports: [RouterModule.forChild(routes), ],
+  imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
 export class ReadingListRoutingModule { }

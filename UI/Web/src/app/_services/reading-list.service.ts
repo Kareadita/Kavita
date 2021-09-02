@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ReadingList } from '../_models/reading-list';
+import { ReadingList, ReadingListItem } from '../_models/reading-list';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +12,16 @@ export class ReadingListService {
 
   constructor(private httpClient: HttpClient) { }
 
+  getReadingList(readingListId: number) {
+    return this.httpClient.get<ReadingList>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
+  }
+
   getReadingLists(includePromoted: boolean = true) {
-    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist?includePromoted=' + includePromoted);
+    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted);
+  }
+
+  getListItems(readingListId: number) {
+    return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
   }
 
   createList(title: string) {

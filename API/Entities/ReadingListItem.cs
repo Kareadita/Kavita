@@ -15,5 +15,14 @@ namespace API.Entities
         /// </summary>
         public int Order { get; set; }
 
+        // Relationship
+        public ReadingList ReadingList { get; set; }
+        public int ReadingListId { get; set; }
+
+        // Idea, keep these for easy join statements
+        public Series Series { get; set; }
+        public Volume Volume { get; set; }
+        public Chapter Chapter { get; set; }
+
     }
 }

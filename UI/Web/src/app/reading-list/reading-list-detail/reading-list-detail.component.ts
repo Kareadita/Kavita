@@ -1,5 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
+import { MangaFormat } from 'src/app/_models/manga-format';
+import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
+import { ActionService } from 'src/app/_services/action.service';
+import { ReadingListService } from 'src/app/_services/reading-list.service';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -8,30 +15,56 @@ import { Chapter } from 'src/app/_models/chapter';
 })
 export class ReadingListDetailComponent implements OnInit {
 
-  chapters: Array<{
-    seriesName: string,
-    chapterNumber: number,
-    volumeNumber: number,
-    read: boolean,
-    order: number
-  }> = [];
-  constructor( ) { }
+  items: Array<ReadingListItem> = [];
+  listId!: number;
+  readingList!: ReadingList;
+  actions: Array<ActionItem<any>> = [];
+
+  get MangaFormat(): typeof MangaFormat {
+    return MangaFormat;
+  }
+
+  constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
+    private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService) {}
 
   ngOnInit(): void {
-    this.chapters.push(this.createChapter('Death Note', 0));
-    this.chapters.push(this.createChapter('Death Note', 1));
-    this.chapters.push(this.createChapter('Aria', 2));
-    this.chapters.push(this.createChapter('Btooom!', 3));
+    const listId = this.route.snapshot.paramMap.get('id');
+
+    if (listId === null) {
+      this.router.navigateByUrl('/libraries');
+      return;
+    }
+
+    this.listId = parseInt(listId, 10);
+
+    this.readingListService.getReadingList(this.listId).subscribe(readingList => {
+      this.readingList = readingList;
+    });
+
+    this.readingListService.getListItems(this.listId).subscribe(items => {
+      this.items = items;
+    });
+
+    this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this));
   }
 
-  createChapter(title: string, order: number) {
-    return {
-      seriesName: title,
-      chapterNumber: Math.round(Math.random() * 100 + 1),
-      volumeNumber: 0,
-      read: Math.random() > 0.5,
-      order
-    };
+  performAction(event: any) {
+
   }
 
+  handleReadingListActionCallback(action: Action, readingList: ReadingList) {
+
+  }
+
+  formatTitle(item: ReadingListItem) {
+    if (item.chapterNumber === '0') {
+      return 'Volume ' + item.volumeNumber;
+    }
+
+    if (item.seriesFormat === MangaFormat.EPUB) {
+      return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
+    }
+
+    return 'Chapter ' + item.chapterNumber;
+  }
 }

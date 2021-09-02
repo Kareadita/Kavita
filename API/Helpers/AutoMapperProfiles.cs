@@ -33,6 +33,7 @@ namespace API.Helpers
             CreateMap<AppUserBookmark, BookmarkDto>();
 
             CreateMap<ReadingList, ReadingListDto>();
+            CreateMap<ReadingListItem, ReadingListItemDto>();
 
             CreateMap<Series, SearchResultDto>()
                 .ForMember(dest => dest.SeriesId,

@@ -225,7 +225,7 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
         {
-            queryString = queryString.Replace(@"%", "");
+            queryString = queryString.Trim().Replace(@"%", "");
 
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             // Get libraries user has access to

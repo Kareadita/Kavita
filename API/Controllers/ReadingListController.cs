@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
@@ -14,6 +15,7 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReadingListController> _logger;
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
         public ReadingListController(IUnitOfWork unitOfWork, ILogger<ReadingListController> logger)
         {
@@ -21,17 +23,39 @@ namespace API.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetList(int readingListId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, user.Id));
+        }
+
         /// <summary>
         /// Returns reading lists for a given user.
         /// </summary>
         /// <param name="includePromoted">Defaults to true</param>
         /// <returns></returns>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListForUser(bool includePromoted = true)
+        [HttpGet("lists")]
+        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser(bool includePromoted = true)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
 
             return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, includePromoted));
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>This call is expensive</remarks>
+        /// <param name="readingListId"></param>
+        /// <returns></returns>
+        [HttpGet("items")]
+        public async Task<ActionResult<IEnumerable<ReadingListItemDto>>> GetListForUser(int readingListId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
+
+            return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList()));
         }
 
         /// <summary>
@@ -72,8 +96,8 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
-            var chaptersForSeries =
-                await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new [] {dto.SeriesId}); // This is really slow
+            var chapterIdsForSeries =
+                await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new [] {dto.SeriesId});
 
             // This should never happen
             if (readingList == null) return BadRequest("Reading List does not exist");
@@ -84,19 +108,23 @@ namespace API.Controllers
                 lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
             }
             var existingChapterIds = readingList.Items.Select(rli => rli.ChapterId).ToList();
+            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIdsForSeries))
+                .OrderBy(c => int.Parse(c.Volume.Name))
+                .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
             var index = 1;
-            foreach (var chapterId in chaptersForSeries)
+            foreach (var chapter in chaptersForSeries)
             {
-                if (existingChapterIds.Contains(chapterId))
+                if (existingChapterIds.Contains(chapter.Id))
                 {
                     continue;
                 }
                 readingList.Items.Add(new ReadingListItem()
                 {
                     Order = lastOrder + index,
-                    ChapterId = chapterId,
+                    ChapterId = chapter.Id,
                     SeriesId = dto.SeriesId,
+                    VolumeId = chapter.VolumeId
                 });
                 index += 1;
             }

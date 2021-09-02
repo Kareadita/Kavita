@@ -6,6 +6,7 @@ import { ReadingListRoutingModule } from './reading-list.router.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CardsModule } from '../cards/cards.module';
 
 
 
@@ -20,6 +21,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     ReadingListRoutingModule,
     ReactiveFormsModule,
     DragDropModule,
+    CardsModule
   ],
   exports: [
     AddToListModalComponent

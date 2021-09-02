@@ -1,12 +1,15 @@
-import { Chapter } from "./chapter";
+import { MangaFormat } from "./manga-format";
 
 export interface ReadingListItem {
-    libraryId: number;
-    volumeId: number;
-    
+    pagesRead: number;
+    totalPages: number;
+    seriesName: string;
+    seriesFormat: MangaFormat;
     seriesId: number;
     chapterId: number;
     order: number;
+    chapterNumber: string;
+    volumeNumber: string;
 }
 
 export interface ReadingList {

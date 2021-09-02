@@ -1,4 +1,4 @@
-<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+<div cdkDropList class="{{items.length > 0 ? 'example-list' : ''}}" (cdkDropListDropped)="drop($event)">
     <div class="example-box" *ngFor="let item of items; index as i" cdkDrag [cdkDragData]="item" cdkDragBoundary=".example-list">
         <div>
             <i class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>

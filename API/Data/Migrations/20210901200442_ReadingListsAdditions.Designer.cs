@@ -3,14 +3,16 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210901200442_ReadingListsAdditions")]
+    partial class ReadingListsAdditions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -497,11 +499,7 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ChapterId");
-
                     b.HasIndex("ReadingListId");
-
-                    b.HasIndex("VolumeId");
 
                     b.HasIndex("SeriesId", "VolumeId", "ChapterId", "LibraryId")
                         .IsUnique();
@@ -862,37 +860,13 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.ReadingListItem", b =>
                 {
-                    b.HasOne("API.Entities.Chapter", "Chapter")
-                        .WithMany()
-                        .HasForeignKey("ChapterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("API.Entities.ReadingList", "ReadingList")
                         .WithMany("Items")
                         .HasForeignKey("ReadingListId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Entities.Series", "Series")
-                        .WithMany()
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Entities.Volume", "Volume")
-                        .WithMany()
-                        .HasForeignKey("VolumeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Chapter");
-
                     b.Navigation("ReadingList");
-
-                    b.Navigation("Series");
-
-                    b.Navigation("Volume");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>
