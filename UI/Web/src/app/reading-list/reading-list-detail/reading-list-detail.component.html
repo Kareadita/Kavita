@@ -41,9 +41,12 @@
       No chapters added
     </div>    
 
-    <app-dragable-ordered-list [items]="items">
+    <!-- NOTE: It might be nice to have a switch for the accessibility toggle -->
+    <app-dragable-ordered-list [items]="items" >
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media">
+                <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
+                (error)="imageService.updateErroredImage($event)">
                 <div class="media-body">
                   <h5 class="mt-0 mb-1">{{formatTitle(item)}}</h5>
                   <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
@@ -53,7 +56,7 @@
                   </span>
                   
                 </div>
-                <div *ngIf="item.pagesRead === item.totalPages"><i class="fa fa-check-square" aria-label="Read"></i></div>
+                <div class="pull-right" *ngIf="item.pagesRead === item.pagesTotal"><i class="fa fa-check-square" aria-label="Read"></i></div>
               </div>
         </ng-template> 
     </app-dragable-ordered-list>

@@ -44,7 +44,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        ///
+        /// Fetches all reading list items for a given list including rich metadata around series, volume, chapters, and progress
         /// </summary>
         /// <remarks>This call is expensive</remarks>
         /// <param name="readingListId"></param>

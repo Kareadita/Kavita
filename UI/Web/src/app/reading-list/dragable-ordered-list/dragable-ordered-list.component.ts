@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
+import { Component, ContentChild, Input, OnInit, Output, TemplateRef } from '@angular/core';
 
 @Component({
   selector: 'app-dragable-ordered-list',
@@ -9,6 +9,7 @@ import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/co
 export class DragableOrderedListComponent implements OnInit {
 
   @Input() items: Array<any> = [];
+  //@Output() orderUpdated = 
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
   constructor() { }

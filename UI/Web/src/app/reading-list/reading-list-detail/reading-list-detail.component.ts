@@ -6,6 +6,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
+import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 
 @Component({
@@ -25,7 +26,8 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
-    private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService) {}
+    private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
+    public imageService: ImageService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');

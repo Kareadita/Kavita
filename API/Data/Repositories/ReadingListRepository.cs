@@ -48,15 +48,16 @@ namespace API.Data.Repositories
                 .Select(rli => rli.SeriesId)
                 .ToListAsync();
 
-            var items = _context.Series
+            var items = await _context.Series
                 .Where(s => seriesIds.Contains(s.Id))
-                .Join(_context.ReadingListItem, s => s.Id, readingListItem => readingListItem.SeriesId, (s, readingListItem) => new
-                {
-                    SeriesName = s.Name,
-                    SeriesFormat = s.Format,
-                    LibraryId = s.LibraryId,
-                    readingListItem
-                })
+                .Join(_context.ReadingListItem, s => s.Id, readingListItem => readingListItem.SeriesId,
+                    (s, readingListItem) => new
+                    {
+                        SeriesName = s.Name,
+                        SeriesFormat = s.Format,
+                        LibraryId = s.LibraryId,
+                        readingListItem
+                    })
                 .Join(_context.Chapter, s => s.readingListItem.ChapterId, chapter => chapter.Id, (data, chapter) => new
                 {
                     SeriesName = data.SeriesName,
@@ -66,7 +67,7 @@ namespace API.Data.Repositories
                     TotalPages = chapter.Pages,
                     ChapterNumber = chapter.Range,
                 })
-                .Join(_context.Volume, s => s.readingListItem.VolumeId, volume =>  volume.Id, (data, volume) => new
+                .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
                 {
                     SeriesName = data.SeriesName,
                     SeriesFormat = data.SeriesFormat,
@@ -86,56 +87,27 @@ namespace API.Data.Repositories
                     PagesTotal = data.TotalPages,
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = data.VolumeNumber,
-                    LibraryId = data.LibraryId
+                    LibraryId = data.LibraryId,
                 })
                 .OrderBy(rli => rli.Order)
-                .AsNoTracking();
+                .AsNoTracking()
+                .ToListAsync();
 
-            // var items2 = _context.ReadingListItem
-            //     .Where(s => seriesIds.Contains(s.Id))
-            //     .Include(r => r.Series)
-            //     .Include(r => r.Volume)
-            //     .Include(r => r.Chapter)
-            //     .Select
-            //     .Join(_context.ReadingListItem, s => s.Id, readingListItem => readingListItem.SeriesId, (s, readingListItem) => new
-            //     {
-            //         SeriesName = s.Name,
-            //         SeriesFormat = s.Format,
-            //         readingListItem
-            //     })
-            //     .Join(_context.Chapter, s => s.readingListItem.ChapterId, chapter => chapter.Id, (data, chapter) => new
-            //     {
-            //         SeriesName = data.SeriesName,
-            //         SeriesFormat = data.SeriesFormat,
-            //         readingListItem = data.readingListItem,
-            //         TotalPages = chapter.Pages,
-            //         ChapterNumber = chapter.Range,
-            //     })
-            //     .Join(_context.Volume, s => s.readingListItem.VolumeId, volume =>  volume.Id, (data, volume) => new
-            //     {
-            //         SeriesName = data.SeriesName,
-            //         SeriesFormat = data.SeriesFormat,
-            //         readingListItem = data.readingListItem,
-            //         TotalPages = data.TotalPages,
-            //         ChapterNumber = data.ChapterNumber,
-            //         VolumeNumber = volume.Name,
-            //     })
-            //     .Select(data => new ReadingListItemDto()
-            //     {
-            //         ChapterId = data.readingListItem.ChapterId,
-            //         Order = data.readingListItem.Order,
-            //         SeriesId = data.readingListItem.SeriesId,
-            //         SeriesName = data.SeriesName,
-            //         SeriesFormat = data.SeriesFormat,
-            //         PagesTotal = data.TotalPages,
-            //         ChapterNumber = data.ChapterNumber,
-            //         VolumeNumber = data.VolumeNumber
-            //     })
-            //     .OrderBy(rli => rli.Order)
-            //     .AsNoTracking();
+            var chapterIds = items.Select(i => i.ChapterId);
+            var progresses = await _context.AppUserProgresses
+                .Where(p => chapterIds.Contains(p.ChapterId))
+                .AsNoTracking()
+                .ToListAsync();
 
+            foreach (var progress in progresses)
+            {
+                var progressItem = items.SingleOrDefault(i => i.ChapterId == progress.ChapterId);
+                if (progressItem == null) continue;
 
-            return await items.ToListAsync();
+                progressItem.PagesRead = progress.PagesRead;
+            }
+
+            return items;
         }
 
         public async Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId)

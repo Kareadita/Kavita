@@ -2,7 +2,7 @@ import { MangaFormat } from "./manga-format";
 
 export interface ReadingListItem {
     pagesRead: number;
-    totalPages: number;
+    pagesTotal: number;
     seriesName: string;
     seriesFormat: MangaFormat;
     seriesId: number;
