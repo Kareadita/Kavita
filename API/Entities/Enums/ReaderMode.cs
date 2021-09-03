@@ -13,8 +13,8 @@ namespace API.Entities.Enums
         [Description("Webtoon")]
         // ReSharper disable once InconsistentNaming
         WEBTOON = 2,
-        [Description("HORIZON")]
+        [Description("Horizontal Scroll")]
         // ReSharper disable once InconsistentNaming
-        HORIZON = 3
+        HORIZONTAL = 3
     }
 }

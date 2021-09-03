@@ -11,5 +11,5 @@ export enum READER_MODE {
      * Webtoon reading (scroll) with optional areas to tap
      */
     WEBTOON = 2,
-    HORIZON = 3
+    HORIZONTAL = 3
 }

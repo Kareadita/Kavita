@@ -30,7 +30,7 @@
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
             <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" [direction] = "0" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"></app-infinite-scroller>
         </div>
-        <div class="horizon-images" *ngIf="readerMode === READER_MODE.HORIZON && !isLoading">
+        <div class="horizon-images" *ngIf="readerMode === READER_MODE.HORIZONTAL && !isLoading">
             <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" [direction] = "1" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"> </app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD"> <!--; else webtoonClickArea; See if people want this mode WEBTOON_WITH_CLICKS-->

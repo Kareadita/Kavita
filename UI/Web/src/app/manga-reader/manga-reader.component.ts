@@ -217,7 +217,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return 'fa-exchange-alt fa-rotate-90';
       case READER_MODE.WEBTOON:
         return 'fa-arrows-alt-v';
-      case READER_MODE.HORIZON:
+      case READER_MODE.HORIZONTAL:
         return 'fa-arrows-alt-v fa-rotate-90';
     }
   }
@@ -416,7 +416,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   render() {
     if (this.readerMode === READER_MODE.WEBTOON) {
       this.isLoading = false;
-    } else if (this.readerMode === READER_MODE.HORIZON) {
+    } else if (this.readerMode === READER_MODE.HORIZONTAL) {
       this.isLoading = false;
     } else {
       this.loadPage();
@@ -591,7 +591,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handlePageChange(event: any, direction: string) {
     if ((this.readerMode === READER_MODE.WEBTOON)
-      || (this.readerMode === READER_MODE.HORIZON)) {
+      || (this.readerMode === READER_MODE.HORIZONTAL)) {
       if (direction === 'right') {
         this.nextPage(event);
       } else {
@@ -627,13 +627,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
       if ((this.readerMode !== READER_MODE.WEBTOON)
-        && (this.readerMode !== READER_MODE.HORIZON)) {
+        && (this.readerMode !== READER_MODE.HORIZONTAL)) {
         this.canvasImage = this.cachedImages.next();
       }
     }
 
     if ((this.readerMode !== READER_MODE.WEBTOON)
-      && (this.readerMode !== READER_MODE.HORIZON)) {
+      && (this.readerMode !== READER_MODE.HORIZONTAL)) {
       this.loadPage();
     }    
   }
@@ -662,7 +662,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if ((this.readerMode !== READER_MODE.WEBTOON)
-      && (this.readerMode !== READER_MODE.HORIZON)) {
+      && (this.readerMode !== READER_MODE.HORIZONTAL)) {
       this.loadPage();
     }  
   }
@@ -906,9 +906,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //this.readerMode = READER_MODE.MANGA_LR;
         break;
       case READER_MODE.WEBTOON:
-        this.readerMode = READER_MODE.HORIZON;
+        this.readerMode = READER_MODE.HORIZONTAL;
         break;
-      case READER_MODE.HORIZON:
+      case READER_MODE.HORIZONTAL:
         this.readerMode = READER_MODE.MANGA_LR;
         break;
     }
@@ -920,7 +920,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateForm() {
     if ((this.readerMode === READER_MODE.WEBTOON)
-      || (this.readerMode === READER_MODE.HORIZON)) {
+      || (this.readerMode === READER_MODE.HORIZONTAL)) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
     } else {
