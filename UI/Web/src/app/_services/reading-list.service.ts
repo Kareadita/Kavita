@@ -31,4 +31,8 @@ export class ReadingListService {
   updateBySeries(readingListId: number, seriesId: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
   }
+
+  delete(readingListId: number) {
+    return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, { responseType: 'text' as 'json' });
+  }
 }

@@ -266,6 +266,12 @@ export class ActionFactoryService {
         title: 'Delete',
         callback: this.dummyCallback,
         requiresAdmin: false
+      },
+      {
+        action: Action.Edit,
+        title: 'Edit',
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
   }

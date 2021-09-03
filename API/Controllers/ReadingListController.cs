@@ -59,6 +59,31 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Deletes a reading list
+        /// </summary>
+        /// <param name="readingListId"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        public async Task<ActionResult> DeleteList([FromQuery] int readingListId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(r => r.Id == readingListId);
+            if (readingList == null)
+            {
+                return BadRequest("User is not associated with this reading list");
+            }
+
+            user.ReadingLists.Remove(readingList);
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                return Ok("Deleted");
+            }
+
+            return BadRequest("There was an issue deleting reading list");
+        }
+
+        /// <summary>
         /// Creates a new List with a unique title. Returns the new ReadingList back
         /// </summary>
         /// <param name="dto"></param>

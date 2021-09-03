@@ -17,5 +17,6 @@ export interface ReadingList {
     id: number;
     title: string;
     summary: string;
+    promoted: boolean;
     items: Array<ReadingListItem>;
 }
