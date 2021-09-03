@@ -18,6 +18,9 @@ import { AllCollectionsComponent } from './all-collections/all-collections.compo
     SharedModule,
     CardsModule,
     CollectionsRoutingModule,
+  ],
+  exports: [
+    AllCollectionsComponent
   ]
 })
 export class CollectionsModule { }

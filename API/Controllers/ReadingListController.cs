@@ -109,12 +109,8 @@ namespace API.Controllers
             if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
 
             await _unitOfWork.CommitAsync();
-            return Ok(new ReadingListDto()
-            {
-                Promoted = false,
-                Title = dto.Title,
-                Summary = string.Empty
-            });
+
+            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(dto.Title));
         }
 
         [HttpPost("update-by-series")]

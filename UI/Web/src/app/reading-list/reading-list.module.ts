@@ -7,6 +7,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardsModule } from '../cards/cards.module';
+import { ReadingListsComponent } from './reading-lists/reading-lists.component';
 
 
 
@@ -14,7 +15,8 @@ import { CardsModule } from '../cards/cards.module';
   declarations: [
     DragableOrderedListComponent,
     ReadingListDetailComponent,
-    AddToListModalComponent
+    AddToListModalComponent,
+    ReadingListsComponent
   ],
   imports: [
     CommonModule,
@@ -24,7 +26,8 @@ import { CardsModule } from '../cards/cards.module';
     CardsModule
   ],
   exports: [
-    AddToListModalComponent
+    AddToListModalComponent,
+    ReadingListsComponent
   ]
 })
 export class ReadingListModule { }

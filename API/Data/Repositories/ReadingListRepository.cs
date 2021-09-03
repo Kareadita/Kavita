@@ -135,6 +135,12 @@ namespace API.Data.Repositories
             return items;
         }
 
-
+        public async Task<ReadingListDto> GetReadingListDtoByTitleAsync(string title)
+        {
+            return await _context.ReadingList
+                .Where(r => r.Title.Equals(title))
+                .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+                .SingleOrDefaultAsync();
+        }
     }
 }

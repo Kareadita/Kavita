@@ -36,6 +36,8 @@ import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
 import { InProgressComponent } from './in-progress/in-progress.component';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
+import { ReadingListModule } from './reading-list/reading-list.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 let sentryProviders: any[] = [];
 
@@ -96,6 +98,7 @@ if (environment.production) {
     PersonBadgeComponent,
     RecentlyAddedComponent,
     InProgressComponent,
+    DashboardComponent,
   ],
   imports: [
     HttpClientModule,
@@ -116,6 +119,7 @@ if (environment.production) {
     TypeaheadModule,
     CardsModule,
     CollectionsModule,
+    ReadingListModule,
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
