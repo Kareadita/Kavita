@@ -6,7 +6,6 @@
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <!-- <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card> -->
-        {{item.title}}
+        <app-card-item [title]="item.title" [entity]="item" [actions]="actions" [supressLibraryLink]="true" [imageUrl]="imageService.placeholderImage" (clicked)="handleClick()"></app-card-item>
     </ng-template>
 </app-card-detail-layout>

@@ -3,6 +3,7 @@ import { take } from 'rxjs/operators';
 import { Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 
 @Component({
@@ -17,7 +18,7 @@ export class ReadingListsComponent implements OnInit {
   pagination!: Pagination;
   actions: ActionItem<ReadingList>[] = [];
 
-  constructor(private readingListService: ReadingListService) { }
+  constructor(private readingListService: ReadingListService, public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.loadPage();
@@ -46,6 +47,10 @@ export class ReadingListsComponent implements OnInit {
   onPageChange(pagination: Pagination) {
     window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
     this.loadPage();
+  }
+
+  handleClick() {
+
   }
 
 }
