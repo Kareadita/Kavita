@@ -5,10 +5,10 @@
     <li *ngFor="let series of series" class="list-group-item">
         <div>
             <h4>
-                <a href="/library/{{series.libraryId}}/series/{{series.id}}" >{{series.name | titlecase}}</a>
+                <a id="series--{{series.name}}" href="/library/{{series.libraryId}}/series/{{series.id}}" >{{series.name | titlecase}}</a>
                 &nbsp;<span class="badge badge-secondary badge-pill">{{getBookmarkPages(series.id)}}</span>
                 <div class="float-right">
-                    <button class="btn btn-danger mr-2 btn-sm" (click)="clearBookmarks(series)" [disabled]="clearingSeries[series.id]" placement="top" ngbTooltip="Clear Bookmarks" attr.aria-label="Clear Bookmarks">
+                    <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-danger mr-2 btn-sm" (click)="clearBookmarks(series)" [disabled]="clearingSeries[series.id]" placement="top" ngbTooltip="Clear Bookmarks" attr.aria-label="Clear Bookmarks">
                         <ng-container *ngIf="clearingSeries[series.id]; else notClearing">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="sr-only">Loading...</span>
@@ -17,7 +17,7 @@
                             <i class="fa fa-trash-alt" aria-hidden="true"></i>
                         </ng-template>
                     </button>
-                    <button class="btn btn-secondary mr-2 btn-sm" (click)="downloadBookmarks(series)" [disabled]="downloadingSeries[series.id]" placement="top" ngbTooltip="Download Bookmarks" attr.aria-label="Download Bookmarks">
+                    <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-secondary mr-2 btn-sm" (click)="downloadBookmarks(series)" [disabled]="downloadingSeries[series.id]" placement="top" ngbTooltip="Download Bookmarks" attr.aria-label="Download Bookmarks">
                         <ng-container *ngIf="downloadingSeries[series.id]; else notDownloading">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="sr-only">Downloading...</span>
@@ -26,7 +26,7 @@
                             <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                         </ng-template>
                     </button>
-                    <button class="btn btn-primary mr-2 btn-sm" (click)="viewBookmarks(series)" placement="top" ngbTooltip="View Bookmarks" attr.aria-label="View Bookmarks">
+                    <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-primary mr-2 btn-sm" (click)="viewBookmarks(series)" placement="top" ngbTooltip="View Bookmarks" attr.aria-label="View Bookmarks">
                         <i class="fa fa-pen" title="View Bookmarks"></i>
                     </button>
                 </div>

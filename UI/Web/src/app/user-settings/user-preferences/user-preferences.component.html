@@ -27,8 +27,8 @@
                                         </div>
                                     </div>
                                     <div class="float-right mb-3">
-                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
-                                        <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
+                                        <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
                                 </form>
                             </ng-template>
@@ -147,8 +147,8 @@
                                     </div>
     
                                     <div class="float-right mb-3">
-                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
-                                        <button type="submit" class="btn btn-primary" (click)="save()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
+                                        <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
                                 </form>
                             </ng-template>
@@ -184,10 +184,21 @@
                                     </div>
                                 </div>
                                 <div class="float-right mb-3">
-                                    <button type="button" class="btn btn-secondary mr-2" (click)="resetPasswordForm()">Reset</button>
-                                    <button type="submit" class="btn btn-primary" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
+                                    <button type="button" class="btn btn-secondary mr-2" aria-describedby="password-panel" (click)="resetPasswordForm()">Reset</button>
+                                    <button type="submit" class="btn btn-primary" aria-describedby="password-panel" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
                                 </div>
                             </form>
+                        </ng-template>
+                    </ngb-panel>
+                    <ngb-panel id="api-panel" title="OPDS">
+                        <ng-template ngbPanelContent>
+                            <p class="alert alert-danger" role="alert" *ngIf="!opdsEnabled">
+                                OPDS is not enabled on this server!
+                            </p>
+                            <ng-container *ngIf="opdsEnabled">
+                                <app-api-key tooltipText="The API key is like a password. Keep it secret, Keep it safe."></app-api-key>
+                                <app-api-key title="OPDS URL" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
+                            </ng-container>
                         </ng-template>
                     </ngb-panel>
                 </ngb-accordion>

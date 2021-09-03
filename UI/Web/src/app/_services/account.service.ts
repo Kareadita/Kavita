@@ -130,4 +130,21 @@ export class AccountService implements OnDestroy {
     return undefined;
   }
 
+  resetApiKey() {
+    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, {responseType: 'text' as 'json'}).pipe(map(key => {
+      const user = this.getUserFromLocalStorage();
+      if (user) {
+        user.apiKey = key;
+
+        localStorage.setItem(this.userKey, JSON.stringify(user));
+    
+        this.currentUserSource.next(user);
+        this.currentUser = user;
+      }
+      return key;
+    }));
+
+    
+  }
+
 }

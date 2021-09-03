@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using AutoMapper;
+using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -106,6 +107,7 @@ namespace API.Controllers
 
                 var user = _mapper.Map<AppUser>(registerDto);
                 user.UserPreferences ??= new AppUserPreferences();
+                user.ApiKey = HashUtil.ApiKey();
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -136,6 +138,7 @@ namespace API.Controllers
                 {
                     Username = user.UserName,
                     Token = await _tokenService.CreateToken(user),
+                    ApiKey = user.ApiKey,
                     Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
                 };
             }
@@ -180,6 +183,7 @@ namespace API.Controllers
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
         }
@@ -235,6 +239,27 @@ namespace API.Controllers
 
             await _unitOfWork.RollbackAsync();
             return BadRequest("Something went wrong, unable to update user's roles");
+
+        }
+
+        /// <summary>
+        /// Resets the API Key assigned with a user
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("reset-api-key")]
+        public async Task<ActionResult<string>> ResetApiKey()
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            user.ApiKey = HashUtil.ApiKey();
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                return Ok(user.ApiKey);
+            }
+
+            await _unitOfWork.RollbackAsync();
+            return BadRequest("Something went wrong, unable to reset key");
 
         }
     }

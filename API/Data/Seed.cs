@@ -48,6 +48,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
+                new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
             };
 
             foreach (var defaultSetting in defaultSettings)
@@ -71,19 +72,18 @@ namespace API.Data
 
         }
 
-        public static async Task SeedSeriesMetadata(DataContext context)
+        public static async Task SeedUserApiKeys(DataContext context)
         {
             await context.Database.EnsureCreatedAsync();
 
-            context.Database.EnsureCreated();
-            var series = await context.Series
-                .Include(s => s.Metadata).ToListAsync();
-
-            foreach (var s in series)
+            var users = await context.AppUser.ToListAsync();
+            foreach (var user in users)
             {
-                s.Metadata ??= new SeriesMetadata();
+                if (string.IsNullOrEmpty(user.ApiKey))
+                {
+                    user.ApiKey = HashUtil.ApiKey();
+                }
             }
-
             await context.SaveChangesAsync();
         }
     }

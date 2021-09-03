@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using API.Interfaces;
-using API.Interfaces.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -27,27 +26,15 @@ namespace API.Services.HostedServices
 
             try
             {
-                await ManageStartupStatsTasks(scope, taskScheduler);
+                // These methods will automatically check if stat collection is disabled to prevent sending any data regardless
+                // of when setting was changed
+                await taskScheduler.ScheduleStatsTasks();
+                taskScheduler.RunStatCollection();
             }
             catch (Exception)
             {
                 //If stats startup fail the user can keep using the app
             }
-        }
-
-        private async Task ManageStartupStatsTasks(IServiceScope serviceScope, ITaskScheduler taskScheduler)
-        {
-            var unitOfWork = serviceScope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-            var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-
-            if (!settingsDto.AllowStatCollection) return;
-
-            taskScheduler.ScheduleStatsTasks();
-
-            var statsService = serviceScope.ServiceProvider.GetRequiredService<IStatsService>();
-
-            await statsService.CollectAndSendStatsData();
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

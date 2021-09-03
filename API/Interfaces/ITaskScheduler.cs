@@ -1,4 +1,6 @@
-﻿namespace API.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace API.Interfaces
 {
     public interface ITaskScheduler
     {
@@ -6,7 +8,7 @@
         /// For use on Server startup
         /// </summary>
         void ScheduleTasks();
-        void ScheduleStatsTasks();
+        Task ScheduleStatsTasks();
         void ScheduleUpdaterTasks();
         void ScanLibrary(int libraryId, bool forceUpdate = false);
         void CleanupChapters(int[] chapterIds);
@@ -15,5 +17,6 @@
         void RefreshSeriesMetadata(int libraryId, int seriesId);
         void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
         void CancelStatsTasks();
+        void RunStatCollection();
     }
 }

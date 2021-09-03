@@ -34,6 +34,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
+      this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
     });
   }
 
@@ -44,6 +45,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('port')?.setValue(this.serverSettings.port);
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
+    this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
   }
 
   saveSettings() {
