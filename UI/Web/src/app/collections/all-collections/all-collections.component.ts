@@ -9,9 +9,6 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 
 
-/**
- * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc.
- */
 @Component({
   selector: 'app-all-collections',
   templateUrl: './all-collections.component.html',
