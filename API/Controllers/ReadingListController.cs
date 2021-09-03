@@ -5,6 +5,7 @@ using API.Comparators;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -31,16 +32,19 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Returns reading lists for a given user.
+        /// Returns reading lists (paginated) for a given user.
         /// </summary>
         /// <param name="includePromoted">Defaults to true</param>
         /// <returns></returns>
-        [HttpGet("lists")]
-        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser(bool includePromoted = true)
+        [HttpPost("lists")]
+        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, [FromQuery] bool includePromoted = true)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, includePromoted,
+                userParams);
+            Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
-            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, includePromoted));
+            return Ok(items);
         }
 
         /// <summary>

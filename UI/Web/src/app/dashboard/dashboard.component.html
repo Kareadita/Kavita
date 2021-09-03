@@ -1,6 +1,6 @@
-<div class="container-fluid" >
+<div class="container-fluid">
     <nav role="navigation">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center" role="tab">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center mt-3" role="tab">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">
             <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
             <ng-template ngbNavContent>

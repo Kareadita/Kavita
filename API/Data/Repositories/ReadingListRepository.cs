@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -22,14 +23,15 @@ namespace API.Data.Repositories
         }
 
 
-        public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted)
+        public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
         {
-            return await _context.ReadingList
+            var query = _context.ReadingList
                 .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
                 .OrderBy(l => l.LastModified)
                 .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking();
+
+            return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<ReadingList> GetReadingListByIdAsync(int readingListId)

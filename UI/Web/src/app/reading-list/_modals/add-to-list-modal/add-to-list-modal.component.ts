@@ -44,7 +44,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
     
     this.loading = true;
     this.readingListService.getReadingLists(false).subscribe(lists => {
-      this.lists = lists;
+      this.lists = lists.result;
       this.loading = false;
     });
 

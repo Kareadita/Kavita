@@ -1,1 +1,12 @@
-<p>reading-lists works!</p>
+<app-card-detail-layout header="Reading Lists" 
+    [isLoading]="loadingLists"
+    [items]="lists"
+    [actions]="actions"
+    [pagination]="pagination"
+    (pageChange)="onPageChange($event)"
+    >
+    <ng-template #cardItem let-item let-position="idx">
+        <!-- <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card> -->
+        {{item.title}}
+    </ng-template>
+</app-card-detail-layout>
