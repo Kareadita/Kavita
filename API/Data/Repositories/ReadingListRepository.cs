@@ -81,6 +81,7 @@ namespace API.Data.Repositories
                 })
                 .Select(data => new ReadingListItemDto()
                 {
+                    Id = data.readingListItem.Id,
                     ChapterId = data.readingListItem.ChapterId,
                     Order = data.readingListItem.Order,
                     SeriesId = data.readingListItem.SeriesId,
@@ -143,6 +144,14 @@ namespace API.Data.Repositories
                 .Where(r => r.Title.Equals(title))
                 .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId)
+        {
+            return await _context.ReadingListItem
+                .Where(r => r.ReadingListId == readingListId)
+                .OrderBy(r => r.Order)
+                .ToListAsync();
         }
     }
 }

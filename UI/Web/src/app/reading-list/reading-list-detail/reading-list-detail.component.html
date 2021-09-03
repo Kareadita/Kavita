@@ -42,7 +42,7 @@
     </div>    
 
     <!-- NOTE: It might be nice to have a switch for the accessibility toggle -->
-    <app-dragable-ordered-list [items]="items" >
+    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)">
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media">
                 <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 

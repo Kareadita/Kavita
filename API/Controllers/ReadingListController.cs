@@ -62,6 +62,56 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList()));
         }
 
+        [HttpPost("update-position")]
+        public async Task<ActionResult> UpdateListItemPosition(UpdateReadingListPosition dto)
+        {
+            // Make sure UI buffers events
+            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
+            var item = items.Find(r => r.Id == dto.ReadingListItemId);
+            items.Remove(item);
+            items.Insert(dto.ToPosition, item);
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                items[i].Order = i;
+            }
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                return Ok("Updated");
+            }
+
+            return BadRequest("Couldn't update position");
+        }
+
+        /// <summary>
+        /// Removes all entries that are fully read from the reading list
+        /// </summary>
+        /// <param name="readingListId"></param>
+        /// <returns></returns>
+        [HttpDelete("remove-read")]
+        public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
+            items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
+
+            // Collect all Ids to remove
+            var itemsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+
+            // try
+            // {
+            //     await _unitOfWork.ReadingListRepository.Remove
+            // }
+            // catch
+            // {
+            //     await _unitOfWork.RollbackAsync();
+            // }
+
+            return Ok();
+            return BadRequest("Not implemented");
+        }
+
         /// <summary>
         /// Deletes a reading list
         /// </summary>

@@ -45,6 +45,10 @@ export class ReadingListService {
     return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, { responseType: 'text' as 'json' });
   }
 
+  updatePosition(readingListId: number, readingListItemId: number, fromPosition: number, toPosition: number) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, { responseType: 'text' as 'json' });
+  }
+
   _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {
     // TODO: Move to utility service
     if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {

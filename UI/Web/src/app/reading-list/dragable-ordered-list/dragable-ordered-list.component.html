@@ -3,7 +3,7 @@
         <div>
             <i class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
             <label for="reorder-{{i}}" class="sr-only">Reorder</label>
-            <input id="reorder-{{i}}" type="number" [value]="i" style="width: 40px" (keydown.enter)="updateIndex(i)" aria-describedby="instructions">
+            <input id="reorder-{{i}}" type="number" [value]="i" style="width: 40px" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
         </div>
 
         <ng-container  style="display: inline-block" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>

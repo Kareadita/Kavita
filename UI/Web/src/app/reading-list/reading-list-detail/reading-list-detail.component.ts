@@ -11,6 +11,7 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
+import { IndexUpdateEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -99,5 +100,12 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     return 'Chapter ' + item.chapterNumber;
+  }
+
+  orderUpdated(event: IndexUpdateEvent) {
+    // TODO: Buffer events so backend can process them all at the same time.
+    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+
+    })
   }
 }

@@ -4,6 +4,7 @@ namespace API.DTOs.ReadingLists
 {
     public class ReadingListItemDto
     {
+        public int Id { get; init; }
         public int Order { get; init; }
         public int ChapterId { get; init; }
         public int SeriesId { get; init; }
