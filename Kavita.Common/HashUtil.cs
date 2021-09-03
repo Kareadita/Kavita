@@ -37,5 +37,20 @@ namespace Kavita.Common
             var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Configuration.JwtToken}_{Environment.UserName}";
             return CalculateCrc(seed);
         }
+
+        /// <summary>
+        /// Generates a unique API key to this server instance
+        /// </summary>
+        /// <returns></returns>
+        public static string ApiKey()
+        {
+            var id = Guid.NewGuid();
+            if (id.Equals(Guid.Empty))
+            {
+                id = Guid.NewGuid();
+            }
+
+            return id.ToString();
+        }
     }
 }

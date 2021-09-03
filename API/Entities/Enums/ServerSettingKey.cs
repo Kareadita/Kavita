@@ -18,6 +18,8 @@ namespace API.Entities.Enums
         BackupDirectory = 5,
         [Description("AllowStatCollection")]
         AllowStatCollection = 6,
-        
+        [Description("EnableOpds")]
+        EnableOpds = 7,
+
     }
 }

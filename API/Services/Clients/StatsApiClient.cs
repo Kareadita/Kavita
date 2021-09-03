@@ -19,6 +19,7 @@ namespace API.Services.Clients
         {
             _client = client;
             _logger = logger;
+            _client.Timeout = TimeSpan.FromSeconds(30);
         }
 
         public async Task SendDataToStatsServer(UsageStatisticsDto data)

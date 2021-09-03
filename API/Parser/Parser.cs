@@ -83,6 +83,11 @@ namespace API.Parser
                 @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // vol_001-1.cbz for MangaPy default naming convention
+            new Regex(
+                @"(vol_)(?<Volume>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
         };
 
         private static readonly Regex[] MangaSeriesRegex = new[]

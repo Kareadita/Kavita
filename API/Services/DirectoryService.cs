@@ -432,5 +432,60 @@ namespace API.Services
                }
            }
        }
+
+        /// <summary>
+        /// Returns the human-readable file size for an arbitrary, 64-bit file size
+        /// <remarks>The default format is "0.## XB", e.g. "4.2 KB" or "1.43 GB"</remarks>
+        /// </summary>
+        /// https://www.somacon.com/p576.php
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+       public static string GetHumanReadableBytes(long bytes)
+       {
+           // Get absolute value
+           var absoluteBytes = (bytes < 0 ? -bytes : bytes);
+           // Determine the suffix and readable value
+           string suffix;
+           double readable;
+           switch (absoluteBytes)
+           {
+               // Exabyte
+               case >= 0x1000000000000000:
+                   suffix = "EB";
+                   readable = (bytes >> 50);
+                   break;
+               // Petabyte
+               case >= 0x4000000000000:
+                   suffix = "PB";
+                   readable = (bytes >> 40);
+                   break;
+               // Terabyte
+               case >= 0x10000000000:
+                   suffix = "TB";
+                   readable = (bytes >> 30);
+                   break;
+               // Gigabyte
+               case >= 0x40000000:
+                   suffix = "GB";
+                   readable = (bytes >> 20);
+                   break;
+               // Megabyte
+               case >= 0x100000:
+                   suffix = "MB";
+                   readable = (bytes >> 10);
+                   break;
+               // Kilobyte
+               case >= 0x400:
+                   suffix = "KB";
+                   readable = bytes;
+                   break;
+               default:
+                   return bytes.ToString("0 B"); // Byte
+           }
+           // Divide by 1024 to get fractional value
+           readable = (readable / 1024);
+           // Return formatted number with suffix
+           return readable.ToString("0.## ") + suffix;
+       }
     }
 }

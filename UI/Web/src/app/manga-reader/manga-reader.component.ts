@@ -486,11 +486,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getFittingIcon() {
-    let value = FITTING_OPTION.HEIGHT;
-    const formControl = this.generalSettingsForm.get('fittingOption');
-    if (formControl !== undefined) {
-      value = formControl?.value;
-    }
+    const value = this.getFit();
     
     switch(value) {
       case FITTING_OPTION.HEIGHT:
@@ -500,6 +496,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case FITTING_OPTION.ORIGINAL:
         return 'fa-expand-arrows-alt';
     }
+  }
+
+  getFit() {
+    let value = FITTING_OPTION.HEIGHT;
+    const formControl = this.generalSettingsForm.get('fittingOption');
+    if (formControl !== undefined) {
+      value = formControl?.value;
+    }
+    return value;
   }
 
   cancelMenuCloseTimer() {
@@ -743,6 +748,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
+      // Reset scroll on non HEIGHT Fits
+      if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+        window.scrollTo(0, 0);
+      }
+
     }
     this.isLoading = false;
   }

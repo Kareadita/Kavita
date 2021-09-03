@@ -37,6 +37,13 @@ namespace API.Tests.Services
         }
 
         [Fact]
+        public void ShouldUpdateCoverImage_OnFirstRunSeries()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null,null, false, false));
+        }
+
+        [Fact]
         public void ShouldUpdateCoverImage_OnSecondRun_FileModified()
         {
             // Represents first run
