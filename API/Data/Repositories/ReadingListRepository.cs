@@ -22,6 +22,11 @@ namespace API.Data.Repositories
             _mapper = mapper;
         }
 
+        public void Remove(ReadingListItem item)
+        {
+            _context.ReadingListItem.Remove(item);
+        }
+
 
         public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
         {
@@ -153,5 +158,7 @@ namespace API.Data.Repositories
                 .OrderBy(r => r.Order)
                 .ToListAsync();
         }
+
+
     }
 }

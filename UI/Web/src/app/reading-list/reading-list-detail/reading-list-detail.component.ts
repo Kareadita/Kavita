@@ -25,6 +25,7 @@ export class ReadingListDetailComponent implements OnInit {
   readingList!: ReadingList;
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
+  isLoading: boolean = false;
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -66,11 +67,15 @@ export class ReadingListDetailComponent implements OnInit {
         }
       });
     });
+    this.getListItems();
+  }
 
+  getListItems() {
+    this.isLoading = true;
     this.readingListService.getListItems(this.listId).subscribe(items => {
       this.items = items;
+      this.isLoading = false;
     });
-    
   }
 
   performAction(action: ActionItem<any>) {
@@ -106,6 +111,13 @@ export class ReadingListDetailComponent implements OnInit {
     // TODO: Buffer events so backend can process them all at the same time.
     this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
 
-    })
+    });
+  }
+
+  removeRead() {
+    this.isLoading = true;
+    this.readingListService.removeRead(this.readingList.id).subscribe(() => {
+      this.getListItems();
+    });
   }
 }

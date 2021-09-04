@@ -15,5 +15,6 @@ namespace API.Interfaces.Repositories
         Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
         Task<ReadingListDto> GetReadingListDtoByTitleAsync(string title);
         Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
+        void Remove(ReadingListItem item);
     }
 }

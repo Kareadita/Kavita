@@ -9,8 +9,14 @@
                     These are global settings that are bound to your account. 
                 </p>
                 
-                <ngb-accordion [closeOthers]="true" activeIds="site-panel">
+                <ngb-accordion [closeOthers]="true" activeIds="site-panel" #acc="ngbAccordion">
                         <ngb-panel id="site-panel" title="Site">
+                            <ng-template ngbPanelHeader>
+                                <div class="d-flex align-items-center justify-content-between">
+                                  <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">Site</button>
+                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('site-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
+                                </div>
+                              </ng-template>
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <div class="form-group">
@@ -34,6 +40,12 @@
                             </ng-template>
                         </ngb-panel>
                         <ngb-panel id="reading-panel" title="Reading">
+                            <ng-template ngbPanelHeader>
+                                <div class="d-flex align-items-center justify-content-between">
+                                  <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">Reading</button>
+                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
+                                </div>
+                              </ng-template>
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <h3 id="manga-header">Manga</h3>
@@ -156,6 +168,12 @@
                     
     
                     <ngb-panel id="password-panel" title="Password">
+                        <ng-template ngbPanelHeader>
+                            <div class="d-flex align-items-center justify-content-between">
+                              <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">Password</button>
+                              <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('password-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
+                            </div>
+                          </ng-template>
                         <ng-template ngbPanelContent>
                             <p>Change your Password</p>
                             <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
@@ -191,6 +209,12 @@
                         </ng-template>
                     </ngb-panel>
                     <ngb-panel id="api-panel" title="OPDS">
+                        <ng-template ngbPanelHeader>
+                            <div class="d-flex align-items-center justify-content-between">
+                              <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">OPDS</button>
+                              <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('api-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
+                            </div>
+                          </ng-template>
                         <ng-template ngbPanelContent>
                             <p class="alert alert-danger" role="alert" *ngIf="!opdsEnabled">
                                 OPDS is not enabled on this server!

@@ -62,6 +62,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList()));
         }
 
+        /// <summary>
+        /// Updates an items position
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("update-position")]
         public async Task<ActionResult> UpdateListItemPosition(UpdateReadingListPosition dto)
         {
@@ -89,27 +94,39 @@ namespace API.Controllers
         /// </summary>
         /// <param name="readingListId"></param>
         /// <returns></returns>
-        [HttpDelete("remove-read")]
+        [HttpPost("remove-read")]
         public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
         {
+            // TODO: PERF: This takes about 400ms, clean it up.
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
             items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
             // Collect all Ids to remove
-            var itemsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+            var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
 
-            // try
-            // {
-            //     await _unitOfWork.ReadingListRepository.Remove
-            // }
-            // catch
-            // {
-            //     await _unitOfWork.RollbackAsync();
-            // }
+            var listItems =
+                (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).Where(r =>
+                    itemIdsToRemove.Contains(r.Id));
 
-            return Ok();
-            return BadRequest("Not implemented");
+            try
+            {
+                foreach (var item in listItems)
+                {
+                    _unitOfWork.ReadingListRepository.Remove(item);
+                }
+
+                if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+                {
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Could not remove read progress");
         }
 
         /// <summary>

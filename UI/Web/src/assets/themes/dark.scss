@@ -30,6 +30,11 @@ $dark-item-accent-bg: #292d32;
     color: white;
   }
 
+  .accordion-header {
+    font-weight: bold;
+    color: $dark-primary-color;
+  }
+
 
   .accent {
     background-color: $dark-form-background !important;
