@@ -227,9 +227,9 @@ namespace API.Controllers
         {
             queryString = queryString.Replace(@"%", "");
 
-            if (char.IsWhiteSpace(queryString, 0))
+            if (char.IsWhiteSpace(queryString, 0) || char.IsWhiteSpace(queryString, queryString.Length - 1))
             {
-                queryString = queryString.TrimStart();
+                queryString = queryString.Trim();
             }
 
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
