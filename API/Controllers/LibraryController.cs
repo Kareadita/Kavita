@@ -227,6 +227,11 @@ namespace API.Controllers
         {
             queryString = queryString.Replace(@"%", "");
 
+            if (char.IsWhiteSpace(queryString, 0))
+            {
+                queryString = queryString.TrimStart();
+            }
+
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             // Get libraries user has access to
             var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();

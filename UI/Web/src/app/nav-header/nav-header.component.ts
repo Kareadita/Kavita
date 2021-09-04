@@ -29,8 +29,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   backToTopNeeded = false;
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService, 
-    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, 
+  constructor(public accountService: AccountService, private router: Router, public navService: NavService,
+    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
     private scrollService: ScrollService) { }
 
   ngOnInit(): void {
@@ -72,7 +72,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   onChangeSearch(val: string) {
       this.isLoading = true;
-      this.searchTerm = val;
+      this.searchTerm = val.trimStart();
       this.libraryService.search(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
@@ -95,9 +95,9 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   scrollToTop() {
     window.scroll({
       top: 0,
-      behavior: 'smooth' 
+      behavior: 'smooth'
     });
   }
 
-  
+
 }
