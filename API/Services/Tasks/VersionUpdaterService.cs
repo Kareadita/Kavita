@@ -91,9 +91,13 @@ namespace API.Services.Tasks
         {
             if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
             var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
-            var currentVersion = updateVersion.Revision == -1
-                ? BuildInfo.Version.ToString().Substring(0, 5)
-                : BuildInfo.Version.ToString();
+            var currentVersion = BuildInfo.Version.ToString();
+
+            if (updateVersion.Revision == -1)
+            {
+                currentVersion = BuildInfo.Version.ToString()
+                    .Substring(0, BuildInfo.Version.ToString().LastIndexOf("."));
+            }
 
             return new UpdateNotificationDto()
             {
