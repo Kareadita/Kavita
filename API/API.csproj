@@ -22,8 +22,6 @@
     <Company>kareadita.github.io</Company>
     <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
 
-    <!-- Should be replaced by CI -->
-    <AssemblyVersion>0.4.1</AssemblyVersion>
     <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
 
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
@@ -75,7 +73,7 @@
     <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
-  
+
 
   <ItemGroup>
     <None Remove="Hangfire-log.db" />
