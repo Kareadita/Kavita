@@ -90,13 +90,14 @@ namespace API.Services.Tasks
         private UpdateNotificationDto CreateDto(GithubReleaseMetadata update)
         {
             if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
+            var buildVersion = BuildInfo.Version;
             var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
-            var currentVersion = BuildInfo.Version.ToString();
+            var currentVersion = buildVersion.ToString();
 
             if (updateVersion.Revision == -1)
             {
-                currentVersion = BuildInfo.Version.ToString()
-                    .Substring(0, BuildInfo.Version.ToString().LastIndexOf("."));
+                currentVersion = buildVersion.ToString()
+                    .Substring(0, buildVersion.ToString().LastIndexOf("."));
             }
 
             return new UpdateNotificationDto()
