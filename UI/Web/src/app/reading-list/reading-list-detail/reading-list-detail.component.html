@@ -27,11 +27,6 @@
                         </span>
                     </button>
                 </div>
-                <!-- <div class="ml-2">
-                    <div class="card-actions">
-                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
-                    </div>
-                </div> -->
             </div>
             <p>{{readingList.summary}}</p>
         </div>
@@ -48,12 +43,17 @@
                 <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
                 (error)="imageService.updateErroredImage($event)">
                 <div class="media-body">
-                  <h5 class="mt-0 mb-1">{{formatTitle(item)}}</h5>
+                  <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}</h5>
                   <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
                   <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
                   <span *ngIf="item.promoted">
                     <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                   </span>
+
+                  <button class="btn btn-icon" (click)="removeItem(item, position)">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                    <span class="sr-only" attr.aria-labelledby="item.id--{{position}}">Remove item</span>
+                  </button>
                   
                 </div>
                 <div class="pull-right" *ngIf="item.pagesRead === item.pagesTotal"><i class="fa fa-check-square" aria-label="Read"></i></div>

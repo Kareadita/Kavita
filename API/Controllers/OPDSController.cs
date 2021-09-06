@@ -94,6 +94,19 @@ namespace API.Controllers
             });
             feed.Entries.Add(new FeedEntry()
             {
+                Id = "readingList",
+                Title = "Reading Lists",
+                Content = new FeedEntryContent()
+                {
+                    Text = "Browse by Reading Lists"
+                },
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list"),
+                }
+            });
+            feed.Entries.Add(new FeedEntry()
+            {
                 Id = "allLibraries",
                 Title = "All Libraries",
                 Content = new FeedEntryContent()
@@ -190,6 +203,7 @@ namespace API.Controllers
             return CreateXmlResult(SerializeXml(feed));
         }
 
+
         [HttpGet("{apiKey}/collections/{collectionId}")]
         [Produces("application/xml")]
         public async Task<IActionResult> GetCollection(int collectionId, string apiKey, [FromQuery] int pageNumber = 0)
@@ -228,6 +242,77 @@ namespace API.Controllers
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
             }
+
+
+            return CreateXmlResult(SerializeXml(feed));
+        }
+
+        [HttpGet("{apiKey}/reading-list")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetReadingLists(string apiKey, [FromQuery] int pageNumber = 0)
+        {
+            if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+                return BadRequest("OPDS is not enabled on this server");
+            var user = await GetUser(apiKey);
+
+            var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, true, new UserParams()
+            {
+                PageNumber = pageNumber
+            });
+
+
+            var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey);
+            //AddPagination(feed, readingLists, $"{Prefix}{apiKey}/readinglists");
+
+            foreach (var readingListDto in readingLists)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Id = readingListDto.Id.ToString(),
+                    Title = readingListDto.Title,
+                    Summary = readingListDto.Summary,
+                    Links = new List<FeedLink>()
+                    {
+                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list/{readingListDto.Id}"),
+                    }
+                });
+            }
+
+            return CreateXmlResult(SerializeXml(feed));
+        }
+
+        [HttpGet("{apiKey}/reading-list/{readingListId}")]
+        [Produces("application/xml")]
+        public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey)
+        {
+            if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+                return BadRequest("OPDS is not enabled on this server");
+            var user = await GetUser(apiKey);
+
+            var userWithLists = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(user.UserName);
+            var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
+            if (readingList == null)
+            {
+                return BadRequest("Reading list does not exist or you don't have access");
+            }
+
+            var feed = CreateFeed(readingList.Title + " Reading List", $"{apiKey}/reading-list/{readingListId}", apiKey);
+
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
+            foreach (var item in items)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Id = item.ChapterId.ToString(),
+                    Title = "Chapter " + item.ChapterNumber,
+                    Links = new List<FeedLink>()
+                    {
+                        CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{item.SeriesId}/volume/{item.VolumeId}/chapter/{item.ChapterId}"),
+                        CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={item.ChapterId}")
+                    }
+                });
+            }
+
 
 
             return CreateXmlResult(SerializeXml(feed));

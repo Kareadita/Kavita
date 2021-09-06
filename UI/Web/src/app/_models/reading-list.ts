@@ -11,6 +11,7 @@ export interface ReadingListItem {
     chapterNumber: string;
     volumeNumber: string;
     libraryId: number;
+    id: number;
 }
 
 export interface ReadingList {

@@ -108,9 +108,13 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   orderUpdated(event: IndexUpdateEvent) {
-    // TODO: Buffer events so backend can process them all at the same time.
-    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
+  }
 
+  removeItem(item: ReadingListItem, position: number) {
+    this.readingListService.deleteItem(this.readingList.id, item.id).subscribe(() => {
+      this.items.splice(position);
+      this.toastr.success('Item removed');
     });
   }
 

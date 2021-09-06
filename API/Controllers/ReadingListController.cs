@@ -89,6 +89,26 @@ namespace API.Controllers
             return BadRequest("Couldn't update position");
         }
 
+        [HttpPost("delete-item")]
+        public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
+        {
+            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
+            var item = items.Find(r => r.Id == dto.ReadingListItemId);
+            items.Remove(item);
+
+            for (var i = 0; i < items.Count; i++)
+            {
+                items[i].Order = i;
+            }
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                return Ok("Updated");
+            }
+
+            return BadRequest("Couldn't delete item");
+        }
+
         /// <summary>
         /// Removes all entries that are fully read from the reading list
         /// </summary>

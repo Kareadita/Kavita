@@ -14,6 +14,7 @@ namespace API.DTOs.ReadingLists
         public int PagesTotal { get; set; }
         public string ChapterNumber { get; set; }
         public string VolumeNumber { get; set; }
+        public int VolumeId { get; set; }
         public int LibraryId { get; set; }
         public string Title { get; set; }
         /// <summary>

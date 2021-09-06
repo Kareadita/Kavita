@@ -72,6 +72,7 @@ namespace API.Data.Repositories
                     readingListItem = data.readingListItem,
                     TotalPages = data.TotalPages,
                     ChapterNumber = data.ChapterNumber,
+                    VolumeId = volume.Id,
                     VolumeNumber = volume.Name,
                 })
                 .Join(_context.Series, s => s.readingListItem.SeriesId, series => series.Id,
@@ -83,7 +84,8 @@ namespace API.Data.Repositories
                         data.readingListItem,
                         data.TotalPages,
                         data.ChapterNumber,
-                        data.VolumeNumber
+                        data.VolumeNumber,
+                        data.VolumeId
                     })
                 .Select(data => new ReadingListItemDto()
                 {
@@ -97,6 +99,7 @@ namespace API.Data.Repositories
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = data.VolumeNumber,
                     LibraryId = data.LibraryId,
+                    VolumeId = data.VolumeId,
                     ReadingListId = data.readingListItem.ReadingListId
                 })
                 .OrderBy(rli => rli.Order)

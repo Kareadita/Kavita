@@ -57,6 +57,10 @@ export class ReadingListService {
     return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, { responseType: 'text' as 'json' });
   }
 
+  deleteItem(readingListId: number, readingListItemId: number) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/delete-item', {readingListId, readingListItemId}, { responseType: 'text' as 'json' });
+  }
+
   removeRead(readingListId: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, { responseType: 'text' as 'json' });
   }
