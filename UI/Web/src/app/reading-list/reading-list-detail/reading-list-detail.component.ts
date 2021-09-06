@@ -113,7 +113,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   removeItem(item: ReadingListItem, position: number) {
     this.readingListService.deleteItem(this.readingList.id, item.id).subscribe(() => {
-      this.items.splice(position);
+      this.items.splice(position, 1);
       this.toastr.success('Item removed');
     });
   }
