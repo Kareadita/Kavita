@@ -241,7 +241,6 @@ namespace API.Controllers
         private static bool AddChaptersToReadingList(int seriesId, IEnumerable<Chapter> chaptersForSeries,
             ICollection<int> existingChapterIds, ReadingList readingList, int lastOrder)
         {
-            // BUG: There is an order issue with this logic
             var index = lastOrder + 1;
             foreach (var chapter in chaptersForSeries)
             {
