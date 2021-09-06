@@ -27,7 +27,7 @@
           </li>
         </ol>
         <ng-template #noBreadcrumb>
-            <div class="breadcrumb">Select a folder to view breadcrumb</div>
+            <div class="breadcrumb">Select a folder to view breadcrumb. Don't see your directory, try checking / first.</div>
         </ng-template>
     </nav>
     <ul class="list-group">
@@ -50,5 +50,6 @@
     </ul>
 </div>
 <div class="modal-footer">
+    <a class="btn btn-info" href="https://wiki.kavitareader.com/en/guides/adding-a-library" target="_blank">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
 </div>
