@@ -194,21 +194,39 @@ namespace API.Controllers
             var chapterIdsForSeries =
                 await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new [] {dto.SeriesId});
 
-
-
-            readingList.Items ??= new List<ReadingListItem>();
-            var lastOrder = 0;
-            if (readingList.Items.Any())
+            // If there are adds, tell tracking this has been modified
+            if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForSeries, readingList))
             {
-                lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
+                _unitOfWork.ReadingListRepository.Update(readingList);
             }
-            var existingChapterIds = readingList.Items.Select(rli => rli.ChapterId).ToList();
-            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIdsForSeries))
-                .OrderBy(c => int.Parse(c.Volume.Name))
-                .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
+
+            try
+            {
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok("Nothing to do");
+        }
+
+        [HttpPost("update-by-volume")]
+        public async Task<ActionResult> UpdateListByVolume(UpdateReadingListByVolumeDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
+            var chapterIdsForVolume =
+                (await _unitOfWork.VolumeRepository.GetChaptersAsync(dto.VolumeId)).Select(c => c.Id).ToList();
 
             // If there are adds, tell tracking this has been modified
-            if (AddChaptersToReadingList(dto.SeriesId, chaptersForSeries, existingChapterIds, readingList, lastOrder))
+            if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForVolume, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
@@ -238,9 +256,20 @@ namespace API.Controllers
         /// <param name="readingList"></param>
         /// <param name="lastOrder"></param>
         /// <returns>True if new chapters were added</returns>
-        private static bool AddChaptersToReadingList(int seriesId, IEnumerable<Chapter> chaptersForSeries,
-            ICollection<int> existingChapterIds, ReadingList readingList, int lastOrder)
+        private async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIdsForSeries,
+            ReadingList readingList)
         {
+            readingList.Items ??= new List<ReadingListItem>();
+            var lastOrder = 0;
+            if (readingList.Items.Any())
+            {
+                lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
+            }
+            var existingChapterIds = readingList.Items.Select(rli => rli.ChapterId).ToList();
+            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIdsForSeries))
+                .OrderBy(c => int.Parse(c.Volume.Name))
+                .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
+
             var index = lastOrder + 1;
             foreach (var chapter in chaptersForSeries)
             {
