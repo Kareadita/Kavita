@@ -124,4 +124,8 @@ export class ReadingListDetailComponent implements OnInit {
       this.getListItems();
     });
   }
+
+  read() {
+    
+  }
 }

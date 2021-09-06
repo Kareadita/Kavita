@@ -13,9 +13,9 @@
             </div>
             <div class="row no-gutters">
                 <div>
-                    <button class="btn btn-primary" (click)="removeRead()">
+                    <button class="btn btn-secondary" (click)="removeRead()">
                         <span>
-                            <i class="fa fa-book"></i>
+                            <i class="fa fa-check"></i>
                         </span>
                         <span class="read-btn--text">&nbsp;Remove Read</span>
                     </button>
@@ -27,6 +27,14 @@
                         </span>
                     </button>
                 </div>
+                <div class="ml-2">
+                  <button class="btn btn-primary" title="Read" (click)="read()">
+                      <span>
+                          <i class="fa fa-book-open" aria-hidden="true"></i>
+                          <span class="read-btn--text">&nbsp;Read</span>
+                      </span>
+                  </button>
+              </div>
             </div>
             <p>{{readingList.summary}}</p>
         </div>
