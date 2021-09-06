@@ -90,7 +90,7 @@ export class ReadingListDetailComponent implements OnInit {
       case Action.Delete:
         this.readingListService.delete(readingList.id).subscribe(() => {
           this.toastr.success('Reading list deleted');
-          this.router.navigateByUrl('library');
+          this.router.navigateByUrl('library#lists');
         });
     }
   }

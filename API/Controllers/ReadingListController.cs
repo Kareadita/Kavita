@@ -98,27 +98,28 @@ namespace API.Controllers
         public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
         {
             // TODO: PERF: This takes about 400ms, clean it up.
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameFastAsync(User.GetUsername());
             var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
             items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
             // Collect all Ids to remove
             var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
 
-            var listItems =
-                (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).Where(r =>
-                    itemIdsToRemove.Contains(r.Id));
-
             try
             {
-                foreach (var item in listItems)
-                {
-                    _unitOfWork.ReadingListRepository.Remove(item);
-                }
+                var listItems =
+                    (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).Where(r =>
+                        itemIdsToRemove.Contains(r.Id));
+                _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
-                if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+                if (_unitOfWork.HasChanges())
                 {
+                    await _unitOfWork.CommitAsync();
                     return Ok("Updated");
+                }
+                else
+                {
+                    return Ok("Nothing to remove");
                 }
             }
             catch
@@ -126,7 +127,7 @@ namespace API.Controllers
                 await _unitOfWork.RollbackAsync();
             }
 
-            return BadRequest("Could not remove read progress");
+            return BadRequest("Could not remove read items");
         }
 
         /// <summary>
@@ -187,12 +188,14 @@ namespace API.Controllers
         [HttpPost("update-by-series")]
         public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
         {
-            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
             var chapterIdsForSeries =
                 await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new [] {dto.SeriesId});
 
-            // This should never happen
-            if (readingList == null) return BadRequest("Reading List does not exist");
+
+
             readingList.Items ??= new List<ReadingListItem>();
             var lastOrder = 0;
             if (readingList.Items.Any())
@@ -204,21 +207,10 @@ namespace API.Controllers
                 .OrderBy(c => int.Parse(c.Volume.Name))
                 .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
-            var index = 1;
-            foreach (var chapter in chaptersForSeries)
+            // If there are adds, tell tracking this has been modified
+            if (AddChaptersToReadingList(dto.SeriesId, chaptersForSeries, existingChapterIds, readingList, lastOrder))
             {
-                if (existingChapterIds.Contains(chapter.Id))
-                {
-                    continue;
-                }
-                readingList.Items.Add(new ReadingListItem()
-                {
-                    Order = lastOrder + index,
-                    ChapterId = chapter.Id,
-                    SeriesId = dto.SeriesId,
-                    VolumeId = chapter.VolumeId
-                });
-                index += 1;
+                _unitOfWork.ReadingListRepository.Update(readingList);
             }
 
             try
@@ -235,6 +227,40 @@ namespace API.Controllers
             }
 
             return Ok("Nothing to do");
+        }
+
+        /// <summary>
+        /// Adds a list of Chapters as reading list items.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="chaptersForSeries"></param>
+        /// <param name="existingChapterIds"></param>
+        /// <param name="readingList"></param>
+        /// <param name="lastOrder"></param>
+        /// <returns>True if new chapters were added</returns>
+        private static bool AddChaptersToReadingList(int seriesId, IEnumerable<Chapter> chaptersForSeries,
+            ICollection<int> existingChapterIds, ReadingList readingList, int lastOrder)
+        {
+            // BUG: There is an order issue with this logic
+            var index = lastOrder + 1;
+            foreach (var chapter in chaptersForSeries)
+            {
+                if (existingChapterIds.Contains(chapter.Id))
+                {
+                    continue;
+                }
+
+                readingList.Items.Add(new ReadingListItem()
+                {
+                    Order = index,
+                    ChapterId = chapter.Id,
+                    SeriesId = seriesId,
+                    VolumeId = chapter.VolumeId
+                });
+                index += 1;
+            }
+
+            return index > lastOrder + 1;
         }
     }
 }

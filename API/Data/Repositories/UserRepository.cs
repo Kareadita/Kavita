@@ -55,7 +55,18 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// Gets an AppUser by username. Returns back Progress information.
+        /// This fetches JUST the User object, no extra relationships are pulled
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        public async Task<AppUser> GetUserByUsernameFastAsync(string username)
+        {
+            return await _context.Users
+                .SingleOrDefaultAsync(x => x.UserName == username);
+        }
+
+        /// <summary>
+        /// Gets an AppUser by username. Returns back Reading List and their Items.
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
@@ -63,6 +74,7 @@ namespace API.Data.Repositories
         {
             return await _context.Users
                 .Include(u => u.ReadingLists)
+                .ThenInclude(l => l.Items)
                 .SingleOrDefaultAsync(x => x.UserName == username);
         }
 

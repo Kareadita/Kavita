@@ -22,9 +22,19 @@ namespace API.Data.Repositories
             _mapper = mapper;
         }
 
+        public void Update(ReadingList list)
+        {
+            _context.Entry(list).State = EntityState.Modified;
+        }
+
         public void Remove(ReadingListItem item)
         {
             _context.ReadingListItem.Remove(item);
+        }
+
+        public void BulkRemove(IEnumerable<ReadingListItem> items)
+        {
+            _context.ReadingListItem.RemoveRange(items);
         }
 
 
@@ -54,6 +64,10 @@ namespace API.Data.Repositories
                 .Where(rli => rli.ReadingListId == readingListId)
                 .Select(rli => rli.SeriesId)
                 .ToListAsync();
+            // var chapterIds = await _context.ReadingListItem
+            //     .Where(rli => rli.ReadingListId == readingListId)
+            //     .Select(rli => rli.SeriesId)
+            //     .ToListAsync();
 
             var items = await _context.Series
                 .Where(s => seriesIds.Contains(s.Id))
@@ -96,11 +110,13 @@ namespace API.Data.Repositories
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = data.VolumeNumber,
                     LibraryId = data.LibraryId,
+                    ReadingListId = data.readingListItem.ReadingListId
                 })
                 .OrderBy(rli => rli.Order)
                 .AsNoTracking()
                 .ToListAsync();
 
+            // Attach progress information
             var chapterIds = items.Select(i => i.ChapterId);
             var progresses = await _context.AppUserProgresses
                 .Where(p => chapterIds.Contains(p.ChapterId))
@@ -109,7 +125,7 @@ namespace API.Data.Repositories
 
             foreach (var progress in progresses)
             {
-                var progressItem = items.SingleOrDefault(i => i.ChapterId == progress.ChapterId);
+                var progressItem = items.SingleOrDefault(i => i.ChapterId == progress.ChapterId && i.ReadingListId == readingListId);
                 if (progressItem == null) continue;
 
                 progressItem.PagesRead = progress.PagesRead;

@@ -2,11 +2,10 @@
 
 namespace API.Entities
 {
-    [Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), nameof(LibraryId), IsUnique = true)]
+    //[Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), IsUnique = true)]
     public class ReadingListItem
     {
         public int Id { get; init; }
-        public int LibraryId { get; set; }
         public int SeriesId { get; set; }
         public int VolumeId { get; set; }
         public int ChapterId { get; set; }

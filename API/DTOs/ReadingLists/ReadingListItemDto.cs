@@ -16,5 +16,9 @@ namespace API.DTOs.ReadingLists
         public string VolumeNumber { get; set; }
         public int LibraryId { get; set; }
         public string Title { get; set; }
+        /// <summary>
+        /// Used internally only
+        /// </summary>
+        public int ReadingListId { get; set; }
     }
 }

@@ -41,7 +41,6 @@ namespace API.Data
         /// <returns></returns>
         public bool Commit()
         {
-
             return _context.SaveChanges() > 0;
         }
         /// <summary>

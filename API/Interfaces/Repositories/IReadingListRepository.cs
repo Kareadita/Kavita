@@ -16,5 +16,7 @@ namespace API.Interfaces.Repositories
         Task<ReadingListDto> GetReadingListDtoByTitleAsync(string title);
         Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
         void Remove(ReadingListItem item);
+        void BulkRemove(IEnumerable<ReadingListItem> items);
+        void Update(ReadingList list);
     }
 }

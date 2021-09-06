@@ -23,7 +23,9 @@ namespace API.Data.Repositories
 
         public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds)
         {
-            return await _context.Chapter.Where(c => chapterIds.Contains(c.Id)).ToListAsync();
+            return await _context.Chapter
+                .Where(c => chapterIds.Contains(c.Id))
+                .ToListAsync();
         }
 
         // TODO: Move over Chapter based queries here
