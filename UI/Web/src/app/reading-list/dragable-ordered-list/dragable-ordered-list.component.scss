@@ -1,5 +1,5 @@
 .example-list {
-    width: 500px;
+    min-width: 500px;
     max-width: 100%;
     border: solid 1px #ccc;
     min-height: 60px;
@@ -23,6 +23,7 @@
 
     .drag-handle {
         cursor: move;
+        font-size: 24px;
     }
   }
   
