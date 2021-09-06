@@ -179,7 +179,7 @@ export class SeriesDetailComponent implements OnInit {
         this.openViewInfo(volume);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addVolumeToReadingList(volume, () => {/* No Operation */ });
+        this.actionService.addVolumeToReadingList(volume, this.series.id, () => {/* No Operation */ });
         break;
       default:
         break;
@@ -198,7 +198,7 @@ export class SeriesDetailComponent implements OnInit {
         this.openViewInfo(chapter);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addChapterToReadingList(chapter, () => {/* No Operation */ });
+        this.actionService.addChapterToReadingList(chapter, this.series.id, () => {/* No Operation */ });
         break;
       default:
         break;

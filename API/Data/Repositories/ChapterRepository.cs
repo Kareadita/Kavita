@@ -25,6 +25,7 @@ namespace API.Data.Repositories
         {
             return await _context.Chapter
                 .Where(c => chapterIds.Contains(c.Id))
+                .Include(c => c.Volume)
                 .ToListAsync();
         }
 

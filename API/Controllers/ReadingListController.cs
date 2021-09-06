@@ -247,16 +247,43 @@ namespace API.Controllers
             return Ok("Nothing to do");
         }
 
+        [HttpPost("update-by-chapter")]
+        public async Task<ActionResult> UpdateListByChapter(UpdateReadingListByChapterDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
+
+            // If there are adds, tell tracking this has been modified
+            if (await AddChaptersToReadingList(dto.SeriesId, new List<int>() { dto.ChapterId }, readingList))
+            {
+                _unitOfWork.ReadingListRepository.Update(readingList);
+            }
+
+            try
+            {
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok("Nothing to do");
+        }
+
         /// <summary>
-        /// Adds a list of Chapters as reading list items.
+        /// Adds a list of Chapters as reading list items to the passed reading list.
         /// </summary>
         /// <param name="seriesId"></param>
-        /// <param name="chaptersForSeries"></param>
-        /// <param name="existingChapterIds"></param>
+        /// <param name="chapterIds"></param>
         /// <param name="readingList"></param>
-        /// <param name="lastOrder"></param>
         /// <returns>True if new chapters were added</returns>
-        private async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIdsForSeries,
+        private async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
             ReadingList readingList)
         {
             readingList.Items ??= new List<ReadingListItem>();
@@ -265,18 +292,16 @@ namespace API.Controllers
             {
                 lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
             }
-            var existingChapterIds = readingList.Items.Select(rli => rli.ChapterId).ToList();
-            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIdsForSeries))
+
+            var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
+            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
                 .OrderBy(c => int.Parse(c.Volume.Name))
                 .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
             var index = lastOrder + 1;
             foreach (var chapter in chaptersForSeries)
             {
-                if (existingChapterIds.Contains(chapter.Id))
-                {
-                    continue;
-                }
+                if (existingChapterExists.Contains(chapter.Id)) continue;
 
                 readingList.Items.Add(new ReadingListItem()
                 {

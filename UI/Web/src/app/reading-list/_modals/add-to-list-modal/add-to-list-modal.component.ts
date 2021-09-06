@@ -69,8 +69,18 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   }
 
   addToList(readingList: ReadingList) {
-    if (this.type === ADD_FLOW.Series && this.seriesId != undefined) {
+    if (this.seriesId === undefined) return;
+
+    if (this.type === ADD_FLOW.Series) {
       this.readingListService.updateBySeries(readingList.id, this.seriesId).subscribe(() => {
+        this.modal.close();
+      });
+    } else if (this.type === ADD_FLOW.Volume && this.volumeId !== undefined) {
+      this.readingListService.updateByVolume(readingList.id, this.seriesId, this.volumeId).subscribe(() => {
+        this.modal.close();
+      });
+    } else if (this.type === ADD_FLOW.Chapter && this.chapterId !== undefined) {
+      this.readingListService.updateByChapter(readingList.id, this.seriesId, this.chapterId).subscribe(() => {
         this.modal.close();
       });
     }

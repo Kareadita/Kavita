@@ -226,8 +226,6 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.componentInstance.title = series.name;
       this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
 
-      console.log('series: ', series);
-
 
       this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
@@ -243,12 +241,48 @@ export class ActionService implements OnDestroy {
       });
   }
 
-  addVolumeToReadingList(volume: Volume, callback?: VolumeActionCallback) {
-    //TODO
+  addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId; 
+      this.readingListModalRef.componentInstance.volumeId = volume.id;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(volume);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(volume);
+        }
+      });
   }
 
-  addChapterToReadingList(chapter: Chapter, callback?: ChapterActionCallback) {
-    //TODO
+  addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId; 
+      this.readingListModalRef.componentInstance.chapterId = chapter.id;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(chapter);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(chapter);
+        }
+      });
   }
 
 }
