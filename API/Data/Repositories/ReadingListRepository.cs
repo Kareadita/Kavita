@@ -59,45 +59,32 @@ namespace API.Data.Repositories
 
         public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId)
         {
-
-            var seriesIds = await _context.ReadingListItem
-                .Where(rli => rli.ReadingListId == readingListId)
-                .Select(rli => rli.SeriesId)
-                .ToListAsync();
-            // var chapterIds = await _context.ReadingListItem
-            //     .Where(rli => rli.ReadingListId == readingListId)
-            //     .Select(rli => rli.SeriesId)
-            //     .ToListAsync();
-
-            var items = await _context.Series
-                .Where(s => seriesIds.Contains(s.Id))
-                .Join(_context.ReadingListItem, s => s.Id, readingListItem => readingListItem.SeriesId,
-                    (s, readingListItem) => new
-                    {
-                        SeriesName = s.Name,
-                        SeriesFormat = s.Format,
-                        LibraryId = s.LibraryId,
-                        readingListItem
-                    })
-                .Join(_context.Chapter, s => s.readingListItem.ChapterId, chapter => chapter.Id, (data, chapter) => new
+            var items = await _context.ReadingListItem
+                .Where(s => s.ReadingListId == readingListId)
+                .Join(_context.Chapter, s => s.ChapterId, chapter => chapter.Id, (data, chapter) => new
                 {
-                    SeriesName = data.SeriesName,
-                    SeriesFormat = data.SeriesFormat,
-                    readingListItem = data.readingListItem,
-                    LibraryId = data.LibraryId,
                     TotalPages = chapter.Pages,
                     ChapterNumber = chapter.Range,
+                    readingListItem = data
                 })
                 .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
                 {
-                    SeriesName = data.SeriesName,
-                    SeriesFormat = data.SeriesFormat,
                     readingListItem = data.readingListItem,
                     TotalPages = data.TotalPages,
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = volume.Name,
-                    LibraryId = data.LibraryId,
                 })
+                .Join(_context.Series, s => s.readingListItem.SeriesId, series => series.Id,
+                    (data, s) => new
+                    {
+                        SeriesName = s.Name,
+                        SeriesFormat = s.Format,
+                        s.LibraryId,
+                        data.readingListItem,
+                        data.TotalPages,
+                        data.ChapterNumber,
+                        data.VolumeNumber
+                    })
                 .Select(data => new ReadingListItemDto()
                 {
                     Id = data.readingListItem.Id,
@@ -117,9 +104,9 @@ namespace API.Data.Repositories
                 .ToListAsync();
 
             // Attach progress information
-            var chapterIds = items.Select(i => i.ChapterId);
+            var fetchedChapterIds = items.Select(i => i.ChapterId);
             var progresses = await _context.AppUserProgresses
-                .Where(p => chapterIds.Contains(p.ChapterId))
+                .Where(p => fetchedChapterIds.Contains(p.ChapterId))
                 .AsNoTracking()
                 .ToListAsync();
 
