@@ -173,7 +173,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Marks a Chapter as Unread (progress)
+        /// Marks a Series as Unread (progress)
         /// </summary>
         /// <param name="markReadDto"></param>
         /// <returns></returns>
@@ -205,6 +205,50 @@ namespace API.Controllers
 
 
             return BadRequest("There was an issue saving progress");
+        }
+
+        /// <summary>
+        /// Marks all chapters within a volume as unread
+        /// </summary>
+        /// <param name="markVolumeReadDto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-volume-unread")]
+        public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            foreach (var chapter in chapters)
+            {
+                user.Progresses ??= new List<AppUserProgress>();
+                var userProgress = user.Progresses.FirstOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = 0,
+                        VolumeId = markVolumeReadDto.VolumeId,
+                        SeriesId = markVolumeReadDto.SeriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = 0;
+                    userProgress.SeriesId = markVolumeReadDto.SeriesId;
+                    userProgress.VolumeId = markVolumeReadDto.VolumeId;
+                }
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
         }
 
         /// <summary>
