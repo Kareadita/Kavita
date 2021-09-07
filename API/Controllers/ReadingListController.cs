@@ -27,8 +27,8 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetList(int readingListId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, user.Id));
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, userId));
         }
 
         /// <summary>
@@ -39,8 +39,8 @@ namespace API.Controllers
         [HttpPost("lists")]
         public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, [FromQuery] bool includePromoted = true)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(user.Id, includePromoted,
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
                 userParams);
             Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
@@ -56,10 +56,10 @@ namespace API.Controllers
         [HttpGet("items")]
         public async Task<ActionResult<IEnumerable<ReadingListItemDto>>> GetListForUser(int readingListId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
 
-            return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList()));
+            return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(userId, items.ToList()));
         }
 
         /// <summary>
@@ -117,10 +117,9 @@ namespace API.Controllers
         [HttpPost("remove-read")]
         public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
         {
-            // TODO: PERF: This takes about 400ms, clean it up.
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameFastAsync(User.GetUsername());
-            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
-            items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
+            items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(userId, items.ToList());
 
             // Collect all Ids to remove
             var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
@@ -334,6 +333,27 @@ namespace API.Controllers
             }
 
             return index > lastOrder + 1;
+        }
+
+        /// <summary>
+        /// Returns the next chapter within the reading list
+        /// </summary>
+        /// <param name="currentChapterId"></param>
+        /// <param name="readingListId"></param>
+        /// <returns>Chapter Id for next item, -1 if nothing exists</returns>
+        [HttpGet("next-chapter")]
+        public async Task<ActionResult<int>> GetNextChapter(int currentChapterId, int readingListId)
+        {
+            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).ToList();
+            var readingListItem = items.SingleOrDefault(rl => rl.ChapterId == currentChapterId);
+            if (readingListItem == null) return BadRequest("Id does not exist");
+            var index = items.IndexOf(readingListItem) + 1;
+            if (items.Count > index)
+            {
+                return items[index].ChapterId;
+            }
+
+            return Ok(-1);
         }
     }
 }

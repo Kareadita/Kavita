@@ -527,8 +527,8 @@ namespace API.Controllers
         [HttpGet("next-chapter")]
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
@@ -593,8 +593,8 @@ namespace API.Controllers
         [HttpGet("prev-chapter")]
         public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
 

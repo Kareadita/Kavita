@@ -55,14 +55,16 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// This fetches JUST the User object, no extra relationships are pulled
+        /// This fetches the Id for a user. Use whenever you just need an ID.
         /// </summary>
         /// <param name="username"></param>
         /// <returns></returns>
-        public async Task<AppUser> GetUserByUsernameFastAsync(string username)
+        public async Task<int> GetUserIdByUsernameAsync(string username)
         {
             return await _context.Users
-                .SingleOrDefaultAsync(x => x.UserName == username);
+                .Where(x => x.UserName == username)
+                .Select(u => u.Id)
+                .SingleOrDefaultAsync();
         }
 
         /// <summary>

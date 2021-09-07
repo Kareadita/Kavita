@@ -65,12 +65,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
+  /**
+   * Reading List id. Defaults to -1.
+   */
+  readingListId: number = CHAPTER_ID_DOESNT_EXIST;
 
   /**
    * If this is true, no progress will be saved.
    */
   incognitoMode: boolean = false;
 
+  /**
+   * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order. 
+   */
+  readingListMode: boolean = false;
   /**
    * The current page. UI will show this number + 1.
    */
@@ -265,6 +273,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    
+    const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
+    console.log('reading list id: ', readingListId);
+    if (readingListId != null) {
+      this.readingListMode = true;
+      this.readingListId = parseInt(readingListId, 10);
+    }
+    
 
     this.continuousChaptersStack.push(this.chapterId);
 
@@ -387,7 +403,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.bookmarks[bookmark.page] = 1;
       });
 
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
@@ -674,7 +690,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.nextPageDisabled) { return; }
     this.isLoading = true;
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'next');
       });

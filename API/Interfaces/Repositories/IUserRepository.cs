@@ -11,7 +11,7 @@ namespace API.Interfaces.Repositories
         void Update(AppUserPreferences preferences);
         public void Delete(AppUser user);
         Task<AppUser> GetUserByUsernameAsync(string username);
-        Task<AppUser> GetUserByUsernameFastAsync(string username);
+        Task<int> GetUserIdByUsernameAsync(string username);
         Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
         Task<AppUser> GetUserByIdAsync(int id);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();

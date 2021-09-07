@@ -73,7 +73,10 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }
 
-  getNextChapter(seriesId: number, volumeId: number, currentChapterId: number) {
+  getNextChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
+    if (readingListId > 0) {
+      return this.httpClient.get<number>(this.baseUrl + 'readinglist/next-chapter?seriesId=' + seriesId + '&currentChapterId=' + currentChapterId + '&readingListId=' + readingListId);
+    }
     return this.httpClient.get<number>(this.baseUrl + 'reader/next-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
