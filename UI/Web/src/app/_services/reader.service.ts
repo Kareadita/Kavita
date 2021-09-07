@@ -138,7 +138,3 @@ export class ReaderService {
     return parseInt(imageSrc.split('&page=')[1], 10);
   }
 }
-function EmptyObservable<T>() {
-  throw new Error('Function not implemented.');
-}
-
