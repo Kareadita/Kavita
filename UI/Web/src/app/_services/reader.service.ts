@@ -80,7 +80,10 @@ export class ReaderService {
     return this.httpClient.get<number>(this.baseUrl + 'reader/next-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
-  getPrevChapter(seriesId: number, volumeId: number, currentChapterId: number) {
+  getPrevChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
+    if (readingListId > 0) {
+      return this.httpClient.get<number>(this.baseUrl + 'readinglist/prev-chapter?seriesId=' + seriesId + '&currentChapterId=' + currentChapterId + '&readingListId=' + readingListId);
+    }
     return this.httpClient.get<number>(this.baseUrl + 'reader/prev-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 

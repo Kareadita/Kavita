@@ -355,5 +355,26 @@ namespace API.Controllers
 
             return Ok(-1);
         }
+
+        /// <summary>
+        /// Returns the prev chapter within the reading list
+        /// </summary>
+        /// <param name="currentChapterId"></param>
+        /// <param name="readingListId"></param>
+        /// <returns>Chapter Id for next item, -1 if nothing exists</returns>
+        [HttpGet("prev-chapter")]
+        public async Task<ActionResult<int>> GetPrevChapter(int currentChapterId, int readingListId)
+        {
+            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(readingListId)).ToList();
+            var readingListItem = items.SingleOrDefault(rl => rl.ChapterId == currentChapterId);
+            if (readingListItem == null) return BadRequest("Id does not exist");
+            var index = items.IndexOf(readingListItem) - 1;
+            if (0 <= index)
+            {
+                return items[index].ChapterId;
+            }
+
+            return Ok(-1);
+        }
     }
 }
