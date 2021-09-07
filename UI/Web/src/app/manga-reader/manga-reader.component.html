@@ -7,7 +7,7 @@
             </button>
             
             <div>
-                <div style="font-weight: bold;">{{title}}</div>
+                <div style="font-weight: bold;">{{title}} <span *ngIf="incognitoMode">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span></div>
                 <div class="subtitle">
                     {{subtitle}}
                 </div>

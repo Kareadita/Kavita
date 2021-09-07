@@ -16,7 +16,8 @@ export enum Action {
   Info = 5,
   RefreshMetadata = 6,
   Download = 7,
-  Bookmarks = 8
+  Bookmarks = 8,
+  IncognitoRead = 9
 }
 
 export interface ActionItem<T> {
@@ -204,6 +205,12 @@ export class ActionFactoryService {
         requiresAdmin: false
       },
       {
+        action: Action.IncognitoRead,
+        title: 'Read in Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
         action: Action.Edit,
         title: 'Info',
         callback: this.dummyCallback,
@@ -223,7 +230,13 @@ export class ActionFactoryService {
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false
-      }
+      },
+      {
+        action: Action.IncognitoRead,
+        title: 'Read in Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
     ];
   }
 }

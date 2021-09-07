@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -66,6 +67,10 @@ export class ReaderService {
 
   markVolumeRead(seriesId: number, volumeId: number) {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-read', {seriesId, volumeId});
+  }
+
+  markVolumeUnread(seriesId: number, volumeId: number) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }
 
   getNextChapter(seriesId: number, volumeId: number, currentChapterId: number) {

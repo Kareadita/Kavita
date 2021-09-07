@@ -175,6 +175,11 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Edit):
         this.openViewInfo(volume);
         break;
+      case(Action.IncognitoRead):
+        if (volume.chapters != undefined && volume.chapters?.length >= 1) {
+          this.openChapter(volume.chapters[0], true);
+        }
+        break;
       default:
         break;
     }
@@ -190,6 +195,9 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Edit):
         this.openViewInfo(chapter);
+        break;
+      case(Action.IncognitoRead):
+        this.openChapter(chapter, true);
         break;
       default:
         break;
@@ -348,16 +356,16 @@ export class SeriesDetailComponent implements OnInit {
     });
   }
 
-  openChapter(chapter: Chapter) {
+  openChapter(chapter: Chapter, incognitoMode = false) {
     if (chapter.pages === 0) {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
 
     if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id], {queryParams: {incognitoMode}});
     } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id], {queryParams: {incognitoMode}});
     }
   }
 
