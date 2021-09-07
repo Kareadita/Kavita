@@ -67,6 +67,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   chapterId!: number;
 
   /**
+   * If this is true, no progress will be saved.
+   */
+  incognitoMode: boolean = false;
+
+  /**
    * The current page. UI will show this number + 1.
    */
   pageNum = 0;
@@ -259,6 +264,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
+    this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
     this.continuousChaptersStack.push(this.chapterId);
 
@@ -706,7 +712,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.continuousChaptersStack.push(chapterId); 
       // Load chapter Id onto route but don't reload
       const lastSlashIndex = this.router.url.lastIndexOf('/');
-      const newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      if (this.incognitoMode) {
+        newRoute += '?incognitoMode=true';
+      }
       window.history.replaceState({}, '', newRoute);
       this.init();
     } else {
@@ -777,8 +786,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       pageNum = this.pageNum + 1;
     }
 
-
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.incognitoMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
@@ -929,6 +939,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleWebtoonPageChange(updatedPageNum: number) {
     this.setPageNum(updatedPageNum);
+    if (this.incognitoMode) return;
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 

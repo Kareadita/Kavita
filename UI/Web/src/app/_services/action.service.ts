@@ -156,7 +156,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markVolumeAsUnread(seriesId: number, volume: Volume, callback?: VolumeActionCallback) {
-    this.readerService.markVolumeRead(seriesId, volume.id).subscribe(() => {
+    this.readerService.markVolumeUnread(seriesId, volume.id).subscribe(() => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Unread');

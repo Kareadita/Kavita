@@ -64,6 +64,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
+  /**
+   * If we should save progress or not
+   */
+  incognitoMode: boolean = false;
 
   chapters: Array<BookChapterItem> = [];
 
@@ -268,6 +272,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
+    this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
@@ -292,7 +297,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.pageNum >= this.maxPages) {
         this.pageNum = this.maxPages - 1;
-        this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+        if (!this.incognitoMode) {
+          this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+        }
       }
 
       // Check if user progress has part, if so load it so we scroll to it
@@ -483,7 +490,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.incognitoMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
