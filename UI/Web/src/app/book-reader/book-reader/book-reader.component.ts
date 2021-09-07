@@ -495,18 +495,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId); 
       // Load chapter Id onto route but don't reload
-      const lastSlashIndex = this.router.url.lastIndexOf('/');
-      let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
-      if (this.incognitoMode) {
-        newRoute += '?incognitoMode=true';
-      }
-      if (this.readingListMode) {
-        if (newRoute.indexOf('?') > 0) {
-          newRoute += '&readingListId=' + this.readingListId;
-        } else {
-          newRoute += '?readingListId=' + this.readingListId;
-        }
-      }
+      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
     } else {

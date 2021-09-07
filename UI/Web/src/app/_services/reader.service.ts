@@ -143,4 +143,20 @@ export class ReaderService {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
     return parseInt(imageSrc.split('&page=')[1], 10);
   }
+
+  getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    const lastSlashIndex = url.lastIndexOf('/');
+    let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';
+      if (incognitoMode) {
+        newRoute += '?incognitoMode=true';
+      }
+      if (readingListMode) {
+        if (newRoute.indexOf('?') > 0) {
+          newRoute += '&readingListId=' + readingListId;
+        } else {
+          newRoute += '?readingListId=' + readingListId;
+        }
+      }
+      return newRoute;
+  }
 }

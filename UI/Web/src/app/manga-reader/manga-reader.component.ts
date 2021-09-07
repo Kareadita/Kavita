@@ -726,18 +726,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId); 
       // Load chapter Id onto route but don't reload
-      const lastSlashIndex = this.router.url.lastIndexOf('/');
-      let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
-      if (this.incognitoMode) {
-        newRoute += '?incognitoMode=true';
-      }
-      if (this.readingListMode) {
-        if (newRoute.indexOf('?') > 0) {
-          newRoute += '&readingListId=' + this.readingListId;
-        } else {
-          newRoute += '?readingListId=' + this.readingListId;
-        }
-      }
+      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
     } else {
@@ -756,7 +745,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   renderPage() {
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
-      //this.ctx.imageSmoothingEnabled = true;
       this.canvas.nativeElement.width = this.canvasImage.width;
       this.canvas.nativeElement.height = this.canvasImage.height;
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;
