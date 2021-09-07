@@ -130,7 +130,7 @@
             </button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
-            <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
+            <div class="book-title col-2 phone-hidden">{{bookTitle}}  <span *ngIf="incognitoMode">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span></div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" 
                 [disabled]="IsNextDisabled" 

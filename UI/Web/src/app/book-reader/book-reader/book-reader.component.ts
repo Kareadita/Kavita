@@ -66,9 +66,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   chapterId!: number;
   chapter!: Chapter;
   /**
-   * If we should save progress or not
+   * Reading List id. Defaults to -1.
    */
+  readingListId: number = CHAPTER_ID_DOESNT_EXIST;
+
+   /**
+    * If this is true, no progress will be saved.
+    */
   incognitoMode: boolean = false;
+ 
+   /**
+    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order. 
+    */
+  readingListMode: boolean = false;
 
   chapters: Array<BookChapterItem> = [];
 
@@ -333,6 +343,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
 
+    const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
+    if (readingListId != null) {
+      this.readingListMode = true;
+      this.readingListId = parseInt(readingListId, 10);
+    }
+
+
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
         this.toggleDrawer();
@@ -373,13 +390,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
         }
       });
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
@@ -441,7 +458,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.nextPageDisabled) { return; }
     this.isLoading = true;
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'next');
       });
@@ -464,7 +481,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         this.loadChapter(chapterId, 'prev');
       });
@@ -479,7 +496,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.continuousChaptersStack.push(chapterId); 
       // Load chapter Id onto route but don't reload
       const lastSlashIndex = this.router.url.lastIndexOf('/');
-      const newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
+      if (this.incognitoMode) {
+        newRoute += '?incognitoMode=true';
+      }
+      if (this.readingListMode) {
+        if (newRoute.indexOf('?') > 0) {
+          newRoute += '&readingListId=' + this.readingListId;
+        } else {
+          newRoute += '?readingListId=' + this.readingListId;
+        }
+      }
       window.history.replaceState({}, '', newRoute);
       this.init();
     } else {
