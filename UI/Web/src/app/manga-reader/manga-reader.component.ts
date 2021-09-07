@@ -275,7 +275,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
     
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
-    console.log('reading list id: ', readingListId);
     if (readingListId != null) {
       this.readingListMode = true;
       this.readingListId = parseInt(readingListId, 10);
@@ -731,6 +730,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
       if (this.incognitoMode) {
         newRoute += '?incognitoMode=true';
+      }
+      if (this.readingListMode) {
+        if (newRoute.indexOf('?') > 0) {
+          newRoute += '&readingListId=' + this.readingListId;
+        } else {
+          newRoute += '?readingListId=' + this.readingListId;
+        }
       }
       window.history.replaceState({}, '', newRoute);
       this.init();
