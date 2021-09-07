@@ -3,13 +3,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 
@@ -33,7 +33,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private readerService: ReaderService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -126,6 +126,19 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   read() {
-    
+    let currentlyReadingChapter = this.items[0];
+    for (let i = 0; i < this.items.length; i++) {
+      if (this.items[i].pagesRead >= this.items[i].pagesTotal) {
+        continue;
+      }
+      currentlyReadingChapter = this.items[i];
+      break;
+    }
+
+    if (currentlyReadingChapter.seriesFormat === MangaFormat.EPUB) {
+      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'book', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
+    } else {
+      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'manga', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
+    }
   }
 }

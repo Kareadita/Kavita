@@ -89,7 +89,7 @@ export class ReaderService {
 
   getCurrentChapter(volumes: Array<Volume>): Chapter {
     let currentlyReadingChapter: Chapter | undefined = undefined;
-    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); // changed from === 0 to != 0
+    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
 
     for (const c of chapters) {
       if (c.pagesRead < c.pages) {

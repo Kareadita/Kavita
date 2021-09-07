@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { Pagination } from 'src/app/_models/pagination';
+import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
@@ -73,7 +73,7 @@ export class ReadingListsComponent implements OnInit {
     }
     this.loadingLists = true;
 
-    this.readingListService.getReadingLists(true, this.pagination?.currentPage, this.pagination?.itemsPerPage).pipe(take(1)).subscribe(readingLists => {
+    this.readingListService.getReadingLists(true, this.pagination?.currentPage, this.pagination?.itemsPerPage).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
       this.loadingLists = false;
