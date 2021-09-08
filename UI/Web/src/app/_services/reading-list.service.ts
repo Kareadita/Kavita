@@ -4,6 +4,7 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
+import { ActionItem } from './action-factory.service';
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +68,11 @@ export class ReadingListService {
 
   removeRead(readingListId: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, { responseType: 'text' as 'json' });
+  }
+
+  actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
+    if (readingList?.promoted && !isAdmin) return false;
+    return true;
   }
 
   _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {

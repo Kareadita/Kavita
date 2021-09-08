@@ -36,12 +36,7 @@ export class ReadingListsComponent implements OnInit {
   }
 
   getActions(readingList: ReadingList) {
-    return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(actions => {
-      if (actions.action != Action.Edit) return true;
-      else if (readingList?.promoted && this.isAdmin) return true;
-      return false;
-      //return actions.action != Action.Edit || (actions.action === Action.Edit && this.readingList.promoted && this.isAdmin);
-    });
+    return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
   }
 
   performAction(action: ActionItem<any>, readingList: ReadingList) {
