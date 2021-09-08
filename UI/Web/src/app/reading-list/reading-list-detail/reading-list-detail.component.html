@@ -12,27 +12,20 @@
               </h2>
             </div>
             <div class="row no-gutters">
-                <div>
-                    <button class="btn btn-secondary" (click)="removeRead()">
-                        <span>
-                            <i class="fa fa-check"></i>
-                        </span>
-                        <span class="read-btn--text">&nbsp;Remove Read</span>
-                    </button>
-                </div>
-                <div class="ml-2">
-                    <button class="btn btn-secondary" title="Edit Series information">
-                        <span>
-                            <i class="fa fa-pen" aria-hidden="true"></i>
-                        </span>
-                    </button>
-                </div>
-                <div class="ml-2">
-                  <button class="btn btn-primary" title="Read" (click)="read()">
+              <div class="mr-2">
+                <button class="btn btn-primary" title="Read" (click)="read()">
+                    <span>
+                        <i class="fa fa-book-open" aria-hidden="true"></i>
+                        <span class="read-btn--text">&nbsp;Read</span>
+                    </span>
+                </button>
+              </div>
+              <div>
+                  <button class="btn btn-secondary" (click)="removeRead()">
                       <span>
-                          <i class="fa fa-book-open" aria-hidden="true"></i>
-                          <span class="read-btn--text">&nbsp;Read</span>
+                          <i class="fa fa-check"></i>
                       </span>
+                      <span class="read-btn--text">&nbsp;Remove Read</span>
                   </button>
               </div>
             </div>
@@ -45,9 +38,9 @@
     </div>    
 
     <!-- NOTE: It might be nice to have a switch for the accessibility toggle -->
-    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)">
+    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)">
         <ng-template #draggableItem let-item let-position="idx">
-            <div class="media">
+            <div class="media" style="width: 100%;">
                 <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
                 (error)="imageService.updateErroredImage($event)">
                 <div class="media-body">
@@ -57,12 +50,6 @@
                   <span *ngIf="item.promoted">
                     <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                   </span>
-
-                  <button class="btn btn-icon" (click)="removeItem(item, position)">
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                    <span class="sr-only" attr.aria-labelledby="item.id--{{position}}">Remove item</span>
-                  </button>
-                  
                 </div>
                 <div class="pull-right" *ngIf="item.pagesRead === item.pagesTotal"><i class="fa fa-check-square" aria-label="Read"></i></div>
               </div>

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
@@ -11,7 +12,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { IndexUpdateEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
+import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -33,7 +34,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private readerService: ReaderService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -59,10 +60,8 @@ export class ReadingListDetailComponent implements OnInit {
           this.isAdmin = this.accountService.hasAdminRole(user);
           
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(actions => {
-            if (actions.action != Action.Edit) return true;
-            else if (this.readingList?.promoted && this.isAdmin) return true;
-            return false;
-            //return actions.action != Action.Edit || (actions.action === Action.Edit && this.readingList.promoted && this.isAdmin);
+            if (actions.action === Action.Edit && this.readingList?.promoted && !this.isAdmin) return false;
+            return true;
           });
         }
       });
@@ -88,11 +87,24 @@ export class ReadingListDetailComponent implements OnInit {
   handleReadingListActionCallback(action: Action, readingList: ReadingList) {
     switch(action) {
       case Action.Delete:
-        this.readingListService.delete(readingList.id).subscribe(() => {
-          this.toastr.success('Reading list deleted');
-          this.router.navigateByUrl('library#lists');
+        this.deleteList(readingList);
+        break;
+      case Action.Edit:
+        this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
+          // Reload information around list
+          this.readingList = readingList;
         });
+        break;
     }
+  }
+
+  async deleteList(readingList: ReadingList) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete the reading list? This cannot be undone.')) return;
+
+    this.readingListService.delete(readingList.id).subscribe(() => {
+      this.toastr.success('Reading list deleted');
+      this.router.navigateByUrl('library#lists');
+    });
   }
 
   formatTitle(item: ReadingListItem) {
@@ -111,9 +123,9 @@ export class ReadingListDetailComponent implements OnInit {
     this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
   }
 
-  removeItem(item: ReadingListItem, position: number) {
-    this.readingListService.deleteItem(this.readingList.id, item.id).subscribe(() => {
-      this.items.splice(position, 1);
+  itemRemoved(event: ItemRemoveEvent) {
+    this.readingListService.deleteItem(this.readingList.id, event.item.id).subscribe(() => {
+      this.items.splice(event.position, 1);
       this.toastr.success('Item removed');
     });
   }

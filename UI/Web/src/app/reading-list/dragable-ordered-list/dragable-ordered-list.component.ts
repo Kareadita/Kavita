@@ -7,6 +7,11 @@ export interface IndexUpdateEvent {
   item: any;
 }
 
+export interface ItemRemoveEvent {
+  position: number;
+  item: any;
+}
+
 @Component({
   selector: 'app-dragable-ordered-list',
   templateUrl: './dragable-ordered-list.component.html',
@@ -17,6 +22,7 @@ export class DragableOrderedListComponent implements OnInit {
   @Input() accessibilityMode: boolean = false;
   @Input() items: Array<any> = [];
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
+  @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
   constructor() { }
@@ -44,6 +50,13 @@ export class DragableOrderedListComponent implements OnInit {
       fromPosition: previousIndex,
       toPosition: newIndex,
       item: this.items[newIndex]
+    });
+  }
+
+  removeItem(item: any, position: number) {
+    this.itemRemove.emit({
+      position,
+      item
     });
   }
 

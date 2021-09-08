@@ -1,0 +1,26 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Edit {{readingList.title}} Reading List</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <form [formGroup]="reviewGroup">
+        <div class="form-group">
+            <label for="title">Name</label>
+            <input id="title" class="form-control" formControlName="title" type="text">
+        </div>
+
+        <div class="form-group">
+            <label for="summary">Summary</label>
+            <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+    <button type="submit" class="btn btn-primary" [disabled]="reviewGroup.get('title')?.value.trim().length === 0" (click)="save()">Save</button>
+</div>
+
+

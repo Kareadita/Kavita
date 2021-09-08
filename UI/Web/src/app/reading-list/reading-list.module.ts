@@ -8,6 +8,7 @@ import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list
 import { ReactiveFormsModule } from '@angular/forms';
 import { CardsModule } from '../cards/cards.module';
 import { ReadingListsComponent } from './reading-lists/reading-lists.component';
+import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 
 
 
@@ -16,7 +17,8 @@ import { ReadingListsComponent } from './reading-lists/reading-lists.component';
     DragableOrderedListComponent,
     ReadingListDetailComponent,
     AddToListModalComponent,
-    ReadingListsComponent
+    ReadingListsComponent,
+    EditReadingListModalComponent
   ],
   imports: [
     CommonModule,
@@ -27,7 +29,8 @@ import { ReadingListsComponent } from './reading-lists/reading-lists.component';
   ],
   exports: [
     AddToListModalComponent,
-    ReadingListsComponent
+    ReadingListsComponent,
+    EditReadingListModalComponent
   ]
 })
 export class ReadingListModule { }

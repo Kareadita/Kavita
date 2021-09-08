@@ -269,20 +269,14 @@ export class ActionFactoryService {
 
     this.readingListActions = [
       {
-        action: Action.Delete,
-        title: 'Delete',
-        callback: this.dummyCallback,
-        requiresAdmin: false
-      },
-      {
         action: Action.Edit,
         title: 'Edit',
         callback: this.dummyCallback,
         requiresAdmin: false
       },
       {
-        action: Action.IncognitoRead,
-        title: 'Read in Incognito',
+        action: Action.Delete,
+        title: 'Delete',
         callback: this.dummyCallback,
         requiresAdmin: false
       },

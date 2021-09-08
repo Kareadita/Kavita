@@ -5,8 +5,10 @@ import { forkJoin, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
+import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { LibraryService } from './library.service';
@@ -17,6 +19,7 @@ export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
 export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
+export type ReadingListActionCallback = (readingList: ReadingList) => void;
 
 /**
  * Responsible for executing actions
@@ -283,6 +286,21 @@ export class ActionService implements OnDestroy {
           callback(chapter);
         }
       });
+  }
+
+  editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'md' });
+    readingListModalRef.componentInstance.readingList = readingList; 
+    readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
+      if (callback && list !== undefined) {
+        callback(readingList);
+      }
+    });
+    readingListModalRef.dismissed.pipe(take(1)).subscribe((list) => {
+      if (callback && list !== undefined) {
+        callback(readingList);
+      }
+    });
   }
 
 }
