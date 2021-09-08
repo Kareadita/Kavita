@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -147,16 +146,33 @@ export class ReaderService {
   getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
     const lastSlashIndex = url.lastIndexOf('/');
     let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';
-      if (incognitoMode) {
-        newRoute += '?incognitoMode=true';
+    newRoute += this.getQueryParams(incognitoMode, readingListMode, readingListId);
+    return newRoute;
+  }
+
+  getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    let params: {[key: string]: any} = {};
+    if (incognitoMode) {
+      params['incognitoMode'] = true;
+    }
+    if (readingListMode) {
+      params['readingListId'] = readingListId;
+    }
+    return params;
+  }
+
+  getQueryParams(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    let params = '';
+    if (incognitoMode) {
+      params += '?incognitoMode=true';
+    }
+    if (readingListMode) {
+      if (params.indexOf('?') > 0) {
+        params += '&readingListId=' + readingListId;
+      } else {
+        params += '?readingListId=' + readingListId;
       }
-      if (readingListMode) {
-        if (newRoute.indexOf('?') > 0) {
-          newRoute += '&readingListId=' + readingListId;
-        } else {
-          newRoute += '?readingListId=' + readingListId;
-        }
-      }
-      return newRoute;
+    }
+    return params;
   }
 }

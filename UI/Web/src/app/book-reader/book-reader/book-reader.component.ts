@@ -22,6 +22,7 @@ import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScrollService } from 'src/app/scroll.service';
+import { MangaFormat } from 'src/app/_models/manga-format';
 
 
 interface PageStyle {
@@ -367,49 +368,61 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
 
-    forkJoin({
-      chapter: this.seriesService.getChapter(this.chapterId),
-      progress: this.readerService.getProgress(this.chapterId),
-      chapters: this.bookService.getBookChapters(this.chapterId),
-      info: this.bookService.getBookInfo(this.chapterId)
-    }).pipe(take(1)).subscribe(results => {
-      this.chapter = results.chapter;
-      this.volumeId = results.chapter.volumeId;
-      this.maxPages = results.chapter.pages;
-      this.chapters = results.chapters;
-      this.pageNum = results.progress.pageNum;
-      this.bookTitle = results.info;
-
-      this.continuousChaptersStack.push(this.chapterId);
-
-
-      if (this.pageNum >= this.maxPages) {
-        this.pageNum = this.maxPages - 1;
-        if (!this.incognitoMode) {
-          this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-        }
+    this.bookService.getBookInfo(this.chapterId).subscribe(info => {
+      this.bookTitle = info.bookTitle;
+  
+      if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
+        // Redirect to the manga reader. 
+        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+        this.router.navigate(['library', info.libraryId, 'series', info.seriesId, 'manga', this.chapterId], {queryParams: params});
+        return;
       }
 
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
-        this.nextChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
-          this.nextChapterDisabled = true;
+      forkJoin({
+        chapter: this.seriesService.getChapter(this.chapterId),
+        progress: this.readerService.getProgress(this.chapterId),
+        chapters: this.bookService.getBookChapters(this.chapterId),
+      }).pipe(take(1)).subscribe(results => {
+        this.chapter = results.chapter;
+        this.volumeId = results.chapter.volumeId;
+        this.maxPages = results.chapter.pages;
+        this.chapters = results.chapters;
+        this.pageNum = results.progress.pageNum;
+        
+  
+        this.continuousChaptersStack.push(this.chapterId);
+  
+  
+        if (this.pageNum >= this.maxPages) {
+          this.pageNum = this.maxPages - 1;
+          if (!this.incognitoMode) {
+            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+          }
         }
+  
+        this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+          this.nextChapterId = chapterId;
+          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+            this.nextChapterDisabled = true;
+          }
+        });
+        this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+          this.prevChapterId = chapterId;
+          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+            this.prevChapterDisabled = true;
+          }
+        });
+  
+        // Check if user progress has part, if so load it so we scroll to it
+        this.loadPage(results.progress.bookScrollId || undefined);
+      }, () => {
+        setTimeout(() => {
+          this.closeReader();
+        }, 200);
       });
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
-        this.prevChapterId = chapterId;
-        if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
-          this.prevChapterDisabled = true;
-        }
-      });
-
-      // Check if user progress has part, if so load it so we scroll to it
-      this.loadPage(results.progress.bookScrollId || undefined);
-    }, () => {
-      setTimeout(() => {
-        this.closeReader();
-      }, 200);
     });
+
+    
   }
 
   @HostListener('window:keydown', ['$event'])

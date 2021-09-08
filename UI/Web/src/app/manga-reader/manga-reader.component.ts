@@ -22,6 +22,7 @@ import { ChapterInfo } from './_models/chapter-info';
 import { COLOR_FILTER, FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
 import { Preferences, scalingOptions } from '../_models/preferences/preferences';
 import { READER_MODE } from '../_models/preferences/reader-mode';
+import { MangaFormat } from '../_models/manga-format';
 
 const PREFETCH_PAGES = 5;
 
@@ -380,6 +381,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       chapterInfo: this.readerService.getChapterInfo(this.seriesId, this.chapterId),
       bookmarks: this.readerService.getBookmarks(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
+
+      if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
+        // Redirect to the book reader. 
+        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+        this.router.navigate(['library', results.chapterInfo.libraryId, 'series', results.chapterInfo.seriesId, 'book', this.chapterId], {queryParams: params});
+        return;
+      }
+
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
 

@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Reader;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -31,12 +33,31 @@ namespace API.Controllers
         }
 
         [HttpGet("{chapterId}/book-info")]
-        public async Task<ActionResult<string>> GetBookInfo(int chapterId)
+        public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
         {
+            // PERF: Write this in one DB call - This does not meet NFR
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
+            if (volume == null) return BadRequest("Could not find Volume");
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            if (series == null) return BadRequest("Series could not be found");
 
-            return book.Title;
+            var bookTitle = string.Empty;
+            if (series.Format == MangaFormat.Epub)
+            {
+                using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+                bookTitle = book.Title;
+            }
+
+
+            return new BookInfoDto()
+            {
+                BookTitle = bookTitle,
+                VolumeId = chapter.VolumeId,
+                SeriesFormat = series.Format,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
+            };
         }
 
         [HttpGet("{chapterId}/book-resources")]

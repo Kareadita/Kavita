@@ -77,20 +77,21 @@ namespace API.Controllers
         /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
-        /// <param name="seriesId"></param>
+        /// <param name="seriesId">Not used</param>
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
         {
-            // PERF: Write this in one DB call
+            // PERF: Write this in one DB call - This does not meet NFR
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 
             var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
             if (volume == null) return BadRequest("Could not find Volume");
             var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            if (series == null) return BadRequest("Series could not be found");
 
             return Ok(new ChapterInfoDto()
             {
@@ -99,6 +100,9 @@ namespace API.Controllers
                 VolumeId = volume.Id,
                 FileName = Path.GetFileName(mangaFile.FilePath),
                 SeriesName = series?.Name,
+                SeriesFormat = series.Format,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
                 IsSpecial = chapter.IsSpecial,
                 Pages = chapter.Pages,
             });
