@@ -6,6 +6,10 @@
     </button>
 </div>
 <div class="modal-body">
+    <p>
+        This list is currently {{readingList?.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
+        Promotion means that the list can be seen server-wide, not just for admin users. All series that are within this list will still have user-access restrictions placed on them.
+    </p>
     <form [formGroup]="reviewGroup">
         <div class="form-group">
             <label for="title">Name</label>
@@ -20,6 +24,7 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+    <button type="button" class="btn btn-info" (click)="togglePromotion()">{{readingList.promoted ? 'Demote' : 'Promote'}}</button>
     <button type="submit" class="btn btn-primary" [disabled]="reviewGroup.get('title')?.value.trim().length === 0" (click)="save()">Save</button>
 </div>
 

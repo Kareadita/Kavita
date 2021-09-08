@@ -37,6 +37,10 @@ export class ReadingListService {
     return this.httpClient.post<ReadingList>(this.baseUrl + 'readinglist/create', {title});
   }
 
+  update(model: {readingListId: number, title?: string, summary?: string, promoted: boolean}) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, { responseType: 'text' as 'json' });
+  }
+
   updateBySeries(readingListId: number, seriesId: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
   }

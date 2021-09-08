@@ -5,9 +5,9 @@
                 
               <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0">
-                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>&nbsp;
                 </span>
-                &nbsp;{{readingList.title}}&nbsp;
+                {{readingList.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>&nbsp;
                 <span class="badge badge-primary badge-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
               </h2>
             </div>
@@ -21,7 +21,7 @@
                 </button>
               </div>
               <div>
-                  <button class="btn btn-secondary" (click)="removeRead()">
+                  <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
                       <span>
                           <i class="fa fa-check"></i>
                       </span>
@@ -29,7 +29,7 @@
                   </button>
               </div>
             </div>
-            <p>{{readingList.summary}}</p>
+            <p class="mt-2" *ngIf="readingList.summary.length > 0">{{readingList.summary}}</p>
         </div>
     </div>
 

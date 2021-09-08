@@ -60,7 +60,7 @@ export class ReadingListDetailComponent implements OnInit {
           this.isAdmin = this.accountService.hasAdminRole(user);
           
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(actions => {
-            if (actions.action === Action.Edit && this.readingList?.promoted && !this.isAdmin) return false;
+            if (this.readingList?.promoted && !this.isAdmin) return false;
             return true;
           });
         }

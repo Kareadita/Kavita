@@ -204,6 +204,32 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(dto.Title));
         }
 
+        [HttpPost("update")]
+        public async Task<ActionResult> UpdateList(UpdateReadingListDto dto)
+        {
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+            if (readingList == null) return BadRequest("List does not exist");
+
+            if (!string.IsNullOrEmpty(dto.Title))
+            {
+                readingList.Title = dto.Title; // Should I check if this is unique?
+            }
+            if (!string.IsNullOrEmpty(dto.Title))
+            {
+                readingList.Summary = dto.Summary;
+            }
+
+            readingList.Promoted = dto.Promoted;
+
+            _unitOfWork.ReadingListRepository.Update(readingList);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok("Updated");
+            }
+            return BadRequest("Could not update reading list");
+        }
+
         [HttpPost("update-by-series")]
         public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
         {
