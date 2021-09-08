@@ -15,13 +15,11 @@ namespace API.Controllers
     public class ReadingListController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<ReadingListController> _logger;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-        public ReadingListController(IUnitOfWork unitOfWork, ILogger<ReadingListController> logger)
+        public ReadingListController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _logger = logger;
         }
 
         [HttpGet]

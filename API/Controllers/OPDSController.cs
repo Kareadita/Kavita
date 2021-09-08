@@ -262,7 +262,6 @@ namespace API.Controllers
 
 
             var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey);
-            //AddPagination(feed, readingLists, $"{Prefix}{apiKey}/readinglists");
 
             foreach (var readingListDto in readingLists)
             {
