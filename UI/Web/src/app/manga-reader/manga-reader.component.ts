@@ -22,6 +22,7 @@ import { ChapterInfo } from './_models/chapter-info';
 import { COLOR_FILTER, FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
 import { Preferences, scalingOptions } from '../_models/preferences/preferences';
 import { READER_MODE } from '../_models/preferences/reader-mode';
+import { MangaFormat } from '../_models/manga-format';
 
 const PREFETCH_PAGES = 5;
 
@@ -65,12 +66,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   seriesId!: number;
   volumeId!: number;
   chapterId!: number;
+  /**
+   * Reading List id. Defaults to -1.
+   */
+  readingListId: number = CHAPTER_ID_DOESNT_EXIST;
 
   /**
    * If this is true, no progress will be saved.
    */
   incognitoMode: boolean = false;
 
+  /**
+   * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order. 
+   */
+  readingListMode: boolean = false;
   /**
    * The current page. UI will show this number + 1.
    */
@@ -265,6 +274,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    
+    const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
+    if (readingListId != null) {
+      this.readingListMode = true;
+      this.readingListId = parseInt(readingListId, 10);
+    }
+    
 
     this.continuousChaptersStack.push(this.chapterId);
 
@@ -365,6 +381,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       chapterInfo: this.readerService.getChapterInfo(this.seriesId, this.chapterId),
       bookmarks: this.readerService.getBookmarks(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
+
+      if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
+        // Redirect to the book reader. 
+        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+        this.router.navigate(['library', results.chapterInfo.libraryId, 'series', results.chapterInfo.seriesId, 'book', this.chapterId], {queryParams: params});
+        return;
+      }
+
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
 
@@ -387,13 +411,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.bookmarks[bookmark.page] = 1;
       });
 
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
         }
       });
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
@@ -674,7 +698,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.nextPageDisabled) { return; }
     this.isLoading = true;
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
-      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
         this.loadChapter(chapterId, 'next');
       });
@@ -697,7 +721,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
-      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId).pipe(take(1)).subscribe(chapterId => {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
         this.loadChapter(chapterId, 'prev');
       });
@@ -711,11 +735,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId); 
       // Load chapter Id onto route but don't reload
-      const lastSlashIndex = this.router.url.lastIndexOf('/');
-      let newRoute = this.router.url.substring(0, lastSlashIndex + 1) + this.chapterId + '';
-      if (this.incognitoMode) {
-        newRoute += '?incognitoMode=true';
-      }
+      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
     } else {
@@ -734,7 +754,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   renderPage() {
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
-      //this.ctx.imageSmoothingEnabled = true;
       this.canvas.nativeElement.width = this.canvasImage.width;
       this.canvas.nativeElement.height = this.canvasImage.height;
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;

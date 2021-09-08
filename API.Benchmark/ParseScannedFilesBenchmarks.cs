@@ -35,6 +35,5 @@ namespace API.Benchmark
             var parsedSeries = _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new string[] {libraryPath},
                 out var totalFiles, out var scanElapsedTime);
         }
-
     }
 }

@@ -66,6 +66,7 @@ namespace API.Tests.Parser
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "0")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
+        [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -128,7 +129,6 @@ namespace API.Tests.Parser
         [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "Fullmetal Alchemist")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "To Love Ru")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
-        //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
         [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
@@ -157,6 +157,7 @@ namespace API.Tests.Parser
         [InlineData("Killing Bites - Vol 11 Chapter 050 Save Me, Nunupi!.cbz", "Killing Bites")]
         [InlineData("Mad Chimera World - Volume 005 - Chapter 026.cbz", "Mad Chimera World")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "Hentai Ouji to Warawanai Neko.")]
+        [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

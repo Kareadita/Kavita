@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -73,17 +72,23 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }
 
-  getNextChapter(seriesId: number, volumeId: number, currentChapterId: number) {
+  getNextChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
+    if (readingListId > 0) {
+      return this.httpClient.get<number>(this.baseUrl + 'readinglist/next-chapter?seriesId=' + seriesId + '&currentChapterId=' + currentChapterId + '&readingListId=' + readingListId);
+    }
     return this.httpClient.get<number>(this.baseUrl + 'reader/next-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
-  getPrevChapter(seriesId: number, volumeId: number, currentChapterId: number) {
+  getPrevChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
+    if (readingListId > 0) {
+      return this.httpClient.get<number>(this.baseUrl + 'readinglist/prev-chapter?seriesId=' + seriesId + '&currentChapterId=' + currentChapterId + '&readingListId=' + readingListId);
+    }
     return this.httpClient.get<number>(this.baseUrl + 'reader/prev-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
   getCurrentChapter(volumes: Array<Volume>): Chapter {
     let currentlyReadingChapter: Chapter | undefined = undefined;
-    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); // changed from === 0 to != 0
+    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
 
     for (const c of chapters) {
       if (c.pagesRead < c.pages) {
@@ -136,5 +141,38 @@ export class ReaderService {
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
     return parseInt(imageSrc.split('&page=')[1], 10);
+  }
+
+  getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    const lastSlashIndex = url.lastIndexOf('/');
+    let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';
+    newRoute += this.getQueryParams(incognitoMode, readingListMode, readingListId);
+    return newRoute;
+  }
+
+  getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    let params: {[key: string]: any} = {};
+    if (incognitoMode) {
+      params['incognitoMode'] = true;
+    }
+    if (readingListMode) {
+      params['readingListId'] = readingListId;
+    }
+    return params;
+  }
+
+  getQueryParams(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
+    let params = '';
+    if (incognitoMode) {
+      params += '?incognitoMode=true';
+    }
+    if (readingListMode) {
+      if (params.indexOf('?') > 0) {
+        params += '&readingListId=' + readingListId;
+      } else {
+        params += '?readingListId=' + readingListId;
+      }
+    }
+    return params;
   }
 }

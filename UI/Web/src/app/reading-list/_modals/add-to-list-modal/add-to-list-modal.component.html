@@ -1,0 +1,37 @@
+
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Add to Reading List</h4>
+    <button type="button" class="close" aria-label="Close" (click)="close()">
+    <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<div class="modal-body">
+    <!-- TODO: Put filter here -->
+    <ul class="list-group">
+        <li class="list-group-item clickable" tabindex="0" role="button" *ngFor="let readingList of lists; let i = index" (click)="addToList(readingList)">
+            <!-- Think about using radio buttons maybe for screen reader-->
+            {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" title="Promoted"></i>
+        </li>
+        <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
+        <li class="list-group-item" *ngIf="loading">
+            <div class="spinner-border text-secondary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="modal-footer" style="justify-content: normal">
+    <form style="width: 100%" [formGroup]="listForm">
+        <div class="form-row">
+          <div class="col-md-10">
+            <label class="sr-only" for="add-rlist">Reading List</label>
+            <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-primary" (click)="create()">Create</button>
+          </div>
+        </div>
+    </form>
+</div>
+
+

@@ -83,6 +83,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       if (metadata) {
         this.metadata = metadata;
         this.settings.savedData = metadata.tags;
+        this.tags = metadata.tags;
       }
     });
 
@@ -146,6 +147,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.seriesService.updateSeries(model),
       this.seriesService.updateMetadata(this.metadata, this.tags)
     ];
+
 
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));

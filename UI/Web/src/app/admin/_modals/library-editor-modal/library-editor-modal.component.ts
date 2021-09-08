@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SettingsService } from '../../settings.service';
@@ -26,7 +27,8 @@ export class LibraryEditorModalComponent implements OnInit {
   libraryTypes: string[] = []
 
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal, private settingService: SettingsService) { }
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, public modal: NgbActiveModal, private settingService: SettingsService,
+    private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
@@ -64,6 +66,7 @@ export class LibraryEditorModalComponent implements OnInit {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
+        this.toastr.success('Library created, a scan has been started');
         this.close(true);
       }, err => {
         this.errorMessage = err;

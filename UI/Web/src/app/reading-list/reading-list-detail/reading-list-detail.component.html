@@ -1,0 +1,58 @@
+<div class="container mt-2" *ngIf="readingList">
+  <div class="row mb-3">
+        <div class="col-md-10 col-xs-8 col-sm-6">
+            <div class="row no-gutters">
+                
+              <h2 style="display: inline-block">
+                <span *ngIf="actions.length > 0">
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>&nbsp;
+                </span>
+                {{readingList.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>&nbsp;
+                <span class="badge badge-primary badge-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
+              </h2>
+            </div>
+            <div class="row no-gutters">
+              <div class="mr-2">
+                <button class="btn btn-primary" title="Read" (click)="read()">
+                    <span>
+                        <i class="fa fa-book-open" aria-hidden="true"></i>
+                        <span class="read-btn--text">&nbsp;Read</span>
+                    </span>
+                </button>
+              </div>
+              <div>
+                  <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
+                      <span>
+                          <i class="fa fa-check"></i>
+                      </span>
+                      <span class="read-btn--text">&nbsp;Remove Read</span>
+                  </button>
+              </div>
+            </div>
+            <p class="mt-2" *ngIf="readingList.summary.length > 0">{{readingList.summary}}</p>
+        </div>
+    </div>
+
+    <div *ngIf="items.length === 0">
+      No chapters added
+    </div>    
+
+    <!-- NOTE: It might be nice to have a switch for the accessibility toggle -->
+    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)">
+        <ng-template #draggableItem let-item let-position="idx">
+            <div class="media" style="width: 100%;">
+                <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
+                (error)="imageService.updateErroredImage($event)">
+                <div class="media-body">
+                  <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}</h5>
+                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i><span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
+                  <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
+                  <span *ngIf="item.promoted">
+                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                  </span>
+                </div>
+                <div class="pull-right" *ngIf="item.pagesRead === item.pagesTotal"><i class="fa fa-check-square" aria-label="Read"></i></div>
+              </div>
+        </ng-template> 
+    </app-dragable-ordered-list>
+</div>

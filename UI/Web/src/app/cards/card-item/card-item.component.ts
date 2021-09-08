@@ -146,6 +146,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   isPromoted() {
     const tag = this.entity as CollectionTag;
+    // TODO: Validate if this works with reading lists
     return tag.hasOwnProperty('promoted') && tag.promoted;
   }
 }

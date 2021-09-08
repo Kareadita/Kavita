@@ -10,6 +10,8 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { InProgressComponent } from './in-progress/in-progress.component';
+import { DashboardComponent as AdminDashboardComponent } from './admin/dashboard/dashboard.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -26,6 +28,10 @@ const routes: Routes = [
   {
     path: 'preferences',
     loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
+  },
+  {
+    path: 'lists',
+    loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
   },
   {
     path: '',
@@ -49,7 +55,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-      {path: 'library', component: LibraryComponent},
+      {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
     ]

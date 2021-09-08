@@ -5,7 +5,6 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import { ScrollService } from '../scroll.service';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
@@ -33,8 +32,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   recentlyAdded: Series[] = [];
   inProgress: Series[] = [];
   continueReading: InProgressChapter[] = [];
-  collectionTags: CollectionTag[] = [];
-  collectionTagActions: ActionItem<CollectionTag>[] = [];
+  // collectionTags: CollectionTag[] = [];
+  // collectionTagActions: ActionItem<CollectionTag>[] = [];
 
   private readonly onDestroy = new Subject<void>();
 
@@ -43,8 +42,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
     private collectionService: CollectionTagService, private router: Router, 
-    private modalService: NgbModal, private titleService: Title, public imageService: ImageService, 
-    private scrollService: ScrollService) { }
+    private modalService: NgbModal, private titleService: Title, public imageService: ImageService) { }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -58,7 +56,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
       });
     });
 
-    this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+    //this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
 
     this.reloadSeries();
   }
@@ -103,9 +101,9 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   reloadTags() {
-    this.collectionService.allTags().pipe(takeUntil(this.onDestroy)).subscribe(tags => {
-      this.collectionTags = tags;
-    });
+    // this.collectionService.allTags().pipe(takeUntil(this.onDestroy)).subscribe(tags => {
+    //   this.collectionTags = tags;
+    // });
   }
 
   handleSectionClick(sectionTitle: string) {
@@ -119,24 +117,24 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   loadCollection(item: CollectionTag) {
-    this.router.navigate(['collections', item.id]);
+    //this.router.navigate(['collections', item.id]);
   }
 
-  handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
-    switch (action) {
-      case(Action.Edit):
-        const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
-        modalRef.componentInstance.tag = collectionTag;
-        modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
-          this.reloadTags();
-          if (results.coverImageUpdated) {
-            collectionTag.coverImage = this.imageService.randomize(collectionTag.coverImage);
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }
+  // handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
+  //   switch (action) {
+  //     case(Action.Edit):
+  //       const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
+  //       modalRef.componentInstance.tag = collectionTag;
+  //       modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
+  //         this.reloadTags();
+  //         if (results.coverImageUpdated) {
+  //           collectionTag.coverImage = this.imageService.randomize(collectionTag.coverImage);
+  //         }
+  //       });
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // }
 
 }

@@ -99,7 +99,7 @@
 
 
     <div>
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs nav-pills" [destroyOnHide]="false">
             <li [ngbNavItem]="1" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>

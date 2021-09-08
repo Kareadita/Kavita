@@ -49,7 +49,7 @@ namespace API.Controllers
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
-            if (page < 0) return BadRequest("Page cannot be less than 0");
+            if (page < 0) page = 0;
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -76,20 +76,21 @@ namespace API.Controllers
         /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
-        /// <param name="seriesId"></param>
+        /// <param name="seriesId">Not used</param>
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
         {
-            // PERF: Write this in one DB call
+            // PERF: Write this in one DB call - This does not meet NFR
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 
             var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
             if (volume == null) return BadRequest("Could not find Volume");
             var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            if (series == null) return BadRequest("Series could not be found");
 
             return Ok(new ChapterInfoDto()
             {
@@ -97,7 +98,10 @@ namespace API.Controllers
                 VolumeNumber = volume.Number + string.Empty,
                 VolumeId = volume.Id,
                 FileName = Path.GetFileName(mangaFile.FilePath),
-                SeriesName = series?.Name,
+                SeriesName = series.Name,
+                SeriesFormat = series.Format,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
                 IsSpecial = chapter.IsSpecial,
                 Pages = chapter.Pages,
             });
@@ -526,8 +530,8 @@ namespace API.Controllers
         [HttpGet("next-chapter")]
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
@@ -592,8 +596,8 @@ namespace API.Controllers
         [HttpGet("prev-chapter")]
         public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
 

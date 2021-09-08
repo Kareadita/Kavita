@@ -161,6 +161,7 @@ namespace API.Services
         /// <summary>
         /// Not an external call. Only public so that we can call this for a Task
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task CheckForUpdate()
         {
             var update = await _versionUpdaterService.CheckForUpdate();
