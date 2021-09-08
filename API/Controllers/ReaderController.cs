@@ -76,34 +76,29 @@ namespace API.Controllers
         /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
-        /// <param name="seriesId">Not used</param>
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("chapter-info")]
-        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
+        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
-            // PERF: Write this in one DB call - This does not meet NFR
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
-            if (volume == null) return BadRequest("Could not find Volume");
+            var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
             var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
-            if (series == null) return BadRequest("Series could not be found");
 
             return Ok(new ChapterInfoDto()
             {
-                ChapterNumber =  chapter.Range,
-                VolumeNumber = volume.Number + string.Empty,
-                VolumeId = volume.Id,
+                ChapterNumber =  dto.ChapterNumber,
+                VolumeNumber = dto.VolumeNumber,
+                VolumeId = dto.VolumeId,
                 FileName = Path.GetFileName(mangaFile.FilePath),
-                SeriesName = series.Name,
-                SeriesFormat = series.Format,
-                SeriesId = series.Id,
-                LibraryId = series.LibraryId,
-                IsSpecial = chapter.IsSpecial,
-                Pages = chapter.Pages,
+                SeriesName = dto.SeriesName,
+                SeriesFormat = dto.SeriesFormat,
+                SeriesId = dto.SeriesId,
+                LibraryId = dto.LibraryId,
+                IsSpecial = dto.IsSpecial,
+                Pages = dto.Pages,
             });
         }
 

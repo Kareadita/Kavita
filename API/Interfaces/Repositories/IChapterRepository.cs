@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.DTOs.Reader;
 using API.Entities;
 
 namespace API.Interfaces.Repositories
@@ -8,5 +9,6 @@ namespace API.Interfaces.Repositories
     {
         void Update(Chapter chapter);
         Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds);
+        Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId);
     }
 }

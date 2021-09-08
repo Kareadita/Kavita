@@ -1,10 +1,10 @@
 ﻿using API.Entities.Enums;
+using Newtonsoft.Json;
 
 namespace API.DTOs.Reader
 {
-    public class BookInfoDto : IChapterInfoDto
+    public interface IChapterInfoDto
     {
-        public string BookTitle { get; set; }
         public int SeriesId { get; set; }
         public int VolumeId { get; set; }
         public MangaFormat SeriesFormat { get; set; }
@@ -14,5 +14,6 @@ namespace API.DTOs.Reader
         public int LibraryId { get; set; }
         public int Pages { get; set; }
         public bool IsSpecial { get; set; }
+
     }
 }
