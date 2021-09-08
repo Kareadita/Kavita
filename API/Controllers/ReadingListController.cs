@@ -8,7 +8,6 @@ using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
