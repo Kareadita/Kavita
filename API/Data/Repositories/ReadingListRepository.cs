@@ -59,6 +59,13 @@ namespace API.Data.Repositories
 
         public async Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId)
         {
+            var userLibraries = _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                .AsNoTracking()
+                .Select(library => library.Id)
+                .ToList();
+
             var items = await _context.ReadingListItem
                 .Where(s => s.ReadingListId == readingListId)
                 .Join(_context.Chapter, s => s.ChapterId, chapter => chapter.Id, (data, chapter) => new
@@ -102,6 +109,7 @@ namespace API.Data.Repositories
                     VolumeId = data.VolumeId,
                     ReadingListId = data.readingListItem.ReadingListId
                 })
+                .Where(o => userLibraries.Contains(o.LibraryId))
                 .OrderBy(rli => rli.Order)
                 .AsNoTracking()
                 .ToListAsync();
