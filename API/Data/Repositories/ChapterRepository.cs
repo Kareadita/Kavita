@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -30,5 +31,47 @@ namespace API.Data.Repositories
         }
 
         // TODO: Move over Chapter based queries here
+
+        /// <summary>
+        /// Populates a partial IChapterInfoDto
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId)
+        {
+            return await _context.Chapter
+                .Where(c => c.Id == chapterId)
+                .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
+                {
+                    ChapterNumber = chapter.Range,
+                    VolumeNumber = volume.Number,
+                    VolumeId = volume.Id,
+                    chapter.IsSpecial,
+                    volume.SeriesId
+                })
+                .Join(_context.Series, data => data.SeriesId, series => series.Id, (data, series) => new
+                {
+                    data.ChapterNumber,
+                    data.VolumeNumber,
+                    data.VolumeId,
+                    data.IsSpecial,
+                    data.SeriesId,
+                    SeriesFormat = series.Format,
+                    SeriesName = series.Name,
+                    series.LibraryId
+                })
+                .Select(data => new BookInfoDto()
+                {
+                    ChapterNumber = data.ChapterNumber,
+                    VolumeNumber = data.VolumeNumber + string.Empty,
+                    VolumeId = data.VolumeId,
+                    IsSpecial = data.IsSpecial,
+                    SeriesId =data.SeriesId,
+                    SeriesFormat = data.SeriesFormat,
+                    SeriesName = data.SeriesName,
+                    LibraryId = data.LibraryId
+                })
+                .AsNoTracking()
+                .SingleAsync();
+        }
     }
 }

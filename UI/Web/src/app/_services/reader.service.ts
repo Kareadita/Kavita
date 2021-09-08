@@ -56,8 +56,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
-  getChapterInfo(seriesId: number, chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&seriesId=' + seriesId);
+  getChapterInfo(chapterId: number) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
   }
 
   saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {

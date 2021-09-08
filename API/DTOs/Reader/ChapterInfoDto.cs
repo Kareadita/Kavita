@@ -2,7 +2,7 @@
 
 namespace API.DTOs.Reader
 {
-    public class ChapterInfoDto
+    public class ChapterInfoDto : IChapterInfoDto
     {
 
         public string ChapterNumber { get; set; }
