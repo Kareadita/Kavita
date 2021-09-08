@@ -14,6 +14,7 @@ export interface IndexUpdateEvent {
 })
 export class DragableOrderedListComponent implements OnInit {
 
+  @Input() accessibilityMode: boolean = false;
   @Input() items: Array<any> = [];
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
@@ -24,6 +25,7 @@ export class DragableOrderedListComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<string[]>) {
+    if (event.previousIndex === event.currentIndex)  return;
     moveItemInArray(this.items, event.previousIndex, event.currentIndex);
     this.orderUpdated.emit({
       fromPosition: event.previousIndex,
@@ -36,6 +38,7 @@ export class DragableOrderedListComponent implements OnInit {
     // get the new value of the input 
     var inputElem = <HTMLInputElement>document.querySelector('#reorder-' + previousIndex);
     const newIndex = parseInt(inputElem.value, 10);
+    if (previousIndex === newIndex)  return;
     moveItemInArray(this.items, previousIndex, newIndex);
     this.orderUpdated.emit({
       fromPosition: previousIndex,
