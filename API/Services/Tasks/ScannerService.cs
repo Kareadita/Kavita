@@ -185,7 +185,7 @@ namespace API.Services.Tasks
                    "There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
 
-           CleanupUserProgress();
+           CleanupAbandonedChapters();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
        }
@@ -193,18 +193,19 @@ namespace API.Services.Tasks
        /// <summary>
        /// Remove any user progress rows that no longer exist since scan library ran and deleted series/volumes/chapters
        /// </summary>
-       private void CleanupUserProgress()
+       private void CleanupAbandonedChapters()
        {
           var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
        }
+
 
        /// <summary>
        /// Cleans up any abandoned rows due to removals from Scan loop
        /// </summary>
        private void CleanupDbEntities()
        {
-           CleanupUserProgress();
+           CleanupAbandonedChapters();
            var cleanedUp = Task.Run( () => _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries()).Result;
            _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
        }

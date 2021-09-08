@@ -7,7 +7,6 @@ using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
 using API.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;

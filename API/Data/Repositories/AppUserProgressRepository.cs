@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
-using API.Interfaces;
 using API.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +26,17 @@ namespace API.Data.Repositories
                 .Where(progress => !chapterIds.Contains(progress.ChapterId))
                 .ToListAsync();
 
+            var rowsToRemoveBookmarks = await _context.AppUserBookmark
+                .Where(progress => !chapterIds.Contains(progress.ChapterId))
+                .ToListAsync();
+
+            var rowsToRemoveReadingLists = await _context.ReadingListItem
+                .Where(item => !chapterIds.Contains(item.ChapterId))
+                .ToListAsync();
+
             _context.RemoveRange(rowsToRemove);
+            _context.RemoveRange(rowsToRemoveBookmarks);
+            _context.RemoveRange(rowsToRemoveReadingLists);
             return await _context.SaveChangesAsync() > 0 ? rowsToRemove.Count : 0;
         }
 

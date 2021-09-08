@@ -427,9 +427,9 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
-            // Green Worldz - Chapter 027
+            // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
             new Regex(
-                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-])?)",
+                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
@@ -827,8 +827,14 @@ namespace API.Parser
 
                     var tokens = value.Split("-");
                     var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
-                    return $"{@from}-{to}";
+                    if (tokens.Length == 2)
+                    {
+                        var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
+                        return $"{@from}-{to}";
+                    }
+
+                    return from;
+
 
                 }
             }
