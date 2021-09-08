@@ -76,9 +76,9 @@ namespace API.Data.Repositories
                 })
                 .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
                 {
-                    readingListItem = data.readingListItem,
-                    TotalPages = data.TotalPages,
-                    ChapterNumber = data.ChapterNumber,
+                    data.readingListItem,
+                    data.TotalPages,
+                    data.ChapterNumber,
                     VolumeId = volume.Id,
                     VolumeNumber = volume.Name,
                 })

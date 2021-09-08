@@ -83,7 +83,7 @@ namespace API.Data.Repositories
         /// <summary>
         /// Gets an AppUser by id. Returns back Progress information.
         /// </summary>
-        /// <param name="username"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
         public async Task<AppUser> GetUserByIdAsync(int id)
         {

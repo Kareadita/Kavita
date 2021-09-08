@@ -103,7 +103,7 @@ namespace API.Controllers
                     }
                     else
                     {
-                        _taskScheduler.ScheduleStatsTasks();
+                        await _taskScheduler.ScheduleStatsTasks();
                     }
                 }
             }

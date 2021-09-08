@@ -98,7 +98,7 @@ namespace API.Controllers
                 VolumeNumber = volume.Number + string.Empty,
                 VolumeId = volume.Id,
                 FileName = Path.GetFileName(mangaFile.FilePath),
-                SeriesName = series?.Name,
+                SeriesName = series.Name,
                 SeriesFormat = series.Format,
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
