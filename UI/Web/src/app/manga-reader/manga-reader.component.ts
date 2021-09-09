@@ -365,6 +365,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const goToPageNum = this.promptForPage();
       if (goToPageNum === null) { return; }
       this.goToPage(parseInt(goToPageNum.trim(), 10));
+    } else if (event.key === KEY_CODES.B) {
+      this.bookmarkPage();
     }
   }
 
@@ -1007,7 +1009,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookmarkPage() {
     const pageNum = this.pageNum;
     if (this.pageBookmarked) {
-      // Remove bookmark
       this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
         delete this.bookmarks[pageNum];
       });
