@@ -512,57 +512,9 @@ namespace API.Controllers
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
-            if (currentVolume.Number == 0)
-            {
-                // Handle specials by sorting on their Filename aka Range
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer), currentChapter.Number);
-                if (chapterId > 0) return Ok(chapterId);
-            }
-
-            foreach (var volume in volumes)
-            {
-                if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
-                {
-                    // Handle Chapters within current Volume
-                    // In this case, i need 0 first because 0 represents a full volume file.
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
-                    if (chapterId > 0) return Ok(chapterId);
-                }
-
-                if (volume.Number == currentVolume.Number + 1)
-                {
-                    // Handle Chapters within next Volume
-                    // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
-                    var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
-                    if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
-                    {
-                        return chapters.Last().Id;
-                    }
-
-                    return Ok(chapters.FirstOrDefault()?.Id);
-                }
-            }
-            return Ok(-1);
+            return await _readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
-        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
-        {
-            var next = false;
-            var chaptersList = chapters.ToList();
-            foreach (var chapter in chaptersList)
-            {
-                if (next)
-                {
-                    return chapter.Id;
-                }
-                if (currentChapterNumber.Equals(chapter.Number)) next = true;
-            }
-
-            return -1;
-        }
 
         /// <summary>
         /// Returns the previous logical chapter from the series.
@@ -578,29 +530,7 @@ namespace API.Controllers
         public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
-
-            if (currentVolume.Number == 0)
-            {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer).Reverse(), currentChapter.Number);
-                if (chapterId > 0) return Ok(chapterId);
-            }
-
-            foreach (var volume in volumes.Reverse())
-            {
-                if (volume.Number == currentVolume.Number)
-                {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
-                    if (chapterId > 0) return Ok(chapterId);
-                }
-                if (volume.Number == currentVolume.Number - 1)
-                {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault()?.Id);
-                }
-            }
-            return Ok(-1);
+            return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
     }

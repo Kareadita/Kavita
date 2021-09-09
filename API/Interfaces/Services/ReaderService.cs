@@ -3,19 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace API.Interfaces.Services
 {
     public class ReaderService : IReaderService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ReaderService> _logger;
+        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+        private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
-        public ReaderService(IUnitOfWork unitOfWork)
+        public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         /// <summary>
@@ -65,8 +72,10 @@ namespace API.Interfaces.Services
                     return true;
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                // When opening a fresh chapter, this seems to fail (sometimes)
+                _logger.LogError(exception, "Could not save progress");
                 await _unitOfWork.RollbackAsync();
             }
 
@@ -87,6 +96,114 @@ namespace API.Interfaces.Services
             }
 
             return page;
+        }
+
+        /// <summary>
+        /// Tries to find the next logical Chapter
+        /// </summary>
+        /// <example>
+        /// V1 → V2 → V3 chapter 0 → V3 chapter 10 → SP 01 → SP 02
+        /// </example>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <param name="currentChapterId"></param>
+        /// <param name="userId"></param>
+        /// <returns>-1 if nothing can be found</returns>
+        public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
+        {
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
+            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
+            if (currentVolume.Number == 0)
+            {
+                // Handle specials by sorting on their Filename aka Range
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer), currentChapter.Number);
+                if (chapterId > 0) return chapterId;
+            }
+
+            foreach (var volume in volumes)
+            {
+                if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
+                {
+                    // Handle Chapters within current Volume
+                    // In this case, i need 0 first because 0 represents a full volume file.
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
+                    if (chapterId > 0) return chapterId;
+                }
+
+                if (volume.Number != currentVolume.Number + 1) continue;
+
+                // Handle Chapters within next Volume
+                // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
+                var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
+                if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
+                {
+                    return chapters.Last().Id;
+                }
+
+                var firstChapter = chapters.FirstOrDefault();
+                if (firstChapter == null) return -1;
+                return firstChapter.Id;
+
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Tries to find the prev logical Chapter
+        /// </summary>
+        /// <example>
+        /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← SP 01 ← SP 02
+        /// </example>
+        /// <param name="seriesId"></param>
+        /// <param name="volumeId"></param>
+        /// <param name="currentChapterId"></param>
+        /// <param name="userId"></param>
+        /// <returns>-1 if nothing can be found</returns>
+        public async Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
+        {
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
+            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
+
+            if (currentVolume.Number == 0)
+            {
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer).Reverse(), currentChapter.Number);
+                if (chapterId > 0) return chapterId;
+            }
+
+            foreach (var volume in volumes.Reverse())
+            {
+                if (volume.Number == currentVolume.Number)
+                {
+                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
+                    if (chapterId > 0) return chapterId;
+                }
+                if (volume.Number == currentVolume.Number - 1)
+                {
+                    var lastChapter = volume.Chapters
+                        .OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+                    if (lastChapter == null) return -1;
+                    return lastChapter.Id;
+                }
+            }
+            return -1;
+        }
+
+        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
+        {
+            var next = false;
+            var chaptersList = chapters.ToList();
+            foreach (var chapter in chaptersList)
+            {
+                if (next)
+                {
+                    return chapter.Id;
+                }
+                if (currentChapterNumber.Equals(chapter.Number)) next = true;
+            }
+
+            return -1;
         }
     }
 }
