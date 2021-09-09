@@ -391,10 +391,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
-      console.log('results: ', results);
       let page = results.progress.pageNum;
-      console.log('page: ', page);
-      console.log('this.pageNum: ', this.pageNum);
       if (page >= this.maxPages) {
         page = this.maxPages - 1;
       }

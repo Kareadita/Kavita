@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -29,6 +29,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Input() urlProvider!: (page: number) => string;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
+  @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
   
@@ -71,9 +73,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
    imagesLoaded: {[key: number]: number} = {};
   /**
+   * If the user has scrolled all the way to the bottom. This is used solely for continuous reading
+   */
+   atBottom: boolean = false;   
+  /**
    * Debug mode. Will show extra information
    */
-  debug: boolean = false;
+  debug: boolean = true;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -104,7 +110,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     fromEvent(window, 'scroll')
-    .pipe(debounceTime(20), takeUntil(this.onDestroy))
+    .pipe(takeUntil(this.onDestroy)) // debounceTime(20), 
     .subscribe((event) => this.handleScrollEvent(event));
 
     if (this.goToPage) {
@@ -145,6 +151,53 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.scrollingDirection = PAGING_DIRECTION.BACKWARDS;
     }
     this.prevScrollPosition = verticalOffset;
+
+    // Check if we hit the last page
+    this.checkIfShouldTriggerContinuousReader();
+
+  }
+
+  checkIfShouldTriggerContinuousReader() {
+    // ?! This code is still finiky to trigger - Need to find the solution to that
+    if (this.isScrolling) return;
+
+    let totalHeight = 0;
+    document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
+
+    if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+      const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+      console.log('totalScroll: ', totalScroll);
+      console.log('totalHeight: ', totalHeight);
+      if (totalScroll === totalHeight && this.pageNum === this.totalPages - 1) {
+        this.atBottom = true;
+      } else if (totalScroll > totalHeight && this.atBottom) {
+        this.loadNextChapter.emit();
+      }
+    } else {
+      if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
+        console.log('At Top')
+        this.atBottom = false;
+        this.loadPrevChapter.emit();
+      }
+    }
+
+
+    // if (!this.isScrolling && this.pageNum === this.totalPages - 1) {
+      
+    //   document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
+    //   const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+    //   console.log('totalScroll: ', totalScroll);
+    //   console.log('totalHeight: ', totalHeight);
+    //   if (totalScroll === totalHeight && this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+    //     console.log('Bottom reached');
+    //     this.atBottom = true;
+    //   } else if (totalScroll > totalHeight && this.atBottom && this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+    //     console.log('Load Next Chapter');
+    //     this.loadNextChapter.emit();
+    //   } else {
+    //     this.atBottom = false;
+    //   }
+    // }  
   }
 
   /**
@@ -170,6 +223,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initWebtoonReader() {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
+    this.atBottom = false;
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
