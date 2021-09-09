@@ -193,10 +193,17 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<AppUser> GetUserByApiKeyAsync(string apiKey)
+        /// <summary>
+        /// Fetches the UserId by API Key. This does not include any extra information
+        /// </summary>
+        /// <param name="apiKey"></param>
+        /// <returns></returns>
+        public async Task<int> GetUserIdByApiKeyAsync(string apiKey)
         {
             return await _context.AppUser
-                .SingleOrDefaultAsync(u => u.ApiKey.Equals(apiKey));
+                .Where(u => u.ApiKey.Equals(apiKey))
+                .Select(u => u.Id)
+                .SingleOrDefaultAsync();
         }
 
 

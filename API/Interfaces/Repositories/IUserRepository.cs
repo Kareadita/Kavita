@@ -21,7 +21,7 @@ namespace API.Interfaces.Repositories
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
         Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
-        Task<AppUser> GetUserByApiKeyAsync(string apiKey);
+        Task<int> GetUserIdByApiKeyAsync(string apiKey);
         Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
         Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     }
