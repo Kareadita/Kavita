@@ -376,7 +376,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
-    this.pageNum = 0; // ?! Why was this 1
+    this.pageNum = 0;
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
