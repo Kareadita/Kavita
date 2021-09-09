@@ -115,7 +115,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     fromEvent(window, 'scroll')
-    .pipe(takeUntil(this.onDestroy)) // debounceTime(20), 
+    .pipe(debounceTime(20),takeUntil(this.onDestroy)) 
     .subscribe((event) => this.handleScrollEvent(event));
 
     if (this.goToPage) {
@@ -163,16 +163,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   checkIfShouldTriggerContinuousReader() {
-    // ?! This code is still finiky to trigger - Need to find the solution to that
     if (this.isScrolling) return;
 
-    let totalHeight = 0;
-    document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+      let totalHeight = 0;
+      document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
       const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
-      console.log('totalScroll: ', totalScroll);
-      console.log('totalHeight: ', totalHeight);
       if (totalScroll === totalHeight) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
@@ -182,7 +178,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       }
     } else {
       if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
-        console.log('At Top')
         this.atBottom = false;
         this.atTop = true;
         this.loadPrevChapter.emit();
