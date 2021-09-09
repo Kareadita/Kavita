@@ -76,6 +76,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * If the user has scrolled all the way to the bottom. This is used solely for continuous reading
    */
    atBottom: boolean = false;   
+   /**
+   * If the user has scrolled all the way to the top. This is used solely for continuous reading
+   */
+   atTop: boolean = false;
   /**
    * Debug mode. Will show extra information
    */
@@ -168,8 +172,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
       console.log('totalScroll: ', totalScroll);
       console.log('totalHeight: ', totalHeight);
-      if (totalScroll === totalHeight && this.pageNum === this.totalPages - 1) {
+      if (totalScroll === totalHeight) { // && this.pageNum === this.totalPages - 1
         this.atBottom = true;
+        this.setPageNum(this.totalPages);
       } else if (totalScroll > totalHeight && this.atBottom) {
         this.loadNextChapter.emit();
       }
@@ -177,6 +182,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
         console.log('At Top')
         this.atBottom = false;
+        this.atTop = true;
         this.loadPrevChapter.emit();
       }
     }
@@ -290,6 +296,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
    */
   setPageNum(pageNum: number, scrollToPage: boolean = false) {
+    if (pageNum > this.totalPages) {
+      pageNum = this.totalPages;
+    } else if (pageNum < 0) {
+      pageNum = 0;
+    }
     this.pageNum = pageNum;
     this.pageNumberChange.emit(this.pageNum);
 

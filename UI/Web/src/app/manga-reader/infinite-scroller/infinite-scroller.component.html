@@ -8,11 +8,13 @@
     <strong>Width:</strong> {{webtoonImageWidth}}
 </div>
 
-
+<div *ngIf="atTop" style="height: 40px" role="alert">
+    <span class="sr-only">Scroll up again to move to next chapter</span>
+</div>
 <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
     <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
 </ng-container>
-<div *ngIf="atBottom" style="height: 20px">
-
+<div *ngIf="atBottom" style="height: 40px" role="alert">
+    <span class="sr-only">Scroll down again to move to next chapter</span>
 </div>
 
