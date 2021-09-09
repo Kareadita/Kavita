@@ -374,7 +374,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
-    this.pageNum = 1;
+    this.pageNum = 0; // ?! Why was this 1
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
@@ -391,12 +391,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
-
+      console.log('results: ', results);
       let page = results.progress.pageNum;
+      console.log('page: ', page);
+      console.log('this.pageNum: ', this.pageNum);
       if (page >= this.maxPages) {
         page = this.maxPages - 1;
       }
       this.setPageNum(page);
+      
+      
 
       // Due to change detection rules in Angular, we need to re-create the options object to apply the change
       const newOptions: Options = Object.assign({}, this.pageOptions);

@@ -46,7 +46,8 @@ namespace API.Data.Repositories
                     VolumeNumber = volume.Number,
                     VolumeId = volume.Id,
                     chapter.IsSpecial,
-                    volume.SeriesId
+                    volume.SeriesId,
+                    chapter.Pages
                 })
                 .Join(_context.Series, data => data.SeriesId, series => series.Id, (data, series) => new
                 {
@@ -55,6 +56,7 @@ namespace API.Data.Repositories
                     data.VolumeId,
                     data.IsSpecial,
                     data.SeriesId,
+                    data.Pages,
                     SeriesFormat = series.Format,
                     SeriesName = series.Name,
                     series.LibraryId
@@ -68,7 +70,8 @@ namespace API.Data.Repositories
                     SeriesId =data.SeriesId,
                     SeriesFormat = data.SeriesFormat,
                     SeriesName = data.SeriesName,
-                    LibraryId = data.LibraryId
+                    LibraryId = data.LibraryId,
+                    Pages = data.Pages
                 })
                 .AsNoTracking()
                 .SingleAsync();
