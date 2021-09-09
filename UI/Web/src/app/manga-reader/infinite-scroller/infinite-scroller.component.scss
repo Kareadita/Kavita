@@ -5,3 +5,50 @@
 .active {
     border: 2px solid red;
 }
+
+.spacer {
+    width: 100%;
+    height: 100px;
+    cursor: pointer;
+
+    .animation {
+        width: 100%;
+        height: 60px;
+        background-color: green;
+        opacity: 80%;
+        animation-duration: 3s;
+        animation-iteration-count: infinite;
+        animation-timing-function: linear;
+
+        &.next {
+            animation-name: scan-next;
+        }
+
+        &.prev {
+            animation-name: scan-prev;
+        }
+    }
+
+    .text {
+        position: absolute;
+        top: 45px;
+        z-index: 101;
+        
+    }
+}
+
+@keyframes scan-prev {
+    0%   {background-color:green; height: 100%}
+    25%  {background-color:green; height: 75%}
+    50%  {background-color:green; height: 50%}
+    75%  {background-color:green; height: 25%}
+    100% {background-color:green; height: 0%}
+}
+
+@keyframes scan-next {
+    0%   {background-color:green; height: 0%}
+    25%  {background-color:green; height: 25%}
+    50%  {background-color:green; height: 50%}
+    75%  {background-color:green; height: 75%}
+    100% {background-color:green; height: 100%}
+}

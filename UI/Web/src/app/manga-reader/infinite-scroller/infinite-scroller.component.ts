@@ -115,7 +115,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     fromEvent(window, 'scroll')
-    .pipe(debounceTime(20),takeUntil(this.onDestroy)) 
+    .pipe(debounceTime(20), takeUntil(this.onDestroy)) 
     .subscribe((event) => this.handleScrollEvent(event));
 
     if (this.goToPage) {
@@ -169,19 +169,30 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       let totalHeight = 0;
       document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
       const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+      // if (this.atBottom) {
+      //   console.log('totalScroll: ', totalScroll);
+      //   console.log('totalHeight: ', totalHeight);
+      // }
+      console.log('totalScroll: ', totalScroll);
+      console.log('totalHeight: ', totalHeight);
+      this.atTop = false;
       if (totalScroll === totalHeight) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
-      } else if (totalScroll > totalHeight && this.atBottom) {
+      } else if (totalScroll >= totalHeight && this.atBottom) { // I can also capture prev total height from when atBottom as capture
         this.loadNextChapter.emit();
         this.toastr.info('Next chapter loaded', '', {timeOut: 3000});
       }
     } else {
+      console.log('scrollTop: ', document.documentElement.scrollTop);
       if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
         this.atBottom = false;
-        this.atTop = true;
-        this.loadPrevChapter.emit();
-        this.toastr.info('Previous chapter loaded', '', {timeOut: 3000});
+        if (this.atTop) {
+          // If already at top, then we moving on
+          this.loadPrevChapter.emit();
+          this.toastr.info('Previous chapter loaded', '', {timeOut: 3000});
+        }
+        this.atTop = true; 
       }
     }
 
@@ -211,7 +222,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
-    this.atTop = false;
+    //this.atTop = document.documentElement.scrollTop === 0 && this.pageNum === 0;
+    this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
