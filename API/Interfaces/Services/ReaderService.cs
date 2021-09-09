@@ -22,24 +22,12 @@ namespace API.Interfaces.Services
         /// Saves progress to DB
         /// </summary>
         /// <param name="progressDto"></param>
-        /// <param name="user"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId)
         {
-            // TODO: Refactor this to check if Progress item exists and update, else pull the user progresses.
-            // Aka optimize for the common path. Creating a new progress only happens once
-
             // Don't let user save past total pages.
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(progressDto.ChapterId);
-            if (progressDto.PageNum > chapter.Pages)
-            {
-                progressDto.PageNum = chapter.Pages;
-            }
-
-            if (progressDto.PageNum < 0)
-            {
-                progressDto.PageNum = 0;
-            }
+            progressDto.PageNum = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
 
             try
             {
@@ -72,8 +60,6 @@ namespace API.Interfaces.Services
                     _unitOfWork.AppUserProgressRepository.Update(userProgress);
                 }
 
-                //_unitOfWork.UserRepository.Update(user);
-
                 if (await _unitOfWork.CommitAsync())
                 {
                     return true;
@@ -85,6 +71,22 @@ namespace API.Interfaces.Services
             }
 
             return false;
+        }
+
+        public async Task<int> CapPageToChapter(int chapterId, int page)
+        {
+            var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            if (page < 0)
+            {
+                page = 0;
+            }
+
+            return page;
         }
     }
 }

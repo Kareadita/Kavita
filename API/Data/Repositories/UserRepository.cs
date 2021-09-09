@@ -46,6 +46,11 @@ namespace API.Data.Repositories
             _context.Entry(preferences).State = EntityState.Modified;
         }
 
+        public void Update(AppUserBookmark bookmark)
+        {
+            _context.Entry(bookmark).State = EntityState.Modified;
+        }
+
         public void Delete(AppUser user)
         {
             _context.AppUser.Remove(user);
@@ -81,6 +86,13 @@ namespace API.Data.Repositories
             query = AddIncludesToQuery(query, includeFlags);
 
             return await query.SingleOrDefaultAsync();
+        }
+
+        public async Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId)
+        {
+            return await _context.AppUserBookmark
+                .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId)
+                .SingleOrDefaultAsync();
         }
 
         private static IQueryable<AppUser> AddIncludesToQuery(IQueryable<AppUser> query, AppUserIncludes includeFlags)

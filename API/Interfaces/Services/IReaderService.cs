@@ -7,5 +7,7 @@ namespace API.Interfaces.Services
     public interface IReaderService
     {
         Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
+
+        Task<int> CapPageToChapter(int chapterId, int page);
     }
 }

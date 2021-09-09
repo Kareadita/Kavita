@@ -76,5 +76,13 @@ namespace API.Data.Repositories
                 .AsNoTracking()
                 .SingleAsync();
         }
+
+        public Task<int> GetChapterTotalPagesAsync(int chapterId)
+        {
+            return _context.Chapter
+                .Where(c => c.Id == chapterId)
+                .Select(c => c.Pages)
+                .SingleOrDefaultAsync();
+        }
     }
 }

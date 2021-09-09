@@ -10,6 +10,7 @@ namespace API.Interfaces.Repositories
     {
         void Update(AppUser user);
         void Update(AppUserPreferences preferences);
+        void Update(AppUserBookmark bookmark);
         public void Delete(AppUser user);
         Task<int> GetUserIdByUsernameAsync(string username);
         Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
@@ -24,5 +25,6 @@ namespace API.Interfaces.Repositories
         Task<int> GetUserIdByApiKeyAsync(string apiKey);
         Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
         Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
+        Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
     }
 }

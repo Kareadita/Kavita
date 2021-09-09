@@ -428,46 +428,28 @@ namespace API.Controllers
         [HttpPost("bookmark")]
         public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
         {
-            // TODO: Speed this up like we did with SaveProgress
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-
             // Don't let user save past total pages.
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
-            if (bookmarkDto.Page > chapter.Pages)
-            {
-                bookmarkDto.Page = chapter.Pages;
-            }
-
-            if (bookmarkDto.Page < 0)
-            {
-                bookmarkDto.Page = 0;
-            }
-
+            bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
 
             try
             {
-                user.Bookmarks ??= new List<AppUserBookmark>();
-               var userBookmark =
-                  user.Bookmarks.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id && x.Page == bookmarkDto.Page);
+                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+                var userBookmark =
+                    await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
                if (userBookmark == null)
                {
-                  user.Bookmarks.Add(new AppUserBookmark()
-                  {
-                     Page = bookmarkDto.Page,
-                     VolumeId = bookmarkDto.VolumeId,
-                     SeriesId = bookmarkDto.SeriesId,
-                     ChapterId = bookmarkDto.ChapterId,
-                  });
-               }
-               else
-               {
-                   userBookmark.Page = bookmarkDto.Page;
-                   userBookmark.SeriesId = bookmarkDto.SeriesId;
-                   userBookmark.VolumeId = bookmarkDto.VolumeId;
+                   user.Bookmarks ??= new List<AppUserBookmark>();
+                   user.Bookmarks.Add(new AppUserBookmark()
+                   {
+                       Page = bookmarkDto.Page,
+                       VolumeId = bookmarkDto.VolumeId,
+                       SeriesId = bookmarkDto.SeriesId,
+                       ChapterId = bookmarkDto.ChapterId,
+                   });
+                   _unitOfWork.UserRepository.Update(user);
                }
 
-               _unitOfWork.UserRepository.Update(user);
 
                if (await _unitOfWork.CommitAsync())
                {
