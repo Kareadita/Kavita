@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Helpers.Converters;

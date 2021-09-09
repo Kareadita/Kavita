@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Interfaces.Repositories;
 using AutoMapper;

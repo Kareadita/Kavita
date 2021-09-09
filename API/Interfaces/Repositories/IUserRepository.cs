@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 
 namespace API.Interfaces.Repositories
@@ -12,8 +13,6 @@ namespace API.Interfaces.Repositories
         void Update(AppUserPreferences preferences);
         void Update(AppUserBookmark bookmark);
         public void Delete(AppUser user);
-        Task<int> GetUserIdByUsernameAsync(string username);
-        Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
         Task<IEnumerable<AppUser>> GetAdminUsersAsync();
         Task<AppUserRating> GetUserRating(int seriesId, int userId);
@@ -22,9 +21,11 @@ namespace API.Interfaces.Repositories
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
         Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
+        Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
         Task<int> GetUserIdByApiKeyAsync(string apiKey);
         Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
         Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
-        Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
+        Task<int> GetUserIdByUsernameAsync(string username);
+        Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
     }
 }
