@@ -693,7 +693,7 @@ namespace API.Controllers
                     PageNum = pageNumber,
                     SeriesId = seriesId,
                     VolumeId = volumeId
-                }, await GetUser(apiKey));
+                }, (await GetUser(apiKey)).Id);
 
                 return File(content, "image/" + format);
             }

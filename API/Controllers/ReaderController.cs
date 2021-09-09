@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
@@ -106,7 +107,7 @@ namespace API.Controllers
         [HttpPost("mark-read")]
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
@@ -178,7 +179,7 @@ namespace API.Controllers
         [HttpPost("mark-unread")]
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
@@ -213,7 +214,7 @@ namespace API.Controllers
         [HttpPost("mark-volume-unread")]
         public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
@@ -257,7 +258,7 @@ namespace API.Controllers
         [HttpPost("mark-volume-read")]
         public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
             var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
@@ -301,7 +302,7 @@ namespace API.Controllers
         [HttpGet("get-progress")]
         public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var progressBookmark = new ProgressDto()
             {
                 PageNum = 0,
@@ -331,7 +332,8 @@ namespace API.Controllers
         public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (await _readerService.SaveReadingProgress(progressDto, user)) return Ok(true);
+
+            if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
 
             return BadRequest("Could not save progress");
         }
@@ -344,7 +346,7 @@ namespace API.Controllers
         [HttpGet("get-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
         }
@@ -356,7 +358,7 @@ namespace API.Controllers
         [HttpGet("get-all-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks()
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id));
         }
@@ -369,7 +371,7 @@ namespace API.Controllers
         [HttpPost("remove-bookmarks")]
         public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
@@ -399,7 +401,7 @@ namespace API.Controllers
         [HttpGet("get-volume-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
         }
@@ -412,7 +414,7 @@ namespace API.Controllers
         [HttpGet("get-series-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
@@ -426,7 +428,8 @@ namespace API.Controllers
         [HttpPost("bookmark")]
         public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            // TODO: Speed this up like we did with SaveProgress
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
 
             // Don't let user save past total pages.
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
@@ -487,10 +490,11 @@ namespace API.Controllers
         [HttpPost("unbookmark")]
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
 
             if (user.Bookmarks == null) return Ok();
             try {
+                // TODO: See if we can just do a Remove() on the entity to make it faster
                 user.Bookmarks = user.Bookmarks.Where(x =>
                     x.ChapterId == bookmarkDto.ChapterId
                     && x.AppUserId == user.Id

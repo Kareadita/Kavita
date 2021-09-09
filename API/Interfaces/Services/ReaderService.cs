@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 
@@ -23,8 +24,11 @@ namespace API.Interfaces.Services
         /// <param name="progressDto"></param>
         /// <param name="user"></param>
         /// <returns></returns>
-        public async Task<bool> SaveReadingProgress(ProgressDto progressDto, AppUser user)
+        public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId)
         {
+            // TODO: Refactor this to check if Progress item exists and update, else pull the user progresses.
+            // Aka optimize for the common path. Creating a new progress only happens once
+
             // Don't let user save past total pages.
             var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(progressDto.ChapterId);
             if (progressDto.PageNum > chapter.Pages)
@@ -39,13 +43,15 @@ namespace API.Interfaces.Services
 
             try
             {
-                user.Progresses ??= new List<AppUserProgress>();
                 var userProgress =
-                    user.Progresses.FirstOrDefault(x => x.ChapterId == progressDto.ChapterId && x.AppUserId == user.Id);
+                    await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
                 if (userProgress == null)
                 {
-                    user.Progresses.Add(new AppUserProgress
+                    // Create a user object
+                    var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                    userWithProgress.Progresses ??= new List<AppUserProgress>();
+                    userWithProgress.Progresses.Add(new AppUserProgress
                     {
                         PagesRead = progressDto.PageNum,
                         VolumeId = progressDto.VolumeId,
@@ -54,6 +60,7 @@ namespace API.Interfaces.Services
                         BookScrollId = progressDto.BookScrollId,
                         LastModified = DateTime.Now
                     });
+                    _unitOfWork.UserRepository.Update(userWithProgress);
                 }
                 else
                 {
@@ -62,9 +69,10 @@ namespace API.Interfaces.Services
                     userProgress.VolumeId = progressDto.VolumeId;
                     userProgress.BookScrollId = progressDto.BookScrollId;
                     userProgress.LastModified = DateTime.Now;
+                    _unitOfWork.AppUserProgressRepository.Update(userProgress);
                 }
 
-                _unitOfWork.UserRepository.Update(user);
+                //_unitOfWork.UserRepository.Update(user);
 
                 if (await _unitOfWork.CommitAsync())
                 {
