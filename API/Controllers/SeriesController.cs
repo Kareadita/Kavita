@@ -110,7 +110,7 @@ namespace API.Controllers
         [HttpGet("chapter")]
         public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
         {
-            return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
+            return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
 
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Interfaces.Repositories;
 using AutoMapper;
@@ -26,83 +27,6 @@ namespace API.Data.Repositories
             _context.Entry(volume).State = EntityState.Modified;
         }
 
-        /// <summary>
-        /// Returns a Chapter for an Id. Includes linked <see cref="MangaFile"/>s.
-        /// </summary>
-        /// <param name="chapterId"></param>
-        /// <returns></returns>
-        public async Task<Chapter> GetChapterAsync(int chapterId)
-        {
-            return await _context.Chapter
-                .Include(c => c.Files)
-                .SingleOrDefaultAsync(c => c.Id == chapterId);
-        }
-
-        /// <summary>
-        /// Returns Chapters for a volume id.
-        /// </summary>
-        /// <param name="volumeId"></param>
-        /// <returns></returns>
-        public async Task<IList<Chapter>> GetChaptersAsync(int volumeId)
-        {
-            return await _context.Chapter
-                .Where(c => c.VolumeId == volumeId)
-                .ToListAsync();
-        }
-
-        /// <summary>
-        /// Returns the cover image for a chapter id.
-        /// </summary>
-        /// <param name="chapterId"></param>
-        /// <returns></returns>
-        public async Task<byte[]> GetChapterCoverImageAsync(int chapterId)
-        {
-            return await _context.Chapter
-                .Where(c => c.Id == chapterId)
-                .Select(c => c.CoverImage)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-        }
-
-
-
-
-        public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
-        {
-            var chapter = await _context.Chapter
-                .Include(c => c.Files)
-                .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .SingleOrDefaultAsync(c => c.Id == chapterId);
-
-            return chapter;
-        }
-
-        /// <summary>
-        /// Returns non-tracked files for a given chapterId
-        /// </summary>
-        /// <param name="chapterId"></param>
-        /// <returns></returns>
-        public async Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId)
-        {
-            return await _context.MangaFile
-                .Where(c => chapterId == c.ChapterId)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-        /// <summary>
-        /// Returns non-tracked files for a set of chapterIds
-        /// </summary>
-        /// <param name="chapterIds"></param>
-        /// <returns></returns>
-        public async Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds)
-        {
-            return await _context.MangaFile
-                .Where(c => chapterIds.Contains(c.ChapterId))
-                .AsNoTracking()
-                .ToListAsync();
-        }
-
         public async Task<IList<MangaFile>> GetFilesForVolume(int volumeId)
         {
             return await _context.Chapter
@@ -111,6 +35,15 @@ namespace API.Data.Repositories
                 .SelectMany(c => c.Files)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        public async Task<byte[]> GetVolumeCoverImageAsync(int volumeId)
+        {
+            return await _context.Volume
+                .Where(v => v.Id == volumeId)
+                .Select(v => v.CoverImage)
+                .AsNoTracking()
+                .SingleOrDefaultAsync();
         }
     }
 }

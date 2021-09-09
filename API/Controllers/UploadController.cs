@@ -142,7 +142,7 @@ namespace API.Controllers
 
                 if (bytes.Length > 0)
                 {
-                    var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(uploadFileDto.Id);
+                    var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
                     chapter.CoverImage = bytes;
                     chapter.CoverImageLocked = true;
                     _unitOfWork.ChapterRepository.Update(chapter);
@@ -178,7 +178,7 @@ namespace API.Controllers
         {
             try
             {
-                var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(uploadFileDto.Id);
+                var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
                 chapter.CoverImage = Array.Empty<byte>();
                 chapter.CoverImageLocked = false;
                 _unitOfWork.ChapterRepository.Update(chapter);

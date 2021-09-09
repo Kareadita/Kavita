@@ -113,7 +113,7 @@ namespace API.Interfaces.Services
         {
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
+            var currentChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(currentChapterId);
             if (currentVolume.Number == 0)
             {
                 // Handle specials by sorting on their Filename aka Range
@@ -164,7 +164,7 @@ namespace API.Interfaces.Services
         {
             var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
             var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
+            var currentChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(currentChapterId);
 
             if (currentVolume.Number == 0)
             {

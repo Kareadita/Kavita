@@ -488,7 +488,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
             var chapters =
-                (await _unitOfWork.VolumeRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
+                (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                     _chapterSortComparer);
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
@@ -518,8 +518,8 @@ namespace API.Controllers
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId);
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
             foreach (var mangaFile in files)
@@ -543,7 +543,7 @@ namespace API.Controllers
         {
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
             var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
             return File(bytes, contentType, fileDownloadName);
         }

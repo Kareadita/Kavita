@@ -67,7 +67,7 @@ namespace API.Services
         public async Task<Chapter> Ensure(int chapterId)
         {
             EnsureCacheDirectory();
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var extractPath = GetCachePath(chapterId);
 
             if (!Directory.Exists(extractPath))
@@ -192,7 +192,7 @@ namespace API.Services
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapter.Id);
+            var chapterFiles = chapter.Files ?? await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
             foreach (var mangaFile in chapterFiles)
             {
                 if (page <= (mangaFile.Pages + pagesSoFar))

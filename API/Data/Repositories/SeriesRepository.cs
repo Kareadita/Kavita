@@ -256,15 +256,6 @@ namespace API.Data.Repositories
             }
         }
 
-        public async Task<byte[]> GetVolumeCoverImageAsync(int volumeId)
-        {
-            return await _context.Volume
-                .Where(v => v.Id == volumeId)
-                .Select(v => v.CoverImage)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-        }
-
         public async Task<byte[]> GetSeriesCoverImageAsync(int seriesId)
         {
             return await _context.Series

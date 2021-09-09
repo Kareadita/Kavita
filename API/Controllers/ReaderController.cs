@@ -86,7 +86,7 @@ namespace API.Controllers
             if (chapter == null) return BadRequest("Could not find Chapter");
 
             var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
-            var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
+            var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
 
             return Ok(new ChapterInfoDto()
             {
@@ -216,7 +216,7 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
-            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
             {
                 user.Progresses ??= new List<AppUserProgress>();
@@ -260,7 +260,7 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
-            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             foreach (var chapter in chapters)
             {
                 user.Progresses ??= new List<AppUserProgress>();

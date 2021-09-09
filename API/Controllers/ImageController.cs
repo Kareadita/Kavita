@@ -27,7 +27,7 @@ namespace API.Controllers
         [HttpGet("chapter-cover")]
         public async Task<ActionResult> GetChapterCoverImage(int chapterId)
         {
-            var content = await _unitOfWork.VolumeRepository.GetChapterCoverImageAsync(chapterId);
+            var content = await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId);
             if (content == null) return BadRequest("No cover image");
 
             Response.AddCacheHeader(content);
@@ -42,7 +42,7 @@ namespace API.Controllers
         [HttpGet("volume-cover")]
         public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
         {
-            var content = await _unitOfWork.SeriesRepository.GetVolumeCoverImageAsync(volumeId);
+            var content = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId);
             if (content == null) return BadRequest("No cover image");
 
             Response.AddCacheHeader(content);
