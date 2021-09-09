@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
@@ -97,7 +98,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2) { }
+  constructor(private readerService: ReaderService, private renderer: Renderer2, private toastr: ToastrService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
@@ -172,11 +173,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
       console.log('totalScroll: ', totalScroll);
       console.log('totalHeight: ', totalHeight);
-      if (totalScroll === totalHeight) { // && this.pageNum === this.totalPages - 1
+      if (totalScroll === totalHeight) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
       } else if (totalScroll > totalHeight && this.atBottom) {
         this.loadNextChapter.emit();
+        this.toastr.info('Next chapter loaded', '', {timeOut: 3000});
       }
     } else {
       if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
@@ -184,26 +186,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.atBottom = false;
         this.atTop = true;
         this.loadPrevChapter.emit();
+        this.toastr.info('Previous chapter loaded', '', {timeOut: 3000});
       }
     }
 
-
-    // if (!this.isScrolling && this.pageNum === this.totalPages - 1) {
-      
-    //   document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-    //   const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
-    //   console.log('totalScroll: ', totalScroll);
-    //   console.log('totalHeight: ', totalHeight);
-    //   if (totalScroll === totalHeight && this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-    //     console.log('Bottom reached');
-    //     this.atBottom = true;
-    //   } else if (totalScroll > totalHeight && this.atBottom && this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-    //     console.log('Load Next Chapter');
-    //     this.loadNextChapter.emit();
-    //   } else {
-    //     this.atBottom = false;
-    //   }
-    // }  
   }
 
   /**
@@ -230,6 +216,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
+    this.atTop = false;
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
