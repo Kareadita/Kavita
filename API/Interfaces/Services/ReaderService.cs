@@ -111,9 +111,10 @@ namespace API.Interfaces.Services
         /// <returns>-1 if nothing can be found</returns>
         public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
         {
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(currentChapterId);
+            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+            var currentVolume = volumes.Single(v => v.Id == volumeId);
+            var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
+
             if (currentVolume.Number == 0)
             {
                 // Handle specials by sorting on their Filename aka Range
@@ -162,9 +163,9 @@ namespace API.Interfaces.Services
         /// <returns>-1 if nothing can be found</returns>
         public async Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
         {
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(currentChapterId);
+            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId)).Reverse().ToList();
+            var currentVolume = volumes.Single(v => v.Id == volumeId);
+            var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
             if (currentVolume.Number == 0)
             {
@@ -172,7 +173,7 @@ namespace API.Interfaces.Services
                 if (chapterId > 0) return chapterId;
             }
 
-            foreach (var volume in volumes.Reverse())
+            foreach (var volume in volumes)
             {
                 if (volume.Number == currentVolume.Number)
                 {
@@ -190,7 +191,7 @@ namespace API.Interfaces.Services
             return -1;
         }
 
-        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
+        private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber)
         {
             var next = false;
             var chaptersList = chapters.ToList();
