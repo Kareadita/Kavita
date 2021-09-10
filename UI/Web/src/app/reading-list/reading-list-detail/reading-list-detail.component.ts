@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, take, takeWhile } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
@@ -11,7 +10,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
-import { ReaderService } from 'src/app/_services/reader.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 
@@ -40,8 +38,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService,
-    private downloadService: DownloadService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -157,18 +154,5 @@ export class ReadingListDetailComponent implements OnInit {
     } else {
       this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'manga', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
     }
-  }
-
-  async downloadList() {
-    const wantToDownload = await this.confirmService.confirm('This reading list contains ' + this.items.length + ' items. It may be large. Are you sure you want to continue?');
-      if (!wantToDownload) { return; }
-      this.downloadInProgress = true;
-      this.downloadService.downloadReadingList(this.readingList.id).pipe(
-        takeWhile(val => {
-          return val.state != 'DONE';
-        }),
-        finalize(() => {
-          this.downloadInProgress = false;
-        })).subscribe(() => {/* No Operation */});;
   }
 }

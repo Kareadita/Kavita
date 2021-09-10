@@ -131,36 +131,6 @@ namespace API.Controllers
             }
         }
 
-        /// <summary>
-        /// Download all the chapters in the order of the reading list
-        /// </summary>
-        /// <param name="readingListId"></param>
-        /// <returns></returns>
-        [HttpGet("reading-list")]
-        public async Task<ActionResult> DownloadReadingList(int readingListId)
-        {
-            // TODO: Implement this with correct order
-            try
-            {
-                var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
-                var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
-
-
-
-                var files =
-                    await _unitOfWork.ChapterRepository.GetFilesForChaptersAsync(items.Select(item => item.ChapterId).ToList());
-                // Ordering aside, we'd need to do some rename function on the copy
-                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                    $"download_{User.GetUsername()}_s{readingList.Title}");
-                return File(fileBytes, DefaultContentType, $"{readingList.Title} Reading List.zip");
-            }
-            catch (KavitaException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpPost("bookmarks")]
         public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
         {
