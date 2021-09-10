@@ -84,7 +84,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information
    */
-  debug: boolean = true;
+  debug: boolean = false;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
