@@ -114,8 +114,6 @@ namespace API.Controllers
         }
 
 
-
-
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
