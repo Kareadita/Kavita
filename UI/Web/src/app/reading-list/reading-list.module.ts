@@ -9,6 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CardsModule } from '../cards/cards.module';
 import { ReadingListsComponent } from './reading-lists/reading-lists.component';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
+import { PipeModule } from '../pipe/pipe.module';
 
 
 
@@ -25,7 +26,8 @@ import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal
     ReadingListRoutingModule,
     ReactiveFormsModule,
     DragDropModule,
-    CardsModule
+    CardsModule,
+    PipeModule
   ],
   exports: [
     AddToListModalComponent,
