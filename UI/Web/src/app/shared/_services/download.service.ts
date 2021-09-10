@@ -73,7 +73,15 @@ export class DownloadService {
             }));
   }
 
-  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series') {
+  downloadReadingList(readingListId: number) {
+    return this.httpClient.get(this.baseUrl + 'download/reading-list?readingListId=' + readingListId, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
+              this.save(blob, filename)
+            }));
+  }
+
+  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series' | 'reading list') {
     return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 
@@ -84,6 +92,8 @@ export class DownloadService {
               this.save(blob, filename)
             }));
   }
+
+  
 
   /**
  * Format bytes as human-readable text.

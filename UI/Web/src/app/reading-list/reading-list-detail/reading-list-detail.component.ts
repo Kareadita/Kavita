@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
@@ -28,13 +29,19 @@ export class ReadingListDetailComponent implements OnInit {
   isAdmin: boolean = false;
   isLoading: boolean = false;
 
+  // Downloading
+  hasDownloadingRole: boolean = false;
+  downloadInProgress: boolean = false;
+
+
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService,
+    private downloadService: DownloadService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -58,6 +65,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
+          this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
           
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
         }
@@ -149,5 +157,18 @@ export class ReadingListDetailComponent implements OnInit {
     } else {
       this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'manga', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
     }
+  }
+
+  async downloadList() {
+    const wantToDownload = await this.confirmService.confirm('This reading list contains ' + this.items.length + ' items. It may be large. Are you sure you want to continue?');
+      if (!wantToDownload) { return; }
+      this.downloadInProgress = true;
+      this.downloadService.downloadReadingList(this.readingList.id).pipe(
+        takeWhile(val => {
+          return val.state != 'DONE';
+        }),
+        finalize(() => {
+          this.downloadInProgress = false;
+        })).subscribe(() => {/* No Operation */});;
   }
 }

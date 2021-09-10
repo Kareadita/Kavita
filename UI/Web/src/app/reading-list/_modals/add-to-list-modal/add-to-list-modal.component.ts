@@ -88,7 +88,6 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
     
   }
 
-
   filterList = (listItem: ReadingList) => {
     return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
   }

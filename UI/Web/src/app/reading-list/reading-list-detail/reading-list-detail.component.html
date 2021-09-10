@@ -28,8 +28,21 @@
                       <span class="read-btn--text">&nbsp;Remove Read</span>
                   </button>
               </div>
+              <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
+                <button class="btn btn-secondary" (click)="downloadList()" title="Download Reading List" [disabled]="downloadInProgress">
+                    <ng-container *ngIf="downloadInProgress; else notDownloading">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="sr-only">Downloading...</span>
+                    </ng-container>
+                    <ng-template #notDownloading>
+                        <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
+                    </ng-template>
+                </button>
             </div>
-            <p class="mt-2" *ngIf="readingList.summary.length > 0">{{readingList.summary}}</p>
+            </div>
+            <div class="row no-gutters mt-2">
+              <app-read-more [text]="readingList.summary" [maxLength]="250"></app-read-more>
+            </div>
         </div>
     </div>
 

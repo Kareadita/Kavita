@@ -10,6 +10,7 @@ import { CardsModule } from '../cards/cards.module';
 import { ReadingListsComponent } from './reading-lists/reading-lists.component';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
+import { SharedModule } from '../shared/shared.module';
 
 
 
@@ -27,7 +28,8 @@ import { PipeModule } from '../pipe/pipe.module';
     ReactiveFormsModule,
     DragDropModule,
     CardsModule,
-    PipeModule
+    PipeModule,
+    SharedModule
   ],
   exports: [
     AddToListModalComponent,

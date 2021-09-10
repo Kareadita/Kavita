@@ -18,7 +18,6 @@
     </div>
     <ul class="list-group">
         <li class="list-group-item clickable" tabindex="0" role="button" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
-            <!-- Think about using radio buttons maybe for screen reader-->
             {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" title="Promoted"></i>
         </li>
         <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
@@ -32,11 +31,11 @@
 <div class="modal-footer" style="justify-content: normal">
     <div style="width: 100%;">
         <div class="form-row">
-            <div class="col-md-10">
+            <div class="col-9 col-lg-10">
               <label class="sr-only" for="add-rlist">Reading List</label>
               <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
             </div>
-            <div class="col-md-2">
+            <div class="col-2">
               <button type="submit" class="btn btn-primary" (click)="create()">Create</button>
             </div>
           </div>
