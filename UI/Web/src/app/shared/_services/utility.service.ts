@@ -13,6 +13,7 @@ export enum KEY_CODES {
   SPACE = ' ',
   ENTER = 'Enter',
   G = 'g',
+  B = 'b',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete'
 }

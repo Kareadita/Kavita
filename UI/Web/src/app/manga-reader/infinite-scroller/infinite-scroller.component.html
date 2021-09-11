@@ -6,10 +6,38 @@
     <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
     <strong>Current Page:</strong>{{pageNum}}
     <strong>Width:</strong> {{webtoonImageWidth}}
+    <strong>Pages:</strong> {{pageNum}} / {{totalPages}}
+    <strong>At Top:</strong> {{atTop}}
+    <strong>At Bottom:</strong> {{atBottom}}
+
 </div>
 
-
+<div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+    <div style="height: 200px"></div>
+    <div>
+        <button class="btn btn-icon mx-auto">
+            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+        </button>
+        <span class="mx-auto text">Previous Chapter</span>
+        <button class="btn btn-icon mx-auto">
+            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+        </button>
+        <span class="sr-only">Scroll up to move to next chapter</span>
+    </div>
+</div>
 <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
     <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
 </ng-container>
-
+<div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadPrevChapter.emit()">
+    <div>
+        <button class="btn btn-icon mx-auto">
+            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+        </button>
+        <span class="mx-auto text">Next Chapter</span>
+        <button class="btn btn-icon mx-auto">
+            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+        </button>
+        <span class="sr-only">Scroll down to move to next chapter</span>
+    </div>
+    <div style="height: 200px"></div>
+</div>

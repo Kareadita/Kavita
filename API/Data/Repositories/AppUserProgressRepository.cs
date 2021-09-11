@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,11 @@ namespace API.Data.Repositories
         public AppUserProgressRepository(DataContext context)
         {
             _context = context;
+        }
+
+        public void Update(AppUserProgress userProgress)
+        {
+            _context.Entry(userProgress).State = EntityState.Modified;
         }
 
         /// <summary>
@@ -61,6 +67,13 @@ namespace API.Data.Repositories
                 .Where(s => seriesIds.Contains(s.Id) && s.Library.Type == libraryType)
                 .AsNoTracking()
                 .AnyAsync();
+        }
+
+        public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)
+        {
+            return await _context.AppUserProgresses
+                .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)
+                .SingleOrDefaultAsync();
         }
     }
 }

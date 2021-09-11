@@ -56,7 +56,7 @@ namespace API.Interfaces.Repositories
         /// <returns></returns>
         Task AddSeriesModifiers(int userId, List<SeriesDto> series);
 
-        Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
+
         Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter);
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);

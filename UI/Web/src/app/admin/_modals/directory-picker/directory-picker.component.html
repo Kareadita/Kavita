@@ -9,7 +9,7 @@
     <div class="form-group">
         <label for="filter">Filter</label>
         <div class="input-group">
-            <input id="filter" autocomplete="false" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
+            <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
             <div class="input-group-append">
                 <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="filterQuery = '';">Clear</button>
             </div>

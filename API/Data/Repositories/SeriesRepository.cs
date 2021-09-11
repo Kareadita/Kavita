@@ -115,8 +115,6 @@ namespace API.Data.Repositories
             await AddVolumeModifiers(userId, volumes);
             SortSpecialChapters(volumes);
 
-
-
             return volumes;
         }
 
@@ -258,15 +256,6 @@ namespace API.Data.Repositories
             }
         }
 
-        public async Task<byte[]> GetVolumeCoverImageAsync(int volumeId)
-        {
-            return await _context.Volume
-                .Where(v => v.Id == volumeId)
-                .Select(v => v.CoverImage)
-                .AsNoTracking()
-                .SingleOrDefaultAsync();
-        }
-
         public async Task<byte[]> GetSeriesCoverImageAsync(int seriesId)
         {
             return await _context.Series
@@ -278,8 +267,9 @@ namespace API.Data.Repositories
 
         private async Task AddVolumeModifiers(int userId, IReadOnlyCollection<VolumeDto> volumes)
         {
+            var volIds = volumes.Select(s => s.Id);
             var userProgress = await _context.AppUserProgresses
-                .Where(p => p.AppUserId == userId && volumes.Select(s => s.Id).Contains(p.VolumeId))
+                .Where(p => p.AppUserId == userId && volIds.Contains(p.VolumeId))
                 .AsNoTracking()
                 .ToListAsync();
 

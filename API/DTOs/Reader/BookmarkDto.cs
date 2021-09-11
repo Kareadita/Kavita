@@ -1,4 +1,4 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs.Reader
 {
     public class BookmarkDto
     {

@@ -6,6 +6,7 @@ import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
+import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 
@@ -23,7 +24,7 @@ export class ReadingListsComponent implements OnInit {
   isAdmin: boolean = false;
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private accountService: AccountService, private toastr: ToastrService, private router: Router) { }
+    private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService) { }
 
   ngOnInit(): void {
     this.loadPage();
@@ -53,6 +54,13 @@ export class ReadingListsComponent implements OnInit {
           this.toastr.success('Reading list deleted');
           this.loadPage();
         });
+        break;
+      case Action.Edit:
+        this.actionService.editReadingList(readingList, (updatedList: ReadingList) => {
+          // Reload information around list
+          readingList = updatedList;
+        });
+        break;
     }
   }
 

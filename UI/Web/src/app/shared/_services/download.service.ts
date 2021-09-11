@@ -73,7 +73,7 @@ export class DownloadService {
             }));
   }
 
-  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series') {
+  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series' | 'reading list') {
     return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 
@@ -84,6 +84,8 @@ export class DownloadService {
               this.save(blob, filename)
             }));
   }
+
+  
 
   /**
  * Format bytes as human-readable text.

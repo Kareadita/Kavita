@@ -48,7 +48,7 @@ namespace API.Controllers
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
             return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
@@ -90,8 +90,8 @@ namespace API.Controllers
         [HttpGet("chapter")]
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
-            var files = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(chapter.VolumeId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
@@ -154,7 +154,7 @@ namespace API.Controllers
                 var chapterExtractPath = Path.Join(fullExtractPath, $"{series.Id}_bookmark_{chapterId}");
                 var chapterPages = downloadBookmarkDto.Bookmarks.Where(b => b.ChapterId == chapterId)
                     .Select(b => b.Page).ToList();
-                var mangaFiles = await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId);
+                var mangaFiles = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
                 switch (series.Format)
                 {
                     case MangaFormat.Image:

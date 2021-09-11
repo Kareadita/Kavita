@@ -10,7 +10,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
-import { ReaderService } from 'src/app/_services/reader.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 
@@ -27,6 +26,11 @@ export class ReadingListDetailComponent implements OnInit {
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
   isLoading: boolean = false;
+
+  // Downloading
+  hasDownloadingRole: boolean = false;
+  downloadInProgress: boolean = false;
+
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -58,6 +62,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
+          this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
           
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
         }

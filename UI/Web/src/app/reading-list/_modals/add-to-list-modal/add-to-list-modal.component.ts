@@ -41,6 +41,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
 
     this.listForm.addControl('title', new FormControl(this.title, []));
+    this.listForm.addControl('filterQuery', new FormControl('', []));
     
     this.loading = true;
     this.readingListService.getReadingLists(false).subscribe(lists => {
@@ -85,6 +86,10 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
       });
     }
     
+  }
+
+  filterList = (listItem: ReadingList) => {
+    return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
   }
 
 }

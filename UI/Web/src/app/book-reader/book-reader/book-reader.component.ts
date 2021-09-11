@@ -288,14 +288,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
             this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+
+            if (!this.incognitoMode) {
+              this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+            }
             return;
           } else {
             this.currentPageAnchor = '';
           }
         }
 
-        if (this.lastSeenScrollPartPath !== '') {
+        if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
           this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
     });
@@ -443,7 +446,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleIntersection(entries: IntersectionObserverEntry[]) {
-    const intersectingEntries = Array.from(entries).filter(entry => entry.isIntersecting).map(entry => entry.target);
+    let intersectingEntries = Array.from(entries)
+      .filter(entry => entry.isIntersecting)
+      .map(entry => entry.target)
     intersectingEntries.sort((a: Element, b: Element) => {
       const aTop = a.getBoundingClientRect().top;
       const bTop = b.getBoundingClientRect().top;
@@ -456,6 +461,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       return 0;
     });
+
 
     if (intersectingEntries.length > 0) {
       let path = this.getXPathTo(intersectingEntries[0]);
@@ -643,7 +649,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPageAnchors() {
     this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
-      this.intersectionObserver.observe(elem);
+      if (!elem.classList.contains('no-observe')) {
+        this.intersectionObserver.observe(elem);
+      }
     });
 
     this.pageAnchors = {};

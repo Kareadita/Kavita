@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
@@ -109,16 +110,14 @@ namespace API.Controllers
         [HttpGet("chapter")]
         public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
         {
-            return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
+            return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
-
-
 
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
             var userRating = await _unitOfWork.UserRepository.GetUserRating(updateSeriesRatingDto.SeriesId, user.Id) ??
                              new AppUserRating();
 

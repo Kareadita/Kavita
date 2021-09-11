@@ -5,13 +5,12 @@ import { ReadingListDetailComponent } from "./reading-list-detail/reading-list-d
 
 const routes: Routes = [
   {
-    path: '', 
+    path: '',
     runGuardsAndResolvers: 'always',
-    canActivate: [AuthGuard], // TODO: Add a guard if they have access to said :id
+    canActivate: [AuthGuard],
     children: [
         {path: '', component: ReadingListDetailComponent, pathMatch: 'full'},
         {path: ':id', component: ReadingListDetailComponent, pathMatch: 'full'},
-        // {path: ':id', component: CollectionDetailComponent},
     ]
   }
 ];

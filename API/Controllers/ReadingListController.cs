@@ -265,7 +265,7 @@ namespace API.Controllers
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
             var chapterIdsForVolume =
-                (await _unitOfWork.VolumeRepository.GetChaptersAsync(dto.VolumeId)).Select(c => c.Id).ToList();
+                (await _unitOfWork.ChapterRepository.GetChaptersAsync(dto.VolumeId)).Select(c => c.Id).ToList();
 
             // If there are adds, tell tracking this has been modified
             if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForVolume, readingList))

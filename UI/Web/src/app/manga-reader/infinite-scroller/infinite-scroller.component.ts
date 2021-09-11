@@ -1,9 +1,15 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
+
+/**
+ * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
+ */
+const SPACER_SCROLL_INTO_PX = 200;
 
 @Component({
   selector: 'app-infinite-scroller',
@@ -29,6 +35,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   @Input() urlProvider!: (page: number) => string;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
+  @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
+  @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
   
@@ -71,6 +79,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
    imagesLoaded: {[key: number]: number} = {};
   /**
+   * If the user has scrolled all the way to the bottom. This is used solely for continuous reading
+   */
+   atBottom: boolean = false;   
+   /**
+   * If the user has scrolled all the way to the top. This is used solely for continuous reading
+   */
+   atTop: boolean = false;
+   /**
+    * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
+    */
+   previousScrollHeightMinusTop: number = 0;
+  /**
    * Debug mode. Will show extra information
    */
   debug: boolean = false;
@@ -87,7 +107,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2) { }
+  constructor(private readerService: ReaderService, private renderer: Renderer2, private toastr: ToastrService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
@@ -104,7 +124,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     fromEvent(window, 'scroll')
-    .pipe(debounceTime(20), takeUntil(this.onDestroy))
+    .pipe(debounceTime(20), takeUntil(this.onDestroy)) 
     .subscribe((event) => this.handleScrollEvent(event));
 
     if (this.goToPage) {
@@ -145,6 +165,48 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.scrollingDirection = PAGING_DIRECTION.BACKWARDS;
     }
     this.prevScrollPosition = verticalOffset;
+
+    // Check if we hit the last page
+    this.checkIfShouldTriggerContinuousReader();
+
+  }
+
+  checkIfShouldTriggerContinuousReader() {
+    if (this.isScrolling) return;
+
+    if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+      let totalHeight = 0;
+      document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
+      const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+
+      // If we were at top but have started scrolling down past page 0, remove top spacer
+      if (this.atTop && this.pageNum > 0) {
+        this.atTop = false;
+      }
+      if (totalScroll === totalHeight) {
+        this.atBottom = true;
+        this.setPageNum(this.totalPages);
+        // Scroll user back to original location
+        this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
+        setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
+      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+        // This if statement will fire once we scroll into the spacer at all
+        this.loadNextChapter.emit();
+      }
+    } else {
+      if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
+        this.atBottom = false;
+        if (this.atTop) {
+          // If already at top, then we moving on
+          this.loadPrevChapter.emit();
+        }
+        this.atTop = true; 
+        // Scroll user back to original location
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2), 10);
+      }
+    }
+
   }
 
   /**
@@ -170,6 +232,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initWebtoonReader() {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
+    this.atBottom = false;
+    //this.atTop = document.documentElement.scrollTop === 0 && this.pageNum === 0;
+    this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
@@ -236,6 +301,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
    */
   setPageNum(pageNum: number, scrollToPage: boolean = false) {
+    if (pageNum > this.totalPages) {
+      pageNum = this.totalPages;
+    } else if (pageNum < 0) {
+      pageNum = 0;
+    }
     this.pageNum = pageNum;
     this.pageNumberChange.emit(this.pageNum);
 

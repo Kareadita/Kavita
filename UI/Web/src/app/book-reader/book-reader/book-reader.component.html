@@ -112,9 +112,9 @@
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
         <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
 
-        <div class="left {{clickOverlayClass('left')}}" (click)="prevPage()" *ngIf="clickToPaginate">
+        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
         </div>
-        <div class="right {{clickOverlayClass('right')}}" (click)="nextPage()" *ngIf="clickToPaginate">
+        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate">
         </div>
         
         <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
