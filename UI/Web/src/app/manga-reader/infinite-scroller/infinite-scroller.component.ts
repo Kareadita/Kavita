@@ -86,6 +86,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * If the user has scrolled all the way to the top. This is used solely for continuous reading
    */
    atTop: boolean = false;
+   /**
+    * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
+    */
+   previousScrollHeightMinusTop: number = 0;
   /**
    * Debug mode. Will show extra information
    */
@@ -167,7 +171,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
-  previousScrollHeightMinusTop: number = 0;
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
@@ -175,12 +178,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       let totalHeight = 0;
       document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
       const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
-      // if (this.atBottom) {
-      //   console.log('totalScroll: ', totalScroll);
-      //   console.log('totalHeight: ', totalHeight);
-      // }
-      console.log('totalScroll: ', totalScroll);
-      console.log('totalHeight: ', totalHeight);
+
       // If we were at top but have started scrolling down past page 0, remove top spacer
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
@@ -193,16 +191,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
-        //this.loadNextChapter.emit();
-        this.toastr.info('loading next chapter (disabled)');
+        this.loadNextChapter.emit();
       }
     } else {
-      console.log('scrollTop: ', document.documentElement.scrollTop);
       if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
         this.atBottom = false;
         if (this.atTop) {
           // If already at top, then we moving on
-          //this.loadPrevChapter.emit();
+          this.loadPrevChapter.emit();
         }
         this.atTop = true; 
         // Scroll user back to original location
