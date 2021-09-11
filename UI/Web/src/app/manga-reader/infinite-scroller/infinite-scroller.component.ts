@@ -167,6 +167,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
+  previousScrollHeightMinusTop: number = 0;
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
@@ -201,6 +202,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.loadPrevChapter.emit();
         }
         this.atTop = true; 
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        // Scroll user back to original location
+        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop, 10);
       }
     }
 
