@@ -202,7 +202,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.atBottom = false;
         if (this.atTop) {
           // If already at top, then we moving on
-          this.loadPrevChapter.emit();
+          //this.loadPrevChapter.emit();
         }
         this.atTop = true; 
         // Scroll user back to original location
