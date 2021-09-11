@@ -19,7 +19,7 @@ namespace API.Benchmark
         private readonly NaturalSortComparer _naturalSortComparer = new ();
 
 
-        private List<VolumeDto> GenerateVolumes(int max)
+        private static IEnumerable<VolumeDto> GenerateVolumes(int max)
         {
             var random = new Random();
             var maxIterations = random.Next(max) + 1;
@@ -36,7 +36,7 @@ namespace API.Benchmark
             return list;
         }
 
-        private List<ChapterDto> GenerateChapters()
+        private static List<ChapterDto> GenerateChapters()
         {
             var list =  new List<ChapterDto>();
             for (var i = 1; i < 40; i++)

@@ -26,9 +26,6 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
-        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
-        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-        private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         /// <inheritdoc />
         public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
@@ -476,14 +473,10 @@ namespace API.Controllers
 
             if (user.Bookmarks == null) return Ok();
             try {
-                // TODO: See if we can just do a Remove() on the entity to make it faster
                 user.Bookmarks = user.Bookmarks.Where(x =>
                     x.ChapterId == bookmarkDto.ChapterId
                     && x.AppUserId == user.Id
                     && x.Page != bookmarkDto.Page).ToList();
-
-
-
 
                 _unitOfWork.UserRepository.Update(user);
 

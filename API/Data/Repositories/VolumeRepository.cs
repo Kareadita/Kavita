@@ -14,12 +14,10 @@ namespace API.Data.Repositories
     public class VolumeRepository : IVolumeRepository
     {
         private readonly DataContext _context;
-        private readonly IMapper _mapper;
 
-        public VolumeRepository(DataContext context, IMapper mapper)
+        public VolumeRepository(DataContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public void Update(Volume volume)
