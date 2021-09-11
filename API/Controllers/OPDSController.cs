@@ -631,7 +631,7 @@ namespace API.Controllers
             return new FeedEntry()
             {
                 Id = volumeDto.Id.ToString(),
-                Title = volumeDto.IsSpecial ? "Specials" : "Volume " + volumeDto.Name,
+                Title = "Volume " + volumeDto.Name,
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),

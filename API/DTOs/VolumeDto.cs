@@ -13,7 +13,7 @@ namespace API.DTOs
         public int PagesRead { get; set; }
         public DateTime LastModified { get; set; }
         public DateTime Created { get; set; }
-        public bool IsSpecial { get; set; }
+        //public bool IsSpecial { get; set; }
         public int SeriesId { get; set; }
         public ICollection<ChapterDto> Chapters { get; set; }
     }
