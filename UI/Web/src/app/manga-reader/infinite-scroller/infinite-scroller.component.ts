@@ -9,7 +9,7 @@ import { WebtoonImage } from '../_models/webtoon-image';
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
  */
-const SPACER_SCROLL_INTO_PX = 100;
+const SPACER_SCROLL_INTO_PX = 200;
 
 @Component({
   selector: 'app-infinite-scroller',
@@ -188,10 +188,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (totalScroll === totalHeight) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
-        document.querySelector('.spacer.bottom')?.scrollIntoView({behavior: 'smooth'});
-      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { // I can also capture prev total height from when atBottom as capture
-        // This if statement will fire once we scroll into the spacer at all. I would like if it gave me a little more leaway
-        this.loadNextChapter.emit();
+        // Scroll user back to original location
+        this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
+        setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
+      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+        // This if statement will fire once we scroll into the spacer at all
+        //this.loadNextChapter.emit();
+        this.toastr.info('loading next chapter (disabled)');
       }
     } else {
       console.log('scrollTop: ', document.documentElement.scrollTop);
@@ -202,9 +205,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.loadPrevChapter.emit();
         }
         this.atTop = true; 
-        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         // Scroll user back to original location
-        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop, 10);
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2), 10);
       }
     }
 
