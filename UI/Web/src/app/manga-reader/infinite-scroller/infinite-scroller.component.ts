@@ -6,6 +6,11 @@ import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
 
+/**
+ * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
+ */
+const SPACER_SCROLL_INTO_PX = 100;
+
 @Component({
   selector: 'app-infinite-scroller',
   templateUrl: './infinite-scroller.component.html',
@@ -175,13 +180,17 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       // }
       console.log('totalScroll: ', totalScroll);
       console.log('totalHeight: ', totalHeight);
-      this.atTop = false;
+      // If we were at top but have started scrolling down past page 0, remove top spacer
+      if (this.atTop && this.pageNum > 0) {
+        this.atTop = false;
+      }
       if (totalScroll === totalHeight) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
-      } else if (totalScroll >= totalHeight && this.atBottom) { // I can also capture prev total height from when atBottom as capture
+        document.querySelector('.spacer.bottom')?.scrollIntoView({behavior: 'smooth'});
+      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { // I can also capture prev total height from when atBottom as capture
+        // This if statement will fire once we scroll into the spacer at all. I would like if it gave me a little more leaway
         this.loadNextChapter.emit();
-        this.toastr.info('Next chapter loaded', '', {timeOut: 3000});
       }
     } else {
       console.log('scrollTop: ', document.documentElement.scrollTop);
@@ -190,7 +199,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         if (this.atTop) {
           // If already at top, then we moving on
           this.loadPrevChapter.emit();
-          this.toastr.info('Previous chapter loaded', '', {timeOut: 3000});
         }
         this.atTop = true; 
       }

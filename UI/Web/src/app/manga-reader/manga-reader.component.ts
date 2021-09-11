@@ -733,6 +733,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // TODO: Change next and prev to next and previous
   loadChapter(chapterId: number, direction: 'next' | 'prev') {
     if (chapterId >= 0) {
       this.chapterId = chapterId;
@@ -741,6 +742,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
+      const titleCase = direction.slice(0, 1).toUpperCase() + direction.slice(1, direction.length);
+      this.toastr.info(titleCase + ' chapter loaded', '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
       this.toastr.warning('Could not find ' + direction + ' chapter');

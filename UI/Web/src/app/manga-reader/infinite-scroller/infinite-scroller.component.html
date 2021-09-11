@@ -12,17 +12,17 @@
 
 </div>
 
-<div *ngIf="atTop" class="spacer" role="alert" (click)="loadPrevChapter.emit()">
-    <!-- <span class="mx-auto text">Previous Chapter</span>
-    <div class="animation prev"></div> -->
+<div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+    <span class="mx-auto text">Previous Chapter</span>
+    <!-- <div class="animation prev"></div> -->
     <span class="sr-only">Scroll up again to move to next chapter</span>
 </div>
 <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
     <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && debug ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
 </ng-container>
-<div *ngIf="atBottom" class="spacer" role="alert" (click)="loadNextChapter.emit()">
-    <!-- <span class="mx-auto text">Next Chapter</span>
-    <div class="animation next"></div> -->
+<div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
+    <span class="mx-auto text">Next Chapter</span>
+    <!-- <div class="animation next"></div> -->
     <span class="sr-only">Scroll down again to move to next chapter</span>
 </div>
 
