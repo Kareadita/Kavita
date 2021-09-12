@@ -39,18 +39,18 @@ namespace API.Services.Tasks.Scanner
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         }
 
+        /// <summary>
+        /// Gets the list of parserInfos given a Series. If the series does not exist within, return empty list.
+        /// </summary>
+        /// <param name="parsedSeries"></param>
+        /// <param name="series"></param>
+        /// <returns></returns>
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
             var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
                 ps.Format == series.Format && ps.NormalizedName == Parser.Parser.Normalize(series.OriginalName));
-            existingKey ??= new ParsedSeries()
-            {
-                Format = series.Format,
-                Name = series.OriginalName,
-                NormalizedName = Parser.Parser.Normalize(series.OriginalName)
-            };
 
-            return parsedSeries[existingKey];
+            return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
         }
 
         /// <summary>
