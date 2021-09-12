@@ -32,9 +32,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
-  
+
   @Input() direction: number = 0;
-  
+
   /**
    * Stores and emits all the src urls
    */
@@ -134,8 +134,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   handleScrollEvent(event?: any) {
     const verticalOffset = this.direction
-    ? (window.pageXOffset || document.documentElement.scrollLeft|| document.body.scrollLeft || 0)
-    : (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
+                          ? (window.pageXOffset || document.getElementsByClassName('horizontal')[0].scrollLeft || document.body.scrollLeft|| 0)
+                          : (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0);
 
     if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
@@ -195,8 +195,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.webtoonImageWidth = event.target.width;
     }
 
-    this.renderer.setAttribute(event.target, 'width', this.webtoonImageWidth + '');
-    this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+    if (!this.direction) { // WEBTOON
+      this.renderer.setAttribute(event.target, 'width', this.webtoonImageWidth + '');
+      this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+      this.renderer.setAttribute(event.target, 'display', 'block;'+ '');
+    } else { // HORIZONTAL
+      this.renderer.setAttribute(event.target, 'height', document.documentElement.clientHeight + 'px' + '');
+      this.renderer.setAttribute(event.target, 'float', 'left' + '');
+      this.renderer.setAttribute(event.target, 'display', 'inline-block;'+ '');
+    }
 
     this.attachIntersectionObserverElem(event.target);
 
@@ -368,8 +375,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   h_scroll(event: WheelEvent): void {
     if (this.direction) {
-      (<Element>event.target).parentElement!.scrollLeft -= event.deltaY;
+      document.getElementsByClassName('horizontal')[0].scrollLeft -= event.deltaY;
       event.preventDefault();
+      this.handleScrollEvent();
     }
   }
 }
