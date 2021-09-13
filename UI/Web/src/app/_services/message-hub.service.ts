@@ -1,13 +1,15 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
+import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 
 export enum EVENTS {
-  UpdateAvailable = 'UpdateAvailable'
+  UpdateAvailable = 'UpdateAvailable',
+  ScanSeries = 'ScanSeries',
 }
 
 export interface Message<T> {
@@ -26,6 +28,8 @@ export class MessageHubService {
   private messagesSource = new ReplaySubject<Message<any>>(1);
   public messages$ = this.messagesSource.asObservable();
 
+  public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
+
   constructor(private modalService: NgbModal) { }
 
   createHubConnection(user: User) {
@@ -42,6 +46,14 @@ export class MessageHubService {
 
     this.hubConnection.on('receiveMessage', body => {
       //console.log('[Hub] Body: ', body);
+    });
+
+    this.hubConnection.on(EVENTS.ScanSeries, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanSeries,
+        payload: resp.body
+      });
+      this.scanSeries.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

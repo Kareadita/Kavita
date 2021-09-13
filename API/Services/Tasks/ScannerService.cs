@@ -14,7 +14,9 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;
 using API.Services.Tasks.Scanner;
+using API.SignalR;
 using Hangfire;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
@@ -27,10 +29,11 @@ namespace API.Services.Tasks
        private readonly IMetadataService _metadataService;
        private readonly IBookService _bookService;
        private readonly ICacheService _cacheService;
+       private readonly IHubContext<MessageHub> _messageHub;
        private readonly NaturalSortComparer _naturalSort = new ();
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
-          IMetadataService metadataService, IBookService bookService, ICacheService cacheService)
+          IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
@@ -38,6 +41,7 @@ namespace API.Services.Tasks
           _metadataService = metadataService;
           _bookService = bookService;
           _cacheService = cacheService;
+          _messageHub = messageHub;
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -76,6 +80,15 @@ namespace API.Services.Tasks
                 CleanupDbEntities();
                 BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+                // TODO: Tell UI that this series is done
+                await _messageHub.Clients.All.SendAsync("ScanSeries", new SignalRMessage
+                {
+                    Name = "ScanSeries",
+                    Body = new
+                    {
+                        SeriesId = seriesId
+                    }
+                }, cancellationToken: token);
             }
             else
             {
@@ -83,6 +96,7 @@ namespace API.Services.Tasks
                     "There was a critical error that resulted in a failed scan. Please check logs and rescan");
                 await _unitOfWork.RollbackAsync();
             }
+
        }
 
        /// <summary>
