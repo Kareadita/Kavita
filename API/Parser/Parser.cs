@@ -149,7 +149,7 @@ namespace API.Parser
             RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
-                @"(?<Series>.*)(\b|_|-|\s)(?:(chapter(\b|_|-|\s))|sp)\d",
+                @"(?<Series>.*)(\b|_|-|\s)(?:(ch(apter|\.)(\b|_|-|\s))|sp)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
