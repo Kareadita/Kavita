@@ -294,6 +294,11 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // Batman Wayne Family Adventures - Ep. 001 - Moving In
+            new Regex(
+                @"^(?<Series>.+?)(\s|_|-)?(?:Ep\.?)(\s|_|-)+\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.+?)(?: \d+)",
