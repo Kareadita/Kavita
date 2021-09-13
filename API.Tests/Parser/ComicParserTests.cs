@@ -23,6 +23,8 @@ namespace API.Tests.Parser
         [InlineData("Amazing Man Comics chapter 25", "Amazing Man Comics")]
         [InlineData("Amazing Man Comics issue #25", "Amazing Man Comics")]
         [InlineData("Teen Titans v1 038 (1972) (c2c).cbr", "Teen Titans")]
+        [InlineData("Batman Beyond 02 (of 6) (1999)", "Batman Beyond")]
+        [InlineData("Batman Beyond - Return of the Joker (2001)", "Batman Beyond - Return of the Joker")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
