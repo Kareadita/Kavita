@@ -245,9 +245,9 @@ namespace API.Parser
                 @"(?<Series>.*)(\s|_|-)#",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
-            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar
+            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
             new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(ch)?\d+-?\d*",
+                @"^(?!Vol\.?)(?<Series>.+?)( |_|-)(?<!-)(ch)?\d+-?\d*",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
