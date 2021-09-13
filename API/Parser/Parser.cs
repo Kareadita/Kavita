@@ -323,41 +323,44 @@ namespace API.Parser
 
         private static readonly Regex[] ComicVolumeRegex = new[]
         {
-            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            new Regex(
-                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // 01 Spider-Man & Wolverine 01.cbr
-            new Regex(
-                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Wildcat (1 of 3)
-            new Regex(
-                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            // new Regex(
+            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // 01 Spider-Man & Wolverine 01.cbr
+            // new Regex(
+            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // Batman & Wildcat (1 of 3)
+            // new Regex(
+            //     @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
-            new Regex(
-                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // BUG: Negative lookbehind has to be fixed width
+            // NOTE: The case this is built for does not make much sense.
+            // new Regex(
+            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
-            new Regex(
-                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Robin the Teen Wonder #0
-            new Regex(
-                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // new Regex(
+            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // Batman & Robin the Teen Wonder #0
+            // new Regex(
+            //     @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
