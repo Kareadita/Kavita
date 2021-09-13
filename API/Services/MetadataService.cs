@@ -223,10 +223,10 @@ namespace API.Services
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    UpdateMetadata(chapter, true);
+                    UpdateMetadata(chapter, false);
                 }
 
-                UpdateMetadata(volume, true);
+                UpdateMetadata(volume, false);
             }
 
             UpdateMetadata(series, true);
