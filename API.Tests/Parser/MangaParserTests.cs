@@ -131,7 +131,7 @@ namespace API.Tests.Parser
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
-        [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
+        [InlineData("Love Hina - Special.cbz", "Love Hina")] // This has to be a fallback case
         [InlineData("Ani-Hina Art Collection.cbz", "")] // This has to be a fallback case
         [InlineData("Magi - Ch.252-005.cbz", "Magi")]
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
@@ -161,6 +161,8 @@ namespace API.Tests.Parser
         [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo")]
         [InlineData("The Duke of Death and His Black Maid - Ch. 177 - The Ball (3).cbz", "The Duke of Death and His Black Maid")]
         [InlineData("A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)", "A Compendium of Ghosts")]
+        [InlineData("The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake", "The Duke of Death and His Black Maid")]
+        [InlineData("Vol. 04 Ch. 054.5", "")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -410,6 +412,14 @@ namespace API.Tests.Parser
             {
               Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
               Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Kono Subarashii Sekai ni Bakuen wo!\Vol. 00 Ch. 000.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Kono Subarashii Sekai ni Bakuen wo!", Volumes = "0", Edition = "",
+              Chapters = "0", Filename = "Vol. 00 Ch. 000.cbz", Format = MangaFormat.Archive,
               FullFilePath = filepath, IsSpecial = false
             });
 

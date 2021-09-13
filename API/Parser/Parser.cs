@@ -102,11 +102,17 @@ namespace API.Parser
                 @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
+            // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
+            new Regex(
+                @"(?<Series>.+?)(\s|_|-)+(?:Vol(ume|\.)?(\s|_|-)+\d+)(\s|_|-)+(?:(Ch|Chapter|Ch)\.?)(\s|_|-)+(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
@@ -115,11 +121,6 @@ namespace API.Parser
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex)
-            new Regex(
-                @"(?<Series>.*)(\s|_|-)(?:Volume(\s|_|-)+\d+)(\s|_|-)+(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
@@ -149,7 +150,7 @@ namespace API.Parser
             RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
-                @"(?<Series>.*)(\b|_|-|\s)(?:(ch(apter|\.)(\b|_|-|\s))|sp)\d",
+                @"^(?<Series>(?!Vol).+?)(?:(ch(apter|\.)(\b|_|-|\s))|sp)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
