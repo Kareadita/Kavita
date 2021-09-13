@@ -150,7 +150,7 @@ namespace API.Parser
             RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
-                @"^(?<Series>(?!Vol).+?)(?:(ch(apter|\.)(\b|_|-|\s))|sp)",
+                @"^(?<Series>(?!Vol).+?)(?:(ch(apter|\.)(\b|_|-|\s))|sp)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
@@ -939,6 +939,9 @@ namespace API.Parser
 
         /// <summary>
         /// Translates _ -> spaces, trims front and back of string, removes release groups
+        /// <example>
+        /// Hippos_the_Great [Digital], -> Hippos the Great
+        /// </example>
         /// </summary>
         /// <param name="title"></param>
         /// <returns></returns>
@@ -951,7 +954,7 @@ namespace API.Parser
             title = RemoveSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
-            if (title.EndsWith("-"))
+            if (title.EndsWith("-") || title.EndsWith(","))
             {
                 title = title.Substring(0, title.Length - 1);
             }

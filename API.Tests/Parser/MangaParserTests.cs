@@ -131,7 +131,7 @@ namespace API.Tests.Parser
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
-        [InlineData("Love Hina - Special.cbz", "Love Hina")] // This has to be a fallback case
+        [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
         [InlineData("Ani-Hina Art Collection.cbz", "")] // This has to be a fallback case
         [InlineData("Magi - Ch.252-005.cbz", "Magi")]
         [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "Umineko no Naku Koro ni")]
@@ -163,6 +163,9 @@ namespace API.Tests.Parser
         [InlineData("A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)", "A Compendium of Ghosts")]
         [InlineData("The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake", "The Duke of Death and His Black Maid")]
         [InlineData("Vol. 04 Ch. 054.5", "")]
+        [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
+        [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
+        [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
