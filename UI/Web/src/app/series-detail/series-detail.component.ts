@@ -140,12 +140,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  loadSeriesMetadata(seriesId: number) {
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
-  }
-
   handleSeriesActionCallback(action: Action, series: Series) {
     this.actionInProgress = true;
     switch(action) {
@@ -436,7 +430,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);
-        this.loadSeriesMetadata(this.series.id);
         if (closeResult.coverImageUpdate) {
           // Random triggers a load change without any problems with API
           this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
