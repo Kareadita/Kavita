@@ -78,17 +78,10 @@ namespace API.Services.Tasks
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
 
                 CleanupDbEntities();
-                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
+                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, false));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
-                // TODO: Tell UI that this series is done
-                await _messageHub.Clients.All.SendAsync("ScanSeries", new SignalRMessage
-                {
-                    Name = "ScanSeries",
-                    Body = new
-                    {
-                        SeriesId = seriesId
-                    }
-                }, cancellationToken: token);
+                // Tell UI that this series is done
+                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId), cancellationToken: token);
             }
             else
             {

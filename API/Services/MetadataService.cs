@@ -9,6 +9,8 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -20,6 +22,7 @@ namespace API.Services
         private readonly IArchiveService _archiveService;
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
+        private readonly IHubContext<MessageHub> _messageHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         /// <summary>
         /// Width of the Thumbnail generation
@@ -27,13 +30,14 @@ namespace API.Services
         public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-            IArchiveService archiveService, IBookService bookService, IImageService imageService)
+            IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _archiveService = archiveService;
             _bookService = bookService;
             _imageService = imageService;
+            _messageHub = messageHub;
         }
 
         /// <summary>
@@ -207,7 +211,7 @@ namespace API.Services
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="seriesId"></param>
-        public void RefreshMetadataForSeries(int libraryId, int seriesId)
+        public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
             var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
@@ -223,19 +227,20 @@ namespace API.Services
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    UpdateMetadata(chapter, false);
+                    UpdateMetadata(chapter, forceUpdate);
                 }
 
-                UpdateMetadata(volume, false);
+                UpdateMetadata(volume, forceUpdate);
             }
 
             UpdateMetadata(series, true);
             _unitOfWork.SeriesRepository.Update(series);
 
 
-            if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.CommitAsync()).Result)
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation("Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.RefreshMetadataEvent(libraryId, seriesId));
             }
         }
     }

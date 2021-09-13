@@ -1,4 +1,5 @@
-﻿using API.Entities;
+﻿using System.Threading.Tasks;
+using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -19,6 +20,6 @@ namespace API.Interfaces.Services
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="seriesId"></param>
-        void RefreshMetadataForSeries(int libraryId, int seriesId);
+        Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false);
     }
 }
