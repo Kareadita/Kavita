@@ -49,6 +49,7 @@ namespace API.Tests.Parser
         [InlineData("Superman v1 024 (09-10 1943)", "1")]
         [InlineData("Amazing Man Comics chapter 25", "0")]
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
+        [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
