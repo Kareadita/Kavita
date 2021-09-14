@@ -332,6 +332,7 @@ namespace API.Controllers
 
             if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
 
+            //return Ok(true);
             return BadRequest("Could not save progress");
         }
 

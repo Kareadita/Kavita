@@ -74,15 +74,17 @@ namespace API.Interfaces.Services
                     return true;
                 }
             }
-            catch (DBConcurrencyException exception)
-            {
-                // Swallow exception, nothing happened
-                _logger.LogError(exception, "Could not save progress due to data being updated since this was called");
-                return true;
-            }
+            // catch (DBConcurrencyException exception)
+            // {
+            //     // Swallow exception, nothing happened
+            //     _logger.LogError(exception, "Could not save progress due to data being updated since this was called");
+            //     return true;
+            // }
             catch (Exception exception)
             {
+                // TODO: Figure out why this sometimes fails when updating too fast
                 // When opening a fresh chapter, this seems to fail (sometimes)
+                // This issue is that the data updates while we are saving. It usually occurs from the webtoon reader when scrolling fast.
                 _logger.LogError(exception, "Could not save progress");
                 await _unitOfWork.RollbackAsync();
             }

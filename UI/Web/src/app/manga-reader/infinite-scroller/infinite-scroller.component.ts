@@ -212,7 +212,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.atTop = false;
       }
       // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
-      if (totalScroll - totalHeight <= 1) { // totalScroll === totalHeight
+      if (totalScroll === totalHeight && !this.atBottom) { // totalScroll === totalHeight, totalScroll - totalHeight <= 1
         this.atBottom = true;
         this.setPageNum(this.totalPages);
         // Scroll user back to original location
