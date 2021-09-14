@@ -117,7 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Logs | DEBUG_MODES.ActionBar | DEBUG_MODES.Outline;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;// DEBUG_MODES.Logs | DEBUG_MODES.ActionBar | DEBUG_MODES.Outline;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -244,8 +244,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         // Scroll user back to original location (FF Mobile: This is causing jank)
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         console.log('up: this.previousScrollHeightMinusTop: ', this.previousScrollHeightMinusTop);
-        console.log('up: new scroll top: ', document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2));
-        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2), 10);
+        console.log('up: new scroll top (old): ', document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2));
+        console.log('up: new scroll top (new): ', (SPACER_SCROLL_INTO_PX * 2));
+
+        // This might work, but not sure. I think it's happenening too fast
+        setTimeout(() => document.documentElement.scrollTop = (SPACER_SCROLL_INTO_PX / 2), 100); // document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2)
       }
       if (this.atTop) {
         // If already at top, then we moving on
