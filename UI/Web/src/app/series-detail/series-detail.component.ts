@@ -124,6 +124,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.messageHub.scanSeries.pipe(takeUntil(this.onDestroy)).subscribe((event: ScanSeriesEvent) => {
       if (event.seriesId == this.series.id)
       this.loadSeries(seriesId);
+      this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+      this.toastr.success('Scan series completed');
     });
 
     const seriesId = parseInt(routeId, 10);
