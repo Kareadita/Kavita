@@ -17,6 +17,19 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage ScanLibraryEvent(int libraryId, string stage)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.ScanLibrary,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Stage = stage
+                }
+            };
+        }
+
         public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
         {
             return new SignalRMessage()
@@ -38,5 +51,6 @@ namespace API.SignalR
                 Body = update
             };
         }
+
     }
 }

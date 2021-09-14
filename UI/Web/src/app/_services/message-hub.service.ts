@@ -5,11 +5,14 @@ import { User } from '@sentry/angular';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
+import { ScanLibraryEvent } from '../_models/events/scan-library-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
+  ScanLibrary = 'ScanLibrary',
+  RefreshMetadata = 'RefreshMetadata',
 }
 
 export interface Message<T> {
@@ -29,6 +32,7 @@ export class MessageHubService {
   public messages$ = this.messagesSource.asObservable();
 
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
+  public scanLibrary: EventEmitter<ScanLibraryEvent> = new EventEmitter<ScanLibraryEvent>();
 
   constructor(private modalService: NgbModal) { }
 
@@ -54,6 +58,17 @@ export class MessageHubService {
         payload: resp.body
       });
       this.scanSeries.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.ScanLibrary, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanLibrary,
+        payload: resp.body
+      });
+      this.scanLibrary.emit(resp.body);
+      // if ((resp.body as ScanLibraryEvent).stage === 'complete') {
+      //   this.toastr.
+      // }
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

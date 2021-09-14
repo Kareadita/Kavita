@@ -12,7 +12,7 @@ namespace API.Interfaces.Services
         /// </summary>
         /// <param name="libraryId">Library to scan against</param>
         /// <param name="forceUpdate">Force overwriting for cover images</param>
-        void ScanLibrary(int libraryId, bool forceUpdate);
+        Task ScanLibrary(int libraryId, bool forceUpdate);
         void ScanLibraries();
         Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token);
     }

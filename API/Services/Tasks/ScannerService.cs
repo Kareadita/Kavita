@@ -123,43 +123,6 @@ namespace API.Services.Tasks
 
        }
 
-       /// <summary>
-       /// Finds the highest directories from a set of MangaFiles
-       /// </summary>
-       /// <param name="library"></param>
-       /// <param name="files"></param>
-       /// <returns></returns>
-       // private static Dictionary<string, string> FindHighestDirectoriesFromFiles(Library library, IList<MangaFile> files)
-       // {
-       //    var stopLookingForDirectories = false;
-       //    var dirs = new Dictionary<string, string>();
-       //    foreach (var folder in library.Folders)
-       //    {
-       //       if (stopLookingForDirectories) break;
-       //       foreach (var file in files)
-       //       {
-       //          if (!file.FilePath.Contains(folder.Path)) continue;
-       //
-       //          var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
-       //          if (parts.Count == 0)
-       //          {
-       //             // Break from all loops, we done, just scan folder.Path (library root)
-       //             dirs.Add(folder.Path, string.Empty);
-       //             stopLookingForDirectories = true;
-       //             break;
-       //          }
-       //
-       //          var fullPath = Path.Join(folder.Path, parts.Last());
-       //          if (!dirs.ContainsKey(fullPath))
-       //          {
-       //             dirs.Add(fullPath, string.Empty);
-       //          }
-       //       }
-       //    }
-       //
-       //    return dirs;
-       // }
-       //
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -183,7 +146,7 @@ namespace API.Services.Tasks
        /// <param name="forceUpdate"></param>
        [DisableConcurrentExecution(360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public void ScanLibrary(int libraryId, bool forceUpdate)
+       public async Task ScanLibrary(int libraryId, bool forceUpdate)
        {
            Library library;
            try
@@ -226,6 +189,7 @@ namespace API.Services.Tasks
            CleanupAbandonedChapters();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibrary, MessageFactory.ScanLibraryEvent(libraryId, "complete"));
        }
 
        /// <summary>
