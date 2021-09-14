@@ -4,12 +4,12 @@
     <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
     <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
     <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
-    <strong>Current Page:</strong>{{pageNum}}
-    <strong>Width:</strong> {{webtoonImageWidth}}
     <strong>Pages:</strong> {{pageNum}} / {{totalPages}}
     <strong>At Top:</strong> {{atTop}}
     <strong>At Bottom:</strong> {{atBottom}}
-
+    <strong>Total Height:</strong> {{getTotalHeight()}}
+    <strong>Total Scroll:</strong> {{getTotalScroll()}}
+    <strong>Scroll Top:</strong> {{getScrollTop()}}
 </div>
 
 <div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">

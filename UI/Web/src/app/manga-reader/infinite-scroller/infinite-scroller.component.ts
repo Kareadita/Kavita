@@ -196,13 +196,24 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
+  getTotalHeight() {
+    let totalHeight = 0;
+    document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
+    return totalHeight;
+  }
+  getTotalScroll() {
+    return document.documentElement.offsetHeight + document.documentElement.scrollTop;
+  }
+  getScrollTop() {
+    return document.documentElement.scrollTop
+  }
+
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-      let totalHeight = 0;
-      document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-      const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+      const totalHeight = this.getTotalHeight();
+      const totalScroll = this.getTotalScroll();
 
       console.log('down: totalScroll: ', totalScroll + (this.debugMode & DEBUG_MODES.None ? 1 : 0));
       console.log('down: totalHeight: ', totalHeight);
@@ -217,6 +228,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.setPageNum(this.totalPages);
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
+        console.log('down: this.previousScrollHeightMinusTop: ', this.previousScrollHeightMinusTop);
+        console.log('down: new scroll top: ', this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
         setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
@@ -225,16 +238,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       console.log('up: totalScroll: ', document.documentElement.scrollTop);
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
-      if (document.documentElement.scrollTop < 5 && this.pageNum === 0) { // document.documentElement.scrollTop === 0
+      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) { // document.documentElement.scrollTop === 0
         this.atBottom = false;
-        if (this.atTop) {
-          // If already at top, then we moving on
-          //this.loadPrevChapter.emit();
-        }
         this.atTop = true; 
-        // Scroll user back to original location
+        // Scroll user back to original location (FF Mobile: This is causing jank)
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        console.log('up: this.previousScrollHeightMinusTop: ', this.previousScrollHeightMinusTop);
+        console.log('up: new scroll top: ', document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2));
         setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2), 10);
+      }
+      if (this.atTop) {
+        // If already at top, then we moving on
+        //this.loadPrevChapter.emit();
       }
     }
 
@@ -456,7 +471,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
-    //if (!this.debug) { return; }
 
     if (extraData !== undefined) {
       console.log(message, extraData);  

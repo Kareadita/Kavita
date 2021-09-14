@@ -55,14 +55,15 @@ namespace API.Controllers
             {
                 var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-
-                var content = await _directoryService.ReadFileAsync(path);
+                // TODO: Try out this new code. We don't cache but we also don't load the byte[] into memory.
+                //var content = await _directoryService.ReadFileAsync(path);
                 var format = Path.GetExtension(path).Replace(".", "");
 
                 // Calculates SHA1 Hash for byte[]
-                Response.AddCacheHeader(content);
-
-                return File(content, "image/" + format);
+                //Response.AddCacheHeader(content);
+                //Response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
+                return PhysicalFile(path, "image/" + format);
+                //return File(content, "image/" + format);
             }
             catch (Exception)
             {
