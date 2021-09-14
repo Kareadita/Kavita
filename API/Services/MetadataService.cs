@@ -85,14 +85,17 @@ namespace API.Services
         /// </summary>
         /// <param name="chapter"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public void UpdateMetadata(Chapter chapter, bool forceUpdate)
+        public bool UpdateMetadata(Chapter chapter, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
             if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
                 chapter.CoverImage = GetCoverImage(firstFile);
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -100,17 +103,18 @@ namespace API.Services
         /// </summary>
         /// <param name="volume"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public void UpdateMetadata(Volume volume, bool forceUpdate)
+        public bool UpdateMetadata(Volume volume, bool forceUpdate)
         {
+            // We need to check if Volume coverImage matches first chapters if forceUpdate is false
             if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, forceUpdate
-                , false)) return;
+                , false)) return false;
 
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
-
-            if (firstChapter == null) return;
+            if (firstChapter == null) return false;
 
             volume.CoverImage = firstChapter.CoverImage;
+            return true;
         }
 
         /// <summary>
@@ -118,9 +122,10 @@ namespace API.Services
         /// </summary>
         /// <param name="series"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public void UpdateMetadata(Series series, bool forceUpdate)
+        public bool UpdateMetadata(Series series, bool forceUpdate)
         {
-            if (series == null) return;
+            var madeUpdate = false;
+            if (series == null) return false;
             if (ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
             {
                 series.Volumes ??= new List<Volume>();
@@ -133,42 +138,46 @@ namespace API.Services
                     {
                         coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
+                        madeUpdate = true;
                     }
 
                     if (!HasCoverImage(coverImage))
                     {
                         coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                             .FirstOrDefault()?.CoverImage;
+                        madeUpdate = true;
                     }
                 }
                 series.CoverImage = firstCover?.CoverImage ?? coverImage;
             }
 
-            UpdateSeriesSummary(series, forceUpdate);
+            return UpdateSeriesSummary(series, forceUpdate) || madeUpdate ;
         }
 
-        private void UpdateSeriesSummary(Series series, bool forceUpdate)
+        private bool UpdateSeriesSummary(Series series, bool forceUpdate)
         {
-            if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
+            if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return false;
 
             var isBook = series.Library.Type == LibraryType.Book;
             var firstVolume = series.Volumes.FirstWithChapters(isBook);
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
             var firstFile = firstChapter?.Files.FirstOrDefault();
-            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
-            if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
+            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return false;
+            if (Parser.Parser.IsPdf(firstFile.FilePath)) return false;
 
             if (series.Format is MangaFormat.Archive or MangaFormat.Epub)
             {
                 var summary = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-                if (string.IsNullOrEmpty(series.Summary))
+                if (!string.IsNullOrEmpty(series.Summary))
                 {
                     series.Summary = summary;
+                    firstFile.LastModified = DateTime.Now;
+                    return true;
                 }
             }
-
-            firstFile.LastModified = DateTime.Now;
+            firstFile.LastModified = DateTime.Now; // NOTE: Should I put this here as well since it might not have actually been parsed?
+            return false;
         }
 
 
@@ -187,17 +196,19 @@ namespace API.Services
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
             foreach (var series in library.Series)
             {
+                var volumeUpdated = false;
                 foreach (var volume in series.Volumes)
                 {
+                    var chapterUpdated = false;
                     foreach (var chapter in volume.Chapters)
                     {
-                        UpdateMetadata(chapter, forceUpdate);
+                        chapterUpdated = UpdateMetadata(chapter, forceUpdate);
                     }
 
-                    UpdateMetadata(volume, forceUpdate);
+                    volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
                 }
 
-                UpdateMetadata(series, forceUpdate);
+                UpdateMetadata(series, volumeUpdated || forceUpdate);
                 _unitOfWork.SeriesRepository.Update(series);
             }
 
@@ -226,17 +237,19 @@ namespace API.Services
                 return;
             }
             _logger.LogInformation("Beginning metadata refresh of {SeriesName}", series.Name);
+            var volumeUpdated = false;
             foreach (var volume in series.Volumes)
             {
+                var chapterUpdated = false;
                 foreach (var chapter in volume.Chapters)
                 {
-                    UpdateMetadata(chapter, forceUpdate);
+                    chapterUpdated = UpdateMetadata(chapter, forceUpdate);
                 }
 
-                UpdateMetadata(volume, forceUpdate);
+                volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
             }
 
-            UpdateMetadata(series, true);
+            UpdateMetadata(series, volumeUpdated || forceUpdate);
             _unitOfWork.SeriesRepository.Update(series);
 
 
