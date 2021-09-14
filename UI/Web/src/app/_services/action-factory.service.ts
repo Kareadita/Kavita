@@ -260,6 +260,12 @@ export class ActionFactoryService {
         requiresAdmin: false
       },
       {
+        action: Action.IncognitoRead,
+        title: 'Read in Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
         callback: this.dummyCallback,
