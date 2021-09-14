@@ -55,16 +55,5 @@ namespace API.Entities
         /// Last date this was updated
         /// </summary>
         public DateTime LastModified { get; set; }
-
-        // /// <inheritdoc />
-        // [ConcurrencyCheck]
-        // public uint RowVersion { get; private set; }
-        //
-        //
-        // /// <inheritdoc />
-        // public void OnSavingChanges()
-        // {
-        //     RowVersion++;
-        // }
     }
 }

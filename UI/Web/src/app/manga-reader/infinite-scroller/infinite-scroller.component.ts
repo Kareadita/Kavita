@@ -412,15 +412,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages + 1);
+      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages + 1);
 
-      if (startingIndex === this.totalPages) {
+      if (startingIndex === this.totalPages + 1) {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages + 1);
+      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages + 1);
     }
 
 
