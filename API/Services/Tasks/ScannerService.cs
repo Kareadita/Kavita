@@ -51,7 +51,7 @@ namespace API.Services.Tasks
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
-           var dirs = FindHighestDirectoriesFromFiles(library, files);
+           var dirs = DirectoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(f => f.Path), files.Select(f => f.FilePath).ToList());
            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{ seriesId });
 
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
@@ -67,6 +67,37 @@ namespace API.Services.Tasks
                parsedSeries.Remove(key);
            }
 
+           if (parsedSeries.Count == 0)
+           {
+               // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
+               // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
+               // is the series folder.
+               var existingFolder = dirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
+               if (dirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
+               {
+                   dirs = new Dictionary<string, string>();
+                   var path = Path.GetPathRoot(existingFolder);
+                   if (!string.IsNullOrEmpty(path))
+                   {
+                       dirs[path] = string.Empty;
+                   }
+               }
+               _logger.LogDebug("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
+               scanner = new ParseScannedFiles(_bookService, _logger);
+               parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
+               totalFiles += totalFiles2;
+               scanElapsedTime += scanElapsedTime2;
+
+               // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
+               // Hence we clear out anything but what we selected for
+               firstSeries = library.Series.FirstOrDefault();
+               keys = parsedSeries.Keys;
+               foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
+               {
+                   parsedSeries.Remove(key);
+               }
+           }
+
            var sw = new Stopwatch();
            UpdateLibrary(library, parsedSeries);
 
@@ -78,7 +109,7 @@ namespace API.Services.Tasks
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
 
                 CleanupDbEntities();
-                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, false));
+                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
                 // Tell UI that this series is done
                 await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId), cancellationToken: token);
@@ -98,37 +129,37 @@ namespace API.Services.Tasks
        /// <param name="library"></param>
        /// <param name="files"></param>
        /// <returns></returns>
-       private static Dictionary<string, string> FindHighestDirectoriesFromFiles(Library library, IList<MangaFile> files)
-       {
-          var stopLookingForDirectories = false;
-          var dirs = new Dictionary<string, string>();
-          foreach (var folder in library.Folders)
-          {
-             if (stopLookingForDirectories) break;
-             foreach (var file in files)
-             {
-                if (!file.FilePath.Contains(folder.Path)) continue;
-
-                var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
-                if (parts.Count == 0)
-                {
-                   // Break from all loops, we done, just scan folder.Path (library root)
-                   dirs.Add(folder.Path, string.Empty);
-                   stopLookingForDirectories = true;
-                   break;
-                }
-
-                var fullPath = Path.Join(folder.Path, parts.Last());
-                if (!dirs.ContainsKey(fullPath))
-                {
-                   dirs.Add(fullPath, string.Empty);
-                }
-             }
-          }
-
-          return dirs;
-       }
-
+       // private static Dictionary<string, string> FindHighestDirectoriesFromFiles(Library library, IList<MangaFile> files)
+       // {
+       //    var stopLookingForDirectories = false;
+       //    var dirs = new Dictionary<string, string>();
+       //    foreach (var folder in library.Folders)
+       //    {
+       //       if (stopLookingForDirectories) break;
+       //       foreach (var file in files)
+       //       {
+       //          if (!file.FilePath.Contains(folder.Path)) continue;
+       //
+       //          var parts = DirectoryService.GetFoldersTillRoot(folder.Path, file.FilePath).ToList();
+       //          if (parts.Count == 0)
+       //          {
+       //             // Break from all loops, we done, just scan folder.Path (library root)
+       //             dirs.Add(folder.Path, string.Empty);
+       //             stopLookingForDirectories = true;
+       //             break;
+       //          }
+       //
+       //          var fullPath = Path.Join(folder.Path, parts.Last());
+       //          if (!dirs.ContainsKey(fullPath))
+       //          {
+       //             dirs.Add(fullPath, string.Empty);
+       //          }
+       //       }
+       //    }
+       //
+       //    return dirs;
+       // }
+       //
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]

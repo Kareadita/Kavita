@@ -176,5 +176,6 @@ namespace API.Services
         {
             await _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate);
         }
+
     }
 }

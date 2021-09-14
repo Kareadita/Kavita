@@ -426,6 +426,14 @@ namespace API.Tests.Parser
               FullFilePath = filepath, IsSpecial = false
             });
 
+            filepath = @"E:\Manga\Toukyou Akazukin\Vol. 01 Ch. 001.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Toukyou Akazukin", Volumes = "1", Edition = "",
+              Chapters = "1", Filename = "Vol. 01 Ch. 001.cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
             // If an image is cover exclusively, ignore it
             filepath = @"E:\Manga\Seraph of the End\cover.png";
             expected.Add(filepath, null);
