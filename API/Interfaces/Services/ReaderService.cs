@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -44,7 +45,8 @@ namespace API.Interfaces.Services
                 if (userProgress == null)
                 {
                     // Create a user object
-                    var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                    var userWithProgress =
+                        await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
                     userWithProgress.Progresses ??= new List<AppUserProgress>();
                     userWithProgress.Progresses.Add(new AppUserProgress
                     {
@@ -71,6 +73,12 @@ namespace API.Interfaces.Services
                 {
                     return true;
                 }
+            }
+            catch (DBConcurrencyException exception)
+            {
+                // Swallow exception, nothing happened
+                _logger.LogError(exception, "Could not save progress due to data being updated since this was called");
+                return true;
             }
             catch (Exception exception)
             {
