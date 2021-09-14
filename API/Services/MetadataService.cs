@@ -159,10 +159,13 @@ namespace API.Services
             if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-            var summary = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-            if (string.IsNullOrEmpty(series.Summary))
+            if (series.Format is MangaFormat.Archive or MangaFormat.Epub)
             {
-                series.Summary = summary;
+                var summary = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
+                if (string.IsNullOrEmpty(series.Summary))
+                {
+                    series.Summary = summary;
+                }
             }
 
             firstFile.LastModified = DateTime.Now;
