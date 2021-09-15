@@ -117,11 +117,12 @@ namespace API.Data.Repositories
             return volumes;
         }
 
-        private void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
+        private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
         {
+            var sorter = new NaturalSortComparer();
             foreach (var v in volumes.Where(vDto => vDto.Number == 0))
             {
-                v.Chapters = v.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()).ToList();
+                v.Chapters = v.Chapters.OrderBy(x => x.Range, sorter).ToList();
             }
         }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
@@ -21,17 +20,15 @@ namespace API.Controllers
     /// </summary>
     public class ReaderController : BaseApiController
     {
-        private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
 
         /// <inheritdoc />
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
+        public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
         {
-            _directoryService = directoryService;
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
