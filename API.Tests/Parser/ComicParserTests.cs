@@ -27,6 +27,7 @@ namespace API.Tests.Parser
         [InlineData("Batman Beyond - Return of the Joker (2001)", "Batman Beyond - Return of the Joker")]
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "Invincible")]
         [InlineData("Batman Wayne Family Adventures - Ep. 001 - Moving In", "Batman Wayne Family Adventures")]
+        [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -74,6 +75,7 @@ namespace API.Tests.Parser
         [InlineData("Amazing Man Comics chapter 25", "25")]
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "33.5")]
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
+        [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

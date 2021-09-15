@@ -396,6 +396,11 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // Saga 001 (2012) (Digital) (Empire-Zone)
+            new Regex(
+                @"(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)\s\(\d{4}",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_)c(hapter)( |_)(?<Chapter>\d*)",
