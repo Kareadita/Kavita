@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, take, takeWhile } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
@@ -13,6 +14,7 @@ import { DownloadService } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
@@ -23,6 +25,7 @@ import { ActionItem, ActionFactoryService, Action } from '../_services/action-fa
 import { ActionService } from '../_services/action.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
+import { MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -32,7 +35,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
-export class SeriesDetailComponent implements OnInit {
+export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   series!: Series;
   volumes: Volume[] = [];
@@ -76,6 +79,8 @@ export class SeriesDetailComponent implements OnInit {
    */
   actionInProgress: boolean = false;
 
+  private onDestroy: Subject<void> = new Subject();
+
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -97,7 +102,7 @@ export class SeriesDetailComponent implements OnInit {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService) {
+              public imageSerivce: ImageService, private messageHub: MessageHubService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -116,20 +121,25 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
+    this.messageHub.scanSeries.pipe(takeUntil(this.onDestroy)).subscribe((event: ScanSeriesEvent) => {
+      if (event.seriesId == this.series.id)
+      this.loadSeries(seriesId);
+      this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+      this.toastr.success('Scan series completed');
+    });
+
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.loadSeriesMetadata(seriesId);
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
       this.loadSeries(seriesId);
     });
   }
 
-  loadSeriesMetadata(seriesId: number) {
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
@@ -422,7 +432,6 @@ export class SeriesDetailComponent implements OnInit {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);
-        this.loadSeriesMetadata(this.series.id);
         if (closeResult.coverImageUpdate) {
           // Random triggers a load change without any problems with API
           this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));

@@ -23,7 +23,7 @@ namespace API.Comparators
         {
             if (x == y) return 0;
 
-            // BUG: Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.
+            // Should be fixed: Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.
             if (!_table.TryGetValue(x ?? Empty, out var x1))
             {
                 x1 = Regex.Split(x ?? Empty, "([0-9]+)");
@@ -33,6 +33,7 @@ namespace API.Comparators
             if (!_table.TryGetValue(y ?? Empty, out var y1))
             {
                 y1 = Regex.Split(y ?? Empty, "([0-9]+)");
+                // Should be fixed: EXCEPTION: An item with the same key has already been added. Key: M:\Girls of the Wild's\Girls of the Wild's - Ep. 083 (Season 1) [LINE Webtoon].cbz
                 _table.Add(y ?? Empty, y1);
             }
 

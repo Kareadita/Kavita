@@ -26,6 +26,7 @@ export class ReadingListDetailComponent implements OnInit {
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
   isLoading: boolean = false;
+  accessibilityMode: boolean = false;
 
   // Downloading
   hasDownloadingRole: boolean = false;

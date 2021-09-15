@@ -4,6 +4,8 @@ using API.Entities;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
+using API.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -19,10 +21,11 @@ namespace API.Tests.Services
         private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         private readonly ILogger<MetadataService> _logger = Substitute.For<ILogger<MetadataService>>();
+        private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
 
         public MetadataServiceTests()
         {
-            _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService);
+            _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService, _messageHub);
         }
 
         [Fact]
@@ -106,6 +109,17 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
+            }, false, false));
+        }
+
+        [Fact]
+
+        public void ShouldUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
+        {
+            Assert.False(MetadataService.ShouldUpdateCoverImage(new byte[] {1}, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = DateTime.Now
             }, false, false));
         }
     }

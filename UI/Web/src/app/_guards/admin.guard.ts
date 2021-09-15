@@ -19,7 +19,7 @@ export class AdminGuard implements CanActivate {
         if (this.accountService.hasAdminRole(user)) {
           return true;
         }
-
+        
         this.toastr.error('You are not authorized to view this page.');
         return false;
       })

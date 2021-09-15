@@ -142,20 +142,20 @@
                                     </div>
                                     <div class="form-group">
                                         <label id="font-size">Font Size</label>
-                                        <ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider>
+                                        <div class="custom-slider"><ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider></div>
                                     </div>
                                     <div class="form-group">
                                         <label>Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
                                         <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
                                         <span class="sr-only" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
-                                        <ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider>
+                                        <div class="custom-slider"><ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider></div>
                                     </div>
     
                                     <div class="form-group">
                                         <label>Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
                                         <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
                                         <span class="sr-only" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
-                                        <ngx-slider [options]="bookReaderMarginOptions" formControlName="bookReaderMargin" aria-describedby="bookmargin"></ngx-slider>
+                                        <div class="custom-slider"><ngx-slider [options]="bookReaderMarginOptions" formControlName="bookReaderMargin" aria-describedby="bookmargin"></ngx-slider></div>
                                     </div>
     
                                     <div class="float-right mb-3">

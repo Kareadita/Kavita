@@ -140,11 +140,7 @@ namespace API.Services.Tasks
                 connections.AddRange(await _tracker.GetConnectionsForUser(admin));
             }
 
-            await _messageHub.Clients.Users(admins).SendAsync("UpdateAvailable", new SignalRMessage
-            {
-                Name = "UpdateAvailable",
-                Body = update
-            });
+            await _messageHub.Clients.Users(admins).SendAsync(SignalREvents.UpdateVersion, MessageFactory.UpdateVersionEvent(update));
         }
 
 

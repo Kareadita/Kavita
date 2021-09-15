@@ -141,10 +141,10 @@ namespace API.Services
             BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(tempDirectory));
         }
 
-        public void RefreshSeriesMetadata(int libraryId, int seriesId)
+        public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
+            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
         }
 
         public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)

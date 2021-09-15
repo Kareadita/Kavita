@@ -190,7 +190,7 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
-                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id);
+                    _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                     return Ok();
                 }
 

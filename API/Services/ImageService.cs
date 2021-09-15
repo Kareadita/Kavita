@@ -14,13 +14,11 @@ namespace API.Services
   {
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
-    private readonly NaturalSortComparer _naturalSortComparer;
 
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
       _logger = logger;
       _directoryService = directoryService;
-      _naturalSortComparer = new NaturalSortComparer();
     }
 
     /// <summary>
@@ -38,7 +36,7 @@ namespace API.Services
       }
 
       var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
-        .OrderBy(f => f, _naturalSortComparer).FirstOrDefault();
+        .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
 
       return firstImage;
     }

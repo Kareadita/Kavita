@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -17,7 +18,6 @@ namespace API.Interfaces.Services
         private readonly ILogger<ReaderService> _logger;
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-        private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
         {
@@ -44,7 +44,8 @@ namespace API.Interfaces.Services
                 if (userProgress == null)
                 {
                     // Create a user object
-                    var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                    var userWithProgress =
+                        await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
                     userWithProgress.Progresses ??= new List<AppUserProgress>();
                     userWithProgress.Progresses.Add(new AppUserProgress
                     {
@@ -74,7 +75,6 @@ namespace API.Interfaces.Services
             }
             catch (Exception exception)
             {
-                // When opening a fresh chapter, this seems to fail (sometimes)
                 _logger.LogError(exception, "Could not save progress");
                 await _unitOfWork.RollbackAsync();
             }
@@ -118,7 +118,7 @@ namespace API.Interfaces.Services
             if (currentVolume.Number == 0)
             {
                 // Handle specials by sorting on their Filename aka Range
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer), currentChapter.Number);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()), currentChapter.Number);
                 if (chapterId > 0) return chapterId;
             }
 
@@ -169,7 +169,7 @@ namespace API.Interfaces.Services
 
             if (currentVolume.Number == 0)
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer).Reverse(), currentChapter.Number);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()).Reverse(), currentChapter.Number);
                 if (chapterId > 0) return chapterId;
             }
 

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -10,6 +10,30 @@ import { WebtoonImage } from '../_models/webtoon-image';
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
  */
 const SPACER_SCROLL_INTO_PX = 200;
+
+/**
+ * Bitwise enums for configuring how much debug information we want
+ */
+const enum DEBUG_MODES {
+  /**
+   * No Debug information
+   */
+  None = 0,
+  /**
+   * Turn on debug logging
+   */
+  Logs = 2,
+  /**
+   * Turn on the action bar in UI
+   */
+  ActionBar = 4,
+  /**
+   * Turn on Page outline
+   */
+  Outline = 8
+
+
+}
 
 @Component({
   selector: 'app-infinite-scroller',
@@ -91,9 +115,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     */
    previousScrollHeightMinusTop: number = 0;
   /**
-   * Debug mode. Will show extra information
+   * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debug: boolean = false;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -102,6 +126,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   get maxPageLoaded() {
     return Math.max(...Object.values(this.imagesLoaded));
   }
+
 
 
 
@@ -171,39 +196,52 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
+  getTotalHeight() {
+    let totalHeight = 0;
+    document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
+    return totalHeight;
+  }
+  getTotalScroll() {
+    return document.documentElement.offsetHeight + document.documentElement.scrollTop;
+  }
+  getScrollTop() {
+    return document.documentElement.scrollTop
+  }
+
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-      let totalHeight = 0;
-      document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-      const totalScroll = document.documentElement.offsetHeight + document.documentElement.scrollTop;
+      const totalHeight = this.getTotalHeight();
+      const totalScroll = this.getTotalScroll();
 
       // If we were at top but have started scrolling down past page 0, remove top spacer
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
       }
-      if (totalScroll === totalHeight) {
+      // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
+      if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
-        setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
+        requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
         this.loadNextChapter.emit();
       }
     } else {
-      if (document.documentElement.scrollTop === 0 && this.pageNum === 0) {
+      // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
+      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
         this.atBottom = false;
-        if (this.atTop) {
-          // If already at top, then we moving on
-          this.loadPrevChapter.emit();
-        }
+
         this.atTop = true; 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
-        setTimeout(() => document.documentElement.scrollTop = document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2), 10);
+        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
+      } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
+        // If already at top, then we moving on
+        this.loadPrevChapter.emit();
       }
     }
 
@@ -233,7 +271,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
-    //this.atTop = document.documentElement.scrollTop === 0 && this.pageNum === 0;
     this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
@@ -411,7 +448,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (startingIndex === 0 && endingIndex === 0) { return; }
 
     this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
-    for(let i = startingIndex; i < endingIndex; i++) {
+    for(let i = startingIndex; i <= endingIndex; i++) {
       this.loadWebtoonImage(i);
     }
 
@@ -424,12 +461,20 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   debugLog(message: string, extraData?: any) {
-    if (!this.debug) { return; }
+    if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 
     if (extraData !== undefined) {
       console.log(message, extraData);  
     } else {
       console.log(message);
     }
+  }
+
+  showDebugBar() {
+    return this.debugMode & DEBUG_MODES.ActionBar;
+  }
+
+  showDebugOutline() {
+    return this.debugMode & DEBUG_MODES.Outline;
   }
 }

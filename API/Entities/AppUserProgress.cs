@@ -9,7 +9,7 @@ namespace API.Entities
     /// Represents the progress a single user has on a given Chapter.
     /// </summary>
     //[Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), nameof(AppUserId), IsUnique = true)]
-    public class AppUserProgress : IEntityDate, IHasConcurrencyToken
+    public class AppUserProgress : IEntityDate
     {
         /// <summary>
         /// Id of Entity
@@ -55,16 +55,5 @@ namespace API.Entities
         /// Last date this was updated
         /// </summary>
         public DateTime LastModified { get; set; }
-
-        /// <inheritdoc />
-        [ConcurrencyCheck]
-        public uint RowVersion { get; private set; }
-
-
-        /// <inheritdoc />
-        public void OnSavingChanges()
-        {
-            RowVersion++;
-        }
     }
 }

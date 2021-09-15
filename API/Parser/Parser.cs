@@ -102,11 +102,17 @@ namespace API.Parser
                 @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
+            // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
+            new Regex(
+                @"(?<Series>.+?)(\s|_|-)+(?:Vol(ume|\.)?(\s|_|-)+\d+)(\s|_|-)+(?:(Ch|Chapter|Ch)\.?)(\s|_|-)+(?<Chapter>\d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             new Regex(
-            @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
                 @"(?<Series>.*)( - )(?:v|vo|c)\d",
@@ -115,11 +121,6 @@ namespace API.Parser
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex)
-            new Regex(
-                @"(?<Series>.*)(\s|_|-)(?:Volume(\s|_|-)+\d+)(\s|_|-)+(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
@@ -149,7 +150,7 @@ namespace API.Parser
             RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
             new Regex(
-                @"(?<Series>.*)(\b|_|-|\s)(?:(chapter(\b|_|-|\s))|sp)\d",
+                @"^(?<Series>(?!Vol).+?)(?:(ch(apter|\.)(\b|_|-|\s))|sp)\d",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
@@ -294,9 +295,14 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
+            // Batman Wayne Family Adventures - Ep. 001 - Moving In
+            new Regex(
+                @"^(?<Series>.+?)(\s|_|-)?(?:Ep\.?)(\s|_|-)+\d+",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: \d+)",
+                @"^(?<Series>.+?)(?: \d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Batman & Robin the Teen Wonder #0
@@ -323,41 +329,44 @@ namespace API.Parser
 
         private static readonly Regex[] ComicVolumeRegex = new[]
         {
-            // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            new Regex(
-                @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // 01 Spider-Man & Wolverine 01.cbr
-            new Regex(
-                @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Wildcat (1 of 3)
-            new Regex(
-                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
+            // new Regex(
+            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // 01 Spider-Man & Wolverine 01.cbr
+            // new Regex(
+            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // Batman & Wildcat (1 of 3)
+            // new Regex(
+            //     @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
-            new Regex(
-                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // BUG: Negative lookbehind has to be fixed width
+            // NOTE: The case this is built for does not make much sense.
+            // new Regex(
+            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
-            new Regex(
-                @"^(?<Series>.*)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Robin the Teen Wonder #0
-            new Regex(
-                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
+            // new Regex(
+            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
+            // // Batman & Robin the Teen Wonder #0
+            // new Regex(
+            //     @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+            //     RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            // RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
@@ -385,6 +394,11 @@ namespace API.Parser
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
                 @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
+            // Saga 001 (2012) (Digital) (Empire-Zone)
+            new Regex(
+                @"(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)\s\(\d{4}",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Amazing Man Comics chapter 25
@@ -930,6 +944,9 @@ namespace API.Parser
 
         /// <summary>
         /// Translates _ -> spaces, trims front and back of string, removes release groups
+        /// <example>
+        /// Hippos_the_Great [Digital], -> Hippos the Great
+        /// </example>
         /// </summary>
         /// <param name="title"></param>
         /// <returns></returns>
@@ -942,7 +959,7 @@ namespace API.Parser
             title = RemoveSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
-            if (title.EndsWith("-"))
+            if (title.EndsWith("-") || title.EndsWith(","))
             {
                 title = title.Substring(0, title.Length - 1);
             }

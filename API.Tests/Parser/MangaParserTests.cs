@@ -159,7 +159,13 @@ namespace API.Tests.Parser
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "Hentai Ouji to Warawanai Neko.")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You")]
         [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo")]
+        [InlineData("The Duke of Death and His Black Maid - Ch. 177 - The Ball (3).cbz", "The Duke of Death and His Black Maid")]
         [InlineData("A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)", "A Compendium of Ghosts")]
+        [InlineData("The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake", "The Duke of Death and His Black Maid")]
+        [InlineData("Vol. 04 Ch. 054.5", "")]
+        [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
+        [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
+        [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -409,6 +415,22 @@ namespace API.Tests.Parser
             {
               Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
               Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Kono Subarashii Sekai ni Bakuen wo!\Vol. 00 Ch. 000.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Kono Subarashii Sekai ni Bakuen wo!", Volumes = "0", Edition = "",
+              Chapters = "0", Filename = "Vol. 00 Ch. 000.cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Toukyou Akazukin\Vol. 01 Ch. 001.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Toukyou Akazukin", Volumes = "1", Edition = "",
+              Chapters = "1", Filename = "Vol. 01 Ch. 001.cbz", Format = MangaFormat.Archive,
               FullFilePath = filepath, IsSpecial = false
             });
 
