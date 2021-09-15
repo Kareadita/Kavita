@@ -442,7 +442,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      // ! Should I move the prefetching code if we start in webtoon reader mode? 
+
       const images = [];
       for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
         images.push(new Image());
@@ -982,6 +982,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveSettings() {
+    // NOTE: This is not called anywhere
     if (this.user === undefined) return;
 
     const data: Preferences = {

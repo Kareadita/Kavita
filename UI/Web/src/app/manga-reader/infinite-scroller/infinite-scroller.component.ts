@@ -117,7 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;// DEBUG_MODES.Logs | DEBUG_MODES.ActionBar | DEBUG_MODES.Outline;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -215,44 +215,33 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       const totalHeight = this.getTotalHeight();
       const totalScroll = this.getTotalScroll();
 
-      console.log('down: totalScroll: ', totalScroll + (this.debugMode & DEBUG_MODES.None ? 1 : 0));
-      console.log('down: totalHeight: ', totalHeight);
-
       // If we were at top but have started scrolling down past page 0, remove top spacer
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
       }
       // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
-      if (totalScroll === totalHeight && !this.atBottom) { // totalScroll === totalHeight, totalScroll - totalHeight <= 1
+      if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
-        console.log('down: this.previousScrollHeightMinusTop: ', this.previousScrollHeightMinusTop);
-        console.log('down: new scroll top: ', this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
-        setTimeout(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2), 10);
+        requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
-        //this.loadNextChapter.emit();
+        this.loadNextChapter.emit();
       }
     } else {
-      console.log('up: totalScroll: ', document.documentElement.scrollTop);
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
-      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) { // document.documentElement.scrollTop === 0
+      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
         this.atBottom = false;
         this.atTop = true; 
         // Scroll user back to original location (FF Mobile: This is causing jank)
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
-        console.log('up: this.previousScrollHeightMinusTop: ', this.previousScrollHeightMinusTop);
-        console.log('up: new scroll top (old): ', document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2));
-        console.log('up: new scroll top (new): ', (SPACER_SCROLL_INTO_PX * 2));
-
-        // This might work, but not sure. I think it's happenening too fast
-        setTimeout(() => document.documentElement.scrollTop = (SPACER_SCROLL_INTO_PX / 2), 100); // document.documentElement.scrollHeight - this.previousScrollHeightMinusTop - (SPACER_SCROLL_INTO_PX / 2)
+        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
       }
       if (this.atTop) {
         // If already at top, then we moving on
-        //this.loadPrevChapter.emit();
+        this.loadPrevChapter.emit();
       }
     }
 
