@@ -479,10 +479,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
-        this.loadChapter(chapterId, 'next');
+        this.loadChapter(chapterId, 'Next');
       });
     } else {
-      this.loadChapter(this.nextChapterId, 'next');
+      this.loadChapter(this.nextChapterId, 'Next');
     }
   }
 
@@ -502,14 +502,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
-        this.loadChapter(chapterId, 'prev');
+        this.loadChapter(chapterId, 'Prev');
       });
     } else {
-      this.loadChapter(this.prevChapterId, 'prev');
+      this.loadChapter(this.prevChapterId, 'Prev');
     }
   }
 
-  loadChapter(chapterId: number, direction: 'next' | 'prev') {
+  loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
     if (chapterId >= 0) {
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId); 
@@ -517,11 +517,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
+      this.toastr.info(direction + ' chapter loaded', '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
       this.toastr.warning('Could not find ' + direction + ' chapter');
       this.isLoading = false;
-      if (direction === 'prev') {
+      if (direction === 'Prev') {
         this.prevPageDisabled = true;
       } else {
         this.nextPageDisabled = true;
