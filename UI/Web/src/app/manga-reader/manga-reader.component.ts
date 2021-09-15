@@ -468,7 +468,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeReader() {
-    this.location.back();
+    if (this.readingListMode) {
+      this.router.navigateByUrl('lists/' + this.readingListId);
+    } else {
+      this.location.back();
+    }
   }
 
   updateTitle(chapterInfo: ChapterInfo) {

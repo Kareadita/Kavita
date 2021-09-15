@@ -172,8 +172,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   lastSeenScrollPartPath: string = '';
 
-
-
   /**
    * Hack: Override background color for reader and restore it onDestroy
    */
@@ -536,7 +534,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeReader() {
-    this.location.back();
+    if (this.readingListMode) {
+      this.router.navigateByUrl('lists/' + this.readingListId);
+    } else {
+      this.location.back();
+    }
   }
 
   resetSettings() {

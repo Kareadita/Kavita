@@ -150,6 +150,7 @@ export class ReaderService {
     return newRoute;
   }
 
+
   getQueryParamsObject(incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
     let params: {[key: string]: any} = {};
     if (incognitoMode) {
