@@ -113,12 +113,13 @@ namespace API.Tests.Services
         }
 
         [Fact]
+
         public void ShouldUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
         {
             Assert.False(MetadataService.ShouldUpdateCoverImage(new byte[] {1}, new MangaFile()
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-                LastModified = new DateTime(2021, 9, 14, 3, 21, 32, DateTimeKind.Local)
+                LastModified = DateTime.Now
             }, false, false));
         }
     }
