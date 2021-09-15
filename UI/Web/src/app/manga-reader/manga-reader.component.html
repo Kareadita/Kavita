@@ -30,7 +30,7 @@
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
             <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages - 1" [urlProvider]="getPageUrl" (loadNextChapter)="loadNextChapter()" (loadPrevChapter)="loadPrevChapter()"></app-infinite-scroller>
         </div>
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD"> <!--; else webtoonClickArea; See if people want this mode WEBTOON_WITH_CLICKS-->
+        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'top'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'bottom'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
         </ng-container>
@@ -64,7 +64,7 @@
         </div>
         <div class="row pt-4 ml-2 mr-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="sr-only">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>

@@ -347,11 +347,26 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:keyup', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
-    if (event.key === KEY_CODES.RIGHT_ARROW || event.key === KEY_CODES.DOWN_ARROW) {
-      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-    } else if (event.key === KEY_CODES.LEFT_ARROW || event.key === KEY_CODES.UP_ARROW) {
-      this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
-    } else if (event.key === KEY_CODES.ESC_KEY) {
+
+    switch (this.readerMode) {
+      case READER_MODE.MANGA_LR:
+        if (event.key === KEY_CODES.RIGHT_ARROW) {
+          this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+        } else if (event.key === KEY_CODES.LEFT_ARROW) {
+          this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
+        }
+        break;
+      case READER_MODE.MANGA_UD:
+      case READER_MODE.WEBTOON:
+        if (event.key === KEY_CODES.DOWN_ARROW) {
+          this.nextPage()
+        } else if (event.key === KEY_CODES.UP_ARROW) {
+          this.prevPage()
+        }
+        break;
+    }
+
+    if (event.key === KEY_CODES.ESC_KEY) {
       if (this.menuOpen) {
         this.toggleMenu();
         event.stopPropagation();
@@ -1008,6 +1023,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Bookmarks the current page for the chapter
    */
   bookmarkPage() {
+    // TODO: Show some sort of UI visual to show that a page was bookmarked
     const pageNum = this.pageNum;
     if (this.pageBookmarked) {
       this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
