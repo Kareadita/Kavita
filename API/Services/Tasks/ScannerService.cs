@@ -126,12 +126,12 @@ namespace API.Services.Tasks
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public void ScanLibraries()
+       public async Task ScanLibraries()
        {
           var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
           foreach (var lib in libraries)
           {
-             ScanLibrary(lib.Id, false);
+             await ScanLibrary(lib.Id, false);
           }
 
        }

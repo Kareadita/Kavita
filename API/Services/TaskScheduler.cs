@@ -144,7 +144,7 @@ namespace API.Services
         public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
+            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
         }
 
         public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
@@ -167,15 +167,5 @@ namespace API.Services
             var update = await _versionUpdaterService.CheckForUpdate();
             await _versionUpdaterService.PushUpdate(update);
         }
-
-        /// <summary>
-        /// Not an external call. Only public so that we can call this for a Task
-        /// </summary>
-        // ReSharper disable once MemberCanBePrivate.Global
-        public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
-        {
-            await _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate);
-        }
-
     }
 }
