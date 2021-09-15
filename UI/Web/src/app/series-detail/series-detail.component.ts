@@ -305,6 +305,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.hasNonSpecialVolumeChapters = false;
         }
 
+        // If an update occured and we were on specials, re-activate Volumes/Chapters 
+        if (!this.hasSpecials && this.activeTabId != 2) {
+          this.activeTabId = 2;
+        }
+
         this.isLoading = false;
       });
     }, err => {
