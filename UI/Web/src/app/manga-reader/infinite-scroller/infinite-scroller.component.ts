@@ -234,12 +234,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
       if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
         this.atBottom = false;
+
         this.atTop = true; 
-        // Scroll user back to original location (FF Mobile: This is causing jank)
+        // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
-      }
-      if (this.atTop) {
+      } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we moving on
         this.loadPrevChapter.emit();
       }
@@ -271,7 +271,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
-    //this.atTop = document.documentElement.scrollTop === 0 && this.pageNum === 0;
     this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
