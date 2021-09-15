@@ -28,6 +28,12 @@
                       <span class="read-btn--text">&nbsp;Remove Read</span>
                   </button>
               </div>
+              <div class="ml-2 mt-2">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
+                  <label class="form-check-label" for="accessibilit-mode">Show Order Numbers</label>
+                </div>
+              </div>
             </div>
             <div class="row no-gutters mt-2">
               <app-read-more [text]="readingList.summary" [maxLength]="250"></app-read-more>
@@ -39,8 +45,7 @@
       No chapters added
     </div>    
 
-    <!-- NOTE: It might be nice to have a switch for the accessibility toggle -->
-    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)">
+    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media" style="width: 100%;">
                 <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
