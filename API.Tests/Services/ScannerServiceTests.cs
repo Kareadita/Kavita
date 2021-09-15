@@ -55,7 +55,7 @@ namespace API.Tests.Services
             IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
 
 
-            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _imageService);
+            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _imageService, _messageHub);
             _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub);
         }
 
