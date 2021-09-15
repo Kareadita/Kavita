@@ -102,8 +102,8 @@
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row">
-                    <div *ngFor="let chapter of specials">
-                        <app-card-item class="col-auto" *ngIf="chapter.isSpecial"  [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
+                    <div *ngFor="let chapter of specials; trackBy: trackByChapterIdentity">
+                        <app-card-item class="col-auto" *ngIf="chapter.isSpecial" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                         [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
                     </div>
@@ -114,12 +114,12 @@
               <a ngbNavLink>Volumes/Chapters</a>
               <ng-template ngbNavContent>
                   <div class="row">
-                    <div *ngFor="let volume of volumes; trackby: trackByVolumeIdentity">
+                    <div *ngFor="let volume of volumes; trackBy: trackByVolumeIdentity">
                         <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                             [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                             [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
                     </div>
-                    <div *ngFor="let chapter of chapters; trackby: trackByChapterIdentity">
+                    <div *ngFor="let chapter of chapters; trackBy: trackByChapterIdentity">
                         <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                         [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
