@@ -16,7 +16,7 @@ namespace API.Interfaces.Services
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
-    /// <returns></returns>
-    public byte[] CreateThumbnailFromBase64(string encodedImage);
+    /// <returns>Path to the file</returns>
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName);
   }
 }

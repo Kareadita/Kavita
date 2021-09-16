@@ -65,19 +65,20 @@ namespace API.Services
 
         private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
+            // TODO: Think about a factory for naming convention & include format & hash
             file.LastModified = DateTime.Now;
             switch (file.Format)
             {
                 case MangaFormat.Pdf:
                 case MangaFormat.Epub:
-                    return _bookService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}"); // TODO: Think about a factory for naming convention & include format & hash
+                    return _bookService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}");
                 case MangaFormat.Image:
                     var coverImage = _imageService.GetCoverFile(file);
                     return _imageService.GetCoverImage(coverImage, $"v{volumeId}_c{chapterId}");
                 case MangaFormat.Archive:
                     return _archiveService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}");
                 default:
-                    return String.Empty;
+                    return string.Empty;
             }
 
         }

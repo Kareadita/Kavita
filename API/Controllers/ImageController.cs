@@ -34,12 +34,6 @@ namespace API.Controllers
 
             // TODO: Need to figure out how to add ETAG caching on it
             return PhysicalFile(path, "image/" + format);
-
-            // var content = await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId);
-            // if (content == null) return BadRequest("No cover image");
-            //
-            // Response.AddCacheHeader(content);
-            // return File(content, "image/" + Format, $"{chapterId}");
         }
 
         /// <summary>
@@ -56,11 +50,6 @@ namespace API.Controllers
 
             // TODO: Need to figure out how to add ETAG caching on it
             return PhysicalFile(path, "image/" + format);
-            // var content = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId);
-            // if (content == null) return BadRequest("No cover image");
-            //
-            // Response.AddCacheHeader(content);
-            // return File(content, "image/" + Format, $"{volumeId}");
         }
 
         /// <summary>
@@ -71,12 +60,6 @@ namespace API.Controllers
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {
-            // var content = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
-            // if (content == null) return BadRequest("No cover image");
-            //
-            // Response.AddCacheHeader(content);
-            // return File(content, "image/" + Format, $"{seriesId}");
-
             var path = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
@@ -99,12 +82,6 @@ namespace API.Controllers
 
             // TODO: Need to figure out how to add ETAG caching on it
             return PhysicalFile(path, "image/" + format);
-
-            // var content = await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId);
-            // if (content == null) return BadRequest("No cover image");
-            //
-            // Response.AddCacheHeader(content);
-            // return File(content, "image/" + Format, $"{collectionTagId}");
         }
     }
 }

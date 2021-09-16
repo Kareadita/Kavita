@@ -50,7 +50,7 @@ namespace API.Tests.Services
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             Assert.Equal(expected, _archiveService.IsValidArchive(Path.Join(testDirectory, archivePath)));
         }
-        
+
         [Theory]
         [InlineData("non existent file.zip", 0)]
         [InlineData("winrar.rar", 0)]
@@ -69,7 +69,7 @@ namespace API.Tests.Services
             Assert.Equal(expected, _archiveService.GetNumberOfPagesFromArchive(Path.Join(testDirectory, archivePath)));
             _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
         }
-        
+
 
 
         [Theory]
@@ -84,12 +84,12 @@ namespace API.Tests.Services
         {
             var sw = Stopwatch.StartNew();
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
-            
+
             Assert.Equal(expected, _archiveService.CanOpen(Path.Join(testDirectory, archivePath)));
             _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
         }
-        
-        
+
+
         [Theory]
         [InlineData("non existent file.zip", 0)]
         [InlineData("winrar.rar", 0)]
@@ -100,18 +100,18 @@ namespace API.Tests.Services
         [InlineData("file in folder_alt.zip", 1)]
         public void CanExtractArchive(string archivePath, int expectedFileCount)
         {
-            
+
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var extractDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives/Extraction");
 
             DirectoryService.ClearAndDeleteDirectory(extractDirectory);
-            
+
             Stopwatch sw = Stopwatch.StartNew();
             _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
             var di1 = new DirectoryInfo(extractDirectory);
             Assert.Equal(expectedFileCount, di1.Exists ? di1.GetFiles().Length : 0);
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
-            
+
             DirectoryService.ClearAndDeleteDirectory(extractDirectory);
         }
 
@@ -142,9 +142,9 @@ namespace API.Tests.Services
             var foundFile = _archiveService.FirstFileEntry(files);
             Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
         }
-        
-        
-        
+
+
+
         [Theory]
         [InlineData("v10.cbz", "v10.expected.jpg")]
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
@@ -160,11 +160,11 @@ namespace API.Tests.Services
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.Equal(expectedBytes, archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            Assert.Equal(expectedBytes, File.ReadAllBytes(archiveService.GetCoverImage(Path.Join(testDirectory, inputFile), Path.GetFileNameWithoutExtension(inputFile) + "_output")));
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
         }
-        
-        
+
+
         [Theory]
         [InlineData("v10.cbz", "v10.expected.jpg")]
         [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
@@ -178,10 +178,10 @@ namespace API.Tests.Services
             var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
-            
+
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
             Stopwatch sw = Stopwatch.StartNew();
-            Assert.Equal(expectedBytes, archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            Assert.Equal(expectedBytes, File.ReadAllBytes(archiveService.GetCoverImage(Path.Join(testDirectory, inputFile), Path.GetFileNameWithoutExtension(inputFile) + "_output")));
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
         }
 
@@ -191,7 +191,7 @@ namespace API.Tests.Services
         public void CanParseCoverImage(string inputFile)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
-            Assert.NotEmpty(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile)));
+            Assert.NotEmpty(File.ReadAllBytes(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile), Path.GetFileNameWithoutExtension(inputFile) + "_output")));
         }
 
         [Fact]
@@ -200,7 +200,7 @@ namespace API.Tests.Services
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
             var archive = Path.Join(testDirectory, "file in folder.zip");
             var summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
-            
+
             Assert.Equal(summaryInfo, _archiveService.GetSummaryInfo(archive));
 
         }

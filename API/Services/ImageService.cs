@@ -107,19 +107,21 @@ namespace API.Services
 
 
     /// <inheritdoc />
-    public byte[] CreateThumbnailFromBase64(string encodedImage)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName)
     {
         try
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), MetadataService.ThumbnailWidth);
-            return thumbnail.WriteToBuffer(".jpg");
+            var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
+            thumbnail.WriteToFile(filename);
+            return filename;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error creating thumbnail from url");
         }
 
-        return Array.Empty<byte>();
+        return string.Empty;
     }
   }
 }
