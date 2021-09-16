@@ -94,7 +94,6 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       if (closeResult.success) {
         if (closeResult.coverImageUpdate) {
           this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(closeResult.series.id));
-          console.log('image url: ', this.imageUrl);
         }
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;

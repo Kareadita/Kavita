@@ -10,7 +10,7 @@ namespace API.Interfaces.Services
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="forceUpdate"></param>
-        void RefreshMetadata(int libraryId, bool forceUpdate = false);
+        Task RefreshMetadata(int libraryId, bool forceUpdate = false);
 
         public bool UpdateMetadata(Chapter chapter, bool forceUpdate);
         public bool UpdateMetadata(Volume volume, bool forceUpdate);

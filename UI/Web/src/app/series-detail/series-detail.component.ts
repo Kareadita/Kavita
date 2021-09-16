@@ -79,6 +79,15 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   actionInProgress: boolean = false;
 
+  /**
+   * Track by function for Volume to tell when to refresh card data
+   */
+  trackByVolumeIdentity = (index: number, item: Volume) => `${item.name}_${item.pagesRead}`;
+  /**
+   * Track by function for Chapter to tell when to refresh card data
+   */
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+
   private onDestroy: Subject<void> = new Subject();
 
 
@@ -294,6 +303,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
           this.activeTabId = 1;
           this.hasNonSpecialVolumeChapters = false;
+        }
+
+        // If an update occured and we were on specials, re-activate Volumes/Chapters 
+        if (!this.hasSpecials && this.activeTabId != 2) {
+          this.activeTabId = 2;
         }
 
         this.isLoading = false;

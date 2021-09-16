@@ -18,6 +18,13 @@ export enum KEY_CODES {
   DELETE = 'Delete'
 }
 
+export enum Breakpoint {
+  Mobile = 768,
+  Tablet = 1280,
+  Desktop = 1440
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -109,6 +116,14 @@ export class UtilityService {
 
   asSeries(d: any) {
     return <Series>d;
+  }
+
+  getActiveBreakpoint(): Breakpoint {
+    if (window.innerWidth <= Breakpoint.Mobile) return Breakpoint.Mobile;
+    else if (window.innerWidth > Breakpoint.Mobile && window.innerWidth <= Breakpoint.Tablet) return Breakpoint.Tablet;
+    else if (window.innerWidth > Breakpoint.Tablet) return Breakpoint.Desktop
+    
+    return Breakpoint.Desktop;
   }
 
 }

@@ -113,17 +113,10 @@ export class ActionFactoryService {
     
         this.chapterActions.push({
           action: Action.Edit,
-          title: 'Edit',
+          title: 'Info',
           callback: this.dummyCallback,
           requiresAdmin: false
         });
-
-        // this.readingListActions.push({
-        //   action: Action.Promote, // Should I just use CollectionTag modal-like instead?
-        //   title: 'Delete',
-        //   callback: this.dummyCallback,
-        //   requiresAdmin: true
-        // });
       }
 
       if (this.hasDownloadRole || this.isAdmin) {
@@ -145,33 +138,39 @@ export class ActionFactoryService {
   }
 
   getLibraryActions(callback: (action: Action, library: Library) => void) {
-    this.libraryActions.forEach(action => action.callback = callback);
-    return this.libraryActions;
+    const actions = this.libraryActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
-    this.seriesActions.forEach(action => action.callback = callback);
-    return this.seriesActions;
+    const actions = this.seriesActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getVolumeActions(callback: (action: Action, volume: Volume) => void) {
-    this.volumeActions.forEach(action => action.callback = callback);
-    return this.volumeActions;
+    const actions = this.volumeActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
-    this.chapterActions.forEach(action => action.callback = callback);
-    return this.chapterActions;
+    const actions = this.chapterActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
-    this.collectionTagActions.forEach(action => action.callback = callback);
-    return this.collectionTagActions;
+    const actions = this.collectionTagActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
-    this.readingListActions.forEach(action => action.callback = callback);
-    return this.readingListActions;
+    const actions = this.readingListActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {

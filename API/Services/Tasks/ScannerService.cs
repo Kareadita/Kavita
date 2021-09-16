@@ -108,7 +108,7 @@ namespace API.Services.Tasks
                     "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                     totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
 
-                CleanupDbEntities();
+                await CleanupDbEntities();
                 BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
                 BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
                 // Tell UI that this series is done
@@ -128,7 +128,7 @@ namespace API.Services.Tasks
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public async Task ScanLibraries()
        {
-          var libraries = Task.Run(() => _unitOfWork.LibraryRepository.GetLibrariesAsync()).Result.ToList();
+          var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
           foreach (var lib in libraries)
           {
              await ScanLibrary(lib.Id, false);
@@ -151,8 +151,7 @@ namespace API.Services.Tasks
            Library library;
            try
            {
-               library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter()
-                   .GetResult();
+               library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
            }
            catch (Exception ex)
            {
@@ -174,7 +173,7 @@ namespace API.Services.Tasks
            UpdateLibrary(library, series);
 
            _unitOfWork.LibraryRepository.Update(library);
-           if (Task.Run(() => _unitOfWork.CommitAsync()).Result)
+           if (await _unitOfWork.CommitAsync())
            {
                _logger.LogInformation(
                    "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
@@ -186,7 +185,7 @@ namespace API.Services.Tasks
                    "There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
 
-           CleanupAbandonedChapters();
+           await CleanupAbandonedChapters();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibrary, MessageFactory.ScanLibraryEvent(libraryId, "complete"));
@@ -195,9 +194,9 @@ namespace API.Services.Tasks
        /// <summary>
        /// Remove any user progress rows that no longer exist since scan library ran and deleted series/volumes/chapters
        /// </summary>
-       private void CleanupAbandonedChapters()
+       private async Task CleanupAbandonedChapters()
        {
-          var cleanedUp = Task.Run(() => _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters()).Result;
+          var cleanedUp = await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
           _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
        }
 
@@ -205,10 +204,10 @@ namespace API.Services.Tasks
        /// <summary>
        /// Cleans up any abandoned rows due to removals from Scan loop
        /// </summary>
-       private void CleanupDbEntities()
+       private async Task CleanupDbEntities()
        {
-           CleanupAbandonedChapters();
-           var cleanedUp = Task.Run( () => _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries()).Result;
+           await CleanupAbandonedChapters();
+           var cleanedUp = await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
            _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
        }
 

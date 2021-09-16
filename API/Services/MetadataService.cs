@@ -187,10 +187,10 @@ namespace API.Services
         /// <remarks>This can be heavy on memory first run</remarks>
         /// <param name="libraryId"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public void RefreshMetadata(int libraryId, bool forceUpdate = false)
+        public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
-            var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
+            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
 
             // PERF: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
@@ -213,7 +213,7 @@ namespace API.Services
             }
 
 
-            if (_unitOfWork.HasChanges() && Task.Run(() => _unitOfWork.CommitAsync()).Result)
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
             }
@@ -228,7 +228,7 @@ namespace API.Services
         public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
-            var library = Task.Run(() => _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId)).GetAwaiter().GetResult();
+            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
 
             var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
             if (series == null)
