@@ -257,17 +257,9 @@ namespace API.Services
 
         private string CreateThumbnail(string entryName, Stream stream, string fileName)
         {
-            // if (!formatExtension.StartsWith("."))
-            // {
-            //     formatExtension = $".png";
-            // }
             try
             {
-                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-                thumbnail.WriteToFile(filename);
-                return filename;
-                //return thumbnail.WriteToBuffer(formatExtension);
+                return ImageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {

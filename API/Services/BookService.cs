@@ -382,43 +382,6 @@ namespace API.Services
             }
         }
 
-
-        public byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true)
-        {
-            if (!IsValidFile(fileFilePath)) return Array.Empty<byte>();
-
-            if (Parser.Parser.IsPdf(fileFilePath))
-            {
-               return GetPdfCoverImage(fileFilePath, createThumbnail);
-            }
-
-            using var epubBook = EpubReader.OpenBook(fileFilePath);
-
-
-            try
-            {
-                // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
-                var coverImageContent = epubBook.Content.Cover
-                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
-                                        ?? epubBook.Content.Images.Values.FirstOrDefault();
-
-                if (coverImageContent == null) return Array.Empty<byte>();
-
-                if (!createThumbnail) return coverImageContent.ReadContent();
-
-                using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
-                using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                return thumbnail.WriteToBuffer(".jpg");
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
-            }
-
-            return Array.Empty<byte>();
-        }
-
         /// <summary>
         /// Extracts the cover image to covers directory and returns file path back
         /// </summary>
@@ -447,63 +410,28 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
 
                 using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
-                using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                // using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
-                // string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2")))
-                var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-                thumbnail.WriteToFile(filename);
-                return filename;
+                return ImageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
-        private byte[] GetPdfCoverImage(string fileFilePath, bool createThumbnail)
-        {
-           try
-           {
-               using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
-               if (docReader.GetPageCount() == 0) return Array.Empty<byte>();
-
-               using var stream = StreamManager.GetStream("BookService.GetPdfPage");
-               GetPdfPage(docReader, 0, stream);
-
-               if (!createThumbnail) return stream.ToArray();
-
-               using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-               return thumbnail.WriteToBuffer(".png");
-
-           }
-           catch (Exception ex)
-           {
-              _logger.LogWarning(ex,
-                 "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
-                 fileFilePath);
-           }
-
-           return Array.Empty<byte>();
-        }
 
         private string GetPdfCoverImage(string fileFilePath, string fileName)
         {
             try
             {
                 using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
-                if (docReader.GetPageCount() == 0) return String.Empty;
+                if (docReader.GetPageCount() == 0) return string.Empty;
 
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-
-                using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-                thumbnail.WriteToFile(filename);
-                return filename;
-                //return thumbnail.WriteToBuffer(".png");
+                return ImageService.WriteCoverThumbnail(stream, fileName);
 
             }
             catch (Exception ex)

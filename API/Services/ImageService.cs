@@ -78,14 +78,31 @@ namespace API.Services
             var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
             thumbnail.WriteToFile(filename);
             return filename;
-            //return thumbnail.WriteToBuffer(".jpg");
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error creating thumbnail from url");
         }
 
-        return String.Empty;
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
+    /// fileName and .png extension.
+    /// </summary>
+    /// <param name="stream">Stream to write to disk.</param>
+    /// <param name="fileName">filename to save as without extension</param>
+    /// <returns>Full file path of saved file</returns>
+    public static string WriteCoverThumbnail(Stream stream, string fileName)
+    {
+        stream.Position = 0;
+        using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+        // using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
+        // string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2")))
+        var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
+        thumbnail.WriteToFile(filename);
+        return filename;
     }
 
 
