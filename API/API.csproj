@@ -85,6 +85,7 @@
     <None Remove="temp\**" />
     <None Remove="kavita.log" />
     <None Remove="kavita.db" />
+    <None Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -95,6 +96,7 @@
     <Compile Remove="backups\**" />
     <Compile Remove="logs\**" />
     <Compile Remove="temp\**" />
+    <Compile Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -104,6 +106,7 @@
     <EmbeddedResource Remove="backups\**" />
     <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="temp\**" />
+    <EmbeddedResource Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -118,6 +121,7 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>

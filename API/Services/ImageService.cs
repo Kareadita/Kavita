@@ -15,6 +15,11 @@ namespace API.Services
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
 
+    /// <summary>
+    /// Width of the Thumbnail generation
+    /// </summary>
+    private const int ThumbnailWidth = 320;
+
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
       _logger = logger;
@@ -43,7 +48,7 @@ namespace API.Services
 
     public string GetCoverImage(string path, string fileName)
     {
-      if (string.IsNullOrEmpty(path)) return String.Empty;
+      if (string.IsNullOrEmpty(path)) return string.Empty;
 
       try
       {
@@ -54,27 +59,15 @@ namespace API.Services
         _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
       }
 
-      return String.Empty;
+      return string.Empty;
     }
-
-    /// <summary>
-    /// Writes the bytes[] to the full path. Will overwrite if already exists
-    /// </summary>
-    /// <param name="image"></param>
-    /// <param name="path"></param>
-    /// <returns></returns>
-    public void WriteBytesToDisk(byte[] image, string path)
-    {
-        File.WriteAllBytesAsync(path, image);
-    }
-
-
+    
     /// <inheritdoc />
     public string CreateThumbnail(string path, string fileName)
     {
         try
         {
-            using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
+            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
             var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
             thumbnail.WriteToFile(filename);
             return filename;
@@ -91,13 +84,12 @@ namespace API.Services
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
     /// fileName and .png extension.
     /// </summary>
-    /// <param name="stream">Stream to write to disk.</param>
+    /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <returns>Full file path of saved file</returns>
     public static string WriteCoverThumbnail(Stream stream, string fileName)
     {
-        stream.Position = 0;
-        using var thumbnail = NetVips.Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
+        using var thumbnail = NetVips.Image.ThumbnailStream(stream, ThumbnailWidth);
         // using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
         // string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2")))
         var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
@@ -111,7 +103,7 @@ namespace API.Services
     {
         try
         {
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), MetadataService.ThumbnailWidth);
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
             var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
             thumbnail.WriteToFile(filename);
             return filename;

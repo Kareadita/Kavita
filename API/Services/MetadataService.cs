@@ -28,7 +28,7 @@ namespace API.Services
         /// <summary>
         /// Width of the Thumbnail generation
         /// </summary>
-        public static readonly int ThumbnailWidth = 320; // 153w x 230h
+        //public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
             IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
