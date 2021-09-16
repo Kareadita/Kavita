@@ -180,7 +180,8 @@ namespace API.Controllers
             try
             {
                 var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                chapter.CoverImage = string.Empty; //Array.Empty<byte>();
+                var originalFile = chapter.CoverImage;
+                chapter.CoverImage = string.Empty;
                 chapter.CoverImageLocked = false;
                 _unitOfWork.ChapterRepository.Update(chapter);
                 var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -191,6 +192,7 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    System.IO.File.Delete(originalFile);
                     _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                     return Ok();
                 }

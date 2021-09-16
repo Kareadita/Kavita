@@ -161,6 +161,7 @@ namespace API.Controllers
             {
                 // Trigger a refresh when we are moving from a locked image to a non-locked
                 needsRefreshMetadata = true;
+                // TODO: Do I need to clear out the coverImage here?
                 series.CoverImageLocked = updateSeries.CoverImageLocked;
             }
 

@@ -64,5 +64,6 @@ namespace API.Interfaces.Repositories
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
         Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
+        Task<IList<string>> GetAllCoverImagesAsync();
     }
 }

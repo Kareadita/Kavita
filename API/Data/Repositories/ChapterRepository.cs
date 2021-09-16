@@ -152,6 +152,11 @@ namespace API.Data.Repositories
                 .SingleOrDefaultAsync();
         }
 
+        public async Task<IList<string>> GetAllCoverImagesAsync()
+        {
+            return await _context.Chapter.Select(c => c.CoverImage).AsNoTracking().ToListAsync();
+        }
+
         /// <summary>
         /// Returns non-tracked files for a set of chapterIds
         /// </summary>

@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +10,6 @@ namespace API.Controllers
     /// </summary>
     public class ImageController : BaseApiController
     {
-        private const string Format = "jpeg";
         private readonly IUnitOfWork _unitOfWork;
 
         /// <inheritdoc />

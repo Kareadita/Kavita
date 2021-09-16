@@ -202,14 +202,6 @@ namespace API.Services
             return String.Empty;
         }
 
-        private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
-        {
-            using var stream = entry.Open();
-            using var ms = StreamManager.GetStream();
-            stream.CopyTo(ms);
-            return ms.ToArray();
-        }
-
         /// <summary>
         /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
         /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
@@ -224,6 +216,7 @@ namespace API.Services
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
+        // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
@@ -266,7 +259,7 @@ namespace API.Services
                 _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -328,7 +321,7 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
+                        _logger.LogTrace("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
                                                                          && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
@@ -344,7 +337,7 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
+                        _logger.LogTrace("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)

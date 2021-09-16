@@ -78,7 +78,6 @@
   <ItemGroup>
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
-    <None Remove="wwwroot\**" />
     <None Remove="cache\**" />
     <None Remove="backups\**" />
     <None Remove="logs\**" />
@@ -91,7 +90,6 @@
   <ItemGroup>
     <Compile Remove="Interfaces\IMetadataService.cs" />
     <Compile Remove="obj\**" />
-    <Compile Remove="wwwroot\**" />
     <Compile Remove="cache\**" />
     <Compile Remove="backups\**" />
     <Compile Remove="logs\**" />
@@ -101,7 +99,6 @@
 
   <ItemGroup>
     <EmbeddedResource Remove="obj\**" />
-    <EmbeddedResource Remove="wwwroot\**" />
     <EmbeddedResource Remove="cache\**" />
     <EmbeddedResource Remove="backups\**" />
     <EmbeddedResource Remove="logs\**" />
@@ -111,7 +108,6 @@
 
   <ItemGroup>
     <Content Remove="obj\**" />
-    <Content Remove="wwwroot\**" />
     <Content Remove="cache\**" />
     <Content Remove="backups\**" />
     <Content Remove="logs\**" />
@@ -246,6 +242,48 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\10.b727db78581442412e9a.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\10.b727db78581442412e9a.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\2.fcc031071e80d6837012.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\2.fcc031071e80d6837012.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\7.c30da7d2e809fa05d1e3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\7.c30da7d2e809fa05d1e3.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\8.d4c77a90c95e9861656a.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\8.d4c77a90c95e9861656a.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\9.489b177dd1a6beeb35ad.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\9.489b177dd1a6beeb35ad.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fonts\Spartan\OFL.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fonts\Spartan\Spartan-VariableFont_wght.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\android-chrome-192x192.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\android-chrome-256x256.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\apple-touch-icon.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\browserconfig.xml" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon-16x16.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon-32x32.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\mstile-150x150.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\image-reset-cover-min.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\image-reset-cover.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\kavita-book-cropped.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\login-bg.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\logo.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\common.fbf71de364f5a1f37413.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\common.fbf71de364f5a1f37413.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\login-bg.8860e6ff9d2a3598539c.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.a3a1e647a39145accff3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.a3a1e647a39145accff3.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\polyfills.3dda3bf3d087e5d131ba.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\polyfills.3dda3bf3d087e5d131ba.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\runtime.b9818dfc90f418b3f0a7.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\runtime.b9818dfc90f418b3f0a7.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\scripts.7d1c78b2763c483bb699.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\scripts.7d1c78b2763c483bb699.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\site.webmanifest" />
+    <_ContentIncludedByDefault Remove="wwwroot\Spartan-VariableFont_wght.0427aac0d980a12ae8ba.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles.85a58cb3e4a4b1add864.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles.85a58cb3e4a4b1add864.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\vendor.54bf44a9aa720ff8881d.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\vendor.54bf44a9aa720ff8881d.js.map" />
   </ItemGroup>
 
   <ItemGroup>
