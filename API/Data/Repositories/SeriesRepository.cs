@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -256,7 +257,7 @@ namespace API.Data.Repositories
             }
         }
 
-        public async Task<byte[]> GetSeriesCoverImageAsync(int seriesId)
+        public async Task<string> GetSeriesCoverImageAsync(int seriesId)
         {
             return await _context.Series
                 .Where(s => s.Id == seriesId)

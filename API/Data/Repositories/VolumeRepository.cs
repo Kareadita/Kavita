@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -35,9 +36,9 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<byte[]> GetVolumeCoverImageAsync(int volumeId)
+        public async Task<string> GetVolumeCoverImageAsync(int volumeId)
         {
-            return await _context.Volume
+           return await _context.Volume
                 .Where(v => v.Id == volumeId)
                 .Select(v => v.CoverImage)
                 .AsNoTracking()

@@ -121,7 +121,7 @@ namespace API.Controllers
                 if (!updateSeriesForTagDto.Tag.CoverImageLocked)
                 {
                     tag.CoverImageLocked = false;
-                    tag.CoverImage = Array.Empty<byte>();
+                    tag.CoverImage = String.Empty;//Array.Empty<byte>();
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 

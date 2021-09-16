@@ -21,6 +21,11 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Fetches a single Reading List
+        /// </summary>
+        /// <param name="readingListId"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetList(int readingListId)
         {
@@ -86,6 +91,11 @@ namespace API.Controllers
             return BadRequest("Couldn't update position");
         }
 
+        /// <summary>
+        /// Deletes a list item from the list. Will reorder all item positions afterwards
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("delete-item")]
         public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
         {
@@ -201,6 +211,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(dto.Title));
         }
 
+        /// <summary>
+        /// Update a
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("update")]
         public async Task<ActionResult> UpdateList(UpdateReadingListDto dto)
         {

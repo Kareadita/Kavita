@@ -1,10 +1,14 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Interfaces;
+using API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NetVips;
 using Sentry;
 
 namespace API
@@ -49,6 +54,13 @@ namespace API
          {
             var context = services.GetRequiredService<DataContext>();
             var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+
+            if (!Directory.Exists(DirectoryService.CoverImageDirectory))
+            {
+                Console.WriteLine("Migrating Cover Images to disk. Expect delay.");
+                DirectoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
+            }
+
             // Apply all migrations on startup
             await context.Database.MigrateAsync();
             await Seed.SeedRoles(roleManager);

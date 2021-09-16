@@ -41,46 +41,51 @@ namespace API.Services
       return firstImage;
     }
 
-    public byte[] GetCoverImage(string path, bool createThumbnail = false)
+    public string GetCoverImage(string path, string fileName)
     {
-      if (string.IsNullOrEmpty(path)) return Array.Empty<byte>();
+      if (string.IsNullOrEmpty(path)) return String.Empty;
 
       try
       {
-        if (createThumbnail)
-        {
-            return CreateThumbnail(path);
-        }
-
-        using var img = Image.NewFromFile(path);
-        using var stream = new MemoryStream();
-        img.JpegsaveStream(stream);
-        stream.Position = 0;
-        return stream.ToArray();
+          return CreateThumbnail(path,  fileName);
       }
       catch (Exception ex)
       {
         _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
       }
 
-      return Array.Empty<byte>();
+      return String.Empty;
+    }
+
+    /// <summary>
+    /// Writes the bytes[] to the full path. Will overwrite if already exists
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public void WriteBytesToDisk(byte[] image, string path)
+    {
+        File.WriteAllBytesAsync(path, image);
     }
 
 
     /// <inheritdoc />
-    public byte[] CreateThumbnail(string path)
+    public string CreateThumbnail(string path, string fileName)
     {
         try
         {
             using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
-            return thumbnail.WriteToBuffer(".jpg");
+            var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
+            thumbnail.WriteToFile(filename);
+            return filename;
+            //return thumbnail.WriteToBuffer(".jpg");
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error creating thumbnail from url");
         }
 
-        return Array.Empty<byte>();
+        return String.Empty;
     }
 
 

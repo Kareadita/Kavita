@@ -17,6 +17,6 @@ namespace API.Interfaces.Repositories
         Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
         Task<IList<Chapter>> GetChaptersAsync(int volumeId);
         Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
-        Task<byte[]> GetChapterCoverImageAsync(int chapterId);
+        Task<string> GetChapterCoverImageAsync(int chapterId);
     }
 }

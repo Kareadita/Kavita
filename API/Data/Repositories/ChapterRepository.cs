@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Reader;
@@ -140,8 +142,9 @@ namespace API.Data.Repositories
         /// </summary>
         /// <param name="chapterId"></param>
         /// <returns></returns>
-        public async Task<byte[]> GetChapterCoverImageAsync(int chapterId)
+        public async Task<string> GetChapterCoverImageAsync(int chapterId)
         {
+
             return await _context.Chapter
                 .Where(c => c.Id == chapterId)
                 .Select(c => c.CoverImage)

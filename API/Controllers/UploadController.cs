@@ -53,7 +53,7 @@ namespace API.Controllers
 
                 if (bytes.Length > 0)
                 {
-                    series.CoverImage = bytes;
+                    series.CoverImage = String.Empty; // TODO: Correct this (bytes)
                     series.CoverImageLocked = true;
                     _unitOfWork.SeriesRepository.Update(series);
                 }
@@ -98,7 +98,8 @@ namespace API.Controllers
 
                 if (bytes.Length > 0)
                 {
-                    tag.CoverImage = bytes;
+                    tag.CoverImage = String.Empty;
+                    ; //TODO: Fix bytes;
                     tag.CoverImageLocked = true;
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
@@ -143,7 +144,7 @@ namespace API.Controllers
                 if (bytes.Length > 0)
                 {
                     var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                    chapter.CoverImage = bytes;
+                    chapter.CoverImage = string.Empty;// TODO: bytes;
                     chapter.CoverImageLocked = true;
                     _unitOfWork.ChapterRepository.Update(chapter);
                     var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -179,7 +180,7 @@ namespace API.Controllers
             try
             {
                 var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                chapter.CoverImage = Array.Empty<byte>();
+                chapter.CoverImage = string.Empty; //Array.Empty<byte>();
                 chapter.CoverImageLocked = false;
                 _unitOfWork.ChapterRepository.Update(chapter);
                 var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);

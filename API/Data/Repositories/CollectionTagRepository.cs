@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -100,9 +101,9 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public Task<byte[]> GetCoverImageAsync(int collectionTagId)
+        public async Task<string> GetCoverImageAsync(int collectionTagId)
         {
-            return _context.CollectionTag
+            return await _context.CollectionTag
                 .Where(c => c.Id == collectionTagId)
                 .Select(c => c.CoverImage)
                 .AsNoTracking()

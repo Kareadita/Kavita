@@ -9,6 +9,6 @@ namespace API.Interfaces.Repositories
     {
         void Update(Volume volume);
         Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
-        Task<byte[]> GetVolumeCoverImageAsync(int volumeId);
+        Task<string> GetVolumeCoverImageAsync(int volumeId);
     }
 }

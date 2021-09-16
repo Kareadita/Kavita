@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -48,7 +49,7 @@ namespace API.Services
         /// <param name="forceUpdate"></param>
         /// <param name="isCoverLocked"></param>
         /// <returns></returns>
-        public static bool ShouldUpdateCoverImage(byte[] coverImage, MangaFile firstFile, bool forceUpdate = false,
+        public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
             bool isCoverLocked = false)
         {
             if (isCoverLocked) return false;
@@ -56,26 +57,27 @@ namespace API.Services
             return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage);
         }
 
-        private static bool HasCoverImage(byte[] coverImage)
+
+        private static bool HasCoverImage(string coverImage)
         {
-            return coverImage != null && coverImage.Any();
+            return !string.IsNullOrEmpty(coverImage) && File.Exists(coverImage);
         }
 
-        private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
+        private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
             file.LastModified = DateTime.Now;
             switch (file.Format)
             {
                 case MangaFormat.Pdf:
                 case MangaFormat.Epub:
-                    return _bookService.GetCoverImage(file.FilePath, createThumbnail);
+                    return _bookService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}"); // TODO: Think about a factory for naming convention & include format & hash
                 case MangaFormat.Image:
                     var coverImage = _imageService.GetCoverFile(file);
-                    return _imageService.GetCoverImage(coverImage, createThumbnail);
+                    return _imageService.GetCoverImage(coverImage, $"v{volumeId}_c{chapterId}");
                 case MangaFormat.Archive:
-                    return _archiveService.GetCoverImage(file.FilePath, createThumbnail);
+                    return _archiveService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}");
                 default:
-                    return Array.Empty<byte>();
+                    return String.Empty;
             }
 
         }
@@ -91,7 +93,7 @@ namespace API.Services
 
             if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
-                chapter.CoverImage = GetCoverImage(firstFile);
+                chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
                 return true;
             }
 
@@ -130,7 +132,7 @@ namespace API.Services
             {
                 series.Volumes ??= new List<Volume>();
                 var firstCover = series.Volumes.GetCoverImage(series.Format);
-                byte[] coverImage = null;
+                string coverImage = null;
                 if (firstCover == null && series.Volumes.Any())
                 {
                     // If firstCover is null and one volume, the whole series is Chapters under Vol 0.

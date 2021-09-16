@@ -147,12 +147,13 @@ namespace API.Services
         ///
         /// This skips over any __MACOSX folder/file iteration.
         /// </summary>
+        /// <remarks>This always creates a thumbnail</remarks>
         /// <param name="archivePath"></param>
-        /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
+        /// <param name="fileName">File name to use based on context of entity.</param>
         /// <returns></returns>
-        public byte[] GetCoverImage(string archivePath, bool createThumbnail = false)
+        public string GetCoverImage(string archivePath, string fileName)
         {
-            if (archivePath == null || !IsValidArchive(archivePath)) return Array.Empty<byte>();
+            if (archivePath == null || !IsValidArchive(archivePath)) return String.Empty;
             try
             {
                 var libraryHandler = CanOpen(archivePath);
@@ -168,7 +169,7 @@ namespace API.Services
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
-                        return createThumbnail ? CreateThumbnail(entry.FullName, stream) : ConvertEntryToByteArray(entry);
+                        return CreateThumbnail(entry.FullName, stream, fileName);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
@@ -183,14 +184,14 @@ namespace API.Services
                         entry.WriteTo(ms);
                         ms.Position = 0;
 
-                        return createThumbnail ? CreateThumbnail(entry.Key, ms, Path.GetExtension(entry.Key)) : ms.ToArray();
+                        return CreateThumbnail(entry.Key, ms, fileName); // Path.GetExtension(entry.Key)
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return Array.Empty<byte>();
+                        return String.Empty;
                     default:
                         _logger.LogWarning("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return Array.Empty<byte>();
+                        return String.Empty;
                 }
             }
             catch (Exception ex)
@@ -198,7 +199,7 @@ namespace API.Services
                 _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
 
-            return Array.Empty<byte>();
+            return String.Empty;
         }
 
         private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
@@ -254,23 +255,26 @@ namespace API.Services
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private byte[] CreateThumbnail(string entryName, Stream stream, string formatExtension = ".jpg")
+        private string CreateThumbnail(string entryName, Stream stream, string fileName)
         {
-            if (!formatExtension.StartsWith("."))
-            {
-                formatExtension = $".{formatExtension}";
-            }
+            // if (!formatExtension.StartsWith("."))
+            // {
+            //     formatExtension = $".png";
+            // }
             try
             {
                 using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                return thumbnail.WriteToBuffer(formatExtension);
+                var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
+                thumbnail.WriteToFile(filename);
+                return filename;
+                //return thumbnail.WriteToBuffer(formatExtension);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
-            return Array.Empty<byte>();
+            return String.Empty;
         }
 
         /// <summary>

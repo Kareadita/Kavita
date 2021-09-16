@@ -4,14 +4,14 @@ namespace API.Interfaces.Services
 {
   public interface IImageService
   {
-    byte[] GetCoverImage(string path, bool createThumbnail = false);
+    string GetCoverImage(string path, string fileName);
     string GetCoverFile(MangaFile file);
     /// <summary>
     /// Creates a Thumbnail version of an image
     /// </summary>
     /// <param name="path">Path to the image file</param>
     /// <returns></returns>
-    public byte[] CreateThumbnail(string path);
+    public string CreateThumbnail(string path, string fileName);
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>

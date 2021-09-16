@@ -8,7 +8,7 @@ namespace API.Interfaces.Services
     public interface IBookService
     {
         int GetNumberOfPages(string filePath);
-        byte[] GetCoverImage(string fileFilePath, bool createThumbnail = true);
+        string GetCoverImage(string fileFilePath, string fileName);
         Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
         /// <summary>
