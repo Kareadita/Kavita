@@ -34,12 +34,6 @@
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'top'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'bottom'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
         </ng-container>
-        <ng-template #webtoonClickArea>
-            <div class="top {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="right {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="left {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
-            <div class="bottom {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
-        </ng-template>
     </div>
     
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
