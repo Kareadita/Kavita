@@ -33,13 +33,13 @@ namespace API.Data
                 {
                     if (series.CoverImage == null || !series.CoverImage.Any()) continue;
                     if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                        $"series{series.Id}.png"))) continue;
+                        $"{ImageService.GetSeriesFormat(int.Parse(series.Id))}.png"))) continue;
 
                     try
                     {
                         var stream = new MemoryStream(series.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, $"series{series.Id}");
+                        ImageService.WriteCoverThumbnail(stream, ImageService.GetSeriesFormat(int.Parse(series.Id)));
                     }
                     catch (Exception e)
                     {
@@ -59,13 +59,13 @@ namespace API.Data
                 {
                     if (chapter.CoverImage == null || !chapter.CoverImage.Any()) continue;
                     if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                        $"v{chapter.ParentId}_c{chapter.Id}.png"))) continue;
+                        $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}.png"))) continue;
 
                     try
                     {
                         var stream = new MemoryStream(chapter.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, $"v{chapter.ParentId}_c{chapter.Id}");
+                        ImageService.WriteCoverThumbnail(stream, $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}");
                     }
                     catch (Exception e)
                     {
@@ -85,12 +85,12 @@ namespace API.Data
                 {
                     if (tag.CoverImage == null || !tag.CoverImage.Any()) continue;
                     if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                        $"tag{tag.Id}.png"))) continue;
+                        $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}.png"))) continue;
                     try
                     {
                         var stream = new MemoryStream(tag.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, $"tag{tag.Id}");
+                        ImageService.WriteCoverThumbnail(stream, $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}");
                     }
                     catch (Exception e)
                     {
@@ -110,8 +110,8 @@ namespace API.Data
             foreach (var series in lockedSeries)
             {
                 if (!File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                    $"series{series.Id}.png"))) continue;
-                series.CoverImage = $"series{series.Id}.png";
+                    $"{ImageService.GetSeriesFormat(series.Id)}.png"))) continue;
+                series.CoverImage = $"{ImageService.GetSeriesFormat(series.Id)}.png";
             }
 
             await context.SaveChangesAsync();
@@ -121,9 +121,9 @@ namespace API.Data
             foreach (var chapter in chapters)
             {
                 if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                    $"v{chapter.VolumeId}_c{chapter.Id}.png")))
+                    $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}.png")))
                 {
-                    chapter.CoverImage = $"v{chapter.VolumeId}_c{chapter.Id}.png";
+                    chapter.CoverImage = $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}.png";
                 }
 
             }
@@ -135,9 +135,9 @@ namespace API.Data
             foreach (var tag in tags)
             {
                 if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
-                    $"tag{tag.Id}.png")))
+                    $"{ImageService.GetCollectionTagFormat(tag.Id)}.png")))
                 {
-                    tag.CoverImage = $"tag{tag.Id}.png";
+                    tag.CoverImage = $"{ImageService.GetCollectionTagFormat(tag.Id)}.png";
                 }
 
             }

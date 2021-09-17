@@ -115,5 +115,21 @@ namespace API.Services
 
         return string.Empty;
     }
+
+    public static string GetChapterFormat(int chapterId, int volumeId)
+    {
+        return $"v{volumeId}_c{chapterId}";
+    }
+
+
+    public static string GetSeriesFormat(int seriesId)
+    {
+        return $"series{seriesId}";
+    }
+
+    public static string GetCollectionTagFormat(int tagId)
+    {
+        return $"tag{tagId}";
+    }
   }
 }

@@ -7,6 +7,7 @@ using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Controllers
 {
@@ -49,7 +50,7 @@ namespace API.Controllers
 
             try
             {
-                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"series{uploadFileDto.Id}");
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, ImageService.GetSeriesFormat(uploadFileDto.Id));
                 var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
 
                 if (!string.IsNullOrEmpty(filePath))
@@ -94,7 +95,7 @@ namespace API.Controllers
 
             try
             {
-                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"tag{uploadFileDto.Id}");
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
                 var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
 
                 if (!string.IsNullOrEmpty(filePath))
@@ -140,7 +141,7 @@ namespace API.Controllers
             try
             {
                 var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"v{chapter.VolumeId}_c{uploadFileDto.Id}");
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
 
                 if (!string.IsNullOrEmpty(filePath))
                 {

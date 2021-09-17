@@ -71,12 +71,12 @@ namespace API.Services
             {
                 case MangaFormat.Pdf:
                 case MangaFormat.Epub:
-                    return _bookService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}");
+                    return _bookService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
                 case MangaFormat.Image:
                     var coverImage = _imageService.GetCoverFile(file);
-                    return _imageService.GetCoverImage(coverImage, $"v{volumeId}_c{chapterId}");
+                    return _imageService.GetCoverImage(coverImage, ImageService.GetChapterFormat(chapterId, volumeId));
                 case MangaFormat.Archive:
-                    return _archiveService.GetCoverImage(file.FilePath, $"v{volumeId}_c{chapterId}");
+                    return _archiveService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
                 default:
                     return string.Empty;
             }
