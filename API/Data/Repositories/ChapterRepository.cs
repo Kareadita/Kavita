@@ -154,7 +154,11 @@ namespace API.Data.Repositories
 
         public async Task<IList<string>> GetAllCoverImagesAsync()
         {
-            return await _context.Chapter.Select(c => c.CoverImage).AsNoTracking().ToListAsync();
+            return await _context.Chapter
+                .Select(c => c.CoverImage)
+                .Where(t => !string.IsNullOrEmpty(t))
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         /// <summary>

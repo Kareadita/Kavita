@@ -47,7 +47,7 @@ namespace API.Services.Tasks
             _logger.LogInformation("Cleaning deleted cover images");
             await DeleteSeriesCoverImages();
             await DeleteChapterCoverImages();
-            // TODO: Handle Tag Cover Images
+            await DeleteTagCoverImages();
             _logger.LogInformation("Cleanup finished");
         }
 
@@ -66,6 +66,18 @@ namespace API.Services.Tasks
         private async Task DeleteChapterCoverImages()
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, @"v\d+_c\d+");
+            foreach (var file in files)
+            {
+                if (images.Contains(file)) continue;
+                File.Delete(file);
+
+            }
+        }
+
+        private async Task DeleteTagCoverImages()
+        {
+            var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, @"v\d+_c\d+");
             foreach (var file in files)
             {

@@ -17,5 +17,6 @@ namespace API.Interfaces.Repositories
         void Update(CollectionTag tag);
         Task<int> RemoveTagsWithoutSeries();
         Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
+        Task<IList<string>> GetAllCoverImagesAsync();
     }
 }

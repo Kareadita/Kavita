@@ -49,8 +49,16 @@ namespace API.Data.Repositories
         public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
         {
             return await _context.CollectionTag
-                .Select(c => c)
                 .OrderBy(c => c.NormalizedTitle)
+                .ToListAsync();
+        }
+
+        public async Task<IList<string>> GetAllCoverImagesAsync()
+        {
+            return await _context.CollectionTag
+                .Select(t => t.CoverImage)
+                .Where(t => !string.IsNullOrEmpty(t))
+                .AsNoTracking()
                 .ToListAsync();
         }
 
