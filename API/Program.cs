@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -7,6 +9,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using API.Services;
 using Kavita.Common;
@@ -18,11 +21,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IO;
 using NetVips;
 using Sentry;
 
 namespace API
 {
+    public class CoverMigration
+    {
+        public string Id { get; set; }
+        public byte[] CoverImage { get; set; }
+        public string ParentId { get; set; }
+    }
    public class Program
    {
       private static readonly int HttpPort = Configuration.Port;
@@ -55,14 +65,20 @@ namespace API
             var context = services.GetRequiredService<DataContext>();
             var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
-            if (!Directory.Exists(DirectoryService.CoverImageDirectory))
+            var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
+            if (requiresCoverImageMigration)
             {
-                Console.WriteLine("Migrating Cover Images to disk. Expect delay.");
-                DirectoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
+                MigrateCoverImages.ExtractToImages(context);
             }
 
             // Apply all migrations on startup
             await context.Database.MigrateAsync();
+
+            if (requiresCoverImageMigration)
+            {
+                await MigrateCoverImages.UpdateDatabaseWithImages(context);
+            }
+
             await Seed.SeedRoles(roleManager);
             await Seed.SeedSettings(context);
             await Seed.SeedUserApiKeys(context);

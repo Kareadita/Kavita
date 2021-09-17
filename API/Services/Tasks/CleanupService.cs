@@ -47,6 +47,7 @@ namespace API.Services.Tasks
             _logger.LogInformation("Cleaning deleted cover images");
             await DeleteSeriesCoverImages();
             await DeleteChapterCoverImages();
+            // TODO: Handle Tag Cover Images
             _logger.LogInformation("Cleanup finished");
         }
 
