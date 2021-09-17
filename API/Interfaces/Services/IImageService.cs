@@ -1,4 +1,5 @@
 ﻿using API.Entities;
+using API.Services;
 
 namespace API.Interfaces.Services
 {
@@ -10,13 +11,13 @@ namespace API.Interfaces.Services
     /// Creates a Thumbnail version of an image
     /// </summary>
     /// <param name="path">Path to the image file</param>
-    /// <returns></returns>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string CreateThumbnail(string path, string fileName);
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
-    /// <returns>Path to the file</returns>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string CreateThumbnailFromBase64(string encodedImage, string fileName);
   }
 }

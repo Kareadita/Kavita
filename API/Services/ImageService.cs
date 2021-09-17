@@ -61,15 +61,15 @@ namespace API.Services
 
       return string.Empty;
     }
-    
+
     /// <inheritdoc />
     public string CreateThumbnail(string path, string fileName)
     {
         try
         {
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
-            var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-            thumbnail.WriteToFile(filename);
+            var filename = fileName + ".png";
+            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
             return filename;
         }
         catch (Exception e)
@@ -86,14 +86,14 @@ namespace API.Services
     /// </summary>
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
-    /// <returns>Full file path of saved file</returns>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public static string WriteCoverThumbnail(Stream stream, string fileName)
     {
         using var thumbnail = NetVips.Image.ThumbnailStream(stream, ThumbnailWidth);
         // using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
         // string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2")))
-        var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-        thumbnail.WriteToFile(filename);
+        var filename = fileName + ".png";
+        thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
         return filename;
     }
 
@@ -104,8 +104,8 @@ namespace API.Services
         try
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
-            var filename = Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png");
-            thumbnail.WriteToFile(filename);
+            var filename = fileName + ".png";
+            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
             return filename;
         }
         catch (Exception e)

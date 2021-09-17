@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using API.Interfaces;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -26,7 +27,7 @@ namespace API.Controllers
         [HttpGet("chapter-cover")]
         public async Task<ActionResult> GetChapterCoverImage(int chapterId)
         {
-            var path =await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId);
+            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
 
@@ -42,7 +43,7 @@ namespace API.Controllers
         [HttpGet("volume-cover")]
         public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
         {
-            var path = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId);
+            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
 
@@ -58,7 +59,7 @@ namespace API.Controllers
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {
-            var path = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
+            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
 
@@ -74,7 +75,7 @@ namespace API.Controllers
         [HttpGet("collection-cover")]
         public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
         {
-            var path = await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId);
+            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
 
