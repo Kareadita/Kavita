@@ -42,8 +42,9 @@ namespace API.Services
         }
 
         /// <summary>
-        /// Determines whether an entity should regenerate cover image
+        /// Determines whether an entity should regenerate cover image.
         /// </summary>
+        /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
         /// <param name="coverImage"></param>
         /// <param name="firstFile"></param>
         /// <param name="forceUpdate"></param>
@@ -52,15 +53,21 @@ namespace API.Services
         public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
             bool isCoverLocked = false)
         {
-            if (isCoverLocked) return false;
+            var fileExists = File.Exists(coverImage);
+            if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
-            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage);
+            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
         }
 
 
         private static bool HasCoverImage(string coverImage)
         {
-            return !string.IsNullOrEmpty(coverImage) && File.Exists(coverImage);
+            return HasCoverImage(coverImage, File.Exists(coverImage));
+        }
+
+        private static bool HasCoverImage(string coverImage, bool fileExists)
+        {
+            return !string.IsNullOrEmpty(coverImage) && fileExists;
         }
 
         private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
