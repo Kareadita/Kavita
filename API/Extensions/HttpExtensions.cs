@@ -33,6 +33,11 @@ namespace API.Extensions
             response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
         }
 
+        /// <summary>
+        /// Calculates SHA256 hash for a cover image filename and sets as ETag. Ensures Cache-Control: private header is added.
+        /// </summary>
+        /// <param name="response"></param>
+        /// <param name="filename"></param>
         public static void AddCacheHeader(this HttpResponse response, string filename)
         {
             if (filename == null || filename.Length <= 0) return;
