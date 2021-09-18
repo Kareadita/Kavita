@@ -15,6 +15,7 @@ namespace API.Tests.Services
     public class MetadataServiceTests
     {
         private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
+        private readonly string _testCoverImageFile = Path.Join(Directory.GetCurrentDirectory(), @"..\..\..\Services\Test Data\ArchiveService\CoverImages\thumbnail.jpg");
         private readonly MetadataService _metadataService;
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         private readonly IImageService _imageService = Substitute.For<IImageService>();
@@ -24,104 +25,115 @@ namespace API.Tests.Services
         private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
 
         // TODO: Uncomment this (bytes)
-        // public MetadataServiceTests()
-        // {
-        //     _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService, _messageHub);
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnFirstRun()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = DateTime.Now
-        //     }, false, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnFirstRunSeries()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null,null, false, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_FileModified()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime.Subtract(TimeSpan.FromDays(1))
-        //     }, false, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_CoverImageLocked()
-        // {
-        //     // Represents first run
-        //     Assert.False(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-        //     }, false, true));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_ForceUpdate()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-        //     }, true, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_NoFileChangeButNoCoverImage()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-        //     }, false, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_FileChangeButNoCoverImage()
-        // {
-        //     // Represents first run
-        //     Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime + TimeSpan.FromDays(1)
-        //     }, false, false));
-        // }
-        //
-        // [Fact]
-        // public void ShouldUpdateCoverImage_OnSecondRun_CoverImageSet()
-        // {
-        //     // Represents first run
-        //     Assert.False(MetadataService.ShouldUpdateCoverImage(new byte[] {1}, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-        //     }, false, false));
-        // }
-        //
-        // [Fact]
-        //
-        // public void ShouldUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
-        // {
-        //     Assert.False(MetadataService.ShouldUpdateCoverImage(new byte[] {1}, new MangaFile()
-        //     {
-        //         FilePath = Path.Join(_testDirectory, "file in folder.zip"),
-        //         LastModified = DateTime.Now
-        //     }, false, false));
-        // }
+        public MetadataServiceTests()
+        {
+            _metadataService = new MetadataService(_unitOfWork, _logger, _archiveService, _bookService, _imageService, _messageHub);
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnFirstRun()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = DateTime.Now
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnFirstRunSeries()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null,null, false, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnFirstRun_FileModified()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime.Subtract(TimeSpan.FromDays(1))
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnFirstRun_CoverImageLocked()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
+            }, false, true));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnSecondRun_ForceUpdate()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
+            }, true, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnSecondRun_NoFileChangeButNoCoverImage()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnSecondRun_FileChangeButNoCoverImage()
+        {
+            // Represents first run
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime + TimeSpan.FromDays(1)
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldNotUpdateCoverImage_OnSecondRun_CoverImageSet()
+        {
+            // Represents first run
+            Assert.False(MetadataService.ShouldUpdateCoverImage(_testCoverImageFile, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldNoteUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
+        {
+
+            Assert.False(MetadataService.ShouldUpdateCoverImage(_testCoverImageFile, new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = DateTime.Now
+            }, false, false));
+        }
+
+        [Fact]
+        public void ShouldUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_HasLock_CoverImageDoesntExist()
+        {
+
+            Assert.True(MetadataService.ShouldUpdateCoverImage(Path.Join(Directory.GetCurrentDirectory(), Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages/doesn'texist.jpg")), new MangaFile()
+            {
+                FilePath = Path.Join(_testDirectory, "file in folder.zip"),
+                LastModified = DateTime.Now
+            }, false, true));
+        }
     }
 }

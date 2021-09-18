@@ -72,7 +72,6 @@ namespace API.Services
 
         private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
-            // TODO: Think about a factory for naming convention & include format & hash
             file.LastModified = DateTime.Now;
             switch (file.Format)
             {
