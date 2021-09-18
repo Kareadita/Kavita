@@ -1,8 +1,10 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using API.Extensions;
 using API.Interfaces;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Controllers
 {
@@ -40,6 +42,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="volumeId"></param>
         /// <returns></returns>
+        //[ResponseCache(Duration = 10, Location = ResponseCacheLocation.Any, NoStore = false)]
         [HttpGet("volume-cover")]
         public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
         {
@@ -48,6 +51,7 @@ namespace API.Controllers
             var format = Path.GetExtension(path).Replace(".", "");
 
             // TODO: Need to figure out how to add ETAG caching on it
+            Response.AddCacheHeader(path);
             return PhysicalFile(path, "image/" + format);
         }
 

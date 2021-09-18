@@ -27,12 +27,6 @@ using Sentry;
 
 namespace API
 {
-    public class CoverMigration
-    {
-        public string Id { get; set; }
-        public byte[] CoverImage { get; set; }
-        public string ParentId { get; set; }
-    }
    public class Program
    {
       private static readonly int HttpPort = Configuration.Port;

@@ -9,6 +9,16 @@ using Microsoft.EntityFrameworkCore;
 namespace API.Data
 {
     /// <summary>
+    /// A data structure to migrate Cover Images from byte[] to files.
+    /// </summary>
+    internal class CoverMigration
+    {
+        public string Id { get; set; }
+        public byte[] CoverImage { get; set; }
+        public string ParentId { get; set; }
+    }
+
+    /// <summary>
     /// In v0.4.6, Cover Images were migrated from byte[] in the DB to external files. This migration handles that work.
     /// </summary>
     public static class MigrateCoverImages

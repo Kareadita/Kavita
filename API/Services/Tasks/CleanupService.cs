@@ -54,10 +54,10 @@ namespace API.Services.Tasks
         private async Task DeleteSeriesCoverImages()
         {
             var images = await _unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, @"seres\d+");
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
             foreach (var file in files)
             {
-                if (images.Contains(file)) continue;
+                if (images.Contains(Path.GetFileName(file))) continue;
                 File.Delete(file);
 
             }
@@ -66,10 +66,10 @@ namespace API.Services.Tasks
         private async Task DeleteChapterCoverImages()
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, @"v\d+_c\d+");
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
             foreach (var file in files)
             {
-                if (images.Contains(file)) continue;
+                if (images.Contains(Path.GetFileName(file))) continue;
                 File.Delete(file);
 
             }
@@ -78,10 +78,10 @@ namespace API.Services.Tasks
         private async Task DeleteTagCoverImages()
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, @"v\d+_c\d+");
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
             foreach (var file in files)
             {
-                if (images.Contains(file)) continue;
+                if (images.Contains(Path.GetFileName(file))) continue;
                 File.Delete(file);
 
             }

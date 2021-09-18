@@ -14,6 +14,10 @@ namespace API.Services
   {
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
+    public const string ChapterCoverImageRegex = @"v\d+_c\d+";
+    public const string SeriesCoverImageRegex = @"seres\d+";
+    public const string CollectionTagCoverImageRegex = @"tag\d+";
+
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -116,17 +120,32 @@ namespace API.Services
         return string.Empty;
     }
 
+    /// <summary>
+    /// Returns the name format for a chapter cover image
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
     public static string GetChapterFormat(int chapterId, int volumeId)
     {
         return $"v{volumeId}_c{chapterId}";
     }
 
-
+    /// <summary>
+    /// Returns the name format for a series cover image
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     public static string GetSeriesFormat(int seriesId)
     {
         return $"series{seriesId}";
     }
 
+    /// <summary>
+    /// Returns the name format for a collection tag cover image
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
     public static string GetCollectionTagFormat(int tagId)
     {
         return $"tag{tagId}";
