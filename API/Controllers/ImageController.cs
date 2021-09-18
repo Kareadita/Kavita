@@ -65,7 +65,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
             var format = Path.GetExtension(path).Replace(".", "");
 
-            // TODO: Need to figure out how to add ETAG caching on it
+            Response.AddCacheHeader(path);
             return PhysicalFile(path, "image/" + format);
         }
 
