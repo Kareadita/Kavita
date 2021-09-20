@@ -60,9 +60,17 @@ namespace API
             var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
             var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
-            if (requiresCoverImageMigration)
+            try
             {
-                MigrateCoverImages.ExtractToImages(context);
+                // If this is a new install, tables wont exist yet
+                if (requiresCoverImageMigration)
+                {
+                    MigrateCoverImages.ExtractToImages(context);
+                }
+            }
+            catch (Exception )
+            {
+                requiresCoverImageMigration = false;
             }
 
             // Apply all migrations on startup
