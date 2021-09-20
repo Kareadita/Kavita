@@ -5,5 +5,6 @@ namespace API.Interfaces.Services
     public interface ICleanupService
     {
         Task Cleanup();
+        void CleanupCacheDirectory();
     }
 }

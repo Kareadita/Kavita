@@ -30,6 +30,12 @@ namespace API.Services.Tasks
             _directoryService = directoryService;
         }
 
+        public void CleanupCacheDirectory()
+        {
+            _logger.LogInformation("Cleaning cache directory");
+            _cacheService.Cleanup();
+        }
+
         /// <summary>
         /// Cleans up Temp, cache, deleted cover images,  and old database backups
         /// </summary>
@@ -40,8 +46,7 @@ namespace API.Services.Tasks
             _logger.LogInformation("Cleaning temp directory");
             var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
             DirectoryService.ClearDirectory(tempDirectory);
-            _logger.LogInformation("Cleaning cache directory");
-            _cacheService.Cleanup();
+            CleanupCacheDirectory();
             _logger.LogInformation("Cleaning old database backups");
             _backupService.CleanupBackups();
             _logger.LogInformation("Cleaning deleted cover images");

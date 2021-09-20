@@ -115,7 +115,7 @@ namespace API.Tests.Services
         }
 
         [Fact]
-        public void ShouldNoteUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
+        public void ShouldNotUpdateCoverImage_OnSecondRun_HasCoverImage_NoForceUpdate_NoLock()
         {
 
             Assert.False(MetadataService.ShouldUpdateCoverImage(_testCoverImageFile, new MangaFile()
