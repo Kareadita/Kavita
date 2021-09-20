@@ -15,7 +15,8 @@ namespace API.Tests.Services
     public class MetadataServiceTests
     {
         private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
-        private readonly string _testCoverImageFile = Path.Join(Directory.GetCurrentDirectory(), @"..\..\..\Services\Test Data\ArchiveService\CoverImages\thumbnail.jpg");
+        private readonly string _testCoverImageFile = "thumbnail.jpg";
+        private readonly string _testCoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), @"..\..\..\Services\Test Data\ArchiveService\CoverImages\");
         private readonly MetadataService _metadataService;
         private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
         private readonly IImageService _imageService = Substitute.For<IImageService>();
@@ -111,7 +112,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-            }, false, false));
+            }, false, false, _testCoverImageDirectory));
         }
 
         [Fact]
@@ -122,7 +123,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = DateTime.Now
-            }, false, false));
+            }, false, false, _testCoverImageDirectory));
         }
 
         [Fact]

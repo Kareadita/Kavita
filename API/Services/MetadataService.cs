@@ -25,10 +25,6 @@ namespace API.Services
         private readonly IImageService _imageService;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-        /// <summary>
-        /// Width of the Thumbnail generation
-        /// </summary>
-        //public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
             IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
@@ -49,11 +45,16 @@ namespace API.Services
         /// <param name="firstFile"></param>
         /// <param name="forceUpdate"></param>
         /// <param name="isCoverLocked"></param>
+        /// <param name="coverImageDirectory">Directory where cover images are. Defaults to <see cref="DirectoryService.CoverImageDirectory"/></param>
         /// <returns></returns>
         public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
-            bool isCoverLocked = false)
+            bool isCoverLocked = false, string coverImageDirectory = null)
         {
-            var fileExists = File.Exists(Path.Join(DirectoryService.CoverImageDirectory, coverImage));
+            if (string.IsNullOrEmpty(coverImageDirectory))
+            {
+                coverImageDirectory = DirectoryService.CoverImageDirectory;
+            }
+            var fileExists = File.Exists(Path.Join(coverImageDirectory, coverImage));
             if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
             return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
