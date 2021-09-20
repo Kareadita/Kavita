@@ -94,8 +94,6 @@ namespace API.Services
     public static string WriteCoverThumbnail(Stream stream, string fileName)
     {
         using var thumbnail = NetVips.Image.ThumbnailStream(stream, ThumbnailWidth);
-        // using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
-        // string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2")))
         var filename = fileName + ".png";
         thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
         return filename;

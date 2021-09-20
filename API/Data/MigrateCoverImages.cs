@@ -32,7 +32,7 @@ namespace API.Data
                 DirectoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
 
                 Console.WriteLine("Extracting cover images for Series");
-                var lockedSeries = SQLHelper.RawSqlQuery(context, "Select Id, CoverImage From Series where CoverImageLocked = true;", x =>
+                var lockedSeries = SqlHelper.RawSqlQuery(context, "Select Id, CoverImage From Series where CoverImageLocked = true;", x =>
                     new CoverMigration()
                     {
                         Id = x[0] + string.Empty,
@@ -58,7 +58,7 @@ namespace API.Data
                 }
 
                 Console.WriteLine("Extracting cover images for Chapters");
-                var chapters = SQLHelper.RawSqlQuery(context, "Select Id, CoverImage, VolumeId From Chapter;", x =>
+                var chapters = SqlHelper.RawSqlQuery(context, "Select Id, CoverImage, VolumeId From Chapter;", x =>
                     new CoverMigration()
                     {
                         Id = x[0] + string.Empty,
@@ -84,7 +84,7 @@ namespace API.Data
                 }
 
                 Console.WriteLine("Extracting cover images for Collection Tags");
-                var tags = SQLHelper.RawSqlQuery(context, "Select Id, CoverImage From CollectionTag Where CoverImage IS NOT NULL;", x =>
+                var tags = SqlHelper.RawSqlQuery(context, "Select Id, CoverImage From CollectionTag Where CoverImage IS NOT NULL;", x =>
                     new CoverMigration()
                     {
                         Id = x[0] + string.Empty,

@@ -7,8 +7,6 @@ namespace API.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            //var query = migrationBuilder.Sql("Select Id, CoverImage, CoverImageLocked from Volume");
-
             migrationBuilder.DropColumn(
                 name: "RowVersion",
                 table: "AppUserProgresses");
