@@ -53,7 +53,7 @@ namespace API.Services
         public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
             bool isCoverLocked = false)
         {
-            var fileExists = File.Exists(coverImage);
+            var fileExists = File.Exists(Path.Join(DirectoryService.CoverImageDirectory, coverImage));
             if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
             return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);

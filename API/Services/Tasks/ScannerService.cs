@@ -277,6 +277,9 @@ namespace API.Services.Tasks
                 _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
              }
           });
+
+          // Last step, remove any series that have no pages
+          library.Series = library.Series.Where(s => s.Pages > 0).ToList();
        }
 
        public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
