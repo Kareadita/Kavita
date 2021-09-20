@@ -453,5 +453,14 @@ namespace API.Data.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<string>> GetLockedCoverImagesAsync()
+        {
+            return await _context.Series
+                .Where(s => s.CoverImageLocked && !string.IsNullOrEmpty(s.CoverImage))
+                .Select(s => s.CoverImage)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

@@ -162,9 +162,23 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// Returns non-tracked files for a set of chapterIds
+        /// Returns cover images for locked chapters
         /// </summary>
-        /// <param name="chapterIds"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync()
+        {
+            return await _context.Chapter
+                .Where(c => c.CoverImageLocked)
+                .Select(c => c.CoverImage)
+                .Where(t => !string.IsNullOrEmpty(t))
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Returns non-tracked files for a set of <paramref name="chapterIds"/>
+        /// </summary>
+        /// <param name="chapterIds">List of chapter Ids</param>
         /// <returns></returns>
         public async Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds)
         {

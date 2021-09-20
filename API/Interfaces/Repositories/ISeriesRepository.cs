@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Filtering;
@@ -65,5 +66,6 @@ namespace API.Interfaces.Repositories
         Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
         Task<IList<string>> GetAllCoverImagesAsync();
+        Task<IEnumerable<string>> GetLockedCoverImagesAsync();
     }
 }
