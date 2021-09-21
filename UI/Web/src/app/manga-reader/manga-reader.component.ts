@@ -774,11 +774,35 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * There are some hard limits on the size of canvas' that we must cap at. https://github.com/jhildenbiddle/canvas-size#test-results
+   * For Safari, it's 16,777,216, so we cap at 4096x4096 when this happens. The drawImage in render will perform bi-cubic scaling for us.
+   * @returns If we should continue to the render loop 
+   */
+  setCanvasSize() {
+    if (this.ctx && this.canvas) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && window['safari'].pushNotification));
+      const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
+      const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
+      if (needsScaling) {
+        this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
+        this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
+      } else {
+        this.canvas.nativeElement.width = this.canvasImage.width;
+        this.canvas.nativeElement.height = this.canvasImage.height;
+      }
+    }
+    return true;
+  }
+
   renderPage() {
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
-      this.canvas.nativeElement.width = this.canvasImage.width;
-      this.canvas.nativeElement.height = this.canvasImage.height;
+
+      if (!this.setCanvasSize()) return;
+
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;
       this.updateSplitPage();
 
