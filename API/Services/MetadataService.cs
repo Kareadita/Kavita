@@ -55,7 +55,6 @@ namespace API.Services
                 coverImageDirectory = DirectoryService.CoverImageDirectory;
             }
 
-            Console.WriteLine($"Checking if file exists at {Path.Join(coverImageDirectory, coverImage)}");
             var fileExists = File.Exists(Path.Join(coverImageDirectory, coverImage));
             if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
