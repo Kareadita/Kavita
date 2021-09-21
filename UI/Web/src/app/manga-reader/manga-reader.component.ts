@@ -787,11 +787,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
       const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
       if (needsScaling) {
-        const rect = document.querySelector('body')?.getBoundingClientRect();
-        if (rect == undefined) {
-          this.toastr.error('The image is too large for this browser. Please use a lower resolution or a different browser.');
-          return false;
-        }
         this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
         this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
       } else {
