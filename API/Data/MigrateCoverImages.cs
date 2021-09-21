@@ -116,8 +116,8 @@ namespace API.Data
         public static async Task UpdateDatabaseWithImages(DataContext context)
         {
             Console.WriteLine("Updating Series entities");
-            var lockedSeries = await context.Series.Where(s => s.CoverImageLocked).ToListAsync();
-            foreach (var series in lockedSeries)
+            var seriesCovers = await context.Series.Where(s => !string.IsNullOrEmpty(s.CoverImage)).ToListAsync();
+            foreach (var series in seriesCovers)
             {
                 if (!File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
                     $"{ImageService.GetSeriesFormat(series.Id)}.png"))) continue;
