@@ -73,7 +73,7 @@ namespace API.Data.Repositories
         {
             return await _context.AppUserProgresses
                 .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
         }
     }
 }

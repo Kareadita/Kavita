@@ -48,7 +48,7 @@ namespace API.Services.Tasks.Scanner
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
             var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == series.Format && ps.NormalizedName == Parser.Parser.Normalize(series.OriginalName));
+                ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
 
             return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
         }

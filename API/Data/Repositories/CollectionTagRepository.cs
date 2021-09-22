@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -48,8 +49,16 @@ namespace API.Data.Repositories
         public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
         {
             return await _context.CollectionTag
-                .Select(c => c)
                 .OrderBy(c => c.NormalizedTitle)
+                .ToListAsync();
+        }
+
+        public async Task<IList<string>> GetAllCoverImagesAsync()
+        {
+            return await _context.CollectionTag
+                .Select(t => t.CoverImage)
+                .Where(t => !string.IsNullOrEmpty(t))
+                .AsNoTracking()
                 .ToListAsync();
         }
 
@@ -100,9 +109,9 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public Task<byte[]> GetCoverImageAsync(int collectionTagId)
+        public async Task<string> GetCoverImageAsync(int collectionTagId)
         {
-            return _context.CollectionTag
+            return await _context.CollectionTag
                 .Where(c => c.Id == collectionTagId)
                 .Select(c => c.CoverImage)
                 .AsNoTracking()

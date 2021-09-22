@@ -157,10 +157,12 @@ namespace API.Controllers
             series.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
+            // This is when you hit Reset
             if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
             {
                 // Trigger a refresh when we are moving from a locked image to a non-locked
                 needsRefreshMetadata = true;
+                series.CoverImage = string.Empty;
                 series.CoverImageLocked = updateSeries.CoverImageLocked;
             }
 

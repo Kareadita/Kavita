@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -24,10 +25,6 @@ namespace API.Services
         private readonly IImageService _imageService;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-        /// <summary>
-        /// Width of the Thumbnail generation
-        /// </summary>
-        public static readonly int ThumbnailWidth = 320; // 153w x 230h
 
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
             IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
@@ -41,41 +38,55 @@ namespace API.Services
         }
 
         /// <summary>
-        /// Determines whether an entity should regenerate cover image
+        /// Determines whether an entity should regenerate cover image.
         /// </summary>
+        /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
         /// <param name="coverImage"></param>
         /// <param name="firstFile"></param>
         /// <param name="forceUpdate"></param>
         /// <param name="isCoverLocked"></param>
+        /// <param name="coverImageDirectory">Directory where cover images are. Defaults to <see cref="DirectoryService.CoverImageDirectory"/></param>
         /// <returns></returns>
-        public static bool ShouldUpdateCoverImage(byte[] coverImage, MangaFile firstFile, bool forceUpdate = false,
-            bool isCoverLocked = false)
+        public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
+            bool isCoverLocked = false, string coverImageDirectory = null)
         {
-            if (isCoverLocked) return false;
+            if (string.IsNullOrEmpty(coverImageDirectory))
+            {
+                coverImageDirectory = DirectoryService.CoverImageDirectory;
+            }
+
+            var fileExists = File.Exists(Path.Join(coverImageDirectory, coverImage));
+            if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
-            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage);
+            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
         }
 
-        private static bool HasCoverImage(byte[] coverImage)
+
+        private static bool HasCoverImage(string coverImage)
         {
-            return coverImage != null && coverImage.Any();
+            return HasCoverImage(coverImage, File.Exists(coverImage));
         }
 
-        private byte[] GetCoverImage(MangaFile file, bool createThumbnail = true)
+        private static bool HasCoverImage(string coverImage, bool fileExists)
+        {
+            return !string.IsNullOrEmpty(coverImage) && fileExists;
+        }
+
+        private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
             file.LastModified = DateTime.Now;
             switch (file.Format)
             {
                 case MangaFormat.Pdf:
                 case MangaFormat.Epub:
-                    return _bookService.GetCoverImage(file.FilePath, createThumbnail);
+                    return _bookService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
                 case MangaFormat.Image:
                     var coverImage = _imageService.GetCoverFile(file);
-                    return _imageService.GetCoverImage(coverImage, createThumbnail);
+                    return _imageService.GetCoverImage(coverImage, ImageService.GetChapterFormat(chapterId, volumeId));
                 case MangaFormat.Archive:
-                    return _archiveService.GetCoverImage(file.FilePath, createThumbnail);
+                    return _archiveService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
                 default:
-                    return Array.Empty<byte>();
+                    return string.Empty;
             }
 
         }
@@ -91,7 +102,7 @@ namespace API.Services
 
             if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
-                chapter.CoverImage = GetCoverImage(firstFile);
+                chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
                 return true;
             }
 
@@ -130,7 +141,7 @@ namespace API.Services
             {
                 series.Volumes ??= new List<Volume>();
                 var firstCover = series.Volumes.GetCoverImage(series.Format);
-                byte[] coverImage = null;
+                string coverImage = null;
                 if (firstCover == null && series.Volumes.Any())
                 {
                     // If firstCover is null and one volume, the whole series is Chapters under Vol 0.

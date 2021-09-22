@@ -300,7 +300,7 @@ namespace API.Controllers
                 SeriesId = 0
             };
             if (user.Progresses == null) return Ok(progressBookmark);
-            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
+            var progress = user.Progresses.FirstOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
             if (progress != null)
             {

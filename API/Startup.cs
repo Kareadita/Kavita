@@ -132,7 +132,7 @@ namespace API
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
                         Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10)
+                        MaxAge = TimeSpan.FromSeconds(10),
                     };
                 context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };

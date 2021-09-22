@@ -3,9 +3,11 @@ using System.Threading.Tasks;
 using API.DTOs.Uploads;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Controllers
 {
@@ -48,12 +50,12 @@ namespace API.Controllers
 
             try
             {
-                var bytes = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url);
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, ImageService.GetSeriesFormat(uploadFileDto.Id));
                 var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
 
-                if (bytes.Length > 0)
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    series.CoverImage = bytes;
+                    series.CoverImage = filePath;
                     series.CoverImageLocked = true;
                     _unitOfWork.SeriesRepository.Update(series);
                 }
@@ -93,12 +95,12 @@ namespace API.Controllers
 
             try
             {
-                var bytes = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url);
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
                 var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
 
-                if (bytes.Length > 0)
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    tag.CoverImage = bytes;
+                    tag.CoverImage = filePath;
                     tag.CoverImageLocked = true;
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
@@ -138,12 +140,12 @@ namespace API.Controllers
 
             try
             {
-                var bytes = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url);
+                var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
 
-                if (bytes.Length > 0)
+                if (!string.IsNullOrEmpty(filePath))
                 {
-                    var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                    chapter.CoverImage = bytes;
+                    chapter.CoverImage = filePath;
                     chapter.CoverImageLocked = true;
                     _unitOfWork.ChapterRepository.Update(chapter);
                     var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -179,7 +181,8 @@ namespace API.Controllers
             try
             {
                 var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-                chapter.CoverImage = Array.Empty<byte>();
+                var originalFile = chapter.CoverImage;
+                chapter.CoverImage = string.Empty;
                 chapter.CoverImageLocked = false;
                 _unitOfWork.ChapterRepository.Update(chapter);
                 var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
@@ -190,6 +193,7 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    System.IO.File.Delete(originalFile);
                     _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                     return Ok();
                 }

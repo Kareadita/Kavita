@@ -14,6 +14,15 @@ namespace API.Services
   {
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
+    public const string ChapterCoverImageRegex = @"v\d+_c\d+";
+    public const string SeriesCoverImageRegex = @"seres\d+";
+    public const string CollectionTagCoverImageRegex = @"tag\d+";
+
+
+    /// <summary>
+    /// Width of the Thumbnail generation
+    /// </summary>
+    private const int ThumbnailWidth = 320;
 
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
@@ -41,63 +50,103 @@ namespace API.Services
       return firstImage;
     }
 
-    public byte[] GetCoverImage(string path, bool createThumbnail = false)
+    public string GetCoverImage(string path, string fileName)
     {
-      if (string.IsNullOrEmpty(path)) return Array.Empty<byte>();
+      if (string.IsNullOrEmpty(path)) return string.Empty;
 
       try
       {
-        if (createThumbnail)
-        {
-            return CreateThumbnail(path);
-        }
-
-        using var img = Image.NewFromFile(path);
-        using var stream = new MemoryStream();
-        img.JpegsaveStream(stream);
-        stream.Position = 0;
-        return stream.ToArray();
+          return CreateThumbnail(path,  fileName);
       }
       catch (Exception ex)
       {
         _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
       }
 
-      return Array.Empty<byte>();
+      return string.Empty;
     }
 
-
     /// <inheritdoc />
-    public byte[] CreateThumbnail(string path)
+    public string CreateThumbnail(string path, string fileName)
     {
         try
         {
-            using var thumbnail = Image.Thumbnail(path, MetadataService.ThumbnailWidth);
-            return thumbnail.WriteToBuffer(".jpg");
+            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
+            var filename = fileName + ".png";
+            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+            return filename;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error creating thumbnail from url");
         }
 
-        return Array.Empty<byte>();
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
+    /// fileName and .png extension.
+    /// </summary>
+    /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
+    /// <param name="fileName">filename to save as without extension</param>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
+    public static string WriteCoverThumbnail(Stream stream, string fileName)
+    {
+        using var thumbnail = NetVips.Image.ThumbnailStream(stream, ThumbnailWidth);
+        var filename = fileName + ".png";
+        thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+        return filename;
     }
 
 
     /// <inheritdoc />
-    public byte[] CreateThumbnailFromBase64(string encodedImage)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName)
     {
         try
         {
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), MetadataService.ThumbnailWidth);
-            return thumbnail.WriteToBuffer(".jpg");
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
+            var filename = fileName + ".png";
+            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+            return filename;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "Error creating thumbnail from url");
         }
 
-        return Array.Empty<byte>();
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// Returns the name format for a chapter cover image
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="volumeId"></param>
+    /// <returns></returns>
+    public static string GetChapterFormat(int chapterId, int volumeId)
+    {
+        return $"v{volumeId}_c{chapterId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a series cover image
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public static string GetSeriesFormat(int seriesId)
+    {
+        return $"series{seriesId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a collection tag cover image
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
+    public static string GetCollectionTagFormat(int tagId)
+    {
+        return $"tag{tagId}";
     }
   }
 }

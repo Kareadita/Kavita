@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -256,7 +257,7 @@ namespace API.Data.Repositories
             }
         }
 
-        public async Task<byte[]> GetSeriesCoverImageAsync(int seriesId)
+        public async Task<string> GetSeriesCoverImageAsync(int seriesId)
         {
             return await _context.Series
                 .Where(s => s.Id == seriesId)
@@ -441,6 +442,24 @@ namespace API.Data.Repositories
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .AsSplitQuery()
+                .ToListAsync();
+        }
+
+        public async Task<IList<string>> GetAllCoverImagesAsync()
+        {
+            return await _context.Series
+                .Select(s => s.CoverImage)
+                .Where(t => !string.IsNullOrEmpty(t))
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetLockedCoverImagesAsync()
+        {
+            return await _context.Series
+                .Where(s => s.CoverImageLocked && !string.IsNullOrEmpty(s.CoverImage))
+                .Select(s => s.CoverImage)
+                .AsNoTracking()
                 .ToListAsync();
         }
     }

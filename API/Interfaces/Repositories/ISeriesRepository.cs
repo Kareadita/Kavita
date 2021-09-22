@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Filtering;
@@ -57,12 +58,14 @@ namespace API.Interfaces.Repositories
         Task AddSeriesModifiers(int userId, List<SeriesDto> series);
 
 
-        Task<byte[]> GetSeriesCoverImageAsync(int seriesId);
+        Task<string> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter);
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
         Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
+        Task<IList<string>> GetAllCoverImagesAsync();
+        Task<IEnumerable<string>> GetLockedCoverImagesAsync();
     }
 }
