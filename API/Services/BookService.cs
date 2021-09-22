@@ -379,7 +379,6 @@ namespace API.Services
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
                 GetPdfPage(docReader, pageNumber, stream);
-                //File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
                 using var fileStream = File.Create(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"));
                 stream.Seek(0, SeekOrigin.Begin);
                 stream.CopyTo(fileStream);
