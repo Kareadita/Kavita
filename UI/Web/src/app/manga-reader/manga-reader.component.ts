@@ -783,7 +783,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.ctx && this.canvas) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      const isSafari = /constructor/i.test(window.HTMLElement) || (function (p) { return p.toString() === "[object SafariRemoteNotification]"; })(!window['safari'] || (typeof safari !== 'undefined' && window['safari'].pushNotification));
+      const isSafari = [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      // iPad on iOS 13 detection
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
       const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
       const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
       if (needsScaling) {
