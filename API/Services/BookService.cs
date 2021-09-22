@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -378,7 +379,9 @@ namespace API.Services
             for (var pageNumber = 0; pageNumber < pages; pageNumber++)
             {
                 GetPdfPage(docReader, pageNumber, stream);
-                File.WriteAllBytes(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"), stream.ToArray());
+                using var fileStream = File.Create(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"));
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.CopyTo(fileStream);
             }
         }
 
