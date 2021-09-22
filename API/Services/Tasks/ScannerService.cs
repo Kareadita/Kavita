@@ -128,12 +128,13 @@ namespace API.Services.Tasks
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public async Task ScanLibraries()
        {
+           _logger.LogInformation("Starting Scan of All Libraries");
           var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
           foreach (var lib in libraries)
           {
              await ScanLibrary(lib.Id, false);
           }
-
+          _logger.LogInformation("Scan of All Libraries Finished");
        }
 
 

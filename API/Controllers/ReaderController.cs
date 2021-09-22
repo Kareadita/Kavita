@@ -54,7 +54,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                return PhysicalFile(path, "image/" + format);
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)
             {
