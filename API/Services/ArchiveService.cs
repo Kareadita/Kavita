@@ -28,7 +28,6 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
-        private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
         private const string ComicInfoFilename = "comicinfo";
 
@@ -169,7 +168,7 @@ namespace API.Services
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
-                        return CreateThumbnail(entry.FullName, stream, fileName);
+                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
@@ -180,18 +179,16 @@ namespace API.Services
                         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
-                        using var ms = StreamManager.GetStream();
-                        entry.WriteTo(ms);
-                        ms.Position = 0;
+                        using var stream = entry.OpenEntryStream();
 
-                        return CreateThumbnail(entry.Key, ms, fileName); // Path.GetExtension(entry.Key)
+                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return String.Empty;
+                        return string.Empty;
                     default:
                         _logger.LogWarning("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return String.Empty;
+                        return string.Empty;
                 }
             }
             catch (Exception ex)
@@ -199,7 +196,7 @@ namespace API.Services
                 _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
 
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -292,9 +289,10 @@ namespace API.Services
                     && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key)
                     && Parser.Parser.IsXml(entry.Key))
                 {
-                    using var ms = StreamManager.GetStream();
-                    entry.WriteTo(ms);
-                    ms.Position = 0;
+                    // using var ms = StreamManager.GetStream();
+                    // entry.WriteTo(ms);
+                    // ms.Position = 0;
+                    using var ms = entry.OpenEntryStream();
 
                     var serializer = new XmlSerializer(typeof(ComicInfo));
                     var info = (ComicInfo) serializer.Deserialize(ms);
