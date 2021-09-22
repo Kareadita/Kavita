@@ -448,7 +448,7 @@ namespace API.Parser
             RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.*)\s(?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+                @"^(?!Vol)(?<Series>.+?)\s(?<!vol\. )(?<Chapter>\d+(?:.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
