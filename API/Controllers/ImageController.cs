@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using API.Extensions;
 using API.Interfaces;
@@ -34,7 +36,7 @@ namespace API.Controllers
             var format = Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format);
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }
 
         /// <summary>
@@ -50,7 +52,7 @@ namespace API.Controllers
             var format = Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format);
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace API.Controllers
             var format = Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format);
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }
 
         /// <summary>
@@ -82,7 +84,7 @@ namespace API.Controllers
             var format = Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format);
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }
     }
 }

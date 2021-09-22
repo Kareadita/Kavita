@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Helpers;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,8 @@ namespace API.Data
     /// </summary>
     public static class MigrateCoverImages
     {
+        private static readonly ChapterSortComparerZeroFirst ChapterSortComparerForInChapterSorting = new ();
+
         /// <summary>
         /// Run first. Will extract byte[]s from DB and write them to the cover directory.
         /// </summary>
@@ -140,6 +143,22 @@ namespace API.Data
 
             await context.SaveChangesAsync();
 
+            Console.WriteLine("Updating Volume entities");
+            var volumes = await context.Volume.Include(v => v.Chapters).ToListAsync();
+            foreach (var volume in volumes)
+            {
+                var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), ChapterSortComparerForInChapterSorting).FirstOrDefault();
+                if (firstChapter == null) continue;
+                if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                    $"{ImageService.GetChapterFormat(firstChapter.Id, firstChapter.VolumeId)}.png")))
+                {
+                    volume.CoverImage = $"{ImageService.GetChapterFormat(firstChapter.Id, firstChapter.VolumeId)}.png";
+                }
+
+            }
+
+            await context.SaveChangesAsync();
+
             Console.WriteLine("Updating Collection Tag entities");
             var tags = await context.CollectionTag.ToListAsync();
             foreach (var tag in tags)
@@ -153,6 +172,7 @@ namespace API.Data
             }
 
             await context.SaveChangesAsync();
+
             Console.WriteLine("Cover Image Migration completed");
         }
 
