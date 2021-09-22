@@ -53,7 +53,18 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   loadMembers() {
     this.loadingMembers = true;
     this.memberService.getMembers().subscribe(members => {
-      this.members = members.filter(member => member.username !== this.loggedInUsername);
+      this.members = members;
+      // Show logged in user at the top of the list
+      this.members.sort((a: Member, b: Member) => {
+        if (a.username === this.loggedInUsername) return 1;
+        if (b.username === this.loggedInUsername) return 1;
+
+        const nameA = a.username.toUpperCase();
+        const nameB = b.username.toUpperCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
+      })
       this.loadingMembers = false;
     });
   }
