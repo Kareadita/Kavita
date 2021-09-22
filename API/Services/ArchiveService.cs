@@ -289,9 +289,6 @@ namespace API.Services
                     && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key)
                     && Parser.Parser.IsXml(entry.Key))
                 {
-                    // using var ms = StreamManager.GetStream();
-                    // entry.WriteTo(ms);
-                    // ms.Position = 0;
                     using var ms = entry.OpenEntryStream();
 
                     var serializer = new XmlSerializer(typeof(ComicInfo));
