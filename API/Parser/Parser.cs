@@ -371,9 +371,14 @@ namespace API.Parser
 
         private static readonly Regex[] ComicChapterRegex = new[]
         {
-          // Batman & Wildcat (1 of 3)
+            // Batman & Wildcat (1 of 3)
             new Regex(
                 @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
+            // Batman Beyond 04 (of 6) (1999)
+            new Regex(
+                @"(?<Series>.+?)(?<Chapter>\d+)(\s|_|-)?\(of",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
