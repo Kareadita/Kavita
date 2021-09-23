@@ -15,7 +15,8 @@ export enum KEY_CODES {
   G = 'g',
   B = 'b',
   BACKSPACE = 'Backspace',
-  DELETE = 'Delete'
+  DELETE = 'Delete',
+  SHIFT = 'Shift'
 }
 
 export enum Breakpoint {

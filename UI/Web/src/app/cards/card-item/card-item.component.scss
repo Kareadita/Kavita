@@ -38,6 +38,11 @@ $image-width: 160px;
     margin-bottom: 0px;
 }
 
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}
+
 .img-top {
     height: $image-height;
 }
@@ -69,6 +74,12 @@ $image-width: 160px;
     border-style: solid;
     border-width: 0 $triangle-size $triangle-size 0;
     border-color: transparent $primary-color transparent transparent;
+}
+
+.bulk-mode {
+    position: absolute;
+    top: 5px;
+    left: 5px;
 }
 
 .overlay {
