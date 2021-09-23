@@ -776,13 +776,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * There are some hard limits on the size of canvas' that we must cap at. https://github.com/jhildenbiddle/canvas-size#test-results
-   * For Safari, it's 16,777,216, so we cap at 4096x4096 when this happens. The drawImage in render will perform bi-cubic scaling for us.
-   * @returns If we should continue to the render loop 
+   * For Safari, it's 16,777,216, so we cap at 4096x4096 when this happens. We must scale the canvasImage, canvas.NativeElement, as well as scale the ctx.drawImage
    */
-  setCanvasSize() {
+  renderPage() {
     if (this.ctx && this.canvas) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       const isSafari = [
         'iPad Simulator',
         'iPhone Simulator',
@@ -794,23 +791,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // iPad on iOS 13 detection
       || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
       const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
-      const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
-      if (needsScaling) {
-        this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
-        this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
-      } else {
-        this.canvas.nativeElement.width = this.canvasImage.width;
-        this.canvas.nativeElement.height = this.canvasImage.height;
-      }
-    }
-    return true;
-  }
-
-  renderPage() {
-    if (this.ctx && this.canvas) {
+      const needsScaling = this.canvasImage.width >= 4096 || this.canvasImage.height >= 4096;
       this.canvasImage.onload = null;
-
-      if (!this.setCanvasSize()) return;
 
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;
       this.updateSplitPage();
@@ -822,7 +804,28 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
-        this.ctx.drawImage(this.canvasImage, 0, 0);
+        if (needsScaling) {
+          // Sets max limits based on OS limitations
+          let maxWidth = isSafari ? 4096 : 16384;
+          let maxHeight = isSafari ? 4096 : 16384;
+          // Gets ratio to determine which to dimension to scale down to max
+          let widthRatio = maxWidth / this.canvasImage.width,
+              heightRatio = maxHeight / this.canvasImage.height;
+          let bestRatio = Math.min(widthRatio, heightRatio);
+          // Calculate new dimension
+          let newWidth = this.canvasImage.width * bestRatio,
+              newHeight = this.canvasImage.height * bestRatio;
+          // Set new dimensions
+          this.canvasImage.width = newWidth;
+          this.canvasImage.height = newHeight;
+          this.canvas.nativeElement.width = this.canvasImage.width;
+          this.canvas.nativeElement.height = this.canvasImage.height;
+          this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
+        } else {
+          this.canvas.nativeElement.width = this.canvasImage.width;
+          this.canvas.nativeElement.height = this.canvasImage.height;
+          this.ctx.drawImage(this.canvasImage, 0, 0);
+        }
       }
       // Reset scroll on non HEIGHT Fits
       if (this.getFit() !== FITTING_OPTION.HEIGHT) {
