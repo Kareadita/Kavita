@@ -2,7 +2,7 @@
 @import "../../../assets/themes/dark.scss";
 
 .bulk-select {
-    border: 1px solid $primary-color;
+    border: 2px solid $primary-color;
     background-color: $dark-form-background;
     border-radius: 5px;
     color: white;
@@ -10,4 +10,8 @@
 
 .btn-icon {
     color: white;
+}
+
+.highlight {
+    color: $primary-color !important;
 }

@@ -1,7 +1,9 @@
-import { HostListener, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { Action, ActionFactoryService } from '../_services/action-factory.service';
+
+type DataSource = 'volume' | 'chapter' | 'special' | 'series';
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
@@ -15,11 +17,11 @@ import { KEY_CODES } from '../shared/_services/utility.service';
 export class BulkSelectionService {
 
   private prevIndex: number = 0;
-  private prevDataSource!: 'volume' | 'chapter' | 'special';
+  private prevDataSource!: DataSource;
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   public isShiftDown: boolean = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private actionFactory: ActionFactoryService) {
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe((event) => {
@@ -27,7 +29,7 @@ export class BulkSelectionService {
       });
   }
 
-  handleCardSelection(dataSource: 'volume' | 'chapter' | 'special', index: number, maxIndex: number, wasSelected: boolean) {
+  handleCardSelection(dataSource: DataSource, index: number, maxIndex: number, wasSelected: boolean) {
     if (this.isShiftDown) {
 
       if (dataSource === this.prevDataSource) {
@@ -56,14 +58,14 @@ export class BulkSelectionService {
     this.prevDataSource = dataSource;
   }
 
-  isCardSelected(dataSource: 'volume' | 'chapter' | 'special', index: number) {
+  isCardSelected(dataSource: DataSource, index: number) {
     if (this.selectedCards.hasOwnProperty(dataSource) && this.selectedCards[dataSource].hasOwnProperty(index)) {
       return this.selectedCards[dataSource][index];
     }
     return false;
   }
 
-  selectCards(dataSource: 'volume' | 'chapter' | 'special', from: number, to: number, value: boolean) {
+  selectCards(dataSource: DataSource, from: number, to: number, value: boolean) {
     if (!this.selectedCards.hasOwnProperty(dataSource)) {
       this.selectedCards[dataSource] = {};
     }
@@ -95,4 +97,36 @@ export class BulkSelectionService {
     }).length > 0;
   }
 
+  totalSelections() {
+    let sum = 0;
+    const keys = Object.keys(this.selectedCards);
+    keys.forEach(key => {
+      sum += Object.values(this.selectedCards[key]).filter(item => item).length;
+    });
+    return sum;
+  }
+
+  getSelectedCardsForSource(dataSource: DataSource) {
+    if (!this.selectedCards.hasOwnProperty(dataSource)) return [];
+
+    let ret = [];
+    for(let k in this.selectedCards[dataSource]) {
+      if (this.selectedCards[dataSource][k]) {
+        ret.push(k);
+      }
+    }
+    
+    return ret;
+  }
+
+  getActions(callback: (action: Action, data: any) => void) {
+    // checks if series is present. If so, returns only series actions
+    // else returns volume/chapter items
+    const allowedActions = [Action.MarkAsRead, Action.MarkAsUnread, Action.AddToReadingList];
+    if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
+      return this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
+    }
+
+    return this.actionFactory.getVolumeActions(callback).filter(item => allowedActions.includes(item.action));
+  }
 }

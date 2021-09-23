@@ -46,6 +46,8 @@ export class ActionFactoryService {
 
   readingListActions: Array<ActionItem<ReadingList>> = [];
 
+  bulkActions: Array<ActionItem<ReadingList>> = [];
+
   isAdmin = false;
   hasDownloadRole = false;
 
@@ -172,6 +174,14 @@ export class ActionFactoryService {
     actions.forEach(action => action.callback = callback);
     return actions;
   }
+
+  // getBulkActions(callback: (action: Action, data: Chapter | Volume | Series) => void) {
+  //   // I need some context on what I can use and what I can't use.
+  //   // I should just support mark as read/unread, add to reading list. Delete only for series
+  //   const actions = this.bulkActions.map(a => {return {...a}});
+  //   //actions.forEach(action => action.callback = callback);
+  //   return actions;
+  // }
 
   filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
     if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;

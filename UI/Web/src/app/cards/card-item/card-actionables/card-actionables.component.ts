@@ -39,7 +39,4 @@ export class CardActionablesComponent implements OnInit {
     }
   }
 
-  // TODO: Insert hr to separate admin actions
-
-
 }

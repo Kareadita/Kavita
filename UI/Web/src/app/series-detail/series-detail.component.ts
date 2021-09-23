@@ -54,6 +54,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
+  bulkActions: ActionItem<any>[] = [];
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
@@ -88,6 +89,25 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+
+  bulkActionCallback = (action: Action, data: any) => {
+    console.log('handling bulk action callback');
+    // we need to figure out what is actually selected now
+    const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
+    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    switch (action) {
+      case Action.AddToReadingList:
+        break;
+      case Action.MarkAsRead:
+        const selectedChapterIds = this.chapters.filter((chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+        const selectedVolumeIds = this.volumes.filter((volume, index: number) => selectedVolumeIndexes.includes(index + ''));
+        console.log('marking volumes as read: ', selectedVolumeIds)
+        console.log('marking chapters as read: ', selectedChapterIds)
+        break;
+      case Action.MarkAsUnread:
+        break;
+    }
+  }
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -296,6 +316,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+      
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
