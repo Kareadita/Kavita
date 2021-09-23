@@ -1,0 +1,13 @@
+@import "../../../theme/colors";
+@import "../../../assets/themes/dark.scss";
+
+.bulk-select {
+    border: 1px solid $primary-color;
+    background-color: $dark-form-background;
+    border-radius: 5px;
+    color: white;
+}
+
+.btn-icon {
+    color: white;
+}

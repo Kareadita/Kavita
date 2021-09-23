@@ -1,0 +1,7 @@
+<div *ngIf="bulkSelectionService.hasSelections()" class="bulk-select">
+    <div class="d-flex justify-between">
+        <app-card-actionables></app-card-actionables>
+        <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Deselect All</button>
+    </div>
+    
+</div>

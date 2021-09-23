@@ -55,10 +55,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() selected: boolean = false;
   /**
-   * When one card in an array (parent component) is selected, this mode will activate exposing whole overlay for selection
-   */
-  @Input() selectionMode: boolean = false;
-  /**
    * Event emitted when item is clicked
    */
   @Output() clicked = new EventEmitter<string>();
@@ -95,7 +91,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private toastr: ToastrService, private bulkSelectionService: BulkSelectionService) {}
+    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -118,7 +114,16 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleClick() {
+  handleClick(event?: any) {
+    // if (this.bulkSelectionService.hasSelections()) {
+    //   this.selected = !this.selected;
+    //   this.handleSelection();
+    //   if (event) {
+    //     event.stopPropagation();
+    //     event.cancelDefault();
+    //   }
+    //   return;
+    // }
     this.clicked.emit(this.title);
   }
 
@@ -199,8 +204,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
   }
 
 
-  handleSelection(event: any) {
-    event.stopPropagation();
+  handleSelection(event?: any) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.selection.emit(this.selected);
   }
 }

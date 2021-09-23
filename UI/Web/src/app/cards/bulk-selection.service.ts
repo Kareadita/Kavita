@@ -23,7 +23,7 @@ export class BulkSelectionService {
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe((event) => {
-        this.selectedCards = {};
+        this.deselectAll();
       });
   }
 
@@ -83,4 +83,16 @@ export class BulkSelectionService {
       this.selectedCards[dataSource][i] = value;
     }
   }
+
+  deselectAll() {
+    this.selectedCards = {};
+  }
+
+  hasSelections() {
+    const keys = Object.keys(this.selectedCards);
+    return keys.filter(key => {
+      return Object.values(this.selectedCards[key]).filter(item => item).length > 0;
+    }).length > 0;
+  }
+
 }

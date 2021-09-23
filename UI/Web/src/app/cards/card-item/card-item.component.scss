@@ -38,10 +38,7 @@ $image-width: 160px;
     margin-bottom: 0px;
 }
 
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-}
+
 
 .img-top {
     height: $image-height;
@@ -76,17 +73,35 @@ input[type="checkbox"] {
     border-color: transparent $primary-color transparent transparent;
 }
 
+
 .bulk-mode {
     position: absolute;
     top: 5px;
     left: 5px;
+    visibility: hidden;
+
+    &.always-show {
+        visibility: visible !important;
+    }
+
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
 }
+
 
 .overlay {
     height: $image-height;
+
+    
     
     &:hover {
         visibility: visible;
+
+        .bulk-mode {
+            visibility: visible;
+        }
 
         .overlay-item {
             visibility: visible;

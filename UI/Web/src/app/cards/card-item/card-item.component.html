@@ -1,5 +1,5 @@
 <div class="card">
-    <div class="overlay"  (click)="handleClick()">
+    <div class="overlay" (click)="handleClick($event)">
       <img *ngIf="total > 0 || supressArchiveWarning" class="img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
       <img *ngIf="total === 0 && !supressArchiveWarning" class="img-top lazyload" [src]="imageService.errorImage" [attr.data-src]="imageUrl" 
@@ -19,7 +19,7 @@
       </div>
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
-      <div class="bulk-mode" (click)="handleSelection($event)">
+      <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
         <input type="checkbox" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
     </div>
