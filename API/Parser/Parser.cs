@@ -383,22 +383,22 @@ namespace API.Parser
             RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
-            new Regex(
-                @"^(?<Series>.*)(?: (?<Volume>\d+))",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled,
-            RegexTimeout),
-            // Batman & Robin the Teen Wonder #0
-            new Regex(
-                @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
+                @"^(?<Series>.+?)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
-                @"^(?<Series>.*)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                @"^(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+                RegexTimeout),
+            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            new Regex(
+                @"^(?<Series>.+?)(?: (?<Chapter>\d+))",
+                RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout),
+            // Batman & Robin the Teen Wonder #0
+            new Regex(
+                @"^(?<Series>.+?)(?:\s|_)#(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Saga 001 (2012) (Digital) (Empire-Zone)
@@ -408,12 +408,12 @@ namespace API.Parser
             RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)c(hapter)( |_)(?<Chapter>\d*)",
+                @"^(?!Vol)(?<Series>.+?)( |_)c(hapter)( |_)(?<Chapter>\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
+                @"^(?!Vol)(?<Series>.+?)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
         };
