@@ -25,6 +25,12 @@ namespace API.Interfaces.Services
             _logger = logger;
         }
 
+        /// <summary>
+        /// Marks all Chapters as Read by creating or updating UserProgress rows. Does not commit.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="seriesId"></param>
+        /// <param name="chapters"></param>
         public void MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
         {
             foreach (var chapter in chapters)
@@ -50,6 +56,12 @@ namespace API.Interfaces.Services
             }
         }
 
+        /// <summary>
+        /// Marks all Chapters as Unread by creating or updating UserProgress rows. Does not commit.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="seriesId"></param>
+        /// <param name="chapters"></param>
         public void MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
         {
             foreach (var chapter in chapters)
@@ -75,6 +87,12 @@ namespace API.Interfaces.Services
             }
         }
 
+        /// <summary>
+        /// Gets the User Progress for a given Chapter. This will handle any duplicates that might have occured in past versions and will delete them. Does not commit.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="chapter"></param>
+        /// <returns></returns>
         public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
         {
             AppUserProgress userProgress = null;
@@ -157,6 +175,12 @@ namespace API.Interfaces.Services
             return false;
         }
 
+        /// <summary>
+        /// Ensures that the page is within 0 and total pages for a chapter. Makes one DB call.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         public async Task<int> CapPageToChapter(int chapterId, int page)
         {
             var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
