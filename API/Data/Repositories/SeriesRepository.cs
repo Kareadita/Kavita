@@ -260,19 +260,11 @@ namespace API.Data.Repositories
             {
                 foreach (var c in v.Chapters)
                 {
-                    //IList<int> list = null;
                     if (!seriesChapters.ContainsKey(v.SeriesId))
                     {
                         var list = new List<int>();
                         seriesChapters.Add(v.SeriesId, list);
                     }
-                    // else
-                    // {
-                    //     list = seriesChapters[v.SeriesId];
-                    // }
-                    // list.Add(c.Id);
-                    //
-                    // seriesChapters.Add(v.SeriesId, list);
                     seriesChapters[v.SeriesId].Add(c.Id);
                 }
             }

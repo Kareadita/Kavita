@@ -164,7 +164,6 @@ namespace API.Services.Tasks
            _logger.LogInformation("Beginning file scan on {LibraryName}", library.Name);
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
-           scanner = null;
 
            foreach (var folderPath in library.Folders)
            {
