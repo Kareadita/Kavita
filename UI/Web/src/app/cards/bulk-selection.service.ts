@@ -16,9 +16,11 @@ type DataSource = 'volume' | 'chapter' | 'special' | 'series';
 })
 export class BulkSelectionService {
 
+  private debug: boolean = false;
   private prevIndex: number = 0;
   private prevDataSource!: DataSource;
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
+  private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
 
   constructor(private router: Router, private actionFactory: ActionFactoryService) {
@@ -26,6 +28,8 @@ export class BulkSelectionService {
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe((event) => {
         this.deselectAll();
+        this.dataSourceMax = {};
+        this.prevIndex = 0;
       });
   }
 
@@ -33,29 +37,30 @@ export class BulkSelectionService {
     if (this.isShiftDown) {
 
       if (dataSource === this.prevDataSource) {
-        console.log('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index);
+        this.debugLog('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index);
         this.selectCards(dataSource, this.prevIndex, index, !wasSelected);  
       } else {
         const isForwardSelection = index < this.prevIndex;
 
         if (isForwardSelection) {
-          console.log('Selecting ' + this.prevDataSource + ' cards from ' + this.prevIndex + ' to ' + maxIndex);
-          this.selectCards(this.prevDataSource, this.prevIndex, maxIndex, !wasSelected);  
-          console.log('Selecting ' + dataSource + ' cards from ' + 0 + ' to ' + maxIndex);
+          this.debugLog('Selecting ' + this.prevDataSource + ' cards from ' + this.prevIndex + ' to ' + this.dataSourceMax[this.prevDataSource]);
+          this.selectCards(this.prevDataSource, this.prevIndex, this.dataSourceMax[this.prevDataSource], !wasSelected);  
+          this.debugLog('Selecting ' + dataSource + ' cards from ' + 0 + ' to ' + index);
           this.selectCards(dataSource, 0, index, !wasSelected);
         } else {
-          console.log('Selecting ' + this.prevDataSource + ' cards from ' + 0 + ' to ' + this.prevIndex);
+          this.debugLog('Selecting ' + this.prevDataSource + ' cards from ' + 0 + ' to ' + this.prevIndex);
           this.selectCards(this.prevDataSource, this.prevIndex, 0, !wasSelected);  
-          console.log('Selecting ' + dataSource + ' cards from ' + index + ' to ' + maxIndex);
+          this.debugLog('Selecting ' + dataSource + ' cards from ' + index + ' to ' + maxIndex);
           this.selectCards(dataSource, index, maxIndex, !wasSelected);
         }
       }
     } else {
-      console.log('Selecting ' + dataSource + ' cards at ' + index);
+      this.debugLog('Selecting ' + dataSource + ' cards at ' + index);
       this.selectCards(dataSource, index, index, !wasSelected);
     }
     this.prevIndex = index;
     this.prevDataSource = dataSource;
+    this.dataSourceMax[dataSource] = maxIndex;
   }
 
   isCardSelected(dataSource: DataSource, index: number) {
@@ -128,5 +133,15 @@ export class BulkSelectionService {
     }
 
     return this.actionFactory.getVolumeActions(callback).filter(item => allowedActions.includes(item.action));
+  }
+
+  private debugLog(message: string, extraData?: any) {
+    if (!this.debug) return;
+
+    if (extraData !== undefined) {
+      console.log(message, extraData);  
+    } else {
+      console.log(message);
+    }
   }
 }
