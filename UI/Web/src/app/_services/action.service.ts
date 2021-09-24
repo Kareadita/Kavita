@@ -232,7 +232,7 @@ export class ActionService implements OnDestroy {
    * @param volumes Volumes, should have id, chapters and pagesRead populated
    * @param callback Optional callback to perform actions after API completes 
    */
-   markVolumesAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+   markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
     this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
       volumes.forEach(volume => {
         volume.pagesRead = volume.pages;
