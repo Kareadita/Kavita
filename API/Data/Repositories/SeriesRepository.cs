@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -235,6 +236,43 @@ namespace API.Data.Repositories
             }
 
             return chapterIds.ToArray();
+        }
+
+        /// <summary>
+        /// This returns a list of tuples<chapterId, seriesId> back for each series id passed
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        /// <returns></returns>
+        public async Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds)
+        {
+            var volumes = await _context.Volume
+                .Where(v => seriesIds.Contains(v.SeriesId))
+                .Include(v => v.Chapters)
+                .ToListAsync();
+
+            var seriesChapters = new Dictionary<int, IList<int>>();
+            foreach (var v in volumes)
+            {
+                foreach (var c in v.Chapters)
+                {
+                    //IList<int> list = null;
+                    if (!seriesChapters.ContainsKey(v.SeriesId))
+                    {
+                        var list = new List<int>();
+                        seriesChapters.Add(v.SeriesId, list);
+                    }
+                    // else
+                    // {
+                    //     list = seriesChapters[v.SeriesId];
+                    // }
+                    // list.Add(c.Id);
+                    //
+                    // seriesChapters.Add(v.SeriesId, list);
+                    seriesChapters[v.SeriesId].Add(c.Id);
+                }
+            }
+
+            return seriesChapters;
         }
 
         public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)

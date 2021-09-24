@@ -19,7 +19,7 @@
       </div>
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
-      <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)">
+      <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
     </div>

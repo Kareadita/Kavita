@@ -21,9 +21,22 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   @Input() data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
+  /**
+   * If the entity is selected or not. 
+   */
+   @Input() selected: boolean = false;
+   /**
+    * If the entity should show selection code
+    */
+   @Input() allowSelection: boolean = false;
+
   @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<boolean>();
   @Output() dataChanged = new EventEmitter<Series>();
+  /**
+   * When the card is selected.
+   */
+   @Output() selection = new EventEmitter<boolean>();
 
   isAdmin = false;
   actions: ActionItem<Series>[] = [];

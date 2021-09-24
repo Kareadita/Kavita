@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -49,6 +50,7 @@ namespace API.Interfaces.Repositories
         Task<Volume> GetVolumeByIdAsync(int volumeId);
         Task<Series> GetSeriesByIdAsync(int seriesId);
         Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
+        Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
         /// <summary>
         /// Used to add Progress/Rating information to series list.
         /// </summary>

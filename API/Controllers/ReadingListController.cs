@@ -319,6 +319,45 @@ namespace API.Controllers
             return Ok("Nothing to do");
         }
 
+        /// <summary>
+        /// Adds all chapters from a list of series to a reading list
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("update-by-multiple-series")]
+        public async Task<ActionResult> UpdateListByMultipleSeries(UpdateReadingListByMultipleSeriesDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
+
+            var ids = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(dto.SeriesIds.ToArray());
+
+            foreach (var seriesId in ids.Keys)
+            {
+                // If there are adds, tell tracking this has been modified
+                if (await AddChaptersToReadingList(seriesId, ids[seriesId], readingList))
+                {
+                    _unitOfWork.ReadingListRepository.Update(readingList);
+                }
+            }
+
+            try
+            {
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok("Nothing to do");
+        }
+
         [HttpPost("update-by-volume")]
         public async Task<ActionResult> UpdateListByVolume(UpdateReadingListByVolumeDto dto)
         {

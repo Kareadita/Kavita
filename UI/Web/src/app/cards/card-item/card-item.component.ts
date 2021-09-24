@@ -55,11 +55,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() selected: boolean = false;
   /**
+   * If the entity should show selection code
+   */
+  @Input() allowSelection: boolean = false;
+  /**
    * Event emitted when item is clicked
    */
   @Output() clicked = new EventEmitter<string>();
   /**
-   * 
+   * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
   /**
