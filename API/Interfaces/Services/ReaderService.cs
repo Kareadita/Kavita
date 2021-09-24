@@ -25,6 +25,81 @@ namespace API.Interfaces.Services
             _logger = logger;
         }
 
+        public void MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+        {
+            foreach (var chapter in chapters)
+            {
+                var userProgress = GetUserProgressForChapter(user, chapter);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = chapter.Pages,
+                        VolumeId = chapter.VolumeId,
+                        SeriesId = seriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = chapter.Pages;
+                    userProgress.SeriesId = seriesId;
+                    userProgress.VolumeId = chapter.VolumeId;
+                }
+            }
+        }
+
+        public void MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+        {
+            foreach (var chapter in chapters)
+            {
+                var userProgress = GetUserProgressForChapter(user, chapter);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = 0,
+                        VolumeId = chapter.VolumeId,
+                        SeriesId = seriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = 0;
+                    userProgress.SeriesId = seriesId;
+                    userProgress.VolumeId = chapter.VolumeId;
+                }
+            }
+        }
+
+        public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+        {
+            AppUserProgress userProgress = null;
+            try
+            {
+                userProgress =
+                    user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+            }
+            catch (Exception)
+            {
+                // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
+                var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
+                if (progresses.Count > 1)
+                {
+                    user.Progresses = new List<AppUserProgress>()
+                    {
+                        user.Progresses.First()
+                    };
+                    userProgress = user.Progresses.First();
+                }
+            }
+
+            return userProgress;
+        }
+
         /// <summary>
         /// Saves progress to DB
         /// </summary>

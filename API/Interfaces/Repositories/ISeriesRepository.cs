@@ -45,7 +45,7 @@ namespace API.Interfaces.Repositories
         /// <param name="volumeId"></param>
         /// <returns></returns>
         Task<VolumeDto> GetVolumeDtoAsync(int volumeId);
-        Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds);
+        Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
         Task<bool> DeleteSeriesAsync(int seriesId);
         Task<Volume> GetVolumeByIdAsync(int volumeId);
         Task<Series> GetSeriesByIdAsync(int seriesId);

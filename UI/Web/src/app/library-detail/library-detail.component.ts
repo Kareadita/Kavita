@@ -46,16 +46,18 @@ export class LibraryDetailComponent implements OnInit {
       case Action.MarkAsRead:
         console.log('marking series as read: ', selectedSeries)
 
-        // this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
-        // });
+        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
+          this.loadPage();
+        });
         
         break;
       case Action.MarkAsUnread:
         //console.log('marking volumes as unread: ', selectedVolumeIds)
         //console.log('marking chapters as unread: ', chapters)
 
-        // this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
-        // });
+        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
+          this.loadPage();
+        });
         break;
     }
   }

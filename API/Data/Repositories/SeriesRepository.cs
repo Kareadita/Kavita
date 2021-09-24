@@ -189,11 +189,16 @@ namespace API.Data.Repositories
         /// </summary>
         /// <param name="seriesIds"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(int[] seriesIds)
+        public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false)
         {
-            return await _context.Volume
-                .Where(v => seriesIds.Contains(v.SeriesId))
-                .ToListAsync();
+            var query = _context.Volume
+                .Where(v => seriesIds.Contains(v.SeriesId));
+
+            if (includeChapters)
+            {
+                query = query.Include(v => v.Chapters);
+            }
+            return await query.ToListAsync();
         }
 
         public async Task<bool> DeleteSeriesAsync(int seriesId)

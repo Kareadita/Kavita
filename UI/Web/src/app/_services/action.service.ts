@@ -247,6 +247,42 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all series as Read.
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsRead(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesRead(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Unread. 
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsUnread(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesUnread(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Unread');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
 
   openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
     if (this.bookmarkModalRef != null) { return; }

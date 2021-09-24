@@ -122,7 +122,7 @@ export class BulkSelectionService {
   getActions(callback: (action: Action, data: any) => void) {
     // checks if series is present. If so, returns only series actions
     // else returns volume/chapter items
-    const allowedActions = [Action.MarkAsRead, Action.MarkAsUnread, Action.AddToReadingList];
+    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread];
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
       return this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
     }
