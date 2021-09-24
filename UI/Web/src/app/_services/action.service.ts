@@ -266,6 +266,30 @@ export class ActionService implements OnDestroy {
       });
   }
 
+  addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId;
+      this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
+      this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
+      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+  }
+
   addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });

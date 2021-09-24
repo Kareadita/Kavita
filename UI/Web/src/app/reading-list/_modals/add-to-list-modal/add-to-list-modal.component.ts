@@ -1,3 +1,4 @@
+import { noUndefined } from '@angular/compiler/src/util';
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -7,7 +8,8 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 export enum ADD_FLOW {
   Series = 0,
   Volume = 1,
-  Chapter = 2
+  Chapter = 2,
+  Multiple = 3
 }
 
 @Component({
@@ -21,6 +23,9 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   @Input() seriesId?: number;
   @Input() volumeId?: number;
   @Input() chapterId?: number;
+  @Input() volumeIds?: Array<number>;
+  @Input() chapterIds?: Array<number>;
+
   /**
    * Determines which Input is required and which API is used to associate to the Reading List
    */
@@ -72,7 +77,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   addToList(readingList: ReadingList) {
     if (this.seriesId === undefined) return;
 
-    if (this.type === ADD_FLOW.Series) {
+    if (this.type === ADD_FLOW.Series && this.seriesId !== undefined) {
       this.readingListService.updateBySeries(readingList.id, this.seriesId).subscribe(() => {
         this.modal.close();
       });
@@ -82,6 +87,10 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
       });
     } else if (this.type === ADD_FLOW.Chapter && this.chapterId !== undefined) {
       this.readingListService.updateByChapter(readingList.id, this.seriesId, this.chapterId).subscribe(() => {
+        this.modal.close();
+      });
+    } else if (this.type === ADD_FLOW.Multiple && this.volumeIds !== undefined && this.chapterIds !== undefined) {
+      this.readingListService.updateByMultiple(readingList.id, this.seriesId, this.volumeIds, this.chapterIds).subscribe(() => {
         this.modal.close();
       });
     }

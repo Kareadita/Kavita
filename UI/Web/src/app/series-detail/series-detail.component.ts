@@ -108,6 +108,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
     switch (action) {
       case Action.AddToReadingList:
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => this.actionInProgress = false);
         break;
       case Action.MarkAsRead:
         console.log('marking volumes as read: ', selectedVolumeIds)

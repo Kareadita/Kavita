@@ -115,15 +115,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
   }
 
   handleClick(event?: any) {
-    // if (this.bulkSelectionService.hasSelections()) {
-    //   this.selected = !this.selected;
-    //   this.handleSelection();
-    //   if (event) {
-    //     event.stopPropagation();
-    //     event.cancelDefault();
-    //   }
-    //   return;
-    // }
     this.clicked.emit(this.title);
   }
 
