@@ -115,7 +115,6 @@
               <a ngbNavLink>Volumes/Chapters</a>
               <ng-template ngbNavContent>
                   <div class="row">
-                      {{volumes.length}}
                         <div *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                                 <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
                                 [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"

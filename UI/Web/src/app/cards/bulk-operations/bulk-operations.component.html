@@ -1,4 +1,4 @@
-<div *ngIf="bulkSelectionService.hasSelections()" class="bulk-select mb-3 fixed-top" [ngStyle]="{'margin-top': topOffset + 10 + 'px'}">
+<div *ngIf="bulkSelectionService.hasSelections()" class="bulk-select mb-3 fixed-top" [ngStyle]="{'margin-top': topOffset + 'px'}">
     <div class="d-flex justify-content-around align-items-center">
         <span class="highlight"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;{{bulkSelectionService.totalSelections()}} selected</span>
         <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>

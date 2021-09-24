@@ -2,11 +2,8 @@
 @import "../../../assets/themes/dark.scss";
 
 .bulk-select {
-
-
-    border: 2px solid $primary-color;
     background-color: $dark-form-background-no-opacity;
-    border-radius: 5px;
+    border-bottom: 2px solid $primary-color;
     color: white;
 }
 
