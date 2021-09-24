@@ -68,6 +68,14 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-read', {seriesId, volumeId});
   }
 
+  markMultipleRead(seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-multiple-read', {seriesId, volumeIds, chapterIds});
+  }
+
+  markMultipleUnread(seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'reader/mark-multiple-unread', {seriesId, volumeIds, chapterIds});
+  }
+
   markVolumeUnread(seriesId: number, volumeId: number) {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }

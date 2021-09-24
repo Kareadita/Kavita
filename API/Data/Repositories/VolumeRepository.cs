@@ -44,5 +44,13 @@ namespace API.Data.Repositories
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
         }
+
+        public async Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds)
+        {
+            return await _context.Chapter
+                .Where(c => volumeIds.Contains(c.VolumeId))
+                .Select(c => c.Id)
+                .ToListAsync();
+        }
     }
 }

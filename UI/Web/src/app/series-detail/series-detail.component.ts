@@ -95,14 +95,27 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // we need to figure out what is actually selected now
     const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
     const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
     switch (action) {
       case Action.AddToReadingList:
         break;
       case Action.MarkAsRead:
         const selectedChapterIds = this.chapters.filter((chapter, index: number) => selectedChapterIndexes.includes(index + ''));
         const selectedVolumeIds = this.volumes.filter((volume, index: number) => selectedVolumeIndexes.includes(index + ''));
+        const selectedSpecials = this.specials.filter((chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
         console.log('marking volumes as read: ', selectedVolumeIds)
         console.log('marking chapters as read: ', selectedChapterIds)
+
+        if (this.series === undefined) {
+          return;
+        }
+        const seriesId = this.series.id;
+    
+        this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, selectedChapterIds,  () => {
+          this.setContinuePoint();
+          this.actionInProgress = false;
+        });
+        
         break;
       case Action.MarkAsUnread:
         break;

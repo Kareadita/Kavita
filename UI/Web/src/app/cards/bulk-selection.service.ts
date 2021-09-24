@@ -76,12 +76,12 @@ export class BulkSelectionService {
     }
 
     if (from > to) {
-      for (let i = to; i < from; i++) {
+      for (let i = to; i <= from; i++) {
         this.selectedCards[dataSource][i] = value;
       }
     }
 
-    for (let i = from; i < to; i++) {
+    for (let i = from; i <= to; i++) {
       this.selectedCards[dataSource][i] = value;
     }
   }

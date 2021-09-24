@@ -283,6 +283,105 @@ namespace API.Controllers
             return BadRequest("Could not save progress");
         }
 
+
+        /// <summary>
+        /// Marks all chapters within a list of volumes as Read. All volumes must belong to the same Series.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-read")]
+        public async Task<ActionResult> MarkVolumeAsRead(MarkVolumesReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
+            foreach (var chapterId in dto.ChapterIds)
+            {
+                chapterIds.Add(chapterId);
+            }
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
+            foreach (var chapter in chapters)
+            {
+                var userProgress = user.Progresses.FirstOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = chapter.Pages,
+                        VolumeId = chapter.VolumeId,
+                        SeriesId = dto.SeriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = chapter.Pages;
+                    userProgress.SeriesId = dto.SeriesId;
+                    userProgress.VolumeId = chapter.VolumeId;
+                }
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
+        /// <summary>
+        /// Marks all chapters within a list of volumes as Unread. All volumes must belong to the same Series.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-unread")]
+        public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumesReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
+            foreach (var chapterId in dto.ChapterIds)
+            {
+                chapterIds.Add(chapterId);
+            }
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
+            foreach (var chapter in chapters)
+            {
+                var userProgress = user.Progresses.FirstOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+
+                if (userProgress == null)
+                {
+                    user.Progresses.Add(new AppUserProgress
+                    {
+                        PagesRead = 0,
+                        VolumeId = chapter.VolumeId,
+                        SeriesId = dto.SeriesId,
+                        ChapterId = chapter.Id
+                    });
+                }
+                else
+                {
+                    userProgress.PagesRead = 0;
+                    userProgress.SeriesId = dto.SeriesId;
+                    userProgress.VolumeId = chapter.VolumeId;
+                }
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
         /// <summary>
         /// Returns Progress (page number) for a chapter for the logged in user
         /// </summary>

@@ -103,10 +103,10 @@
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row">
-                    <div *ngFor="let chapter of specials; trackBy: trackByChapterIdentity">
+                    <div *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
                         <app-card-item class="col-auto" *ngIf="chapter.isSpecial" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"  (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('special', idx)"></app-card-item>
                     </div>
                 </div>
               </ng-template>

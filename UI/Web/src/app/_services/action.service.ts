@@ -20,6 +20,7 @@ export type SeriesActionCallback = (series: Series) => void;
 export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
 export type ReadingListActionCallback = (readingList: ReadingList) => void;
+export type VoidActionCallback = () => void;
 
 /**
  * Responsible for executing actions
@@ -199,6 +200,49 @@ export class ActionService implements OnDestroy {
       this.toastr.success('Marked as unread');
       if (callback) {
         callback(chapter);
+      }
+    });
+  }
+
+  /**
+   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters? Chapters, should have id
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleAsRead(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all chapters and the volumes as Unread. All volumes must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markVolumesAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
       }
     });
   }
