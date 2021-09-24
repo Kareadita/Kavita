@@ -10,6 +10,7 @@ import { BulkSelectionService } from '../bulk-selection.service';
 export class BulkOperationsComponent implements OnInit {
 
   @Input() actionCallback!: (action: Action, data: any) => void;
+  topOffset: number = 0;
 
   get actions() {
     return this.bulkSelectionService.getActions(this.actionCallback.bind(this));
@@ -18,7 +19,10 @@ export class BulkOperationsComponent implements OnInit {
   constructor(public bulkSelectionService: BulkSelectionService) { }
 
   ngOnInit(): void {
-
+    const navBar = document.querySelector('.navbar');
+    if (navBar) {
+      this.topOffset = Math.ceil(navBar.getBoundingClientRect().height);
+    }
   }
 
   handleActionCallback(action: Action, data: any) {

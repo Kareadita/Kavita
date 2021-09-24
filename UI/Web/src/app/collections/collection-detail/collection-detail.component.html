@@ -11,14 +11,6 @@
                 </h2>
             </div>
             <div class="row no-gutters mt-2 mb-2">
-                <!-- <div>
-                    <button class="btn btn-primary" (click)="read()" [disabled]="isLoading">
-                        <span>
-                            <i class="fa fa-book-open"></i>
-                        </span>
-                        <span class="read-btn--text">&nbsp;Read</span>
-                    </button>
-                </div> -->
                 <div class="ml-2" *ngIf="isAdmin">
                     <button class="btn btn-secondary" (click)="openEditCollectionTagModal(collectionTag)" title="Edit Series information">
                         <span>
@@ -33,6 +25,7 @@
         </div>
     </div>
     <hr>
+    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
     <app-card-detail-layout
     header="Series"
@@ -44,7 +37,9 @@
     (applyFilter)="updateFilter($event)"
     >
         <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"></app-series-card>
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
+            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+            ></app-series-card>
         </ng-template>
     </app-card-detail-layout>
 
