@@ -91,7 +91,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
 
   bulkActionCallback = (action: Action, data: any) => {
-    console.log('handling bulk action callback');
     if (this.series === undefined) {
       return;
     }
@@ -101,32 +100,31 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
     const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
 
-    const selectedChapterIds = this.chapters.filter((chapter, index: number) => selectedChapterIndexes.includes(index + ''));
-    const selectedVolumeIds = this.volumes.filter((volume, index: number) => selectedVolumeIndexes.includes(index + ''));
-    const selectedSpecials = this.specials.filter((chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
+    const selectedChapterIds = this.chapters.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
+    const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
     const chapters = [...selectedChapterIds, ...selectedSpecials];
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => this.actionInProgress = false);
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
         break;
       case Action.MarkAsRead:
-        console.log('marking volumes as read: ', selectedVolumeIds)
-        console.log('marking chapters as read: ', chapters)
-
         this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
         });
         
         break;
       case Action.MarkAsUnread:
-        console.log('marking volumes as unread: ', selectedVolumeIds)
-        console.log('marking chapters as unread: ', chapters)
-
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
         });
         break;
     }

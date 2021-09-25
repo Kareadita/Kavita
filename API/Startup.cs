@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -109,7 +111,7 @@ namespace API
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials() // For SignalR token query param
-                    .WithOrigins("http://localhost:4200")
+                    .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200")
                     .WithExposedHeaders("Content-Disposition", "Pagination"));
             }
 
@@ -162,6 +164,19 @@ namespace API
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
             Console.WriteLine("You may now close the application window.");
+        }
+
+        private static string GetLocalIpAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
 

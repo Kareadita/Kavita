@@ -33,30 +33,26 @@ export class LibraryDetailComponent implements OnInit {
   };
 
   bulkActionCallback = (action: Action, data: any) => {
-    console.log('handling bulk action callback');
-    // we need to figure out what is actually selected now
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries);
+        this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
+          this.bulkSelectionService.deselectAll();
+        });
         break;
       case Action.MarkAsRead:
-        console.log('marking series as read: ', selectedSeries)
-
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
           this.loadPage();
+          this.bulkSelectionService.deselectAll();
         });
         
         break;
       case Action.MarkAsUnread:
-        //console.log('marking volumes as unread: ', selectedVolumeIds)
-        //console.log('marking chapters as unread: ', chapters)
-
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
           this.loadPage();
+          this.bulkSelectionService.deselectAll();
         });
         break;
     }
