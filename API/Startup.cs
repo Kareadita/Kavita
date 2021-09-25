@@ -168,14 +168,9 @@ namespace API
 
         private static string GetLocalIpAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
-            }
+            using var socket = new Socket(AddressFamily.InterNetwork, 							SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530);
+            if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
             throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 

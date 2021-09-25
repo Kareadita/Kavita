@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
@@ -116,6 +116,28 @@ export class CardItemComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  // touchStartTimestamp: number = 0;
+  // touchEndTimestamp: number = 0;
+  // prevTouchTimestamp: number = 0;
+  touchTimer?: number | undefined = undefined;
+
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent) {
+    if (this.touchTimer) {
+      clearTimeout(this.touchTimer);
+      setTimeout(this.checkLongPress, 300);
+    }
+  }
+
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent) {
+    clearTimeout(this.touchTimer);
+  }
+
+  checkLongPress() {
+    this.handleSelection();
   }
 
   handleClick(event?: any) {
