@@ -20,6 +20,7 @@ export type SeriesActionCallback = (series: Series) => void;
 export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
 export type ReadingListActionCallback = (readingList: ReadingList) => void;
+export type VoidActionCallback = () => void;
 
 /**
  * Responsible for executing actions
@@ -203,6 +204,85 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters? Chapters, should have id
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleAsRead(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all chapters and the volumes as Unread. All volumes must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Read.
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsRead(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesRead(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Unread. 
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsUnread(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesUnread(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Unread');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
 
   openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
     if (this.bookmarkModalRef != null) { return; }
@@ -218,6 +298,52 @@ export class ActionService implements OnDestroy {
         this.bookmarkModalRef = null;
         if (callback) {
           callback(series);
+        }
+      });
+  }
+
+  addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId;
+      this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
+      this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
+      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+  }
+
+  addMultipleSeriesToReadingList(series: Array<Series>, callback?: VoidActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
+      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
         }
       });
   }

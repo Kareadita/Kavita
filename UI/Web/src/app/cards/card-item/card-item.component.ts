@@ -13,6 +13,7 @@ import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { BulkSelectionService } from '../bulk-selection.service';
 
 @Component({
   selector: 'app-card-item',
@@ -21,22 +22,70 @@ import { LibraryService } from 'src/app/_services/library.service';
 })
 export class CardItemComponent implements OnInit, OnDestroy {
 
+  /**
+   * Card item url. Will internally handle error and missing covers
+   */
   @Input() imageUrl = '';
+  /**
+   * Name of the card
+   */
   @Input() title = '';
+  /**
+   * Any actions to perform on the card
+   */
   @Input() actions: ActionItem<any>[] = [];
-  @Input() read = 0; // Pages read
-  @Input() total = 0; // Total Pages
+  /**
+   * Pages Read
+   */
+  @Input() read = 0; 
+  /**
+   * Total Pages
+   */
+  @Input() total = 0; 
+  /**
+   * Supress library link
+   */
   @Input() supressLibraryLink = false;
-  @Input() entity!: Series | Volume | Chapter | CollectionTag; // This is the entity we are representing. It will be returned if an action is executed.
+  /**
+   * This is the entity we are representing. It will be returned if an action is executed.
+   */
+  @Input() entity!: Series | Volume | Chapter | CollectionTag;
+  /**
+   * If the entity is selected or not. 
+   */
+  @Input() selected: boolean = false;
+  /**
+   * If the entity should show selection code
+   */
+  @Input() allowSelection: boolean = false;
+  /**
+   * Event emitted when item is clicked
+   */
   @Output() clicked = new EventEmitter<string>();
-
-  libraryName: string | undefined = undefined; // Library name item belongs to
+  /**
+   * When the card is selected.
+   */
+  @Output() selection = new EventEmitter<boolean>();
+  /**
+   * Library name item belongs to
+   */
+  libraryName: string | undefined = undefined; 
   libraryId: number | undefined = undefined; 
-  supressArchiveWarning: boolean = false; // This will supress the cannot read archive warning when total pages is 0
+  /**
+   * This will supress the cannot read archive warning when total pages is 0
+   */
+  supressArchiveWarning: boolean = false;
+  /**
+   * Format of the entity (only applies to Series)
+   */
   format: MangaFormat = MangaFormat.UNKNOWN;
+  
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
+
+  isShiftDown: boolean = false;
+  
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -46,7 +95,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private toastr: ToastrService) {}
+    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -69,7 +118,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleClick() {
+  handleClick(event?: any) {
     this.clicked.emit(this.title);
   }
 
@@ -146,7 +195,14 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   isPromoted() {
     const tag = this.entity as CollectionTag;
-    // TODO: Validate if this works with reading lists
     return tag.hasOwnProperty('promoted') && tag.promoted;
+  }
+
+
+  handleSelection(event?: any) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.selection.emit(this.selected);
   }
 }

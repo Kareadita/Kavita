@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
+import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
+import { KEY_CODES } from '../shared/_services/utility.service';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -30,9 +32,39 @@ export class LibraryDetailComponent implements OnInit {
     mangaFormat: null
   };
 
+  bulkActionCallback = (action: Action, data: any) => {
+    console.log('handling bulk action callback');
+    // we need to figure out what is actually selected now
+    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
+
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+
+    switch (action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleSeriesToReadingList(selectedSeries);
+        break;
+      case Action.MarkAsRead:
+        console.log('marking series as read: ', selectedSeries)
+
+        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
+          this.loadPage();
+        });
+        
+        break;
+      case Action.MarkAsUnread:
+        //console.log('marking volumes as unread: ', selectedVolumeIds)
+        //console.log('marking chapters as unread: ', chapters)
+
+        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
+          this.loadPage();
+        });
+        break;
+    }
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -51,6 +83,20 @@ export class LibraryDetailComponent implements OnInit {
 
   ngOnInit(): void {
     
+  }
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
   }
 
   handleAction(action: Action, library: Library) {

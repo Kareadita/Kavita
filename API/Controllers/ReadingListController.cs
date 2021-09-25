@@ -212,7 +212,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Update a
+        /// Update the properites (title, summary) of a reading list
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
@@ -242,6 +242,11 @@ namespace API.Controllers
             return BadRequest("Could not update reading list");
         }
 
+        /// <summary>
+        /// Adds all chapters from a Series to a reading list
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("update-by-series")]
         public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
         {
@@ -255,6 +260,86 @@ namespace API.Controllers
             if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForSeries, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
+            }
+
+            try
+            {
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok("Nothing to do");
+        }
+
+
+        /// <summary>
+        /// Adds all chapters from a list of volumes and chapters to a reading list
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("update-by-multiple")]
+        public async Task<ActionResult> UpdateListByMultiple(UpdateReadingListByMultipleDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
+
+            var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
+            foreach (var chapterId in dto.ChapterIds)
+            {
+                chapterIds.Add(chapterId);
+            }
+
+            // If there are adds, tell tracking this has been modified
+            if (await AddChaptersToReadingList(dto.SeriesId, chapterIds, readingList))
+            {
+                _unitOfWork.ReadingListRepository.Update(readingList);
+            }
+
+            try
+            {
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok("Updated");
+                }
+            }
+            catch
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok("Nothing to do");
+        }
+
+        /// <summary>
+        /// Adds all chapters from a list of series to a reading list
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("update-by-multiple-series")]
+        public async Task<ActionResult> UpdateListByMultipleSeries(UpdateReadingListByMultipleSeriesDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
+            if (readingList == null) return BadRequest("Reading List does not exist");
+
+            var ids = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(dto.SeriesIds.ToArray());
+
+            foreach (var seriesId in ids.Keys)
+            {
+                // If there are adds, tell tracking this has been modified
+                if (await AddChaptersToReadingList(seriesId, ids[seriesId], readingList))
+                {
+                    _unitOfWork.ReadingListRepository.Update(readingList);
+                }
             }
 
             try

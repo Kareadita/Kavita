@@ -1,3 +1,4 @@
+<app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 <app-card-detail-layout header="{{libraryName}}" 
     [isLoading]="loadingSeries"
     [items]="series"
@@ -8,6 +9,6 @@
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"></app-series-card>
+        <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"  (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
     </ng-template>
 </app-card-detail-layout>
