@@ -82,6 +82,8 @@ $image-width: 160px;
 
     &.always-show {
         visibility: visible !important;
+        width: $image-width;
+        height: $image-height;
     }
 
     input[type="checkbox"] {

@@ -46,16 +46,20 @@ export class CollectionDetailComponent implements OnInit {
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries);
+        this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
+          this.bulkSelectionService.deselectAll();
+        });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
           this.loadPage();
+          this.bulkSelectionService.deselectAll();
         });
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
           this.loadPage();
+          this.bulkSelectionService.deselectAll();
         });
         break;
     }
