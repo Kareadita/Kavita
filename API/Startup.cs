@@ -171,7 +171,7 @@ namespace API
             using var socket = new Socket(AddressFamily.InterNetwork, 							SocketType.Dgram, 0);
             socket.Connect("8.8.8.8", 65530);
             if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
-            throw new Exception("No network adapters with an IPv4 address in the system!");
+            throw new ApplicationException("No network adapters with an IPv4 address in the system!");
         }
 
 
