@@ -11,6 +11,7 @@ using API.Services.HostedServices;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -171,7 +172,7 @@ namespace API
             using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
             socket.Connect("8.8.8.8", 65530);
             if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
-            throw new ApplicationException("No network adapters with an IPv4 address in the system!");
+            throw new KavitaException("No network adapters with an IPv4 address in the system!");
         }
 
 
