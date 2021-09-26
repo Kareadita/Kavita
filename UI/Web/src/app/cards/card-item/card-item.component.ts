@@ -118,27 +118,23 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  // touchStartTimestamp: number = 0;
-  // touchEndTimestamp: number = 0;
-  // prevTouchTimestamp: number = 0;
-  touchTimer?: number | undefined = undefined;
 
+  prevTouchTime: number = 0;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
-    if (this.touchTimer) {
-      clearTimeout(this.touchTimer);
-      setTimeout(this.checkLongPress, 300);
-    }
+    this.prevTouchTime = event.timeStamp;
   }
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent) {
-    clearTimeout(this.touchTimer);
+    if (event.timeStamp - this.prevTouchTime >= 200) {
+      this.handleSelection();
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    this.prevTouchTime = 0;
   }
 
-  checkLongPress() {
-    this.handleSelection();
-  }
 
   handleClick(event?: any) {
     this.clicked.emit(this.title);
