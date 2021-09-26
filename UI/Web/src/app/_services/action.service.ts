@@ -1,11 +1,14 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
+import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
+import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { LibraryService } from './library.service';
@@ -16,6 +19,8 @@ export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
 export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
+export type ReadingListActionCallback = (readingList: ReadingList) => void;
+export type VoidActionCallback = () => void;
 
 /**
  * Responsible for executing actions
@@ -27,6 +32,7 @@ export class ActionService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
   private bookmarkModalRef: NgbModalRef | null = null;
+  private readingListModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal) { }
@@ -156,7 +162,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markVolumeAsUnread(seriesId: number, volume: Volume, callback?: VolumeActionCallback) {
-    this.readerService.markVolumeRead(seriesId, volume.id).subscribe(() => {
+    this.readerService.markVolumeUnread(seriesId, volume.id).subscribe(() => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Unread');
@@ -198,6 +204,85 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters? Chapters, should have id
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleAsRead(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all chapters and the volumes as Unread. All volumes must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
+      volumes.forEach(volume => {
+        volume.pagesRead = volume.pages;
+        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+      });
+      chapters?.forEach(c => c.pagesRead = c.pages);
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Read.
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsRead(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesRead(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Read');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  /**
+   * Mark all series as Unread. 
+   * @param series Series, should have id, pagesRead populated
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   markMultipleSeriesAsUnread(series: Array<Series>, callback?: VoidActionCallback) {
+    this.readerService.markMultipleSeriesUnread(series.map(v => v.id)).pipe(take(1)).subscribe(() => {
+      series.forEach(s => {
+        s.pagesRead = s.pages;
+      });
+      this.toastr.success('Marked as Unread');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
 
   openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
     if (this.bookmarkModalRef != null) { return; }
@@ -215,6 +300,133 @@ export class ActionService implements OnDestroy {
           callback(series);
         }
       });
+  }
+
+  addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId;
+      this.readingListModalRef.componentInstance.volumeIds = volumes.map(v => v.id);
+      this.readingListModalRef.componentInstance.chapterIds = chapters?.map(c => c.id);
+      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+  }
+
+  addMultipleSeriesToReadingList(series: Array<Series>, callback?: VoidActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
+      this.readingListModalRef.componentInstance.title = 'Multiple Selections';
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Multiple_Series;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+  }
+
+  addSeriesToReadingList(series: Series, callback?: SeriesActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = series.id; 
+      this.readingListModalRef.componentInstance.title = series.name;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Series;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(series);
+        }
+      });
+  }
+
+  addVolumeToReadingList(volume: Volume, seriesId: number, callback?: VolumeActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId; 
+      this.readingListModalRef.componentInstance.volumeId = volume.id;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Volume;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(volume);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(volume);
+        }
+      });
+  }
+
+  addChapterToReadingList(chapter: Chapter, seriesId: number, callback?: ChapterActionCallback) {
+    if (this.readingListModalRef != null) { return; }
+      this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
+      this.readingListModalRef.componentInstance.seriesId = seriesId; 
+      this.readingListModalRef.componentInstance.chapterId = chapter.id;
+      this.readingListModalRef.componentInstance.type = ADD_FLOW.Chapter;
+
+
+      this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(chapter);
+        }
+      });
+      this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.readingListModalRef = null;
+        if (callback) {
+          callback(chapter);
+        }
+      });
+  }
+
+  editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'md' });
+    readingListModalRef.componentInstance.readingList = readingList; 
+    readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
+      if (callback && list !== undefined) {
+        callback(readingList);
+      }
+    });
+    readingListModalRef.dismissed.pipe(take(1)).subscribe((list) => {
+      if (callback && list !== undefined) {
+        callback(readingList);
+      }
+    });
   }
 
 }

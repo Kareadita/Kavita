@@ -2,8 +2,17 @@
 
 namespace API.Comparators
 {
+    /// <summary>
+    /// Sorts chapters based on their Number. Uses natural ordering of doubles.
+    /// </summary>
     public class ChapterSortComparer : IComparer<double>
     {
+        /// <summary>
+        /// Normal sort for 2 doubles. 0 always comes before anything else
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public int Compare(double x, double y)
         {
             if (x == 0.0 && y == 0.0) return 0;

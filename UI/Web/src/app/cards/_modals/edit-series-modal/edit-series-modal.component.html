@@ -6,13 +6,13 @@
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
-    <div class="modal-body scrollable-modal">
-        <form [formGroup]="editSeriesForm">
-            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs">
+    <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+        
+            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
                 <li [ngbNavItem]="tabs[0]">
                   <a ngbNavLink>{{tabs[0]}}</a>
                   <ng-template ngbNavContent>
-
+                    <form [formGroup]="editSeriesForm">
                     <div class="row no-gutters">
                         <div class="form-group" style="width: 100%">
                             <label for="name">Name</label>
@@ -77,6 +77,7 @@
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                         </div>
                     </div>
+                    </form>
 
                   </ng-template>
                 </li>
@@ -117,7 +118,6 @@
                                       </div>
                                       <div class="row no-gutters">
                                           <div class="col">
-                                              <!-- Is Special: {{volume.isSpecial}} -->
                                               <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!volumeCollapsed[volume.name]">
                                                   View Files
                                               </button>
@@ -152,9 +152,8 @@
                   </ng-template>
                 </li>
             </ul>
-        </form>
         
-        <div [ngbNavOutlet]="nav" class="mt-3"></div>
+            <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ml-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">Close</button>

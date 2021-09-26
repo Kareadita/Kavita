@@ -14,8 +14,10 @@ using API.Parser;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
+using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -34,6 +36,7 @@ namespace API.Tests.Services
         private readonly IImageService _imageService = Substitute.For<IImageService>();
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
         private readonly ICacheService _cacheService = Substitute.For<ICacheService>();
+        private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
 
         private readonly DbConnection _connection;
         private readonly DataContext _context;
@@ -52,8 +55,8 @@ namespace API.Tests.Services
             IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
 
 
-            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _imageService);
-            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService);
+            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _imageService, _messageHub);
+            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub);
         }
 
         private async Task<bool> SeedDb()
@@ -110,6 +113,7 @@ namespace API.Tests.Services
 
             Assert.Empty(_scannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
+
 
         // TODO: Figure out how to do this with ParseScannedFiles
         // [Theory]

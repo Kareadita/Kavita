@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "prod": "ng build --prod",
-    "explore": "ng build --stats-json && webpack-bundle-analyzer ../kavita/API/wwwroot/stats.json",
+    "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@angular-slider/ngx-slider": "^2.0.3",
     "@angular/animations": "~11.0.0",
+    "@angular/cdk": "^12.2.3",
     "@angular/common": "~11.0.0",
     "@angular/compiler": "~11.0.0",
     "@angular/core": "~11.0.0",
@@ -45,6 +46,7 @@
     "rxjs": "~6.6.0",
     "swiper": "^6.5.8",
     "tslib": "^2.0.0",
+    "webpack-bundle-analyzer": "^4.4.2",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

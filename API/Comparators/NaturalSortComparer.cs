@@ -10,7 +10,7 @@ namespace API.Comparators
     {
         private readonly bool _isAscending;
         private Dictionary<string, string[]> _table = new();
-        
+
         private bool _disposed;
 
 
@@ -23,9 +23,9 @@ namespace API.Comparators
         {
             if (x == y) return 0;
 
+            // Should be fixed: Operations that change non-concurrent collections must have exclusive access. A concurrent update was performed on this collection and corrupted its state. The collection's state is no longer correct.
             if (!_table.TryGetValue(x ?? Empty, out var x1))
             {
-                // .Replace(" ", Empty)
                 x1 = Regex.Split(x ?? Empty, "([0-9]+)");
                 _table.Add(x ?? Empty, x1);
             }
@@ -33,6 +33,7 @@ namespace API.Comparators
             if (!_table.TryGetValue(y ?? Empty, out var y1))
             {
                 y1 = Regex.Split(y ?? Empty, "([0-9]+)");
+                // Should be fixed: EXCEPTION: An item with the same key has already been added. Key: M:\Girls of the Wild's\Girls of the Wild's - Ep. 083 (Season 1) [LINE Webtoon].cbz
                 _table.Add(y ?? Empty, y1);
             }
 
@@ -50,8 +51,8 @@ namespace API.Comparators
                 returnVal = 1;
             }
             else if (x1.Length > y1.Length)
-            { 
-                returnVal = -1; 
+            {
+                returnVal = -1;
             }
             else
             {
@@ -78,12 +79,12 @@ namespace API.Comparators
             {
                 if (disposing)
                 {
-                    // called via myClass.Dispose(). 
+                    // called via myClass.Dispose().
                     _table.Clear();
                     _table = null;
                 }
                 // Release unmanaged resources.
-                // Set large fields to null.                
+                // Set large fields to null.
                 _disposed = true;
             }
         }
@@ -93,7 +94,7 @@ namespace API.Comparators
             Dispose(true);
             SuppressFinalize(this);
         }
-        
+
         ~NaturalSortComparer() // the finalizer
         {
             Dispose(false);

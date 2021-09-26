@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
@@ -20,20 +20,15 @@ namespace API.Controllers
     /// </summary>
     public class ReaderController : BaseApiController
     {
-        private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
-        private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
-        private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-        private readonly NaturalSortComparer _naturalSortComparer = new NaturalSortComparer();
 
         /// <inheritdoc />
-        public ReaderController(IDirectoryService directoryService, ICacheService cacheService,
+        public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
         {
-            _directoryService = directoryService;
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -49,7 +44,7 @@ namespace API.Controllers
         [HttpGet("image")]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
-            if (page < 0) return BadRequest("Page cannot be less than 0");
+            if (page < 0) page = 0;
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -57,14 +52,9 @@ namespace API.Controllers
             {
                 var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-
-                var content = await _directoryService.ReadFileAsync(path);
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                // Calculates SHA1 Hash for byte[]
-                Response.AddCacheHeader(content);
-
-                return File(content, "image/" + format);
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)
             {
@@ -76,30 +66,29 @@ namespace API.Controllers
         /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
-        /// <param name="seriesId"></param>
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("chapter-info")]
-        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int seriesId, int chapterId)
+        public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
-            // PERF: Write this in one DB call
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(chapter.VolumeId);
-            if (volume == null) return BadRequest("Could not find Volume");
-            var mangaFile = (await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapterId)).First();
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
+            var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
 
             return Ok(new ChapterInfoDto()
             {
-                ChapterNumber =  chapter.Range,
-                VolumeNumber = volume.Number + string.Empty,
-                VolumeId = volume.Id,
+                ChapterNumber =  dto.ChapterNumber,
+                VolumeNumber = dto.VolumeNumber,
+                VolumeId = dto.VolumeId,
                 FileName = Path.GetFileName(mangaFile.FilePath),
-                SeriesName = series?.Name,
-                IsSpecial = chapter.IsSpecial,
-                Pages = chapter.Pages,
+                SeriesName = dto.SeriesName,
+                SeriesFormat = dto.SeriesFormat,
+                SeriesId = dto.SeriesId,
+                LibraryId = dto.LibraryId,
+                IsSpecial = dto.IsSpecial,
+                Pages = dto.Pages,
             });
         }
 
@@ -107,32 +96,12 @@ namespace API.Controllers
         [HttpPost("mark-read")]
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
-                foreach (var chapter in volume.Chapters)
-                {
-                    var userProgress = GetUserProgressForChapter(user, chapter);
-
-                    if (userProgress == null)
-                    {
-                        user.Progresses.Add(new AppUserProgress
-                        {
-                            PagesRead = chapter.Pages,
-                            VolumeId = volume.Id,
-                            SeriesId = markReadDto.SeriesId,
-                            ChapterId = chapter.Id
-                        });
-                    }
-                    else
-                    {
-                        userProgress.PagesRead = chapter.Pages;
-                        userProgress.SeriesId = markReadDto.SeriesId;
-                        userProgress.VolumeId = volume.Id;
-                    }
-                }
+                _readerService.MarkChaptersAsRead(user, markReadDto.SeriesId, volume.Chapters);
             }
 
             _unitOfWork.UserRepository.Update(user);
@@ -146,47 +115,23 @@ namespace API.Controllers
             return BadRequest("There was an issue saving progress");
         }
 
-        private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
-        {
-            AppUserProgress userProgress = null;
-            try
-            {
-                userProgress =
-                    user.Progresses.SingleOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
-            }
-            catch (Exception)
-            {
-                // There is a very rare chance that user progress will duplicate current row. If that happens delete one with less pages
-                var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
-                if (progresses.Count > 1)
-                {
-                    user.Progresses = new List<AppUserProgress>()
-                    {
-                        user.Progresses.First()
-                    };
-                    userProgress = user.Progresses.First();
-                }
-            }
-
-            return userProgress;
-        }
 
         /// <summary>
-        /// Marks a Chapter as Unread (progress)
+        /// Marks a Series as Unread (progress)
         /// </summary>
         /// <param name="markReadDto"></param>
         /// <returns></returns>
         [HttpPost("mark-unread")]
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
                 foreach (var chapter in volume.Chapters)
                 {
-                    var userProgress = GetUserProgressForChapter(user, chapter);
+                    var userProgress = ReaderService.GetUserProgressForChapter(user, chapter);
 
                     if (userProgress == null) continue;
                     userProgress.PagesRead = 0;
@@ -207,6 +152,29 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Marks all chapters within a volume as unread
+        /// </summary>
+        /// <param name="markVolumeReadDto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-volume-unread")]
+        public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
+        /// <summary>
         /// Marks all chapters within a volume as Read
         /// </summary>
         /// <param name="markVolumeReadDto"></param>
@@ -214,30 +182,122 @@ namespace API.Controllers
         [HttpPost("mark-volume-read")]
         public async Task<ActionResult> MarkVolumeAsRead(MarkVolumeReadDto markVolumeReadDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
-            var chapters = await _unitOfWork.VolumeRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
-            foreach (var chapter in chapters)
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+            _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
             {
-                user.Progresses ??= new List<AppUserProgress>();
-                var userProgress = user.Progresses.FirstOrDefault(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id);
+                return Ok();
+            }
 
-                if (userProgress == null)
-                {
-                    user.Progresses.Add(new AppUserProgress
-                    {
-                        PagesRead = chapter.Pages,
-                        VolumeId = markVolumeReadDto.VolumeId,
-                        SeriesId = markVolumeReadDto.SeriesId,
-                        ChapterId = chapter.Id
-                    });
-                }
-                else
-                {
-                    userProgress.PagesRead = chapter.Pages;
-                    userProgress.SeriesId = markVolumeReadDto.SeriesId;
-                    userProgress.VolumeId = markVolumeReadDto.VolumeId;
-                }
+            return BadRequest("Could not save progress");
+        }
+
+
+        /// <summary>
+        /// Marks all chapters within a list of volumes as Read. All volumes must belong to the same Series.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-read")]
+        public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
+            foreach (var chapterId in dto.ChapterIds)
+            {
+                chapterIds.Add(chapterId);
+            }
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
+            _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters);
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
+        /// <summary>
+        /// Marks all chapters within a list of volumes as Unread. All volumes must belong to the same Series.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-unread")]
+        public async Task<ActionResult> MarkMultipleAsUnread(MarkVolumesReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
+            foreach (var chapterId in dto.ChapterIds)
+            {
+                chapterIds.Add(chapterId);
+            }
+            var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
+            _readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters);
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
+        /// <summary>
+        /// Marks all chapters within a list of series as Read.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-series-read")]
+        public async Task<ActionResult> MarkMultipleSeriesAsRead(MarkMultipleSeriesAsReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
+            foreach (var volume in volumes)
+            {
+                _readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            return BadRequest("Could not save progress");
+        }
+
+        /// <summary>
+        /// Marks all chapters within a list of series as Unread.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("mark-multiple-series-unread")]
+        public async Task<ActionResult> MarkMultipleSeriesAsUnread(MarkMultipleSeriesAsReadDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            var volumes = await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
+            foreach (var volume in volumes)
+            {
+                _readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters);
             }
 
             _unitOfWork.UserRepository.Update(user);
@@ -258,7 +318,7 @@ namespace API.Controllers
         [HttpGet("get-progress")]
         public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             var progressBookmark = new ProgressDto()
             {
                 PageNum = 0,
@@ -267,7 +327,7 @@ namespace API.Controllers
                 SeriesId = 0
             };
             if (user.Progresses == null) return Ok(progressBookmark);
-            var progress = user.Progresses.SingleOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
+            var progress = user.Progresses.FirstOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
             if (progress != null)
             {
@@ -288,7 +348,8 @@ namespace API.Controllers
         public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            if (await _readerService.SaveReadingProgress(progressDto, user)) return Ok(true);
+
+            if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
 
             return BadRequest("Could not save progress");
         }
@@ -301,7 +362,7 @@ namespace API.Controllers
         [HttpGet("get-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
         }
@@ -313,7 +374,7 @@ namespace API.Controllers
         [HttpGet("get-all-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks()
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id));
         }
@@ -326,7 +387,7 @@ namespace API.Controllers
         [HttpPost("remove-bookmarks")]
         public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
@@ -356,7 +417,7 @@ namespace API.Controllers
         [HttpGet("get-volume-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
         }
@@ -369,7 +430,7 @@ namespace API.Controllers
         [HttpGet("get-series-bookmarks")]
         public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
             return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
@@ -383,45 +444,28 @@ namespace API.Controllers
         [HttpPost("bookmark")]
         public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
             // Don't let user save past total pages.
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(bookmarkDto.ChapterId);
-            if (bookmarkDto.Page > chapter.Pages)
-            {
-                bookmarkDto.Page = chapter.Pages;
-            }
-
-            if (bookmarkDto.Page < 0)
-            {
-                bookmarkDto.Page = 0;
-            }
-
+            bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
 
             try
             {
-                user.Bookmarks ??= new List<AppUserBookmark>();
-               var userBookmark =
-                  user.Bookmarks.SingleOrDefault(x => x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id && x.Page == bookmarkDto.Page);
+                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+                var userBookmark =
+                    await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
                if (userBookmark == null)
                {
-                  user.Bookmarks.Add(new AppUserBookmark()
-                  {
-                     Page = bookmarkDto.Page,
-                     VolumeId = bookmarkDto.VolumeId,
-                     SeriesId = bookmarkDto.SeriesId,
-                     ChapterId = bookmarkDto.ChapterId,
-                  });
-               }
-               else
-               {
-                   userBookmark.Page = bookmarkDto.Page;
-                   userBookmark.SeriesId = bookmarkDto.SeriesId;
-                   userBookmark.VolumeId = bookmarkDto.VolumeId;
+                   user.Bookmarks ??= new List<AppUserBookmark>();
+                   user.Bookmarks.Add(new AppUserBookmark()
+                   {
+                       Page = bookmarkDto.Page,
+                       VolumeId = bookmarkDto.VolumeId,
+                       SeriesId = bookmarkDto.SeriesId,
+                       ChapterId = bookmarkDto.ChapterId,
+                   });
+                   _unitOfWork.UserRepository.Update(user);
                }
 
-               _unitOfWork.UserRepository.Update(user);
 
                if (await _unitOfWork.CommitAsync())
                {
@@ -444,7 +488,7 @@ namespace API.Controllers
         [HttpPost("unbookmark")]
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
 
             if (user.Bookmarks == null) return Ok();
             try {
@@ -452,7 +496,6 @@ namespace API.Controllers
                     x.ChapterId == bookmarkDto.ChapterId
                     && x.AppUserId == user.Id
                     && x.Page != bookmarkDto.Page).ToList();
-
 
                 _unitOfWork.UserRepository.Update(user);
 
@@ -482,58 +525,10 @@ namespace API.Controllers
         [HttpGet("next-chapter")]
         public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
-            if (currentVolume.Number == 0)
-            {
-                // Handle specials by sorting on their Filename aka Range
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer), currentChapter.Number);
-                if (chapterId > 0) return Ok(chapterId);
-            }
-
-            foreach (var volume in volumes)
-            {
-                if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
-                {
-                    // Handle Chapters within current Volume
-                    // In this case, i need 0 first because 0 represents a full volume file.
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
-                    if (chapterId > 0) return Ok(chapterId);
-                }
-
-                if (volume.Number == currentVolume.Number + 1)
-                {
-                    // Handle Chapters within next Volume
-                    // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
-                    var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
-                    if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
-                    {
-                        return chapters.Last().Id;
-                    }
-
-                    return Ok(chapters.FirstOrDefault()?.Id);
-                }
-            }
-            return Ok(-1);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return await _readerService.GetNextChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
-        private static int GetNextChapterId(IEnumerable<Chapter> chapters, string currentChapterNumber)
-        {
-            var next = false;
-            var chaptersList = chapters.ToList();
-            foreach (var chapter in chaptersList)
-            {
-                if (next)
-                {
-                    return chapter.Id;
-                }
-                if (currentChapterNumber.Equals(chapter.Number)) next = true;
-            }
-
-            return -1;
-        }
 
         /// <summary>
         /// Returns the previous logical chapter from the series.
@@ -548,30 +543,8 @@ namespace API.Controllers
         [HttpGet("prev-chapter")]
         public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id);
-            var currentVolume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
-            var currentChapter = await _unitOfWork.VolumeRepository.GetChapterAsync(currentChapterId);
-
-            if (currentVolume.Number == 0)
-            {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, _naturalSortComparer).Reverse(), currentChapter.Number);
-                if (chapterId > 0) return Ok(chapterId);
-            }
-
-            foreach (var volume in volumes.Reverse())
-            {
-                if (volume.Number == currentVolume.Number)
-                {
-                    var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
-                    if (chapterId > 0) return Ok(chapterId);
-                }
-                if (volume.Number == currentVolume.Number - 1)
-                {
-                    return Ok(volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault()?.Id);
-                }
-            }
-            return Ok(-1);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
     }

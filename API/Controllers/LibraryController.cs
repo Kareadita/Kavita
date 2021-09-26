@@ -225,11 +225,11 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
         {
-            queryString = queryString.Replace(@"%", "");
+            queryString = queryString.Trim().Replace(@"%", "");
 
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             // Get libraries user has access to
-            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
 
             if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 

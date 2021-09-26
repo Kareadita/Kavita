@@ -37,8 +37,8 @@
                     <h5 class="mt-0 mb-1">
                         <span *ngIf="chapter.number !== '0'; else specialHeader">
                             <span class="">
-                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="'Chapter' + formatChapterNumber(chapter)"></app-card-actionables>
-                            </span>&nbsp;Chapter {{formatChapterNumber(chapter)}}
+                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="'Chapter' + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
+                            </span>Chapter {{formatChapterNumber(chapter)}}
                             <span class="badge badge-primary badge-pill">
                                 <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
                                 <span *ngIf="chapter.pagesRead === 0">UNREAD</span>

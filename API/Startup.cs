@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -9,6 +11,7 @@ using API.Services.HostedServices;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -109,7 +112,7 @@ namespace API
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials() // For SignalR token query param
-                    .WithOrigins("http://localhost:4200")
+                    .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200")
                     .WithExposedHeaders("Content-Disposition", "Pagination"));
             }
 
@@ -132,7 +135,7 @@ namespace API
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
                         Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10)
+                        MaxAge = TimeSpan.FromSeconds(10),
                     };
                 context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
@@ -162,6 +165,14 @@ namespace API
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
             Console.WriteLine("You may now close the application window.");
+        }
+
+        private static string GetLocalIpAddress()
+        {
+            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530);
+            if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
+            throw new KavitaException("No network adapters with an IPv4 address in the system!");
         }
 
 

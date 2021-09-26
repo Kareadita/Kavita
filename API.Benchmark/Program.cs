@@ -13,6 +13,7 @@ namespace API.Benchmark
         static void Main(string[] args)
         {
             BenchmarkRunner.Run<ParseScannedFilesBenchmarks>();
+            //BenchmarkRunner.Run<TestBenchmark>();
         }
     }
 }

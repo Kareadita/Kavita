@@ -66,6 +66,7 @@ namespace API.Tests.Parser
         [InlineData("Noblesse - Episode 406 (52 Pages).7z", "0")]
         [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
+        [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -128,7 +129,6 @@ namespace API.Tests.Parser
         [InlineData("Fullmetal Alchemist chapters 101-108.cbz", "Fullmetal Alchemist")]
         [InlineData("To Love Ru v09 Uncensored (Ch.071-079).cbz", "To Love Ru")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "One Piece - Digital Colored Comics")]
-        //[InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01", "Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U")]
         [InlineData("Vol03_ch15-22.rar", "")]
         [InlineData("Love Hina - Special.cbz", "")] // This has to be a fallback case
@@ -157,6 +157,15 @@ namespace API.Tests.Parser
         [InlineData("Killing Bites - Vol 11 Chapter 050 Save Me, Nunupi!.cbz", "Killing Bites")]
         [InlineData("Mad Chimera World - Volume 005 - Chapter 026.cbz", "Mad Chimera World")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "Hentai Ouji to Warawanai Neko.")]
+        [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You")]
+        [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo")]
+        [InlineData("The Duke of Death and His Black Maid - Ch. 177 - The Ball (3).cbz", "The Duke of Death and His Black Maid")]
+        [InlineData("A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)", "A Compendium of Ghosts")]
+        [InlineData("The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake", "The Duke of Death and His Black Maid")]
+        [InlineData("Vol. 04 Ch. 054.5", "")]
+        [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
+        [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
+        [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -226,6 +235,9 @@ namespace API.Tests.Parser
         [InlineData("Ijousha No Ai - Vol.01 Chapter 029 8 Years Ago", "29")]
         [InlineData("Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", "9")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "34.5")]
+        [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "1-10")]
+        [InlineData("Deku_&_Bakugo_-_Rising_v1_c1.1.cbz", "1.1")]
+        [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -405,6 +417,22 @@ namespace API.Tests.Parser
             {
               Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
               Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Kono Subarashii Sekai ni Bakuen wo!\Vol. 00 Ch. 000.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Kono Subarashii Sekai ni Bakuen wo!", Volumes = "0", Edition = "",
+              Chapters = "0", Filename = "Vol. 00 Ch. 000.cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Toukyou Akazukin\Vol. 01 Ch. 001.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Toukyou Akazukin", Volumes = "1", Edition = "",
+              Chapters = "1", Filename = "Vol. 01 Ch. 001.cbz", Format = MangaFormat.Archive,
               FullFilePath = filepath, IsSpecial = false
             });
 

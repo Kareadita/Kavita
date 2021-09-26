@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
@@ -32,14 +33,14 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, user.Id, userParams, filterDto);
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for library");
 
-            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -55,10 +56,10 @@ namespace API.Controllers
         [HttpGet("{seriesId}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             try
             {
-                return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, user.Id));
+                return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId));
             }
             catch (Exception e)
             {
@@ -95,30 +96,28 @@ namespace API.Controllers
         [HttpGet("volumes")]
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, user.Id));
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId));
         }
 
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, user.Id));
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, userId));
         }
 
         [HttpGet("chapter")]
         public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
         {
-            return Ok(await _unitOfWork.VolumeRepository.GetChapterDtoAsync(chapterId));
+            return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
-
-
 
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
             var userRating = await _unitOfWork.UserRepository.GetUserRating(updateSeriesRatingDto.SeriesId, user.Id) ??
                              new AppUserRating();
 
@@ -158,10 +157,12 @@ namespace API.Controllers
             series.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
+            // This is when you hit Reset
             if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
             {
                 // Trigger a refresh when we are moving from a locked image to a non-locked
                 needsRefreshMetadata = true;
+                series.CoverImage = string.Empty;
                 series.CoverImageLocked = updateSeries.CoverImageLocked;
             }
 
@@ -182,14 +183,14 @@ namespace API.Controllers
         [HttpPost("recently-added")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, user.Id, userParams, filterDto);
+                await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series");
 
-            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -200,8 +201,8 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             // NOTE: This has to be done manually like this due to the DistinctBy requirement
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var results = await _unitOfWork.SeriesRepository.GetInProgress(user.Id, libraryId, userParams, filterDto);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var results = await _unitOfWork.SeriesRepository.GetInProgress(userId, libraryId, userParams, filterDto);
 
             var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
                 .Take(userParams.PageSize).ToList();
@@ -316,14 +317,14 @@ namespace API.Controllers
         [HttpGet("series-by-collection")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var series =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, user.Id, userParams);
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series for collection");
 
-            await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -339,8 +340,8 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
         {
             if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, user.Id));
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
         }
 
 

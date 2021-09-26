@@ -14,7 +14,6 @@ namespace API.Extensions
         public static bool HasFileBeenModifiedSince(this FileInfo fileInfo, DateTime comparison)
         {
             return DateTime.Compare(fileInfo.LastWriteTime, comparison) > 0;
-            //return fileInfo?.LastWriteTime > comparison;
         }
     }
 }

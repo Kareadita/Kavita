@@ -30,4 +30,8 @@
       <Folder Include="Services\Test Data\ScannerService\Manga" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="Extensions\Test Data\modified on run.txt" />
+    </ItemGroup>
+
 </Project>

@@ -10,7 +10,7 @@ namespace API.Interfaces.Services
     {
         void ExtractArchive(string archivePath, string extractPath);
         int GetNumberOfPagesFromArchive(string archivePath);
-        byte[] GetCoverImage(string archivePath, bool createThumbnail = false);
+        string GetCoverImage(string archivePath, string fileName);
         bool IsValidArchive(string archivePath);
         string GetSummaryInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);

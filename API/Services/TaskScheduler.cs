@@ -121,7 +121,7 @@ namespace API.Services
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
             BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
             // When we do a scan, force cache to re-unpack in case page numbers change
-            BackgroundJob.Enqueue(() => _cleanupService.Cleanup());
+            BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
         }
 
         public void CleanupChapters(int[] chapterIds)
@@ -141,10 +141,10 @@ namespace API.Services
             BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(tempDirectory));
         }
 
-        public void RefreshSeriesMetadata(int libraryId, int seriesId)
+        public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
+            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
         }
 
         public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
@@ -161,6 +161,7 @@ namespace API.Services
         /// <summary>
         /// Not an external call. Only public so that we can call this for a Task
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public async Task CheckForUpdate()
         {
             var update = await _versionUpdaterService.CheckForUpdate();

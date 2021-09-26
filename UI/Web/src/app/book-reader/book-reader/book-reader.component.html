@@ -63,11 +63,13 @@
                     </div>
                 </div>
                 <div class="row no-gutters">
-                    <div class="col-1">{{pageNum}}</div>
-                    <div class="col-10" style="margin-top: 9px">
+                    <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                    <div class="col-1" style="margin-top: 6px">{{pageNum}}</div>
+                    <div class="col-8" style="margin-top: 15px">
                         <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
                     </div>
-                    <div class="col-1">{{maxPages - 1}}</div>
+                    <div class="col-1 btn-icon" style="margin-top: 6px" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
+                    <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                 </div>
                 <div class="table-of-contents">
                     <h3>Table of Contents</h3>
@@ -77,18 +79,18 @@
                     <div *ngIf="chapters.length === 1; else nestedChildren">
                         <ul>
                             <li *ngFor="let chapter of chapters[0].children">
-                                <a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a>
+                                <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
                             </li>
                         </ul>
                     </div>
                     <ng-template #nestedChildren>
                         <ul *ngFor="let chapterGroup of chapters" style="padding-inline-start: 0px">
-                            <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapter(chapterGroup.page, '')">
+                            <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
                                 {{chapterGroup.title}}
                             </li>
                             <ul *ngFor="let chapter of chapterGroup.children">
                                 <li class="{{cleanIdSelector(chapter.part) === currentPageAnchor ? 'active' : ''}}">
-                                    <a href="javascript:void(0);" (click)="loadChapter(chapter.page, chapter.part)">{{chapter.title}}</a>
+                                    <a href="javascript:void(0);" (click)="loadChapterPage(chapter.page, chapter.part)">{{chapter.title}}</a>
                                 </li>
                             </ul>
                         </ul>
@@ -110,9 +112,9 @@
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
         <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
 
-        <div class="left {{clickOverlayClass('left')}}" (click)="prevPage()" *ngIf="clickToPaginate">
+        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
         </div>
-        <div class="right {{clickOverlayClass('right')}}" (click)="nextPage()" *ngIf="clickToPaginate">
+        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate">
         </div>
         
         <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
@@ -122,12 +124,22 @@
 
     <ng-template #actionBar>
         <div class="reading-bar row no-gutters justify-content-between">
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" [disabled]="readingDirection === 0 ? pageNum === 0 : pageNum + 1 >= maxPages - 1" title="{{readingDirection === 0 ? 'Previous' : 'Next'}} Page"><i class="fa fa-arrow-left" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Previous' : 'Next'}}</span></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" 
+                [disabled]="IsPrevDisabled" 
+                title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum === 0 : pageNum + 1 >= maxPages - 1) ? 'fa-angle-double-left' : 'fa-angle-left'}}" aria-hidden="true"></i>
+                <span class="phone-hidden">&nbsp;{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}}</span>
+            </button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
-            <div class="book-title col-2 phone-hidden">{{bookTitle}} </div>
+            <div class="book-title col-2 phone-hidden">{{bookTitle}}  <span *ngIf="incognitoMode">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span></div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" [disabled]="readingDirection === 0 ? pageNum + 1 >= maxPages - 1 : pageNum === 0" (click)="nextPage()" title="{{readingDirection === 0 ? 'Next' : 'Previous'}} Page"><span class="phone-hidden">{{readingDirection === 0 ? 'Next' : 'Previous'}}&nbsp;</span><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" 
+                [disabled]="IsNextDisabled" 
+                (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
+                <span class="phone-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}}&nbsp;</span>
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 >= maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
+            </button>
         </div>
     </ng-template>
 

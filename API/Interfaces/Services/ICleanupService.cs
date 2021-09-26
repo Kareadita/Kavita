@@ -1,7 +1,10 @@
-﻿namespace API.Interfaces.Services
+﻿using System.Threading.Tasks;
+
+namespace API.Interfaces.Services
 {
     public interface ICleanupService
     {
-        void Cleanup();
+        Task Cleanup();
+        void CleanupCacheDirectory();
     }
 }

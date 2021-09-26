@@ -59,8 +59,11 @@ namespace API.Services.Tasks
             return files;
         }
 
+        /// <summary>
+        /// Will backup anything that needs to be backed up. This includes logs, setting files, bare minimum cover images (just locked and first cover).
+        /// </summary>
         [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
-        public void BackupDatabase()
+        public async Task BackupDatabase()
         {
             _logger.LogInformation("Beginning backup of Database at {BackupTime}", DateTime.Now);
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
@@ -87,6 +90,9 @@ namespace API.Services.Tasks
 
             _directoryService.CopyFilesToDirectory(
                 _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
+
+            await CopyCoverImagesToBackupDirectory(tempDirectory);
+
             try
             {
                 ZipFile.CreateFromDirectory(tempDirectory, zipPath);
@@ -98,6 +104,31 @@ namespace API.Services.Tasks
 
             DirectoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
+        }
+
+        private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
+        {
+            var outputTempDir = Path.Join(tempDirectory, "covers");
+            DirectoryService.ExistOrCreate(outputTempDir);
+
+            try
+            {
+                var seriesImages = await _unitOfWork.SeriesRepository.GetLockedCoverImagesAsync();
+                _directoryService.CopyFilesToDirectory(
+                    seriesImages.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+
+                var collectionTags = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
+                _directoryService.CopyFilesToDirectory(
+                    collectionTags.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+
+                var chapterImages = await _unitOfWork.ChapterRepository.GetCoverImagesForLockedChaptersAsync();
+                _directoryService.CopyFilesToDirectory(
+                    chapterImages.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+            }
+            catch (IOException e)
+            {
+                // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.Entities;
 using API.Interfaces;
 using API.Interfaces.Repositories;
@@ -24,14 +25,15 @@ namespace API.Data
         public IUserRepository UserRepository => new UserRepository(_context, _userManager, _mapper);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
-        public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
+        public IVolumeRepository VolumeRepository => new VolumeRepository(_context);
 
         public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
 
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
         public IFileRepository FileRepository => new FileRepository(_context);
-        public IChapterRepository ChapterRepository => new ChapterRepository(_context);
+        public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
+        public IReadingListRepository ReadingListRepository => new ReadingListRepository(_context, _mapper);
 
         /// <summary>
         /// Commits changes to the DB. Completes the open transaction.
@@ -39,7 +41,6 @@ namespace API.Data
         /// <returns></returns>
         public bool Commit()
         {
-
             return _context.SaveChanges() > 0;
         }
         /// <summary>

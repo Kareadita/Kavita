@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
@@ -12,7 +13,11 @@ namespace API.Entities
         public IList<Chapter> Chapters { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
-        public byte[] CoverImage { get; set; }
+        /// <summary>
+        /// Absolute path to the (managed) image file
+        /// </summary>
+        /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
+        public string CoverImage { get; set; }
         public int Pages { get; set; }
 
 

@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -21,7 +21,6 @@ import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
-import { NgxSliderModule } from '@angular-slider/ngx-slider';
 
 
 import * as Sentry from '@sentry/angular';
@@ -33,11 +32,12 @@ import { Dedupe as DedupeIntegration } from '@sentry/integrations';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
-import { InProgressComponent } from './in-progress/in-progress.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
-import { CommonModule } from '@angular/common';
+import { InProgressComponent } from './in-progress/in-progress.component';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
+import { ReadingListModule } from './reading-list/reading-list.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 let sentryProviders: any[] = [];
 
@@ -98,6 +98,7 @@ if (environment.production) {
     PersonBadgeComponent,
     RecentlyAddedComponent,
     InProgressComponent,
+    DashboardComponent,
   ],
   imports: [
     HttpClientModule,
@@ -109,19 +110,16 @@ if (environment.production) {
 
     NgbDropdownModule, // Nav
     AutocompleteLibModule, // Nav
-    //NgbTooltipModule, // Shared & SettingsModule
     NgbRatingModule, // Series Detail
     NgbNavModule,
-    //NgbAccordionModule, // User Preferences
-    //NgxSliderModule, // User Preference
     NgbPaginationModule,
-
 
     SharedModule,
     CarouselModule,
     TypeaheadModule,
     CardsModule,
     CollectionsModule,
+    ReadingListModule,
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

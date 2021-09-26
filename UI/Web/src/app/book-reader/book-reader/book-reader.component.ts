@@ -22,6 +22,7 @@ import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScrollService } from 'src/app/scroll.service';
+import { MangaFormat } from 'src/app/_models/manga-format';
 
 
 interface PageStyle {
@@ -38,7 +39,8 @@ interface HistoryPoint {
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
-const SCROLL_PART_TIMEOUT = 5000;
+const CHAPTER_ID_NOT_FETCHED = -2;
+const CHAPTER_ID_DOESNT_EXIST = -1;
 
 @Component({
   selector: 'app-book-reader',
@@ -64,12 +66,31 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
+  /**
+   * Reading List id. Defaults to -1.
+   */
+  readingListId: number = CHAPTER_ID_DOESNT_EXIST;
+
+   /**
+    * If this is true, no progress will be saved.
+    */
+  incognitoMode: boolean = false;
+ 
+   /**
+    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order. 
+    */
+  readingListMode: boolean = false;
 
   chapters: Array<BookChapterItem> = [];
 
   pageNum = 0;
   maxPages = 1;
   adhocPageHistory: Stack<HistoryPoint> = new Stack<HistoryPoint>();
+  /**
+   * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
+   * @see Stack
+   */
+   continuousChaptersStack: Stack<number> = new Stack();
   
   user!: User;
 
@@ -90,6 +111,38 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
 
+  /**
+   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   */
+   nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
+   /**
+    * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+    */
+   prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
+   /**
+    * Is there a next chapter. If not, this will disable UI controls.
+    */
+   nextChapterDisabled: boolean = false;
+   /**
+    * Is there a previous chapter. If not, this will disable UI controls.
+    */
+   prevChapterDisabled: boolean = false;
+   /**
+    * Has the next chapter been prefetched. Prefetched means the backend will cache the files.
+    */
+   nextChapterPrefetched: boolean = false;
+   /**
+    * Has the previous chapter been prefetched. Prefetched means the backend will cache the files.
+    */
+   prevChapterPrefetched: boolean = false;
+  /**
+   * If the prev page allows a page change to occur.
+   */
+   prevPageDisabled = false;
+   /**
+    * If the next page allows a page change to occur.
+    */
+   nextPageDisabled = false;
 
   /**
    * Internal property used to capture all the different css properties to render on all elements
@@ -118,6 +171,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Last seen progress part path
    */
   lastSeenScrollPartPath: string = '';
+
   /**
    * Hack: Override background color for reader and restore it onDestroy
    */
@@ -146,6 +200,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       background-color: initial !important;
     }
   `;
+
+  get ReadingDirection(): typeof ReadingDirection {
+    return ReadingDirection;
+  }
+
+  get IsPrevDisabled() {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      return this.prevPageDisabled && this.pageNum === 0;
+    } 
+    return this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+  }
+
+  get IsNextDisabled() {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+    }
+    return this.prevPageDisabled && this.pageNum === 0;
+  }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
@@ -214,14 +286,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
             this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+
+            if (!this.incognitoMode) {
+              this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+            }
             return;
           } else {
             this.currentPageAnchor = '';
           }
         }
 
-        if (this.lastSeenScrollPartPath !== '') {
+        if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
           this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
     });
@@ -268,6 +343,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
+    this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+
+    const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
+    if (readingListId != null) {
+      this.readingListMode = true;
+      this.readingListId = parseInt(readingListId, 10);
+    }
+
 
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
@@ -276,32 +359,71 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    forkJoin({
-      chapter: this.seriesService.getChapter(this.chapterId),
-      progress: this.readerService.getProgress(this.chapterId),
-      chapters: this.bookService.getBookChapters(this.chapterId),
-      info: this.bookService.getBookInfo(this.chapterId)
-    }).pipe(take(1)).subscribe(results => {
-      this.chapter = results.chapter;
-      this.volumeId = results.chapter.volumeId;
-      this.maxPages = results.chapter.pages;
-      this.chapters = results.chapters;
-      this.pageNum = results.progress.pageNum;
-      this.bookTitle = results.info;
+    this.init();
+  }
 
+  init() {
+    this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
+    this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
+    this.nextChapterDisabled = false;
+    this.prevChapterDisabled = false;
+    this.nextChapterPrefetched = false;
 
-      if (this.pageNum >= this.maxPages) {
-        this.pageNum = this.maxPages - 1;
-        this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.bookService.getBookInfo(this.chapterId).subscribe(info => {
+      this.bookTitle = info.bookTitle;
+  
+      if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
+        // Redirect to the manga reader. 
+        const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
+        this.router.navigate(['library', info.libraryId, 'series', info.seriesId, 'manga', this.chapterId], {queryParams: params});
+        return;
       }
 
-      // Check if user progress has part, if so load it so we scroll to it
-      this.loadPage(results.progress.bookScrollId || undefined);
-    }, () => {
-      setTimeout(() => {
-        this.closeReader();
-      }, 200);
+      forkJoin({
+        chapter: this.seriesService.getChapter(this.chapterId),
+        progress: this.readerService.getProgress(this.chapterId),
+        chapters: this.bookService.getBookChapters(this.chapterId),
+      }).pipe(take(1)).subscribe(results => {
+        this.chapter = results.chapter;
+        this.volumeId = results.chapter.volumeId;
+        this.maxPages = results.chapter.pages;
+        this.chapters = results.chapters;
+        this.pageNum = results.progress.pageNum;
+        
+  
+        this.continuousChaptersStack.push(this.chapterId);
+  
+  
+        if (this.pageNum >= this.maxPages) {
+          this.pageNum = this.maxPages - 1;
+          if (!this.incognitoMode) {
+            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+          }
+        }
+  
+        this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+          this.nextChapterId = chapterId;
+          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+            this.nextChapterDisabled = true;
+          }
+        });
+        this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+          this.prevChapterId = chapterId;
+          if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
+            this.prevChapterDisabled = true;
+          }
+        });
+  
+        // Check if user progress has part, if so load it so we scroll to it
+        this.loadPage(results.progress.bookScrollId || undefined);
+      }, () => {
+        setTimeout(() => {
+          this.closeReader();
+        }, 200);
+      });
     });
+
+    
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -322,7 +444,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleIntersection(entries: IntersectionObserverEntry[]) {
-    const intersectingEntries = Array.from(entries).filter(entry => entry.isIntersecting).map(entry => entry.target);
+    let intersectingEntries = Array.from(entries)
+      .filter(entry => entry.isIntersecting)
+      .map(entry => entry.target)
     intersectingEntries.sort((a: Element, b: Element) => {
       const aTop = a.getBoundingClientRect().top;
       const bTop = b.getBoundingClientRect().top;
@@ -336,6 +460,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return 0;
     });
 
+
     if (intersectingEntries.length > 0) {
       let path = this.getXPathTo(intersectingEntries[0]);
         if (path === '') { return; }
@@ -346,13 +471,74 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  loadChapter(pageNum: number, part: string) {
+  loadNextChapter() {
+    if (this.nextPageDisabled) { return; }
+    this.isLoading = true;
+    if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
+      this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+        this.nextChapterId = chapterId;
+        this.loadChapter(chapterId, 'Next');
+      });
+    } else {
+      this.loadChapter(this.nextChapterId, 'Next');
+    }
+  }
+
+  loadPrevChapter() {
+    if (this.prevPageDisabled) { return; }
+    this.isLoading = true;
+    this.continuousChaptersStack.pop();
+    const prevChapter = this.continuousChaptersStack.peek();
+    if (prevChapter != this.chapterId) {
+      if (prevChapter !== undefined) {
+        this.chapterId = prevChapter;
+        this.init();
+        return;
+      }
+    }
+
+    if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
+      this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
+        this.prevChapterId = chapterId;
+        this.loadChapter(chapterId, 'Prev');
+      });
+    } else {
+      this.loadChapter(this.prevChapterId, 'Prev');
+    }
+  }
+
+  loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
+    if (chapterId >= 0) {
+      this.chapterId = chapterId;
+      this.continuousChaptersStack.push(chapterId); 
+      // Load chapter Id onto route but don't reload
+      const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+      window.history.replaceState({}, '', newRoute);
+      this.init();
+      this.toastr.info(direction + ' chapter loaded', '', {timeOut: 3000});
+    } else {
+      // This will only happen if no actual chapter can be found
+      this.toastr.warning('Could not find ' + direction + ' chapter');
+      this.isLoading = false;
+      if (direction === 'Prev') {
+        this.prevPageDisabled = true;
+      } else {
+        this.nextPageDisabled = true;
+      }
+    }
+  }
+
+  loadChapterPage(pageNum: number, part: string) {
     this.setPageNum(pageNum);
     this.loadPage('id("' + part + '")');
   }
 
   closeReader() {
-    this.location.back();
+    if (this.readingListMode) {
+      this.router.navigateByUrl('lists/' + this.readingListId);
+    } else {
+      this.location.back();
+    }
   }
 
   resetSettings() {
@@ -466,7 +652,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPageAnchors() {
     this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
-      this.intersectionObserver.observe(elem);
+      if (!elem.classList.contains('no-observe')) {
+        this.intersectionObserver.observe(elem);
+      }
     });
 
     this.pageAnchors = {};
@@ -483,7 +671,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.incognitoMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
@@ -563,7 +753,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum + 1);
     }
 
+    if (oldPageNum === 0) {
+      // Move to next volume/chapter automatically
+      this.loadPrevChapter();
+      return;
+    }
+
     if (oldPageNum === this.pageNum) { return; }
+
     this.loadPage();
   }
 
@@ -579,7 +776,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.setPageNum(this.pageNum - 1);
     }
-    
+
+    if (this.pageNum >= this.maxPages - 1) {
+      // Move to next volume/chapter automatically
+      this.loadNextChapter();
+    }
+
     if (oldPageNum === this.pageNum) { return; }
 
     this.loadPage();

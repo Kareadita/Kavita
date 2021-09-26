@@ -28,7 +28,6 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
-        private static readonly RecyclableMemoryStreamManager StreamManager = new();
         private readonly NaturalSortComparer _comparer;
         private const string ComicInfoFilename = "comicinfo";
 
@@ -147,12 +146,13 @@ namespace API.Services
         ///
         /// This skips over any __MACOSX folder/file iteration.
         /// </summary>
+        /// <remarks>This always creates a thumbnail</remarks>
         /// <param name="archivePath"></param>
-        /// <param name="createThumbnail">Create a smaller variant of file extracted from archive. Archive images are usually 1MB each.</param>
+        /// <param name="fileName">File name to use based on context of entity.</param>
         /// <returns></returns>
-        public byte[] GetCoverImage(string archivePath, bool createThumbnail = false)
+        public string GetCoverImage(string archivePath, string fileName)
         {
-            if (archivePath == null || !IsValidArchive(archivePath)) return Array.Empty<byte>();
+            if (archivePath == null || !IsValidArchive(archivePath)) return String.Empty;
             try
             {
                 var libraryHandler = CanOpen(archivePath);
@@ -168,7 +168,7 @@ namespace API.Services
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
-                        return createThumbnail ? CreateThumbnail(entry.FullName, stream) : ConvertEntryToByteArray(entry);
+                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
@@ -179,18 +179,16 @@ namespace API.Services
                         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
-                        using var ms = StreamManager.GetStream();
-                        entry.WriteTo(ms);
-                        ms.Position = 0;
+                        using var stream = entry.OpenEntryStream();
 
-                        return createThumbnail ? CreateThumbnail(entry.Key, ms, Path.GetExtension(entry.Key)) : ms.ToArray();
+                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return Array.Empty<byte>();
+                        return string.Empty;
                     default:
                         _logger.LogWarning("[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
-                        return Array.Empty<byte>();
+                        return string.Empty;
                 }
             }
             catch (Exception ex)
@@ -198,15 +196,7 @@ namespace API.Services
                 _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             }
 
-            return Array.Empty<byte>();
-        }
-
-        private static byte[] ConvertEntryToByteArray(ZipArchiveEntry entry)
-        {
-            using var stream = entry.Open();
-            using var ms = StreamManager.GetStream();
-            stream.CopyTo(ms);
-            return ms.ToArray();
+            return string.Empty;
         }
 
         /// <summary>
@@ -223,6 +213,7 @@ namespace API.Services
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
+        // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
@@ -254,23 +245,18 @@ namespace API.Services
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private byte[] CreateThumbnail(string entryName, Stream stream, string formatExtension = ".jpg")
+        private string CreateThumbnail(string entryName, Stream stream, string fileName)
         {
-            if (!formatExtension.StartsWith("."))
-            {
-                formatExtension = $".{formatExtension}";
-            }
             try
             {
-                using var thumbnail = Image.ThumbnailStream(stream, MetadataService.ThumbnailWidth);
-                return thumbnail.WriteToBuffer(formatExtension);
+                return ImageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
-            return Array.Empty<byte>();
+            return string.Empty;
         }
 
         /// <summary>
@@ -303,9 +289,7 @@ namespace API.Services
                     && !Parser.Parser.HasBlacklistedFolderInPath(entry.Key)
                     && Parser.Parser.IsXml(entry.Key))
                 {
-                    using var ms = StreamManager.GetStream();
-                    entry.WriteTo(ms);
-                    ms.Position = 0;
+                    using var ms = entry.OpenEntryStream();
 
                     var serializer = new XmlSerializer(typeof(ComicInfo));
                     var info = (ComicInfo) serializer.Deserialize(ms);
@@ -332,7 +316,7 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
+                        _logger.LogTrace("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
                                                                          && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
@@ -348,7 +332,7 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
+                        _logger.LogTrace("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)

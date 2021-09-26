@@ -21,9 +21,22 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   @Input() data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
+  /**
+   * If the entity is selected or not. 
+   */
+   @Input() selected: boolean = false;
+   /**
+    * If the entity should show selection code
+    */
+   @Input() allowSelection: boolean = false;
+
   @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<boolean>();
   @Output() dataChanged = new EventEmitter<Series>();
+  /**
+   * When the card is selected.
+   */
+   @Output() selection = new EventEmitter<boolean>();
 
   isAdmin = false;
   actions: ActionItem<Series>[] = [];
@@ -78,6 +91,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case(Action.Bookmarks):
         this.actionService.openBookmarkModal(series, (series) => {/* No Operation */ });
         break;
+      case(Action.AddToReadingList):
+        this.actionService.addSeriesToReadingList(series, (series) => {/* No Operation */ });
+        break;
       default:
         break;
     }
@@ -91,7 +107,6 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       if (closeResult.success) {
         if (closeResult.coverImageUpdate) {
           this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(closeResult.series.id));
-          console.log('image url: ', this.imageUrl);
         }
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
