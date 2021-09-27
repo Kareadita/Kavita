@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
@@ -41,7 +42,8 @@ namespace API.Controllers
         [HttpGet("has-reading-progress")]
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
         {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+            // TODO: Test this flow to ensure that no joins is fine for this API
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
         }

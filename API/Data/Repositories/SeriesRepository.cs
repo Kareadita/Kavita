@@ -497,5 +497,21 @@ namespace API.Data.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Returns the number of series for a given library (or all libraries if libraryId is 0)
+        /// </summary>
+        /// <param name="libraryId">Defaults to 0, library to restrict count to</param>
+        /// <returns></returns>
+        public async Task<int> GetSeriesCount(int libraryId = 0)
+        {
+            if (libraryId > 0)
+            {
+                return await _context.Series
+                    .Where(s => s.LibraryId == libraryId)
+                    .CountAsync();
+            }
+            return await _context.Series.CountAsync();
+        }
     }
 }

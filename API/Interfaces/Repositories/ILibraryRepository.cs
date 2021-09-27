@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -13,7 +14,7 @@ namespace API.Interfaces.Repositories
         void Delete(Library library);
         Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
         Task<bool> LibraryExists(string libraryName);
-        Task<Library> GetLibraryForIdAsync(int libraryId);
+        Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes);
         Task<Library> GetFullLibraryForIdAsync(int libraryId);
         Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId);
         Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);

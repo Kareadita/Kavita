@@ -45,6 +45,10 @@ namespace API.Parser
             RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout);
 
+        private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9]",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled,
+            RegexTimeout);
+
 
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -1064,7 +1068,7 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
+            return NormalizeRegex.Replace(name, string.Empty).ToLower();
         }
 
 

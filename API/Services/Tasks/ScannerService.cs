@@ -531,5 +531,18 @@ namespace API.Services.Tasks
              }
           }
        }
+
+       /// <summary>
+       /// Returns the number of series that should be processed in parallel to optimize speed and memory.
+       /// </summary>
+       /// <param name="libraryId">Defaults to 0 meaning no library</param>
+       /// <returns></returns>
+       public async Task<int> GetChunkSize(int libraryId = 0)
+       {
+           var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(libraryId);
+           var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+
+           return totalSeries / procCount;
+       }
     }
 }

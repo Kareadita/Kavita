@@ -69,5 +69,6 @@ namespace API.Interfaces.Repositories
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
         Task<IList<string>> GetAllCoverImagesAsync();
         Task<IEnumerable<string>> GetLockedCoverImagesAsync();
+        Task<int> GetSeriesCount(int libraryId = 0);
     }
 }
