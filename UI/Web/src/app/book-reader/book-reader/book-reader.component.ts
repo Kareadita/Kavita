@@ -541,13 +541,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  resetSettings() {
+  resetSettings(afterSave: boolean = false) {
     const windowWidth = window.innerWidth
       || document.documentElement.clientWidth
       || document.body.clientWidth;
 
     let margin = '15%';
     if (windowWidth <= 700) {
+      if (afterSave && this.user.preferences.bookReaderMargin !== 0) {
+        this.toastr.info('Margin will be reset to 0% on mobile. You do not have to save for settings to take effect.');
+      }
       margin = '0%';
     }
     if (this.user) {
@@ -913,7 +916,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.user) {
         this.user.preferences = updatedPrefs;
       }
-      this.resetSettings();
+      this.resetSettings(true);
     });
   }
 

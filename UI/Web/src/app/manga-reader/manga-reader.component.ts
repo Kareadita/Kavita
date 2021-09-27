@@ -201,6 +201,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
    */
   bookmarks: {[key: string]: number} = {};
+  /**
+   * Tracks if the first page is rendered or not. This is used to keep track of Automatic Scaling and adjusting decision after first page dimensions load up.
+   */
+  firstPageRendered: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -822,6 +826,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
+        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
+          
+          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+          const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+          const windowHeight = window.innerHeight
+                    || document.documentElement.clientHeight
+                    || document.body.clientHeight;
+
+          const widthRatio = windowWidth / this.canvasImage.width;
+          const heightRatio = windowHeight / this.canvasImage.height;
+
+          // Given that we now have image dimensions, assuming this isn't a split image, 
+          // Try to reset one time based on who's dimension (width/height) is smaller
+          if (widthRatio < heightRatio) {
+            newScale = FITTING_OPTION.WIDTH;
+          } else if (widthRatio > heightRatio) {
+            newScale = FITTING_OPTION.HEIGHT;
+          }
+
+          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
+          this.firstPageRendered = true;
+        }
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       // Reset scroll on non HEIGHT Fits
