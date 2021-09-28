@@ -1,13 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
-using API.DTOs.Reader;
 using API.Entities;
 using API.Interfaces.Repositories;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories
@@ -21,9 +16,19 @@ namespace API.Data.Repositories
             _context = context;
         }
 
+        public void Add(Volume volume)
+        {
+            _context.Volume.Add(volume);
+        }
+
         public void Update(Volume volume)
         {
             _context.Entry(volume).State = EntityState.Modified;
+        }
+
+        public void Remove(Volume volume)
+        {
+            _context.Volume.Remove(volume);
         }
 
         public async Task<IList<MangaFile>> GetFilesForVolume(int volumeId)

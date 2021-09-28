@@ -109,7 +109,7 @@ namespace API.Data.Repositories
             var query = _context.Library
                 .Where(x => x.Id == libraryId);
 
-            AddIncludesToQuery(query, includes);
+            query = AddIncludesToQuery(query, includes);
             return await query.SingleAsync();
         }
 

@@ -7,9 +7,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;
@@ -99,7 +101,7 @@ namespace API.Services.Tasks
            }
 
            var sw = new Stopwatch();
-           UpdateLibrary(library, parsedSeries);
+           await UpdateLibrary(library, parsedSeries);
 
             _unitOfWork.LibraryRepository.Update(library);
             if (await _unitOfWork.CommitAsync())
@@ -152,7 +154,8 @@ namespace API.Services.Tasks
            Library library;
            try
            {
-               library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
+               //library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
+               library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
            }
            catch (Exception ex)
            {
@@ -171,7 +174,7 @@ namespace API.Services.Tasks
            }
            var sw = Stopwatch.StartNew();
 
-           UpdateLibrary(library, series);
+           await UpdateLibrary(library, series);
 
            _unitOfWork.LibraryRepository.Update(library);
            if (await _unitOfWork.CommitAsync())
@@ -212,78 +215,154 @@ namespace API.Services.Tasks
            _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
        }
 
-       private void UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       private async Task UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
 
-          // First, remove any series that are not in parsedSeries list
-          var missingSeries = FindSeriesNotOnDisk(library.Series, parsedSeries).ToList();
-          library.Series = RemoveMissingSeries(library.Series, missingSeries, out var removeCount);
-          if (removeCount > 0)
+          // Library now contains no Series, so we need to fetch series in groups of ChunkSize
+          var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
+          var chunkSize = await GetChunkSize(library.Id);
+
+          var totalChunks = (int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize));
+          var stopwatch = new Stopwatch();
+
+          for (var chunk = 0; chunk < totalChunks; chunk++)
           {
-             _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
-             foreach (var s in missingSeries)
-             {
-                _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
-             }
+              stopwatch.Restart();
+              _logger.LogDebug($"Processing chunk {chunk} / {totalChunks}");
+              var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
+              {
+                  PageNumber = chunk,
+                  PageSize = chunkSize
+              });
+
+              // First, remove any series that are not in parsedSeries list
+              var missingSeries = FindSeriesNotOnDisk(nonLibrarySeries, parsedSeries).ToList();
+
+              foreach (var missing in missingSeries)
+              {
+                  _unitOfWork.SeriesRepository.Remove(missing);
+              }
+
+              var cleanedSeries = RemoveMissingSeries(nonLibrarySeries, missingSeries, out var removeCount);
+              if (removeCount > 0)
+              {
+                  _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
+                  foreach (var s in missingSeries)
+                  {
+                      _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
+                  }
+              }
+
+              // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
+              var librarySeries = cleanedSeries.ToList();
+              // TODO: Make this Parallel.ForEach work on chunks, not on invidiual series
+              Parallel.ForEach(librarySeries, (series) =>
+              {
+                  try
+                  {
+                      _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+                      var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
+                      UpdateVolumes(series, parsedInfos);
+                      series.Pages = series.Volumes.Sum(v => v.Pages);
+                      series.NormalizedName = Parser.Parser.Normalize(series.Name);
+                      series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+                      // series.Format = key.Format;
+                      // series.OriginalName ??= infos[0].Series;
+
+                      //_unitOfWork.SeriesRepository.Update(series);
+                  }
+                  catch (Exception ex)
+                  {
+                      _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+                  }
+              });
+
+              // Last step, remove any series that have no pages
+              //library.Series = library.Series.Where(s => s.Pages > 0).ToList();
+              if (await _unitOfWork.CommitAsync())
+              {
+                  _logger.LogInformation(
+                      "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                      chunk * chunkSize, (chunk + 1) * chunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+              }
+              else
+              {
+                  _logger.LogCritical(
+                      "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+              }
           }
 
+
+
           // Add new series that have parsedInfos
+          var newSeries = new List<Series>();
+          var allSeries = (await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id)).ToList();
           foreach (var (key, infos) in parsedSeries)
           {
               // Key is normalized already
-             Series existingSeries;
-             try
-             {
-                existingSeries = library.Series.SingleOrDefault(s =>
-                    (s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName)
-                    && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
-             }
-             catch (Exception e)
-             {
-                _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key.NormalizedName);
-                var duplicateSeries = library.Series.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
-                foreach (var series in duplicateSeries)
-                {
-                   _logger.LogCritical("{Key} maps with {Series}", key.Name, series.OriginalName);
-                }
+              Series existingSeries;
+              try
+              {
+                  existingSeries = allSeries.SingleOrDefault(s =>
+                      (s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName)
+                      && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
+              }
+              catch (Exception e)
+              {
+                  _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key.NormalizedName);
+                  var duplicateSeries = allSeries.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
+                  foreach (var series in duplicateSeries)
+                  {
+                      _logger.LogCritical("{Key} maps with {Series}", key.Name, series.OriginalName);
+                  }
 
-                continue;
-             }
-             if (existingSeries == null)
-             {
-                existingSeries = DbFactory.Series(infos[0].Series);
-                existingSeries.Format = key.Format;
-                library.Series.Add(existingSeries);
-             }
+                  continue;
+              }
+              if (existingSeries == null)
+              {
+                  existingSeries = DbFactory.Series(infos[0].Series);
+                  existingSeries.Format = key.Format;
+                  newSeries.Add(existingSeries);
+              }
 
-             existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
-             existingSeries.OriginalName ??= infos[0].Series;
-             existingSeries.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-             existingSeries.Format = key.Format;
+              // This updates existing entities, let's not do this since we've already processed them above
+              // existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
+              // existingSeries.OriginalName ??= infos[0].Series;
+              // existingSeries.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+              // existingSeries.Format = key.Format;
           }
 
-          // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
-          var librarySeries = library.Series.ToList();
-          Parallel.ForEach(librarySeries, (series) =>
+          Parallel.ForEach(newSeries, (series) =>
           {
-             try
-             {
-                _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
-                UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
-                series.Pages = series.Volumes.Sum(v => v.Pages);
-             }
-             catch (Exception ex)
-             {
-                _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
-             }
+              try
+              {
+                  _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+                  UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
+                  series.Pages = series.Volumes.Sum(v => v.Pages);
+                  series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
+                  _unitOfWork.SeriesRepository.Attach(series);
+              }
+              catch (Exception ex)
+              {
+                  _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+              }
           });
 
-          // Last step, remove any series that have no pages
-          library.Series = library.Series.Where(s => s.Pages > 0).ToList();
+          if (await _unitOfWork.CommitAsync())
+          {
+              _logger.LogInformation(
+                  "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                  newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+          }
+          else
+          {
+              _logger.LogCritical(
+                  "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+          }
        }
 
-       public IEnumerable<Series> FindSeriesNotOnDisk(ICollection<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       public IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
            var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
            return existingSeries.Where(es => !es.NameInList(foundSeries) && !SeriesHasMatchingParserInfoFormat(es, parsedSeries));
@@ -332,7 +411,7 @@ namespace API.Services.Tasks
        /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
        /// <param name="removeCount"></param>
        /// <returns>the updated existingSeries</returns>
-       public static ICollection<Series> RemoveMissingSeries(ICollection<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
+       public static IList<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
        {
           var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
@@ -359,6 +438,7 @@ namespace API.Services.Tasks
              {
                 volume = DbFactory.Volume(volumeNumber);
                 series.Volumes.Add(volume);
+                _unitOfWork.VolumeRepository.Add(volume);
              }
 
              _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
@@ -517,9 +597,26 @@ namespace API.Services.Tasks
              existingFile.Format = info.Format;
              if (existingFile.HasFileBeenModified() || existingFile.Pages == 0)
              {
-                existingFile.Pages = (existingFile.Format == MangaFormat.Epub || existingFile.Format == MangaFormat.Pdf)
-                   ? _bookService.GetNumberOfPages(info.FullFilePath)
-                   : _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+                 // TODO: This needs to handle Page number for Image types
+                 switch (existingFile.Format)
+                 {
+                     case MangaFormat.Epub:
+                     case MangaFormat.Pdf:
+                         existingFile.Pages = _bookService.GetNumberOfPages(info.FullFilePath);
+                         break;
+                     case MangaFormat.Image:
+                         existingFile.Pages = 1;
+                         break;
+                     case MangaFormat.Unknown:
+                         existingFile.Pages = 0;
+                         break;
+                     case MangaFormat.Archive:
+                         existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+                         break;
+                 }
+                 // existingFile.Pages = (existingFile.Format == MangaFormat.Epub || existingFile.Format == MangaFormat.Pdf)
+                //    ? _bookService.GetNumberOfPages(info.FullFilePath)
+                //    : _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
              }
           }
           else
@@ -541,6 +638,11 @@ namespace API.Services.Tasks
        {
            var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(libraryId);
            var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+
+           if (totalSeries < procCount * 2)
+           {
+               return totalSeries;
+           }
 
            return totalSeries / procCount;
        }

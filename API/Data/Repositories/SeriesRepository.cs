@@ -10,6 +10,7 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
+using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -26,9 +27,10 @@ namespace API.Data.Repositories
             _mapper = mapper;
         }
 
-        public void Add(Series series)
+        public void Attach(Series series)
         {
-            _context.Series.Add(series);
+            //_context.Series.Add(series);
+            _context.Series.Attach(series);
         }
 
         public void Update(Series series)
@@ -36,15 +38,11 @@ namespace API.Data.Repositories
             _context.Entry(series).State = EntityState.Modified;
         }
 
-        public async Task<bool> SaveAllAsync()
+        public void Remove(Series series)
         {
-            return await _context.SaveChangesAsync() > 0;
+            _context.Series.Remove(series);
         }
 
-        public bool SaveAll()
-        {
-            return _context.SaveChanges() > 0;
-        }
 
         public async Task<Series> GetSeriesByNameAsync(string name)
         {
@@ -75,6 +73,25 @@ namespace API.Data.Repositories
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Used for <see cref="ScannerService"/> to
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <returns></returns>
+        public async Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams)
+        {
+            var query = _context.Series
+                .Where(s => s.LibraryId == libraryId)
+                .Include(s => s.Metadata)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .AsSplitQuery()
+                .OrderBy(s => s.SortName);
+
+            return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)

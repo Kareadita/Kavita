@@ -11,8 +11,10 @@ namespace API.Interfaces.Repositories
 {
     public interface ISeriesRepository
     {
-        void Add(Series series);
+        //void Add(Series series);
+        void Attach(Series series);
         void Update(Series series);
+        void Remove(Series series);
         Task<Series> GetSeriesByNameAsync(string name);
         Task<bool> DoesSeriesNameExistInLibrary(string name);
         Series GetSeriesByName(string name);
@@ -70,5 +72,6 @@ namespace API.Interfaces.Repositories
         Task<IList<string>> GetAllCoverImagesAsync();
         Task<IEnumerable<string>> GetLockedCoverImagesAsync();
         Task<int> GetSeriesCount(int libraryId = 0);
+        Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
     }
 }
