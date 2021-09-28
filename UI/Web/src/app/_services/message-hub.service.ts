@@ -2,17 +2,20 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { ScanLibraryEvent } from '../_models/events/scan-library-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
   ScanLibrary = 'ScanLibrary',
   RefreshMetadata = 'RefreshMetadata',
+  SeriesAdded = 'SeriesAdded'
 }
 
 export interface Message<T> {
@@ -33,8 +36,9 @@ export class MessageHubService {
 
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
   public scanLibrary: EventEmitter<ScanLibraryEvent> = new EventEmitter<ScanLibraryEvent>();
+  public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
 
-  constructor(private modalService: NgbModal) { }
+  constructor(private modalService: NgbModal, private toastr: ToastrService) { }
 
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
@@ -69,6 +73,15 @@ export class MessageHubService {
       // if ((resp.body as ScanLibraryEvent).stage === 'complete') {
       //   this.toastr.
       // }
+    });
+
+    this.hubConnection.on(EVENTS.SeriesAdded, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAdded,
+        payload: resp.body
+      });
+      this.seriesAdded.emit(resp.body);
+      this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

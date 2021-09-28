@@ -256,21 +256,25 @@ namespace API.Services.Tasks
 
               // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
               var librarySeries = cleanedSeries.ToList();
-              // TODO: Make this Parallel.ForEach work on chunks, not on invidiual series
+              // TODO: Make this Parallel.ForEach work on chunks, not on individual series
               Parallel.ForEach(librarySeries, (series) =>
               {
                   try
                   {
                       _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+
                       var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
                       UpdateVolumes(series, parsedInfos);
                       series.Pages = series.Volumes.Sum(v => v.Pages);
+
                       series.NormalizedName = Parser.Parser.Normalize(series.Name);
                       series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-                      // series.Format = key.Format;
-                      // series.OriginalName ??= infos[0].Series;
+                      if (series.Format == MangaFormat.Unknown)
+                      {
+                          series.Format = parsedInfos[0].Format;
+                      }
 
-                      //_unitOfWork.SeriesRepository.Update(series);
+                      // series.OriginalName ??= infos[0].Series;
                   }
                   catch (Exception ex)
                   {
@@ -285,6 +289,12 @@ namespace API.Services.Tasks
                   _logger.LogInformation(
                       "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                       chunk * chunkSize, (chunk + 1) * chunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+
+                  // Emit any series removed
+                  foreach (var missing in missingSeries)
+                  {
+                      await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
+                  }
               }
               else
               {
@@ -325,12 +335,6 @@ namespace API.Services.Tasks
                   existingSeries.Format = key.Format;
                   newSeries.Add(existingSeries);
               }
-
-              // This updates existing entities, let's not do this since we've already processed them above
-              // existingSeries.NormalizedName = Parser.Parser.Normalize(existingSeries.Name);
-              // existingSeries.OriginalName ??= infos[0].Series;
-              // existingSeries.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-              // existingSeries.Format = key.Format;
           }
 
           Parallel.ForEach(newSeries, (series) =>
@@ -354,15 +358,22 @@ namespace API.Services.Tasks
               _logger.LogInformation(
                   "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                   newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+
+              // Inform UI of new series added
+              foreach (var newSeriesSeries in newSeries)
+              {
+                  await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(newSeriesSeries.Id, newSeriesSeries.Name, library.Id));
+              }
           }
           else
           {
+              // This is probably not needed. Better to catch the exception.
               _logger.LogCritical(
                   "There was a critical error that resulted in a failed scan. Please check logs and rescan");
           }
        }
 
-       public IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
            var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
            return existingSeries.Where(es => !es.NameInList(foundSeries) && !SeriesHasMatchingParserInfoFormat(es, parsedSeries));

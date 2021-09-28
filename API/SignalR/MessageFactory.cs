@@ -12,7 +12,36 @@ namespace API.SignalR
                 Name = SignalREvents.ScanSeries,
                 Body = new
                 {
-                    SeriesId = seriesId
+                    SeriesId = seriesId,
+                    SeriesName = string.Empty // TODO: Add this
+                }
+            };
+        }
+
+        public static SignalRMessage SeriesAddedEvent(int seriesId, string seriesName, int libraryId)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SeriesAdded,
+                Body = new
+                {
+                    SeriesId = seriesId,
+                    SeriesName = seriesName,
+                    LibraryId = libraryId
+                }
+            };
+        }
+
+        public static SignalRMessage SeriesRemovedEvent(int seriesId, string seriesName, int libraryId)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SeriesRemoved,
+                Body = new
+                {
+                    SeriesId = seriesId,
+                    SeriesName = seriesName,
+                    LibraryId = libraryId
                 }
             };
         }
