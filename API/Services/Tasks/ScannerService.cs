@@ -100,10 +100,12 @@ namespace API.Services.Tasks
                }
            }
 
+           // TODO: this needs to be handled differently
            var sw = new Stopwatch();
-           await UpdateLibrary(library, parsedSeries);
+           //await UpdateLibrary(library, parsedSeries);
+           UpdateSeries(series, parsedSeries); // Just this doesn't handle the removing of a series if it no longer exists
 
-            _unitOfWork.LibraryRepository.Update(library);
+            //_unitOfWork.LibraryRepository.Update(library);
             if (await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation(
@@ -220,20 +222,21 @@ namespace API.Services.Tasks
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
 
           // Library now contains no Series, so we need to fetch series in groups of ChunkSize
-          var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
-          var chunkSize = await GetChunkSize(library.Id);
+          // var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
+          // var chunkSize = await _unitOfWork.SeriesRepository.GetChunkSize(library.Id);
+          // var totalChunks = (int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize));
+          var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
 
-          var totalChunks = (int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize));
-          var stopwatch = new Stopwatch();
+          var stopwatch = Stopwatch.StartNew();
 
-          for (var chunk = 0; chunk < totalChunks; chunk++)
+          for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
           {
               stopwatch.Restart();
-              _logger.LogDebug($"Processing chunk {chunk} / {totalChunks}");
+              _logger.LogDebug($"Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize}");
               var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
               {
                   PageNumber = chunk,
-                  PageSize = chunkSize
+                  PageSize = chunkInfo.ChunkSize
               });
 
               // First, remove any series that are not in parsedSeries list
@@ -256,39 +259,15 @@ namespace API.Services.Tasks
 
               // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
               var librarySeries = cleanedSeries.ToList();
-              // TODO: Make this Parallel.ForEach work on chunks, not on individual series
-              Parallel.ForEach(librarySeries, (series) =>
-              {
-                  try
-                  {
-                      _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+              Parallel.ForEach(librarySeries, (series) => { UpdateSeries(series, parsedSeries); });
 
-                      var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
-                      UpdateVolumes(series, parsedInfos);
-                      series.Pages = series.Volumes.Sum(v => v.Pages);
-
-                      series.NormalizedName = Parser.Parser.Normalize(series.Name);
-                      series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-                      if (series.Format == MangaFormat.Unknown)
-                      {
-                          series.Format = parsedInfos[0].Format;
-                      }
-
-                      // series.OriginalName ??= infos[0].Series;
-                  }
-                  catch (Exception ex)
-                  {
-                      _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
-                  }
-              });
-
-              // Last step, remove any series that have no pages
+              // Last step, remove any series that have no pages ( I don't think we actually need this )
               //library.Series = library.Series.Where(s => s.Pages > 0).ToList();
               if (await _unitOfWork.CommitAsync())
               {
                   _logger.LogInformation(
                       "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                      chunk * chunkSize, (chunk + 1) * chunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+                      chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
 
                   // Emit any series removed
                   foreach (var missing in missingSeries)
@@ -337,7 +316,7 @@ namespace API.Services.Tasks
               newSeries.Add(existingSeries);
           }
 
-          Parallel.ForEach(newSeries, (series) =>
+          foreach(var series in newSeries)
           {
               try
               {
@@ -346,31 +325,71 @@ namespace API.Services.Tasks
                   series.Pages = series.Volumes.Sum(v => v.Pages);
                   series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
                   _unitOfWork.SeriesRepository.Attach(series);
+                  if (await _unitOfWork.CommitAsync())
+                  {
+                      _logger.LogInformation(
+                          "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                          newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+
+                      // Inform UI of new series added
+                      await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
+                  }
+                  else
+                  {
+                      // This is probably not needed. Better to catch the exception.
+                      _logger.LogCritical(
+                          "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+                  }
               }
               catch (Exception ex)
               {
                   _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
               }
-          });
+          }//);
 
-          if (await _unitOfWork.CommitAsync())
-          {
-              _logger.LogInformation(
-                  "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                  newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+          // if (await _unitOfWork.CommitAsync())
+          // {
+          //     _logger.LogInformation(
+          //         "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+          //         newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+          //
+          //     // Inform UI of new series added
+          //     foreach (var newSeriesSeries in newSeries)
+          //     {
+          //         await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(newSeriesSeries.Id, newSeriesSeries.Name, library.Id));
+          //     }
+          // }
+          // else
+          // {
+          //     // This is probably not needed. Better to catch the exception.
+          //     _logger.LogCritical(
+          //         "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+          // }
+       }
 
-              // Inform UI of new series added
-              foreach (var newSeriesSeries in newSeries)
-              {
-                  await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(newSeriesSeries.Id, newSeriesSeries.Name, library.Id));
-              }
-          }
-          else
-          {
-              // This is probably not needed. Better to catch the exception.
-              _logger.LogCritical(
-                  "There was a critical error that resulted in a failed scan. Please check logs and rescan");
-          }
+       private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+       {
+           try
+           {
+               _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+
+               var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
+               UpdateVolumes(series, parsedInfos);
+               series.Pages = series.Volumes.Sum(v => v.Pages);
+
+               series.NormalizedName = Parser.Parser.Normalize(series.Name);
+               series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+               if (series.Format == MangaFormat.Unknown)
+               {
+                   series.Format = parsedInfos[0].Format;
+               }
+
+               // series.OriginalName ??= infos[0].Series;
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+           }
        }
 
        public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
@@ -608,7 +627,6 @@ namespace API.Services.Tasks
              existingFile.Format = info.Format;
              if (existingFile.HasFileBeenModified() || existingFile.Pages == 0)
              {
-                 // TODO: This needs to handle Page number for Image types
                  switch (existingFile.Format)
                  {
                      case MangaFormat.Epub:
@@ -625,9 +643,6 @@ namespace API.Services.Tasks
                          existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                          break;
                  }
-                 // existingFile.Pages = (existingFile.Format == MangaFormat.Epub || existingFile.Format == MangaFormat.Pdf)
-                //    ? _bookService.GetNumberOfPages(info.FullFilePath)
-                //    : _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
              }
           }
           else
@@ -638,24 +653,6 @@ namespace API.Services.Tasks
                 chapter.Files.Add(file);
              }
           }
-       }
-
-       /// <summary>
-       /// Returns the number of series that should be processed in parallel to optimize speed and memory.
-       /// </summary>
-       /// <param name="libraryId">Defaults to 0 meaning no library</param>
-       /// <returns></returns>
-       public async Task<int> GetChunkSize(int libraryId = 0)
-       {
-           var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(libraryId);
-           var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
-
-           if (totalSeries < procCount * 2)
-           {
-               return totalSeries;
-           }
-
-           return totalSeries / procCount;
        }
     }
 }

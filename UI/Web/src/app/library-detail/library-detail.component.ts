@@ -1,10 +1,12 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { take, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -12,6 +14,7 @@ import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
+import { MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -60,7 +63,7 @@ export class LibraryDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -78,7 +81,10 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
+
+    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId)).subscribe((event: SeriesAddedEvent) => {
+      this.loadPage();
+    });
   }
 
   @HostListener('document:keydown.shift', ['$event'])

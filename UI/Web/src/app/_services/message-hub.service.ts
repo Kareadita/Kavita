@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanLibraryEvent } from '../_models/events/scan-library-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
@@ -37,6 +38,7 @@ export class MessageHubService {
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
   public scanLibrary: EventEmitter<ScanLibraryEvent> = new EventEmitter<ScanLibraryEvent>();
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
+  public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 
   constructor(private modalService: NgbModal, private toastr: ToastrService) { }
 
@@ -82,6 +84,14 @@ export class MessageHubService {
       });
       this.seriesAdded.emit(resp.body);
       this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
+    });
+
+    this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
+      this.messagesSource.next({
+        event: EVENTS.RefreshMetadata,
+        payload: resp.body
+      });
+      this.refreshMetadata.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

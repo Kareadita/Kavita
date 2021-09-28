@@ -5,9 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.SignalR;
@@ -201,33 +203,51 @@ namespace API.Services
         public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
-            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
-
-            // PERF: See if we can break this up into multiple threads that process 20 series at a time then save so we can reduce amount of memory used
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
-            foreach (var series in library.Series)
+
+
+            // var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
+            // var chunkSize = await _unitOfWork.SeriesRepository.GetChunkSize(library.Id);
+            // var totalChunks = Math.Min((int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize)), 1);
+            var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
+
+            for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
             {
-                var volumeUpdated = false;
-                foreach (var volume in series.Volumes)
-                {
-                    var chapterUpdated = false;
-                    foreach (var chapter in volume.Chapters)
+                var stopwatch = Stopwatch.StartNew();
+                _logger.LogDebug($"Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize}");
+                var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
+                    new UserParams()
                     {
-                        chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                        PageNumber = chunk,
+                        PageSize = chunkInfo.ChunkSize
+                    });
+
+                foreach (var series in nonLibrarySeries)
+                {
+                    var volumeUpdated = false;
+                    foreach (var volume in series.Volumes)
+                    {
+                        var chapterUpdated = false;
+                        foreach (var chapter in volume.Chapters)
+                        {
+                            chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                        }
+
+                        volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
                     }
 
-                    volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
+                    UpdateMetadata(series, volumeUpdated || forceUpdate);
+                    if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+                    {
+                        _logger.LogDebug("Updated metadata for Series {StartIndex} - {EndIndex} in {ElapsedMilliseconds} milliseconds",
+                            (chunk + 1) * chunkInfo.ChunkSize, chunkInfo.TotalChunks * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds);
+                        await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
+                    }
                 }
-
-                UpdateMetadata(series, volumeUpdated || forceUpdate);
-                _unitOfWork.SeriesRepository.Update(series);
             }
 
-
-            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-            {
-                _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
-            }
+            _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds total", library.Name, sw.ElapsedMilliseconds);
         }
 
 
@@ -239,9 +259,10 @@ namespace API.Services
         public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
-            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
+            //var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
 
-            var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
+            //var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
             if (series == null)
             {
                 _logger.LogError("Series {SeriesId} was not found on Library {LibraryName}", seriesId, libraryId);
@@ -261,13 +282,13 @@ namespace API.Services
             }
 
             UpdateMetadata(series, volumeUpdated || forceUpdate);
-            _unitOfWork.SeriesRepository.Update(series);
+            //_unitOfWork.SeriesRepository.Update(series);
 
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation("Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
-                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.RefreshMetadataEvent(libraryId, seriesId));
+                await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
             }
         }
     }

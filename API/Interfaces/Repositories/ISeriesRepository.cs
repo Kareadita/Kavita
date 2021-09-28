@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
@@ -73,5 +74,7 @@ namespace API.Interfaces.Repositories
         Task<IEnumerable<string>> GetLockedCoverImagesAsync();
         Task<int> GetSeriesCount(int libraryId = 0);
         Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
+        Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
+        Task<Chunk> GetChunkInfo(int libraryId = 0);
     }
 }

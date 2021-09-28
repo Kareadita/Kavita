@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
@@ -29,7 +30,6 @@ namespace API.Data.Repositories
 
         public void Attach(Series series)
         {
-            //_context.Series.Add(series);
             _context.Series.Attach(series);
         }
 
@@ -92,6 +92,23 @@ namespace API.Data.Repositories
                 .OrderBy(s => s.SortName);
 
             return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        }
+
+        /// <summary>
+        /// This is a heavy call. Returns all entities down to Files and Library and Series Metadata.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        public async Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId)
+        {
+            return await _context.Series
+                .Where(s => s.Id == seriesId)
+                .Include(s => s.Metadata)
+                .Include(s => s.Library)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .SingleOrDefaultAsync();
         }
 
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
@@ -231,6 +248,11 @@ namespace API.Data.Repositories
             return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
         }
 
+        /// <summary>
+        /// Returns Volumes, Metadata, and Collection Tags
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         public async Task<Series> GetSeriesByIdAsync(int seriesId)
         {
             return await _context.Series
@@ -529,6 +551,39 @@ namespace API.Data.Repositories
                     .CountAsync();
             }
             return await _context.Series.CountAsync();
+        }
+
+        /// <summary>
+        /// Returns the number of series that should be processed in parallel to optimize speed and memory. Minimum of 50
+        /// </summary>
+        /// <param name="libraryId">Defaults to 0 meaning no library</param>
+        /// <returns></returns>
+        private async Task<int> GetChunkSize(int libraryId = 0)
+        {
+            var totalSeries = await GetSeriesCount(libraryId);
+            var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+
+            if (totalSeries < procCount * 2 || totalSeries < 50)
+            {
+                return totalSeries;
+            }
+
+
+            return totalSeries / procCount;
+        }
+
+        public async Task<Chunk> GetChunkInfo(int libraryId = 0)
+        {
+            var totalSeries = await GetSeriesCount(libraryId);
+            var chunkSize = await GetChunkSize(libraryId);
+            var totalChunks = Math.Min((int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize)), 1);
+
+            return new Chunk()
+            {
+                TotalSize = totalSeries,
+                ChunkSize = chunkSize,
+                TotalChunks = totalChunks
+            };
         }
     }
 }
