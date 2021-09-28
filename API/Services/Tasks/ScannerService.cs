@@ -643,15 +643,16 @@ namespace API.Services.Tasks
                          existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                          break;
                  }
+                 existingFile.LastModified = DateTime.Now;
              }
           }
           else
           {
              var file = CreateMangaFile(info);
-             if (file != null)
-             {
-                chapter.Files.Add(file);
-             }
+             if (file == null) return;
+
+             file.LastModified = DateTime.Now;
+             chapter.Files.Add(file);
           }
        }
     }
