@@ -588,7 +588,8 @@ namespace API.Services.Tasks
                 {
                    FilePath = info.FullFilePath,
                    Format = info.Format,
-                   Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
+                   Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath),
+                   LastModified = File.GetLastWriteTime(info.FullFilePath)
                 };
              }
              case MangaFormat.Pdf:
@@ -598,7 +599,8 @@ namespace API.Services.Tasks
                 {
                    FilePath = info.FullFilePath,
                    Format = info.Format,
-                   Pages = _bookService.GetNumberOfPages(info.FullFilePath)
+                   Pages = _bookService.GetNumberOfPages(info.FullFilePath),
+                   LastModified = File.GetLastWriteTime(info.FullFilePath)
                 };
              }
              case MangaFormat.Image:
@@ -607,7 +609,8 @@ namespace API.Services.Tasks
                {
                  FilePath = info.FullFilePath,
                  Format = info.Format,
-                 Pages = 1
+                 Pages = 1,
+                 LastModified = File.GetLastWriteTime(info.FullFilePath)
                };
              }
              default:
@@ -625,33 +628,30 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             if (existingFile.HasFileBeenModified() || existingFile.Pages == 0)
+             if (!existingFile.HasFileBeenModified() && existingFile.Pages != 0) return;
+             switch (existingFile.Format)
              {
-                 switch (existingFile.Format)
-                 {
-                     case MangaFormat.Epub:
-                     case MangaFormat.Pdf:
-                         existingFile.Pages = _bookService.GetNumberOfPages(info.FullFilePath);
-                         break;
-                     case MangaFormat.Image:
-                         existingFile.Pages = 1;
-                         break;
-                     case MangaFormat.Unknown:
-                         existingFile.Pages = 0;
-                         break;
-                     case MangaFormat.Archive:
-                         existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
-                         break;
-                 }
-                 existingFile.LastModified = DateTime.Now;
+                 case MangaFormat.Epub:
+                 case MangaFormat.Pdf:
+                     existingFile.Pages = _bookService.GetNumberOfPages(info.FullFilePath);
+                     break;
+                 case MangaFormat.Image:
+                     existingFile.Pages = 1;
+                     break;
+                 case MangaFormat.Unknown:
+                     existingFile.Pages = 0;
+                     break;
+                 case MangaFormat.Archive:
+                     existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
+                     break;
              }
+             existingFile.LastModified = File.GetLastWriteTime(info.FullFilePath);
           }
           else
           {
              var file = CreateMangaFile(info);
              if (file == null) return;
 
-             file.LastModified = DateTime.Now;
              chapter.Files.Add(file);
           }
        }
