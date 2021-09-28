@@ -320,21 +320,21 @@ namespace API.Services.Tasks
               }
               catch (Exception e)
               {
-                  _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it", key.NormalizedName);
+                  _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it. This will be skipped", key.NormalizedName);
                   var duplicateSeries = allSeries.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
                   foreach (var series in duplicateSeries)
                   {
-                      _logger.LogCritical("{Key} maps with {Series}", key.Name, series.OriginalName);
+                      _logger.LogCritical("Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
                   }
 
                   continue;
               }
-              if (existingSeries == null)
-              {
-                  existingSeries = DbFactory.Series(infos[0].Series);
-                  existingSeries.Format = key.Format;
-                  newSeries.Add(existingSeries);
-              }
+
+              if (existingSeries != null) continue;
+
+              existingSeries = DbFactory.Series(infos[0].Series);
+              existingSeries.Format = key.Format;
+              newSeries.Add(existingSeries);
           }
 
           Parallel.ForEach(newSeries, (series) =>
