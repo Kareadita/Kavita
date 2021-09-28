@@ -50,6 +50,7 @@ namespace API.Services.Tasks
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token)
        {
+           var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
            var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
@@ -84,28 +85,53 @@ namespace API.Services.Tasks
                        dirs[path] = string.Empty;
                    }
                }
-               _logger.LogDebug("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
-               scanner = new ParseScannedFiles(_bookService, _logger);
-               parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
-               totalFiles += totalFiles2;
-               scanElapsedTime += scanElapsedTime2;
 
-               // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
-               // Hence we clear out anything but what we selected for
-               firstSeries = library.Series.FirstOrDefault();
-               keys = parsedSeries.Keys;
-               foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
+               // This can come in when we have no files left in a folder, so we should also check if any of the manga files exist on the disk any longer
+               var anyFilesExist =
+                   (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id)).Any(m => File.Exists(m.FilePath));
+
+               if (anyFilesExist)
                {
-                   parsedSeries.Remove(key);
+                   _logger.LogDebug("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
+                   scanner = new ParseScannedFiles(_bookService, _logger);
+                   parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
+                   totalFiles += totalFiles2;
+                   scanElapsedTime += scanElapsedTime2;
+
+                   // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
+                   // Hence we clear out anything but what we selected for
+                   firstSeries = library.Series.FirstOrDefault();
+                   keys = parsedSeries.Keys;
+                   foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
+                   {
+                       parsedSeries.Remove(key);
+                   }
+
+                   if (parsedSeries.Count > 0)
+                   {
+                       UpdateSeries(series, parsedSeries);
+                   }
                }
+               else
+               {
+                   _unitOfWork.SeriesRepository.Remove(series);
+               }
+
+
            }
 
-           // TODO: this needs to be handled differently
-           var sw = new Stopwatch();
-           //await UpdateLibrary(library, parsedSeries);
-           UpdateSeries(series, parsedSeries); // Just this doesn't handle the removing of a series if it no longer exists
+           //var sw = new Stopwatch();
+           // if (parsedSeries.Count == 0)
+           // {
+           //     // If count is still 0, that means the files have been deleted
+           //     _unitOfWork.SeriesRepository.Remove(series);
+           // }
+           // else
+           // {
+           //     // Just this doesn't handle the removing of a series if it no longer exists
+           //     UpdateSeries(series, parsedSeries);
+           // }
 
-            //_unitOfWork.LibraryRepository.Update(library);
             if (await _unitOfWork.CommitAsync())
             {
                 _logger.LogInformation(
@@ -221,12 +247,8 @@ namespace API.Services.Tasks
        {
           if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
 
-          // Library now contains no Series, so we need to fetch series in groups of ChunkSize
-          // var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
-          // var chunkSize = await _unitOfWork.SeriesRepository.GetChunkSize(library.Id);
-          // var totalChunks = (int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize));
+          // Library contains no Series, so we need to fetch series in groups of ChunkSize
           var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
-
           var stopwatch = Stopwatch.StartNew();
 
           for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
