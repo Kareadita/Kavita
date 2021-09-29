@@ -53,104 +53,98 @@ namespace API.Services.Tasks
            var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-           var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId, seriesId);
-           var dirs = DirectoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(f => f.Path), files.Select(f => f.FilePath).ToList());
-           var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{ seriesId });
+           var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
+           var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
+           var folderPaths = library.Folders.Select(f => f.Path).ToList();
+           var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
-           // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
-           // Hence we clear out anything but what we selected for
-           var firstSeries = library.Series.FirstOrDefault();
-           var keys = parsedSeries.Keys;
-           foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
-           {
-               parsedSeries.Remove(key);
-           }
+           // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
+           RemoveParsedInfosNotForSeries(parsedSeries, series);
 
+           // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
            if (parsedSeries.Count == 0)
            {
-               // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
-               // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
-               // is the series folder.
-               var existingFolder = dirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
-               if (dirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
-               {
-                   dirs = new Dictionary<string, string>();
-                   var path = Path.GetPathRoot(existingFolder);
-                   if (!string.IsNullOrEmpty(path))
-                   {
-                       dirs[path] = string.Empty;
-                   }
-               }
-
-               // This can come in when we have no files left in a folder, so we should also check if any of the manga files exist on the disk any longer
                var anyFilesExist =
                    (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id)).Any(m => File.Exists(m.FilePath));
 
-               if (anyFilesExist)
+               if (!anyFilesExist)
                {
-                   _logger.LogDebug("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
+                   _unitOfWork.SeriesRepository.Remove(series);
+                   await CommitAndSend(libraryId, seriesId, forceUpdate, token, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
+               }
+               else
+               {
+                   // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
+                   // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
+                   // is the series folder.
+                   var existingFolder = dirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
+                   if (dirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
+                   {
+                       dirs = new Dictionary<string, string>();
+                       var path = Directory.GetParent(existingFolder)?.FullName;
+                       if (!folderPaths.Contains(path))
+                       {
+                           _logger.LogInformation("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                           return;
+                       }
+                       if (!string.IsNullOrEmpty(path))
+                       {
+                           dirs[path] = string.Empty;
+                       }
+                   }
+
+                   _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
                    scanner = new ParseScannedFiles(_bookService, _logger);
                    parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                    totalFiles += totalFiles2;
                    scanElapsedTime += scanElapsedTime2;
-
-                   // If a root level folder scan occurs, then multiple series gets passed in and thus we get a unique constraint issue
-                   // Hence we clear out anything but what we selected for
-                   firstSeries = library.Series.FirstOrDefault();
-                   keys = parsedSeries.Keys;
-                   foreach (var key in keys.Where(key => !firstSeries.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || firstSeries?.Format != key.Format))
-                   {
-                       parsedSeries.Remove(key);
-                   }
-
-                   if (parsedSeries.Count > 0)
-                   {
-                       UpdateSeries(series, parsedSeries);
-                   }
+                   RemoveParsedInfosNotForSeries(parsedSeries, series);
                }
-               else
-               {
-                   _unitOfWork.SeriesRepository.Remove(series);
-               }
-
-
            }
 
-           //var sw = new Stopwatch();
-           // if (parsedSeries.Count == 0)
-           // {
-           //     // If count is still 0, that means the files have been deleted
-           //     _unitOfWork.SeriesRepository.Remove(series);
-           // }
-           // else
-           // {
-           //     // Just this doesn't handle the removing of a series if it no longer exists
-           //     UpdateSeries(series, parsedSeries);
-           // }
+           // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
+           if (parsedSeries.Count == 0) return;
 
-            if (await _unitOfWork.CommitAsync())
-            {
-                _logger.LogInformation(
-                    "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
-                    totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
+           UpdateSeries(series, parsedSeries);
+           await CommitAndSend(libraryId, seriesId, forceUpdate, token, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
+       }
 
-                await CleanupDbEntities();
-                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
-                BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
-                // Tell UI that this series is done
-                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId), cancellationToken: token);
-            }
-            else
-            {
-                _logger.LogCritical(
-                    "There was a critical error that resulted in a failed scan. Please check logs and rescan");
-                await _unitOfWork.RollbackAsync();
-            }
+       private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
+       {
+           var keys = parsedSeries.Keys;
+           foreach (var key in keys.Where(key =>
+               !series.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || series.Format != key.Format))
+           {
+               parsedSeries.Remove(key);
+           }
+       }
 
+       private async Task CommitAndSend(int libraryId, int seriesId, bool forceUpdate, CancellationToken token, int totalFiles,
+           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds)
+       {
+           if (await _unitOfWork.CommitAsync())
+           {
+               _logger.LogInformation(
+                   "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
+                   totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
+
+               await CleanupDbEntities();
+               BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
+               BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+               // Tell UI that this series is done
+               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId),
+                   cancellationToken: token);
+           }
+           else
+           {
+               _logger.LogCritical(
+                   "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+               await _unitOfWork.RollbackAsync();
+           }
        }
 
 
@@ -405,8 +399,7 @@ namespace API.Services.Tasks
                {
                    series.Format = parsedInfos[0].Format;
                }
-
-               // series.OriginalName ??= infos[0].Series;
+               series.OriginalName ??= parsedInfos[0].Series;
            }
            catch (Exception ex)
            {
@@ -506,14 +499,19 @@ namespace API.Services.Tasks
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
                 (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
              var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
+             // NOTE: Do I need this deletion logger output?
              foreach (var volume in deletedVolumes)
              {
-                var file = volume.Chapters.FirstOrDefault()?.Files.FirstOrDefault()?.FilePath ?? "no files";
-                if (new FileInfo(file).Exists)
-                {
-                   _logger.LogError("Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}", file);
-                }
-                _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+                 var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? "";
+                 if (!string.IsNullOrEmpty(file) && File.Exists(file))
+                 {
+                     _logger.LogError(
+                         "Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
+                         file);
+                 }
+
+                 _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+                 //_unitOfWork.VolumeRepository.Remove(volume);
              }
 
              series.Volumes = nonDeletedVolumes;
