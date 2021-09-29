@@ -76,7 +76,7 @@ namespace API.Services
 
         private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
-            file.LastModified = DateTime.Now;
+            file.UpdateLastModified();
             switch (file.Format)
             {
                 case MangaFormat.Pdf:

@@ -600,45 +600,47 @@ namespace API.Services.Tasks
 
        private MangaFile CreateMangaFile(ParserInfo info)
        {
-          switch (info.Format)
+           MangaFile mangaFile = null;
+           switch (info.Format)
           {
              case MangaFormat.Archive:
              {
-                return new MangaFile()
+                 mangaFile = new MangaFile()
                 {
                    FilePath = info.FullFilePath,
                    Format = info.Format,
-                   Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath),
-                   LastModified = File.GetLastWriteTime(info.FullFilePath)
+                   Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
                 };
+                 break;
              }
              case MangaFormat.Pdf:
              case MangaFormat.Epub:
              {
-                return new MangaFile()
+                 mangaFile = new MangaFile()
                 {
                    FilePath = info.FullFilePath,
                    Format = info.Format,
-                   Pages = _bookService.GetNumberOfPages(info.FullFilePath),
-                   LastModified = File.GetLastWriteTime(info.FullFilePath)
+                   Pages = _bookService.GetNumberOfPages(info.FullFilePath)
                 };
+                 break;
              }
              case MangaFormat.Image:
              {
-               return new MangaFile()
-               {
-                 FilePath = info.FullFilePath,
-                 Format = info.Format,
-                 Pages = 1,
-                 LastModified = File.GetLastWriteTime(info.FullFilePath)
-               };
+                 mangaFile = new MangaFile()
+                 {
+                     FilePath = info.FullFilePath,
+                     Format = info.Format,
+                     Pages = 1
+                 };
+                 break;
              }
              default:
                 _logger.LogWarning("[Scanner] Ignoring {Filename}. File type is not supported", info.Filename);
                 break;
           }
 
-          return null;
+           mangaFile?.UpdateLastModified();
+           return mangaFile;
        }
 
        private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
