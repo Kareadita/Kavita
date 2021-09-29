@@ -185,7 +185,7 @@ namespace API.Services
                 if (!string.IsNullOrEmpty(series.Summary))
                 {
                     series.Summary = summary;
-                    firstFile.LastModified = DateTime.Now;
+                    firstFile.LastModified = DateTime.Now; // TODO: Validate this should be DateTime.Now or it should be File.LastWriteTime() like in Scanner. Or is it needed here at all?
                     return true;
                 }
             }
@@ -204,12 +204,8 @@ namespace API.Services
         {
             var sw = Stopwatch.StartNew();
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
-            _logger.LogInformation("Beginning metadata refresh of {LibraryName}", library.Name);
+            _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
-
-            // var totalSeries = await _unitOfWork.SeriesRepository.GetSeriesCount(library.Id);
-            // var chunkSize = await _unitOfWork.SeriesRepository.GetChunkSize(library.Id);
-            // var totalChunks = Math.Min((int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize)), 1);
             var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
 
             for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
@@ -238,16 +234,17 @@ namespace API.Services
                     }
 
                     UpdateMetadata(series, volumeUpdated || forceUpdate);
+
                     if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
                     {
-                        _logger.LogDebug("Updated metadata for Series {StartIndex} - {EndIndex} in {ElapsedMilliseconds} milliseconds",
-                            (chunk + 1) * chunkInfo.ChunkSize, chunkInfo.TotalChunks * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds);
+                        _logger.LogDebug("[MetadataService] Updated metadata for Series {SeriesName} in {ElapsedMilliseconds} milliseconds",
+                            series.Name, stopwatch.ElapsedMilliseconds);
                         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
                     }
                 }
             }
 
-            _logger.LogInformation("Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds total", library.Name, sw.ElapsedMilliseconds);
+            _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, sw.ElapsedMilliseconds);
         }
 
 
@@ -259,16 +256,13 @@ namespace API.Services
         public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             var sw = Stopwatch.StartNew();
-            //var library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
-
-            //var series = library.Series.SingleOrDefault(s => s.Id == seriesId);
             var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
             if (series == null)
             {
-                _logger.LogError("Series {SeriesId} was not found on Library {LibraryName}", seriesId, libraryId);
+                _logger.LogError("[MetadataService] Series {SeriesId} was not found on Library {LibraryId}", seriesId, libraryId);
                 return;
             }
-            _logger.LogInformation("Beginning metadata refresh of {SeriesName}", series.Name);
+            _logger.LogInformation("[MetadataService] Beginning metadata refresh of {SeriesName}", series.Name);
             var volumeUpdated = false;
             foreach (var volume in series.Volumes)
             {
@@ -282,12 +276,11 @@ namespace API.Services
             }
 
             UpdateMetadata(series, volumeUpdated || forceUpdate);
-            //_unitOfWork.SeriesRepository.Update(series);
 
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
             {
-                _logger.LogInformation("Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
+                _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
                 await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
             }
         }

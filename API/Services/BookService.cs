@@ -412,7 +412,7 @@ namespace API.Services
 
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
-                //using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
+
                 return ImageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
