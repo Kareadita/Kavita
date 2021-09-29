@@ -50,6 +50,7 @@ namespace API.Services.Tasks
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
        public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token)
        {
+           // TODO: We can remove forceUpdate. That will never be true. Only time we will ever force update is calling refresh metadata directly
            var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
@@ -74,7 +75,7 @@ namespace API.Services.Tasks
                if (!anyFilesExist)
                {
                    _unitOfWork.SeriesRepository.Remove(series);
-                   await CommitAndSend(libraryId, seriesId, forceUpdate, token, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
+                   await CommitAndSend(libraryId, seriesId, forceUpdate, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
                }
                else
                {
@@ -110,7 +111,7 @@ namespace API.Services.Tasks
            if (parsedSeries.Count == 0) return;
 
            UpdateSeries(series, parsedSeries);
-           await CommitAndSend(libraryId, seriesId, forceUpdate, token, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
+           await CommitAndSend(libraryId, seriesId, forceUpdate, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
        }
 
        private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
@@ -123,8 +124,8 @@ namespace API.Services.Tasks
            }
        }
 
-       private async Task CommitAndSend(int libraryId, int seriesId, bool forceUpdate, CancellationToken token, int totalFiles,
-           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds)
+       private async Task CommitAndSend(int libraryId, int seriesId, bool forceUpdate, int totalFiles,
+           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds, CancellationToken token)
        {
            if (await _unitOfWork.CommitAsync())
            {
@@ -136,7 +137,7 @@ namespace API.Services.Tasks
                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
                BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
                // Tell UI that this series is done
-               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId),
+               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
                    cancellationToken: token);
            }
            else
@@ -176,7 +177,6 @@ namespace API.Services.Tasks
            Library library;
            try
            {
-               //library = await _unitOfWork.LibraryRepository.GetFullLibraryForIdAsync(libraryId);
                library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
            }
            catch (Exception ex)
@@ -239,7 +239,7 @@ namespace API.Services.Tasks
 
        private async Task UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
-          if (parsedSeries == null) throw new ArgumentNullException(nameof(parsedSeries));
+          if (parsedSeries == null) return;
 
           // Library contains no Series, so we need to fetch series in groups of ChunkSize
           var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
@@ -277,27 +277,17 @@ namespace API.Services.Tasks
               var librarySeries = cleanedSeries.ToList();
               Parallel.ForEach(librarySeries, (series) => { UpdateSeries(series, parsedSeries); });
 
-              // Last step, remove any series that have no pages ( I don't think we actually need this )
-              //library.Series = library.Series.Where(s => s.Pages > 0).ToList();
-              if (await _unitOfWork.CommitAsync())
-              {
-                  _logger.LogInformation(
-                      "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                      chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+              await _unitOfWork.CommitAsync();
+              _logger.LogInformation(
+                  "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                  chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
 
-                  // Emit any series removed
-                  foreach (var missing in missingSeries)
-                  {
-                      await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
-                  }
-              }
-              else
+              // Emit any series removed
+              foreach (var missing in missingSeries)
               {
-                  _logger.LogCritical(
-                      "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+                  await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
               }
           }
-
 
 
           // Add new series that have parsedInfos
@@ -361,26 +351,7 @@ namespace API.Services.Tasks
               {
                   _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
               }
-          }//);
-
-          // if (await _unitOfWork.CommitAsync())
-          // {
-          //     _logger.LogInformation(
-          //         "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-          //         newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
-          //
-          //     // Inform UI of new series added
-          //     foreach (var newSeriesSeries in newSeries)
-          //     {
-          //         await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(newSeriesSeries.Id, newSeriesSeries.Name, library.Id));
-          //     }
-          // }
-          // else
-          // {
-          //     // This is probably not needed. Better to catch the exception.
-          //     _logger.LogCritical(
-          //         "There was a critical error that resulted in a failed scan. Please check logs and rescan");
-          // }
+          }
        }
 
        private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
@@ -499,7 +470,6 @@ namespace API.Services.Tasks
              _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
                 (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
              var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
-             // NOTE: Do I need this deletion logger output?
              foreach (var volume in deletedVolumes)
              {
                  var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? "";
@@ -511,7 +481,6 @@ namespace API.Services.Tasks
                  }
 
                  _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
-                 //_unitOfWork.VolumeRepository.Remove(volume);
              }
 
              series.Volumes = nonDeletedVolumes;

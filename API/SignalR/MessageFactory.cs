@@ -5,7 +5,7 @@ namespace API.SignalR
 {
     public static class MessageFactory
     {
-        public static SignalRMessage ScanSeriesEvent(int seriesId)
+        public static SignalRMessage ScanSeriesEvent(int seriesId, string seriesName)
         {
             return new SignalRMessage()
             {
@@ -13,7 +13,7 @@ namespace API.SignalR
                 Body = new
                 {
                     SeriesId = seriesId,
-                    SeriesName = string.Empty // TODO: Add this
+                    SeriesName = seriesName
                 }
             };
         }
