@@ -160,7 +160,6 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
@@ -172,7 +171,6 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 

@@ -434,7 +434,7 @@ namespace API.Data.Repositories
         /// </summary>
         /// <param name="libraryId">Defaults to 0, library to restrict count to</param>
         /// <returns></returns>
-        public async Task<int> GetSeriesCount(int libraryId = 0)
+        private async Task<int> GetSeriesCount(int libraryId = 0)
         {
             if (libraryId > 0)
             {
@@ -450,25 +450,33 @@ namespace API.Data.Repositories
         /// </summary>
         /// <param name="libraryId">Defaults to 0 meaning no library</param>
         /// <returns></returns>
-        private async Task<int> GetChunkSize(int libraryId = 0)
+        private async Task<Tuple<int, int>> GetChunkSize(int libraryId = 0)
         {
             var totalSeries = await GetSeriesCount(libraryId);
             var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
 
             if (totalSeries < procCount * 2 || totalSeries < 50)
             {
-                return totalSeries;
+                return new Tuple<int, int>(totalSeries, totalSeries);
             }
 
 
-            return totalSeries / procCount;
+            return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
         }
 
         public async Task<Chunk> GetChunkInfo(int libraryId = 0)
         {
-            var totalSeries = await GetSeriesCount(libraryId);
-            var chunkSize = await GetChunkSize(libraryId);
-            var totalChunks = Math.Min((int) Math.Truncate(Math.Ceiling((totalSeries * 1.0) / chunkSize)), 1);
+            //var totalSeries = await GetSeriesCount(libraryId);
+            var (totalSeries, chunkSize) = await GetChunkSize(libraryId);
+
+            if (totalSeries == 0) return new Chunk()
+            {
+                TotalChunks = 0,
+                TotalSize = 0,
+                ChunkSize = 0
+            };
+
+            var totalChunks = Math.Max((int) Math.Ceiling((totalSeries * 1.0) / chunkSize), 1);
 
             return new Chunk()
             {

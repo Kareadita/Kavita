@@ -182,11 +182,11 @@ namespace API.Services.Tasks
            catch (Exception ex)
            {
                // This usually only fails if user is not authenticated.
-               _logger.LogError(ex, "There was an issue fetching Library {LibraryId}", libraryId);
+               _logger.LogError(ex, "[ScannerService] There was an issue fetching Library {LibraryId}", libraryId);
                return;
            }
 
-           _logger.LogInformation("Beginning file scan on {LibraryName}", library.Name);
+           _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
@@ -202,13 +202,13 @@ namespace API.Services.Tasks
            if (await _unitOfWork.CommitAsync())
            {
                _logger.LogInformation(
-                   "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                   "[ScannerService] Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                    totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
            }
            else
            {
                _logger.LogCritical(
-                   "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+                   "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
 
            await CleanupAbandonedChapters();
@@ -248,7 +248,7 @@ namespace API.Services.Tasks
           for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
           {
               stopwatch.Restart();
-              _logger.LogDebug($"Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize}");
+              _logger.LogDebug($"[ScannerService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
               var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
               {
                   PageNumber = chunk,

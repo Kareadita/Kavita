@@ -217,7 +217,7 @@ namespace API.Controllers
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
             return Ok();
         }
 
