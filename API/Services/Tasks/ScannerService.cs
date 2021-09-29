@@ -87,7 +87,7 @@ namespace API.Services.Tasks
                    {
                        dirs = new Dictionary<string, string>();
                        var path = Directory.GetParent(existingFolder)?.FullName;
-                       if (!folderPaths.Contains(path))
+                       if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
                        {
                            _logger.LogInformation("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
                            return;

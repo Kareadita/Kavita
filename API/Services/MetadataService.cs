@@ -104,6 +104,7 @@ namespace API.Services
 
             if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
+                _logger.LogDebug("[RefreshMetadata] Generating cover image for {File}", firstFile?.FilePath);
                 chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
                 return true;
             }
@@ -280,9 +281,10 @@ namespace API.Services
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
             {
-                _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
                 await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
             }
+
+            _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
     }
 }
