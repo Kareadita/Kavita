@@ -47,6 +47,8 @@ namespace API.Services
       var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
         .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
 
+
+
       return firstImage;
     }
 
@@ -73,7 +75,7 @@ namespace API.Services
         {
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, filename));
             return filename;
         }
         catch (Exception e)

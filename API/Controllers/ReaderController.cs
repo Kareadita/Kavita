@@ -97,7 +97,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
@@ -125,7 +125,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumes(markReadDto.SeriesId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
@@ -267,7 +267,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
             foreach (var volume in volumes)
             {
                 _readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
@@ -294,7 +294,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
             foreach (var volume in volumes)
             {
                 _readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters);

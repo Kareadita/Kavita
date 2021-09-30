@@ -11,9 +11,8 @@ namespace API.Interfaces.Services
         /// cover images if forceUpdate is true.
         /// </summary>
         /// <param name="libraryId">Library to scan against</param>
-        /// <param name="forceUpdate">Force overwriting for cover images</param>
-        Task ScanLibrary(int libraryId, bool forceUpdate);
+        Task ScanLibrary(int libraryId);
         Task ScanLibraries();
-        Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token);
+        Task ScanSeries(int libraryId, int seriesId, CancellationToken token);
     }
 }

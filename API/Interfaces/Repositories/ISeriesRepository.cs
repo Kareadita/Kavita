@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
@@ -11,12 +12,10 @@ namespace API.Interfaces.Repositories
 {
     public interface ISeriesRepository
     {
-        void Add(Series series);
+        void Attach(Series series);
         void Update(Series series);
-        Task<Series> GetSeriesByNameAsync(string name);
+        void Remove(Series series);
         Task<bool> DoesSeriesNameExistInLibrary(string name);
-        Series GetSeriesByName(string name);
-
         /// <summary>
         /// Adds user information like progress, ratings, etc
         /// </summary>
@@ -25,7 +24,6 @@ namespace API.Interfaces.Repositories
         /// <param name="userParams"></param>
         /// <returns></returns>
         Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter);
-
         /// <summary>
         /// Does not add user information like progress, ratings, etc.
         /// </summary>
@@ -34,20 +32,8 @@ namespace API.Interfaces.Repositories
         /// <returns></returns>
         Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
         Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
-        Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
-        Task<IEnumerable<Volume>> GetVolumes(int seriesId);
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
-        Task<Volume> GetVolumeAsync(int volumeId);
-        Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
-        /// <summary>
-        /// A fast lookup of just the volume information with no tracking.
-        /// </summary>
-        /// <param name="volumeId"></param>
-        /// <returns></returns>
-        Task<VolumeDto> GetVolumeDtoAsync(int volumeId);
-        Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
         Task<bool> DeleteSeriesAsync(int seriesId);
-        Task<Volume> GetVolumeByIdAsync(int volumeId);
         Task<Series> GetSeriesByIdAsync(int seriesId);
         Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
         Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
@@ -62,12 +48,15 @@ namespace API.Interfaces.Repositories
 
         Task<string> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter);
-        Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
+        Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter); // NOTE: Probably put this in LibraryRepo
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
         Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
         Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
         Task<IList<string>> GetAllCoverImagesAsync();
         Task<IEnumerable<string>> GetLockedCoverImagesAsync();
+        Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
+        Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
+        Task<Chunk> GetChunkInfo(int libraryId = 0);
     }
 }

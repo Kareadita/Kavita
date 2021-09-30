@@ -148,7 +148,7 @@ namespace API.Controllers
                     chapter.CoverImage = filePath;
                     chapter.CoverImageLocked = true;
                     _unitOfWork.ChapterRepository.Update(chapter);
-                    var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+                    var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
                     volume.CoverImage = chapter.CoverImage;
                     _unitOfWork.VolumeRepository.Update(volume);
                 }
@@ -185,7 +185,7 @@ namespace API.Controllers
                 chapter.CoverImage = string.Empty;
                 chapter.CoverImageLocked = false;
                 _unitOfWork.ChapterRepository.Update(chapter);
-                var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(chapter.VolumeId);
+                var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
                 volume.CoverImage = chapter.CoverImage;
                 _unitOfWork.VolumeRepository.Update(volume);
                 var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);

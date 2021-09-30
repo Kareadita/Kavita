@@ -97,14 +97,14 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId));
+            return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId));
         }
 
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, userId));
+            return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId));
         }
 
         [HttpGet("chapter")]
@@ -217,7 +217,7 @@ namespace API.Controllers
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
             return Ok();
         }
 

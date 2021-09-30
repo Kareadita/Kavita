@@ -467,7 +467,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
             var feed = CreateFeed(series.Name + " - Volumes", $"{apiKey}/series/{series.Id}", apiKey);
             feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
@@ -486,7 +486,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
             var chapters =
                 (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                     _chapterSortComparer);
@@ -517,7 +517,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 

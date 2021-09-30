@@ -393,7 +393,7 @@ namespace API.Services
         /// <returns></returns>
         public string GetCoverImage(string fileFilePath, string fileName)
         {
-            if (!IsValidFile(fileFilePath)) return String.Empty;
+            if (!IsValidFile(fileFilePath)) return string.Empty;
 
             if (Parser.Parser.IsPdf(fileFilePath))
             {
@@ -411,8 +411,8 @@ namespace API.Services
                                         ?? epubBook.Content.Images.Values.FirstOrDefault();
 
                 if (coverImageContent == null) return string.Empty;
+                using var stream = coverImageContent.GetContentStream();
 
-                using var stream = StreamManager.GetStream("BookService.GetCoverImage", coverImageContent.ReadContent());
                 return ImageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)

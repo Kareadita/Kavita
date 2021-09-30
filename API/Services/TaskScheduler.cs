@@ -119,7 +119,7 @@ namespace API.Services
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
+            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
             // When we do a scan, force cache to re-unpack in case page numbers change
             BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
         }
@@ -141,7 +141,7 @@ namespace API.Services
             BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(tempDirectory));
         }
 
-        public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
+        public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)
         {
             _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
             BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
@@ -150,7 +150,7 @@ namespace API.Services
         public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, forceUpdate, CancellationToken.None));
+            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, CancellationToken.None));
         }
 
         public void BackupDatabase()

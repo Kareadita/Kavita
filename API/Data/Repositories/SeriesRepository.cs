@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
+using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -26,9 +27,9 @@ namespace API.Data.Repositories
             _mapper = mapper;
         }
 
-        public void Add(Series series)
+        public void Attach(Series series)
         {
-            _context.Series.Add(series);
+            _context.Series.Attach(series);
         }
 
         public void Update(Series series)
@@ -36,19 +37,9 @@ namespace API.Data.Repositories
             _context.Entry(series).State = EntityState.Modified;
         }
 
-        public async Task<bool> SaveAllAsync()
+        public void Remove(Series series)
         {
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        public bool SaveAll()
-        {
-            return _context.SaveChanges() > 0;
-        }
-
-        public async Task<Series> GetSeriesByNameAsync(string name)
-        {
-            return await _context.Series.SingleOrDefaultAsync(x => x.Name == name);
+            _context.Series.Remove(series);
         }
 
         public async Task<bool> DoesSeriesNameExistInLibrary(string name)
@@ -64,17 +55,49 @@ namespace API.Data.Repositories
                 .CountAsync() > 1;
         }
 
-        public Series GetSeriesByName(string name)
-        {
-            return _context.Series.SingleOrDefault(x => x.Name == name);
-        }
-
         public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
         {
             return await _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .OrderBy(s => s.SortName)
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Used for <see cref="ScannerService"/> to
+        /// </summary>
+        /// <param name="libraryId"></param>
+        /// <returns></returns>
+        public async Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams)
+        {
+            var query = _context.Series
+                .Where(s => s.LibraryId == libraryId)
+                .Include(s => s.Metadata)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .AsSplitQuery()
+                .OrderBy(s => s.SortName);
+
+            return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        }
+
+        /// <summary>
+        /// This is a heavy call. Returns all entities down to Files and Library and Series Metadata.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        public async Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId)
+        {
+            return await _context.Series
+                .Where(s => s.Id == seriesId)
+                .Include(s => s.Metadata)
+                .Include(s => s.Library)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.Files)
+                .AsSplitQuery()
+                .SingleOrDefaultAsync();
         }
 
         public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
@@ -103,41 +126,12 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId)
-        {
-            var volumes =  await _context.Volume
-                .Where(vol => vol.SeriesId == seriesId)
-                .Include(vol => vol.Chapters)
-                .OrderBy(volume => volume.Number)
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking()
-                .ToListAsync();
-
-            await AddVolumeModifiers(userId, volumes);
-            SortSpecialChapters(volumes);
-
-            return volumes;
-        }
-
-        private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
-        {
-            var sorter = new NaturalSortComparer();
-            foreach (var v in volumes.Where(vDto => vDto.Number == 0))
-            {
-                v.Chapters = v.Chapters.OrderBy(x => x.Range, sorter).ToList();
-            }
-        }
 
 
-        public async Task<IEnumerable<Volume>> GetVolumes(int seriesId)
-        {
-            return await _context.Volume
-                .Where(vol => vol.SeriesId == seriesId)
-                .Include(vol => vol.Chapters)
-                .ThenInclude(c => c.Files)
-                .OrderBy(vol => vol.Number)
-                .ToListAsync();
-        }
+
+
+
+
 
         public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId)
         {
@@ -151,55 +145,8 @@ namespace API.Data.Repositories
             return seriesList[0];
         }
 
-        public async Task<Volume> GetVolumeAsync(int volumeId)
-        {
-            return await _context.Volume
-                .Include(vol => vol.Chapters)
-                .ThenInclude(c => c.Files)
-                .SingleOrDefaultAsync(vol => vol.Id == volumeId);
-        }
 
-        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId)
-        {
-            return await _context.Volume
-                .Where(vol => vol.Id == volumeId)
-                .AsNoTracking()
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-                .SingleAsync();
 
-        }
-
-        public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
-        {
-            var volume = await _context.Volume
-                .Where(vol => vol.Id == volumeId)
-                .Include(vol => vol.Chapters)
-                .ThenInclude(c => c.Files)
-                .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-                .SingleAsync(vol => vol.Id == volumeId);
-
-            var volumeList = new List<VolumeDto>() {volume};
-            await AddVolumeModifiers(userId, volumeList);
-
-            return volumeList[0];
-        }
-
-        /// <summary>
-        /// Returns all volumes that contain a seriesId in passed array.
-        /// </summary>
-        /// <param name="seriesIds"></param>
-        /// <returns></returns>
-        public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false)
-        {
-            var query = _context.Volume
-                .Where(v => seriesIds.Contains(v.SeriesId));
-
-            if (includeChapters)
-            {
-                query = query.Include(v => v.Chapters);
-            }
-            return await query.ToListAsync();
-        }
 
         public async Task<bool> DeleteSeriesAsync(int seriesId)
         {
@@ -209,11 +156,12 @@ namespace API.Data.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<Volume> GetVolumeByIdAsync(int volumeId)
-        {
-            return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
-        }
 
+        /// <summary>
+        /// Returns Volumes, Metadata, and Collection Tags
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         public async Task<Series> GetSeriesByIdAsync(int seriesId)
         {
             return await _context.Series
@@ -244,7 +192,7 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// This returns a list of tuples<chapterId, seriesId> back for each series id passed
+        /// This returns a dictonary mapping seriesId -> list of chapters back for each series id passed
         /// </summary>
         /// <param name="seriesIds"></param>
         /// <returns></returns>
@@ -301,24 +249,7 @@ namespace API.Data.Repositories
                 .SingleOrDefaultAsync();
         }
 
-        private async Task AddVolumeModifiers(int userId, IReadOnlyCollection<VolumeDto> volumes)
-        {
-            var volIds = volumes.Select(s => s.Id);
-            var userProgress = await _context.AppUserProgresses
-                .Where(p => p.AppUserId == userId && volIds.Contains(p.VolumeId))
-                .AsNoTracking()
-                .ToListAsync();
 
-            foreach (var v in volumes)
-            {
-                foreach (var c in v.Chapters)
-                {
-                    c.PagesRead = userProgress.Where(p => p.ChapterId == c.Id).Sum(p => p.PagesRead);
-                }
-
-                v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
-            }
-        }
 
         /// <summary>
         /// Returns a list of Series that were added, ordered by Created desc
@@ -496,6 +427,64 @@ namespace API.Data.Repositories
                 .Select(s => s.CoverImage)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Returns the number of series for a given library (or all libraries if libraryId is 0)
+        /// </summary>
+        /// <param name="libraryId">Defaults to 0, library to restrict count to</param>
+        /// <returns></returns>
+        private async Task<int> GetSeriesCount(int libraryId = 0)
+        {
+            if (libraryId > 0)
+            {
+                return await _context.Series
+                    .Where(s => s.LibraryId == libraryId)
+                    .CountAsync();
+            }
+            return await _context.Series.CountAsync();
+        }
+
+        /// <summary>
+        /// Returns the number of series that should be processed in parallel to optimize speed and memory. Minimum of 50
+        /// </summary>
+        /// <param name="libraryId">Defaults to 0 meaning no library</param>
+        /// <returns></returns>
+        private async Task<Tuple<int, int>> GetChunkSize(int libraryId = 0)
+        {
+            // TODO: Think about making this bigger depending on number of files a user has in said library
+            // and number of cores and amount of memory. We can then make an optimal choice
+            var totalSeries = await GetSeriesCount(libraryId);
+            var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+
+            if (totalSeries < procCount * 2 || totalSeries < 50)
+            {
+                return new Tuple<int, int>(totalSeries, totalSeries);
+            }
+
+
+            return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
+        }
+
+        public async Task<Chunk> GetChunkInfo(int libraryId = 0)
+        {
+            var (totalSeries, chunkSize) = await GetChunkSize(libraryId);
+
+            if (totalSeries == 0) return new Chunk()
+            {
+                TotalChunks = 0,
+                TotalSize = 0,
+                ChunkSize = 0
+            };
+
+            var totalChunks = Math.Max((int) Math.Ceiling((totalSeries * 1.0) / chunkSize), 1);
+
+            return new Chunk()
+            {
+                TotalSize = totalSeries,
+                ChunkSize = chunkSize,
+                TotalChunks = totalChunks
+            };
         }
     }
 }

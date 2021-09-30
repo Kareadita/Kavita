@@ -13,10 +13,8 @@ using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using Microsoft.IO;
 using SharpCompress.Archives;
 using SharpCompress.Common;
-using Image = NetVips.Image;
 
 namespace API.Services
 {
@@ -28,14 +26,12 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
-        private readonly NaturalSortComparer _comparer;
         private const string ComicInfoFilename = "comicinfo";
 
         public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
         {
             _logger = logger;
             _directoryService = directoryService;
-            _comparer = new NaturalSortComparer();
         }
 
         /// <summary>
@@ -81,13 +77,11 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
-                        using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                        using var archive = ZipFile.OpenRead(archivePath);
                         return archive.Entries.Count(e => !Parser.Parser.HasBlacklistedFolderInPath(e.FullName) && Parser.Parser.IsImage(e.FullName));
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         return archive.Entries.Count(entry => !entry.IsDirectory &&
                                                               !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
@@ -130,7 +124,7 @@ namespace API.Services
         /// <returns>Entry name of match, null if no match</returns>
         public string FirstFileEntry(IEnumerable<string> entryFullNames)
         {
-            var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
+            var result = entryFullNames.OrderBy(Path.GetFileName, new NaturalSortComparer())
                 .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
                                      && Parser.Parser.IsImage(x)
                                      && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
@@ -160,7 +154,6 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
@@ -172,7 +165,6 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
@@ -316,7 +308,6 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogTrace("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
                                                                          && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
@@ -332,7 +323,6 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogTrace("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
@@ -410,14 +400,12 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         ExtractArchiveEntries(archive, extractPath);
                         break;
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)

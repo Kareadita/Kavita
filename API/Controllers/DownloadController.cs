@@ -63,7 +63,7 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(volumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
@@ -92,7 +92,7 @@ namespace API.Controllers
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeByIdAsync(chapter.VolumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {

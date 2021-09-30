@@ -210,7 +210,7 @@ namespace API.Interfaces.Services
         /// <returns>-1 if nothing can be found</returns>
         public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
         {
-            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+            var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
             var currentVolume = volumes.Single(v => v.Id == volumeId);
             var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
@@ -262,7 +262,7 @@ namespace API.Interfaces.Services
         /// <returns>-1 if nothing can be found</returns>
         public async Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
         {
-            var volumes = (await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId)).Reverse().ToList();
+            var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).Reverse().ToList();
             var currentVolume = volumes.Single(v => v.Id == volumeId);
             var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
