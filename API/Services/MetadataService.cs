@@ -200,15 +200,17 @@ namespace API.Services
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
-            var sw = Stopwatch.StartNew();
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
             var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
+            var stopwatch = Stopwatch.StartNew();
+            var totalTime = 0L;
 
             for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
             {
-                var stopwatch = Stopwatch.StartNew();
+                totalTime += stopwatch.ElapsedMilliseconds;
+                stopwatch.Restart();
                 _logger.LogDebug($"[MetadataService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
                 var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
                     new UserParams()
@@ -248,7 +250,7 @@ namespace API.Services
                 }
             }
 
-            _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, sw.ElapsedMilliseconds);
+            _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
         }
 
 

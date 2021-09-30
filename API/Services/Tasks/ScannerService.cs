@@ -244,11 +244,13 @@ namespace API.Services.Tasks
           // Library contains no Series, so we need to fetch series in groups of ChunkSize
           var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
           var stopwatch = Stopwatch.StartNew();
+          var totalTime = 0L;
 
           // Update existing series
           _logger.LogDebug("[ScannerService] Updating existing series");
           for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
           {
+              totalTime += stopwatch.ElapsedMilliseconds;
               stopwatch.Restart();
               _logger.LogDebug($"[ScannerService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
               var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
@@ -282,7 +284,7 @@ namespace API.Services.Tasks
               await _unitOfWork.CommitAsync();
               _logger.LogInformation(
                   "[ScannerService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                  chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+                  chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, totalTime, library.Name);
 
               // Emit any series removed
               foreach (var missing in missingSeries)
