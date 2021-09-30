@@ -245,6 +245,8 @@ namespace API.Services.Tasks
           var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
           var stopwatch = Stopwatch.StartNew();
 
+          // Update existing series
+          _logger.LogDebug("[ScannerService] Updating existing series");
           for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
           {
               stopwatch.Restart();
@@ -266,10 +268,10 @@ namespace API.Services.Tasks
               var cleanedSeries = RemoveMissingSeries(nonLibrarySeries, missingSeries, out var removeCount);
               if (removeCount > 0)
               {
-                  _logger.LogInformation("Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
+                  _logger.LogInformation("[ScannerService] Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
                   foreach (var s in missingSeries)
                   {
-                      _logger.LogDebug("Removed {SeriesName} ({Format})", s.Name, s.Format);
+                      _logger.LogDebug("[ScannerService] Removed {SeriesName} ({Format})", s.Name, s.Format);
                   }
               }
 
@@ -279,7 +281,7 @@ namespace API.Services.Tasks
 
               await _unitOfWork.CommitAsync();
               _logger.LogInformation(
-                  "Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                  "[ScannerService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                   chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
 
               // Emit any series removed
@@ -291,6 +293,7 @@ namespace API.Services.Tasks
 
 
           // Add new series that have parsedInfos
+          _logger.LogDebug("[ScannerService] Adding new series");
           var newSeries = new List<Series>();
           var allSeries = (await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id)).ToList();
           foreach (var (key, infos) in parsedSeries)
@@ -305,11 +308,11 @@ namespace API.Services.Tasks
               }
               catch (Exception e)
               {
-                  _logger.LogCritical(e, "There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it. This will be skipped", key.NormalizedName);
+                  _logger.LogCritical(e, "[ScannerService] There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it. This will be skipped", key.NormalizedName);
                   var duplicateSeries = allSeries.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
                   foreach (var series in duplicateSeries)
                   {
-                      _logger.LogCritical("Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
+                      _logger.LogCritical("[ScannerService] Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
                   }
 
                   continue;
@@ -322,11 +325,13 @@ namespace API.Services.Tasks
               newSeries.Add(existingSeries);
           }
 
+          // TODO: BUG: This is throwing UNIQUE constraint failed: Series.Name, Series.NormalizedName, Series.LocalizedName, Series.LibraryId, Series.Format
+          // Either the series already exists or there is a deadlock on DB
           foreach(var series in newSeries)
           {
               try
               {
-                  _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+                  _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
                   UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
                   series.Pages = series.Volumes.Sum(v => v.Pages);
                   series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
@@ -334,7 +339,7 @@ namespace API.Services.Tasks
                   if (await _unitOfWork.CommitAsync())
                   {
                       _logger.LogInformation(
-                          "Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                          "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                           newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
 
                       // Inform UI of new series added
@@ -344,12 +349,12 @@ namespace API.Services.Tasks
                   {
                       // This is probably not needed. Better to catch the exception.
                       _logger.LogCritical(
-                          "There was a critical error that resulted in a failed scan. Please check logs and rescan");
+                          "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
                   }
               }
               catch (Exception ex)
               {
-                  _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+                  _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
               }
           }
        }
@@ -358,7 +363,7 @@ namespace API.Services.Tasks
        {
            try
            {
-               _logger.LogInformation("Processing series {SeriesName}", series.OriginalName);
+               _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
                var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
                UpdateVolumes(series, parsedInfos);
@@ -374,7 +379,7 @@ namespace API.Services.Tasks
            }
            catch (Exception ex)
            {
-               _logger.LogError(ex, "There was an exception updating volumes for {SeriesName}", series.Name);
+               _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
            }
        }
 
@@ -446,7 +451,7 @@ namespace API.Services.Tasks
           var startingVolumeCount = series.Volumes.Count;
           // Add new volumes and update chapters per volume
           var distinctVolumes = parsedInfos.DistinctVolumes();
-          _logger.LogDebug("Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
+          _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
           foreach (var volumeNumber in distinctVolumes)
           {
              var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
@@ -457,7 +462,7 @@ namespace API.Services.Tasks
                 _unitOfWork.VolumeRepository.Add(volume);
              }
 
-             _logger.LogDebug("Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
+             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
              var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
              UpdateChapters(volume, infos);
              volume.Pages = volume.Chapters.Sum(c => c.Pages);
@@ -467,7 +472,7 @@ namespace API.Services.Tasks
           var nonDeletedVolumes = series.Volumes.Where(v => parsedInfos.Select(p => p.Volumes).Contains(v.Name)).ToList();
           if (series.Volumes.Count != nonDeletedVolumes.Count)
           {
-             _logger.LogDebug("Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
+             _logger.LogDebug("[ScannerService] Removed {Count} volumes from {SeriesName} where parsed infos were not mapping with volume name",
                 (series.Volumes.Count - nonDeletedVolumes.Count), series.Name);
              var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
              foreach (var volume in deletedVolumes)
@@ -476,17 +481,17 @@ namespace API.Services.Tasks
                  if (!string.IsNullOrEmpty(file) && File.Exists(file))
                  {
                      _logger.LogError(
-                         "Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
+                         "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
                          file);
                  }
 
-                 _logger.LogDebug("Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
+                 _logger.LogDebug("[ScannerService] Removed {SeriesName} - Volume {Volume}: {File}", series.Name, volume.Name, file);
              }
 
              series.Volumes = nonDeletedVolumes;
           }
 
-          _logger.LogDebug("Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
+          _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
              series.Name, startingVolumeCount, series.Volumes.Count);
        }
 
@@ -516,7 +521,7 @@ namespace API.Services.Tasks
              if (chapter == null)
              {
                 _logger.LogDebug(
-                   "Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
+                   "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 volume.Chapters.Add(DbFactory.Chapter(info));
              }
              else
@@ -553,7 +558,7 @@ namespace API.Services.Tasks
           {
              if (existingChapter.Files.Count == 0 || !parsedInfos.HasInfo(existingChapter))
              {
-                _logger.LogDebug("Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
+                _logger.LogDebug("[ScannerService] Removed chapter {Chapter} for Volume {VolumeNumber} on {SeriesName}", existingChapter.Range, volume.Name, parsedInfos[0].Series);
                 volume.Chapters.Remove(existingChapter);
              }
              else
