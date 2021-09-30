@@ -4,14 +4,12 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { ToastrService } from 'ngx-toastr';
 import { ReplaySubject } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanLibraryEvent } from '../_models/events/scan-library-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
-import { AccountService } from './account.service';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -44,15 +42,13 @@ export class MessageHubService {
 
   isAdmin: boolean = false;
 
-  constructor(private modalService: NgbModal, private toastr: ToastrService, private accountService: AccountService) {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.isAdmin = this.accountService.hasAdminRole(user);
-      }
-    });
+  constructor(private modalService: NgbModal, private toastr: ToastrService) {
+    
   }
 
-  createHubConnection(user: User) {
+  createHubConnection(user: User, isAdmin: boolean) {
+    this.isAdmin = isAdmin;
+
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
         accessTokenFactory: () => user.token
@@ -82,9 +78,6 @@ export class MessageHubService {
         payload: resp.body
       });
       this.scanLibrary.emit(resp.body);
-      // if ((resp.body as ScanLibraryEvent).stage === 'complete') {
-      //   this.toastr.
-      // }
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {

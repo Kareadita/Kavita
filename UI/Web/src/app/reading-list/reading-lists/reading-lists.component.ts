@@ -41,7 +41,6 @@ export class ReadingListsComponent implements OnInit {
   }
 
   performAction(action: ActionItem<any>, readingList: ReadingList) {
-    // TODO: Try to move performAction into the actionables component. (have default handler in the component, allow for overridding to pass additional context)
     if (typeof action.callback === 'function') {
       action.callback(action.action, readingList);
     }

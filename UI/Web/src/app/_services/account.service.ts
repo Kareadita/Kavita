@@ -51,7 +51,7 @@ export class AccountService implements OnDestroy {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
-          this.messageHub.createHubConnection(user);
+          this.messageHub.createHubConnection(user, this.hasAdminRole(user));
           this.presenceHub.createHubConnection(user);
         }
       }),
