@@ -29,15 +29,14 @@ namespace API.Benchmark
             Console.WriteLine($"Performing benchmark on {_names.Count} series");
         }
 
-        private static string NormalizeOriginal(string name)
+        private static void NormalizeOriginal(string name)
         {
-            return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
+            Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
         }
 
-        private static string NormalizeNew(string name)
+        private static void NormalizeNew(string name)
         {
-            return NormalizeRegex.Replace(name, string.Empty).ToLower();
-            //return Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
+            NormalizeRegex.Replace(name, string.Empty).ToLower();
         }
 
 
@@ -67,6 +66,7 @@ namespace API.Benchmark
             {
                 if ((name + ".epub").ToLower() == ".epub")
                 {
+                    /* No Operation */
                 }
             }
         }
@@ -79,6 +79,7 @@ namespace API.Benchmark
 
                 if (IsEpub.IsMatch((name + ".epub")))
                 {
+                    /* No Operation */
                 }
             }
         }

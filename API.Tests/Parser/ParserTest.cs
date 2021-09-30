@@ -54,7 +54,7 @@ namespace API.Tests.Parser
         // public void ReplaceStyleUrlTest(string input, string expected)
         // {
         //     var replacementStr = "PaytoneOne.ttf";
-        //     // TODO: Use Match to validate since replace is weird
+        //     // Use Match to validate since replace is weird
         //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
         //     var match = FontSrcUrlRegex.Match(input);
         //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
