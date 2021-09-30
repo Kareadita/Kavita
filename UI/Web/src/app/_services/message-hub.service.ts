@@ -3,20 +3,21 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { ToastrService } from 'ngx-toastr';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
-import { ScanLibraryEvent } from '../_models/events/scan-library-event';
+import { ScanLibraryProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
-  ScanLibrary = 'ScanLibrary',
   RefreshMetadata = 'RefreshMetadata',
-  SeriesAdded = 'SeriesAdded'
+  SeriesAdded = 'SeriesAdded',
+  ScanLibraryProgress = 'ScanLibraryProgress',
+  OnlineUsers = 'OnlineUsers'
 }
 
 export interface Message<T> {
@@ -35,8 +36,11 @@ export class MessageHubService {
   private messagesSource = new ReplaySubject<Message<any>>(1);
   public messages$ = this.messagesSource.asObservable();
 
+  private onlineUsersSource = new BehaviorSubject<string[]>([]);
+  onlineUsers$ = this.onlineUsersSource.asObservable();
+
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
-  public scanLibrary: EventEmitter<ScanLibraryEvent> = new EventEmitter<ScanLibraryEvent>();
+  public scanLibrary: EventEmitter<ScanLibraryProgressEvent> = new EventEmitter<ScanLibraryProgressEvent>();
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
   public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 
@@ -60,9 +64,10 @@ export class MessageHubService {
     .start()
     .catch(err => console.error(err));
 
-    this.hubConnection.on('receiveMessage', body => {
-      //console.log('[Hub] Body: ', body);
+    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
+      this.onlineUsersSource.next(usernames);
     });
+
 
     this.hubConnection.on(EVENTS.ScanSeries, resp => {
       this.messagesSource.next({
@@ -72,9 +77,9 @@ export class MessageHubService {
       this.scanSeries.emit(resp.body);
     });
 
-    this.hubConnection.on(EVENTS.ScanLibrary, resp => {
+    this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
       this.messagesSource.next({
-        event: EVENTS.ScanLibrary,
+        event: EVENTS.ScanLibraryProgress,
         payload: resp.body
       });
       this.scanLibrary.emit(resp.body);

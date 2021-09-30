@@ -8,7 +8,6 @@ import { User } from '../_models/user';
 import * as Sentry from "@sentry/angular";
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
-import { PresenceHubService } from './presence-hub.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +25,7 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService, private presenceHub: PresenceHubService) {}
+    private messageHub: MessageHubService) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -52,7 +51,6 @@ export class AccountService implements OnDestroy {
         if (user) {
           this.setCurrentUser(user);
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
-          this.presenceHub.createHubConnection(user);
         }
       }),
       takeUntil(this.onDestroy)
@@ -85,7 +83,6 @@ export class AccountService implements OnDestroy {
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
     this.messageHub.stopHubConnection();
-    this.presenceHub.stopHubConnection();
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {

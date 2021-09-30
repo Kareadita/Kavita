@@ -134,6 +134,7 @@ namespace API.Services.Tasks
 
         private async Task SendEvent(UpdateNotificationDto update, IReadOnlyList<string> admins)
         {
+            // TODO: Refactor sending to admins to MessageHub
             var connections = new List<string>();
             foreach (var admin in admins)
             {

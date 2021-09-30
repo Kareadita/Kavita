@@ -4,8 +4,10 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { ScanLibraryProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
 import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
+import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
@@ -22,13 +24,21 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
+  scanInProgress: {[key: number]: boolean} = {};
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, private toastr: ToastrService, private confirmService: ConfirmService) { }
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, 
+    private toastr: ToastrService, private confirmService: ConfirmService,
+    private hubService: MessageHubService) { }
 
   ngOnInit(): void {
     this.getLibraries();
+
+    this.hubService.scanLibrary.subscribe((event: ScanLibraryProgressEvent) => {
+      
+      this.scanInProgress[event.libraryId] = event.progress !== 100;
+    });
   }
 
   ngOnDestroy() {

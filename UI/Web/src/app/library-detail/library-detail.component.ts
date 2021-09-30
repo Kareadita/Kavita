@@ -1,11 +1,10 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, takeWhile } from 'rxjs/operators';
+import { debounceTime, take, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
@@ -81,8 +80,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000)).subscribe((event: SeriesAddedEvent) => {
       this.loadPage();
     });
   }

@@ -59,6 +59,22 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, int progress, string seriesName)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.ScanLibrary,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                    SeriesName = seriesName
+                }
+            };
+        }
+
+
+
         public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
         {
             return new SignalRMessage()
