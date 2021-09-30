@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
 
     if (user) {
       this.navService.setDarkMode(user.preferences.siteDarkMode);
-      this.messageHub.createHubConnection(user);
+      this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.presenceHub.createHubConnection(user);
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
     } else {
