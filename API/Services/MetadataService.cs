@@ -185,11 +185,9 @@ namespace API.Services
                 if (!string.IsNullOrEmpty(series.Summary))
                 {
                     series.Summary = summary;
-                    //firstFile.LastModified = DateTime.Now; // TODO: Validate this should be DateTime.Now or it should be File.LastWriteTime() like in Scanner. Or is it needed here at all?
                     return true;
                 }
             }
-            firstFile.LastModified = DateTime.Now; // NOTE: Should I put this here as well since it might not have actually been parsed?
             return false;
         }
 
@@ -211,7 +209,7 @@ namespace API.Services
             for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
             {
                 var stopwatch = Stopwatch.StartNew();
-                _logger.LogDebug($"[MetadataService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize}");
+                _logger.LogDebug($"[MetadataService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
                 var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
                     new UserParams()
                     {
@@ -219,32 +217,9 @@ namespace API.Services
                         PageSize = chunkInfo.ChunkSize
                     });
 
-                // foreach (var series in nonLibrarySeries)
-                // {
-                //     var volumeUpdated = false;
-                //     foreach (var volume in series.Volumes)
-                //     {
-                //         var chapterUpdated = false;
-                //         foreach (var chapter in volume.Chapters)
-                //         {
-                //             chapterUpdated = UpdateMetadata(chapter, forceUpdate);
-                //         }
-                //
-                //         volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
-                //     }
-                //
-                //     UpdateMetadata(series, volumeUpdated || forceUpdate);
-                //
-                //     // if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-                //     // {
-                //     //     _logger.LogDebug("[MetadataService] Updated metadata for Series {SeriesName} in {ElapsedMilliseconds} milliseconds",
-                //     //         series.Name, stopwatch.ElapsedMilliseconds);
-                //     //     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
-                //     // }
-                // }
-
                 Parallel.ForEach(nonLibrarySeries, series =>
                 {
+                    _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
                     var volumeUpdated = false;
                     foreach (var volume in series.Volumes)
                     {

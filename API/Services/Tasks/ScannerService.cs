@@ -325,13 +325,11 @@ namespace API.Services.Tasks
               newSeries.Add(existingSeries);
           }
 
-          // TODO: BUG: This is throwing UNIQUE constraint failed: Series.Name, Series.NormalizedName, Series.LocalizedName, Series.LibraryId, Series.Format
-          // Either the series already exists or there is a deadlock on DB
           foreach(var series in newSeries)
           {
               try
               {
-                  _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
+                  _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
                   UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
                   series.Pages = series.Volumes.Sum(v => v.Pages);
                   series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
