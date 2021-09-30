@@ -4,12 +4,14 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '@sentry/angular';
 import { ToastrService } from 'ngx-toastr';
 import { ReplaySubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanLibraryEvent } from '../_models/events/scan-library-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { AccountService } from './account.service';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -40,7 +42,15 @@ export class MessageHubService {
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
   public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 
-  constructor(private modalService: NgbModal, private toastr: ToastrService) { }
+  isAdmin: boolean = false;
+
+  constructor(private modalService: NgbModal, private toastr: ToastrService, private accountService: AccountService) {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.isAdmin = this.accountService.hasAdminRole(user);
+      }
+    });
+  }
 
   createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
@@ -83,7 +93,9 @@ export class MessageHubService {
         payload: resp.body
       });
       this.seriesAdded.emit(resp.body);
-      this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
+      if (this.isAdmin) {
+        this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
+      }
     });
 
     this.hubConnection.on(EVENTS.RefreshMetadata, resp => {

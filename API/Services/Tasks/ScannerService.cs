@@ -48,9 +48,8 @@ namespace API.Services.Tasks
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate, CancellationToken token)
+       public async Task ScanSeries(int libraryId, int seriesId, CancellationToken token)
        {
-           // TODO: We can remove forceUpdate. That will never be true. Only time we will ever force update is calling refresh metadata directly
            var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
@@ -75,7 +74,7 @@ namespace API.Services.Tasks
                if (!anyFilesExist)
                {
                    _unitOfWork.SeriesRepository.Remove(series);
-                   await CommitAndSend(libraryId, seriesId, forceUpdate, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+                   await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
                }
                else
                {
@@ -111,7 +110,7 @@ namespace API.Services.Tasks
            if (parsedSeries.Count == 0) return;
 
            UpdateSeries(series, parsedSeries);
-           await CommitAndSend(libraryId, seriesId, forceUpdate, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+           await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
        }
 
        private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
@@ -124,7 +123,7 @@ namespace API.Services.Tasks
            }
        }
 
-       private async Task CommitAndSend(int libraryId, int seriesId, bool forceUpdate, int totalFiles,
+       private async Task CommitAndSend(int libraryId, int seriesId, int totalFiles,
            Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds, CancellationToken token)
        {
            if (await _unitOfWork.CommitAsync())
@@ -134,7 +133,7 @@ namespace API.Services.Tasks
                    totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
 
                await CleanupDbEntities();
-               BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
+               BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, false));
                BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
                // Tell UI that this series is done
                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
@@ -157,7 +156,7 @@ namespace API.Services.Tasks
           var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
           foreach (var lib in libraries)
           {
-             await ScanLibrary(lib.Id, false);
+             await ScanLibrary(lib.Id);
           }
           _logger.LogInformation("Scan of All Libraries Finished");
        }
@@ -169,10 +168,9 @@ namespace API.Services.Tasks
        /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
        /// </summary>
        /// <param name="libraryId"></param>
-       /// <param name="forceUpdate"></param>
        [DisableConcurrentExecution(360)]
        [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-       public async Task ScanLibrary(int libraryId, bool forceUpdate)
+       public async Task ScanLibrary(int libraryId)
        {
            Library library;
            try
@@ -213,7 +211,7 @@ namespace API.Services.Tasks
 
            await CleanupAbandonedChapters();
 
-           BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+           BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibrary, MessageFactory.ScanLibraryEvent(libraryId, "complete"));
        }
 

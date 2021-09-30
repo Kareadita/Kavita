@@ -468,7 +468,6 @@ namespace API.Data.Repositories
 
         public async Task<Chunk> GetChunkInfo(int libraryId = 0)
         {
-            //var totalSeries = await GetSeriesCount(libraryId);
             var (totalSeries, chunkSize) = await GetChunkSize(libraryId);
 
             if (totalSeries == 0) return new Chunk()
