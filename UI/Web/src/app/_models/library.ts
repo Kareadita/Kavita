@@ -7,7 +7,7 @@ export enum LibraryType {
 export interface Library {
     id: number;
     name: string;
-    coverImage: string;
+    lastScanned: string;
     type: LibraryType;
     folders: string[];
 }

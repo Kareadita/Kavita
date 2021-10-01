@@ -59,7 +59,7 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, int progress, string seriesName)
+        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress, string seriesName)
         {
             return new SignalRMessage()
             {
