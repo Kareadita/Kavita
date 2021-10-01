@@ -59,7 +59,7 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, int progress, string seriesName)
+        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress, string seriesName)
         {
             return new SignalRMessage()
             {
@@ -97,5 +97,17 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage SeriesAddedToCollection(int tagId, int seriesId)
+        {
+            return new SignalRMessage
+            {
+                Name = SignalREvents.UpdateVersion,
+                Body = new
+                {
+                    TagId = tagId,
+                    SeriesId = seriesId
+                }
+            };
+        }
     }
 }

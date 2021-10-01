@@ -199,6 +199,7 @@ namespace API.Services.Tasks
 
            await UpdateLibrary(library, series);
 
+           library.LastScanned = DateTime.Now;
            _unitOfWork.LibraryRepository.Update(library);
            if (await _unitOfWork.CommitAsync())
            {
@@ -296,6 +297,9 @@ namespace API.Services.Tasks
               {
                   await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
               }
+
+              await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                  MessageFactory.ScanLibraryProgressEvent(library.Id, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize, string.Empty));
           }
 
 

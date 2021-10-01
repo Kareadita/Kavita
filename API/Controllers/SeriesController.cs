@@ -10,9 +10,11 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -22,12 +24,14 @@ namespace API.Controllers
         private readonly ILogger<SeriesController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<MessageHub> _messageHub;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+            _messageHub = messageHub;
         }
 
         [HttpPost]
@@ -296,6 +300,12 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    foreach (var tag in updateSeriesMetadataDto.Tags)
+                    {
+                        await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAddedToCollection,
+                            MessageFactory.SeriesAddedToCollection(tag.Id,
+                                updateSeriesMetadataDto.SeriesMetadata.SeriesId));
+                    }
                     return Ok("Successfully updated");
                 }
             }

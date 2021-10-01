@@ -237,8 +237,8 @@ namespace API.Data.Repositories
                     Libraries =  u.Libraries.Select(l => new LibraryDto
                     {
                         Name = l.Name,
-                        CoverImage = l.CoverImage,
                         Type = l.Type,
+                        LastScanned = l.LastScanned,
                         Folders = l.Folders.Select(x => x.Path).ToList()
                     }).ToList()
                 })
