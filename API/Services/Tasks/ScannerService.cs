@@ -299,7 +299,7 @@ namespace API.Services.Tasks
               }
 
               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-                  MessageFactory.ScanLibraryProgressEvent(library.Id, ((chunk + 1) * chunkInfo.ChunkSize) / chunkInfo.TotalSize, string.Empty));
+                  MessageFactory.ScanLibraryProgressEvent(library.Id, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize, string.Empty));
           }
 
 
