@@ -259,7 +259,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case(Action.IncognitoRead):
         if (volume.chapters != undefined && volume.chapters?.length >= 1) {
-          this.openChapter(volume.chapters[0], true);
+          this.openChapter(volume.chapters.sort(this.utilityService.sortChapters)[0], true);
         }
         break;
       default:
