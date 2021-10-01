@@ -42,6 +42,15 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label for="authentication" aria-describedby="authentication-info">Authentication</label>
+            <p class="accent" id="authentication-info">By disabling authentication, all non-admin users will be able to login by just their username. No password will be required to authenticate.</p>
+            <div class="form-check">
+                <input id="authentication" type="checkbox" aria-label="User Authentication" class="form-check-input" formControlName="enableAuthentication">
+                <label for="authentication" class="form-check-label">Enable Authentication</label>
+            </div>
+        </div>
+
         <h4>Reoccuring Tasks</h4>
         <div class="form-group">
             <label for="settings-tasks-scan">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { first } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
+import { SettingsService } from '../admin/settings.service';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
 import { NavService } from '../_services/nav.service';
@@ -17,12 +18,25 @@ export class UserLoginComponent implements OnInit {
   model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required])
+      password: new FormControl('', [Validators.required]) 
   });
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, private toastr: ToastrService, private navService: NavService) { }
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, 
+    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService) { }
 
   ngOnInit(): void {
+
+    this.settingsService.getAuthenticationEnabled().pipe(take(1)).subscribe((enabled: boolean) => {
+      console.log('authed: ', enabled);
+      const isAuthenticated: boolean = enabled;
+      // There is a bug where this is coming back as a string not a boolean.
+      if (isAuthenticated + '' === 'false') {
+        this.loginForm.get('password')?.setValidators([]);
+      }
+    })
+    
+
+
     // Validate that there are users so you can refresh to home. This is important for first installs
     this.validateAdmin();
   }

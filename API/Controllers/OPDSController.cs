@@ -170,7 +170,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);;
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
@@ -213,7 +213,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);;
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)

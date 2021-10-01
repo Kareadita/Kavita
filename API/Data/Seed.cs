@@ -49,6 +49,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
                 new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
+                new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
             };
 
             foreach (var defaultSetting in defaultSettings)

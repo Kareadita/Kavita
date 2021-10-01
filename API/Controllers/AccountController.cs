@@ -7,10 +7,10 @@ using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
 using API.Entities;
-using API.Errors;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
 using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
@@ -31,13 +31,14 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper)
+            IMapper mapper, IAccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,6 +46,7 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+            _accountService = accountService;
         }
 
         /// <summary>
@@ -61,30 +63,35 @@ namespace API.Controllers
             if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
                 return Unauthorized("You are not permitted to this operation.");
 
-            // Validate Password
-            foreach (var validator in _userManager.PasswordValidators)
+            // // Validate Password
+            // foreach (var validator in _userManager.PasswordValidators)
+            // {
+            //     var validationResult = await validator.ValidateAsync(_userManager, user, resetPasswordDto.Password);
+            //     if (!validationResult.Succeeded)
+            //     {
+            //         return BadRequest(
+            //             validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+            //     }
+            // }
+            //
+            // var result = await _userManager.RemovePasswordAsync(user);
+            // if (!result.Succeeded)
+            // {
+            //     _logger.LogError("Could not update password");
+            //     return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+            // }
+            //
+            //
+            // result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
+            // if (!result.Succeeded)
+            // {
+            //     _logger.LogError("Could not update password");
+            //     return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+            // }
+            var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
+            if (errors.Any())
             {
-                var validationResult = await validator.ValidateAsync(_userManager, user, resetPasswordDto.Password);
-                if (!validationResult.Succeeded)
-                {
-                    return BadRequest(
-                        validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-                }
-            }
-
-            var result = await _userManager.RemovePasswordAsync(user);
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Could not update password");
-                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            }
-
-
-            result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Could not update password");
-                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
+                return BadRequest(errors);
             }
 
             _logger.LogInformation("{User}'s Password has been reset", resetPasswordDto.UserName);
@@ -109,6 +116,13 @@ namespace API.Controllers
                 var user = _mapper.Map<AppUser>(registerDto);
                 user.UserPreferences ??= new AppUserPreferences();
                 user.ApiKey = HashUtil.ApiKey();
+
+                var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+                if (!settings.EnableAuthentication && !registerDto.IsAdmin)
+                {
+                    _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password.", registerDto.Username);
+                    registerDto.Password = AccountService.DefaultPassword;
+                }
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -165,6 +179,14 @@ namespace API.Controllers
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
             if (user == null) return Unauthorized("Invalid username");
+
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            if (!settings.EnableAuthentication && !isAdmin)
+            {
+                _logger.LogDebug("User {UserName} is logging in with authentication disabled", loginDto.Username);
+                loginDto.Password = AccountService.DefaultPassword;
+            }
 
             var result = await _signInManager
                 .CheckPasswordSignInAsync(user, loginDto.Password, false);

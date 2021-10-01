@@ -153,6 +153,16 @@ namespace API.Data.Repositories
             return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
         }
 
+        public async Task<IEnumerable<AppUser>> GetNonAdminUsersAsync()
+        {
+            return await _userManager.GetUsersInRoleAsync(PolicyConstants.PlebRole);
+        }
+
+        public async Task<bool> IsUserAdmin(AppUser user)
+        {
+            return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+        }
+
         public async Task<AppUserRating> GetUserRating(int seriesId, int userId)
         {
             return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)

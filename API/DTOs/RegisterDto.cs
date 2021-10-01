@@ -8,7 +8,7 @@ namespace API.DTOs
         public string Username { get; init; }
         [Required]
         [StringLength(32, MinimumLength = 6)]
-        public string Password { get; init; }
+        public string Password { get; set; }
         public bool IsAdmin { get; init; }
     }
 }
