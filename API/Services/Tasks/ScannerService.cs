@@ -185,6 +185,9 @@ namespace API.Services.Tasks
            }
 
            _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
+           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 0, string.Empty));
+
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
@@ -212,7 +215,8 @@ namespace API.Services.Tasks
            await CleanupAbandonedChapters();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
-           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibrary, MessageFactory.ScanLibraryEvent(libraryId, "complete"));
+           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 100, string.Empty));
        }
 
        /// <summary>
@@ -277,7 +281,10 @@ namespace API.Services.Tasks
 
               // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
               var librarySeries = cleanedSeries.ToList();
-              Parallel.ForEach(librarySeries, (series) => { UpdateSeries(series, parsedSeries); });
+              Parallel.ForEach(librarySeries, (series) =>
+              {
+                  UpdateSeries(series, parsedSeries);
+              });
 
               await _unitOfWork.CommitAsync();
               _logger.LogInformation(
