@@ -147,7 +147,6 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("hubs/messages");
-                //endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });

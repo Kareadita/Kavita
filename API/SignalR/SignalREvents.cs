@@ -8,7 +8,7 @@
         public const string ScanLibrary = "ScanLibrary";
         public const string SeriesAdded = "SeriesAdded";
         public const string SeriesRemoved = "SeriesRemoved";
-        public static string ScanLibraryProgress = "ScanLibraryProgress";
-        public static string OnlineUsers = "OnlineUsers";
+        public const string ScanLibraryProgress = "ScanLibraryProgress";
+        public const string OnlineUsers = "OnlineUsers";
     }
 }
