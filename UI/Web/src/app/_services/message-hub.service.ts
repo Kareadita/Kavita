@@ -17,7 +17,8 @@ export enum EVENTS {
   RefreshMetadata = 'RefreshMetadata',
   SeriesAdded = 'SeriesAdded',
   ScanLibraryProgress = 'ScanLibraryProgress',
-  OnlineUsers = 'OnlineUsers'
+  OnlineUsers = 'OnlineUsers',
+  SeriesAddedToCollection = 'SeriesAddedToCollection'
 }
 
 export interface Message<T> {
@@ -83,6 +84,13 @@ export class MessageHubService {
         payload: resp.body
       });
       this.scanLibrary.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAddedToCollection,
+        payload: resp.body
+      });
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {

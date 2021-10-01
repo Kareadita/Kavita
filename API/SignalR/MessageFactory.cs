@@ -97,5 +97,17 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage SeriesAddedToCollection(int tagId, int seriesId)
+        {
+            return new SignalRMessage
+            {
+                Name = SignalREvents.UpdateVersion,
+                Body = new
+                {
+                    TagId = tagId,
+                    SeriesId = seriesId
+                }
+            };
+        }
     }
 }

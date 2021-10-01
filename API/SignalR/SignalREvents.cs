@@ -10,5 +10,6 @@
         public const string SeriesRemoved = "SeriesRemoved";
         public const string ScanLibraryProgress = "ScanLibraryProgress";
         public const string OnlineUsers = "OnlineUsers";
+        public const string SeriesAddedToCollection = "SeriesAddedToCollection";
     }
 }
