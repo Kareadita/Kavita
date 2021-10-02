@@ -63,31 +63,6 @@ namespace API.Controllers
             if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
                 return Unauthorized("You are not permitted to this operation.");
 
-            // // Validate Password
-            // foreach (var validator in _userManager.PasswordValidators)
-            // {
-            //     var validationResult = await validator.ValidateAsync(_userManager, user, resetPasswordDto.Password);
-            //     if (!validationResult.Succeeded)
-            //     {
-            //         return BadRequest(
-            //             validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            //     }
-            // }
-            //
-            // var result = await _userManager.RemovePasswordAsync(user);
-            // if (!result.Succeeded)
-            // {
-            //     _logger.LogError("Could not update password");
-            //     return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            // }
-            //
-            //
-            // result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
-            // if (!result.Succeeded)
-            // {
-            //     _logger.LogError("Could not update password");
-            //     return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            // }
             var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
             if (errors.Any())
             {
