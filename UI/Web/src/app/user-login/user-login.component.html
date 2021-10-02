@@ -19,9 +19,9 @@
                 </span>
 
                 <div class="card-text" #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed[member]" (keyup.enter)="$event.stopPropagation()">
-                    <div class="form-group" style="display: none;">
+                    <div class="form-group" [ngStyle]="authDisabled ? {display: 'none'} : {}">
                         <label for="username--{{member}}">Username</label>
-                        <input class="form-control" formControlName="username" id="username--{{member}}" type="text" [readonly]="true">
+                        <input class="form-control" formControlName="username" id="username--{{member}}" type="text" [readonly]="authDisabled">
                     </div>
                     
                     <div class="form-group">
