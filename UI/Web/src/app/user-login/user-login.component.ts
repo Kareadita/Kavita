@@ -47,7 +47,6 @@ export class UserLoginComponent implements OnInit {
       this.memberNames = members;
       this.memberNames.forEach(name => this.isCollapsed[name] = true);
       this.firstTimeFlow = members.length === 0;
-      this.firstTimeFlow = true;
     });
   }
 
