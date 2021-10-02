@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize]
     public class UsersController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -39,6 +38,15 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
         }
 
+        [AllowAnonymous]
+        [HttpGet("names")]
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUserNames()
+        {
+            var members = await _unitOfWork.UserRepository.GetMembersAsync();
+            return Ok(members.Select(m => m.Username));
+        }
+
+        [Authorize]
         [HttpGet("has-reading-progress")]
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
         {
@@ -47,6 +55,7 @@ namespace API.Controllers
             return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
         }
 
+        [Authorize]
         [HttpGet("has-library-access")]
         public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
         {
@@ -54,6 +63,7 @@ namespace API.Controllers
             return Ok(libs.Any(x => x.Id == libraryId));
         }
 
+        [Authorize]
         [HttpPost("update-preferences")]
         public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
         {

@@ -26,7 +26,6 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDownloadService _downloadService;
         private readonly IDirectoryService _directoryService;
-        private readonly UserManager<AppUser> _userManager;
         private readonly ICacheService _cacheService;
         private readonly IReaderService _readerService;
 
@@ -41,13 +40,12 @@ namespace API.Controllers
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
-            IDirectoryService directoryService, UserManager<AppUser> userManager,
-            ICacheService cacheService, IReaderService readerService)
+            IDirectoryService directoryService, ICacheService cacheService,
+            IReaderService readerService)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
             _directoryService = directoryService;
-            _userManager = userManager;
             _cacheService = cacheService;
             _readerService = readerService;
 
@@ -170,7 +168,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
@@ -213,7 +211,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)

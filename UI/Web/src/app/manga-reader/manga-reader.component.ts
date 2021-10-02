@@ -325,7 +325,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       } else {
         // If no user, we can't render 
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/login');
       }
     });
 

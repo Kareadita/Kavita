@@ -131,7 +131,9 @@ export class MessageHubService {
   }
 
   stopHubConnection() {
-    this.hubConnection.stop().catch(err => console.error(err));
+    if (this.hubConnection) {
+      this.hubConnection.stop().catch(err => console.error(err));
+    }
   }
 
   sendMessage(methodName: string, body?: any) {
