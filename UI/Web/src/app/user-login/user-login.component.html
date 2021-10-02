@@ -1,28 +1,54 @@
-<div class="mx-auto login">
-    <div class="card p-3" style="width: 18rem;">
-        <div class="logo-container">
-            <img class="logo" src="assets/images/kavita-book-cropped.png" alt="Kavita logo"/>        
-            <h3 class="card-title text-center">Kavita</h3>
-        </div>
+<!--
+    We are going to have multiple titles of cards. Each card is a user. when we click on it, the card becomes centered and expands to show a login form. If authentication is disabled
+        then we just automatically login. 
+-->
 
-        <div class="card-text">
-            <form [formGroup]="loginForm" (ngSubmit)="login()">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input class="form-control" formControlName="username" id="username" type="text" autofocus>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input class="form-control" formControlName="password" id="password" type="password">
-                </div>
-                
-                <div class="float-right">
-                    <button class="btn btn-primary alt" type="submit">Login</button>
-                </div>
-                
-            </form>
-        </div>
-        
+<!-- <div class="mx-auto login" style="height: auto; min-height: auto;">
+    <div class="logo-container">
+        <img class="logo" src="assets/images/kavita-book-cropped.png" alt="Kavita logo"/>        
+        <h2 class="card-title text-center">Kavita</h2>
     </div>
+</div> -->
+<div class="spacer mt-4"></div>
+
+<div class="mx-auto login">
+
+    
+
+    <!-- IF First time flow, show register here -->
+
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">
+        <ng-container *ngFor="let member of memberNames">
+        
+            
+                <div class="col card p-3 m-3" style="width: 12rem;">
+                    <span (click)="select(member)">
+                        <div class="logo-container">
+                            <!-- <img class="logo" src="assets/images/kavita-book-cropped.png" alt="Kavita logo"/> -->
+                            <h3 class="card-title text-center">{{member | titlecase}}</h3>
+                        </div>
+                    </span>
+    
+                    <div class="card-text" #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed[member]">
+                        
+                            <div class="form-group">
+                                <label for="username--{{member}}">Username</label>
+                                <input class="form-control" formControlName="username" id="username--{{member}}" type="text" autofocus>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="password--{{member}}">Password</label>
+                                <input class="form-control" formControlName="password" id="password--{{member}}" type="password">
+                            </div>
+                            
+                            <div class="float-right">
+                                <button class="btn btn-primary alt" type="submit--{{member}}">Login</button>
+                            </div>
+                    </div>
+                </div>
+        </ng-container>
+        </div>
+    </form>
+
 </div>
