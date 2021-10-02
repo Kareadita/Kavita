@@ -16,6 +16,7 @@ export class AccountService implements OnDestroy {
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
+  public lastLoginKey = 'kavita-lastlogin';
   currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
@@ -70,6 +71,7 @@ export class AccountService implements OnDestroy {
       });
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
+      localStorage.setItem(this.lastLoginKey, user.username);
     }
 
     this.currentUserSource.next(user);

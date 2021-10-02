@@ -46,24 +46,43 @@ export class UserLoginComponent implements OnInit {
       this.authDisabled = enabled + '' === 'false';
       if (this.authDisabled) {
         this.loginForm.get('password')?.setValidators([]);
+
+        // This API is only useable on disabled authentication
+        this.memberService.getMemberNames().pipe(take(1)).subscribe(members => {
+          this.memberNames = members;
+          const isOnlyOne = this.memberNames.length === 1;
+          this.memberNames.forEach(name => this.isCollapsed[name] = !isOnlyOne);
+          this.firstTimeFlow = members.length === 0;
+        });
+      } else {
+        this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
+          this.firstTimeFlow = !adminExists;
+          this.setupAuthenticatedLoginFlow();
+        });
       }
     });
 
-    this.memberService.getMemberNames().pipe(take(1)).subscribe(members => {
-      this.memberNames = members;
-      const isOnlyOne = this.memberNames.length === 1;
-      this.memberNames.forEach(name => this.isCollapsed[name] = !isOnlyOne);
-      this.firstTimeFlow = members.length === 0;
+    
+  }
 
-    });
+  setupAuthenticatedLoginFlow() {
+    if (this.memberNames.indexOf(' Login ') >= 0) { return; }
+    this.memberNames.push(' Login ');
+      this.memberNames.forEach(name => this.isCollapsed[name] = false);
+      const lastLogin = localStorage.getItem(this.accountService.lastLoginKey);
+      if (lastLogin != undefined && lastLogin != null && lastLogin != '') {
+        this.loginForm.get('username')?.setValue(lastLogin);
+      }
   }
 
   onAdminCreated(user: User | null) {
     if (user != null) {
       this.firstTimeFlow = false;
-      this.isCollapsed[user.username] = true;
-      this.select(user.username);
-      this.memberNames.push(user.username);
+      if (this.authDisabled) {
+        this.isCollapsed[user.username] = true;
+        this.select(user.username);
+        this.memberNames.push(user.username);
+      }
     } else {
       this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
     }
@@ -95,6 +114,10 @@ export class UserLoginComponent implements OnInit {
   }
 
   select(member: string) {
+    // This is a special case
+    if (member === ' Login ' && !this.authDisabled) {
+      return;
+    }
 
     this.loginForm.get('username')?.setValue(member);
 
