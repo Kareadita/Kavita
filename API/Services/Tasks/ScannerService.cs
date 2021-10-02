@@ -52,7 +52,7 @@ namespace API.Services.Tasks
        {
            var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-           var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+           var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
            var folderPaths = library.Folders.Select(f => f.Path).ToList();
