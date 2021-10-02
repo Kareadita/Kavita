@@ -77,7 +77,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.createMemberToggle = true;
   }
 
-  onMemberCreated(success: boolean) {
+  onMemberCreated(createdUser: User | null) {
     this.createMemberToggle = false;
     this.loadMembers();
   }

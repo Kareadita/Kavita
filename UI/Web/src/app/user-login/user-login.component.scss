@@ -4,6 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: -61px; // To offset the navbar
     height: calc(100vh);
     min-height: 289px;
     position: relative;
@@ -28,6 +29,10 @@
             display:inline-block;
             height: 50px;
         }
+    }
+
+    .row {
+        margin-top: 10vh;
     }
 
     .card {
@@ -66,3 +71,7 @@
     }
 }
 
+.invalid-feedback {
+    display: inline-block;
+    color: #343c59; //#424C72;
+}

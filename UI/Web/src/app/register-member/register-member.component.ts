@@ -3,6 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { take } from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 import { SettingsService } from '../admin/settings.service';
+import { User } from '../_models/user';
 
 @Component({
   selector: 'app-register-member',
@@ -12,7 +13,10 @@ import { SettingsService } from '../admin/settings.service';
 export class RegisterMemberComponent implements OnInit {
 
   @Input() firstTimeFlow = false;
-  @Output() created = new EventEmitter<boolean>();
+  /**
+   * Emits the new user created.
+   */
+  @Output() created = new EventEmitter<User | null>();
 
   adminExists = false;
   authDisabled: boolean = false;
@@ -36,15 +40,15 @@ export class RegisterMemberComponent implements OnInit {
   }
 
   register() {
-    this.accountService.register(this.registerForm.value).subscribe(resp => {
-      this.created.emit(true);
+    this.accountService.register(this.registerForm.value).subscribe(user => {
+      this.created.emit(user);
     }, err => {
       this.errors = err;
     });
   }
 
   cancel() {
-    this.created.emit(false);
+    this.created.emit(null);
   }
 
 }

@@ -1,28 +1,21 @@
-<!--
-    We are going to have multiple titles of cards. Each card is a user. when we click on it, the card becomes centered and expands to show a login form. If authentication is disabled
-        then we just automatically login. 
--->
-
-<!-- <div class="mx-auto login" style="height: auto; min-height: auto;">
-    <div class="logo-container">
-        <img class="logo" src="assets/images/kavita-book-cropped.png" alt="Kavita logo"/>        
-        <h2 class="card-title text-center">Kavita</h2>
-    </div>
-</div> -->
-<div class="spacer mt-4"></div>
-
 <div class="mx-auto login">
 
     
+    <div class="display: inline-block" *ngIf="firstTimeFlow">
+        <h3 class="card-title text-center">Create an Admin Account</h3>
+        <div class="card p-3">
+            <p>Please create an admin account for yourself to start your reading journey.</p>
+            <app-register-member (created)="onAdminCreated($event)" [firstTimeFlow]="firstTimeFlow"></app-register-member>
+        </div>
+    </div>
 
-    <!-- IF First time flow, show register here -->
 
-    <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">
         <ng-container *ngFor="let member of memberNames">
         
             
-                <div class="col card p-3 m-3" style="width: 12rem;">
+                <div class="col align-self-center card p-3 m-3" style="width: 12rem;">
                     <span (click)="select(member)">
                         <div class="logo-container">
                             <!-- <img class="logo" src="assets/images/kavita-book-cropped.png" alt="Kavita logo"/> -->
@@ -31,20 +24,24 @@
                     </span>
     
                     <div class="card-text" #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed[member]">
-                        
-                            <div class="form-group">
+
+                            <div class="form-group" style="display: none;">
                                 <label for="username--{{member}}">Username</label>
-                                <input class="form-control" formControlName="username" id="username--{{member}}" type="text" autofocus>
+                                <input class="form-control" formControlName="username" id="username--{{member}}" type="text" [readonly]="true">
                             </div>
                             
                             <div class="form-group">
                                 <label for="password--{{member}}">Password</label>
-                                <input class="form-control" formControlName="password" id="password--{{member}}" type="password">
+                                <input class="form-control" formControlName="password" id="password--{{member}}" type="password" autofocus>
+                                <div *ngIf="authDisabled" class="invalid-feedback">
+                                   Authentication is disabled. Only type password if this is an admin account.
+                                </div>
                             </div>
                             
                             <div class="float-right">
                                 <button class="btn btn-primary alt" type="submit--{{member}}">Login</button>
                             </div>
+
                     </div>
                 </div>
         </ng-container>

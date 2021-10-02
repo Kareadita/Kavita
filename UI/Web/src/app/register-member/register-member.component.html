@@ -1,3 +1,4 @@
+
 <div class="text-danger" *ngIf="errors.length > 0">
     <p>Errors:</p>
     <ul>
@@ -21,7 +22,7 @@
     </div>
 
     <div class="float-right">
-        <button class="btn btn-secondary mr-2" type="button" (click)="cancel()">Cancel</button>
-        <button class="btn btn-primary" type="submit">Register</button>
+        <button class="btn btn-secondary mr-2" type="button" (click)="cancel()" *ngIf="!firstTimeFlow">Cancel</button>
+        <button class="btn btn-primary {{firstTimeFlow ? 'alt' : ''}}" type="submit">Register</button>
     </div>
 </form>

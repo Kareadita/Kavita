@@ -13,6 +13,7 @@ import { Title } from '@angular/platform-browser';
 })
 export class HomeComponent implements OnInit {
 
+  // TODO: Delete this component file
   firstTimeFlow = false;
   model: any = {};
   registerForm: FormGroup = new FormGroup({
@@ -20,7 +21,8 @@ export class HomeComponent implements OnInit {
       password: new FormControl('', [Validators.required])
   });
 
-  constructor(public accountService: AccountService, private memberService: MemberService, private router: Router, private titleService: Title) {
+  constructor(public accountService: AccountService, private memberService: MemberService, 
+    private router: Router, private titleService: Title) {
   }
 
   ngOnInit(): void {
