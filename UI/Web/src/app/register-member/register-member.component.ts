@@ -31,8 +31,8 @@ export class RegisterMemberComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.settingsService.getServerSettings().pipe(take(1)).subscribe(settings => {
-      this.authDisabled = !settings.enableAuthentication;
+    this.settingsService.getAuthenticationEnabled().pipe(take(1)).subscribe(authEnabled => {
+      this.authDisabled = !authEnabled;
     });
     if (this.firstTimeFlow) {
       this.registerForm.get('isAdmin')?.setValue(true);

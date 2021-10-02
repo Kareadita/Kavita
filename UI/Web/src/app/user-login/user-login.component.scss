@@ -23,8 +23,6 @@
     }
 
     .logo-container {
-        margin: 0 auto 15px;
-
         .logo {
             display:inline-block;
             height: 50px;
@@ -38,13 +36,21 @@
     .card {
         background-color: $primary-color;
         color: #fff;
+        cursor: pointer;
+        min-width: 300px;
+
+        &:focus {
+            border: 2px solid white;
+
+        }
+
 
         .card-title {
             font-family: 'Spartan', sans-serif;
             font-weight: bold;
             display: inline-block;
-            margin: 0 10px;
             vertical-align: middle;
+            width: 280px;
         }
 
         .card-text {
@@ -73,5 +79,5 @@
 
 .invalid-feedback {
     display: inline-block;
-    color: #343c59; //#424C72;
+    color: #343c59;
 }

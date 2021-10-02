@@ -34,6 +34,12 @@ export class UserLoginComponent implements OnInit {
     private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService) { }
 
   ngOnInit(): void {
+    this.navService.showNavBar();
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.router.navigateByUrl('/library');
+      }
+    });
 
     this.settingsService.getAuthenticationEnabled().pipe(take(1)).subscribe((enabled: boolean) => {
       // There is a bug where this is coming back as a string not a boolean.
@@ -45,23 +51,25 @@ export class UserLoginComponent implements OnInit {
 
     this.memberService.getMemberNames().pipe(take(1)).subscribe(members => {
       this.memberNames = members;
-      this.memberNames.forEach(name => this.isCollapsed[name] = true);
+      const isOnlyOne = this.memberNames.length === 1;
+      this.memberNames.forEach(name => this.isCollapsed[name] = !isOnlyOne);
       this.firstTimeFlow = members.length === 0;
+
     });
   }
 
   onAdminCreated(user: User | null) {
     if (user != null) {
-      this.accountService.login(user);
-      this.router.navigateByUrl('/library');
+      this.firstTimeFlow = false;
+      this.isCollapsed[user.username] = true;
+      this.select(user.username);
+      this.memberNames.push(user.username);
     } else {
       this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
     }
   }
 
   login() {
-    if (!this.loginForm.dirty || !this.loginForm.valid) { return; }
-
     this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
@@ -69,7 +77,7 @@ export class UserLoginComponent implements OnInit {
 
       // Check if user came here from another url, else send to library route
       const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      if (pageResume && pageResume !== '/no-connection') {
+      if (pageResume && pageResume !== '/no-connection' && pageResume !== '/login') {
         localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl(pageResume);
       } else {
@@ -91,11 +99,15 @@ export class UserLoginComponent implements OnInit {
     this.loginForm.get('username')?.setValue(member);
 
     this.isCollapsed[member] = !this.isCollapsed[member];
+    this.collapseAllButName(member);
+    // ?! Scroll to the newly opened element? 
+  }
+
+  collapseAllButName(name: string) {
     Object.keys(this.isCollapsed).forEach(key => {
-      if (key !== member) {
+      if (key !== name) {
         this.isCollapsed[key] = true;
       }
     });
   }
-
 }

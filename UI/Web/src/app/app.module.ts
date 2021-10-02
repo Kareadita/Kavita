@@ -4,7 +4,6 @@ import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HomeComponent } from './home/home.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
@@ -87,7 +86,6 @@ if (environment.production) {
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
     NavHeaderComponent,
     UserLoginComponent,
     LibraryComponent, 
@@ -113,6 +111,7 @@ if (environment.production) {
     NgbRatingModule, // Series Detail
     NgbNavModule,
     NgbPaginationModule,
+
     NgbCollapseModule, // Login 
 
     SharedModule,
