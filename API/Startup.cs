@@ -52,8 +52,41 @@ namespace API
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
+
+                c.SwaggerDoc("Kavita API", new OpenApiInfo()
+                {
+                    Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
+                    Title = "Kavita API",
+                    Version = "v1",
+                });
+
                 var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
                 c.IncludeXmlComments(filePath);
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+                    In = ParameterLocation.Header,
+                    Description = "Please insert JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] { }
+                    }
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Description = "Local Server",
+                    Url = "http://localhost:5000/",
+                });
             });
             services.AddResponseCompression(options =>
             {
@@ -95,7 +128,10 @@ namespace API
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+                });
                 app.UseHangfireDashboard();
             }
 

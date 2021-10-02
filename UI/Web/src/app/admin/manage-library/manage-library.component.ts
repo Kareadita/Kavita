@@ -39,6 +39,15 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     this.hubService.messages$.pipe(takeWhile(event => event.event === EVENTS.ScanLibraryProgress)).subscribe((event) => {
       const scanEvent = event.payload as ScanLibraryProgressEvent;
       this.scanInProgress[scanEvent.libraryId] = scanEvent.progress !== 100;
+      if (this.scanInProgress[scanEvent.libraryId] === false && scanEvent.progress === 100) {
+        this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
+          const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
+          const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);
+          if (existingLibrary !== undefined) {
+            existingLibrary.lastScanned = newLibrary?.lastScanned || existingLibrary.lastScanned;
+          }
+        });
+      }
     });
   }
 
