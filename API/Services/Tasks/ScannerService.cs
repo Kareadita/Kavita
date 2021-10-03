@@ -73,8 +73,17 @@ namespace API.Services.Tasks
 
                if (!anyFilesExist)
                {
-                   _unitOfWork.SeriesRepository.Remove(series);
-                   await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+                   try
+                   {
+                       _unitOfWork.SeriesRepository.Remove(series);
+                       await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+                   }
+                   catch (Exception ex)
+                   {
+                       _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series");
+                       await _unitOfWork.RollbackAsync();
+                   }
+
                }
                else
                {
@@ -97,7 +106,7 @@ namespace API.Services.Tasks
                        }
                    }
 
-                   _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory.", series.OriginalName);
+                   _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
                    scanner = new ParseScannedFiles(_bookService, _logger);
                    parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                    totalFiles += totalFiles2;
@@ -109,8 +118,19 @@ namespace API.Services.Tasks
            // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
            if (parsedSeries.Count == 0) return;
 
-           UpdateSeries(series, parsedSeries);
-           await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+           try
+           {
+               UpdateSeries(series, parsedSeries);
+               await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+           }
+           catch (Exception ex)
+           {
+               _logger.LogCritical(ex, "There was an error during ScanSeries to update the series");
+               await _unitOfWork.RollbackAsync();
+           }
+           // Tell UI that this series is done
+           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
+               cancellationToken: token);
        }
 
        private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
@@ -126,8 +146,9 @@ namespace API.Services.Tasks
        private async Task CommitAndSend(int libraryId, int seriesId, int totalFiles,
            Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds, CancellationToken token)
        {
-           if (await _unitOfWork.CommitAsync())
+           if (_unitOfWork.HasChanges())
            {
+               await _unitOfWork.CommitAsync();
                _logger.LogInformation(
                    "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                    totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
@@ -135,15 +156,6 @@ namespace API.Services.Tasks
                await CleanupDbEntities();
                BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, false));
                BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
-               // Tell UI that this series is done
-               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
-                   cancellationToken: token);
-           }
-           else
-           {
-               _logger.LogCritical(
-                   "There was a critical error that resulted in a failed scan. Please check logs and rescan");
-               await _unitOfWork.RollbackAsync();
            }
        }
 
