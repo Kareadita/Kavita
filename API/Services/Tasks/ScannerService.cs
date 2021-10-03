@@ -52,7 +52,7 @@ namespace API.Services.Tasks
        {
            var sw = new Stopwatch();
            var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-           var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+           var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
            var folderPaths = library.Folders.Select(f => f.Path).ToList();
@@ -186,7 +186,7 @@ namespace API.Services.Tasks
 
            _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-               MessageFactory.ScanLibraryProgressEvent(libraryId, 0, string.Empty));
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
@@ -217,7 +217,7 @@ namespace API.Services.Tasks
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-               MessageFactory.ScanLibraryProgressEvent(libraryId, 100, string.Empty));
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 100));
        }
 
        /// <summary>
@@ -253,6 +253,7 @@ namespace API.Services.Tasks
           _logger.LogDebug("[ScannerService] Updating existing series");
           for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
           {
+              if (chunkInfo.TotalChunks == 0) continue;
               totalTime += stopwatch.ElapsedMilliseconds;
               stopwatch.Restart();
               _logger.LogDebug($"[ScannerService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
@@ -298,8 +299,9 @@ namespace API.Services.Tasks
                   await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
               }
 
+              var progress =  Math.Max(0, Math.Min(100, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-                  MessageFactory.ScanLibraryProgressEvent(library.Id, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize, string.Empty));
+                  MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
           }
 
 
@@ -336,6 +338,7 @@ namespace API.Services.Tasks
               newSeries.Add(existingSeries);
           }
 
+          var i = 0;
           foreach(var series in newSeries)
           {
               try
@@ -353,6 +356,9 @@ namespace API.Services.Tasks
 
                       // Inform UI of new series added
                       await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
+                      var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
+                      await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                          MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
                   }
                   else
                   {
@@ -360,6 +366,8 @@ namespace API.Services.Tasks
                       _logger.LogCritical(
                           "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
                   }
+
+                  i++;
               }
               catch (Exception ex)
               {

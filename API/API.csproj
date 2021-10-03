@@ -16,6 +16,10 @@
     <DocumentationFile>bin\Debug\API.xml</DocumentationFile>
   </PropertyGroup>
 
+    <PropertyGroup>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
+
   <!-- Set the Product and Version info for our own projects -->
   <PropertyGroup>
     <Product>Kavita</Product>

@@ -1,7 +1,8 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, take, takeWhile } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
@@ -21,7 +22,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './library-detail.component.html',
   styleUrls: ['./library-detail.component.scss']
 })
-export class LibraryDetailComponent implements OnInit {
+export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   libraryId!: number;
   libraryName = '';
@@ -33,6 +34,7 @@ export class LibraryDetailComponent implements OnInit {
   filter: SeriesFilter = {
     mangaFormat: null
   };
+  onDestroy: Subject<void> = new Subject<void>();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -80,9 +82,14 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
       this.loadPage();
     });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
