@@ -245,10 +245,10 @@ export class ActionService implements OnDestroy {
    markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
     this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
       volumes.forEach(volume => {
-        volume.pagesRead = volume.pages;
-        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+        volume.pagesRead = 0;
+        volume.chapters?.forEach(c => c.pagesRead = 0);
       });
-      chapters?.forEach(c => c.pagesRead = c.pages);
+      chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Read');
 
       if (callback) {
