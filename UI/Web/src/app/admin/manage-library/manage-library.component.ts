@@ -25,6 +25,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    */
   deletionInProgress: boolean = false;
   scanInProgress: {[key: number]: boolean} = {};
+  libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
 
   private readonly onDestroy = new Subject<void>();
 

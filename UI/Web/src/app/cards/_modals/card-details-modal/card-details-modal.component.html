@@ -19,7 +19,7 @@
             </div>
             <div class="row no-gutters">
                 <div class="col" *ngIf="utilityService.isVolume(data)">
-                    Added: {{(data.created | date: 'MM/dd/yyyy') || '-'}}
+                    Added: {{(data.created | date: 'short') || '-'}}
                 </div>
                 <div class="col">
                     Pages: {{data.pages}}
