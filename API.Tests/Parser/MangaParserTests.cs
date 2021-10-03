@@ -68,8 +68,6 @@ namespace API.Tests.Parser
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03.5 Ch. 023.5 - Volume 3 Extras.cbz", "3.5")]
-        [InlineData("X-Men v1.1 #201 (September 2007).cbz", "1.1")]
-        [InlineData("X-Men v0.1 #201 (September 2007).cbz", "0.1")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
