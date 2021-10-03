@@ -29,6 +29,10 @@ export class UserLoginComponent implements OnInit {
    * If there are no admins on the server, this will enable the registration to kick in.
    */
   firstTimeFlow: boolean = true;
+  /**
+   * Used for first time the page loads to ensure no flashing
+   */
+  isLoaded: boolean = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, 
     private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService) { }
@@ -53,11 +57,13 @@ export class UserLoginComponent implements OnInit {
           const isOnlyOne = this.memberNames.length === 1;
           this.memberNames.forEach(name => this.isCollapsed[name] = !isOnlyOne);
           this.firstTimeFlow = members.length === 0;
+          this.isLoaded = true;
         });
       } else {
         this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
           this.firstTimeFlow = !adminExists;
           this.setupAuthenticatedLoginFlow();
+          this.isLoaded = true;
         });
       }
     });
