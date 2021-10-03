@@ -42,7 +42,7 @@ namespace API.Extensions
 
             services.AddSqLite(config, env);
             services.AddLogging(config);
-            services.AddSignalR();
+            services.AddSignalR(opt => opt.EnableDetailedErrors = true);
         }
 
         private static void AddSqLite(this IServiceCollection services, IConfiguration config,
