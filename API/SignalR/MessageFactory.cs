@@ -59,7 +59,7 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress, string seriesName)
+        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
         {
             return new SignalRMessage()
             {
@@ -68,7 +68,6 @@ namespace API.SignalR
                 {
                     LibraryId = libraryId,
                     Progress = progress,
-                    SeriesName = seriesName
                 }
             };
         }

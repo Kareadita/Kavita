@@ -83,6 +83,7 @@ export class MessageHubService {
         event: EVENTS.ScanLibraryProgress,
         payload: resp.body
       });
+      console.log('ScanLibraryProgress: ', resp.body);
       this.scanLibrary.emit(resp.body);
     });
 

@@ -186,7 +186,7 @@ namespace API.Services.Tasks
 
            _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-               MessageFactory.ScanLibraryProgressEvent(libraryId, 0, string.Empty));
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
            var scanner = new ParseScannedFiles(_bookService, _logger);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
@@ -217,7 +217,7 @@ namespace API.Services.Tasks
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-               MessageFactory.ScanLibraryProgressEvent(libraryId, 100, string.Empty));
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 100));
        }
 
        /// <summary>
@@ -301,7 +301,7 @@ namespace API.Services.Tasks
 
               var progress =  Math.Max(0, Math.Min(100, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-                  MessageFactory.ScanLibraryProgressEvent(library.Id, progress, string.Empty));
+                  MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
           }
 
 
@@ -358,7 +358,7 @@ namespace API.Services.Tasks
                       await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
                       var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
                       await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-                          MessageFactory.ScanLibraryProgressEvent(library.Id, progress, string.Empty));
+                          MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
                   }
                   else
                   {
