@@ -3,7 +3,7 @@
 
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs nav-pills">
       <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
+        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
         <ng-template ngbNavContent>
           <ng-container *ngIf="tab.fragment === ''">
             <app-manage-settings></app-manage-settings>
