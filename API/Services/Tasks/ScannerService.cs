@@ -76,7 +76,7 @@ namespace API.Services.Tasks
                    try
                    {
                        _unitOfWork.SeriesRepository.Remove(series);
-                       await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+                       await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
                    }
                    catch (Exception ex)
                    {
@@ -121,7 +121,7 @@ namespace API.Services.Tasks
            try
            {
                UpdateSeries(series, parsedSeries);
-               await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds, token);
+               await CommitAndSend(libraryId, seriesId, totalFiles, parsedSeries, sw, scanElapsedTime, series, chapterIds);
            }
            catch (Exception ex)
            {
@@ -144,7 +144,7 @@ namespace API.Services.Tasks
        }
 
        private async Task CommitAndSend(int libraryId, int seriesId, int totalFiles,
-           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds, CancellationToken token)
+           Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series, int[] chapterIds)
        {
            if (_unitOfWork.HasChanges())
            {
