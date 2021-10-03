@@ -55,10 +55,6 @@
 
         .card-text {
             font-family: "EBGaramond", "Helvetica Neue", sans-serif;
-
-            input {
-                background-color: #fff;
-            }
         }
 
         .alt {
@@ -80,4 +76,8 @@
 .invalid-feedback {
     display: inline-block;
     color: #343c59;
+}
+
+input {
+    background-color: #fff !important;
 }
