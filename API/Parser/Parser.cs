@@ -327,6 +327,11 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
                 MatchOptions,
             RegexTimeout),
+            // spawn-123 (from https://github.com/Girbons/comics-downloader)
+            new Regex(
+                @"^(?<Series>.+?)-(?<Chapter>\d+)",
+                MatchOptions,
+            RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
             new Regex(
                 @"^(?<Series>.*)",
@@ -421,6 +426,11 @@ namespace API.Parser
             // Amazing Man Comics issue #25
             new Regex(
                 @"^(?!Vol)(?<Series>.+?)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
+                MatchOptions,
+            RegexTimeout),
+            // spawn-123 (from https://github.com/Girbons/comics-downloader )
+            new Regex(
+                @"^(?<Series>.+?)-(?<Chapter>\d+)",
                 MatchOptions,
             RegexTimeout),
         };

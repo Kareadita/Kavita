@@ -28,6 +28,7 @@ namespace API.Tests.Parser
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "Invincible")]
         [InlineData("Batman Wayne Family Adventures - Ep. 001 - Moving In", "Batman Wayne Family Adventures")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
+        [InlineData("spawn-123", "spawn")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "Batman Beyond")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
@@ -52,6 +53,7 @@ namespace API.Tests.Parser
         [InlineData("Amazing Man Comics chapter 25", "0")]
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
+        [InlineData("spawn-123", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -77,6 +79,7 @@ namespace API.Tests.Parser
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "33.5")]
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
+        [InlineData("spawn-123", "123")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "4")]
         [InlineData("Invincible 052 (c2c) (2008) (Minutemen-TheCouple)", "52")]
         [InlineData("Y - The Last Man #001", "1")]
