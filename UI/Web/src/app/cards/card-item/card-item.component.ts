@@ -123,6 +123,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   prevOffset: number = 0;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
+    if (!this.allowSelection) return;
     const verticalOffset = (window.pageYOffset 
       || document.documentElement.scrollTop 
       || document.body.scrollTop || 0);
@@ -133,6 +134,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent) {
+    if (!this.allowSelection) return;
     const delta = event.timeStamp - this.prevTouchTime;
     const verticalOffset = (window.pageYOffset 
       || document.documentElement.scrollTop 
