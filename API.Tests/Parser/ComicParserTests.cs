@@ -52,6 +52,7 @@ namespace API.Tests.Parser
         [InlineData("Amazing Man Comics chapter 25", "0")]
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
+        [InlineData("spawn-123", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -78,7 +79,6 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
         [InlineData("spawn-123", "123")]
-        [InlineData("spawn-0", "0")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

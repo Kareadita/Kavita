@@ -320,9 +320,9 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
-            // spawn-123 (from https://github.com/Girbons/comics-downloader )
+            // spawn-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+)-(?<Chapter>\d+)",
+                @"^(?<Series>.+?)-(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
@@ -418,7 +418,7 @@ namespace API.Parser
             RegexTimeout),
             // spawn-123 (from https://github.com/Girbons/comics-downloader )
             new Regex(
-                @"^(?<Series>.+)-(?<Chapter>\d+)",
+                @"^(?<Series>.+?)-(?<Chapter>\d+)",
                 RegexOptions.IgnoreCase | RegexOptions.Compiled,
             RegexTimeout),
         };
