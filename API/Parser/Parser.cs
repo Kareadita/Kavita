@@ -70,19 +70,19 @@ namespace API.Parser
                 @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 MatchOptions,
             RegexTimeout),
-            // Kodomo no Jikan vol. 10
+            // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
             new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(vol\.? ?)(?<Volume>\d+)",
+                @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(volume )(?<Volume>\d+)",
+                @"(volume )(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
@@ -92,7 +92,7 @@ namespace API.Parser
             RegexTimeout),
             // vol_001-1.cbz for MangaPy default naming convention
             new Regex(
-                @"(vol_)(?<Volume>\d+)",
+                @"(vol_)(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
         };
@@ -1027,7 +1027,7 @@ namespace API.Parser
 
         private static string PerformPadding(string number)
         {
-            var num = Int32.Parse(number);
+            var num = int.Parse(number);
             return num switch
             {
                 < 10 => "00" + num,
