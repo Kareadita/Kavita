@@ -480,7 +480,7 @@ namespace API.Parser
             RegexTimeout),
             // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<ChapterPart>b)?(\s|_|\[|\()",
+                @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
                 MatchOptions,
             RegexTimeout),
             // Yumekui-Merry_DKThias_Chapter21.zip
@@ -810,11 +810,14 @@ namespace API.Parser
                     if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
 
                     var value = match.Groups["Volume"].Value;
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
-                    return $"{@from}-{to}";
+                    var hasPart = match.Groups["Part"].Success;
+                    return FormatValue(value, hasPart);
+
+                    // if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
+                    // var tokens = value.Split("-");
+                    // var from = RemoveLeadingZeroes(tokens[0]);
+                    // var to = RemoveLeadingZeroes(tokens[1]);
+                    // return $"{@from}-{to}";
 
                 }
             }
@@ -832,16 +835,37 @@ namespace API.Parser
                     if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
 
                     var value = match.Groups["Volume"].Value;
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
-                    return $"{@from}-{to}";
+                    var hasPart = match.Groups["Part"].Success;
+                    return FormatValue(value, hasPart);
+
+                    // if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
+                    // var tokens = value.Split("-");
+                    // var from = RemoveLeadingZeroes(tokens[0]);
+                    // var to = RemoveLeadingZeroes(tokens[1]);
+                    // return $"{@from}-{to}";
 
                 }
             }
 
             return DefaultVolume;
+        }
+
+        private static string FormatValue(string value, bool hasPart)
+        {
+            if (!value.Contains("-"))
+            {
+                return RemoveLeadingZeroes(hasPart ? AddChapterPart(value) : value);
+            }
+
+            var tokens = value.Split("-");
+            var from = RemoveLeadingZeroes(tokens[0]);
+            if (tokens.Length == 2)
+            {
+                var to = RemoveLeadingZeroes(hasPart ? AddChapterPart(tokens[1]) : tokens[1]);
+                return $"{@from}-{to}";
+            }
+
+            return @from;
         }
 
         public static string ParseChapter(string filename)
@@ -854,24 +878,9 @@ namespace API.Parser
                     if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
 
                     var value = match.Groups["Chapter"].Value;
-                    var hasChapterPart = match.Groups["ChapterPart"].Success;
+                    var hasPart = match.Groups["Part"].Success;
 
-                    if (!value.Contains("-"))
-                    {
-                        return RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(value) : value);
-                    }
-
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    if (tokens.Length == 2)
-                    {
-                        var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
-                        return $"{@from}-{to}";
-                    }
-
-                    return from;
-
-
+                    return FormatValue(value, hasPart);
                 }
             }
 
@@ -898,16 +907,8 @@ namespace API.Parser
                     if (match.Groups["Chapter"].Success && match.Groups["Chapter"] != Match.Empty)
                     {
                         var value = match.Groups["Chapter"].Value;
-
-                        if (value.Contains("-"))
-                        {
-                            var tokens = value.Split("-");
-                            var from = RemoveLeadingZeroes(tokens[0]);
-                            var to = RemoveLeadingZeroes(tokens[1]);
-                            return $"{from}-{to}";
-                        }
-
-                        return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                        var hasPart = match.Groups["Part"].Success;
+                        return FormatValue(value, hasPart);
                     }
 
                 }
