@@ -16,6 +16,10 @@ export class MemberService {
     return this.httpClient.get<Member[]>(this.baseUrl + 'users');
   }
 
+  getMemberNames() {
+    return this.httpClient.get<string[]>(this.baseUrl + 'users/names');
+  }
+
   adminExists() {
     return this.httpClient.get<boolean>(this.baseUrl + 'admin/exists');
   }

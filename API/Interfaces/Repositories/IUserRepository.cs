@@ -15,6 +15,8 @@ namespace API.Interfaces.Repositories
         public void Delete(AppUser user);
         Task<IEnumerable<MemberDto>>  GetMembersAsync();
         Task<IEnumerable<AppUser>> GetAdminUsersAsync();
+        Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
+        Task<bool> IsUserAdmin(AppUser user);
         Task<AppUserRating> GetUserRating(int seriesId, int userId);
         Task<AppUserPreferences> GetPreferencesAsync(string username);
         Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);

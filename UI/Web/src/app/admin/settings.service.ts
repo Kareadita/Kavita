@@ -35,4 +35,8 @@ export class SettingsService {
   getOpdsEnabled() {
     return this.http.get<boolean>(this.baseUrl + 'settings/opds-enabled', {responseType: 'text' as 'json'});
   }
+
+  getAuthenticationEnabled() {
+    return this.http.get<boolean>(this.baseUrl + 'settings/authentication-enabled', {responseType: 'text' as 'json'});
+  }
 }

@@ -201,6 +201,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
    */
   bookmarks: {[key: string]: number} = {};
+  /**
+   * Tracks if the first page is rendered or not. This is used to keep track of Automatic Scaling and adjusting decision after first page dimensions load up.
+   */
+  firstPageRendered: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -321,7 +325,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       } else {
         // If no user, we can't render 
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/login');
       }
     });
 
@@ -774,11 +778,44 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * There are some hard limits on the size of canvas' that we must cap at. https://github.com/jhildenbiddle/canvas-size#test-results
+   * For Safari, it's 16,777,216, so we cap at 4096x4096 when this happens. The drawImage in render will perform bi-cubic scaling for us.
+   * @returns If we should continue to the render loop 
+   */
+  setCanvasSize() {
+    if (this.ctx && this.canvas) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      const isSafari = [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+      ].includes(navigator.platform)
+      // iPad on iOS 13 detection
+      || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+      const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
+      const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
+      if (needsScaling) {
+        this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
+        this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
+      } else {
+        this.canvas.nativeElement.width = this.canvasImage.width;
+        this.canvas.nativeElement.height = this.canvasImage.height;
+      }
+    }
+    return true;
+  }
+
   renderPage() {
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
-      this.canvas.nativeElement.width = this.canvasImage.width;
-      this.canvas.nativeElement.height = this.canvasImage.height;
+
+      if (!this.setCanvasSize()) return;
+
       const needsSplitting = this.canvasImage.width > this.canvasImage.height;
       this.updateSplitPage();
 
@@ -789,6 +826,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
+        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
+          
+          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+          const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+          const windowHeight = window.innerHeight
+                    || document.documentElement.clientHeight
+                    || document.body.clientHeight;
+
+          const widthRatio = windowWidth / this.canvasImage.width;
+          const heightRatio = windowHeight / this.canvasImage.height;
+
+          // Given that we now have image dimensions, assuming this isn't a split image, 
+          // Try to reset one time based on who's dimension (width/height) is smaller
+          if (widthRatio < heightRatio) {
+            newScale = FITTING_OPTION.WIDTH;
+          } else if (widthRatio > heightRatio) {
+            newScale = FITTING_OPTION.HEIGHT;
+          }
+
+          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
+          this.firstPageRendered = true;
+        }
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       // Reset scroll on non HEIGHT Fits

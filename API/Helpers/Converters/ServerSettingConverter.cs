@@ -36,6 +36,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.EnableOpds:
                         destination.EnableOpds = bool.Parse(row.Value);
                         break;
+                    case ServerSettingKey.EnableAuthentication:
+                        destination.EnableAuthentication = bool.Parse(row.Value);
+                        break;
                 }
             }
 

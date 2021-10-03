@@ -8,7 +8,6 @@ import { User } from '../_models/user';
 import * as Sentry from "@sentry/angular";
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
-import { PresenceHubService } from './presence-hub.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +16,7 @@ export class AccountService implements OnDestroy {
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
+  public lastLoginKey = 'kavita-lastlogin';
   currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
@@ -26,7 +26,7 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService, private presenceHub: PresenceHubService) {}
+    private messageHub: MessageHubService) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -51,8 +51,7 @@ export class AccountService implements OnDestroy {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
-          this.messageHub.createHubConnection(user);
-          this.presenceHub.createHubConnection(user);
+          this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),
       takeUntil(this.onDestroy)
@@ -72,6 +71,7 @@ export class AccountService implements OnDestroy {
       });
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
+      localStorage.setItem(this.lastLoginKey, user.username);
     }
 
     this.currentUserSource.next(user);
@@ -85,7 +85,6 @@ export class AccountService implements OnDestroy {
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
     this.messageHub.stopHubConnection();
-    this.presenceHub.stopHubConnection();
   }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {

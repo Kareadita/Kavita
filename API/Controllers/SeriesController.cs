@@ -10,9 +10,11 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -22,12 +24,14 @@ namespace API.Controllers
         private readonly ILogger<SeriesController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<MessageHub> _messageHub;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+            _messageHub = messageHub;
         }
 
         [HttpPost]
@@ -97,14 +101,14 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId));
+            return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId));
         }
 
         [HttpGet("volume")]
         public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetVolumeDtoAsync(volumeId, userId));
+            return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId));
         }
 
         [HttpGet("chapter")]
@@ -157,10 +161,12 @@ namespace API.Controllers
             series.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
+            // This is when you hit Reset
             if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
             {
                 // Trigger a refresh when we are moving from a locked image to a non-locked
                 needsRefreshMetadata = true;
+                series.CoverImage = string.Empty;
                 series.CoverImageLocked = updateSeries.CoverImageLocked;
             }
 
@@ -215,7 +221,7 @@ namespace API.Controllers
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
             return Ok();
         }
 
@@ -294,6 +300,12 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    foreach (var tag in updateSeriesMetadataDto.Tags)
+                    {
+                        await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAddedToCollection,
+                            MessageFactory.SeriesAddedToCollection(tag.Id,
+                                updateSeriesMetadataDto.SeriesMetadata.SeriesId));
+                    }
                     return Ok("Successfully updated");
                 }
             }

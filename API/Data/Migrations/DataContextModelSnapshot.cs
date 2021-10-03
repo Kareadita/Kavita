@@ -229,10 +229,6 @@ namespace API.Data.Migrations
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
 
-                    b.Property<uint>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
@@ -292,8 +288,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -335,8 +331,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -399,6 +395,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastScanned")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -511,8 +510,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -607,8 +606,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");

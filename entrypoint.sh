@@ -74,6 +74,20 @@ else
 	ln -s /kavita/data/stats /kavita/stats
 fi
 
+if [ -d /kavita/data/covers ]
+then
+	if [ -d /kavita/covers ]
+	then
+		unlink /kavita/covers
+		ln -s /kavita/data/covers /kavita/covers
+	else
+		ln -s /kavita/data/covers /kavita/covers
+	fi
+else
+	mkdir /kavita/data/covers
+	ln -s /kavita/data/covers /kavita/covers
+fi
+
 chmod +x ./Kavita
 
 ./Kavita

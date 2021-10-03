@@ -1,17 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { DownloadService } from '../shared/_services/download.service';
-import { UtilityService } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
@@ -53,6 +54,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
+  bulkActions: ActionItem<any>[] = [];
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
@@ -88,6 +90,46 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
 
+  bulkActionCallback = (action: Action, data: any) => {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+    // we need to figure out what is actually selected now
+    const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
+    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
+
+    const selectedChapterIds = this.chapters.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
+    const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
+    const chapters = [...selectedChapterIds, ...selectedSpecials];
+
+    switch (action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
+          this.setContinuePoint();
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
+          this.setContinuePoint();
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+    }
+  }
+
   private onDestroy: Subject<void> = new Subject();
 
 
@@ -111,7 +153,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService, private messageHub: MessageHubService) {
+              public imageSerivce: ImageService, private messageHub: MessageHubService, 
+              public bulkSelectionService: BulkSelectionService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -149,6 +192,20 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
@@ -202,7 +259,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case(Action.IncognitoRead):
         if (volume.chapters != undefined && volume.chapters?.length >= 1) {
-          this.openChapter(volume.chapters[0], true);
+          this.openChapter(volume.chapters.sort(this.utilityService.sortChapters)[0], true);
         }
         break;
       default:
@@ -280,6 +337,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+      
       
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
@@ -490,7 +548,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   downloadSeries() {
-    
     this.downloadService.downloadSeriesSize(this.series.id).pipe(take(1)).subscribe(async (size) => {
       const wantToDownload = await this.downloadService.confirmSize(size, 'series');
       if (!wantToDownload) { return; }

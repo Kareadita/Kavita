@@ -21,5 +21,10 @@
         /// Enables OPDS connections to be made to the server.
         /// </summary>
         public bool EnableOpds { get; set; }
+
+        /// <summary>
+        /// Enables Authentication on the server. Defaults to true.
+        /// </summary>
+        public bool EnableAuthentication { get; set; }
     }
 }

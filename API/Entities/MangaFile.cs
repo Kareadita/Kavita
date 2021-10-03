@@ -38,5 +38,13 @@ namespace API.Entities
         {
             return File.GetLastWriteTime(FilePath) > LastModified;
         }
+
+        /// <summary>
+        /// Updates the Last Modified time of the underlying file
+        /// </summary>
+        public void UpdateLastModified()
+        {
+            LastModified = File.GetLastWriteTime(FilePath);
+        }
     }
 }

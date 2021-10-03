@@ -42,6 +42,14 @@ export class ReadingListService {
     return this.httpClient.post(this.baseUrl + 'readinglist/update', model, { responseType: 'text' as 'json' });
   }
 
+  updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds});
+  }
+
+  updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds});
+  }
+
   updateBySeries(readingListId: number, seriesId: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
   }

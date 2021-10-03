@@ -26,7 +26,6 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDownloadService _downloadService;
         private readonly IDirectoryService _directoryService;
-        private readonly UserManager<AppUser> _userManager;
         private readonly ICacheService _cacheService;
         private readonly IReaderService _readerService;
 
@@ -41,13 +40,12 @@ namespace API.Controllers
         private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
         public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
-            IDirectoryService directoryService, UserManager<AppUser> userManager,
-            ICacheService cacheService, IReaderService readerService)
+            IDirectoryService directoryService, ICacheService cacheService,
+            IReaderService readerService)
         {
             _unitOfWork = unitOfWork;
             _downloadService = downloadService;
             _directoryService = directoryService;
-            _userManager = userManager;
             _cacheService = cacheService;
             _readerService = readerService;
 
@@ -170,7 +168,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
@@ -213,7 +211,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
             IEnumerable <CollectionTagDto> tags;
             if (isAdmin)
@@ -467,7 +465,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volumes = await _unitOfWork.SeriesRepository.GetVolumesDtoAsync(seriesId, userId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
             var feed = CreateFeed(series.Name + " - Volumes", $"{apiKey}/series/{series.Id}", apiKey);
             feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
@@ -486,7 +484,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
             var chapters =
                 (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                     _chapterSortComparer);
@@ -517,7 +515,7 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var volume = await _unitOfWork.SeriesRepository.GetVolumeAsync(volumeId);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 

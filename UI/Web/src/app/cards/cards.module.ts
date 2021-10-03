@@ -19,6 +19,7 @@ import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { BrowserModule } from '@angular/platform-browser';
 import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layout.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
+import { BulkOperationsComponent } from './bulk-operations/bulk-operations.component';
 
 
 
@@ -34,7 +35,8 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
-    CardDetailsModalComponent
+    CardDetailsModalComponent,
+    BulkOperationsComponent
   ],
   imports: [
     CommonModule,
@@ -70,7 +72,8 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
     BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
-    CardDetailsModalComponent
+    CardDetailsModalComponent,
+    BulkOperationsComponent
   ]
 })
 export class CardsModule { }

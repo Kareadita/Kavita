@@ -29,6 +29,7 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 001 - Moving In", "Batman Wayne Family Adventures")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
         [InlineData("spawn-123", "spawn")]
+        [InlineData("Batman Beyond 04 (of 6) (1999)", "Batman Beyond")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -59,17 +60,17 @@ namespace API.Tests.Parser
         }
 
         [Theory]
-        [InlineData("01 Spider-Man & Wolverine 01.cbr", "0")]
+        [InlineData("01 Spider-Man & Wolverine 01.cbr", "1")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "0")]
         [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "0")]
-        [InlineData("Batman & Catwoman - Trail of the Gun 01", "0")]
+        [InlineData("Batman & Catwoman - Trail of the Gun 01", "1")]
         [InlineData("Batman & Daredevil - King of New York", "0")]
         [InlineData("Batman & Grendel (1996) 01 - Devil's Bones", "1")]
         [InlineData("Batman & Robin the Teen Wonder #0", "0")]
         [InlineData("Batman & Wildcat (1 of 3)", "1")]
         [InlineData("Batman & Wildcat (2 of 3)", "2")]
-        [InlineData("Batman And Superman World's Finest #01", "0")]
-        [InlineData("Babe 01", "0")]
+        [InlineData("Batman And Superman World's Finest #01", "1")]
+        [InlineData("Babe 01", "1")]
         [InlineData("Scott Pilgrim 01 - Scott Pilgrim's Precious Little Life (2004)", "1")]
         [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Superman v1 024 (09-10 1943)", "24")]
@@ -79,6 +80,9 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
         [InlineData("spawn-123", "123")]
+        [InlineData("Batman Beyond 04 (of 6) (1999)", "4")]
+        [InlineData("Invincible 052 (c2c) (2008) (Minutemen-TheCouple)", "52")]
+        [InlineData("Y - The Last Man #001", "1")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

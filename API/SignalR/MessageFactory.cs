@@ -5,14 +5,43 @@ namespace API.SignalR
 {
     public static class MessageFactory
     {
-        public static SignalRMessage ScanSeriesEvent(int seriesId)
+        public static SignalRMessage ScanSeriesEvent(int seriesId, string seriesName)
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.ScanSeries,
                 Body = new
                 {
-                    SeriesId = seriesId
+                    SeriesId = seriesId,
+                    SeriesName = seriesName
+                }
+            };
+        }
+
+        public static SignalRMessage SeriesAddedEvent(int seriesId, string seriesName, int libraryId)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SeriesAdded,
+                Body = new
+                {
+                    SeriesId = seriesId,
+                    SeriesName = seriesName,
+                    LibraryId = libraryId
+                }
+            };
+        }
+
+        public static SignalRMessage SeriesRemovedEvent(int seriesId, string seriesName, int libraryId)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SeriesRemoved,
+                Body = new
+                {
+                    SeriesId = seriesId,
+                    SeriesName = seriesName,
+                    LibraryId = libraryId
                 }
             };
         }
@@ -29,6 +58,21 @@ namespace API.SignalR
                 }
             };
         }
+
+        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.ScanLibrary,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                }
+            };
+        }
+
+
 
         public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
         {
@@ -52,5 +96,17 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage SeriesAddedToCollection(int tagId, int seriesId)
+        {
+            return new SignalRMessage
+            {
+                Name = SignalREvents.UpdateVersion,
+                Body = new
+                {
+                    TagId = tagId,
+                    SeriesId = seriesId
+                }
+            };
+        }
     }
 }

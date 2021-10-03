@@ -13,9 +13,13 @@ namespace API.Entities
         public LibraryType Type { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
+        /// <summary>
+        /// Last time Library was scanned
+        /// </summary>
+        public DateTime LastScanned { get; set; }
         public ICollection<FolderPath> Folders { get; set; }
         public ICollection<AppUser> AppUsers { get; set; }
         public ICollection<Series> Series { get; set; }
-        
+
     }
 }

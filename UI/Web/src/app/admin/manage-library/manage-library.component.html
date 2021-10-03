@@ -7,7 +7,10 @@
         <li *ngFor="let library of libraries; let idx = index;" class="list-group-item">
             <div>
                 <h4>
-                    <span id="library-name--{{idx}}">{{library.name | titlecase}}</span>
+                    <span id="library-name--{{idx}}">{{library.name}}</span>&nbsp;
+                    <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" *ngIf="scanInProgress.hasOwnProperty(library.id) && scanInProgress[library.id]" title="Scan in progress">
+                        <span class="sr-only">Scan for {{library.name}} in progress</span>
+                    </div>
                     <div class="float-right">
                         <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
                         <button class="btn btn-danger mr-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" ngbTooltip="Delete Library" attr.aria-label="Delete {{library.name | titlecase}}"></i></button>
@@ -17,6 +20,13 @@
             </div>
             <div>Type: {{libraryType(library.type)}}</div>
             <div>Shared Folders: {{library.folders.length + ' folders'}}</div>
+            <div>
+                Last Scanned: 
+                <span *ngIf="library.lastScanned == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                <ng-template #activeDate>
+                    {{library.lastScanned | date: 'short'}}
+                </ng-template>
+            </div>
         </li>
         <li *ngIf="loading" class="list-group-item">
             <div class="spinner-border text-secondary" role="status">

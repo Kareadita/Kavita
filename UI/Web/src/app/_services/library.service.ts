@@ -37,7 +37,7 @@ export class LibraryService {
   listDirectories(rootPath: string) {
     let query = '';
     if (rootPath !== undefined && rootPath.length > 0) {
-      query = '?path=' + rootPath;
+      query = '?path=' + encodeURIComponent(rootPath);
     }
 
     return this.httpClient.get<string[]>(this.baseUrl + 'library/list' + query);

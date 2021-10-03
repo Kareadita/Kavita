@@ -111,7 +111,7 @@ namespace API.Tests.Services
 
 
 
-            Assert.Empty(_scannerService.FindSeriesNotOnDisk(existingSeries, infos));
+            Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
         }
 
 
