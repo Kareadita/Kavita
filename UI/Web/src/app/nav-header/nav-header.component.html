@@ -63,7 +63,7 @@
 
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
         <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-          {{user.username | titlecase}}
+          {{user.username | sentenceCase}}
         </button>
         <div ngbDropdownMenu>
           <a ngbDropdownItem routerLink="/preferences/">User Settings</a>

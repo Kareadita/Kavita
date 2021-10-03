@@ -239,6 +239,7 @@ namespace API.Tests.Parser
         [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "1-10")]
         [InlineData("Deku_&_Bakugo_-_Rising_v1_c1.1.cbz", "1.1")]
         [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
+        [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -422,6 +423,14 @@ namespace API.Tests.Parser
             {
               Series = "Toukyou Akazukin", Volumes = "1", Edition = "",
               Chapters = "1", Filename = "Vol. 01 Ch. 001.cbz", Format = MangaFormat.Archive,
+              FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub";
+            expected.Add(filepath, new ParserInfo
+            {
+              Series = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows", Volumes = "2.5", Edition = "",
+              Chapters = "0", Filename = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", Format = MangaFormat.Epub,
               FullFilePath = filepath, IsSpecial = false
             });
 
