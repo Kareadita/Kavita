@@ -70,19 +70,19 @@ namespace API.Parser
                 @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 MatchOptions,
             RegexTimeout),
-            // Kodomo no Jikan vol. 10
+            // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
             new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(vol\.? ?)(?<Volume>\d+)",
+                @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(volume )(?<Volume>\d+)",
+                @"(volume )(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
@@ -92,7 +92,7 @@ namespace API.Parser
             RegexTimeout),
             // vol_001-1.cbz for MangaPy default naming convention
             new Regex(
-                @"(vol_)(?<Volume>\d+)",
+                @"(vol_)(?<Volume>\d+(\.\d)?)",
                 MatchOptions,
             RegexTimeout),
         };
@@ -480,7 +480,7 @@ namespace API.Parser
             RegexTimeout),
             // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<ChapterPart>b)?(\s|_|\[|\()",
+                @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
                 MatchOptions,
             RegexTimeout),
             // Yumekui-Merry_DKThias_Chapter21.zip
@@ -810,12 +810,8 @@ namespace API.Parser
                     if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
 
                     var value = match.Groups["Volume"].Value;
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
-                    return $"{@from}-{to}";
-
+                    var hasPart = match.Groups["Part"].Success;
+                    return FormatValue(value, hasPart);
                 }
             }
 
@@ -832,16 +828,30 @@ namespace API.Parser
                     if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
 
                     var value = match.Groups["Volume"].Value;
-                    if (!value.Contains("-")) return RemoveLeadingZeroes(match.Groups["Volume"].Value);
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    var to = RemoveLeadingZeroes(tokens[1]);
-                    return $"{@from}-{to}";
-
+                    var hasPart = match.Groups["Part"].Success;
+                    return FormatValue(value, hasPart);
                 }
             }
 
             return DefaultVolume;
+        }
+
+        private static string FormatValue(string value, bool hasPart)
+        {
+            if (!value.Contains("-"))
+            {
+                return RemoveLeadingZeroes(hasPart ? AddChapterPart(value) : value);
+            }
+
+            var tokens = value.Split("-");
+            var from = RemoveLeadingZeroes(tokens[0]);
+            if (tokens.Length == 2)
+            {
+                var to = RemoveLeadingZeroes(hasPart ? AddChapterPart(tokens[1]) : tokens[1]);
+                return $"{@from}-{to}";
+            }
+
+            return @from;
         }
 
         public static string ParseChapter(string filename)
@@ -854,24 +864,9 @@ namespace API.Parser
                     if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
 
                     var value = match.Groups["Chapter"].Value;
-                    var hasChapterPart = match.Groups["ChapterPart"].Success;
+                    var hasPart = match.Groups["Part"].Success;
 
-                    if (!value.Contains("-"))
-                    {
-                        return RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(value) : value);
-                    }
-
-                    var tokens = value.Split("-");
-                    var from = RemoveLeadingZeroes(tokens[0]);
-                    if (tokens.Length == 2)
-                    {
-                        var to = RemoveLeadingZeroes(hasChapterPart ? AddChapterPart(tokens[1]) : tokens[1]);
-                        return $"{@from}-{to}";
-                    }
-
-                    return from;
-
-
+                    return FormatValue(value, hasPart);
                 }
             }
 
@@ -898,16 +893,8 @@ namespace API.Parser
                     if (match.Groups["Chapter"].Success && match.Groups["Chapter"] != Match.Empty)
                     {
                         var value = match.Groups["Chapter"].Value;
-
-                        if (value.Contains("-"))
-                        {
-                            var tokens = value.Split("-");
-                            var from = RemoveLeadingZeroes(tokens[0]);
-                            var to = RemoveLeadingZeroes(tokens[1]);
-                            return $"{from}-{to}";
-                        }
-
-                        return RemoveLeadingZeroes(match.Groups["Chapter"].Value);
+                        var hasPart = match.Groups["Part"].Success;
+                        return FormatValue(value, hasPart);
                     }
 
                 }
@@ -1026,7 +1013,7 @@ namespace API.Parser
 
         private static string PerformPadding(string number)
         {
-            var num = Int32.Parse(number);
+            var num = int.Parse(number);
             return num switch
             {
                 < 10 => "00" + num,

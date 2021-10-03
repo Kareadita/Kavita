@@ -67,6 +67,7 @@ namespace API.Tests.Parser
         [InlineData("X-Men v1 #201 (September 2007).cbz", "1")]
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
+        [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03.5 Ch. 023.5 - Volume 3 Extras.cbz", "3.5")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -291,18 +292,6 @@ namespace API.Tests.Parser
             Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
-/*
-        private static ParserInfo CreateParserInfo(string series, string chapter, string volume, bool isSpecial = false)
-        {
-          return new ParserInfo()
-          {
-            Chapters = chapter,
-            Volumes = volume,
-            IsSpecial = isSpecial,
-            Series = series,
-          };
-        }
-*/
 
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]

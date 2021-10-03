@@ -8,6 +8,9 @@ namespace API.Entities
     public class Volume : IEntityDate
     {
         public int Id { get; set; }
+        /// <summary>
+        /// A String representation of the volume number. Allows for floats
+        /// </summary>
         public string Name { get; set; }
         public int Number { get; set; }
         public IList<Chapter> Chapters { get; set; }

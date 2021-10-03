@@ -437,7 +437,7 @@ namespace API.Controllers
 
             var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
             var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
-                .OrderBy(c => int.Parse(c.Volume.Name))
+                .OrderBy(c => float.Parse(c.Volume.Name))
                 .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
             var index = lastOrder + 1;
