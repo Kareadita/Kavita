@@ -603,7 +603,7 @@ namespace API.Parser
             var edition = ParseEdition(fileName);
             if (!string.IsNullOrEmpty(edition))
             {
-                ret.Series = CleanTitle(ret.Series.Replace(edition, ""));
+                ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type == LibraryType.Comic);
                 ret.Edition = edition;
             }
 
@@ -628,7 +628,7 @@ namespace API.Parser
 
             if (string.IsNullOrEmpty(ret.Series))
             {
-                ret.Series = CleanTitle(fileName);
+                ret.Series = CleanTitle(fileName, type == LibraryType.Comic);
             }
 
             // Pdfs may have .pdf in the series name, remove that
@@ -676,7 +676,7 @@ namespace API.Parser
 
                 if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
                 {
-                    ret.Series = CleanTitle(folder);
+                    ret.Series = CleanTitle(folder, type == LibraryType.Comic);
                     break;
                 }
 
@@ -795,7 +795,7 @@ namespace API.Parser
                 {
                     if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
                     {
-                        return CleanTitle(match.Groups["Series"].Value);
+                        return CleanTitle(match.Groups["Series"].Value, true);
                     }
                 }
             }
@@ -979,16 +979,16 @@ namespace API.Parser
         /// </example>
         /// </summary>
         /// <param name="title"></param>
+        /// <param name="isComic"></param>
         /// <returns></returns>
-        public static string CleanTitle(string title)
+        public static string CleanTitle(string title, bool isComic = false)
         {
             title = RemoveReleaseGroup(title);
 
             title = RemoveEditionTagHolders(title);
 
-            title = RemoveMangaSpecialTags(title);
+            title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
 
-            title = RemoveComicSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-") || title.EndsWith(","))
