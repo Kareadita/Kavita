@@ -558,9 +558,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         margin = this.user.preferences.bookReaderMargin + '%';
       }
       this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
-      if (this.user.preferences.siteDarkMode && !this.user.preferences.bookReaderDarkMode) {
-        this.user.preferences.bookReaderDarkMode = true;
+      if (!afterSave) {
+        if (this.user.preferences.siteDarkMode && !this.user.preferences.bookReaderDarkMode) {
+          this.user.preferences.bookReaderDarkMode = true;
+        }
       }
+      
       this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
     } else {
       this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};

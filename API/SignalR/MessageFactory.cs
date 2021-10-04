@@ -1,4 +1,4 @@
-﻿using System.Threading;
+﻿using System;
 using API.DTOs.Update;
 
 namespace API.SignalR
@@ -46,19 +46,6 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryEvent(int libraryId, string stage)
-        {
-            return new SignalRMessage()
-            {
-                Name = SignalREvents.ScanLibrary,
-                Body = new
-                {
-                    LibraryId = libraryId,
-                    Stage = stage
-                }
-            };
-        }
-
         public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
         {
             return new SignalRMessage()
@@ -68,6 +55,7 @@ namespace API.SignalR
                 {
                     LibraryId = libraryId,
                     Progress = progress,
+                    EventTime = DateTime.Now
                 }
             };
         }

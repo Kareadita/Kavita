@@ -48,7 +48,7 @@ namespace API.Parser
             MatchOptions,
             RegexTimeout);
 
-        private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9]",
+        private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9\+]",
             MatchOptions,
             RegexTimeout);
 

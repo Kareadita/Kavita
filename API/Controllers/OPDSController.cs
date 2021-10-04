@@ -170,14 +170,14 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
-            IEnumerable <CollectionTagDto> tags;
+            IList<CollectionTagDto> tags;
             if (isAdmin)
             {
-                tags = await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+                tags = (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList();
             }
             else
             {
-                tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
+                tags = (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
             }
 
 
@@ -196,6 +196,14 @@ namespace API.Controllers
                         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}"),
                         CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}")
                     }
+                });
+            }
+
+            if (tags.Count == 0)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Title = "Nothing here",
                 });
             }
 
@@ -298,18 +306,26 @@ namespace API.Controllers
 
             var feed = CreateFeed(readingList.Title + " Reading List", $"{apiKey}/reading-list/{readingListId}", apiKey);
 
-            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
+            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
             foreach (var item in items)
             {
                 feed.Entries.Add(new FeedEntry()
                 {
                     Id = item.ChapterId.ToString(),
-                    Title = "Chapter " + item.ChapterNumber,
+                    Title = $"{item.SeriesName} Chapter {item.ChapterNumber}",
                     Links = new List<FeedLink>()
                     {
                         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{item.SeriesId}/volume/{item.VolumeId}/chapter/{item.ChapterId}"),
                         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={item.ChapterId}")
                     }
+                });
+            }
+
+            if (items.Count == 0)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Title = "Nothing here",
                 });
             }
 
@@ -371,6 +387,14 @@ namespace API.Controllers
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
             }
 
+            if (recentlyAdded.Count == 0)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Title = "Nothing here",
+                });
+            }
+
 
             return CreateXmlResult(SerializeXml(feed));
         }
@@ -400,6 +424,14 @@ namespace API.Controllers
             foreach (var seriesDto in pagedList)
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
+            }
+
+            if (pagedList.Count == 0)
+            {
+                feed.Entries.Add(new FeedEntry()
+                {
+                    Title = "Nothing here",
+                });
             }
 
             return CreateXmlResult(SerializeXml(feed));

@@ -24,7 +24,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
-  scanInProgress: {[key: number]: boolean} = {};
+  scanInProgress: {[key: number]: {progress: boolean, timestamp?: string}} = {};
   libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
 
   private readonly onDestroy = new Subject<void>();
@@ -41,9 +41,12 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
       if (event.event != EVENTS.ScanLibraryProgress) return;
       
       const scanEvent = event.payload as ScanLibraryProgressEvent;
-      this.scanInProgress[scanEvent.libraryId] = scanEvent.progress !== 100;
+      this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 100};
+      if (scanEvent.progress === 0) {
+        this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;
+      }
       
-      if (this.scanInProgress[scanEvent.libraryId] === false && scanEvent.progress === 100) {
+      if (this.scanInProgress[scanEvent.libraryId].progress === false && scanEvent.progress === 100) {
         this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
           const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
           const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);

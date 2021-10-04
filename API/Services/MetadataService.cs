@@ -139,6 +139,8 @@ namespace API.Services
         {
             var madeUpdate = false;
             if (series == null) return false;
+
+            // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
             if (ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
             {
                 series.Volumes ??= new List<Volume>();
