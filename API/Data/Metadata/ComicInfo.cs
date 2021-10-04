@@ -28,6 +28,7 @@
         /// </summary>
         public float UserRating { get; set; }
 
+        public string AlternateSeries { get; set; }
         public string StoryArc { get; set; }
         public string SeriesGroup { get; set; }
         public string AlternativeSeries { get; set; }
