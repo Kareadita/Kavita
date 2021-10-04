@@ -95,7 +95,7 @@ namespace API.Services
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public static string WriteCoverThumbnail(Stream stream, string fileName)
     {
-        using var thumbnail = NetVips.Image.ThumbnailStream(stream, ThumbnailWidth);
+        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
         thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
         return filename;

@@ -1,16 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
-using API.Helpers;
-using API.Interfaces;
 using API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -21,8 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.IO;
-using NetVips;
 using Sentry;
 
 namespace API

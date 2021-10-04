@@ -1,5 +1,4 @@
 ﻿using API.Entities.Enums;
-using Newtonsoft.Json;
 
 namespace API.DTOs.Reader
 {
