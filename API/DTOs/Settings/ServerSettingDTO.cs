@@ -1,4 +1,4 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs.Settings
 {
     public class ServerSettingDto
     {

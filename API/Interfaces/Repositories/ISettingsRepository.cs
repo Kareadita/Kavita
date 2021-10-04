@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 

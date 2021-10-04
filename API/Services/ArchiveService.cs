@@ -337,7 +337,6 @@ namespace API.Services
                                                                                        .Parser
                                                                                        .MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
-                        break;
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetComicInfo] This archive cannot be read: {ArchivePath}", archivePath);

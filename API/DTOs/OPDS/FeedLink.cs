@@ -23,7 +23,7 @@ namespace API.DTOs.OPDS
         public string Title { get; set; }
 
         [XmlAttribute("count", Namespace = "http://vaemendis.net/opds-pse/ns")]
-        public int TotalPages { get; set; } = 0;
+        public int TotalPages { get; set; }
 
         public bool ShouldSerializeTotalPages()
         {
