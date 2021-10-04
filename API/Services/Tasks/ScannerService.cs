@@ -131,6 +131,9 @@ namespace API.Services.Tasks
            // Tell UI that this series is done
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
                cancellationToken: token);
+           await CleanupDbEntities();
+           BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+           BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
        }
 
        private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
@@ -152,10 +155,6 @@ namespace API.Services.Tasks
                _logger.LogInformation(
                    "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                    totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
-
-               await CleanupDbEntities();
-               BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, false));
-               BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
            }
        }
 
@@ -225,7 +224,7 @@ namespace API.Services.Tasks
                    "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
 
-           await CleanupAbandonedChapters();
+           await CleanupDbEntities();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,

@@ -19,6 +19,9 @@
         public string Web { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
+        /// <summary>
+        /// Rating based on the content. Think PG-13, R for movies
+        /// </summary>
         public string AgeRating { get; set; }
         /// <summary>
         /// User's rating of the content
@@ -32,7 +35,7 @@
 
 
         /// <summary>
-        /// This is the Author. For Books, we map creator tag in OPF to this field
+        /// This is the Author. For Books, we map creator tag in OPF to this field. Comma separated if multiple.
         /// </summary>
         public string Writer { get; set; } // TODO: Validate if we should make this a list of writers
         public string Penciller { get; set; }

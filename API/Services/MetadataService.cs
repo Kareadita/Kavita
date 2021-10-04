@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -183,10 +182,11 @@ namespace API.Services
 
             if (series.Format is MangaFormat.Archive or MangaFormat.Epub)
             {
-                var summary = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-                if (!string.IsNullOrEmpty(series.Summary))
+                var info = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
+
+                if (string.IsNullOrEmpty(series.Summary) && !string.IsNullOrEmpty(info.Summary))
                 {
-                    series.Summary = summary;
+                    series.Summary = info.Summary;
                     return true;
                 }
             }

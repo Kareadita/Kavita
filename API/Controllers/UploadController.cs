@@ -7,7 +7,6 @@ using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Controllers
 {

@@ -36,7 +36,8 @@ namespace API.Benchmark
 
         private static void NormalizeNew(string name)
         {
-            NormalizeRegex.Replace(name, string.Empty).ToLower();
+            // ReSharper disable once UnusedVariable
+            var ret = NormalizeRegex.Replace(name, string.Empty).ToLower();
         }
 
 

@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.IO;
 using System.Threading.Tasks;
 using API.Extensions;
 using API.Interfaces;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 
 namespace API.Controllers
 {
