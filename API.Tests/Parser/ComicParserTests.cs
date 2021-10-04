@@ -1,9 +1,21 @@
+using System;
+using System.Collections.Generic;
+using API.Entities.Enums;
+using API.Parser;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Parser
 {
     public class ComicParserTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public ComicParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Theory]
         [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
@@ -36,6 +48,9 @@ namespace API.Tests.Parser
         [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "Chew")]
         [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "Chew Script Book")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition Book")]
+        [InlineData("Cyberpunk 2077 - Your Voice 01", "Cyberpunk 2077")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
+        [InlineData("Batgirl V2000 #57", "Batgirl")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -66,6 +81,8 @@ namespace API.Tests.Parser
         [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "0")]
         [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "1")]
         [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "2000")]
+        [InlineData("Batgirl V2000 #57", "2000")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -100,6 +117,8 @@ namespace API.Tests.Parser
         [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "1")]
         [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "0")]
         [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "57")]
+        [InlineData("Batgirl V2000 #57", "57")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
@@ -108,9 +127,50 @@ namespace API.Tests.Parser
 
         [Theory]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", true)]
-        public void ParseComcSpecialTest(string input, bool expected)
+        public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
+        }
+
+        [Fact]
+        public void ParseInfoTest()
+        {
+            const string rootPath = @"E:/Comics/";
+            var expected = new Dictionary<string, ParserInfo>();
+            var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Teen Titans", Volumes = "0",
+                 Chapters = "0", Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath
+             });
+
+            foreach (var file in expected.Keys)
+            {
+                var expectedInfo = expected[file];
+                var actual = API.Parser.Parser.Parse(file, rootPath);
+                if (expectedInfo == null)
+                {
+                    Assert.Null(actual);
+                    return;
+                }
+                Assert.NotNull(actual);
+                _testOutputHelper.WriteLine($"Validating {file}");
+                Assert.Equal(expectedInfo.Format, actual.Format);
+                _testOutputHelper.WriteLine("Format ✓");
+                Assert.Equal(expectedInfo.Series, actual.Series);
+                _testOutputHelper.WriteLine("Series ✓");
+                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
+                _testOutputHelper.WriteLine("Chapters ✓");
+                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
+                _testOutputHelper.WriteLine("Volumes ✓");
+                Assert.Equal(expectedInfo.Edition, actual.Edition);
+                _testOutputHelper.WriteLine("Edition ✓");
+                Assert.Equal(expectedInfo.Filename, actual.Filename);
+                _testOutputHelper.WriteLine("Filename ✓");
+                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
+                _testOutputHelper.WriteLine("FullFilePath ✓");
+            }
         }
 
     }
