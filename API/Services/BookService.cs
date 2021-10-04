@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using API.Data.Metadata;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
@@ -163,6 +164,45 @@ namespace API.Services
                 styleRule.Text = ".reading-section " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+
+        public ComicInfo GetComicInfo(string filePath)
+        {
+            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return null;
+
+            try
+            {
+                using var epubBook = EpubReader.OpenBook(filePath);
+                var publicationDate =
+                    epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
+
+                var info =  new ComicInfo()
+                {
+                    Summary = epubBook.Schema.Package.Metadata.Description,
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators),
+                    Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
+                    Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
+                    Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                };
+                // Parse tags not exposed via Library
+                foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
+                {
+                    switch (metadataItem.Name)
+                    {
+                        case "calibre:rating":
+                            info.UserRating = float.Parse(metadataItem.Content);
+                            break;
+                    }
+                }
+
+                return info;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[GetComicInfo] There was an exception getting metadata");
+            }
+
+            return null;
         }
 
         public string GetSummaryInfo(string filePath)

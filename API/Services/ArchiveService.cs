@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Comparators;
+using API.Data.Metadata;
 using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
@@ -289,6 +290,69 @@ namespace API.Services
                 }
             }
 
+
+            return null;
+        }
+
+        public ComicInfo GetComicInfo(string archivePath)
+        {
+            if (!IsValidArchive(archivePath)) return null;
+
+            try
+            {
+                if (!File.Exists(archivePath)) return null;
+
+                var libraryHandler = CanOpen(archivePath);
+                switch (libraryHandler)
+                {
+                    case ArchiveLibrary.Default:
+                    {
+                        using var archive = ZipFile.OpenRead(archivePath);
+                        var entry = archive.Entries.SingleOrDefault(x =>
+                            !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
+                            && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
+                            && !Path.GetFileNameWithoutExtension(x.Name)
+                                .StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
+                            && Parser.Parser.IsXml(x.FullName));
+                        if (entry != null)
+                        {
+                            using var stream = entry.Open();
+                            var serializer = new XmlSerializer(typeof(ComicInfo));
+                            return (ComicInfo) serializer.Deserialize(stream);
+                        }
+
+                        break;
+                    }
+                    case ArchiveLibrary.SharpCompress:
+                    {
+                        using var archive = ArchiveFactory.Open(archivePath);
+                        return FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
+                                                                               && !Parser.Parser
+                                                                                   .HasBlacklistedFolderInPath(
+                                                                                       Path.GetDirectoryName(
+                                                                                           entry.Key) ?? string.Empty)
+                                                                               && !Path
+                                                                                   .GetFileNameWithoutExtension(
+                                                                                       entry.Key).StartsWith(Parser
+                                                                                       .Parser
+                                                                                       .MacOsMetadataFileStartsWith)
+                                                                               && Parser.Parser.IsXml(entry.Key)));
+                        break;
+                    }
+                    case ArchiveLibrary.NotSupported:
+                        _logger.LogWarning("[GetComicInfo] This archive cannot be read: {ArchivePath}", archivePath);
+                        return null;
+                    default:
+                        _logger.LogWarning(
+                            "[GetComicInfo] There was an exception when reading archive stream: {ArchivePath}",
+                            archivePath);
+                        return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
+            }
 
             return null;
         }
