@@ -356,63 +356,6 @@ namespace API.Services
             return null;
         }
 
-        public string GetSummaryInfo(string archivePath)
-        {
-            var summary = string.Empty;
-            if (!IsValidArchive(archivePath)) return summary;
-
-            ComicInfo info = null;
-            try
-            {
-                if (!File.Exists(archivePath)) return summary;
-
-                var libraryHandler = CanOpen(archivePath);
-                switch (libraryHandler)
-                {
-                    case ArchiveLibrary.Default:
-                    {
-                        using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
-                                                                         && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
-                                                                         && !Path.GetFileNameWithoutExtension(x.Name).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
-                                                                         && Parser.Parser.IsXml(x.FullName));
-                        if (entry != null)
-                        {
-                            using var stream = entry.Open();
-                            var serializer = new XmlSerializer(typeof(ComicInfo));
-                            info = (ComicInfo) serializer.Deserialize(stream);
-                        }
-                        break;
-                    }
-                    case ArchiveLibrary.SharpCompress:
-                    {
-                        using var archive = ArchiveFactory.Open(archivePath);
-                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
-                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-                                                                               && !Path.GetFileNameWithoutExtension(entry.Key).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
-                                                                               && Parser.Parser.IsXml(entry.Key)));
-                        break;
-                    }
-                    case ArchiveLibrary.NotSupported:
-                        _logger.LogWarning("[GetSummaryInfo] This archive cannot be read: {ArchivePath}", archivePath);
-                        return summary;
-                    default:
-                        _logger.LogWarning("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}", archivePath);
-                        return summary;
-                }
-
-                if (info != null)
-                {
-                    return info.Summary;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
-            }
-
-            return summary;
-        }
 
         private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {

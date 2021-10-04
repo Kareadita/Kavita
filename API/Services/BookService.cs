@@ -204,24 +204,6 @@ namespace API.Services
             return null;
         }
 
-        public string GetSummaryInfo(string filePath)
-        {
-            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return string.Empty;
-
-
-            try
-            {
-                using var epubBook = EpubReader.OpenBook(filePath);
-                return epubBook.Schema.Package.Metadata.Description;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
-            }
-
-            return string.Empty;
-        }
-
         private bool IsValidFile(string filePath)
         {
             if (!File.Exists(filePath))

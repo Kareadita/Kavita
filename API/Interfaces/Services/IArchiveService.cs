@@ -13,7 +13,6 @@ namespace API.Interfaces.Services
         int GetNumberOfPagesFromArchive(string archivePath);
         string GetCoverImage(string archivePath, string fileName);
         bool IsValidArchive(string archivePath);
-        string GetSummaryInfo(string archivePath);
         ComicInfo GetComicInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
