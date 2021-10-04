@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using API.Helpers;
@@ -41,8 +42,9 @@ namespace API.Extensions
         public static void AddCacheHeader(this HttpResponse response, string filename)
         {
             if (filename == null || filename.Length <= 0) return;
+            var hashContent = filename + File.GetLastWriteTimeUtc(filename);
             using var sha1 = new System.Security.Cryptography.SHA256CryptoServiceProvider();
-            response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(Encoding.UTF8.GetBytes(filename)).Select(x => x.ToString("X2"))));
+            response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
         }
 
     }
