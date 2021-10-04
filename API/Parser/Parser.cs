@@ -555,7 +555,7 @@ namespace API.Parser
         /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
         public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
         {
-            var fileName = Path.GetFileName(filePath);
+            var fileName = Path.GetFileNameWithoutExtension(filePath);
             ParserInfo ret;
 
             if (IsEpub(filePath))
@@ -565,7 +565,7 @@ namespace API.Parser
                     Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
                     Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
                     Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
-                    Filename = fileName,
+                    Filename = Path.GetFileName(filePath),
                     Format = ParseFormat(filePath),
                     FullFilePath = filePath
                 };
@@ -577,14 +577,14 @@ namespace API.Parser
                     Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
                     Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
                     Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
-                    Filename = fileName,
+                    Filename = Path.GetFileName(filePath),
                     Format = ParseFormat(filePath),
                     Title = Path.GetFileNameWithoutExtension(fileName),
                     FullFilePath = filePath
                 };
             }
 
-            if (IsImage(filePath) && IsCoverImage(fileName)) return null;
+            if (IsImage(filePath) && IsCoverImage(filePath)) return null;
 
             if (IsImage(filePath))
             {
@@ -632,7 +632,7 @@ namespace API.Parser
             }
 
             // Pdfs may have .pdf in the series name, remove that
-            if (IsPdf(fileName) && ret.Series.ToLower().EndsWith(".pdf"))
+            if (IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
             {
                 ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
             }
@@ -915,11 +915,12 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "").Trim();
+                        title = title.Replace(match.Value, string.Empty).Trim();
                     }
                 }
             }
 
+            // TODO: Since we have loops like this, think about using a method
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);
@@ -927,7 +928,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "").Trim();
+                        title = title.Replace(match.Value, string.Empty).Trim();
                     }
                 }
             }
