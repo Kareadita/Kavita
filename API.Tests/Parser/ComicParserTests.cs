@@ -49,6 +49,7 @@ namespace API.Tests.Parser
         [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "Chew Script Book")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition Book")]
         [InlineData("Cyberpunk 2077 - Your Voice 01", "Cyberpunk 2077")]
+        [InlineData("Cyberpunk 2077 #01", "Cyberpunk 2077")]
         [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
         [InlineData("Batgirl V2000 #57", "Batgirl")]
         public void ParseComicSeriesTest(string filename, string expected)

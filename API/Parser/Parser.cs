@@ -312,6 +312,11 @@ namespace API.Parser
                 @"^(?<Series>.+?)(\s|_|-)?(?:Ep\.?)(\s|_|-)+\d+",
                 MatchOptions,
                 RegexTimeout),
+            // Batgirl Vol.2000 #57 (December, 2004)
+            new Regex(
+                @"^(?<Series>.+?)Vol\.?\s?#?(?:\d+)",
+                MatchOptions,
+                RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.+?)(?: \d+)",
@@ -351,6 +356,11 @@ namespace API.Parser
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
                 MatchOptions,
             RegexTimeout),
+            // Batgirl Vol.2000 #57 (December, 2004)
+            new Regex(
+                @"^(?<Series>.+?)(?:\s|_)vol\.?\s?(?<Volume>\d+)",
+                MatchOptions,
+                RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
@@ -378,6 +388,11 @@ namespace API.Parser
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
                 @"^(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                MatchOptions,
+                RegexTimeout),
+            // Batgirl Vol.2000 #57 (December, 2004)
+            new Regex(
+                @"^(?<Series>.+?)(?:vol\.?\d+)\s#(?<Chapter>\d+)",
                 MatchOptions,
                 RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
