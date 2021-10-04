@@ -185,7 +185,7 @@ namespace API.Services
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return false;
 
             var comicInfo = GetComicInfo(series.Format, firstFile);
-            if (string.IsNullOrEmpty(comicInfo.Summary)) return false;
+            if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
 
             series.Summary = comicInfo.Summary;
             return true;
