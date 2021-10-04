@@ -13,6 +13,8 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import { ChangeCoverImageModalComponent } from '../change-cover-image/change-cover-image-modal.component';
+import { LibraryType } from '../../../_models/library';
+import { LibraryService } from '../../../_services/library.service';
 
 
 
@@ -39,12 +41,16 @@ export class CardDetailsModalComponent implements OnInit {
   isAdmin: boolean = false;
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
+  libraryType: LibraryType = LibraryType.Manga; 
 
+  get LibraryType(): typeof LibraryType {
+    return LibraryType;
+  }
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, private router: Router) { }
+    private actionService: ActionService, private router: Router, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -53,6 +59,10 @@ export class CardDetailsModalComponent implements OnInit {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
       }
+    });
+
+    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
+      this.libraryType = type;
     });
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this)).filter(item => item.action !== Action.Edit);

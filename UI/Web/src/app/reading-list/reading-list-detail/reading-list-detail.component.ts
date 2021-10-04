@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -12,6 +13,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
+import { LibraryService } from '../../_services/library.service';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -19,7 +21,6 @@ import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/drag
   styleUrls: ['./reading-list-detail.component.scss']
 })
 export class ReadingListDetailComponent implements OnInit {
-
   items: Array<ReadingListItem> = [];
   listId!: number;
   readingList!: ReadingList;
@@ -32,6 +33,11 @@ export class ReadingListDetailComponent implements OnInit {
   hasDownloadingRole: boolean = false;
   downloadInProgress: boolean = false;
 
+  libraryType: LibraryType = LibraryType.Manga; 
+
+  get LibraryType(): typeof LibraryType {
+    return LibraryType;
+  }
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -39,7 +45,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService, private libraryService: LibraryService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -117,6 +123,10 @@ export class ReadingListDetailComponent implements OnInit {
 
     if (item.seriesFormat === MangaFormat.EPUB) {
       return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
+    }
+
+    if (item.libraryId === 1) {
+      return 'Issue #' + item.chapterNumber;
     }
 
     return 'Chapter ' + item.chapterNumber;
