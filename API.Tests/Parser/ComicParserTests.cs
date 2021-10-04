@@ -1,4 +1,4 @@
-﻿using Xunit;
+using Xunit;
 
 namespace API.Tests.Parser
 {
@@ -30,6 +30,12 @@ namespace API.Tests.Parser
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
         [InlineData("spawn-123", "spawn")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "Batman Beyond")]
+        [InlineData("Batman Beyond 001 (2012)", "Batman Beyond")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "Batman Beyond 2.0")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "Batman - Catwoman")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "Chew")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "Chew Script Book")]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition Book")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -54,6 +60,12 @@ namespace API.Tests.Parser
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("spawn-123", "0")]
+        [InlineData("Batman Beyond 04 (of 6) (1999)", "0")]
+        [InlineData("Batman Beyond 001 (2012)", "0")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "0")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "0")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "1")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -83,9 +95,23 @@ namespace API.Tests.Parser
         [InlineData("Batman Beyond 04 (of 6) (1999)", "4")]
         [InlineData("Invincible 052 (c2c) (2008) (Minutemen-TheCouple)", "52")]
         [InlineData("Y - The Last Man #001", "1")]
+        [InlineData("Batman Beyond 001 (2012)", "1")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "1")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "1")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "0")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
         }
+
+
+        [Theory]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", true)]
+        public void ParseComcSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
+        }
+
     }
 }

@@ -11,6 +11,7 @@ namespace API.Tests.Parser
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]
         [InlineData("Beastars Extra 01", false)]
+        [InlineData("Batman Beyond - Return of the Joker (2001) SP01", true)]
         public void HasSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  HasSpecialMarker(input));
@@ -40,6 +41,7 @@ namespace API.Tests.Parser
         [InlineData("[ReleaseGroup] The Title", "The Title")]
         [InlineData("[ReleaseGroup]_The_Title", "The Title")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", "Kasumi Otoko no Ko v1.1")]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition")]
         public void CleanTitleTest(string input, string expected)
         {
             Assert.Equal(expected, CleanTitle(input));

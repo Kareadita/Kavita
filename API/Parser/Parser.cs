@@ -272,6 +272,11 @@ namespace API.Parser
                 @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
                 MatchOptions,
             RegexTimeout),
+            // Batman Beyond 2.0 001 (2013)
+            new Regex(
+                @"^(?<Series>.+?\S\.\d) (?<Chapter>\d+)",
+                MatchOptions,
+            RegexTimeout),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
             @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
@@ -341,44 +346,11 @@ namespace API.Parser
 
         private static readonly Regex[] ComicVolumeRegex = new[]
         {
-            // // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
-            // new Regex(
-            //     @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
-            //     MatchOptions,
-            // RegexTimeout),
-            // // 01 Spider-Man & Wolverine 01.cbr
-            // new Regex(
-            //     @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
-            //     MatchOptions,
-            // RegexTimeout),
-            // // Batman & Wildcat (1 of 3)
-            // new Regex(
-            //     @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
-            //     MatchOptions,
-            // RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
                 MatchOptions,
             RegexTimeout),
-            // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
-            // BUG: Negative lookbehind has to be fixed width
-            // NOTE: The case this is built for does not make much sense.
-            // new Regex(
-            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: |_)(?<!of )(?<Volume>\d+)",
-            //     MatchOptions,
-            // RegexTimeout),
-
-            // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
-            // new Regex(
-            //     @"^(?<Series>.+?)(?<!c(hapter)|i(ssue))(?<!of)(?: (?<Volume>\d+))",
-            //     MatchOptions,
-            // RegexTimeout),
-            // // Batman & Robin the Teen Wonder #0
-            // new Regex(
-            //     @"^(?<Series>.*)(?: |_)#(?<Volume>\d+)",
-            //     MatchOptions,
-            // RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
@@ -391,6 +363,11 @@ namespace API.Parser
             // Batman Beyond 04 (of 6) (1999)
             new Regex(
                 @"(?<Series>.+?)(?<Chapter>\d+)(\s|_|-)?\(of",
+                MatchOptions,
+            RegexTimeout),
+            // Batman Beyond 2.0 001 (2013)
+            new Regex(
+                @"^(?<Series>.+?\S\.\d) (?<Chapter>\d+)",
                 MatchOptions,
             RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
@@ -547,6 +524,15 @@ namespace API.Parser
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
                 @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|Bonus)",
+                MatchOptions,
+            RegexTimeout),
+        };
+
+        private static readonly Regex[] ComicSpecialRegex =
+        {
+            // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+            new Regex(
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|TPB \d.+?|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side( |_)Stories|Bonus)",
                 MatchOptions,
             RegexTimeout),
         };
@@ -767,6 +753,23 @@ namespace API.Parser
             return string.Empty;
         }
 
+        public static string ParseComicSpecial(string filePath)
+        {
+            foreach (var regex in ComicSpecialRegex)
+            {
+                var matches = regex.Matches(filePath);
+                foreach (Match match in matches)
+                {
+                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
+                    {
+                        return match.Groups["Special"].Value;
+                    }
+                }
+            }
+
+            return string.Empty;
+        }
+
         public static string ParseSeries(string filename)
         {
             foreach (var regex in MangaSeriesRegex)
@@ -932,9 +935,26 @@ namespace API.Parser
             return title;
         }
 
-        private static string RemoveSpecialTags(string title)
+        private static string RemoveMangaSpecialTags(string title)
         {
             foreach (var regex in MangaSpecialRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, "").Trim();
+                    }
+                }
+            }
+
+            return title;
+        }
+
+        private static string RemoveComicSpecialTags(string title)
+        {
+            foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(title);
                 foreach (Match match in matches)
@@ -965,7 +985,9 @@ namespace API.Parser
 
             title = RemoveEditionTagHolders(title);
 
-            title = RemoveSpecialTags(title);
+            title = RemoveMangaSpecialTags(title);
+
+            title = RemoveComicSpecialTags(title);
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-") || title.EndsWith(","))
