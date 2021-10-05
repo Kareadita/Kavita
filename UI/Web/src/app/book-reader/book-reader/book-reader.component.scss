@@ -95,22 +95,16 @@ $primary-color: #0062cc;
 }
 
 .dark-mode {
-    .reading-bar, .book-title, .drawer-body {
+    .reading-bar, .book-title, .drawer-body, .drawer-container {
         background-color: $dark-form-background-no-opacity;
     }
     button {
         background-color: $dark-form-background-no-opacity;
     }
-
-    .drawer-body {
-        * {
-            background-color: $dark-form-background-no-opacity;
-        }
-    }
 }
 
 ::ng-deep .dark-mode .drawer-container {
-    .header, body {
+    .header, body, * {
         background-color: $dark-form-background-no-opacity !important;
     }
 }
