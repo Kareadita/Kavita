@@ -881,7 +881,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getDarkModeBackgroundColor() {
-    return this.darkMode ? '#292929' : '#fff';
+    return this.darkMode ? '#010409' : '#fff';
   }
 
   setOverrideStyles() {
