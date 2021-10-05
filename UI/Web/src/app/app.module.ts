@@ -21,13 +21,6 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
-
-import * as Sentry from '@sentry/angular';
-import { environment } from 'src/environments/environment';
-import { version } from 'package.json';
-import { Router } from '@angular/router';
-import { RewriteFrames as RewriteFramesIntegration } from '@sentry/integrations';
-import { Dedupe as DedupeIntegration } from '@sentry/integrations';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
@@ -37,51 +30,6 @@ import { InProgressComponent } from './in-progress/in-progress.component';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-
-let sentryProviders: any[] = [];
-
-if (environment.production) {
-  Sentry.init({
-    dsn: 'https://db1a1f6445994b13a6f479512aecdd48@o641015.ingest.sentry.io/5757426',
-    environment: environment.production ? 'prod' : 'dev',
-    release: version,
-    integrations: [
-      new Sentry.Integrations.GlobalHandlers({
-        onunhandledrejection: true,
-        onerror: true
-      }),
-      new DedupeIntegration(),
-      new RewriteFramesIntegration(),
-    ],
-    ignoreErrors: [new RegExp(/\/api\/admin/)],
-    tracesSampleRate: 0,
-  });
-
-  Sentry.configureScope(scope => {
-    scope.setUser({
-      username: 'Not authorized'
-    });
-    scope.setTag('production', environment.production);
-    scope.setTag('version', version);
-  });
-
-  sentryProviders = [{
-    provide: ErrorHandler,
-    useValue: Sentry.createErrorHandler({
-      showDialog: false,
-    }),
-  },
-  {
-    provide: Sentry.TraceService,
-    deps: [Router],
-  },
-  {
-    provide: APP_INITIALIZER,
-    useFactory: () => () => {},
-    deps: [Sentry.TraceService],
-    multi: true,
-  }];
-}
 
 @NgModule({
   declarations: [
@@ -133,8 +81,7 @@ if (environment.production) {
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
-    {provide: SAVER, useFactory: getSaver},
-    ...sentryProviders,
+    {provide: SAVER, useFactory: getSaver}
   ],
   entryComponents: [],
   bootstrap: [AppComponent]

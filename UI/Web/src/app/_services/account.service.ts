@@ -5,7 +5,6 @@ import { map, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
-import * as Sentry from "@sentry/angular";
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
 
@@ -63,12 +62,6 @@ export class AccountService implements OnDestroy {
       user.roles = [];
       const roles = this.getDecodedToken(user.token).role;
       Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
-      Sentry.setContext('admin', {'admin': this.hasAdminRole(user)});
-      Sentry.configureScope(scope => {
-        scope.setUser({
-          username: user.username
-        });
-      });
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(this.lastLoginKey, user.username);
