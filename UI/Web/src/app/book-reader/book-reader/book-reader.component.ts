@@ -205,18 +205,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return ReadingDirection;
   }
 
-  get IsPrevDisabled() {
+  get IsPrevDisabled(): boolean {
     if (this.readingDirection === ReadingDirection.LeftToRight) {
+      // Acting as Previous button
       return this.prevPageDisabled && this.pageNum === 0;
-    } 
-    return this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+    } else {
+      // Acting as a Next button
+      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+    }
   }
 
-  get IsNextDisabled() {
+  get IsNextDisabled(): boolean {
     if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+      // Acting as Next button
+      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+    } else {
+      // Acting as Previous button
+      return this.prevPageDisabled && this.pageNum === 0;
     }
-    return this.prevPageDisabled && this.pageNum === 0;
   }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,

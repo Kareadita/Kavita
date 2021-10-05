@@ -100,15 +100,6 @@
         </app-drawer>
     </div>
 
-    <!-- This pushes down the page. Need to overlay  
-        <ng-container *ngIf="isLoading">
-        <div class="d-flex justify-content-center m-5">
-            <div class="spinner-border text-secondary loading" role="status">
-                <span class="invisible">Loading...</span>
-            </div>
-        </div>
-    </ng-container> -->
-    
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
         <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
 
@@ -138,7 +129,7 @@
                 [disabled]="IsNextDisabled" 
                 (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
                 <span class="phone-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}}&nbsp;</span>
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 >= maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 > maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
             </button>
         </div>
     </ng-template>
