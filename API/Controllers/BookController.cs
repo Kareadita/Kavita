@@ -68,7 +68,6 @@ namespace API.Controllers
             var key = BookService.CleanContentKeys(file);
             if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
 
-            // TODO: Optimize this by sending data back the new way
             var bookFile = book.Content.AllFiles[key];
             var content = await bookFile.ReadContentAsBytesAsync();
 
