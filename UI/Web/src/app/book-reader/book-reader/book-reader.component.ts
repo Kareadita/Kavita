@@ -18,7 +18,6 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Stack } from 'src/app/shared/data-structures/stack';
-import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScrollService } from 'src/app/scroll.service';
@@ -185,10 +184,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     code {
         color: #e83e8c !important;
     }
-
-    // .btn-icon {
-    //     background-color: transparent;
-    // }
 
     :link, a {
         color: #8db2e5 !important;
@@ -547,16 +542,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  resetSettings(afterSave: boolean = false) {
+  resetSettings() {
     const windowWidth = window.innerWidth
       || document.documentElement.clientWidth
       || document.body.clientWidth;
 
     let margin = '15%';
     if (windowWidth <= 700) {
-      if (afterSave && this.user.preferences.bookReaderMargin !== 0) {
-        this.toastr.info('Margin will be reset to 0% on mobile. You do not have to save for settings to take effect.');
-      }
       margin = '0%';
     }
     if (this.user) {
@@ -564,11 +556,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         margin = this.user.preferences.bookReaderMargin + '%';
       }
       this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
-      if (!afterSave) {
-        if (this.user.preferences.siteDarkMode && !this.user.preferences.bookReaderDarkMode) {
-          this.user.preferences.bookReaderDarkMode = true;
-        }
-      }
       
       this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
     } else {
@@ -900,33 +887,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.renderer.removeChild(head, this.darkModeStyleElem);
     }
-  }
-
-  saveSettings() {
-    if (this.user === undefined) return;
-    const modelSettings = this.settingsForm.value;
-    const data: Preferences = {
-      readingDirection: this.user.preferences.readingDirection, 
-      scalingOption: this.user.preferences.scalingOption, 
-      pageSplitOption: this.user.preferences.pageSplitOption, 
-      autoCloseMenu: this.user.preferences.autoCloseMenu,
-      readerMode: this.user.preferences.readerMode,
-      bookReaderDarkMode: this.darkMode,
-      bookReaderFontFamily: modelSettings.bookReaderFontFamily,
-      bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
-      bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
-      bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
-      bookReaderTapToPaginate: this.clickToPaginate,
-      bookReaderReadingDirection: this.readingDirection,
-      siteDarkMode: this.user.preferences.siteDarkMode,
-    };
-    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
-      this.toastr.success('User settings updated');
-      if (this.user) {
-        this.user.preferences = updatedPrefs;
-      }
-      this.resetSettings(true);
-    });
   }
 
   toggleDrawer() {
