@@ -11,7 +11,7 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.27.0.35380">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.29.0.36737">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
