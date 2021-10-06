@@ -49,6 +49,10 @@ $primary-color: #0062cc;
     padding-right: 2px;
 }
 
+.fixed-top {
+    z-index: 1022;
+}
+
 .dark-mode {
 
     color: #dcdcdc !important;
@@ -199,12 +203,4 @@ $primary-color: #0062cc;
     i {
         background-color: unset;
     }
-}
-
-.drawer-container {
-    box-shadow: 1px 1px 7px 2px rgb(0 0 0 / 70%);
-}
-
-.book-content {
-    padding-bottom: 58px;
 }

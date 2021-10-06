@@ -100,7 +100,7 @@
     </div>
 
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
-        <div #readingHtml class="book-content" [innerHtml]="page" *ngIf="page !== undefined"></div>
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px'}" [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
         </div>
