@@ -195,7 +195,7 @@ namespace Kavita.Common
           var json = File.ReadAllText(filePath);
           if (!json.Contains("BaseUrl"))
           {
-              var lastComma = json.LastIndexOf(",");
+              var lastComma = json.LastIndexOf(",", StringComparison.Ordinal);
               json = json.Substring(0, lastComma) + (",\n  \"BaseUrl\": " + currentPort) + json.Substring(lastComma, json.Length);
           }
           else
