@@ -85,11 +85,14 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
-                if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.Port + string.Empty != setting.Value)
+                if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.BaseUrl + string.Empty != setting.Value)
                 {
-                    setting.Value = updateSettingsDto.Port + string.Empty;
-                    // Port is managed in appSetting.json
-                    Configuration.Port = updateSettingsDto.Port;
+                    var path = !updateSettingsDto.BaseUrl.StartsWith("/")
+                        ? $"/{updateSettingsDto.BaseUrl}"
+                        : updateSettingsDto.BaseUrl;
+                    setting.Value = path;
+                    // BaseUrl is managed in appSetting.json
+                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
