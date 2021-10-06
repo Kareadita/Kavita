@@ -104,7 +104,7 @@ $primary-color: #0062cc;
 }
 
 ::ng-deep .dark-mode .drawer-container {
-    .header, body, * {
+    .header, body, *:not(.progress-bar) {
         background-color: $dark-form-background-no-opacity !important;
     }
 }
