@@ -14,7 +14,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { BookService } from '../book.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Stack } from 'src/app/shared/data-structures/stack';
@@ -165,7 +165,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [1] });
   /**
    * Last seen progress part path
    */
@@ -224,7 +223,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService) {
+    private scrollService: ScrollService, private utilityService: UtilityService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -297,6 +296,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
 
+    
+        // Find the element that is on screen to bookmark against
+        const intersectingEntries = Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+                                .filter(element => !element.classList.contains('no-observe'))
+                                .filter(entry => {
+                                  return this.utilityService.isInViewport(entry, this.topOffset);
+                                });
+
+        intersectingEntries.sort((a: Element, b: Element) => {
+          const aTop = a.getBoundingClientRect().top;
+          const bTop = b.getBoundingClientRect().top;
+          if (aTop < bTop) {
+            return -1;
+          }
+          if (aTop > bTop) {
+            return 1;
+          }
+    
+          return 0;
+        });
+    
+        if (intersectingEntries.length > 0) {
+          let path = this.getXPathTo(intersectingEntries[0]);
+            if (path === '') { return; }
+            if (!path.startsWith('id')) {
+              path = '//html[1]/' + path;
+            }
+            this.lastSeenScrollPartPath = path;
+        }
+
         if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
           this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
@@ -327,7 +356,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.onDestroy.next();
     this.onDestroy.complete();
-    this.intersectionObserver.disconnect();
   }
 
   ngOnInit(): void {
@@ -444,12 +472,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  handleIntersection(entries: IntersectionObserverEntry[]) {
-    let intersectingEntries = Array.from(entries)
-      .filter(entry => entry.isIntersecting)
-      .map(entry => entry.target)
-    intersectingEntries.sort((a: Element, b: Element) => {
-      const aTop = a.getBoundingClientRect().top;
+  sortElements(a: Element, b: Element) {
+    const aTop = a.getBoundingClientRect().top;
       const bTop = b.getBoundingClientRect().top;
       if (aTop < bTop) {
         return -1;
@@ -459,17 +483,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       return 0;
-    });
-
-
-    if (intersectingEntries.length > 0) {
-      let path = this.getXPathTo(intersectingEntries[0]);
-        if (path === '') { return; }
-        if (!path.startsWith('id')) {
-          path = '//html[1]/' + path;
-        }
-        this.lastSeenScrollPartPath = path;
-    }
   }
 
   loadNextChapter() {
@@ -650,12 +663,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setupPageAnchors() {
-    this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
-      if (!elem.classList.contains('no-observe')) {
-        this.intersectionObserver.observe(elem);
-      }
-    });
-
     this.pageAnchors = {};
     this.currentPageAnchor = '';
     const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
