@@ -33,6 +33,14 @@ namespace API.Controllers
             _accountService = accountService;
         }
 
+        [AllowAnonymous]
+        [HttpGet("base-url")]
+        public async Task<ActionResult<string>> GetBaseUrl()
+        {
+            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            return Ok(settingsDto.BaseUrl);
+        }
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet]
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
@@ -91,8 +99,6 @@ namespace API.Controllers
                         ? $"/{updateSettingsDto.BaseUrl}"
                         : updateSettingsDto.BaseUrl;
                     setting.Value = path;
-                    // BaseUrl is managed in appSetting.json
-                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
