@@ -48,9 +48,9 @@ namespace API.Tests.Parser
         [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "Chew")]
         [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "Chew Script Book")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition Book")]
-        [InlineData("Cyberpunk 2077 - Your Voice 01", "Cyberpunk 2077 - Your Voice")]
+        [InlineData("Cyberpunk 2077 - Your Voice #01", "Cyberpunk 2077 - Your Voice")]
         [InlineData("Cyberpunk 2077 #01", "Cyberpunk 2077")]
-        [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "Cyberpunk 2077 - Trauma Team")]
+        [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "Cyberpunk 2077 - Trauma Team")]
         [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
         [InlineData("Batgirl V2000 #57", "Batgirl")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "Fables")]
@@ -125,7 +125,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "57")]
         [InlineData("Batgirl V2000 #57", "57")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "21")]
-        [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "4")]
+        [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
