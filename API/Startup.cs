@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using API.Extensions;
+using API.Interfaces;
+using API.Interfaces.Repositories;
 using API.Middleware;
 using API.Services;
 using API.Services.HostedServices;
@@ -121,7 +123,7 @@ namespace API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
-            IHostApplicationLifetime applicationLifetime)
+            IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
@@ -160,7 +162,9 @@ namespace API
 
             app.UseDefaultFiles();
 
-            if (!string.IsNullOrEmpty(Configuration.BaseUrl))
+            var service = serviceProvider.GetRequiredService<IUnitOfWork>();
+            var settings = service.SettingsRepository.GetSettingsDto();
+            if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
             {
                 var path = !Configuration.BaseUrl.StartsWith("/")
                     ? $"/{Configuration.BaseUrl}"

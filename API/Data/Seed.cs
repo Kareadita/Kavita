@@ -50,7 +50,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
                 new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
                 new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
-                new () {Key = ServerSettingKey.BaseUrl, Value = ""},// Not used from DB, but DB is sync with appSettings.json
+                new () {Key = ServerSettingKey.BaseUrl, Value = "/"},
             };
 
             foreach (var defaultSetting in defaultSettings)
@@ -64,20 +64,11 @@ namespace API.Data
 
             await context.SaveChangesAsync();
 
-            if (string.IsNullOrEmpty(Configuration.BaseUrl))
-            {
-                Configuration.BaseUrl = "/";
-            }
-
             // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
             context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
                 Configuration.Port + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
-            context.ServerSetting.First(s => s.Key == ServerSettingKey.BaseUrl).Value =
-                Configuration.BaseUrl;
-
-
 
             await context.SaveChangesAsync();
 
