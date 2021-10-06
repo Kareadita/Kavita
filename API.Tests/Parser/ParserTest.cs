@@ -54,7 +54,7 @@ namespace API.Tests.Parser
         // public void ReplaceStyleUrlTest(string input, string expected)
         // {
         //     var replacementStr = "PaytoneOne.ttf";
-        //     // TODO: Use Match to validate since replace is weird
+        //     // Use Match to validate since replace is weird
         //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
         //     var match = FontSrcUrlRegex.Match(input);
         //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
@@ -142,6 +142,8 @@ namespace API.Tests.Parser
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
         [InlineData("Darker Than_Black", "darkerthanblack")]
+        [InlineData("Citrus", "citrus")]
+        [InlineData("Citrus+", "citrus+")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -156,6 +158,7 @@ namespace API.Tests.Parser
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
         [InlineData("!test.jpg", false)]
+        [InlineData("test.webp", true)]
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));

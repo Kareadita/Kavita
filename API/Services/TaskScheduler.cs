@@ -22,6 +22,7 @@ namespace API.Services
 
         private readonly IStatsService _statsService;
         private readonly IVersionUpdaterService _versionUpdaterService;
+        private const string SendDataTask = "finalize-stats";
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
 
@@ -70,23 +71,23 @@ namespace API.Services
             }
 
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
+
+            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily);
         }
 
         #region StatsTasks
 
-        private const string SendDataTask = "finalize-stats";
-        public void ScheduleStatsTasks()
+
+        public async Task ScheduleStatsTasks()
         {
-            var allowStatCollection = bool.Parse(Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.AllowStatCollection)).GetAwaiter().GetResult().Value);
+            var allowStatCollection  = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
             if (!allowStatCollection)
             {
                 _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
 
-            _logger.LogDebug("Adding StatsTasks");
-
-            _logger.LogDebug("Scheduling Send data to the Stats server {Setting}", nameof(Cron.Daily));
+            _logger.LogDebug("Scheduling stat collection daily");
             RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
         }
 
@@ -97,6 +98,12 @@ namespace API.Services
             RecurringJob.RemoveIfExists(SendDataTask);
         }
 
+        public void RunStatCollection()
+        {
+            _logger.LogInformation("Enqueuing stat collection");
+            BackgroundJob.Enqueue(() => _statsService.CollectAndSendStatsData());
+        }
+
         #endregion
 
         #region UpdateTasks
@@ -104,7 +111,7 @@ namespace API.Services
         public void ScheduleUpdaterTasks()
         {
             _logger.LogInformation("Scheduling Auto-Update tasks");
-            RecurringJob.AddOrUpdate("check-updates", () => _versionUpdaterService.CheckForUpdate(), Cron.Daily);
+            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Weekly);
 
         }
         #endregion
@@ -112,9 +119,9 @@ namespace API.Services
         public void ScanLibrary(int libraryId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, forceUpdate));
+            BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
             // When we do a scan, force cache to re-unpack in case page numbers change
-            BackgroundJob.Enqueue(() => _cleanupService.Cleanup());
+            BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
         }
 
         public void CleanupChapters(int[] chapterIds)
@@ -134,16 +141,16 @@ namespace API.Services
             BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(tempDirectory));
         }
 
-        public void RefreshSeriesMetadata(int libraryId, int seriesId)
+        public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)
         {
             _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId));
+            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
         }
 
         public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
         {
             _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, forceUpdate, CancellationToken.None));
+            BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, CancellationToken.None));
         }
 
         public void BackupDatabase()
@@ -151,9 +158,14 @@ namespace API.Services
             BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
         }
 
-        public void CheckForUpdate()
+        /// <summary>
+        /// Not an external call. Only public so that we can call this for a Task
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task CheckForUpdate()
         {
-            BackgroundJob.Enqueue(() => _versionUpdaterService.CheckForUpdate());
+            var update = await _versionUpdaterService.CheckForUpdate();
+            await _versionUpdaterService.PushUpdate(update);
         }
     }
 }

@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
@@ -15,7 +17,9 @@ export enum Action {
   Info = 5,
   RefreshMetadata = 6,
   Download = 7,
-  Bookmarks = 8
+  Bookmarks = 8,
+  IncognitoRead = 9,
+  AddToReadingList = 10
 }
 
 export interface ActionItem<T> {
@@ -39,6 +43,8 @@ export class ActionFactoryService {
   chapterActions: Array<ActionItem<Chapter>> = [];
 
   collectionTagActions: Array<ActionItem<CollectionTag>> = [];
+
+  readingListActions: Array<ActionItem<ReadingList>> = [];
 
   isAdmin = false;
   hasDownloadRole = false;
@@ -104,6 +110,13 @@ export class ActionFactoryService {
           callback: this.dummyCallback,
           requiresAdmin: true
         });
+    
+        this.chapterActions.push({
+          action: Action.Edit,
+          title: 'Info',
+          callback: this.dummyCallback,
+          requiresAdmin: false
+        });
       }
 
       if (this.hasDownloadRole || this.isAdmin) {
@@ -125,28 +138,44 @@ export class ActionFactoryService {
   }
 
   getLibraryActions(callback: (action: Action, library: Library) => void) {
-    this.libraryActions.forEach(action => action.callback = callback);
-    return this.libraryActions;
+    const actions = this.libraryActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
-    this.seriesActions.forEach(action => action.callback = callback);
-    return this.seriesActions;
+    const actions = this.seriesActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getVolumeActions(callback: (action: Action, volume: Volume) => void) {
-    this.volumeActions.forEach(action => action.callback = callback);
-    return this.volumeActions;
+    const actions = this.volumeActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
-    this.chapterActions.forEach(action => action.callback = callback);
-    return this.chapterActions;
+    const actions = this.chapterActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
   }
 
   getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
-    this.collectionTagActions.forEach(action => action.callback = callback);
-    return this.collectionTagActions;
+    const actions = this.collectionTagActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
+  }
+
+  getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
+    const actions = this.readingListActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
+  }
+
+  filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
+    if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
+    return true;
   }
 
   dummyCallback(action: Action, data: any) {}
@@ -174,7 +203,13 @@ export class ActionFactoryService {
         title: 'Bookmarks',
         callback: this.dummyCallback,
           requiresAdmin: false
-      }
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
     ];
 
     this.volumeActions = [
@@ -187,6 +222,24 @@ export class ActionFactoryService {
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.IncognitoRead,
+        title: 'Read in Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.Edit,
+        title: 'Info',
         callback: this.dummyCallback,
         requiresAdmin: false
       }
@@ -204,23 +257,34 @@ export class ActionFactoryService {
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false
-      }
+      },
+      {
+        action: Action.IncognitoRead,
+        title: 'Read in Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.AddToReadingList,
+        title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
     ];
 
-    this.volumeActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback,
-      requiresAdmin: false
-    });
-
-    this.chapterActions.push({
-      action: Action.Info,
-      title: 'Info',
-      callback: this.dummyCallback,
-      requiresAdmin: false
-    });
-
-
+    this.readingListActions = [
+      {
+        action: Action.Edit,
+        title: 'Edit',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.Delete,
+        title: 'Delete',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+    ];
   }
 }

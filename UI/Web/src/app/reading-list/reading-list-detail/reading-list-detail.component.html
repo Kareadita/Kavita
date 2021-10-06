@@ -1,0 +1,73 @@
+<div class="container-sm mt-2" *ngIf="readingList">
+  <div class="mb-3">
+    <!-- Title row-->
+    <div class="row no-gutters">
+                
+      <h2 style="display: inline-block">
+        <span *ngIf="actions.length > 0">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>&nbsp;
+        </span>
+        {{readingList.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>&nbsp;
+        <span class="badge badge-primary badge-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
+      </h2>
+    </div>
+    <!-- Action row-->
+    <div class="row no-gutters">
+      <div class="mr-2">
+        <button class="btn btn-primary" title="Read" (click)="read()">
+            <span>
+                <i class="fa fa-book-open" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;Read</span>
+            </span>
+        </button>
+      </div>
+      <div>
+          <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
+              <span>
+                  <i class="fa fa-check"></i>
+              </span>
+              <span class="read-btn--text">&nbsp;Remove Read</span>
+          </button>
+      </div>
+      <div class="ml-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
+          <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
+        </div>
+      </div>
+    </div>
+    <!-- Summary row-->
+    <div class="row no-gutters mt-2">
+      <app-read-more [text]="readingList.summary" [maxLength]="250"></app-read-more>
+    </div>
+    </div>
+
+    <div *ngIf="items.length === 0">
+      No chapters added
+    </div>    
+
+    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
+        <ng-template #draggableItem let-item let-position="idx">
+            <div class="media" style="width: 100%;">
+                <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
+                (error)="imageService.updateErroredImage($event)">
+                <div class="media-body">
+                  <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}&nbsp;
+                      <span class="badge badge-primary badge-pill">
+                      <span *ngIf="item.pagesRead > 0 && item.pagesRead < item.pagesTotal">{{item.pagesRead}} / {{item.pagesTotal}}</span>
+                      <span *ngIf="item.pagesRead === 0">UNREAD</span>
+                      <span *ngIf="item.pagesRead === item.pagesTotal">READ</span>
+                    </span>
+                  </h5>
+                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i>
+                  <span class="sr-only">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
+
+                  <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
+                  <span *ngIf="item.promoted">
+                    <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+                  </span>
+                </div>
+              </div>
+        </ng-template> 
+    </app-dragable-ordered-list>
+</div>

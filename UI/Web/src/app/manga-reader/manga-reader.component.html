@@ -7,7 +7,7 @@
             </button>
             
             <div>
-                <div style="font-weight: bold;">{{title}}</div>
+                <div style="font-weight: bold;">{{title}} <span *ngIf="incognitoMode">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span></div>
                 <div class="subtitle">
                     {{subtitle}}
                 </div>
@@ -28,29 +28,28 @@
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
-            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages" [urlProvider]="getPageUrl"></app-infinite-scroller>
+            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages - 1" [urlProvider]="getPageUrl" (loadNextChapter)="loadNextChapter()" (loadPrevChapter)="loadPrevChapter()"></app-infinite-scroller>
         </div>
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD"> <!--; else webtoonClickArea; See if people want this mode WEBTOON_WITH_CLICKS-->
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'top'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'bottom'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
+            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
+            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
         </ng-container>
-        <ng-template #webtoonClickArea>
-            <div class="top {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="right {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="left {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
-            <div class="bottom {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
-        </ng-template>
     </div>
     
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
-        <div class="form-group" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined && pageOptions.ceil > 0">
+        <div class="form-group" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="sr-only" id="slider-info"></span>
             <div class="row no-gutters">
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-                <div class="col custom-slider">
+                <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
                     <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                 </div>
+                <ng-template #noSlider>
+                    <div class="col custom-slider">
+                        <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                    </div>
+                </ng-template>
                 <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
@@ -59,7 +58,7 @@
         </div>
         <div class="row pt-4 ml-2 mr-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="sr-only">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>

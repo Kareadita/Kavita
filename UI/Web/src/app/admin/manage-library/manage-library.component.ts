@@ -2,10 +2,12 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { take, takeUntil, takeWhile } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { ScanLibraryProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
 import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
@@ -22,13 +24,38 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
+  scanInProgress: {[key: number]: {progress: boolean, timestamp?: string}} = {};
+  libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, private toastr: ToastrService, private confirmService: ConfirmService) { }
+  constructor(private modalService: NgbModal, private libraryService: LibraryService, 
+    private toastr: ToastrService, private confirmService: ConfirmService,
+    private hubService: MessageHubService) { }
 
   ngOnInit(): void {
     this.getLibraries();
+
+    // when a progress event comes in, show it on the UI next to library
+    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
+      if (event.event != EVENTS.ScanLibraryProgress) return;
+      
+      const scanEvent = event.payload as ScanLibraryProgressEvent;
+      this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 100};
+      if (scanEvent.progress === 0) {
+        this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;
+      }
+      
+      if (this.scanInProgress[scanEvent.libraryId].progress === false && scanEvent.progress === 100) {
+        this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
+          const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
+          const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);
+          if (existingLibrary !== undefined) {
+            existingLibrary.lastScanned = newLibrary?.lastScanned || existingLibrary.lastScanned;
+          }
+        });
+      }
+    });
   }
 
   ngOnDestroy() {

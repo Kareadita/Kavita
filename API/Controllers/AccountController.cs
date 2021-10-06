@@ -5,12 +5,14 @@ using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.DTOs.Account;
 using API.Entities;
-using API.Errors;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.Services;
 using AutoMapper;
+using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +20,9 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// All Account matters
+    /// </summary>
     public class AccountController : BaseApiController
     {
         private readonly UserManager<AppUser> _userManager;
@@ -26,12 +31,14 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
+        private readonly IAccountService _accountService;
 
+        /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
-            SignInManager<AppUser> signInManager, 
-            ITokenService tokenService, IUnitOfWork unitOfWork, 
+            SignInManager<AppUser> signInManager,
+            ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper)
+            IMapper mapper, IAccountService accountService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -39,8 +46,14 @@ namespace API.Controllers
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+            _accountService = accountService;
         }
-        
+
+        /// <summary>
+        /// Update a user's password
+        /// </summary>
+        /// <param name="resetPasswordDto"></param>
+        /// <returns></returns>
         [HttpPost("reset-password")]
         public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
         {
@@ -49,37 +62,22 @@ namespace API.Controllers
 
             if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
                 return Unauthorized("You are not permitted to this operation.");
-            
-            // Validate Password
-            foreach (var validator in _userManager.PasswordValidators)
+
+            var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
+            if (errors.Any())
             {
-                var validationResult = await validator.ValidateAsync(_userManager, user, resetPasswordDto.Password);
-                if (!validationResult.Succeeded)
-                {
-                    return BadRequest(
-                        validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-                }
+                return BadRequest(errors);
             }
-            
-            var result = await _userManager.RemovePasswordAsync(user);
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Could not update password");
-                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            }
-            
-            
-            result = await _userManager.AddPasswordAsync(user, resetPasswordDto.Password);
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Could not update password");
-                return BadRequest(result.Errors.Select(e => new ApiException(400, e.Code, e.Description)));
-            }
-            
+
             _logger.LogInformation("{User}'s Password has been reset", resetPasswordDto.UserName);
             return Ok();
         }
 
+        /// <summary>
+        /// Register a new user on the server
+        /// </summary>
+        /// <param name="registerDto"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
@@ -92,6 +90,14 @@ namespace API.Controllers
 
                 var user = _mapper.Map<AppUser>(registerDto);
                 user.UserPreferences ??= new AppUserPreferences();
+                user.ApiKey = HashUtil.ApiKey();
+
+                var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+                if (!settings.EnableAuthentication && !registerDto.IsAdmin)
+                {
+                    _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password.", registerDto.Username);
+                    registerDto.Password = AccountService.DefaultPassword;
+                }
 
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -122,6 +128,7 @@ namespace API.Controllers
                 {
                     Username = user.UserName,
                     Token = await _tokenService.CreateToken(user),
+                    ApiKey = user.ApiKey,
                     Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
                 };
             }
@@ -134,6 +141,11 @@ namespace API.Controllers
             return BadRequest("Something went wrong when registering user");
         }
 
+        /// <summary>
+        /// Perform a login. Will send JWT Token of the logged in user back.
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
@@ -143,28 +155,41 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            if (!settings.EnableAuthentication && !isAdmin)
+            {
+                _logger.LogDebug("User {UserName} is logging in with authentication disabled", loginDto.Username);
+                loginDto.Password = AccountService.DefaultPassword;
+            }
+
             var result = await _signInManager
                 .CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if (!result.Succeeded) return Unauthorized("Your credentials are not correct.");
-            
+
             // Update LastActive on account
             user.LastActive = DateTime.Now;
             user.UserPreferences ??= new AppUserPreferences();
-            
+
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
-            
+
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
             return new UserDto
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
         }
 
+        /// <summary>
+        /// Get All Roles back. See <see cref="PolicyConstants"/>
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("roles")]
         public ActionResult<IList<string>> GetRoles()
         {
@@ -175,6 +200,11 @@ namespace API.Controllers
                     f => (string) f.GetValue(null)).Values.ToList();
         }
 
+        /// <summary>
+        /// Sets the given roles to the user.
+        /// </summary>
+        /// <param name="updateRbsDto"></param>
+        /// <returns></returns>
         [HttpPost("update-rbs")]
         public async Task<ActionResult> UpdateRoles(UpdateRbsDto updateRbsDto)
         {
@@ -190,7 +220,7 @@ namespace API.Controllers
             var existingRoles = (await _userManager.GetRolesAsync(user))
                 .Where(s => s != PolicyConstants.AdminRole && s != PolicyConstants.PlebRole)
                 .ToList();
-        
+
             // Find what needs to be added and what needs to be removed
             var rolesToRemove = existingRoles.Except(updateRbsDto.Roles);
             var result = await _userManager.AddToRolesAsync(user, updateRbsDto.Roles);
@@ -204,9 +234,30 @@ namespace API.Controllers
             {
                 return Ok();
             }
-            
+
             await _unitOfWork.RollbackAsync();
             return BadRequest("Something went wrong, unable to update user's roles");
+
+        }
+
+        /// <summary>
+        /// Resets the API Key assigned with a user
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("reset-api-key")]
+        public async Task<ActionResult<string>> ResetApiKey()
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+            user.ApiKey = HashUtil.ApiKey();
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                return Ok(user.ApiKey);
+            }
+
+            await _unitOfWork.RollbackAsync();
+            return BadRequest("Something went wrong, unable to reset key");
 
         }
     }

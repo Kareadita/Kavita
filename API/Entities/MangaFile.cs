@@ -5,6 +5,9 @@ using API.Entities.Enums;
 
 namespace API.Entities
 {
+    /// <summary>
+    /// Represents a wrapper to the underlying file. This provides information around file, like number of pages, format, etc.
+    /// </summary>
     public class MangaFile
     {
         public int Id { get; set; }
@@ -27,9 +30,21 @@ namespace API.Entities
         public int ChapterId { get; set; }
 
         // Methods
+        /// <summary>
+        /// If the File on disk's last modified time is after what is stored in MangaFile
+        /// </summary>
+        /// <returns></returns>
         public bool HasFileBeenModified()
         {
-            return !File.GetLastWriteTime(FilePath).Equals(LastModified);
+            return File.GetLastWriteTime(FilePath) > LastModified;
+        }
+
+        /// <summary>
+        /// Updates the Last Modified time of the underlying file
+        /// </summary>
+        public void UpdateLastModified()
+        {
+            LastModified = File.GetLastWriteTime(FilePath);
         }
     }
 }

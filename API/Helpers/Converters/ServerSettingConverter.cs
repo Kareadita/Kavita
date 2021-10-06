@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using API.DTOs;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using AutoMapper;
@@ -32,6 +32,12 @@ namespace API.Helpers.Converters
                         break;
                     case ServerSettingKey.AllowStatCollection:
                         destination.AllowStatCollection = bool.Parse(row.Value);
+                        break;
+                    case ServerSettingKey.EnableOpds:
+                        destination.EnableOpds = bool.Parse(row.Value);
+                        break;
+                    case ServerSettingKey.EnableAuthentication:
+                        destination.EnableAuthentication = bool.Parse(row.Value);
                         break;
                 }
             }

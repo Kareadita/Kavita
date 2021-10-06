@@ -1,0 +1,36 @@
+@import '../../../theme/colors';
+$image-height: 230px;
+$image-width: 160px;
+
+.card-img-top {
+    width: $image-width;
+    height: $image-height;
+    max-height: $image-height;
+}
+
+.image-card {
+    margin: 10px;
+    cursor: pointer;
+}
+
+.selected {
+    outline: 5px solid $primary-color;
+    outline-width: medium;
+    outline-offset: -1px;
+}
+
+ngx-file-drop ::ng-deep > div {
+    // styling for the outer drop box
+    width: 100%;
+    border: 2px solid $primary-color;
+    border-radius: 5px;
+    height: 100px;
+    margin: auto;
+
+    > div {
+      // styling for the inner box (template)
+      width: 100%;
+      display: inline-block;
+
+    }
+  }

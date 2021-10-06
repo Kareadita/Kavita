@@ -5,3 +5,27 @@
 .active {
     border: 2px solid red;
 }
+
+.spacer {
+    width: 100%;
+    height: 300px;
+    cursor: pointer;
+
+    .animate {
+        animation: move-up-down 1s linear infinite;
+    }
+
+    .text {
+        z-index: 101;
+        
+    }
+}
+
+@keyframes move-up-down {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+}

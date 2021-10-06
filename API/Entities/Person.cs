@@ -10,9 +10,11 @@ namespace API.Entities
         public string Name { get; set; }
         public PersonRole Role { get; set; }
 
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

@@ -9,7 +9,6 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
-using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -68,7 +67,7 @@ namespace API.Services
         public async Task<Chapter> Ensure(int chapterId)
         {
             EnsureCacheDirectory();
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var extractPath = GetCachePath(chapterId);
 
             if (!Directory.Exists(extractPath))
@@ -158,9 +157,13 @@ namespace API.Services
             _logger.LogInformation("Cache directory purged");
         }
 
+        /// <summary>
+        /// Removes the cached files and folders for a set of chapterIds
+        /// </summary>
+        /// <param name="chapterIds"></param>
         public void CleanupChapters(IEnumerable<int> chapterIds)
         {
-            _logger.LogInformation("Running Cache cleanup on Volumes");
+            _logger.LogInformation("Running Cache cleanup on Chapters");
 
             foreach (var chapter in chapterIds)
             {
@@ -182,14 +185,14 @@ namespace API.Services
         /// <returns></returns>
         private string GetCachePath(int chapterId)
         {
-            return Path.GetFullPath(Path.Join(CacheDirectory, $"{chapterId}/"));
+            return Path.GetFullPath(Path.Join(DirectoryService.CacheDirectory, $"{chapterId}/"));
         }
 
         public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)
         {
             // Calculate what chapter the page belongs to
             var pagesSoFar = 0;
-            var chapterFiles = chapter.Files ?? await _unitOfWork.VolumeRepository.GetFilesForChapterAsync(chapter.Id);
+            var chapterFiles = chapter.Files ?? await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
             foreach (var mangaFile in chapterFiles)
             {
                 if (page <= (mangaFile.Pages + pagesSoFar))

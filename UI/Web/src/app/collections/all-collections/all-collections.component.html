@@ -1,0 +1,8 @@
+<app-card-detail-layout header="Collections" 
+    [isLoading]="isLoading"
+    [items]="collections"
+    >
+        <ng-template #cardItem let-item let-position="idx">
+            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="item.coverImage" (clicked)="loadCollection(item)"></app-card-item>
+        </ng-template>
+</app-card-detail-layout>

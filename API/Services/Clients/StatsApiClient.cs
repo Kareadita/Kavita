@@ -11,12 +11,15 @@ namespace API.Services.Clients
     {
         private readonly HttpClient _client;
         private readonly ILogger<StatsApiClient> _logger;
+#pragma warning disable S1075
         private const string ApiUrl = "http://stats.kavitareader.com";
+#pragma warning restore S1075
 
         public StatsApiClient(HttpClient client, ILogger<StatsApiClient> logger)
         {
             _client = client;
             _logger = logger;
+            _client.Timeout = TimeSpan.FromSeconds(30);
         }
 
         public async Task SendDataToStatsServer(UsageStatisticsDto data)

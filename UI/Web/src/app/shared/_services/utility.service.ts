@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 
 export enum KEY_CODES {
@@ -12,9 +13,18 @@ export enum KEY_CODES {
   SPACE = ' ',
   ENTER = 'Enter',
   G = 'g',
+  B = 'b',
   BACKSPACE = 'Backspace',
-  DELETE = 'Delete'
+  DELETE = 'Delete',
+  SHIFT = 'Shift'
 }
+
+export enum Breakpoint {
+  Mobile = 768,
+  Tablet = 1280,
+  Desktop = 1440
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -83,6 +93,48 @@ export class UtilityService {
       case MangaFormat.UNKNOWN:
         return 'fa-question';
     }
+  }
+
+  isVolume(d: any) {
+    return d != null && d.hasOwnProperty('chapters');
+  }
+
+  isChapter(d: any) {
+    return d != null && d.hasOwnProperty('volumeId');
+  }
+
+  isSeries(d: any) {
+    return d != null && d.hasOwnProperty('originalName');
+  }
+
+  asVolume(d: any) {
+    return <Volume>d;
+  }
+
+  asChapter(d: any) {
+    return <Chapter>d;
+  }
+
+  asSeries(d: any) {
+    return <Series>d;
+  }
+
+  getActiveBreakpoint(): Breakpoint {
+    if (window.innerWidth <= Breakpoint.Mobile) return Breakpoint.Mobile;
+    else if (window.innerWidth > Breakpoint.Mobile && window.innerWidth <= Breakpoint.Tablet) return Breakpoint.Tablet;
+    else if (window.innerWidth > Breakpoint.Tablet) return Breakpoint.Desktop
+    
+    return Breakpoint.Desktop;
+  }
+
+  isInViewport(element: Element, additionalTopOffset: number = 0) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= additionalTopOffset &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
   }
 
 }

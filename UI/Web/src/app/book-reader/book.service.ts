@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { BookChapterItem } from './_models/book-chapter-item';
+import { BookInfo } from './_models/book-info';
 
 export interface BookPage {
   bookTitle: string;
@@ -32,7 +33,7 @@ export class BookService {
   }
 
   getBookInfo(chapterId: number) {
-    return this.http.get<string>(this.baseUrl + 'book/' + chapterId + '/book-info', {responseType: 'text' as 'json'});
+    return this.http.get<BookInfo>(this.baseUrl + 'book/' + chapterId + '/book-info');
   }
 
   getBookPageUrl(chapterId: number, page: number) {

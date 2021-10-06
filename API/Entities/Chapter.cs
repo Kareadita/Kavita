@@ -23,7 +23,12 @@ namespace API.Entities
         public ICollection<MangaFile> Files { get; set; }
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
-        public byte[] CoverImage { get; set; }
+        /// <summary>
+        /// Absolute path to the (managed) image file
+        /// </summary>
+        /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
+        public string CoverImage { get; set; }
+        public bool CoverImageLocked { get; set; }
         /// <summary>
         /// Total number of pages in all MangaFiles
         /// </summary>
@@ -33,7 +38,7 @@ namespace API.Entities
         /// </summary>
         public bool IsSpecial { get; set; }
         /// <summary>
-        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/> 
+        /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
         /// </summary>
         public string Title { get; set; }
 
@@ -52,7 +57,7 @@ namespace API.Entities
             Title = (IsSpecial && info.Format == MangaFormat.Epub)
                 ? info.Title
                 : Range;
-            
+
         }
     }
 }

@@ -12,9 +12,10 @@ import { DirectoryPickerComponent } from './_modals/directory-picker/directory-p
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
-import { FilterPipe } from './filter.pipe';
 import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
+import { ChangelogComponent } from './changelog/changelog.component';
+import { PipeModule } from '../pipe/pipe.module';
 
 
 
@@ -29,9 +30,9 @@ import { ManageSystemComponent } from './manage-system/manage-system.component';
     DirectoryPickerComponent,
     ResetPasswordModalComponent,
     ManageSettingsComponent,
-    FilterPipe,
     EditRbsModalComponent,
-    ManageSystemComponent
+    ManageSystemComponent,
+    ChangelogComponent,
   ],
   imports: [
     CommonModule,
@@ -42,6 +43,7 @@ import { ManageSystemComponent } from './manage-system/manage-system.component';
     NgbTooltipModule,
     NgbDropdownModule,
     SharedModule,
+    PipeModule
   ],
   providers: []
 })

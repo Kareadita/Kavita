@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -48,7 +51,42 @@ namespace API
             services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
+
+                c.SwaggerDoc("Kavita API", new OpenApiInfo()
+                {
+                    Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
+                    Title = "Kavita API",
+                    Version = "v1",
+                });
+
+                var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
+                c.IncludeXmlComments(filePath);
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+                    In = ParameterLocation.Header,
+                    Description = "Please insert JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Description = "Local Server",
+                    Url = "http://localhost:5000/",
+                });
             });
             services.AddResponseCompression(options =>
             {
@@ -90,7 +128,10 @@ namespace API
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+                });
                 app.UseHangfireDashboard();
             }
 
@@ -107,7 +148,7 @@ namespace API
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials() // For SignalR token query param
-                    .WithOrigins("http://localhost:4200")
+                    .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200")
                     .WithExposedHeaders("Content-Disposition", "Pagination"));
             }
 
@@ -142,7 +183,7 @@ namespace API
                     new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
                     {
                         Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10)
+                        MaxAge = TimeSpan.FromSeconds(10),
                     };
                 context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
@@ -154,7 +195,6 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("hubs/messages");
-                endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });
@@ -172,6 +212,14 @@ namespace API
             TaskScheduler.Client.Dispose();
             System.Threading.Thread.Sleep(1000);
             Console.WriteLine("You may now close the application window.");
+        }
+
+        private static string GetLocalIpAddress()
+        {
+            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+            socket.Connect("8.8.8.8", 65530);
+            if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
+            throw new KavitaException("No network adapters with an IPv4 address in the system!");
         }
 
 

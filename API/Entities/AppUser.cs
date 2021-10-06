@@ -17,10 +17,21 @@ namespace API.Entities
         public ICollection<AppUserRating> Ratings { get; set; }
         public AppUserPreferences UserPreferences { get; set; }
         public ICollection<AppUserBookmark> Bookmarks { get; set; }
+        /// <summary>
+        /// Reading lists associated with this user
+        /// </summary>
+        public ICollection<ReadingList> ReadingLists { get; set; }
+        /// <summary>
+        /// An API Key to interact with external services, like OPDS
+        /// </summary>
+        public string ApiKey { get; set; }
 
+
+        /// <inheritdoc />
         [ConcurrencyCheck]
-        public uint RowVersion { get; set; }
+        public uint RowVersion { get; private set; }
 
+        /// <inheritdoc />
         public void OnSavingChanges()
         {
             RowVersion++;

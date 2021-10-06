@@ -5,4 +5,6 @@ export interface ServerSettings {
     loggingLevel: string;
     port: number;
     allowStatCollection: boolean;
+    enableOpds: boolean;
+    enableAuthentication: boolean;
 }

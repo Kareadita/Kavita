@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using API.Comparators;
 
@@ -77,7 +76,8 @@ namespace API.Extensions
                 directoryIndex++;
             }
 
-            foreach (var subDirectory in directory.EnumerateDirectories())
+            var sort = new NaturalSortComparer();
+            foreach (var subDirectory in directory.EnumerateDirectories().OrderBy(d => d.FullName, sort))
             {
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }

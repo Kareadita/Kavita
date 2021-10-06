@@ -12,6 +12,7 @@ namespace API.DTOs
         public string SortName { get; init; }
         public string Summary { get; init; }
         public int Pages { get; init; }
+        public bool CoverImageLocked { get; set; }
         /// <summary>
         /// Sum of pages read from linked Volumes. Calculated at API-time.
         /// </summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -179,12 +180,14 @@ namespace API.Controllers
 
             try
             {
-                var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+                var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
                 _unitOfWork.LibraryRepository.Delete(library);
                 await _unitOfWork.CommitAsync();
 
                 if (chapterIds.Any())
                 {
+                    await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                    await _unitOfWork.CommitAsync();
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
                 return Ok(true);
@@ -201,7 +204,7 @@ namespace API.Controllers
         [HttpPost("update")]
         public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
         {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id);
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id, LibraryIncludes.Folders);
 
             var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
@@ -223,11 +226,11 @@ namespace API.Controllers
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
         {
-            queryString = queryString.Replace(@"%", "");
+            queryString = queryString.Trim().Replace(@"%", "");
 
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             // Get libraries user has access to
-            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
 
             if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 

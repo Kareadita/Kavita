@@ -6,7 +6,12 @@ const routes: Routes = [
   {
       path: ':chapterId',
       component: MangaReaderComponent
-  }
+  },
+  {
+    // This will allow the MangaReader to have a list to use for next/prev chapters rather than natural sort order
+    path: ':chapterId/list/:listId',
+    component: MangaReaderComponent
+}
 ];
 
 

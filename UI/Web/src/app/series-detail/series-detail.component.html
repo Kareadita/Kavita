@@ -1,7 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">            
-            <img class="poster lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="imageService.getSeriesCoverImage(series.id)" 
+            <img class="poster lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="seriesImage" 
             (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true">
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
@@ -28,10 +28,14 @@
                     </button>
                 </div>
                 <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
-                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series">
-                        <span>
+                    <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series" [disabled]="downloadInProgress">
+                        <ng-container *ngIf="downloadInProgress; else notDownloading">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="sr-only">Downloading...</span>
+                        </ng-container>
+                        <ng-template #notDownloading>
                             <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
-                        </span>
+                        </ng-template>
                     </button>
                 </div>
                 <div class="ml-2">
@@ -91,19 +95,18 @@
             </div>
         </div>
     </div>
-    <hr>
-
 
     <div>
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs" [destroyOnHide]="false">
+        <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs nav-pills" [destroyOnHide]="false">
             <li [ngbNavItem]="1" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
-                <div class="row">
-                    <div *ngFor="let chapter of specials">
-                        <app-card-item class="col-auto" *ngIf="chapter.isSpecial"  [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
+                <div class="row no-gutters">
+                    <div *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
+                        <app-card-item class="col-auto" *ngIf="chapter.isSpecial" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
+                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true"></app-card-item>
                     </div>
                 </div>
               </ng-template>
@@ -111,17 +114,17 @@
             <li [ngbNavItem]="2" *ngIf="hasNonSpecialVolumeChapters">
               <a ngbNavLink>Volumes/Chapters</a>
               <ng-template ngbNavContent>
-                  <div class="row">
-                    <div *ngFor="let volume of volumes">
-                        <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
-                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                            [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions"></app-card-item>
-                    </div>
-                    <div *ngFor="let chapter of chapters">
-                        <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
-                        [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                        [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions"></app-card-item>
-                    </div>
+                  <div class="row no-gutters">
+                        <div *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
+                                <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="'Volume ' + volume.name" (click)="openVolume(volume)"
+                                [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
+                                [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
+                        </div>
+                        <div *ngFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
+                            <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+                            [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
+                            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
+                        </div>
                   </div>
               </ng-template>
             </li>
