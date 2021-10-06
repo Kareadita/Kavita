@@ -179,7 +179,7 @@ $primary-color: #0062cc;
     &.btn-secondary {
         border-color: transparent;
 
-        &:hover {
+        &:hover, &:focus {
             border-color: #545b62;
         }
     }
@@ -187,7 +187,7 @@ $primary-color: #0062cc;
     &.btn-outline-secondary {
         border-color: transparent;
 
-        &:hover {
+        &:hover, &:focus {
             border-color: #545b62;
         }
     }
