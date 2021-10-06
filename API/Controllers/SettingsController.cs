@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
@@ -82,6 +82,17 @@ namespace API.Controllers
                     setting.Value = updateSettingsDto.Port + string.Empty;
                     // Port is managed in appSetting.json
                     Configuration.Port = updateSettingsDto.Port;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
+                if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.BaseUrl + string.Empty != setting.Value)
+                {
+                    var path = !updateSettingsDto.BaseUrl.StartsWith("/")
+                        ? $"/{updateSettingsDto.BaseUrl}"
+                        : updateSettingsDto.BaseUrl;
+                    setting.Value = path;
+                    // BaseUrl is managed in appSetting.json
+                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 

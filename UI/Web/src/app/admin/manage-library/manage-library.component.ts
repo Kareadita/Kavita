@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { take, takeUntil, takeWhile } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { ScanLibraryProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
 import { Library, LibraryType } from 'src/app/_models/library';

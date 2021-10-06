@@ -4,12 +4,12 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using API.Data.Metadata;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
@@ -165,22 +165,43 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
-        public string GetSummaryInfo(string filePath)
+        public ComicInfo GetComicInfo(string filePath)
         {
-            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return string.Empty;
-
+            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return null;
 
             try
             {
                 using var epubBook = EpubReader.OpenBook(filePath);
-                return epubBook.Schema.Package.Metadata.Description;
+                var publicationDate =
+                    epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
+
+                var info =  new ComicInfo()
+                {
+                    Summary = epubBook.Schema.Package.Metadata.Description,
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators),
+                    Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
+                    Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
+                    Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                };
+                // Parse tags not exposed via Library
+                foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
+                {
+                    switch (metadataItem.Name)
+                    {
+                        case "calibre:rating":
+                            info.UserRating = float.Parse(metadataItem.Content);
+                            break;
+                    }
+                }
+
+                return info;
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[BookService] There was an exception getting summary, defaulting to empty string");
+                _logger.LogWarning(ex, "[GetComicInfo] There was an exception getting metadata");
             }
 
-            return string.Empty;
+            return null;
         }
 
         private bool IsValidFile(string filePath)

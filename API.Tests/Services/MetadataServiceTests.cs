@@ -1,13 +1,7 @@
 ﻿using System;
 using System.IO;
 using API.Entities;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
-using API.SignalR;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Services

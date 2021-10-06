@@ -3,6 +3,7 @@ using System.Linq;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Helpers.Converters;
 using AutoMapper;

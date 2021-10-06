@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using API.Data;
+﻿using System.IO;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
@@ -57,8 +55,8 @@ namespace API.Benchmark
                 Title = "A Town Where You Live",
                 Volumes = "1"
             };
-            var parsedSeries = _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new string[] {libraryPath},
-                out var totalFiles, out var scanElapsedTime);
+            _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new [] {libraryPath},
+                out _, out _);
             _parseScannedFiles.MergeName(p1);
         }
     }

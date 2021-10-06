@@ -1,11 +1,9 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Services.Tasks
 {

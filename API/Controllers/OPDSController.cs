@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Comparators;
-using API.Constants;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
@@ -16,7 +15,6 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

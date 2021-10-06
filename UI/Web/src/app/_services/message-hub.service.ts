@@ -1,7 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { User } from '@sentry/angular';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -10,6 +9,7 @@ import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanLibraryProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { User } from '../_models/user';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',

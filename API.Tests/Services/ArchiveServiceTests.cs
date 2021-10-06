@@ -2,6 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using API.Archive;
+using API.Data.Metadata;
 using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
@@ -216,8 +217,30 @@ namespace API.Tests.Services
             var archive = Path.Join(testDirectory, "file in folder.zip");
             var summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
 
-            Assert.Equal(summaryInfo, _archiveService.GetSummaryInfo(archive));
+            Assert.Equal(summaryInfo, _archiveService.GetComicInfo(archive).Summary);
+        }
 
+        [Fact]
+        public void CanParseComicInfo()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+            var archive = Path.Join(testDirectory, "ComicInfo.zip");
+            var actual = _archiveService.GetComicInfo(archive);
+            var expected = new ComicInfo()
+            {
+                Publisher = "Yen Press",
+                Genre = "Manga, Movies & TV",
+                Summary =
+                    "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?",
+                PageCount = 194,
+                LanguageISO = "en",
+                Notes = "Scraped metadata from Comixology [CMXDB450184]",
+                Series = "BTOOOM!",
+                Title = "v01",
+                Web = "https://www.comixology.com/BTOOOM/digital-comic/450184"
+            };
+
+            Assert.NotStrictEqual(expected, actual);
         }
     }
 }

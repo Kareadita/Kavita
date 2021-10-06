@@ -1,4 +1,4 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs.Settings
 {
     public class ServerSettingDto
     {
@@ -26,5 +26,9 @@
         /// Enables Authentication on the server. Defaults to true.
         /// </summary>
         public bool EnableAuthentication { get; set; }
+        /// <summary>
+        /// Base Url for the kavita. Defaults to "/". Managed in appsettings.json.Requires restart to take effect.
+        /// </summary>
+        public string BaseUrl { get; set; } = "/";
     }
 }

@@ -14,11 +14,10 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { BookService } from '../book.service';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { Stack } from 'src/app/shared/data-structures/stack';
-import { Preferences } from 'src/app/_models/preferences/preferences';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScrollService } from 'src/app/scroll.service';
@@ -166,7 +165,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: [1] });
   /**
    * Last seen progress part path
    */
@@ -186,10 +184,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         color: #e83e8c !important;
     }
 
-    // .btn-icon {
-    //     background-color: transparent;
-    // }
-
     :link, a {
         color: #8db2e5 !important;
     }
@@ -205,25 +199,31 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return ReadingDirection;
   }
 
-  get IsPrevDisabled() {
+  get IsPrevDisabled(): boolean {
     if (this.readingDirection === ReadingDirection.LeftToRight) {
+      // Acting as Previous button
       return this.prevPageDisabled && this.pageNum === 0;
-    } 
-    return this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+    } else {
+      // Acting as a Next button
+      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+    }
   }
 
-  get IsNextDisabled() {
+  get IsNextDisabled(): boolean {
     if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.nextPageDisabled && this.pageNum + 1 >= this.maxPages - 1;
+      // Acting as Next button
+      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+    } else {
+      // Acting as Previous button
+      return this.prevPageDisabled && this.pageNum === 0;
     }
-    return this.prevPageDisabled && this.pageNum === 0;
   }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService) {
+    private scrollService: ScrollService, private utilityService: UtilityService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -296,6 +296,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
 
+    
+        // Find the element that is on screen to bookmark against
+        const intersectingEntries = Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+                                .filter(element => !element.classList.contains('no-observe'))
+                                .filter(entry => {
+                                  return this.utilityService.isInViewport(entry, this.topOffset);
+                                });
+
+        intersectingEntries.sort((a: Element, b: Element) => {
+          const aTop = a.getBoundingClientRect().top;
+          const bTop = b.getBoundingClientRect().top;
+          if (aTop < bTop) {
+            return -1;
+          }
+          if (aTop > bTop) {
+            return 1;
+          }
+    
+          return 0;
+        });
+    
+        if (intersectingEntries.length > 0) {
+          let path = this.getXPathTo(intersectingEntries[0]);
+            if (path === '') { return; }
+            if (!path.startsWith('id')) {
+              path = '//html[1]/' + path;
+            }
+            this.lastSeenScrollPartPath = path;
+        }
+
         if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
           this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
         }
@@ -326,7 +356,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.onDestroy.next();
     this.onDestroy.complete();
-    this.intersectionObserver.disconnect();
   }
 
   ngOnInit(): void {
@@ -443,12 +472,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  handleIntersection(entries: IntersectionObserverEntry[]) {
-    let intersectingEntries = Array.from(entries)
-      .filter(entry => entry.isIntersecting)
-      .map(entry => entry.target)
-    intersectingEntries.sort((a: Element, b: Element) => {
-      const aTop = a.getBoundingClientRect().top;
+  sortElements(a: Element, b: Element) {
+    const aTop = a.getBoundingClientRect().top;
       const bTop = b.getBoundingClientRect().top;
       if (aTop < bTop) {
         return -1;
@@ -458,17 +483,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       return 0;
-    });
-
-
-    if (intersectingEntries.length > 0) {
-      let path = this.getXPathTo(intersectingEntries[0]);
-        if (path === '') { return; }
-        if (!path.startsWith('id')) {
-          path = '//html[1]/' + path;
-        }
-        this.lastSeenScrollPartPath = path;
-    }
   }
 
   loadNextChapter() {
@@ -541,16 +555,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  resetSettings(afterSave: boolean = false) {
+  resetSettings() {
     const windowWidth = window.innerWidth
       || document.documentElement.clientWidth
       || document.body.clientWidth;
 
     let margin = '15%';
     if (windowWidth <= 700) {
-      if (afterSave && this.user.preferences.bookReaderMargin !== 0) {
-        this.toastr.info('Margin will be reset to 0% on mobile. You do not have to save for settings to take effect.');
-      }
       margin = '0%';
     }
     if (this.user) {
@@ -558,11 +569,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         margin = this.user.preferences.bookReaderMargin + '%';
       }
       this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
-      if (!afterSave) {
-        if (this.user.preferences.siteDarkMode && !this.user.preferences.bookReaderDarkMode) {
-          this.user.preferences.bookReaderDarkMode = true;
-        }
-      }
       
       this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
     } else {
@@ -657,12 +663,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setupPageAnchors() {
-    this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span').forEach(elem => {
-      if (!elem.classList.contains('no-observe')) {
-        this.intersectionObserver.observe(elem);
-      }
-    });
-
     this.pageAnchors = {};
     this.currentPageAnchor = '';
     const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
@@ -875,7 +875,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getDarkModeBackgroundColor() {
-    return this.darkMode ? '#292929' : '#fff';
+    return this.darkMode ? '#010409' : '#fff';
   }
 
   setOverrideStyles() {
@@ -894,33 +894,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.renderer.removeChild(head, this.darkModeStyleElem);
     }
-  }
-
-  saveSettings() {
-    if (this.user === undefined) return;
-    const modelSettings = this.settingsForm.value;
-    const data: Preferences = {
-      readingDirection: this.user.preferences.readingDirection, 
-      scalingOption: this.user.preferences.scalingOption, 
-      pageSplitOption: this.user.preferences.pageSplitOption, 
-      autoCloseMenu: this.user.preferences.autoCloseMenu,
-      readerMode: this.user.preferences.readerMode,
-      bookReaderDarkMode: this.darkMode,
-      bookReaderFontFamily: modelSettings.bookReaderFontFamily,
-      bookReaderFontSize: parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10),
-      bookReaderLineSpacing: parseInt(this.pageStyles['line-height'].replace('!important', '').trim(), 10),
-      bookReaderMargin: parseInt(this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim(), 10),
-      bookReaderTapToPaginate: this.clickToPaginate,
-      bookReaderReadingDirection: this.readingDirection,
-      siteDarkMode: this.user.preferences.siteDarkMode,
-    };
-    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
-      this.toastr.success('User settings updated');
-      if (this.user) {
-        this.user.preferences = updatedPrefs;
-      }
-      this.resetSettings(true);
-    });
   }
 
   toggleDrawer() {

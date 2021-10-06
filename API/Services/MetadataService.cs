@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
@@ -171,6 +171,9 @@ namespace API.Services
 
         private bool UpdateSeriesSummary(Series series, bool forceUpdate)
         {
+            // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
+            // better to let the user kick off a refresh metadata on an individual Series than having overhead of
+            // checking File last write time.
             if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return false;
 
             var isBook = series.Library.Type == LibraryType.Book;
@@ -181,16 +184,21 @@ namespace API.Services
             if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return false;
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return false;
 
-            if (series.Format is MangaFormat.Archive or MangaFormat.Epub)
+            var comicInfo = GetComicInfo(series.Format, firstFile);
+            if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
+
+            series.Summary = comicInfo.Summary;
+            return true;
+        }
+
+        private ComicInfo GetComicInfo(MangaFormat format, MangaFile firstFile)
+        {
+            if (format is MangaFormat.Archive or MangaFormat.Epub)
             {
-                var summary = Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetSummaryInfo(firstFile.FilePath) : _archiveService.GetSummaryInfo(firstFile.FilePath);
-                if (!string.IsNullOrEmpty(series.Summary))
-                {
-                    series.Summary = summary;
-                    return true;
-                }
+                return Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
             }
-            return false;
+
+            return null;
         }
 
 
