@@ -28,7 +28,7 @@
     src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
 }
 
-@import '../../../assets/themes/dark.scss';
+$dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
 
 .control-container {
