@@ -234,4 +234,10 @@ $primary-color: #0062cc;
         background-color: unset;
         color: #6c757d;
     }
+
+    &:active {
+        * {
+            color: white;
+        }
+    }
 }
