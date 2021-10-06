@@ -317,11 +317,13 @@ namespace API.Parser
                 @"^(?<Series>.+?)Vol\.?\s?#?(?:\d+)",
                 MatchOptions,
                 RegexTimeout),
+
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
                 @"^(?<Series>.+?)(?: \d+)",
                 MatchOptions,
             RegexTimeout),
+
             // Batman & Robin the Teen Wonder #0
             new Regex(
                 @"^(?<Series>.*)(?: |_)#\d+",
@@ -618,7 +620,7 @@ namespace API.Parser
             var edition = ParseEdition(fileName);
             if (!string.IsNullOrEmpty(edition))
             {
-                ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type == LibraryType.Comic);
+                ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
                 ret.Edition = edition;
             }
 
@@ -643,7 +645,7 @@ namespace API.Parser
 
             if (string.IsNullOrEmpty(ret.Series))
             {
-                ret.Series = CleanTitle(fileName, type == LibraryType.Comic);
+                ret.Series = CleanTitle(fileName, type is LibraryType.Comic);
             }
 
             // Pdfs may have .pdf in the series name, remove that
@@ -691,7 +693,7 @@ namespace API.Parser
 
                 if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
                 {
-                    ret.Series = CleanTitle(folder, type == LibraryType.Comic);
+                    ret.Series = CleanTitle(folder, type is LibraryType.Comic);
                     break;
                 }
 
