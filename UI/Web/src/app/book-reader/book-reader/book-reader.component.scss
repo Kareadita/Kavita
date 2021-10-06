@@ -174,3 +174,37 @@ $primary-color: #0062cc;
   background-color: rgba(65, 105, 225, 0.5) !important;
   animation: fadein .5s both;
 }
+
+.btn {
+    &.btn-secondary {
+        border-color: transparent;
+
+        &:hover {
+            border-color: #545b62;
+        }
+    }
+    
+    &.btn-outline-secondary {
+        border-color: transparent;
+
+        &:hover {
+            border-color: #545b62;
+        }
+    }
+
+    span {
+        background-color: unset;
+    }
+
+    i {
+        background-color: unset;
+    }
+}
+
+.drawer-container {
+    box-shadow: 1px 1px 7px 2px rgb(0 0 0 / 70%);
+}
+
+.book-content {
+    padding-bottom: 58px;
+}
