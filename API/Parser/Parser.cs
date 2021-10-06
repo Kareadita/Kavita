@@ -220,6 +220,18 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
         };
 
+        private static readonly Regex[] ComicSeriesSpecialCaseRegex = new[]
+{
+            // Cyberpunk 2077 - Your Voice 01
+            new Regex(
+                @"^(?<Series>.+? \d.+) (?<Chapter>(?:[^#])\d+?)",
+                MatchOptions, RegexTimeout),
+            // Cyberpunk 2077 #01
+            new Regex(
+                @"^(?<Series>.+? \d.+) #(?<Chapter>\d.+?)",
+                MatchOptions, RegexTimeout),
+        };
+
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
             // Invincible Vol 01 Family matters (2005) (Digital)
@@ -714,7 +726,15 @@ namespace API.Parser
         }
         public static string ParseComicSeries(string filename)
         {
-            foreach (var regex in ComicSeriesRegex)
+            Regex[] ComicCase;
+            if (filename.Contains("Cyberpunk 2077"))
+            {
+                ComicCase = ComicSeriesSpecialCaseRegex;
+            } else
+            {
+                ComicCase = ComicSeriesRegex;
+            }
+            foreach (var regex in ComicCase)
             {
                 var matches = regex.Matches(filename);
                 foreach (Match match in matches)
