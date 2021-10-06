@@ -46,9 +46,7 @@ namespace API.Services
 
       var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
         .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
-
-
-
+      
       return firstImage;
     }
 

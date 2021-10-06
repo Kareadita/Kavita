@@ -127,4 +127,14 @@ export class UtilityService {
     return Breakpoint.Desktop;
   }
 
+  isInViewport(element: Element, additionalTopOffset: number = 0) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= additionalTopOffset &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+  }
+
 }

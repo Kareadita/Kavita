@@ -205,7 +205,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return document.documentElement.offsetHeight + document.documentElement.scrollTop;
   }
   getScrollTop() {
-    return document.documentElement.scrollTop
+    return document.documentElement.scrollTop;
   }
 
   checkIfShouldTriggerContinuousReader() {

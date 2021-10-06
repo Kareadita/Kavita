@@ -28,6 +28,7 @@
     src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
 }
 
+@import '../../../assets/themes/dark.scss';
 $primary-color: #0062cc;
 
 .control-container {
@@ -42,6 +43,11 @@ $primary-color: #0062cc;
     }
 }
 
+.page-stub {
+    margin-top: 6px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
 
 .dark-mode {
 
@@ -73,60 +79,12 @@ $primary-color: #0062cc;
         color: #8db2e5 !important;
     }
 
-    // Coppied
-    // html, body {
-    //     color: #dcdcdc !important;
-    //     background-image: none !important;
-    //     background-color: #292929 !important;
-    //   }
-      
-    //   html::before, body::before {
-    //     background-image: none !important;
-    //   }
-      
-    //   html *:not(input) {color: #dcdcdc !important}
-    //   html * {background-color: rgb(41, 41, 41, 0.90) !important}
-      
-    //   html *, html *[id], html *[class] {
-    //     box-shadow: none !important;
-    //     text-shadow: none !important;
-    //     border-radius: unset !important;
-    //     border-color: #555555 !important;
-    //     outline-color: #555555 !important;
-    //   }
-      
-      img, img[src] {
+    img, img[src] {
         z-index: 1;
         filter: brightness(0.85) !important;
         background-color: initial !important;
-      }
+    }
       
-    //   video, video[src] {
-    //     z-index: 1;
-    //     background-color: transparent !important;
-    //   }
-      
-    //   input:not([type='button']):not([type='submit']) {
-    //     color: #dcdcdc !important;
-    //     background-image: none !important;
-    //     background-color: #333333 !important;
-    //   }
-      
-    //   textarea, textarea[class], input[type='text'], input[type='text'][class] {
-    //     color: #dcdcdc !important;
-    //     background-color: #555555 !important;
-    //   }
-      
-    //   svg:not([fill]) {fill: #7d7d7d !important}
-    //   li, select {background-image: none !important}
-    //   input[type='text'], input[type='search'] {text-indent: 10px}
-    //   a {background-color: rgba(255, 255, 255, 0.01) !important}
-    //   html cite, html cite *, html cite *[class] {color: #029833 !important}
-    //   svg[fill], button, input[type='button'], input[type='submit'] {opacity: 0.85 !important}
-      
-    //   :before {color: #dcdcdc !important}
-    //   :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
-    //   :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
     :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
     :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
 }
@@ -134,6 +92,21 @@ $primary-color: #0062cc;
 .reading-bar {
     background-color: white;
     overflow: hidden;
+}
+
+.dark-mode {
+    .reading-bar, .book-title, .drawer-body, .drawer-container {
+        background-color: $dark-form-background-no-opacity;
+    }
+    button {
+        background-color: $dark-form-background-no-opacity;
+    }
+}
+
+::ng-deep .dark-mode .drawer-container {
+    .header, body, *:not(.progress-bar) {
+        background-color: $dark-form-background-no-opacity !important;
+    }
 }
 
 @media(max-width: 875px) {
