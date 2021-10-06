@@ -7,4 +7,5 @@ export interface ServerSettings {
     allowStatCollection: boolean;
     enableOpds: boolean;
     enableAuthentication: boolean;
+    baseUrl: string;
 }

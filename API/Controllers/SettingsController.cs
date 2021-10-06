@@ -85,6 +85,14 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.Port + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.Port + string.Empty;
+                    // Port is managed in appSetting.json
+                    Configuration.Port = updateSettingsDto.Port;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
                 if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.LoggingLevel + string.Empty;

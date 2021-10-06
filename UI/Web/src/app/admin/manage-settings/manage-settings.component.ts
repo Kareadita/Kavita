@@ -37,6 +37,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('enableAuthentication', new FormControl(this.serverSettings.enableAuthentication, [Validators.required]));
+      this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
     });
   }
 
@@ -49,6 +50,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
     this.settingsForm.get('enableAuthentication')?.setValue(this.serverSettings.enableAuthentication);
+    this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
   }
 
   async saveSettings() {
