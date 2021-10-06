@@ -160,13 +160,13 @@ namespace API
 
             app.UseDefaultFiles();
 
-            // && env.IsProduction() removed for testing
             if (!string.IsNullOrEmpty(Configuration.BaseUrl))
             {
                 var path = !Configuration.BaseUrl.StartsWith("/")
                     ? $"/{Configuration.BaseUrl}"
                     : Configuration.BaseUrl;
                 app.UsePathBase(path);
+                Console.WriteLine("Starting with base url as " + path);
             }
 
             app.UseStaticFiles(new StaticFileOptions

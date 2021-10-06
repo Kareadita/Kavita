@@ -40,4 +40,9 @@
   <app-root></app-root>
   <noscript>Please enable JavaScript to continue using this application.</noscript>
 </body>
+<script>
+  (function() {
+    window['_app_base'] = '/' + window.location.pathname.split('/')[1];
+  })();
+</script>
 </html>
