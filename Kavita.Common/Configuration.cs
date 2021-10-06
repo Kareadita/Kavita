@@ -162,7 +162,7 @@ namespace Kavita.Common
       {
           if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
           {
-              return string.Empty;
+              return "/";
           }
 
           try
@@ -181,7 +181,7 @@ namespace Kavita.Common
               Console.WriteLine("Error reading app settings: " + ex.Message);
           }
 
-          return string.Empty;
+          return "/";
       }
 
       private static void SetBaseUrl(string filePath, string value)
@@ -191,16 +191,16 @@ namespace Kavita.Common
               return;
           }
 
-          var currentPort = GetPort(filePath);
+          var currentBaseUrl = GetBaseUrl(filePath);
           var json = File.ReadAllText(filePath);
           if (!json.Contains("BaseUrl"))
           {
-              var lastComma = json.LastIndexOf(",", StringComparison.Ordinal);
-              json = json.Substring(0, lastComma) + (",\n  \"BaseUrl\": " + currentPort) + json.Substring(lastComma, json.Length);
+              var lastBracket = json.LastIndexOf("}", StringComparison.Ordinal) - 1;
+              json = (json.Substring(0, lastBracket) + (",\n  \"BaseUrl\": " + currentBaseUrl) + "}");
           }
           else
           {
-              json = json.Replace("\"BaseUrl\": " + currentPort, "\"BaseUrl\": " + value);
+              json = json.Replace("\"BaseUrl\": " + currentBaseUrl, "\"BaseUrl\": " + value);
           }
           File.WriteAllText(filePath, json);
       }
