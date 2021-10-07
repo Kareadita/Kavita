@@ -87,7 +87,6 @@ namespace API.Controllers
                 SeriesFormat = dto.SeriesFormat,
                 SeriesId = dto.SeriesId,
                 LibraryId = dto.LibraryId,
-                LibraryType = dto.LibraryType,
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
             });
