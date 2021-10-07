@@ -22,6 +22,8 @@ import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { LibraryService } from 'src/app/_services/library.service';
+import { LibraryType } from 'src/app/_models/library';
 
 
 interface PageStyle {
@@ -169,6 +171,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Last seen progress part path
    */
   lastSeenScrollPartPath: string = '';
+  /**
+   * Library Type used for rendering chapter or issue
+   */
+   libraryType: LibraryType = LibraryType.Book;
 
   /**
    * Hack: Override background color for reader and restore it onDestroy
@@ -223,7 +229,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService, private utilityService: UtilityService) {
+    private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -421,6 +427,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         
   
         this.continuousChaptersStack.push(this.chapterId);
+
+        this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
+          this.libraryType = type;
+        });
+  
   
   
         if (this.pageNum >= this.maxPages) {
@@ -529,10 +540,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
-      this.toastr.info(direction + ' chapter loaded', '', {timeOut: 3000});
+      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction + ' chapter');
+      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;

@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -12,6 +13,8 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
+import { LibraryService } from '../../_services/library.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -19,7 +22,6 @@ import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/drag
   styleUrls: ['./reading-list-detail.component.scss']
 })
 export class ReadingListDetailComponent implements OnInit {
-
   items: Array<ReadingListItem> = [];
   listId!: number;
   readingList!: ReadingList;
@@ -32,6 +34,7 @@ export class ReadingListDetailComponent implements OnInit {
   hasDownloadingRole: boolean = false;
   downloadInProgress: boolean = false;
 
+  libraryTypes: {[key: number]: LibraryType} = {};
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -39,7 +42,8 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, private confirmService: ConfirmService) {}
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
+    private confirmService: ConfirmService, private libraryService: LibraryService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -51,7 +55,21 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.listId = parseInt(listId, 10);
 
-    this.readingListService.getReadingList(this.listId).subscribe(readingList => {
+    this.libraryService.getLibraries().subscribe(libs => {
+      
+    });
+
+    forkJoin([
+      this.libraryService.getLibraries(), 
+      this.readingListService.getReadingList(this.listId)
+    ]).subscribe(results => {
+      const libraries = results[0];
+      const readingList = results[1];
+
+      libraries.forEach(lib => {
+        this.libraryTypes[lib.id] = lib.type;
+      });
+
       if (readingList == null) {
         // The list doesn't exist
         this.toastr.error('This list doesn\'t exist.');
@@ -81,7 +99,6 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   performAction(action: ActionItem<any>) {
-    // TODO: Try to move performAction into the actionables component. (have default handler in the component, allow for overridding to pass additional context)
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.readingList);
     }
@@ -119,7 +136,7 @@ export class ReadingListDetailComponent implements OnInit {
       return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
     }
 
-    return 'Chapter ' + item.chapterNumber;
+    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + item.chapterNumber;
   }
 
   orderUpdated(event: IndexUpdateEvent) {

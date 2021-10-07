@@ -1,9 +1,21 @@
-﻿using Xunit;
+using System;
+using System.Collections.Generic;
+using API.Entities.Enums;
+using API.Parser;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Parser
 {
     public class ComicParserTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public ComicParserTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Theory]
         [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
@@ -29,7 +41,21 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 001 - Moving In", "Batman Wayne Family Adventures")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
         [InlineData("spawn-123", "spawn")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "Spawn")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "Batman Beyond")]
+        [InlineData("Batman Beyond 001 (2012)", "Batman Beyond")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "Batman Beyond 2.0")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "Batman - Catwoman")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "Chew")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "Chew Script Book")]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", "Batman - Detective Comics - Rebirth Deluxe Edition Book")]
+        [InlineData("Cyberpunk 2077 - Your Voice #01", "Cyberpunk 2077 - Your Voice")]
+        [InlineData("Cyberpunk 2077 #01", "Cyberpunk 2077")]
+        [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "Cyberpunk 2077 - Trauma Team")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
+        [InlineData("Batgirl V2000 #57", "Batgirl")]
+        [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "Fables")]
+        
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -54,6 +80,17 @@ namespace API.Tests.Parser
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("spawn-123", "0")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "0")]
+        [InlineData("Batman Beyond 04 (of 6) (1999)", "0")]
+        [InlineData("Batman Beyond 001 (2012)", "0")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "0")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "0")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "1")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "2000")]
+        [InlineData("Batgirl V2000 #57", "2000")]
+        [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "0")]
+        [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -80,12 +117,75 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
         [InlineData("spawn-123", "123")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "62")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "4")]
         [InlineData("Invincible 052 (c2c) (2008) (Minutemen-TheCouple)", "52")]
         [InlineData("Y - The Last Man #001", "1")]
+        [InlineData("Batman Beyond 001 (2012)", "1")]
+        [InlineData("Batman Beyond 2.0 001 (2013)", "1")]
+        [InlineData("Batman - Catwoman 001 (2021) (Webrip) (The Last Kryptonian-DCP)", "1")]
+        [InlineData("Chew v1 - Taster´s Choise (2012) (Digital) (1920) (Kingpin-Empire)", "0")]
+        [InlineData("Chew Script Book (2011) (digital-Empire) SP04", "0")]
+        [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "57")]
+        [InlineData("Batgirl V2000 #57", "57")]
+        [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "21")]
+        [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
         }
+
+
+        [Theory]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", true)]
+        [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", true)]
+        [InlineData("Baldwin the Brave & Other Tales Special SP1.cbr", true)]
+        [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", true)]
+        public void ParseComicSpecialTest(string input, bool expected)
+        {
+            Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
+        }
+
+        [Fact]
+        public void ParseInfoTest()
+        {
+            const string rootPath = @"E:/Comics/";
+            var expected = new Dictionary<string, ParserInfo>();
+            var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Teen Titans", Volumes = "0",
+                 Chapters = "0", Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath
+             });
+
+            foreach (var file in expected.Keys)
+            {
+                var expectedInfo = expected[file];
+                var actual = API.Parser.Parser.Parse(file, rootPath);
+                if (expectedInfo == null)
+                {
+                    Assert.Null(actual);
+                    return;
+                }
+                Assert.NotNull(actual);
+                _testOutputHelper.WriteLine($"Validating {file}");
+                Assert.Equal(expectedInfo.Format, actual.Format);
+                _testOutputHelper.WriteLine("Format ✓");
+                Assert.Equal(expectedInfo.Series, actual.Series);
+                _testOutputHelper.WriteLine("Series ✓");
+                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
+                _testOutputHelper.WriteLine("Chapters ✓");
+                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
+                _testOutputHelper.WriteLine("Volumes ✓");
+                Assert.Equal(expectedInfo.Edition, actual.Edition);
+                _testOutputHelper.WriteLine("Edition ✓");
+                Assert.Equal(expectedInfo.Filename, actual.Filename);
+                _testOutputHelper.WriteLine("Filename ✓");
+                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
+                _testOutputHelper.WriteLine("FullFilePath ✓");
+            }
+        }
+
     }
 }
