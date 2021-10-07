@@ -41,6 +41,7 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 001 - Moving In", "Batman Wayne Family Adventures")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone).cbr", "Saga")]
         [InlineData("spawn-123", "spawn")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "Spawn")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "Batman Beyond")]
         [InlineData("Batman Beyond 001 (2012)", "Batman Beyond")]
         [InlineData("Batman Beyond 2.0 001 (2013)", "Batman Beyond 2.0")]
@@ -54,6 +55,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
         [InlineData("Batgirl V2000 #57", "Batgirl")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "Fables")]
+        
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -78,6 +80,7 @@ namespace API.Tests.Parser
         [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("spawn-123", "0")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "0")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "0")]
         [InlineData("Batman Beyond 001 (2012)", "0")]
         [InlineData("Batman Beyond 2.0 001 (2013)", "0")]
@@ -114,6 +117,7 @@ namespace API.Tests.Parser
         [InlineData("Batman Wayne Family Adventures - Ep. 014 - Moving In", "14")]
         [InlineData("Saga 001 (2012) (Digital) (Empire-Zone)", "1")]
         [InlineData("spawn-123", "123")]
+        [InlineData("Spawn 062 (1997) (digital) (TLK-EMPIRE-HD).cbr", "62")]
         [InlineData("Batman Beyond 04 (of 6) (1999)", "4")]
         [InlineData("Invincible 052 (c2c) (2008) (Minutemen-TheCouple)", "52")]
         [InlineData("Y - The Last Man #001", "1")]
@@ -135,6 +139,8 @@ namespace API.Tests.Parser
         [Theory]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 02 (2018) (digital) (Son of Ultron-Empire)", true)]
         [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", true)]
+        [InlineData("Baldwin the Brave & Other Tales Special SP1.cbr", true)]
+        [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
