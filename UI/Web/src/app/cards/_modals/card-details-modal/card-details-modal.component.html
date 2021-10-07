@@ -30,7 +30,7 @@
             </div>
         </ng-container>
 
-        <h4 *ngIf="!utilityService.isChapter(data)">{{libraryType !== LibraryType.Comic ? 'Chapters' : 'Issues'}}</h4>
+        <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
         <ul class="list-unstyled">
             <li class="media my-4" *ngFor="let chapter of chapters">
                 <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
@@ -40,8 +40,8 @@
                     <h5 class="mt-0 mb-1">
                         <span *ngIf="chapter.number !== '0'; else specialHeader">
                             <span >
-                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #' + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
-                                {{libraryType !== LibraryType.Comic ? 'Chapter' : 'Issue #' }} {{formatChapterNumber(chapter)}}
+                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
+                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                             </span>
                             <span class="badge badge-primary badge-pill">
                                 <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>

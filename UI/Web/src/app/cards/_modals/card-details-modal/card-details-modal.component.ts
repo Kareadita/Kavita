@@ -104,7 +104,7 @@ export class CardDetailsModalComponent implements OnInit {
       const chapter = this.utilityService.asChapter(this.data)
       chapter.coverImage = this.imageService.getChapterCoverImage(chapter.id);
       modalRef.componentInstance.chapter = chapter;
-      modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : 'Chapter ') + chapter.range + '\'s Cover';
+      modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : this.utilityService.formatChapterName(this.libraryType, false, true)) + chapter.range + '\'s Cover';
     } else {
       const volume = this.utilityService.asVolume(this.data);
       const chapters = volume.chapters;

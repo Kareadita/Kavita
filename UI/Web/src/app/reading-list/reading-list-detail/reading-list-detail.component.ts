@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { LibraryType } from 'src/app/_models/library';
@@ -34,12 +34,7 @@ export class ReadingListDetailComponent implements OnInit {
   hasDownloadingRole: boolean = false;
   downloadInProgress: boolean = false;
 
-  //libraryType: LibraryType = LibraryType.Manga; 
   libraryTypes: {[key: number]: LibraryType} = {};
-
-  get LibraryType(): typeof LibraryType {
-    return LibraryType;
-  }
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -141,11 +136,7 @@ export class ReadingListDetailComponent implements OnInit {
       return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
     }
 
-    if (this.libraryTypes[item.libraryId] === LibraryType.Comic) {
-      return 'Issue #' + item.chapterNumber;
-    }
-
-    return 'Chapter ' + item.chapterNumber;
+    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + item.chapterNumber;
   }
 
   orderUpdated(event: IndexUpdateEvent) {
