@@ -49,6 +49,10 @@ $primary-color: #0062cc;
     padding-right: 2px;
 }
 
+.fixed-top {
+    z-index: 1022;
+}
+
 .dark-mode {
 
     color: #dcdcdc !important;
@@ -92,6 +96,7 @@ $primary-color: #0062cc;
 .reading-bar {
     background-color: white;
     overflow: hidden;
+    box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
 }
 
 .dark-mode {
@@ -100,6 +105,32 @@ $primary-color: #0062cc;
     }
     button {
         background-color: $dark-form-background-no-opacity;
+    }
+
+    .btn {
+        &.btn-secondary {
+            border-color: transparent;
+    
+            &:hover, &:focus {
+                border-color: #545b62;
+            }
+        }
+        
+        &.btn-outline-secondary {
+            border-color: transparent;
+    
+            &:hover, &:focus {
+                border-color: #545b62;
+            }
+        }
+    
+        span {
+            background-color: unset;
+        }
+    
+        i {
+            background-color: unset;
+        }
     }
 }
 
@@ -173,4 +204,40 @@ $primary-color: #0062cc;
 .highlight-2 {
   background-color: rgba(65, 105, 225, 0.5) !important;
   animation: fadein .5s both;
+}
+
+.btn {
+    &.btn-secondary {
+        border-color: transparent;
+        background-color: unset;
+
+        &:hover, &:focus {
+            border-color: #545b62;
+        }
+    }
+    
+    &.btn-outline-secondary {
+        border-color: transparent;
+        background-color: unset;
+
+        &:hover, &:focus {
+            border-color: #545b62;
+        }
+    }
+
+    span {
+        background-color: unset;
+        color: #6c757d;
+    }
+
+    i {
+        background-color: unset;
+        color: #6c757d;
+    }
+
+    &:active {
+        * {
+            color: white;
+        }
+    }
 }

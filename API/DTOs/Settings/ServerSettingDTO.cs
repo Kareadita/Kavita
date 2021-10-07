@@ -27,8 +27,8 @@
         /// </summary>
         public bool EnableAuthentication { get; set; }
         /// <summary>
-        /// Base Url for the kavita. Defaults to "/". Managed in appsettings.json.Requires restart to take effect.
+        /// Base Url for the kavita. Requires restart to take effect.
         /// </summary>
-        public string BaseUrl { get; set; } = "/";
+        public string BaseUrl { get; set; }
     }
 }

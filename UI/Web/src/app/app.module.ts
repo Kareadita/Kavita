@@ -31,6 +31,8 @@ import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
+import { ConfigData } from './_models/config-data';
+
 
 @NgModule({
   declarations: [
@@ -83,7 +85,7 @@ import { SAVER, getSaver } from './shared/_providers/saver.provider';
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
     {provide: SAVER, useFactory: getSaver},
-    { provide: APP_BASE_HREF, useValue: window['_app_base' as keyof Window] || '/' },
+    { provide: APP_BASE_HREF, useFactory: (config: ConfigData) => config.baseUrl, deps: [ConfigData] },
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
