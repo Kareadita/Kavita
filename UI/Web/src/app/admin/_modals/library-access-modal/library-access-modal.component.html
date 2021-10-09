@@ -14,6 +14,9 @@
                 <label attr.for="library-{{i}}" class="form-check-label">{{library.data.name}}</label>
             </div>
         </li>
+        <li class="list-group-item" *ngIf="selectedLibraries.length === 0">
+            There are no libraries setup yet.
+        </li>
     </div>
 </div>
 <div class="modal-footer">

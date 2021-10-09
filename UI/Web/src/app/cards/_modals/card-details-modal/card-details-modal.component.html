@@ -1,7 +1,10 @@
 <div *ngIf="data !== undefined">
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">
+        <h4 *ngIf="libraryType !== LibraryType.Comic else comicHeader" class="modal-title" id="modal-basic-title">
             {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}} Details</h4>
+        <ng-template #comicHeader><h4 class="modal-title" id="modal-basic-title">
+            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}} Details</h4>
+        </ng-template>
         <button type="button" class="close" aria-label="Close" (click)="close()">
         <span aria-hidden="true">&times;</span>
         </button>
@@ -19,7 +22,7 @@
             </div>
             <div class="row no-gutters">
                 <div class="col" *ngIf="utilityService.isVolume(data)">
-                    Added: {{(data.created | date: 'MM/dd/yyyy') || '-'}}
+                    Added: {{(data.created | date: 'short') || '-'}}
                 </div>
                 <div class="col">
                     Pages: {{data.pages}}
@@ -27,18 +30,19 @@
             </div>
         </ng-container>
 
-        <h4 *ngIf="!utilityService.isChapter(data)">Chapters</h4>
+        <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
         <ul class="list-unstyled">
             <li class="media my-4" *ngFor="let chapter of chapters">
-                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read Chapter {{chapter.number}}">
+                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
                     <img class="mr-3" style="width: 74px" [src]="chapter.coverImage">
                 </a>
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">
                         <span *ngIf="chapter.number !== '0'; else specialHeader">
-                            <span class="">
-                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="'Chapter' + formatChapterNumber(chapter)"></app-card-actionables>
-                            </span>&nbsp;Chapter {{formatChapterNumber(chapter)}}
+                            <span >
+                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
+                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                            </span>
                             <span class="badge badge-primary badge-pill">
                                 <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
                                 <span *ngIf="chapter.pagesRead === 0">UNREAD</span>

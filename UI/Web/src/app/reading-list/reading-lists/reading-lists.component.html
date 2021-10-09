@@ -1,0 +1,11 @@
+<app-card-detail-layout header="Reading Lists" 
+    [isLoading]="loadingLists"
+    [items]="lists"
+    [actions]="actions"
+    [pagination]="pagination"
+    (pageChange)="onPageChange($event)"
+    >
+    <ng-template #cardItem let-item let-position="idx">
+        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" [supressLibraryLink]="true" [imageUrl]="imageService.placeholderImage" (clicked)="handleClick(item)"></app-card-item>
+    </ng-template>
+</app-card-detail-layout>

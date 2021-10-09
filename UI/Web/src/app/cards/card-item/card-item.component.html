@@ -1,5 +1,5 @@
 <div class="card">
-    <div class="overlay"  (click)="handleClick()">
+    <div class="overlay" (click)="handleClick($event)">
       <img *ngIf="total > 0 || supressArchiveWarning" class="img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
       <img *ngIf="total === 0 && !supressArchiveWarning" class="img-top lazyload" [src]="imageService.errorImage" [attr.data-src]="imageUrl" 
@@ -15,27 +15,29 @@
         </span>
       </div>
       <div class="error-banner" *ngIf="total === 0 && !supressArchiveWarning">
-        Cannot Read Archive
+        Cannot Read
       </div>
-
-      
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
+      <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
+        <input type="checkbox" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
+      </div>
     </div>
+
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
       <div>
-        <span class="card-title" placement="top" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
+        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+            <span class="sr-only">(promoted)</span>
           </span>
           <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
           &nbsp;{{title}}
-          <span class="sr-only">(promoted)</span>
         </span>
         <span class="card-actions float-right">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | titlecase}}</a>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | sentenceCase}}</a>
     </div>
 </div>

@@ -1,8 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HomeComponent } from './home/home.component';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
-import { LibraryComponent } from './library/library.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
@@ -10,11 +8,12 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { InProgressComponent } from './in-progress/in-progress.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
 const routes: Routes = [
-  {path: '', component: HomeComponent},
+  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
@@ -26,6 +25,10 @@ const routes: Routes = [
   {
     path: 'preferences',
     loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
+  },
+  {
+    path: 'lists',
+    loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
   },
   {
     path: '',
@@ -49,14 +52,14 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-      {path: 'library', component: LibraryComponent},
+      {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'in-progress', component: InProgressComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},
   {path: 'no-connection', component: NotConnectedComponent},
-  {path: '**', component: HomeComponent, pathMatch: 'full'}
+  {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
 
 @NgModule({

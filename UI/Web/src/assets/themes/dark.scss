@@ -5,6 +5,7 @@ $dark-primary-color: rgba(74, 198, 148, 0.9);
 $dark-text-color: #efefef;
 $dark-hover-color: #4ac694;
 $dark-form-background: rgba(1, 4, 9, 0.5);
+$dark-form-background-no-opacity: rgb(1, 4, 9);
 $dark-form-placeholder: #efefef;
 $dark-link-color: rgb(88, 166, 255);
 $dark-icon-color: white;
@@ -28,6 +29,11 @@ $dark-item-accent-bg: #292d32;
 
   a.btn {
     color: white;
+  }
+
+  .accordion-header {
+    font-weight: bold;
+    color: $dark-primary-color;
   }
 
 
@@ -121,6 +127,7 @@ $dark-item-accent-bg: #292d32;
   
 
   .dropdown-menu {
+    background-color: #171719;
     .dropdown-item:hover, .dropdown-item:focus {
         color: $dark-text-color;
         background-color: $dark-hover-color;

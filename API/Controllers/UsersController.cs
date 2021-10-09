@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
 using API.Interfaces;
@@ -18,7 +19,7 @@ namespace API.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete-user")]
         public async Task<ActionResult> DeleteUser(string username)
@@ -30,7 +31,7 @@ namespace API.Controllers
 
             return BadRequest("Could not delete the user.");
         }
-        
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
@@ -38,12 +39,25 @@ namespace API.Controllers
             return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
         }
 
+        [AllowAnonymous]
+        [HttpGet("names")]
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUserNames()
+        {
+            var setting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            if (setting.EnableAuthentication)
+            {
+                return Unauthorized("This API cannot be used given your server's configuration");
+            }
+            var members = await _unitOfWork.UserRepository.GetMembersAsync();
+            return Ok(members.Select(m => m.Username));
+        }
+
         [HttpGet("has-reading-progress")]
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
         {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, user.Id));
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+            return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
         }
 
         [HttpGet("has-library-access")]
@@ -77,7 +91,7 @@ namespace API.Controllers
             {
                 return Ok(preferencesDto);
             }
-            
+
             return BadRequest("There was an issue saving preferences.");
         }
     }

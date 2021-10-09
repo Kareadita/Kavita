@@ -36,12 +36,13 @@ namespace API.Extensions
             services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
             services.AddScoped<IDownloadService, DownloadService>();
             services.AddScoped<IReaderService, ReaderService>();
+            services.AddScoped<IAccountService, AccountService>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 
             services.AddSqLite(config, env);
             services.AddLogging(config);
-            services.AddSignalR();
+            services.AddSignalR(opt => opt.EnableDetailedErrors = true);
         }
 
         private static void AddSqLite(this IServiceCollection services, IConfiguration config,

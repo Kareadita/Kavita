@@ -23,6 +23,7 @@ namespace API.Services.Tasks
         /// Name of the Tag
         /// <example>v0.4.3</example>
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public string Tag_Name { get; init; }
         /// <summary>
         /// Name of the Release
@@ -35,6 +36,7 @@ namespace API.Services.Tasks
         /// <summary>
         /// Url of the release on Github
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         public string Html_Url { get; init; }
     }
 
@@ -53,8 +55,10 @@ namespace API.Services.Tasks
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly IPresenceTracker _tracker;
         private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+#pragma warning disable S1075
         private static readonly string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
         private static readonly string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
+#pragma warning restore S1075
 
         public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
         {
@@ -90,12 +94,17 @@ namespace API.Services.Tasks
         private UpdateNotificationDto CreateDto(GithubReleaseMetadata update)
         {
             if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
-            var version = update.Tag_Name.Replace("v", string.Empty);
-            var updateVersion = new Version(version);
+            var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
+            var currentVersion = BuildInfo.Version.ToString();
+
+            if (updateVersion.Revision == -1)
+            {
+                currentVersion = currentVersion.Substring(0, currentVersion.LastIndexOf(".", StringComparison.Ordinal));
+            }
 
             return new UpdateNotificationDto()
             {
-                CurrentVersion = version,
+                CurrentVersion = currentVersion,
                 UpdateVersion = updateVersion.ToString(),
                 UpdateBody = _markdown.Transform(update.Body.Trim()),
                 UpdateTitle = update.Name,
@@ -131,11 +140,7 @@ namespace API.Services.Tasks
                 connections.AddRange(await _tracker.GetConnectionsForUser(admin));
             }
 
-            await _messageHub.Clients.Users(admins).SendAsync("UpdateAvailable", new SignalRMessage
-            {
-                Name = "UpdateAvailable",
-                Body = update
-            });
+            await _messageHub.Clients.Users(admins).SendAsync(SignalREvents.UpdateVersion, MessageFactory.UpdateVersionEvent(update));
         }
 
 

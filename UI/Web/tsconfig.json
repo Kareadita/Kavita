@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",
+    "removeComments": true /* Do not emit comments to output. */,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitReturns": true,

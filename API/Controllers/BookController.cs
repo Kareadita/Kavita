@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Reader;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -31,18 +33,36 @@ namespace API.Controllers
         }
 
         [HttpGet("{chapterId}/book-info")]
-        public async Task<ActionResult<string>> GetBookInfo(int chapterId)
+        public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
         {
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
-            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
+            var bookTitle = string.Empty;
+            if (dto.SeriesFormat == MangaFormat.Epub)
+            {
+                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath);
+                bookTitle = book.Title;
+            }
 
-            return book.Title;
+            return Ok(new BookInfoDto()
+            {
+                ChapterNumber =  dto.ChapterNumber,
+                VolumeNumber = dto.VolumeNumber,
+                VolumeId = dto.VolumeId,
+                BookTitle = bookTitle,
+                SeriesName = dto.SeriesName,
+                SeriesFormat = dto.SeriesFormat,
+                SeriesId = dto.SeriesId,
+                LibraryId = dto.LibraryId,
+                IsSpecial = dto.IsSpecial,
+                Pages = dto.Pages,
+            });
         }
 
         [HttpGet("{chapterId}/book-resources")]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
 
             var key = BookService.CleanContentKeys(file);
@@ -61,7 +81,7 @@ namespace API.Controllers
         {
             // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
             // this is used to rewrite anchors in the book text so that we always load properly in FE
-            var chapter = await _unitOfWork.VolumeRepository.GetChapterAsync(chapterId);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 

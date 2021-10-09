@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -42,6 +42,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
    * Selected Cover for uploading
    */
   selectedCover: string = '';
+
+  get Breakpoint(): typeof Breakpoint {
+    return Breakpoint;
+  }
 
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
@@ -83,6 +87,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       if (metadata) {
         this.metadata = metadata;
         this.settings.savedData = metadata.tags;
+        this.tags = metadata.tags;
       }
     });
 
@@ -146,6 +151,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.seriesService.updateSeries(model),
       this.seriesService.updateMetadata(this.metadata, this.tags)
     ];
+
 
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));

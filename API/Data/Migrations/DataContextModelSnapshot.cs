@@ -229,10 +229,6 @@ namespace API.Data.Migrations
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
 
-                    b.Property<uint>("RowVersion")
-                        .IsConcurrencyToken()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
@@ -292,8 +288,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -335,8 +331,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -401,6 +397,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastScanned")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -440,14 +439,79 @@ namespace API.Data.Migrations
                     b.ToTable("MangaFile");
                 });
 
+            modelBuilder.Entity("API.Entities.ReadingList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Promoted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("ReadingList");
+                });
+
+            modelBuilder.Entity("API.Entities.ReadingListItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ReadingListId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("ReadingListId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.HasIndex("VolumeId");
+
+                    b.ToTable("ReadingListItem");
+                });
+
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("CoverImageLocked")
                         .HasColumnType("INTEGER");
@@ -542,8 +606,8 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<byte[]>("CoverImage")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
@@ -780,6 +844,52 @@ namespace API.Data.Migrations
                     b.Navigation("Chapter");
                 });
 
+            modelBuilder.Entity("API.Entities.ReadingList", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ReadingLists")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("API.Entities.ReadingListItem", b =>
+                {
+                    b.HasOne("API.Entities.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.ReadingList", "ReadingList")
+                        .WithMany("Items")
+                        .HasForeignKey("ReadingListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Volume", "Volume")
+                        .WithMany()
+                        .HasForeignKey("VolumeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("ReadingList");
+
+                    b.Navigation("Series");
+
+                    b.Navigation("Volume");
+                });
+
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
                     b.HasOne("API.Entities.Library", "Library")
@@ -892,6 +1002,8 @@ namespace API.Data.Migrations
 
                     b.Navigation("Ratings");
 
+                    b.Navigation("ReadingLists");
+
                     b.Navigation("UserPreferences");
 
                     b.Navigation("UserRoles");
@@ -907,6 +1019,11 @@ namespace API.Data.Migrations
                     b.Navigation("Folders");
 
                     b.Navigation("Series");
+                });
+
+            modelBuilder.Entity("API.Entities.ReadingList", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>

@@ -90,6 +90,15 @@ namespace API.Tests.Services
         }
 
         [Theory]
+        [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] folders, string expectedDirectory)
+        {
+            var actual = DirectoryService.FindHighestDirectoriesFromFiles(rootDirectories, folders);
+            var expected = new Dictionary<string, string> {{expectedDirectory, ""}};
+            Assert.Equal(expected, actual);
+        }
+
+        [Theory]
         [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
         [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake", "Omake,Specials,Love Hina")]
         [InlineData("C:/Manga", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
@@ -102,6 +111,7 @@ namespace API.Tests.Services
         [InlineData(@"C:/", @"C://Btooom!/Vol.1 Chapter 2/1.cbz", "Vol.1 Chapter 2,Btooom!")]
         [InlineData(@"C:\\", @"C://Btooom!/Vol.1 Chapter 2/1.cbz", "Vol.1 Chapter 2,Btooom!")]
         [InlineData(@"C://mount/gdrive/Library/Test Library/Comics", @"C://mount/gdrive/Library/Test Library/Comics/Dragon Age/Test", "Test,Dragon Age")]
+        [InlineData(@"M:\", @"M:\Toukyou Akazukin\Vol. 01 Ch. 005.cbz", @"Toukyou Akazukin")]
         public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
         {
             var expected = expectedArray.Split(",");

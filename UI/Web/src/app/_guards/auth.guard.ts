@@ -19,7 +19,9 @@ export class AuthGuard implements CanActivate {
         if (user) {
           return true;
         }
-        this.toastr.error('You are not authorized to view this page.');
+        if (this.toastr.toasts.filter(toast => toast.message === 'Unauthorized' || toast.message === 'You are not authorized to view this page.').length === 0) {
+          this.toastr.error('You are not authorized to view this page.');
+        }
         localStorage.setItem(this.urlKey, window.location.pathname);
         this.router.navigateByUrl('/libraries');
         return false;

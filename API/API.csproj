@@ -16,14 +16,16 @@
     <DocumentationFile>bin\Debug\API.xml</DocumentationFile>
   </PropertyGroup>
 
+    <PropertyGroup>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    </PropertyGroup>
+
   <!-- Set the Product and Version info for our own projects -->
   <PropertyGroup>
     <Product>Kavita</Product>
     <Company>kareadita.github.io</Company>
     <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
 
-    <!-- Should be replaced by CI -->
-    <AssemblyVersion>0.4.1</AssemblyVersion>
     <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
 
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
@@ -35,39 +37,38 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="Docnet.Core" Version="2.3.1" />
+    <PackageReference Include="Docnet.Core" Version="2.4.0-alpha.1" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Flurl" Version="3.0.2" />
     <PackageReference Include="Flurl.Http" Version="3.2.0" />
-    <PackageReference Include="Hangfire" Version="1.7.24" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.24" />
+    <PackageReference Include="Hangfire" Version="1.7.25" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.25" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.35" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.9" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.1.3" />
     <PackageReference Include="NetVips" Version="2.0.1" />
-    <PackageReference Include="NetVips.Native" Version="8.11.0" />
+    <PackageReference Include="NetVips.Native" Version="8.11.4" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.2" />
-    <PackageReference Include="Sentry.AspNetCore" Version="3.8.3" />
-    <PackageReference Include="SharpCompress" Version="0.28.3" />
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.27.0.35380">
+    <PackageReference Include="SharpCompress" Version="0.30.0" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.29.0.36737">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.2" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.2" />
     <PackageReference Include="VersOne.Epub" Version="3.0.3.1" />
   </ItemGroup>
 
@@ -75,42 +76,41 @@
     <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
   </ItemGroup>
 
-  
+
 
   <ItemGroup>
     <None Remove="Hangfire-log.db" />
     <None Remove="obj\**" />
-    <None Remove="wwwroot\**" />
     <None Remove="cache\**" />
     <None Remove="backups\**" />
     <None Remove="logs\**" />
     <None Remove="temp\**" />
     <None Remove="kavita.log" />
     <None Remove="kavita.db" />
+    <None Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Interfaces\IMetadataService.cs" />
     <Compile Remove="obj\**" />
-    <Compile Remove="wwwroot\**" />
     <Compile Remove="cache\**" />
     <Compile Remove="backups\**" />
     <Compile Remove="logs\**" />
     <Compile Remove="temp\**" />
+    <Compile Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Remove="obj\**" />
-    <EmbeddedResource Remove="wwwroot\**" />
     <EmbeddedResource Remove="cache\**" />
     <EmbeddedResource Remove="backups\**" />
     <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="temp\**" />
+    <EmbeddedResource Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Remove="obj\**" />
-    <Content Remove="wwwroot\**" />
     <Content Remove="cache\**" />
     <Content Remove="backups\**" />
     <Content Remove="logs\**" />
@@ -120,6 +120,7 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Remove="covers\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -244,6 +245,48 @@
     <_ContentIncludedByDefault Remove="wwwroot\styles.4bd902bb3037f36f2c64.css.map" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js" />
     <_ContentIncludedByDefault Remove="wwwroot\vendor.6b2a0912ae80e6fd297f.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\10.b727db78581442412e9a.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\10.b727db78581442412e9a.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\2.fcc031071e80d6837012.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\2.fcc031071e80d6837012.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\7.c30da7d2e809fa05d1e3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\7.c30da7d2e809fa05d1e3.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\8.d4c77a90c95e9861656a.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\8.d4c77a90c95e9861656a.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\9.489b177dd1a6beeb35ad.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\9.489b177dd1a6beeb35ad.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fonts\Spartan\OFL.txt" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\fonts\Spartan\Spartan-VariableFont_wght.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\android-chrome-192x192.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\android-chrome-256x256.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\apple-touch-icon.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\browserconfig.xml" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon-16x16.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon-32x32.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\favicon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\icons\mstile-150x150.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\image-reset-cover-min.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\image-reset-cover.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\kavita-book-cropped.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\login-bg.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\assets\images\logo.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\common.fbf71de364f5a1f37413.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\common.fbf71de364f5a1f37413.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\login-bg.8860e6ff9d2a3598539c.jpg" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.a3a1e647a39145accff3.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\main.a3a1e647a39145accff3.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\polyfills.3dda3bf3d087e5d131ba.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\polyfills.3dda3bf3d087e5d131ba.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\runtime.b9818dfc90f418b3f0a7.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\runtime.b9818dfc90f418b3f0a7.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\scripts.7d1c78b2763c483bb699.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\scripts.7d1c78b2763c483bb699.js.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\site.webmanifest" />
+    <_ContentIncludedByDefault Remove="wwwroot\Spartan-VariableFont_wght.0427aac0d980a12ae8ba.ttf" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles.85a58cb3e4a4b1add864.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles.85a58cb3e4a4b1add864.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\vendor.54bf44a9aa720ff8881d.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\vendor.54bf44a9aa720ff8881d.js.map" />
   </ItemGroup>
 
   <ItemGroup>

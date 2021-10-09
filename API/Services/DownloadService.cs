@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace API.Services

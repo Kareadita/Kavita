@@ -10,9 +10,12 @@ namespace API.Benchmark
     /// </summary>
     public static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            BenchmarkRunner.Run<ParseScannedFilesBenchmarks>();
+            //BenchmarkRunner.Run<ParseScannedFilesBenchmarks>();
+            //BenchmarkRunner.Run<TestBenchmark>();
+            BenchmarkRunner.Run<ParserBenchmarks>();
+
         }
     }
 }

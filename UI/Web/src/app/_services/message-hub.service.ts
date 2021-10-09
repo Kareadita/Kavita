@@ -1,13 +1,24 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { User } from '@sentry/angular';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
+import { ScanLibraryProgressEvent } from '../_models/events/scan-library-progress-event';
+import { ScanSeriesEvent } from '../_models/events/scan-series-event';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { User } from '../_models/user';
 
 export enum EVENTS {
-  UpdateAvailable = 'UpdateAvailable'
+  UpdateAvailable = 'UpdateAvailable',
+  ScanSeries = 'ScanSeries',
+  RefreshMetadata = 'RefreshMetadata',
+  SeriesAdded = 'SeriesAdded',
+  ScanLibraryProgress = 'ScanLibraryProgress',
+  OnlineUsers = 'OnlineUsers',
+  SeriesAddedToCollection = 'SeriesAddedToCollection'
 }
 
 export interface Message<T> {
@@ -26,9 +37,23 @@ export class MessageHubService {
   private messagesSource = new ReplaySubject<Message<any>>(1);
   public messages$ = this.messagesSource.asObservable();
 
-  constructor(private modalService: NgbModal) { }
+  private onlineUsersSource = new BehaviorSubject<string[]>([]);
+  onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  createHubConnection(user: User) {
+  public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
+  public scanLibrary: EventEmitter<ScanLibraryProgressEvent> = new EventEmitter<ScanLibraryProgressEvent>();
+  public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
+  public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
+
+  isAdmin: boolean = false;
+
+  constructor(private modalService: NgbModal, private toastr: ToastrService) {
+    
+  }
+
+  createHubConnection(user: User, isAdmin: boolean) {
+    this.isAdmin = isAdmin;
+
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
         accessTokenFactory: () => user.token
@@ -40,8 +65,51 @@ export class MessageHubService {
     .start()
     .catch(err => console.error(err));
 
-    this.hubConnection.on('receiveMessage', body => {
-      //console.log('[Hub] Body: ', body);
+    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
+      this.onlineUsersSource.next(usernames);
+    });
+
+
+    this.hubConnection.on(EVENTS.ScanSeries, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanSeries,
+        payload: resp.body
+      });
+      this.scanSeries.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanLibraryProgress,
+        payload: resp.body
+      });
+      this.scanLibrary.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAddedToCollection,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SeriesAdded, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAdded,
+        payload: resp.body
+      });
+      this.seriesAdded.emit(resp.body);
+      if (this.isAdmin) {
+        this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
+      }
+    });
+
+    this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
+      this.messagesSource.next({
+        event: EVENTS.RefreshMetadata,
+        payload: resp.body
+      });
+      this.refreshMetadata.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {
@@ -63,7 +131,9 @@ export class MessageHubService {
   }
 
   stopHubConnection() {
-    this.hubConnection.stop().catch(err => console.error(err));
+    if (this.hubConnection) {
+      this.hubConnection.stop().catch(err => console.error(err));
+    }
   }
 
   sendMessage(methodName: string, body?: any) {

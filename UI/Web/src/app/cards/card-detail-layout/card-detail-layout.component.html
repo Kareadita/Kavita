@@ -3,8 +3,8 @@
         <div class="col mr-auto">
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
-                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>
-                </span>&nbsp;{{header}}&nbsp;
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+                </span>{{header}}&nbsp;
                 <!-- NOTE: On mobile the pill can eat up a lot of space, we can hide it and move to the filter section if user is interested -->
                 <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>

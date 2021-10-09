@@ -19,6 +19,7 @@ namespace API.Services
        public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
        public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
        public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
+       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "covers");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -302,6 +303,44 @@ namespace API.Services
        {
           if (!File.Exists(path)) return Array.Empty<byte>();
           return await File.ReadAllBytesAsync(path);
+       }
+
+
+       /// <summary>
+       /// Finds the highest directories from a set of MangaFiles
+       /// </summary>
+       /// <param name="libraryFolders">List of top level folders which files belong to</param>
+       /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
+       /// <returns></returns>
+       public static Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+       {
+           var stopLookingForDirectories = false;
+           var dirs = new Dictionary<string, string>();
+           foreach (var folder in libraryFolders)
+           {
+               if (stopLookingForDirectories) break;
+               foreach (var file in filePaths)
+               {
+                   if (!file.Contains(folder)) continue;
+
+                   var parts = GetFoldersTillRoot(folder, file).ToList();
+                   if (parts.Count == 0)
+                   {
+                       // Break from all loops, we done, just scan folder.Path (library root)
+                       dirs.Add(folder, string.Empty);
+                       stopLookingForDirectories = true;
+                       break;
+                   }
+
+                   var fullPath = Path.Join(folder, parts.Last());
+                   if (!dirs.ContainsKey(fullPath))
+                   {
+                       dirs.Add(fullPath, string.Empty);
+                   }
+               }
+           }
+
+           return dirs;
        }
 
 

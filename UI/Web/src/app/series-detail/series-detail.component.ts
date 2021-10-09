@@ -1,18 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, take, takeWhile } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { DownloadService } from '../shared/_services/download.service';
-import { UtilityService } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
@@ -23,6 +26,7 @@ import { ActionItem, ActionFactoryService, Action } from '../_services/action-fa
 import { ActionService } from '../_services/action.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
+import { MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -32,7 +36,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
-export class SeriesDetailComponent implements OnInit {
+export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   series!: Series;
   volumes: Volume[] = [];
@@ -50,6 +54,7 @@ export class SeriesDetailComponent implements OnInit {
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
+  bulkActions: ActionItem<any>[] = [];
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
@@ -76,6 +81,57 @@ export class SeriesDetailComponent implements OnInit {
    */
   actionInProgress: boolean = false;
 
+  /**
+   * Track by function for Volume to tell when to refresh card data
+   */
+  trackByVolumeIdentity = (index: number, item: Volume) => `${item.name}_${item.pagesRead}`;
+  /**
+   * Track by function for Chapter to tell when to refresh card data
+   */
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+
+  bulkActionCallback = (action: Action, data: any) => {
+    if (this.series === undefined) {
+      return;
+    }
+    const seriesId = this.series.id;
+    // we need to figure out what is actually selected now
+    const selectedVolumeIndexes = this.bulkSelectionService.getSelectedCardsForSource('volume');
+    const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
+    const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
+
+    const selectedChapterIds = this.chapters.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
+    const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
+    const chapters = [...selectedChapterIds, ...selectedSpecials];
+
+    switch (action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
+          this.setContinuePoint();
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
+          this.setContinuePoint();
+          this.actionInProgress = false;
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+    }
+  }
+
+  private onDestroy: Subject<void> = new Subject();
+
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -97,7 +153,8 @@ export class SeriesDetailComponent implements OnInit {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService) {
+              public imageSerivce: ImageService, private messageHub: MessageHubService, 
+              public bulkSelectionService: BulkSelectionService) {
     ratingConfig.max = 5;
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -116,20 +173,39 @@ export class SeriesDetailComponent implements OnInit {
       return;
     }
 
+    this.messageHub.scanSeries.pipe(takeUntil(this.onDestroy)).subscribe((event: ScanSeriesEvent) => {
+      if (event.seriesId == this.series.id)
+      this.loadSeries(seriesId);
+      this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+      this.toastr.success('Scan series completed');
+    });
+
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.loadSeriesMetadata(seriesId);
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
       this.loadSeries(seriesId);
     });
   }
 
-  loadSeriesMetadata(seriesId: number) {
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
@@ -159,6 +235,9 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Bookmarks):
         this.actionService.openBookmarkModal(series, () => this.actionInProgress = false);
         break;
+      case(Action.AddToReadingList):
+        this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
+        break;
       default:
         break;
     }
@@ -175,6 +254,14 @@ export class SeriesDetailComponent implements OnInit {
       case(Action.Edit):
         this.openViewInfo(volume);
         break;
+      case(Action.AddToReadingList):
+        this.actionService.addVolumeToReadingList(volume, this.series.id, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        if (volume.chapters != undefined && volume.chapters?.length >= 1) {
+          this.openChapter(volume.chapters.sort(this.utilityService.sortChapters)[0], true);
+        }
+        break;
       default:
         break;
     }
@@ -190,6 +277,12 @@ export class SeriesDetailComponent implements OnInit {
         break;
       case(Action.Edit):
         this.openViewInfo(chapter);
+        break;
+      case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.series.id, () => {/* No Operation */ });
+        break;
+      case(Action.IncognitoRead):
+        this.openChapter(chapter, true);
         break;
       default:
         break;
@@ -245,6 +338,7 @@ export class SeriesDetailComponent implements OnInit {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
       
+      
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
@@ -267,6 +361,11 @@ export class SeriesDetailComponent implements OnInit {
         if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
           this.activeTabId = 1;
           this.hasNonSpecialVolumeChapters = false;
+        }
+
+        // If an update occured and we were on specials, re-activate Volumes/Chapters 
+        if (!this.hasSpecials && this.activeTabId != 2) {
+          this.activeTabId = 2;
         }
 
         this.isLoading = false;
@@ -348,16 +447,16 @@ export class SeriesDetailComponent implements OnInit {
     });
   }
 
-  openChapter(chapter: Chapter) {
+  openChapter(chapter: Chapter, incognitoMode = false) {
     if (chapter.pages === 0) {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
 
     if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id], {queryParams: {incognitoMode}});
     } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id], {queryParams: {incognitoMode}});
     }
   }
 
@@ -405,7 +504,6 @@ export class SeriesDetailComponent implements OnInit {
       window.scrollTo(0, 0);
       if (closeResult.success) {
         this.loadSeries(this.series.id);
-        this.loadSeriesMetadata(this.series.id);
         if (closeResult.coverImageUpdate) {
           // Random triggers a load change without any problems with API
           this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
@@ -450,7 +548,6 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   downloadSeries() {
-    
     this.downloadService.downloadSeriesSize(this.series.id).pipe(take(1)).subscribe(async (size) => {
       const wantToDownload = await this.downloadService.confirmSize(size, 'series');
       if (!wantToDownload) { return; }

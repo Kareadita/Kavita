@@ -11,6 +11,7 @@ namespace API.Tests.Parser
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]
         [InlineData("Beastars Extra 01", false)]
+        [InlineData("Batman Beyond - Return of the Joker (2001) SP01", true)]
         public void HasSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  HasSpecialMarker(input));
@@ -35,14 +36,15 @@ namespace API.Tests.Parser
         }
 
         [Theory]
-        [InlineData("Hello_I_am_here", "Hello I am here")]
-        [InlineData("Hello_I_am_here   ", "Hello I am here")]
-        [InlineData("[ReleaseGroup] The Title", "The Title")]
-        [InlineData("[ReleaseGroup]_The_Title", "The Title")]
-        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", "Kasumi Otoko no Ko v1.1")]
-        public void CleanTitleTest(string input, string expected)
+        [InlineData("Hello_I_am_here", false, "Hello I am here")]
+        [InlineData("Hello_I_am_here   ",  false, "Hello I am here")]
+        [InlineData("[ReleaseGroup] The Title", false, "The Title")]
+        [InlineData("[ReleaseGroup]_The_Title", false, "The Title")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
+        public void CleanTitleTest(string input, bool isComic, string expected)
         {
-            Assert.Equal(expected, CleanTitle(input));
+            Assert.Equal(expected, CleanTitle(input, isComic));
         }
 
 
@@ -54,7 +56,7 @@ namespace API.Tests.Parser
         // public void ReplaceStyleUrlTest(string input, string expected)
         // {
         //     var replacementStr = "PaytoneOne.ttf";
-        //     // TODO: Use Match to validate since replace is weird
+        //     // Use Match to validate since replace is weird
         //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
         //     var match = FontSrcUrlRegex.Match(input);
         //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
@@ -142,6 +144,8 @@ namespace API.Tests.Parser
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
         [InlineData("Darker Than_Black", "darkerthanblack")]
+        [InlineData("Citrus", "citrus")]
+        [InlineData("Citrus+", "citrus+")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -156,6 +160,7 @@ namespace API.Tests.Parser
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
         [InlineData("!test.jpg", false)]
+        [InlineData("test.webp", true)]
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));

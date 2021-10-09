@@ -1,21 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { UpdateFilterEvent } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
-import { MangaFormat } from 'src/app/_models/manga-format';
+import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
+import { ActionService } from 'src/app/_services/action.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
@@ -23,7 +27,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   templateUrl: './collection-detail.component.html',
   styleUrls: ['./collection-detail.component.scss']
 })
-export class CollectionDetailComponent implements OnInit {
+export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   collectionTag!: CollectionTag;
   tagImage: string = '';
@@ -39,9 +43,37 @@ export class CollectionDetailComponent implements OnInit {
     mangaFormat: null
   };
 
+  private onDestory: Subject<void> = new Subject<void>();
+
+  bulkActionCallback = (action: Action, data: any) => {
+    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+
+    switch (action) {
+      case Action.AddToReadingList:
+        this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.MarkAsRead:
+        this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.MarkAsUnread:
+        this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+    }
+  }
+
   constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
-    private modalService: NgbModal, private titleService: Title, private accountService: AccountService, private utilityService: UtilityService) {
+    private modalService: NgbModal, private titleService: Title, private accountService: AccountService,
+    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -61,6 +93,32 @@ export class CollectionDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+
+    this.messageHub.messages$.pipe(takeWhile(event => event.event === EVENTS.SeriesAddedToCollection), takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
+      const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
+      if (collectionEvent.tagId === this.collectionTag.id) {
+        this.loadPage();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.onDestory.next();
+    this.onDestory.complete();
+  }
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+    }
   }
 
   updateTag(tagId: number) {

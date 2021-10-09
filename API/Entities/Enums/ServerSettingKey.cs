@@ -20,6 +20,10 @@ namespace API.Entities.Enums
         AllowStatCollection = 6,
         [Description("EnableOpds")]
         EnableOpds = 7,
+        [Description("EnableAuthentication")]
+        EnableAuthentication = 8,
+        [Description("BaseUrl")]
+        BaseUrl = 9
 
     }
 }

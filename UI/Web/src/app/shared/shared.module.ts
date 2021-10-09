@@ -13,9 +13,9 @@ import { ShowIfScrollbarDirective } from './show-if-scrollbar.directive';
 import { A11yClickDirective } from './a11y-click.directive';
 import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
-import { SAVER, getSaver } from './_providers/saver.provider';
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { SentenceCasePipe } from './sentence-case.pipe';
 
 @NgModule({
   declarations: [
@@ -30,6 +30,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
+    SentenceCasePipe,
   ],
   imports: [
     CommonModule,
@@ -41,6 +42,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
   exports: [
     RegisterMemberComponent,
     SafeHtmlPipe,
+    SentenceCasePipe,
     ReadMoreComponent,
     DrawerComponent,
     TagBadgeComponent,
@@ -51,6 +53,5 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     TagBadgeComponent,
     CircularLoaderComponent,
   ],
-  //providers: [{provide: SAVER, useFactory: getSaver}]
 })
 export class SharedModule { }

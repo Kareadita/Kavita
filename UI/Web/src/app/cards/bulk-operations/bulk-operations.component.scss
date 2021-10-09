@@ -1,0 +1,16 @@
+@import "../../../theme/colors";
+@import "../../../assets/themes/dark.scss";
+
+.bulk-select {
+    background-color: $dark-form-background-no-opacity;
+    border-bottom: 2px solid $primary-color;
+    color: white;
+}
+
+.btn-icon {
+    color: white;
+}
+
+.highlight {
+    color: $primary-color !important;
+}

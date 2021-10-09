@@ -1,11 +1,18 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <p class="text-warning pt-2">Port and Logging Level require a manual restart of Kavita to take effect.</p>
+        <p class="text-warning pt-2">Port, Base Url, and Logging Level require a manual restart of Kavita to take effect.</p>
         <div class="form-group">
             <label for="settings-cachedir">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
             <ng-template #cacheDirectoryTooltip>Where the server place temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
             <span class="sr-only" id="settings-cachedir-help">Where the server place temporary files when reading. This will be cleaned up on a regular basis.</span>
             <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
+        </div>
+
+        <div class="form-group">
+            <label for="settings-baseurl">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
+            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
+            <span class="sr-only" id="settings-baseurl-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</span>
+            <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text">
         </div>
 
         <div class="form-group">
@@ -39,6 +46,15 @@
             <div class="form-check">
                 <input id="opds" type="checkbox" aria-label="OPDS Support" class="form-check-input" formControlName="enableOpds">
                 <label for="opds" class="form-check-label">Enable OPDS</label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="authentication" aria-describedby="authentication-info">Authentication</label>
+            <p class="accent" id="authentication-info">By disabling authentication, all non-admin users will be able to login by just their username. No password will be required to authenticate.</p>
+            <div class="form-check">
+                <input id="authentication" type="checkbox" aria-label="User Authentication" class="form-check-input" formControlName="enableAuthentication">
+                <label for="authentication" class="form-check-label">Enable Authentication</label>
             </div>
         </div>
 
