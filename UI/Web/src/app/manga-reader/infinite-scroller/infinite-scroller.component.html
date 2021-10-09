@@ -1,14 +1,3 @@
-<head>
-    <style>
-        .horizontal {
-            overflow: hidden;
-            overflow-x: scroll;
-            white-space: nowrap;
-            direction: rtl;
-        }
-    </style>
-</head>
-
 <div class="fixed-top overlay" *ngIf="debug">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
     <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}

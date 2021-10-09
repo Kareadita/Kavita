@@ -5,3 +5,10 @@
 .active {
     border: 2px solid red;
 }
+
+.horizontal {
+    overflow: hidden;
+    overflow-x: scroll;
+    white-space: nowrap;
+    direction: rtl;
+}
