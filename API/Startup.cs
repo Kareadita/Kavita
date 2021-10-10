@@ -166,9 +166,12 @@ namespace API
             var settings = service.SettingsRepository.GetSettingsDto();
             if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
             {
-                var path = !Configuration.BaseUrl.StartsWith("/")
-                    ? $"/{Configuration.BaseUrl}"
-                    : Configuration.BaseUrl;
+                var path = !settings.BaseUrl.StartsWith("/")
+                    ? $"/{settings.BaseUrl}"
+                    : settings.BaseUrl;
+                path = !path.EndsWith("/")
+                    ? $"{path}/"
+                    : path;
                 app.UsePathBase(path);
                 Console.WriteLine("Starting with base url as " + path);
             }

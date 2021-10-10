@@ -258,6 +258,12 @@ namespace API.Services
                         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
                     }
                 }
+                else
+                {
+                    _logger.LogInformation(
+                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                        chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+                }
             }
 
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);

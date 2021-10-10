@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities.Enums;
@@ -52,27 +53,27 @@ namespace API.Services
                 var scanLibrarySetting = setting;
                 _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
                 RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(),
-                    () => CronConverter.ConvertToCronNotation(scanLibrarySetting));
+                    () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
             }
             else
             {
-                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), Cron.Daily);
+                RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
             }
 
             setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Result.Value;
             if (setting != null)
             {
                 _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting));
+                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
             }
             else
             {
-                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), Cron.Weekly);
+                RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
             }
 
-            RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily);
+            RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
 
-            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily);
+            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         #region StatsTasks
@@ -88,7 +89,7 @@ namespace API.Services
             }
 
             _logger.LogDebug("Scheduling stat collection daily");
-            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily);
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         public void CancelStatsTasks()
@@ -111,7 +112,7 @@ namespace API.Services
         public void ScheduleUpdaterTasks()
         {
             _logger.LogInformation("Scheduling Auto-Update tasks");
-            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Weekly);
+            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Weekly, TimeZoneInfo.Local);
 
         }
         #endregion
