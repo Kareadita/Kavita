@@ -278,9 +278,9 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
                 MatchOptions, RegexTimeout),
-            // spawn-123 (from https://github.com/Girbons/comics-downloader)
+            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)-(?<Chapter>\d+)",
+                @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
             new Regex(
@@ -348,9 +348,9 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol)(?<Series>.+?)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
                 MatchOptions, RegexTimeout),
-            // spawn-123 (from https://github.com/Girbons/comics-downloader )
+            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)-(?<Chapter>\d+)",
+                @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Cyberpunk 2077 - Your Voice 01
             // new Regex(
