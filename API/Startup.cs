@@ -162,16 +162,20 @@ namespace API
 
             app.UseDefaultFiles();
 
-            var service = serviceProvider.GetRequiredService<IUnitOfWork>();
-            var settings = service.SettingsRepository.GetSettingsDto();
-            if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
-            {
-                var path = !Configuration.BaseUrl.StartsWith("/")
-                    ? $"/{Configuration.BaseUrl}"
-                    : Configuration.BaseUrl;
-                app.UsePathBase(path);
-                Console.WriteLine("Starting with base url as " + path);
-            }
+            // This is not implemented completely. Commenting out until implemented
+            // var service = serviceProvider.GetRequiredService<IUnitOfWork>();
+            // var settings = service.SettingsRepository.GetSettingsDto();
+            // if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
+            // {
+            //     var path = !settings.BaseUrl.StartsWith("/")
+            //         ? $"/{settings.BaseUrl}"
+            //         : settings.BaseUrl;
+            //     path = !path.EndsWith("/")
+            //         ? $"{path}/"
+            //         : path;
+            //     app.UsePathBase(path);
+            //     Console.WriteLine("Starting with base url as " + path);
+            // }
 
             app.UseStaticFiles(new StaticFileOptions
             {

@@ -232,11 +232,11 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
-            @"^(?<Volume>\d+) (- |_)?(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            @"^(?<Volume>\d+)\s(-\s|_)(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
                 MatchOptions, RegexTimeout),
             // 01 Spider-Man & Wolverine 01.cbr
             new Regex(
-            @"^(?<Volume>\d+) (?:- )?(?<Series>.*) (\d+)?",
+            @"^(?<Volume>\d+)\s(?:-\s)(?<Series>.*) (\d+)?",
                 MatchOptions, RegexTimeout),
             // Batman & Wildcat (1 of 3)
             new Regex(

@@ -98,6 +98,9 @@ namespace API.Controllers
                     var path = !updateSettingsDto.BaseUrl.StartsWith("/")
                         ? $"/{updateSettingsDto.BaseUrl}"
                         : updateSettingsDto.BaseUrl;
+                    path = !path.EndsWith("/")
+                        ? $"{path}/"
+                        : path;
                     setting.Value = path;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }

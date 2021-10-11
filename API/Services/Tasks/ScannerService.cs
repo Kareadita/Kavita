@@ -262,7 +262,7 @@ namespace API.Services.Tasks
 
           // Update existing series
           _logger.LogDebug("[ScannerService] Updating existing series");
-          for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
+          for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
           {
               if (chunkInfo.TotalChunks == 0) continue;
               totalTime += stopwatch.ElapsedMilliseconds;
@@ -302,7 +302,7 @@ namespace API.Services.Tasks
               await _unitOfWork.CommitAsync();
               _logger.LogInformation(
                   "[ScannerService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                  chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, totalTime, library.Name);
+                  chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, totalTime, library.Name);
 
               // Emit any series removed
               foreach (var missing in missingSeries)
@@ -385,6 +385,10 @@ namespace API.Services.Tasks
                   _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
               }
           }
+
+          _logger.LogDebug(
+              "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+              newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
        }
 
        private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)

@@ -8,7 +8,7 @@ namespace Kavita.Common
 {
    public static class Configuration
    {
-      private static string AppSettingsFilename = GetAppSettingFilename();
+      private static readonly string AppSettingsFilename = GetAppSettingFilename();
       public static string Branch
       {
          get => GetBranch(GetAppSettingFilename());
@@ -31,12 +31,6 @@ namespace Kavita.Common
       {
          get => GetLogLevel(GetAppSettingFilename());
          set => SetLogLevel(GetAppSettingFilename(), value);
-      }
-
-      public static string BaseUrl
-      {
-          get => GetBaseUrl(GetAppSettingFilename());
-          set => SetBaseUrl(GetAppSettingFilename(), value);
       }
 
       private static string GetAppSettingFilename()
@@ -155,55 +149,6 @@ namespace Kavita.Common
          return defaultPort;
       }
 
-      #endregion
-
-      #region BaseUrl
-      private static string GetBaseUrl(string filePath)
-      {
-          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
-          {
-              return "/";
-          }
-
-          try
-          {
-              var json = File.ReadAllText(filePath);
-              var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-              const string key = "BaseUrl";
-
-              if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
-              {
-                  return tokenElement.GetString();
-              }
-          }
-          catch (Exception ex)
-          {
-              Console.WriteLine("Error reading app settings: " + ex.Message);
-          }
-
-          return "/";
-      }
-
-      private static void SetBaseUrl(string filePath, string value)
-      {
-          if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
-          {
-              return;
-          }
-
-          var currentBaseUrl = GetBaseUrl(filePath);
-          var json = File.ReadAllText(filePath);
-          if (!json.Contains("BaseUrl"))
-          {
-              var lastBracket = json.LastIndexOf("}", StringComparison.Ordinal) - 1;
-              json = (json.Substring(0, lastBracket) + (",\n  \"BaseUrl\": " + currentBaseUrl) + "}");
-          }
-          else
-          {
-              json = json.Replace("\"BaseUrl\": " + currentBaseUrl, "\"BaseUrl\": " + value);
-          }
-          File.WriteAllText(filePath, json);
-      }
       #endregion
 
       #region LogLevel
