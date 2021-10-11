@@ -17,7 +17,6 @@ namespace API.Tests.Parser
         }
 
         [Theory]
-        [InlineData("01 Spider-Man & Wolverine 01.cbr", "Spider-Man & Wolverine")]
         [InlineData("04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)", "Asterix the Gladiator")]
         [InlineData("The First Asterix Frieze (WebP by Doc MaKS)", "The First Asterix Frieze")]
         [InlineData("Batman & Catwoman - Trail of the Gun 01", "Batman & Catwoman - Trail of the Gun")]
