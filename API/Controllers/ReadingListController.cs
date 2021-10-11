@@ -147,7 +147,7 @@ namespace API.Controllers
                 _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
                 if (!_unitOfWork.HasChanges()) return Ok("Nothing to remove");
-                
+
                 await _unitOfWork.CommitAsync();
                 return Ok("Updated");
             }
