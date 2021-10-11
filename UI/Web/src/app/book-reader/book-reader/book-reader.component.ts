@@ -285,6 +285,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(window, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
+
+        // Highlight the current chapter we are on
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
           const verticalOffset = this.scrollService.scrollPosition + (document.body.offsetHeight / 2);
@@ -292,11 +294,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
             this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-
-            if (!this.incognitoMode) {
-              this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
-            }
-            return;
           } else {
             this.currentPageAnchor = '';
           }
@@ -322,7 +319,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     
           return 0;
         });
-    
+        
         if (intersectingEntries.length > 0) {
           let path = this.getXPathTo(intersectingEntries[0]);
             if (path === '') { return; }

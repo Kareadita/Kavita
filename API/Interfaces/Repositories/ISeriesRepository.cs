@@ -42,8 +42,6 @@ namespace API.Interfaces.Repositories
         /// <param name="series"></param>
         /// <returns></returns>
         Task AddSeriesModifiers(int userId, List<SeriesDto> series);
-
-
         Task<string> GetSeriesCoverImageAsync(int seriesId);
         Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter);
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter); // NOTE: Probably put this in LibraryRepo
