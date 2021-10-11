@@ -101,9 +101,6 @@ namespace API.Controllers
         public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
-            // var item = readingList.Items.FirstOrDefault(r => r.Id == dto.ReadingListItemId);
-            // if (item == null) return BadRequest("Could not find item");
-            // readingList.Items.Remove(item);
             readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).ToList();
 
 
