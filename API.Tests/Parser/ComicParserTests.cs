@@ -54,8 +54,8 @@ namespace API.Tests.Parser
         [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "Cyberpunk 2077 - Trauma Team")]
         [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "Batgirl")]
         [InlineData("Batgirl V2000 #57", "Batgirl")]
-        [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "Fables")]
-        
+        [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire)", "Fables")]
+        [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "2000 AD")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -91,6 +91,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl V2000 #57", "2000")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
+        [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -130,6 +131,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl V2000 #57", "57")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "21")]
         [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
+        [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

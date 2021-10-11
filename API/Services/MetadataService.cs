@@ -216,8 +216,10 @@ namespace API.Services
             var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
             var stopwatch = Stopwatch.StartNew();
             var totalTime = 0L;
+            _logger.LogDebug($"[MetadataService] Refreshing Library {library.Name}. Total Items: {chunkInfo.TotalSize}. Total Chunks: {chunkInfo.TotalChunks} with {chunkInfo.ChunkSize} size.");
 
-            for (var chunk = 0; chunk <= chunkInfo.TotalChunks; chunk++)
+            // This technically does
+            for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
             {
                 totalTime += stopwatch.ElapsedMilliseconds;
                 stopwatch.Restart();
@@ -228,7 +230,7 @@ namespace API.Services
                         PageNumber = chunk,
                         PageSize = chunkInfo.ChunkSize
                     });
-
+                _logger.LogDebug($"[MetadataService] Fetched {nonLibrarySeries.Count} series for refresh");
                 Parallel.ForEach(nonLibrarySeries, series =>
                 {
                     _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
@@ -250,8 +252,8 @@ namespace API.Services
                 if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
                 {
                     _logger.LogInformation(
-                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                        chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                        chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
 
                     foreach (var series in nonLibrarySeries)
                     {
@@ -261,8 +263,8 @@ namespace API.Services
                 else
                 {
                     _logger.LogInformation(
-                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                        chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize, stopwatch.ElapsedMilliseconds, library.Name);
+                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                        chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
                 }
             }
 
