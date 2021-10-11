@@ -163,6 +163,15 @@ namespace API.Tests.Parser
                  FullFilePath = filepath
              });
 
+             // Fallback test with bad naming
+             filepath = @"E:\Comics\Comics\Babe\Babe Vol.1 #1-4\Babe 01.cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Babe", Volumes = "0", Edition = "",
+                 Chapters = "1", Filename = "Babe 01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
