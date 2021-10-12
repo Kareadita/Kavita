@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Extensions;
+using API.SignalR.Presence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -13,7 +15,13 @@ namespace API.SignalR
     [Authorize]
     public class MessageHub : Hub
     {
+        private readonly IPresenceTracker _tracker;
         private static readonly HashSet<string> Connections = new HashSet<string>();
+
+        public MessageHub(IPresenceTracker tracker)
+        {
+            _tracker = tracker;
+        }
 
         public static bool IsConnected
         {
@@ -33,6 +41,12 @@ namespace API.SignalR
                 Connections.Add(Context.ConnectionId);
             }
 
+            await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
+
+            var currentUsers = await PresenceTracker.GetOnlineUsers();
+            await Clients.All.SendAsync(SignalREvents.OnlineUsers, currentUsers);
+
+
             await base.OnConnectedAsync();
         }
 
@@ -42,6 +56,12 @@ namespace API.SignalR
             {
                 Connections.Remove(Context.ConnectionId);
             }
+
+            await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
+
+            var currentUsers = await PresenceTracker.GetOnlineUsers();
+            await Clients.All.SendAsync(SignalREvents.OnlineUsers, currentUsers);
+
 
             await base.OnDisconnectedAsync(exception);
         }

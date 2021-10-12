@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Chapter } from 'src/app/_models/chapter';
+import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
@@ -54,6 +55,27 @@ export class UtilityService {
     }
 
     return this.mangaFormatKeys.filter(item => MangaFormat[format] === item)[0];
+  }
+
+  /**
+   * Formats a Chapter name based on the library it's in
+   * @param libraryType 
+   * @param includeHash For comics only, includes a # which is used for numbering on cards
+   * @param includeSpace Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.
+   * @returns 
+   */
+  formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
+    switch(libraryType) {
+      case LibraryType.Book:
+        return 'Book' + (includeSpace ? ' ' : '');
+      case LibraryType.Comic:
+        if (includeHash) {
+          return 'Issue #';
+        }
+        return 'Issue' + (includeSpace ? ' ' : '');
+      case LibraryType.Manga:
+        return 'Chapter' + (includeSpace ? ' ' : '');
+    }
   }
 
   cleanSpecialTitle(title: string) {
@@ -125,6 +147,16 @@ export class UtilityService {
     else if (window.innerWidth > Breakpoint.Tablet) return Breakpoint.Desktop
     
     return Breakpoint.Desktop;
+  }
+
+  isInViewport(element: Element, additionalTopOffset: number = 0) {
+    const rect = element.getBoundingClientRect();
+    return (
+        rect.top >= additionalTopOffset &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
   }
 
 }

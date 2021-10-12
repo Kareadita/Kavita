@@ -6,6 +6,7 @@ import { take } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
+import { ConfirmService } from '../shared/confirm.service';
 import { Chapter } from '../_models/chapter';
 import { Library } from '../_models/library';
 import { ReadingList } from '../_models/reading-list';
@@ -35,7 +36,8 @@ export class ActionService implements OnDestroy {
   private readingListModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
-    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal) { }
+    private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
+    private confirmService: ConfirmService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -66,8 +68,12 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    * @returns 
    */
-  refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback) {
+  async refreshMetadata(library: Partial<Library>, callback?: LibraryActionCallback) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return;
+    }
+
+    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
       return;
     }
 
@@ -128,7 +134,11 @@ export class ActionService implements OnDestroy {
    * @param series Series, must have libraryId, id and name populated
    * @param callback Optional callback to perform actions after API completes
    */
-  refreshMetdata(series: Series, callback?: SeriesActionCallback) {
+  async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
+    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      return;
+    }
+
     this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
       this.toastr.success('Refresh started for ' + series.name);
       if (callback) {
@@ -235,10 +245,10 @@ export class ActionService implements OnDestroy {
    markMultipleAsUnread(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
     this.readerService.markMultipleUnread(seriesId, volumes.map(v => v.id), chapters?.map(c => c.id)).pipe(take(1)).subscribe(() => {
       volumes.forEach(volume => {
-        volume.pagesRead = volume.pages;
-        volume.chapters?.forEach(c => c.pagesRead = c.pages);
+        volume.pagesRead = 0;
+        volume.chapters?.forEach(c => c.pagesRead = 0);
       });
-      chapters?.forEach(c => c.pagesRead = c.pages);
+      chapters?.forEach(c => c.pagesRead = 0);
       this.toastr.success('Marked as Read');
 
       if (callback) {

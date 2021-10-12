@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces.Repositories;
@@ -32,6 +32,15 @@ namespace API.Data.Repositories
                 .Select(x => x)
                 .AsNoTracking()
                 .ToListAsync();
+            return _mapper.Map<ServerSettingDto>(settings);
+        }
+
+        public ServerSettingDto GetSettingsDto()
+        {
+            var settings = _context.ServerSetting
+                .Select(x => x)
+                .AsNoTracking()
+                .ToList();
             return _mapper.Map<ServerSettingDto>(settings);
         }
 

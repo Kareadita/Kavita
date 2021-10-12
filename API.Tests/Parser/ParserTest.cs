@@ -11,6 +11,7 @@ namespace API.Tests.Parser
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]
         [InlineData("Beastars Extra 01", false)]
+        [InlineData("Batman Beyond - Return of the Joker (2001) SP01", true)]
         public void HasSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  HasSpecialMarker(input));
@@ -35,14 +36,15 @@ namespace API.Tests.Parser
         }
 
         [Theory]
-        [InlineData("Hello_I_am_here", "Hello I am here")]
-        [InlineData("Hello_I_am_here   ", "Hello I am here")]
-        [InlineData("[ReleaseGroup] The Title", "The Title")]
-        [InlineData("[ReleaseGroup]_The_Title", "The Title")]
-        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", "Kasumi Otoko no Ko v1.1")]
-        public void CleanTitleTest(string input, string expected)
+        [InlineData("Hello_I_am_here", false, "Hello I am here")]
+        [InlineData("Hello_I_am_here   ",  false, "Hello I am here")]
+        [InlineData("[ReleaseGroup] The Title", false, "The Title")]
+        [InlineData("[ReleaseGroup]_The_Title", false, "The Title")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
+        [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
+        public void CleanTitleTest(string input, bool isComic, string expected)
         {
-            Assert.Equal(expected, CleanTitle(input));
+            Assert.Equal(expected, CleanTitle(input, isComic));
         }
 
 
@@ -54,7 +56,7 @@ namespace API.Tests.Parser
         // public void ReplaceStyleUrlTest(string input, string expected)
         // {
         //     var replacementStr = "PaytoneOne.ttf";
-        //     // TODO: Use Match to validate since replace is weird
+        //     // Use Match to validate since replace is weird
         //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
         //     var match = FontSrcUrlRegex.Match(input);
         //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
@@ -98,33 +100,6 @@ namespace API.Tests.Parser
             Assert.Equal(expected, IsEpub(input));
         }
 
-        // [Theory]
-        // [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
-        // [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
-        // [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
-        // [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
-        // [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
-        // [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
-        // [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "Digital Colored Comics")]
-        // [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
-        // public void ParseEditionTest(string input, string expected)
-        // {
-        //     Assert.Equal(expected, ParseEdition(input));
-        // }
-
-        // [Theory]
-        // [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
-        // [InlineData("Beelzebub_Omake_June_2012_RHS", true)]
-        // [InlineData("Beelzebub_Side_Story_02_RHS.zip", false)]
-        // [InlineData("Darker than Black Shikkoku no Hana Special [Simple Scans].zip", true)]
-        // [InlineData("Darker than Black Shikkoku no Hana Fanbook Extra [Simple Scans].zip", true)]
-        // [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter", true)]
-        // [InlineData("Ani-Hina Art Collection.cbz", true)]
-        // public void ParseMangaSpecialTest(string input, bool expected)
-        // {
-        //     Assert.Equal(expected, ParseMangaSpecial(input) != "");
-        // }
-
         [Theory]
         [InlineData("12-14", 12)]
         [InlineData("24", 24)]
@@ -142,6 +117,8 @@ namespace API.Tests.Parser
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
         [InlineData("Darker Than_Black", "darkerthanblack")]
+        [InlineData("Citrus", "citrus")]
+        [InlineData("Citrus+", "citrus+")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {

@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
+using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Interfaces;
+using API.Interfaces.Services;
+using API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -21,12 +23,22 @@ namespace API.Controllers
         private readonly ILogger<SettingsController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITaskScheduler _taskScheduler;
+        private readonly IAccountService _accountService;
 
-        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler)
+        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler, IAccountService accountService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
+            _accountService = accountService;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("base-url")]
+        public async Task<ActionResult<string>> GetBaseUrl()
+        {
+            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            return Ok(settingsDto.BaseUrl);
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -57,6 +69,7 @@ namespace API.Controllers
 
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
+            var updateAuthentication = false;
 
             foreach (var setting in currentSettings)
             {
@@ -80,6 +93,18 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.BaseUrl + string.Empty != setting.Value)
+                {
+                    var path = !updateSettingsDto.BaseUrl.StartsWith("/")
+                        ? $"/{updateSettingsDto.BaseUrl}"
+                        : updateSettingsDto.BaseUrl;
+                    path = !path.EndsWith("/")
+                        ? $"{path}/"
+                        : path;
+                    setting.Value = path;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
                 if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.LoggingLevel + string.Empty;
@@ -91,6 +116,13 @@ namespace API.Controllers
                 {
                     setting.Value = updateSettingsDto.EnableOpds + string.Empty;
                     _unitOfWork.SettingsRepository.Update(setting);
+                }
+
+                if (setting.Key == ServerSettingKey.EnableAuthentication && updateSettingsDto.EnableAuthentication + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.EnableAuthentication + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                    updateAuthentication = true;
                 }
 
                 if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
@@ -110,11 +142,32 @@ namespace API.Controllers
 
             if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
 
-            if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync())
+            try
             {
+                await _unitOfWork.CommitAsync();
+
+                if (updateAuthentication)
+                {
+                    var users = await _unitOfWork.UserRepository.GetNonAdminUsersAsync();
+                    foreach (var user in users)
+                    {
+                        var errors = await _accountService.ChangeUserPassword(user, AccountService.DefaultPassword);
+                        if (!errors.Any()) continue;
+
+                        await _unitOfWork.RollbackAsync();
+                        return BadRequest(errors);
+                    }
+
+                    _logger.LogInformation("Server authentication changed. Updated all non-admins to default password");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception when updating server settings");
                 await _unitOfWork.RollbackAsync();
                 return BadRequest("There was a critical issue. Please try again.");
             }
+
 
             _logger.LogInformation("Server Settings updated");
             _taskScheduler.ScheduleTasks();
@@ -147,6 +200,13 @@ namespace API.Controllers
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             return Ok(settingsDto.EnableOpds);
+        }
+
+        [HttpGet("authentication-enabled")]
+        public async Task<ActionResult<bool>> GetAuthenticationEnabled()
+        {
+            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            return Ok(settingsDto.EnableAuthentication);
         }
     }
 }

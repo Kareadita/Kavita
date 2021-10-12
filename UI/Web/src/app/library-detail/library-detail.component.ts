@@ -1,10 +1,12 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -12,6 +14,7 @@ import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
+import { MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -19,7 +22,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './library-detail.component.html',
   styleUrls: ['./library-detail.component.scss']
 })
-export class LibraryDetailComponent implements OnInit {
+export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   libraryId!: number;
   libraryName = '';
@@ -31,6 +34,7 @@ export class LibraryDetailComponent implements OnInit {
   filter: SeriesFilter = {
     mangaFormat: null
   };
+  onDestroy: Subject<void> = new Subject<void>();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -60,7 +64,7 @@ export class LibraryDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -78,7 +82,14 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    
+    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+      this.loadPage();
+    });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])

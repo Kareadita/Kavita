@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Comparators;
+using API.Data.Metadata;
 using API.Extensions;
 using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using Microsoft.IO;
 using SharpCompress.Archives;
 using SharpCompress.Common;
-using Image = NetVips.Image;
 
 namespace API.Services
 {
@@ -28,14 +27,12 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
-        private readonly NaturalSortComparer _comparer;
         private const string ComicInfoFilename = "comicinfo";
 
         public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
         {
             _logger = logger;
             _directoryService = directoryService;
-            _comparer = new NaturalSortComparer();
         }
 
         /// <summary>
@@ -81,13 +78,11 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
-                        using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                        using var archive = ZipFile.OpenRead(archivePath);
                         return archive.Entries.Count(e => !Parser.Parser.HasBlacklistedFolderInPath(e.FullName) && Parser.Parser.IsImage(e.FullName));
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         return archive.Entries.Count(entry => !entry.IsDirectory &&
                                                               !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
@@ -130,7 +125,7 @@ namespace API.Services
         /// <returns>Entry name of match, null if no match</returns>
         public string FirstFileEntry(IEnumerable<string> entryFullNames)
         {
-            var result = entryFullNames.OrderBy(Path.GetFileName, _comparer)
+            var result = entryFullNames.OrderBy(Path.GetFileName, new NaturalSortComparer())
                 .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
                                      && Parser.Parser.IsImage(x)
                                      && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
@@ -160,7 +155,6 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
@@ -172,7 +166,6 @@ namespace API.Services
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
@@ -301,65 +294,68 @@ namespace API.Services
             return null;
         }
 
-        public string GetSummaryInfo(string archivePath)
+        public ComicInfo GetComicInfo(string archivePath)
         {
-            var summary = string.Empty;
-            if (!IsValidArchive(archivePath)) return summary;
+            if (!IsValidArchive(archivePath)) return null;
 
-            ComicInfo info = null;
             try
             {
-                if (!File.Exists(archivePath)) return summary;
+                if (!File.Exists(archivePath)) return null;
 
                 var libraryHandler = CanOpen(archivePath);
                 switch (libraryHandler)
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogTrace("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
-                                                                         && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
-                                                                         && !Path.GetFileNameWithoutExtension(x.Name).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
-                                                                         && Parser.Parser.IsXml(x.FullName));
+                        var entry = archive.Entries.SingleOrDefault(x =>
+                            !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
+                            && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
+                            && !Path.GetFileNameWithoutExtension(x.Name)
+                                .StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
+                            && Parser.Parser.IsXml(x.FullName));
                         if (entry != null)
                         {
                             using var stream = entry.Open();
                             var serializer = new XmlSerializer(typeof(ComicInfo));
-                            info = (ComicInfo) serializer.Deserialize(stream);
+                            return (ComicInfo) serializer.Deserialize(stream);
                         }
+
                         break;
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogTrace("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
-                        info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
-                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-                                                                               && !Path.GetFileNameWithoutExtension(entry.Key).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
+                        return FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
+                                                                               && !Parser.Parser
+                                                                                   .HasBlacklistedFolderInPath(
+                                                                                       Path.GetDirectoryName(
+                                                                                           entry.Key) ?? string.Empty)
+                                                                               && !Path
+                                                                                   .GetFileNameWithoutExtension(
+                                                                                       entry.Key).StartsWith(Parser
+                                                                                       .Parser
+                                                                                       .MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
-                        break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogWarning("[GetSummaryInfo] This archive cannot be read: {ArchivePath}", archivePath);
-                        return summary;
+                        _logger.LogWarning("[GetComicInfo] This archive cannot be read: {ArchivePath}", archivePath);
+                        return null;
                     default:
-                        _logger.LogWarning("[GetSummaryInfo] There was an exception when reading archive stream: {ArchivePath}", archivePath);
-                        return summary;
-                }
-
-                if (info != null)
-                {
-                    return info.Summary;
+                        _logger.LogWarning(
+                            "[GetComicInfo] There was an exception when reading archive stream: {ArchivePath}",
+                            archivePath);
+                        return null;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[GetSummaryInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
+                _logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
             }
 
-            return summary;
+            return null;
         }
+
 
         private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
@@ -410,14 +406,12 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        _logger.LogDebug("Using default compression handling");
                         using var archive = ZipFile.OpenRead(archivePath);
                         ExtractArchiveEntries(archive, extractPath);
                         break;
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
-                        _logger.LogDebug("Using SharpCompress compression handling");
                         using var archive = ArchiveFactory.Open(archivePath);
                         ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
                                                                               && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)

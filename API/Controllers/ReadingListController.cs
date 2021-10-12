@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -99,16 +100,20 @@ namespace API.Controllers
         [HttpPost("delete-item")]
         public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
         {
-            var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
-            var item = items.Find(r => r.Id == dto.ReadingListItemId);
-            items.Remove(item);
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+            readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).ToList();
 
-            for (var i = 0; i < items.Count; i++)
+
+            var index = 0;
+            foreach (var readingListItem in readingList.Items)
             {
-                items[i].Order = i;
+                readingListItem.Order = index;
+                index++;
             }
 
-            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            if (!_unitOfWork.HasChanges()) return Ok();
+
+            if (await _unitOfWork.CommitAsync())
             {
                 return Ok("Updated");
             }
@@ -138,15 +143,10 @@ namespace API.Controllers
                         itemIdsToRemove.Contains(r.Id));
                 _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
-                if (_unitOfWork.HasChanges())
-                {
-                    await _unitOfWork.CommitAsync();
-                    return Ok("Updated");
-                }
-                else
-                {
-                    return Ok("Nothing to remove");
-                }
+                if (!_unitOfWork.HasChanges()) return Ok("Nothing to remove");
+
+                await _unitOfWork.CommitAsync();
+                return Ok("Updated");
             }
             catch
             {
@@ -437,7 +437,7 @@ namespace API.Controllers
 
             var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
             var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
-                .OrderBy(c => int.Parse(c.Volume.Name))
+                .OrderBy(c => float.Parse(c.Volume.Name))
                 .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
             var index = lastOrder + 1;

@@ -49,7 +49,7 @@ Password: Demouser64
 - Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
 - Run Kavita
 - If you are updating, do not copy appsettings.json from the new version over. It will override your TokenKey and you will have to reauthenticate on your devices.
-
+- Open localhost:5000 and setup your account and libraries in the UI.
 ### Docker
 Running your Kavita server in docker is super easy! Barely an inconvenience. You can run it with this command: 
 

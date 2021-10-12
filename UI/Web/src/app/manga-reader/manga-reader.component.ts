@@ -12,7 +12,7 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
 import { Stack } from '../shared/data-structures/stack';
@@ -23,6 +23,8 @@ import { COLOR_FILTER, FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from 
 import { Preferences, scalingOptions } from '../_models/preferences/preferences';
 import { READER_MODE } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
+import { LibraryService } from '../_services/library.service';
+import { LibraryType } from '../_models/library';
 
 const PREFETCH_PAGES = 5;
 
@@ -201,6 +203,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * A map of bookmarked pages to anything. Used for O(1) lookup time if a page is bookmarked or not.
    */
   bookmarks: {[key: string]: number} = {};
+  /**
+   * Tracks if the first page is rendered or not. This is used to keep track of Automatic Scaling and adjusting decision after first page dimensions load up.
+   */
+  firstPageRendered: boolean = false;
+  /**
+   * Library Type used for rendering chapter or issue
+   */
+  libraryType: LibraryType = LibraryType.Manga;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -256,7 +266,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService, 
-              private toastr: ToastrService, private memberService: MemberService) {
+              private toastr: ToastrService, private memberService: MemberService,
+              private libraryService: LibraryService, private utilityService: UtilityService) {
                 this.navService.hideNavBar();
   }
 
@@ -321,7 +332,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       } else {
         // If no user, we can't render 
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl('/login');
       }
     });
 
@@ -396,7 +407,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
-      bookmarks: this.readerService.getBookmarks(this.chapterId)
+      bookmarks: this.readerService.getBookmarks(this.chapterId),
     }).pipe(take(1)).subscribe(results => {
 
       if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
@@ -421,7 +432,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
       this.pageOptions = newOptions;
 
-      this.updateTitle(results.chapterInfo);
+      this.libraryService.getLibraryType(results.chapterInfo.libraryId).pipe(take(1)).subscribe(type => {
+        this.libraryType = type;
+        this.updateTitle(results.chapterInfo, type);
+      });
+
+      
 
       // From bookmarks, create map of pages to make lookup time O(1)
       this.bookmarks = {};
@@ -475,7 +491,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  updateTitle(chapterInfo: ChapterInfo) {
+  updateTitle(chapterInfo: ChapterInfo, type: LibraryType) {
       this.title = chapterInfo.seriesName;
       if (chapterInfo.chapterTitle.length > 0) {
         this.title += ' - ' + chapterInfo.chapterTitle;
@@ -485,12 +501,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (chapterInfo.isSpecial && chapterInfo.volumeNumber === '0') {
         this.subtitle = chapterInfo.fileName;
       } else if (!chapterInfo.isSpecial && chapterInfo.volumeNumber === '0') {
-        this.subtitle = 'Chapter ' + chapterInfo.chapterNumber;
+        this.subtitle = this.utilityService.formatChapterName(type, true, true) + chapterInfo.chapterNumber;
       } else {
         this.subtitle = 'Volume ' + chapterInfo.volumeNumber;
 
         if (chapterInfo.chapterNumber !== '0') {
-          this.subtitle += ' Chapter ' + chapterInfo.chapterNumber;
+          this.subtitle += ' ' + this.utilityService.formatChapterName(type, true, true) + chapterInfo.chapterNumber;
         }
       }
   }
@@ -760,10 +776,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
-      this.toastr.info(direction + ' chapter loaded', '', {timeOut: 3000});
+      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' chapter');
+      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;
@@ -822,6 +838,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
+        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
+          
+          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+          const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+          const windowHeight = window.innerHeight
+                    || document.documentElement.clientHeight
+                    || document.body.clientHeight;
+
+          const widthRatio = windowWidth / this.canvasImage.width;
+          const heightRatio = windowHeight / this.canvasImage.height;
+
+          // Given that we now have image dimensions, assuming this isn't a split image, 
+          // Try to reset one time based on who's dimension (width/height) is smaller
+          if (widthRatio < heightRatio) {
+            newScale = FITTING_OPTION.WIDTH;
+          } else if (widthRatio > heightRatio) {
+            newScale = FITTING_OPTION.HEIGHT;
+          }
+
+          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
+          this.firstPageRendered = true;
+        }
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       // Reset scroll on non HEIGHT Fits

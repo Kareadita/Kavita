@@ -90,7 +90,7 @@ namespace API.Tests.Services
         }
 
         [Theory]
-        [InlineData(new string[] {"C:/Manga/"}, new string[] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] folders, string expectedDirectory)
         {
             var actual = DirectoryService.FindHighestDirectoriesFromFiles(rootDirectories, folders);

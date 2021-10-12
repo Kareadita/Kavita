@@ -120,14 +120,33 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
 
   prevTouchTime: number = 0;
+  prevOffset: number = 0;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
+    if (!this.allowSelection) return;
+    const verticalOffset = (window.pageYOffset 
+      || document.documentElement.scrollTop 
+      || document.body.scrollTop || 0);
+
     this.prevTouchTime = event.timeStamp;
+    this.prevOffset = verticalOffset;
   }
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent) {
-    if (event.timeStamp - this.prevTouchTime >= 200) {
+    if (!this.allowSelection) return;
+    const delta = event.timeStamp - this.prevTouchTime;
+    const verticalOffset = (window.pageYOffset 
+      || document.documentElement.scrollTop 
+      || document.body.scrollTop || 0);
+
+    if (verticalOffset != this.prevOffset) {
+      this.prevTouchTime = 0;
+
+      return;
+    }
+
+    if (delta >= 300 && delta <= 1000) {
       this.handleSelection();
       event.stopPropagation();
       event.preventDefault();

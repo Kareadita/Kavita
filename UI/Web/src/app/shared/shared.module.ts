@@ -15,6 +15,7 @@ import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { SentenceCasePipe } from './sentence-case.pipe';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
+    SentenceCasePipe,
   ],
   imports: [
     CommonModule,
@@ -40,6 +42,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
   exports: [
     RegisterMemberComponent,
     SafeHtmlPipe,
+    SentenceCasePipe,
     ReadMoreComponent,
     DrawerComponent,
     TagBadgeComponent,

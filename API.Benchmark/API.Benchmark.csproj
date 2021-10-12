@@ -15,4 +15,10 @@
       <PackageReference Include="NSubstitute" Version="4.2.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Data\SeriesNamesForNormalization.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

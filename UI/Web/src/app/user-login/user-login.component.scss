@@ -4,6 +4,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-top: -61px; // To offset the navbar
     height: calc(100vh);
     min-height: 289px;
     position: relative;
@@ -22,32 +23,38 @@
     }
 
     .logo-container {
-        margin: 0 auto 15px;
-
         .logo {
             display:inline-block;
             height: 50px;
         }
     }
 
+    .row {
+        margin-top: 10vh;
+    }
+
     .card {
         background-color: $primary-color;
         color: #fff;
+        cursor: pointer;
+        min-width: 300px;
+
+        &:focus {
+            border: 2px solid white;
+
+        }
+
 
         .card-title {
             font-family: 'Spartan', sans-serif;
             font-weight: bold;
             display: inline-block;
-            margin: 0 10px;
             vertical-align: middle;
+            width: 280px;
         }
 
         .card-text {
             font-family: "EBGaramond", "Helvetica Neue", sans-serif;
-
-            input {
-                background-color: #fff;
-            }
         }
 
         .alt {
@@ -66,3 +73,11 @@
     }
 }
 
+.invalid-feedback {
+    display: inline-block;
+    color: #343c59;
+}
+
+input {
+    background-color: #fff !important;
+}

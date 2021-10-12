@@ -9,7 +9,7 @@
         <li *ngFor="let member of members; let idx = index;" class="list-group-item">
             <div>
                 <h4>
-                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (presence.onlineUsers$ | async)?.includes(member.username)"></i><span id="member-name--{{idx}}">{{member.username | titlecase}} </span><span *ngIf="member.username === loggedInUsername">(You)</span>
+                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i><span id="member-name--{{idx}}">{{member.username | titlecase}} </span><span *ngIf="member.username === loggedInUsername">(You)</span>
                     <div class="float-right" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
                         <button class="btn btn-secondary mr-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
@@ -19,7 +19,7 @@
                 <div>Last Active: 
                     <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
                     <ng-template #activeDate>
-                        {{member.lastActive | date: 'MM/dd/yyyy'}}
+                        {{member.lastActive | date: 'short'}}
                     </ng-template>
                 </div>
                 <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>

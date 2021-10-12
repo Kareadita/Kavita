@@ -53,7 +53,7 @@ namespace API.Data.Repositories
         {
             return await _context.ReadingList
                 .Where(r => r.Id == readingListId)
-                .Include(r => r.Items)
+                .Include(r => r.Items.OrderBy(item => item.Order))
                 .SingleOrDefaultAsync();
         }
 

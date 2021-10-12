@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
@@ -10,8 +10,8 @@ import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.component';
-import { PresenceHubService } from 'src/app/_services/presence-hub.service';
 import { Subject } from 'rxjs';
+import { MessageHubService } from 'src/app/_services/message-hub.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -34,7 +34,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
               private modalService: NgbModal,
               private toastr: ToastrService,
               private confirmService: ConfirmService,
-              public presence: PresenceHubService) {
+              public messageHub: MessageHubService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
@@ -77,7 +77,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.createMemberToggle = true;
   }
 
-  onMemberCreated(success: boolean) {
+  onMemberCreated(createdUser: User | null) {
     this.createMemberToggle = false;
     this.loadMembers();
   }

@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { take, takeUntil, takeWhile } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -11,13 +11,16 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
+import { RefreshMetadataEvent } from 'src/app/_models/events/refresh-metadata-event';
+import { MessageHubService } from 'src/app/_services/message-hub.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-series-card',
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss']
 })
-export class SeriesCardComponent implements OnInit, OnChanges {
+export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
@@ -41,12 +44,13 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   isAdmin = false;
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
+  onDestroy: Subject<void> = new Subject<void>();
 
   constructor(private accountService: AccountService, private router: Router,
               private seriesService: SeriesService, private toastr: ToastrService,
               private modalService: NgbModal, private confirmService: ConfirmService, 
               public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-              private actionService: ActionService) {
+              private actionService: ActionService, private hubService: MessageHubService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -58,6 +62,12 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     if (this.data) {
       this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+
+      this.hubService.refreshMetadata.pipe(takeWhile(event => event.libraryId === this.libraryId), takeUntil(this.onDestroy)).subscribe((event: RefreshMetadataEvent) => {
+        if (this.data.id === event.seriesId) {
+          this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+        }    
+      });
     }
   }
 
@@ -66,6 +76,11 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series)).filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.data));
       this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
     }
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {

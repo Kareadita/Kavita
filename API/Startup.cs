@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using API.Extensions;
+using API.Interfaces;
+using API.Interfaces.Repositories;
 using API.Middleware;
 using API.Services;
 using API.Services.HostedServices;
@@ -52,8 +54,41 @@ namespace API
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
+
+                c.SwaggerDoc("Kavita API", new OpenApiInfo()
+                {
+                    Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
+                    Title = "Kavita API",
+                    Version = "v1",
+                });
+
                 var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
                 c.IncludeXmlComments(filePath);
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+                    In = ParameterLocation.Header,
+                    Description = "Please insert JWT with Bearer into field",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Description = "Local Server",
+                    Url = "http://localhost:5000/",
+                });
             });
             services.AddResponseCompression(options =>
             {
@@ -88,14 +123,17 @@ namespace API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
-            IHostApplicationLifetime applicationLifetime)
+            IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
         {
             app.UseMiddleware<ExceptionMiddleware>();
 
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1"));
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+                });
                 app.UseHangfireDashboard();
             }
 
@@ -124,10 +162,28 @@ namespace API
 
             app.UseDefaultFiles();
 
+            // This is not implemented completely. Commenting out until implemented
+            // var service = serviceProvider.GetRequiredService<IUnitOfWork>();
+            // var settings = service.SettingsRepository.GetSettingsDto();
+            // if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
+            // {
+            //     var path = !settings.BaseUrl.StartsWith("/")
+            //         ? $"/{settings.BaseUrl}"
+            //         : settings.BaseUrl;
+            //     path = !path.EndsWith("/")
+            //         ? $"{path}/"
+            //         : path;
+            //     app.UsePathBase(path);
+            //     Console.WriteLine("Starting with base url as " + path);
+            // }
+
             app.UseStaticFiles(new StaticFileOptions
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
+
+
+
 
             app.Use(async (context, next) =>
             {
@@ -147,7 +203,6 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("hubs/messages");
-                endpoints.MapHub<PresenceHub>("hubs/presence");
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });

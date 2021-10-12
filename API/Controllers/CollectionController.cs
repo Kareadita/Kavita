@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,13 +17,11 @@ namespace API.Controllers
     public class CollectionController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<AppUser> _userManager;
 
         /// <inheritdoc />
-        public CollectionController(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public CollectionController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
         }
 
         /// <summary>
@@ -36,7 +32,7 @@ namespace API.Controllers
         public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var isAdmin = await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
             if (isAdmin)
             {
                 return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();

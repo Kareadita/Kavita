@@ -125,7 +125,7 @@ namespace API.Services.Tasks
                 _directoryService.CopyFilesToDirectory(
                     chapterImages.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
             }

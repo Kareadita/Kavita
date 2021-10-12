@@ -112,7 +112,7 @@
               </ng-template>
             </li>
             <li [ngbNavItem]="2" *ngIf="hasNonSpecialVolumeChapters">
-              <a ngbNavLink>Volumes/Chapters</a>
+              <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
               <ng-template ngbNavContent>
                   <div class="row no-gutters">
                         <div *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
@@ -121,7 +121,7 @@
                                 [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                         </div>
                         <div *ngFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
-                            <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="'Chapter ' + chapter.range" (click)="openChapter(chapter)"
+                            <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="utilityService.formatChapterName(libraryType, true, true) + chapter.range" (click)="openChapter(chapter)"
                             [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
                         </div>

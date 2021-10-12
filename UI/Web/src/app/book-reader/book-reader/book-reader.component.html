@@ -58,17 +58,16 @@
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
                     </div>
                     <div class="row no-gutters justify-content-between">
-                        <button (click)="resetSettings()" class="btn btn-secondary col">Reset</button>
-                        <button (click)="saveSettings()" class="btn btn-primary col" style="margin-left:10px;">Save</button>
+                        <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
                     </div>
                 </div>
                 <div class="row no-gutters">
                     <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                    <div class="col-1" style="margin-top: 6px">{{pageNum}}</div>
-                    <div class="col-8" style="margin-top: 15px">
+                    <div class="col-1 page-stub">{{pageNum}}</div>
+                    <div class="col-8" style="margin-top: 15px;padding-right:10px">
                         <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
                     </div>
-                    <div class="col-1 btn-icon" style="margin-top: 6px" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
+                    <div class="col-1 btn-icon page-stub" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
                     <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                 </div>
                 <div class="table-of-contents">
@@ -100,24 +99,15 @@
         </app-drawer>
     </div>
 
-    <!-- This pushes down the page. Need to overlay  
-        <ng-container *ngIf="isLoading">
-        <div class="d-flex justify-content-center m-5">
-            <div class="spinner-border text-secondary loading" role="status">
-                <span class="invisible">Loading...</span>
-            </div>
-        </div>
-    </ng-container> -->
-    
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
-        <div #readingHtml [innerHtml]="page" *ngIf="page !== undefined"></div>
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px'}" [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
         </div>
         <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate">
         </div>
         
-        <div [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" *ngIf="page !== undefined && scrollbarNeeded">
+        <div *ngIf="page !== undefined && scrollbarNeeded">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         </div>
     </div>
@@ -138,7 +128,7 @@
                 [disabled]="IsNextDisabled" 
                 (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
                 <span class="phone-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}}&nbsp;</span>
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 >= maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 > maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
             </button>
         </div>
     </ng-template>

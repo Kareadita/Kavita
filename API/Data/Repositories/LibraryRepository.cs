@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -11,6 +12,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories
 {
+
+    [Flags]
+    public enum LibraryIncludes
+    {
+        None = 1,
+        Series = 2,
+        AppUser = 4,
+        Folders = 8,
+        // Ratings = 16
+    }
+
     public class LibraryRepository : ILibraryRepository
     {
         private readonly DataContext _context;
@@ -58,7 +70,7 @@ namespace API.Data.Repositories
 
         public async Task<bool> DeleteLibrary(int libraryId)
         {
-            var library = await GetLibraryForIdAsync(libraryId);
+            var library = await GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.Series);
             _context.Library.Remove(library);
             return await _context.SaveChangesAsync() > 0;
         }
@@ -91,14 +103,37 @@ namespace API.Data.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Library> GetLibraryForIdAsync(int libraryId)
+        public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes)
         {
-            return await _context.Library
-                .Where(x => x.Id == libraryId)
-                .Include(f => f.Folders)
-                .Include(l => l.Series)
-                .SingleAsync();
+
+            var query = _context.Library
+                .Where(x => x.Id == libraryId);
+
+            query = AddIncludesToQuery(query, includes);
+            return await query.SingleAsync();
         }
+
+        private static IQueryable<Library> AddIncludesToQuery(IQueryable<Library> query, LibraryIncludes includeFlags)
+        {
+            if (includeFlags.HasFlag(LibraryIncludes.Folders))
+            {
+                query = query.Include(l => l.Folders);
+            }
+
+            if (includeFlags.HasFlag(LibraryIncludes.Series))
+            {
+                query = query.Include(l => l.Series);
+            }
+
+            if (includeFlags.HasFlag(LibraryIncludes.AppUser))
+            {
+                query = query.Include(l => l.AppUsers);
+            }
+
+            return query;
+        }
+
+
         /// <summary>
         /// This returns a Library with all it's Series -> Volumes -> Chapters. This is expensive. Should only be called when needed.
         /// </summary>
@@ -106,7 +141,6 @@ namespace API.Data.Repositories
         /// <returns></returns>
         public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
         {
-
             return await _context.Library
                 .Where(x => x.Id == libraryId)
                 .Include(f => f.Folders)
