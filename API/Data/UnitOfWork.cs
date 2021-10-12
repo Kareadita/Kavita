@@ -25,7 +25,7 @@ namespace API.Data
         public IUserRepository UserRepository => new UserRepository(_context, _userManager, _mapper);
         public ILibraryRepository LibraryRepository => new LibraryRepository(_context, _mapper);
 
-        public IVolumeRepository VolumeRepository => new VolumeRepository(_context);
+        public IVolumeRepository VolumeRepository => new VolumeRepository(_context, _mapper);
 
         public ISettingsRepository SettingsRepository => new SettingsRepository(_context, _mapper);
 
