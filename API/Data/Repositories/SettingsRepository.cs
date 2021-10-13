@@ -35,15 +35,6 @@ namespace API.Data.Repositories
             return _mapper.Map<ServerSettingDto>(settings);
         }
 
-        public ServerSettingDto GetSettingsDto()
-        {
-            var settings = _context.ServerSetting
-                .Select(x => x)
-                .AsNoTracking()
-                .ToList();
-            return _mapper.Map<ServerSettingDto>(settings);
-        }
-
         public Task<ServerSetting> GetSettingAsync(ServerSettingKey key)
         {
             return _context.ServerSetting.SingleOrDefaultAsync(x => x.Key == key);
