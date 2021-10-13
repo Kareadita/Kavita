@@ -47,7 +47,7 @@ export class UserLoginComponent implements OnInit {
 
     this.settingsService.getAuthenticationEnabled().pipe(take(1)).subscribe((enabled: boolean) => {
       // There is a bug where this is coming back as a string not a boolean.
-      this.authDisabled = enabled + '' === 'false';
+      this.authDisabled = !enabled;
       if (this.authDisabled) {
         this.loginForm.get('password')?.setValidators([]);
 

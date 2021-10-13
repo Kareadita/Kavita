@@ -11,8 +11,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
-import { keyframes } from '@angular/animations';
-import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-user-preferences',
@@ -29,6 +27,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
+  isAdmin: boolean = false;
+  isAuthenticationEnabled: boolean = true;
 
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
@@ -75,7 +75,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
-    })
+    });
+    this.settingsService.getAuthenticationEnabled().subscribe(res => {
+      this.isAuthenticationEnabled = res;
+    });
   }
 
   ngOnInit(): void {
@@ -83,6 +86,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       if (user) {
         this.user = user;
+        this.isAdmin = this.accountService.hasAdminRole(user);
 
         if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
           this.user.preferences.bookReaderFontFamily = 'default';
