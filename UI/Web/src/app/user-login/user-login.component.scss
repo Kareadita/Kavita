@@ -8,6 +8,8 @@
     height: calc(100vh);
     min-height: 289px;
     position: relative;
+    width: 100vw;
+    max-width: 100vw;
 
 
     &::before {
