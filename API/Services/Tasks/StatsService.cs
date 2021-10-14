@@ -1,9 +1,7 @@
-﻿using System;
+using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Stats;
@@ -12,7 +10,6 @@ using API.Interfaces.Services;
 using API.Services.Clients;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
@@ -39,28 +36,11 @@ namespace API.Services.Tasks
         private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
         private static bool FileExists => File.Exists(FinalPath);
 
-        public async Task PathData(ClientInfoDto clientInfoDto)
-        {
-            _logger.LogDebug("Pathing client data to the file");
-
-            var statisticsDto = await GetData();
-
-            statisticsDto.AddClientInfo(clientInfoDto);
-
-            await SaveFile(statisticsDto);
-        }
-
         private async Task CollectRelevantData()
         {
-            _logger.LogDebug("Collecting data from the server and database");
-
-            _logger.LogDebug("Collecting usage info");
-            var usageInfo = await GetUsageInfo();
-
             _logger.LogDebug("Collecting server info");
-            var serverInfo = GetServerInfo();
-
-            await PathData(serverInfo, usageInfo);
+            
+            await PathData();
         }
 
         private async Task FinalizeStats()
@@ -96,61 +76,44 @@ namespace API.Services.Tasks
             await FinalizeStats();
         }
 
-        private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
+        private async Task PathData()
         {
             _logger.LogDebug("Pathing server and usage info to the file");
 
             var data = await GetData();
-
-            data.ServerInfo = serverInfoDto;
-            data.UsageInfo = usageInfoDto;
-
-            data.MarkAsUpdatedNow();
 
             await SaveFile(data);
         }
 
         private async ValueTask<UsageStatisticsDto> GetData()
         {
-            if (!FileExists) return new UsageStatisticsDto {InstallId = HashUtil.AnonymousToken()};
+            //Initialize a new request everytime stats are requested. Stat file is deleted here to ensure old data is not reused.
 
-            return await GetExistingData<UsageStatisticsDto>();
-        }
+            if (FileExists) File.Delete(FinalPath);
 
-        private async Task<UsageInfoDto> GetUsageInfo()
-        {
-            var usersCount = await _dbContext.Users.CountAsync();
-
-            var libsCountByType = await _dbContext.Library
-                .AsNoTracking()
-                .GroupBy(x => x.Type)
-                .Select(x => new LibInfo {Type = x.Key, Count = x.Count()})
-                .ToArrayAsync();
-
-            var uniqueFileTypes = await _unitOfWork.FileRepository.GetFileExtensions();
-
-            var usageInfo = new UsageInfoDto
+            return new UsageStatisticsDto
             {
-                UsersCount = usersCount,
-                LibraryTypesCreated = libsCountByType,
-                FileTypes = uniqueFileTypes
+                Os = RuntimeInformation.OSDescription,
+                dotnetVersion = Environment.Version.ToString(),
+                kavitaVersion = BuildInfo.Version.ToString(),
+                installId = HashUtil.AnonymousToken(),
+                isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
             };
 
-            return usageInfo;
+           
         }
+
 
         public static ServerInfoDto GetServerInfo()
         {
             var serverInfo = new ServerInfoDto
             {
                 Os = RuntimeInformation.OSDescription,
-                DotNetVersion = Environment.Version.ToString(),
-                RunTimeVersion = RuntimeInformation.FrameworkDescription,
-                KavitaVersion = BuildInfo.Version.ToString(),
-                Culture = Thread.CurrentThread.CurrentCulture.Name,
-                BuildBranch = BuildInfo.Branch,
-                IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
-                NumOfCores = Environment.ProcessorCount
+                dotnetVersion = Environment.Version.ToString(),
+                kavitaVersion = BuildInfo.Version.ToString(),
+                installId = HashUtil.AnonymousToken(),
+                isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
+
             };
 
             return serverInfo;

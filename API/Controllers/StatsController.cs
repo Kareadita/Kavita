@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.Interfaces.Services;
@@ -21,11 +21,11 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("client-info")]
-        public async Task<IActionResult> AddClientInfo([FromBody] ClientInfoDto clientInfoDto)
+        public async Task<IActionResult> AddClientInfo([FromBody] ServerInfoDto serverInfoDto)
         {
             try
             {
-                await _statsService.PathData(clientInfoDto);
+                await _statsService.CollectAndSendStatsData();
 
                 return Ok();
             }
