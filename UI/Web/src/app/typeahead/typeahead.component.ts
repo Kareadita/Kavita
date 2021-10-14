@@ -1,7 +1,7 @@
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable, Observer, of, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, last, map, shareReplay, switchMap, take, takeLast, takeUntil, tap, withLatestFrom } from 'rxjs/operators';
+import { Observable, of, Subject } from 'rxjs';
+import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from './typeahead-settings';
 

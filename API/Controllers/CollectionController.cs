@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Extensions;
 using API.Interfaces;
@@ -88,6 +89,31 @@ namespace API.Controllers
             }
 
             return BadRequest("Something went wrong, please try again");
+        }
+
+
+        [HttpPost("update-for-series")]
+        public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
+        {
+            var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(dto.CollectionTagId);
+            if (tag == null) return BadRequest("Not a valid Tag Id");
+
+            var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(dto.SeriesIds);
+            foreach (var metadata in seriesMetadatas)
+            {
+                if (!metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                {
+                    tag.SeriesMetadatas.Add(metadata);
+                    _unitOfWork.CollectionTagRepository.Update(tag);
+                }
+            }
+
+            if (!_unitOfWork.HasChanges()) return Ok();
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+            return BadRequest("There was an issue updating series with collection tag");
         }
 
         /// <summary>

@@ -35,4 +35,8 @@ export class CollectionTagService {
   updateSeriesForTag(tag: CollectionTag, seriesIdsToRemove: Array<number>) {
     return this.httpClient.post(this.baseUrl + 'collection/update-series', {tag, seriesIdsToRemove}, {responseType: 'text' as 'json'});
   }
+
+  addByMultiple(tagId: number, seriesIds: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'collection/update-for-series', {collectionTagId: tagId, seriesIds}, {responseType: 'text' as 'json'});
+  }
 }

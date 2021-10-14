@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;

@@ -46,6 +46,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
         });
         break;
+      case Action.AddToCollection:
+        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
           this.loadPage();
