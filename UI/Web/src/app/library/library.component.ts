@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from '../_models/collection-tag';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
@@ -15,6 +16,7 @@ import { Action, ActionFactoryService, ActionItem } from '../_services/action-fa
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -32,17 +34,24 @@ export class LibraryComponent implements OnInit, OnDestroy {
   recentlyAdded: Series[] = [];
   inProgress: Series[] = [];
   continueReading: InProgressChapter[] = [];
-  // collectionTags: CollectionTag[] = [];
-  // collectionTagActions: ActionItem<CollectionTag>[] = [];
 
   private readonly onDestroy = new Subject<void>();
 
   seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
 
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
-    private seriesService: SeriesService, private actionFactoryService: ActionFactoryService, 
-    private collectionService: CollectionTagService, private router: Router, 
-    private modalService: NgbModal, private titleService: Title, public imageService: ImageService) { }
+    private seriesService: SeriesService, private router: Router, 
+    private titleService: Title, public imageService: ImageService, 
+    private messageHub: MessageHubService) {
+      this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
+        if (res.event == EVENTS.SeriesAdded) {
+          const seriesAddedEvent = res.payload as SeriesAddedEvent;
+          this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
+            this.recentlyAdded.unshift(series);
+          });
+        }
+      });
+    }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -56,8 +65,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
       });
     });
 
-    //this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
-
     this.reloadSeries();
   }
 
@@ -68,10 +75,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   reloadSeries() {
     this.loadRecentlyAdded();
-
     this.loadInProgress();
-
-    this.reloadTags();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -85,7 +89,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
     }
 
     this.loadInProgress();
-    this.reloadTags();
   }
 
   loadInProgress() {
@@ -100,12 +103,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-  reloadTags() {
-    // this.collectionService.allTags().pipe(takeUntil(this.onDestroy)).subscribe(tags => {
-    //   this.collectionTags = tags;
-    // });
-  }
-
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'collections') {
       this.router.navigate(['collections']);
@@ -115,26 +112,4 @@ export class LibraryComponent implements OnInit, OnDestroy {
       this.router.navigate(['in-progress']);
     } 
   }
-
-  loadCollection(item: CollectionTag) {
-    //this.router.navigate(['collections', item.id]);
-  }
-
-  // handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
-  //   switch (action) {
-  //     case(Action.Edit):
-  //       const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
-  //       modalRef.componentInstance.tag = collectionTag;
-  //       modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
-  //         this.reloadTags();
-  //         if (results.coverImageUpdated) {
-  //           collectionTag.coverImage = this.imageService.randomize(collectionTag.coverImage);
-  //         }
-  //       });
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  // }
-
 }
