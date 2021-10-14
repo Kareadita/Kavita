@@ -212,6 +212,8 @@ namespace API.Controllers
                 .Take(userParams.PageSize).ToList();
             var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
 
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
+
             Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
             return Ok(pagedList);
