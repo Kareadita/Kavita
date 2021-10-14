@@ -8,6 +8,9 @@ namespace API.Entities
     {
         [Key]
         public ServerSettingKey Key { get; set; }
+        /// <summary>
+        /// The value of the Setting. Converter knows how to convert to the correct type
+        /// </summary>
         public string Value { get; set; }
 
         /// <inheritdoc />
