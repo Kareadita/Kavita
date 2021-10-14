@@ -216,14 +216,14 @@ namespace API.Services
             var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
             var stopwatch = Stopwatch.StartNew();
             var totalTime = 0L;
-            _logger.LogDebug($"[MetadataService] Refreshing Library {library.Name}. Total Items: {chunkInfo.TotalSize}. Total Chunks: {chunkInfo.TotalChunks} with {chunkInfo.ChunkSize} size.");
-
+            _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
             // This technically does
             for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
             {
                 totalTime += stopwatch.ElapsedMilliseconds;
                 stopwatch.Restart();
-                _logger.LogDebug($"[MetadataService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
+                _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+                    chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
                 var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
                     new UserParams()
                     {

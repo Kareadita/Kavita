@@ -133,13 +133,11 @@ namespace API.Services.Tasks.Scanner
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
-            _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
             var existingName =
                 _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries && p.Key.Format == info.Format)
                 .Key;
             if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
             {
-                _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName.Name);
                 return existingName.Name;
             }
 
