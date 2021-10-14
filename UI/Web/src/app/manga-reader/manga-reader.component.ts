@@ -1113,4 +1113,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     
   }
+
+  /**
+   * Turns off Incognito mode. This can only happen once if the user clicks the icon. This will modify URL state
+   */
+  turnOffIncognito() {
+    this.incognitoMode = false;
+    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+    window.history.replaceState({}, '', newRoute);
+    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+  }
 }
