@@ -22,7 +22,7 @@ namespace API.Services.Clients
             _client.Timeout = TimeSpan.FromSeconds(30);
         }
 
-        public async Task SendDataToStatsServer(UsageStatisticsDto data)
+        public async Task SendDataToStatsServer(InstallationStatsDto data)
         {
             var responseContent = string.Empty;
 

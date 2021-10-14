@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace API.DTOs.Stats
 {
-    public class ServerInfoDto
+    public class InstallationStatsDto
     {
         public string InstallId { get; set; }
         public string Os { get; set; }
