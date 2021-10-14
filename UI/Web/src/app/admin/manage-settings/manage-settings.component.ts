@@ -56,13 +56,13 @@ export class ManageSettingsComponent implements OnInit {
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
 
-    if (this.settingsForm.get('enableAuthentication')?.value === false) {
+    if (this.settingsForm.get('enableAuthentication')?.dirty && this.settingsForm.get('enableAuthentication')?.value === false) {
       if (!await this.confirmService.confirm('Disabling Authentication opens your server up to unauthorized access and possible hacking. Are you sure you want to continue with this?')) {
         return;
       }
     }
 
-    const informUserAfterAuthenticationEnabled = this.settingsForm.get('enableAuthentication')?.value && !this.serverSettings.enableAuthentication;
+    const informUserAfterAuthenticationEnabled = this.settingsForm.get('enableAuthentication')?.dirty && this.settingsForm.get('enableAuthentication')?.value && !this.serverSettings.enableAuthentication;
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
