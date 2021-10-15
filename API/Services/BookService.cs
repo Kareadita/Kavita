@@ -140,13 +140,18 @@ namespace API.Services
             }
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
-            stylesheetHtml =
-                Parser.Parser.CssImportUrlRegex.Replace(stylesheetHtml, "$1" + apiBase + prepend + "$2" + "$3");
+            var importMatches = Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml);
+            foreach (Match match in importMatches)
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
+
+            // Check if there are any background images and rewrite those urls
+            EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
 
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
-            styleContent =
-                Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
-
             styleContent = styleContent.Replace("body", ".reading-section");
 
             var stylesheet = await _cssParser.ParseAsync(styleContent);
@@ -163,6 +168,21 @@ namespace API.Services
                 styleRule.Text = ".reading-section " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+
+        private void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
+        {
+            var matches = Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
+            foreach (Match match in matches)
+            {
+                if (!match.Success) continue;
+
+                var importFile = match.Groups["Filename"].Value;
+                var key = CleanContentKeys(importFile);
+                if (!book.Content.AllFiles.ContainsKey(key)) continue;
+
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + key);
+            }
         }
 
         public ComicInfo GetComicInfo(string filePath)
