@@ -19,7 +19,7 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
 
 #pragma warning disable S1075
-        private const string ApiUrl = "http://stats.kavitareader.com";
+        private const string ApiUrl = "http://stats2.kavitareader.com"; // TODO: Change this to stats for Release
 #pragma warning restore S1075
 
         public StatsService(ILogger<StatsService> logger,
@@ -56,12 +56,10 @@ namespace API.Services.Tasks
             catch (HttpRequestException e)
             {
                 _logger.LogError(e, "KavitaStats did not respond successfully");
-                throw;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "An error happened during the request to KavitaStats");
-                throw;
             }
         }
 
