@@ -22,6 +22,11 @@ namespace API.Data.Repositories
             _mapper = mapper;
         }
 
+        public void Add(CollectionTag tag)
+        {
+            _context.CollectionTag.Add(tag);
+        }
+
         public void Remove(CollectionTag tag)
         {
             _context.CollectionTag.Remove(tag);

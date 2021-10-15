@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.Entities;
@@ -91,20 +92,29 @@ namespace API.Controllers
             return BadRequest("Something went wrong, please try again");
         }
 
-
+        /// <summary>
+        /// Adds a collection tag onto multiple Series. If tag id is 0, this will create a new tag.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost("update-for-series")]
         public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(dto.CollectionTagId);
-            if (tag == null) return BadRequest("Not a valid Tag Id");
+            if (tag == null)
+            {
+                tag = DbFactory.CollectionTag(0, dto.CollectionTagTitle, String.Empty, false);
+                _unitOfWork.CollectionTagRepository.Add(tag);
+            }
+
 
             var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(dto.SeriesIds);
             foreach (var metadata in seriesMetadatas)
             {
-                if (!metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                if (!metadata.CollectionTags.Any(t => t.Title.Equals(tag.Title, StringComparison.InvariantCulture)))
                 {
-                    tag.SeriesMetadatas.Add(metadata);
-                    _unitOfWork.CollectionTagRepository.Update(tag);
+                    metadata.CollectionTags.Add(tag);
+                    _unitOfWork.SeriesMetadataRepository.Update(metadata);
                 }
             }
 

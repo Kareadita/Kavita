@@ -7,7 +7,9 @@ namespace API.DTOs.CollectionTags
         /// <summary>
         /// Collection Tag Id
         /// </summary>
+        /// <remarks>Can be 0 which then will use Title to create a tag</remarks>
         public int CollectionTagId { get; init; }
+        public string CollectionTagTitle { get; init; }
         /// <summary>
         /// Series Ids to add onto Collection Tag
         /// </summary>

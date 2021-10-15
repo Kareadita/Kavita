@@ -55,19 +55,18 @@ export class BulkAddToCollectionComponent implements OnInit {
   }
 
   create() {
-    // this.readingListService.createList(this.listForm.value.title).subscribe(list => {
-    //   this.addToList(list);
-    // });
-    alert('TODO: Implement this flow');
+    const tagName = this.listForm.value.title;
+    this.collectionService.addByMultiple(0, this.seriesIds, tagName).subscribe(() => {
+      this.toastr.success('Series added to ' + tagName + ' collection');
+      this.modal.close();
+    });
   }
 
   addToCollection(tag: CollectionTag) {
-
     if (this.seriesIds.length === 0) return;
 
-
-    this.collectionService.addByMultiple(tag.id, this.seriesIds).subscribe(() => {
-      this.toastr.success('Series added to reading list');
+    this.collectionService.addByMultiple(tag.id, this.seriesIds, '').subscribe(() => {
+      this.toastr.success('Series added to ' + tag.title + ' collection');
       this.modal.close();
     });
     
