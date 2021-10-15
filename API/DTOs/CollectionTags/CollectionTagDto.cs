@@ -1,4 +1,4 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs.CollectionTags
 {
     public class CollectionTagDto
     {

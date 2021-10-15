@@ -26,7 +26,7 @@ namespace API.Parser
 
         public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))",
             MatchOptions, RegexTimeout);
-        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)",
+        public static readonly Regex CssImportUrlRegex = new Regex("@import\\s([\"|']|url\\([\"|'])(?<Filename>[^'\"]+)[\"|']\\)?;",
             MatchOptions, RegexTimeout);
 
         private static readonly string XmlRegexExtensions = @"\.xml";

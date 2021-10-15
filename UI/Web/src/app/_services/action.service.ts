@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
+import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { ConfirmService } from '../shared/confirm.service';
@@ -34,6 +35,7 @@ export class ActionService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
   private bookmarkModalRef: NgbModalRef | null = null;
   private readingListModalRef: NgbModalRef | null = null;
+  private collectionModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
@@ -352,6 +354,32 @@ export class ActionService implements OnDestroy {
       });
       this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+  }
+
+  /**
+   * Adds a set of series to a collection tag
+   * @param series 
+   * @param callback 
+   * @returns 
+   */
+  addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: VoidActionCallback) {
+    if (this.collectionModalRef != null) { return; }
+      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md' });
+      this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
+      this.collectionModalRef.componentInstance.title = 'New Collection';
+
+      this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
+        this.collectionModalRef = null;
+        if (callback) {
+          callback();
+        }
+      });
+      this.collectionModalRef.dismissed.pipe(take(1)).subscribe(() => {
+        this.collectionModalRef = null;
         if (callback) {
           callback();
         }

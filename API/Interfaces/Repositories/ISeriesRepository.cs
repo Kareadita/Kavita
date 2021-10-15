@@ -54,5 +54,6 @@ namespace API.Interfaces.Repositories
         Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
         Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
         Task<Chunk> GetChunkInfo(int libraryId = 0);
+        Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     }
 }

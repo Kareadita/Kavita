@@ -19,7 +19,8 @@ export enum Action {
   Download = 7,
   Bookmarks = 8,
   IncognitoRead = 9,
-  AddToReadingList = 10
+  AddToReadingList = 10,
+  AddToCollection = 11
 }
 
 export interface ActionItem<T> {
@@ -86,6 +87,13 @@ export class ActionFactoryService {
         this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
+          callback: this.dummyCallback,
+          requiresAdmin: true
+        });
+
+        this.seriesActions.push({
+          action: Action.AddToCollection,
+          title: 'Add to Collection',
           callback: this.dummyCallback,
           requiresAdmin: true
         });
@@ -209,7 +217,7 @@ export class ActionFactoryService {
         title: 'Add to Reading List',
         callback: this.dummyCallback,
         requiresAdmin: false
-      },
+      }
     ];
 
     this.volumeActions = [

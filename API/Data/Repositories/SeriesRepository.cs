@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Scanner;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
@@ -484,6 +485,14 @@ namespace API.Data.Repositories
                 ChunkSize = chunkSize,
                 TotalChunks = totalChunks
             };
+        }
+
+        public async Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds)
+        {
+            return await _context.SeriesMetadata
+                .Where(sm => seriesIds.Contains(sm.SeriesId))
+                .Include(sm => sm.CollectionTags)
+                .ToListAsync();
         }
     }
 }

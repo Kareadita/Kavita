@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs
+namespace API.DTOs.CollectionTags
 {
     public class UpdateSeriesForTagDto
     {
         public CollectionTagDto Tag { get; init; }
-        public ICollection<int> SeriesIdsToRemove { get; init; }
+        public IEnumerable<int> SeriesIdsToRemove { get; init; }
     }
 }
