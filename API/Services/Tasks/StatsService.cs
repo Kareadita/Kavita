@@ -1,67 +1,73 @@
-using System;
-using System.IO;
+﻿using System;
+using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs.Stats;
 using API.Interfaces;
 using API.Interfaces.Services;
-using API.Services.Clients;
+using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
 {
     public class StatsService : IStatsService
     {
-        private readonly StatsApiClient _client;
-        private readonly DataContext _dbContext;
         private readonly ILogger<StatsService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger,
+#pragma warning disable S1075
+        private const string ApiUrl = "http://stats.kavitareader.com";
+#pragma warning restore S1075
+
+        public StatsService(ILogger<StatsService> logger,
             IUnitOfWork unitOfWork)
         {
-            _client = client;
-            _dbContext = dbContext;
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
-        #region Communcation Methods
+
         private async Task CollectAndSendRelevantData()
         {
-            _logger.LogDebug("Collecting server info");
-
-            var data = await GetData();
+            var data = GetServerInfo();
 
             _logger.LogDebug("Sending data to the Stats server");
 
-            await _client.SendDataToStatsServer(data);
+
+            await SendDataToStatsServer(data);
         }
 
-        #endregion
-
-
-        #region Data Collection
-
-        public async Task CollectAndSendStatsData()
+        private async Task SendDataToStatsServer(ServerInfoDto data)
         {
-            var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
-            if (!allowStatCollection)
+            try
             {
-                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
-                return;
+                var response = await (ApiUrl + "/api/Stats")
+                    .WithHeader("Accept", "application/json")
+                    .WithHeader("User-Agent", "Kavita")
+                    .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                    .PostJsonAsync(data);
+                if (response.StatusCode != StatusCodes.Status200OK)
+                {
+                    _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
+                }
             }
-            await CollectAndSendRelevantData();
-            
+            catch (HttpRequestException e)
+            {
+                _logger.LogError(e, "KavitaStats did not respond successfully");
+                throw;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An error happened during the request to KavitaStats");
+                throw;
+            }
         }
 
-        private async ValueTask<InstallationStatDto> GetData()
+        public static ServerInfoDto GetServerInfo()
         {
-
-            return new InstallationStatDto
+            return new ServerInfoDto
             {
                 Os = RuntimeInformation.OSDescription,
                 DotnetVersion = Environment.Version.ToString(),
@@ -69,25 +75,21 @@ namespace API.Services.Tasks
                 InstallId = HashUtil.AnonymousToken(),
                 IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
             };
-
-
         }
 
 
-        public static ServerInfoDto GetServerInfo()
+        /// <summary>
+        /// If Data Collection is enabled, will Send information about this install to KavitaStats
+        /// </summary>
+        public async Task Send()
         {
-            var serverInfo = new ServerInfoDto
+            var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
+            if (!allowStatCollection)
             {
-                Os = RuntimeInformation.OSDescription,
-                dotnetVersion = Environment.Version.ToString(),
-                kavitaVersion = BuildInfo.Version.ToString(),
-                installId = HashUtil.AnonymousToken(),
-                isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
+                return;
+            }
+            await CollectAndSendRelevantData();
 
-            };
-
-            return serverInfo;
         }
-        #endregion
     }
 }

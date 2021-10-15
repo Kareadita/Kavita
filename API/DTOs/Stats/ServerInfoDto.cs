@@ -2,10 +2,10 @@ namespace API.DTOs.Stats
 {
     public class ServerInfoDto
     {
-        public string installId { get; set; }
+        public string InstallId { get; set; }
         public string Os { get; set; }
-        public bool isDocker { get; set; }
-        public string dotnetVersion { get; set; }
-        public string kavitaVersion { get; set; }
+        public bool IsDocker { get; set; }
+        public string DotnetVersion { get; set; }
+        public string KavitaVersion { get; set; }
     }
 }
