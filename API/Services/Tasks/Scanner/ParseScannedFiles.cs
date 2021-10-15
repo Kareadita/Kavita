@@ -74,7 +74,7 @@ namespace API.Services.Tasks.Scanner
             }
 
             // If we couldn't match, log. But don't log if the file parses as a cover image
-            if (info == null && !(Parser.Parser.IsImage(path) || Parser.Parser.IsCoverImage(path)))
+            if (info == null || !(Parser.Parser.IsImage(path) || Parser.Parser.IsCoverImage(path)))
             {
                 _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
                 return;
