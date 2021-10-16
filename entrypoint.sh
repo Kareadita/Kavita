@@ -60,6 +60,20 @@ else
 	ln -s /kavita/data/logs /kavita/logs
 fi
 
+if [ -d /kavita/data/backups ]
+then
+	if [ -d /kavita/backups ]
+	then
+		unlink /kavita/backups
+		ln -s /kavita/data/backups /kavita/backups
+	else
+		ln -s /kavita/data/backups /kavita/backups
+	fi
+else
+	mkdir /kavita/data/backups
+	ln -s /kavita/data/backups /kavita/backups
+fi
+
 if [ -d /kavita/data/stats ]
 then
 	if [ -d /kavita/stats ]
