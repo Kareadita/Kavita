@@ -455,15 +455,15 @@ namespace API.Data.Repositories
             // TODO: Think about making this bigger depending on number of files a user has in said library
             // and number of cores and amount of memory. We can then make an optimal choice
             var totalSeries = await GetSeriesCount(libraryId);
-            var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
-
-            if (totalSeries < procCount * 2 || totalSeries < 50)
-            {
-                return new Tuple<int, int>(totalSeries, totalSeries);
-            }
-
-
-            return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
+            // var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+            //
+            // if (totalSeries < procCount * 2 || totalSeries < 50)
+            // {
+            //     return new Tuple<int, int>(totalSeries, totalSeries);
+            // }
+            //
+            // return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
+            return new Tuple<int, int>(totalSeries, 50);
         }
 
         public async Task<Chunk> GetChunkInfo(int libraryId = 0)

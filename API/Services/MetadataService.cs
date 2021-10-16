@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -217,9 +218,10 @@ namespace API.Services
             var stopwatch = Stopwatch.StartNew();
             var totalTime = 0L;
             _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
-            // This technically does
+
             for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
             {
+                if (chunkInfo.TotalChunks == 0) continue;
                 totalTime += stopwatch.ElapsedMilliseconds;
                 stopwatch.Restart();
                 _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
@@ -230,23 +232,30 @@ namespace API.Services
                         PageNumber = chunk,
                         PageSize = chunkInfo.ChunkSize
                     });
-                _logger.LogDebug($"[MetadataService] Fetched {nonLibrarySeries.Count} series for refresh");
+                _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
                 Parallel.ForEach(nonLibrarySeries, series =>
                 {
-                    _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
-                    var volumeUpdated = false;
-                    foreach (var volume in series.Volumes)
+                    try
                     {
-                        var chapterUpdated = false;
-                        foreach (var chapter in volume.Chapters)
+                        _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
+                        var volumeUpdated = false;
+                        foreach (var volume in series.Volumes)
                         {
-                            chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                            var chapterUpdated = false;
+                            foreach (var chapter in volume.Chapters)
+                            {
+                                chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                            }
+
+                            volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
                         }
 
-                        volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
+                        UpdateMetadata(series, volumeUpdated || forceUpdate);
                     }
-
-                    UpdateMetadata(series, volumeUpdated || forceUpdate);
+                    catch (Exception)
+                    {
+                        /* Swallow exception */
+                    }
                 });
 
                 if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
