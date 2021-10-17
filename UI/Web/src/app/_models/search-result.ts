@@ -6,7 +6,7 @@ export interface SearchResult {
     libraryName: string;
     name: string;
     originalName: string;
+    localizedName: string;
     sortName: string;
-    coverImage: string; // byte64 encoded (not used)
     format: MangaFormat;
 }
