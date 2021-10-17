@@ -1057,45 +1057,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 
-  saveSettings() {
-    // NOTE: This is not called anywhere
-    if (this.user === undefined) return;
-
-    const data: Preferences = {
-      readingDirection: this.readingDirection, 
-      scalingOption: this.scalingOption, 
-      pageSplitOption: this.pageSplitOption,
-      autoCloseMenu: this.autoCloseMenu,
-      readerMode: this.readerMode,
-
-      bookReaderDarkMode: this.user.preferences.bookReaderDarkMode,
-      bookReaderFontFamily: this.user.preferences.bookReaderFontFamily,
-      bookReaderFontSize: this.user.preferences.bookReaderFontSize,
-      bookReaderLineSpacing: this.user.preferences.bookReaderLineSpacing,
-      bookReaderMargin: this.user.preferences.bookReaderMargin,
-      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate,
-      bookReaderReadingDirection: this.readingDirection,
-
-      siteDarkMode: this.user.preferences.siteDarkMode,
-    };
-    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
-      this.toastr.success('User settings updated');
-      if (this.user) {
-        this.user.preferences = updatedPrefs;
-      }
-      this.resetSettings();
-    });
-
-  }
-
-  resetSettings() {
-    this.generalSettingsForm.get('fittingOption')?.value.get('fittingOption')?.setValue(this.translateScalingOption(this.user.preferences.scalingOption));
-    this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption + '');
-    this.generalSettingsForm.get('autoCloseMenu')?.setValue(this.autoCloseMenu);
-
-    this.updateForm();
-  }
-
   /**
    * Bookmarks the current page for the chapter
    */
