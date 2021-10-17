@@ -533,14 +533,16 @@ namespace API.Parser
                 ret.Edition = edition;
             }
 
-            var isSpecial = ParseMangaSpecial(fileName);
+            var isSpecial = type == LibraryType.Comic ? ParseComicSpecial(fileName) : ParseMangaSpecial(fileName);
             // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
             // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
             if (ret.Chapters == DefaultChapter && ret.Volumes == DefaultVolume && !string.IsNullOrEmpty(isSpecial))
             {
                 ret.IsSpecial = true;
+                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
             }
 
+            // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
             if (HasSpecialMarker(fileName))
             {
                 ret.IsSpecial = true;
@@ -549,8 +551,6 @@ namespace API.Parser
 
                 ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
             }
-            // here is the issue. If we are a special with marker, we need to ensure we use the correct series name.
-            // we can do this by falling back
 
             if (string.IsNullOrEmpty(ret.Series))
             {
