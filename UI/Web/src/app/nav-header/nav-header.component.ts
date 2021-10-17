@@ -3,6 +3,7 @@ import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { isTemplateSpan } from 'typescript';
 import { ScrollService } from '../scroll.service';
 import { SearchResult } from '../_models/search-result';
 import { AccountService } from '../_services/account.service';
@@ -24,6 +25,16 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResult[] = [];
   searchTerm = '';
+  customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
+    const normalizedQuery = query.trim().toLowerCase();
+    const matches = items.filter(item => {
+      const normalizedSeriesName = item.name.toLowerCase().trim();
+      const normalizedOriginalName = item.originalName.toLowerCase().trim();
+      const normalizedLocalizedName = item.localizedName.toLowerCase().trim();
+      return normalizedSeriesName.indexOf(normalizedQuery) >= 0 || normalizedOriginalName.indexOf(normalizedQuery) >= 0 || normalizedLocalizedName.indexOf(normalizedQuery) >= 0;
+    });
+    return matches;
+  };
 
 
   backToTopNeeded = false;
