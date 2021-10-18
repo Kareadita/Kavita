@@ -27,14 +27,5 @@ namespace API.Tests.Parser
             var actual = API.Parser.Parser.FontSrcUrlRegex.Replace(input, "$1" + apiBase + "$2" + "$3");
             Assert.Equal(expected, actual);
         }
-
-        [Theory]
-        [InlineData("@import url('font.css');", "@import url('TEST/font.css');")]
-        public void ReplaceImportSrcUrl(string input, string expected)
-        {
-            var apiBase = "TEST/";
-            var actual = API.Parser.Parser.CssImportUrlRegex.Replace(input, "$1" + apiBase + "$2" + "$3");
-            Assert.Equal(expected, actual);
-        }
     }
 }

@@ -170,7 +170,7 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
-        private void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
+        private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
         {
             var matches = Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
             foreach (Match match in matches)
