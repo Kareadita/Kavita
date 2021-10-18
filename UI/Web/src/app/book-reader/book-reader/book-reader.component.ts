@@ -160,7 +160,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readerStyles: string = '';
   darkModeStyleElem!: HTMLElement;
   topOffset: number = 0; // Offset for drawer and rendering canvas
-  scrollbarNeeded = false; // Used for showing/hiding bottom action bar
+  /**
+   * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
+   * Will hide if all content in book is absolute positioned
+   */
+  scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
 
   private readonly onDestroy = new Subject<void>();
@@ -714,6 +718,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
     this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+
+    const itemsOnScreen = Array.from(this.readingHtml.nativeElement.querySelectorAll('*')).filter(elem => (elem as HTMLElement).nodeName != 'STYLE');
+    const itemsWithAbsolutePositioning = itemsOnScreen.filter(elem => (elem as HTMLElement).style.getPropertyValue('position') === 'absolute').length;
+
+    if (itemsWithAbsolutePositioning >= itemsOnScreen.length) {
+      // Supress bottom actionbar. This is because of how the html is structured, with abs positioning, it will render inside images, etc. 
+      this.scrollbarNeeded = false;
+    }
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
