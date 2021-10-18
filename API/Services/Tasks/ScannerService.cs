@@ -301,7 +301,21 @@ namespace API.Services.Tasks
                   UpdateSeries(series, parsedSeries);
               });
 
-              await _unitOfWork.CommitAsync();
+              try
+              {
+                  await _unitOfWork.CommitAsync();
+              }
+              catch (Exception ex)
+              {
+                  _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB. If debug mode, series to check will be printed", chunk);
+                  foreach (var series in nonLibrarySeries)
+                  {
+                      _logger.LogDebug("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
+                  }
+                  await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryError,
+                      MessageFactory.ScanLibraryError(library.Id));
+                  continue;
+              }
               _logger.LogInformation(
                   "[ScannerService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                   chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, totalTime, library.Name);
