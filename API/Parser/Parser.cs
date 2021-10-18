@@ -24,10 +24,24 @@ namespace API.Parser
         private const RegexOptions MatchOptions =
             RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
 
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))",
+        /// <summary>
+        /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
+        /// </summary>
+        /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(src:\s?)?url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(?<End>.{1}\))",
             MatchOptions, RegexTimeout);
-        public static readonly Regex CssImportUrlRegex = new Regex("@import\\s([\"|']|url\\([\"|'])(?<Filename>[^'\"]+)[\"|']\\)?;",
+        /// <summary>
+        /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
+        /// </summary>
+        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);",
+            MatchOptions | RegexOptions.Multiline, RegexTimeout);
+        /// <summary>
+        /// Misc css image references, like background-image: url(), border-image, or list-style-image
+        /// </summary>
+        /// Original prepend: (background|border|list-style)-image:\s?)?
+        public static readonly Regex CssImageUrlRegex = new Regex(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
             MatchOptions, RegexTimeout);
+
 
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
