@@ -96,5 +96,17 @@ namespace API.SignalR
                 }
             };
         }
+
+        public static SignalRMessage ScanLibraryError(int libraryId)
+        {
+            return new SignalRMessage
+            {
+                Name = SignalREvents.ScanLibraryError,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                }
+            };
+        }
     }
 }

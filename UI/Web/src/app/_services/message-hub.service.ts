@@ -18,7 +18,8 @@ export enum EVENTS {
   SeriesAdded = 'SeriesAdded',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
-  SeriesAddedToCollection = 'SeriesAddedToCollection'
+  SeriesAddedToCollection = 'SeriesAddedToCollection',
+  ScanLibraryError = 'ScanLibraryError'
 }
 
 export interface Message<T> {
@@ -91,6 +92,16 @@ export class MessageHubService {
         event: EVENTS.SeriesAddedToCollection,
         payload: resp.body
       });
+    });
+
+    this.hubConnection.on(EVENTS.ScanLibraryError, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanLibraryError,
+        payload: resp.body
+      });
+      if (this.isAdmin) {
+        this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
+      }
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {
