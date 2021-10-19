@@ -63,6 +63,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   
   /**
    * Stores and emits all the src urls
@@ -165,6 +166,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         }
 
         this.setPageNum(page, true);
+      });
+    }
+
+    if (this.bookmarkPage) {
+      this.bookmarkPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+        const image = document.querySelector('img[id^="page-' + page + '"]');
+        if (image) {
+          this.renderer.addClass(image, 'bookmark-effect');
+          setTimeout(() => {
+            this.renderer.removeClass(image, 'bookmark-effect');
+          }, 1000);
+        }
       });
     }
   }

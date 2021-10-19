@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
@@ -124,7 +124,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * An event emiter when a page change occurs. Used soley by the webtoon reader.
    */
    goToPageEvent: ReplaySubject<number> = new ReplaySubject<number>();
-
+   /**
+   * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
+   */
+   showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
   /**
    * If the menu is open/visible.
    */
@@ -267,7 +270,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService, 
               private toastr: ToastrService, private memberService: MemberService,
-              private libraryService: LibraryService, private utilityService: UtilityService) {
+              private libraryService: LibraryService, private utilityService: UtilityService, 
+              private renderer: Renderer2) {
                 this.navService.hideNavBar();
   }
 
@@ -354,6 +358,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.goToPageEvent.complete();
+    this.showBookmarkEffectEvent.complete();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -1061,7 +1066,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Bookmarks the current page for the chapter
    */
   bookmarkPage() {
-    // TODO: Show some sort of UI visual to show that a page was bookmarked
     const pageNum = this.pageNum;
     if (this.pageBookmarked) {
       this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
@@ -1072,7 +1076,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.bookmarks[pageNum] = 1;
       });
     }
-    
+
+    // Show an effect on the image to show that it was bookmarked
+    this.showBookmarkEffectEvent.next(pageNum);
+    if (this.readerMode != READER_MODE.WEBTOON) {
+      if (this.canvas) {
+        this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
+        setTimeout(() => {
+          this.renderer.removeClass(this.canvas?.nativeElement, 'bookmark-effect');
+        }, 1000);
+      }
+    }
   }
 
   /**

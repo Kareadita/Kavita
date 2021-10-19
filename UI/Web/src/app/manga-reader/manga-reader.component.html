@@ -24,11 +24,19 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}}" 
+        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} " 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
-            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages - 1" [urlProvider]="getPageUrl" (loadNextChapter)="loadNextChapter()" (loadPrevChapter)="loadPrevChapter()"></app-infinite-scroller>
+            <app-infinite-scroller [pageNum]="pageNum" 
+            [bufferPages]="5" 
+            [goToPage]="goToPageEvent" 
+            (pageNumberChange)="handleWebtoonPageChange($event)" 
+            [totalPages]="maxPages - 1" 
+            [urlProvider]="getPageUrl" 
+            (loadNextChapter)="loadNextChapter()" 
+            (loadPrevChapter)="loadPrevChapter()"
+            [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
