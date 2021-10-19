@@ -154,6 +154,8 @@ namespace API.Services
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
             styleContent = styleContent.Replace("body", ".reading-section");
 
+            if (string.IsNullOrEmpty(styleContent)) return string.Empty;
+
             var stylesheet = await _cssParser.ParseAsync(styleContent);
             foreach (var styleRule in stylesheet.StyleRules)
             {
@@ -508,15 +510,29 @@ namespace API.Services
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)
         {
+            if (string.IsNullOrEmpty(body))
+            {
+                return string.Empty;
+            }
+
+            // Remove comments from CSS
+            body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
+
             body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
             body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty);
             body = Regex.Replace(body, @"\s+", " ");
             body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1");
-            body = body.Replace(";}", "}");
+            try
+            {
+                body = body.Replace(";}", "}");
+            }
+            catch (Exception)
+            {
+                /* Swallow exception. Some css doesn't have style rules ending in ; */
+            }
+
             body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");
 
-            // Remove comments from CSS
-            body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
 
             return body;
         }
