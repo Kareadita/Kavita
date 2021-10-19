@@ -9,6 +9,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -33,15 +34,32 @@ namespace API.Services.Tasks
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
             var files = LogFiles(maxRollingFiles, loggingSection);
-            _backupFiles = new List<string>()
+
+            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
             {
-                "appsettings.json",
-                "Hangfire.db",
-                "Hangfire-log.db",
-                "kavita.db",
-                "kavita.db-shm", // This wont always be there
-                "kavita.db-wal", // This wont always be there
-            };
+                _backupFiles = new List<string>()
+                {
+                    "data/appsettings.json",
+                    "data/Hangfire.db",
+                    "data/Hangfire-log.db",
+                    "data/kavita.db",
+                    "data/kavita.db-shm", // This wont always be there
+                    "data/kavita.db-wal" // This wont always be there
+                };
+            }
+            else
+            {
+                _backupFiles = new List<string>()
+                {
+                    "appsettings.json",
+                    "Hangfire.db",
+                    "Hangfire-log.db",
+                    "kavita.db",
+                    "kavita.db-shm", // This wont always be there
+                    "kavita.db-wal" // This wont always be there
+                };
+            }
+
             foreach (var file in files.Select(f => (new FileInfo(f)).Name).ToList())
             {
                 _backupFiles.Add(file);
@@ -128,6 +146,11 @@ namespace API.Services.Tasks
             catch (IOException)
             {
                 // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
+            }
+
+            if (!_directoryService.GetFiles(outputTempDir).Any())
+            {
+                DirectoryService.ClearAndDeleteDirectory(outputTempDir);
             }
         }
 
