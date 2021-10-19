@@ -71,10 +71,10 @@ namespace API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("backup-db")]
-        public ActionResult BackupDatabase()
+        public async Task<ActionResult> BackupDatabase()
         {
             _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-            _backupService.BackupDatabase();
+            await _backupService.BackupDatabase();
 
             return Ok();
         }
