@@ -155,6 +155,11 @@ $primary-color: #0062cc;
 
 .reading-section {
     height: 100vh;
+    width: 100%;
+}
+
+.book-content {
+    position: relative;
 }
 
 .drawer-body {

@@ -41,12 +41,13 @@ namespace Kavita.Common.EnvironmentInfo
                         break;
                     }
             }
+
         }
 
         public OsInfo(IEnumerable<IOsVersionAdapter> versionAdapters)
         {
             OsVersionModel osInfo = null;
-        
+
             foreach (var osVersionAdapter in versionAdapters.Where(c => c.Enabled))
             {
                 try
@@ -57,13 +58,13 @@ namespace Kavita.Common.EnvironmentInfo
                 {
                     Console.WriteLine("Couldn't get OS Version info: " + e.Message);
                 }
-        
+
                 if (osInfo != null)
                 {
                     break;
                 }
             }
-        
+
             if (osInfo != null)
             {
                 Name = osInfo.Name;
@@ -75,7 +76,7 @@ namespace Kavita.Common.EnvironmentInfo
                 Name = Os.ToString();
                 FullName = Name;
             }
-        
+
             if (IsLinux && File.Exists("/proc/1/cgroup") && File.ReadAllText("/proc/1/cgroup").Contains("/docker/"))
             {
                 IsDocker = true;

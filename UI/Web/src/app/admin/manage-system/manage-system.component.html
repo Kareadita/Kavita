@@ -2,7 +2,7 @@
 
     <div class="float-right">
         <div class="d-inline-block" ngbDropdown #myDrop="ngbDropdown">
-            <button class="btn btn-outline-primary mr-2" id="dropdownManual" ngbDropdownAnchor (focus)="myDrop.open()">
+            <button class="btn btn-outline-primary mr-2" id="dropdownManual" ngbDropdownToggle>
                 <ng-container *ngIf="backupDBInProgress || clearCacheInProgress || isCheckingForUpdate || downloadLogsInProgress">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span class="sr-only">Loading...</span>

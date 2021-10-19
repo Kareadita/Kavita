@@ -259,7 +259,10 @@ namespace API.Controllers
                             }
 
                             var styleContent = await _bookService.ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase, book.Content.Css[key].FileName, book);
-                            body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                            if (styleContent != null)
+                            {
+                                body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                            }
                         }
                     }
 
