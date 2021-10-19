@@ -717,15 +717,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
-
-    const itemsOnScreen = Array.from(this.readingHtml.nativeElement.querySelectorAll('*')).filter(elem => (elem as HTMLElement).nodeName != 'STYLE');
-    const itemsWithAbsolutePositioning = itemsOnScreen.filter(elem => (elem as HTMLElement).style.getPropertyValue('position') === 'absolute').length;
-
-    if (itemsWithAbsolutePositioning >= itemsOnScreen.length) {
-      // Supress bottom actionbar. This is because of how the html is structured, with abs positioning, it will render inside images, etc. 
-      this.scrollbarNeeded = false;
-    }
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
