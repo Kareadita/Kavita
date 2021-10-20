@@ -44,9 +44,9 @@ namespace API.Services
         return null;
       }
 
-      var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
+      var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
         .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
-      
+
       return firstImage;
     }
 

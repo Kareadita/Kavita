@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
@@ -10,89 +12,171 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API
 {
-   public class Program
-   {
-      private static readonly int HttpPort = Configuration.Port;
+    public class Program
+    {
+        private static readonly int HttpPort = Configuration.Port;
 
-      protected Program()
-      {
-      }
+        protected Program()
+        {
+        }
 
-      public static async Task Main(string[] args)
-      {
-         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        public static async Task Main(string[] args)
+        {
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-         // Before anything, check if JWT has been generated properly or if user still has default
-         if (!Configuration.CheckIfJwtTokenSet() &&
-             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
-         {
-            Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
-            var rBytes = new byte[128];
-            using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
-            Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
-         }
+            MigrateConfigFiles();
 
-         var host = CreateHostBuilder(args).Build();
+            // Before anything, check if JWT has been generated properly or if user still has default
+            if (!Configuration.CheckIfJwtTokenSet() &&
+                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
+            {
+                Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
+                var rBytes = new byte[128];
+                using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
+                Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
+            }
 
-         using var scope = host.Services.CreateScope();
-         var services = scope.ServiceProvider;
+            var host = CreateHostBuilder(args).Build();
 
-         try
-         {
-            var context = services.GetRequiredService<DataContext>();
-            var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
 
-            var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
             try
             {
-                // If this is a new install, tables wont exist yet
+                var context = services.GetRequiredService<DataContext>();
+                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+
+                var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
+                try
+                {
+                    // If this is a new install, tables wont exist yet
+                    if (requiresCoverImageMigration)
+                    {
+                        MigrateCoverImages.ExtractToImages(context);
+                    }
+                }
+                catch (Exception)
+                {
+                    requiresCoverImageMigration = false;
+                }
+
+                // Apply all migrations on startup
+                await context.Database.MigrateAsync();
+
                 if (requiresCoverImageMigration)
                 {
-                    MigrateCoverImages.ExtractToImages(context);
+                    await MigrateCoverImages.UpdateDatabaseWithImages(context);
+                }
+
+                await Seed.SeedRoles(roleManager);
+                await Seed.SeedSettings(context);
+                await Seed.SeedUserApiKeys(context);
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred during migration");
+            }
+
+            await host.RunAsync();
+        }
+
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.Sources.Clear();
+
+                    var env = hostingContext.HostingEnvironment;
+
+                    config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
+                        .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
+                            optional: true, reloadOnChange: false);
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseKestrel((opts) =>
+                    {
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                    });
+
+                    webBuilder.UseStartup<Startup>();
+                });
+
+        /// <summary>
+        /// In v0.4.8 we moved all config files to config/ to match with how docker was setup. This will move all config files from current directory
+        /// to config/
+        /// </summary>
+        private static void MigrateConfigFiles()
+        {
+            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists) return;
+
+            Console.WriteLine(
+                "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
+
+            var configDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
+            DirectoryService.ExistOrCreate(configDirectory);
+            var configFiles = new List<string>()
+            {
+                "appsettings.json",
+                "appsettings.Development.json",
+                "kavita.db",
+            }.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
+                .Where(f => f.Exists)
+                .ToList();
+            // First step is to move all the files
+            foreach (var fileInfo in configFiles)
+            {
+                try
+                {
+                    fileInfo.CopyTo(Path.Join(configDirectory, fileInfo.Name));
+                }
+                catch (Exception)
+                {
+                    /* Swallow exception when already exists */
                 }
             }
-            catch (Exception )
+
+            var foldersToMove = new List<string>()
             {
-                requiresCoverImageMigration = false;
+                "covers",
+                "stats",
+                "logs",
+                "backups",
+                "cache",
+                "temp"
+            };
+            foreach (var folderToMove in foldersToMove)
+            {
+                if (new DirectoryInfo(Path.Join(configDirectory, folderToMove)).Exists) continue;
+
+                DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
+                    Path.Join(configDirectory, folderToMove));
             }
 
-            // Apply all migrations on startup
-            await context.Database.MigrateAsync();
+            // Then we need to update the config file to point to the new DB file
+            Configuration.DatabasePath = "config//kavita.db";
 
-            if (requiresCoverImageMigration)
+            // Finally delete everything in the source directory
+            DirectoryService.DeleteFiles(configFiles.Select(f => f.FullName));
+            foreach (var folderToDelete in foldersToMove)
             {
-                await MigrateCoverImages.UpdateDatabaseWithImages(context);
+                if (!new DirectoryInfo(Path.Join(Directory.GetCurrentDirectory(), folderToDelete)).Exists) continue;
+
+                DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToDelete));
             }
 
-            await Seed.SeedRoles(roleManager);
-            await Seed.SeedSettings(context);
-            await Seed.SeedUserApiKeys(context);
-         }
-         catch (Exception ex)
-         {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "An error occurred during migration");
-         }
+            Console.WriteLine("Migration complete. All config files are now in config/ directory");
 
-         await host.RunAsync();
-      }
+        }
 
-      private static IHostBuilder CreateHostBuilder(string[] args) =>
-         Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-               webBuilder.UseKestrel((opts) =>
-               {
-                  opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
-               });
 
-               webBuilder.UseStartup<Startup>();
-            });
-   }
+    }
 }
