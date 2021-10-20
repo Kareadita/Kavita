@@ -72,6 +72,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
         });
         break;
+      case Action.Delete:
+        this.actionService.deleteMultipleSeries(selectedSeries, () => {
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
     }
   }
 
