@@ -10,6 +10,7 @@ using API.DTOs.Stats;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services.Clients;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
@@ -58,23 +59,29 @@ namespace API.Services.Tasks
         {
             try
             {
-                _logger.LogDebug("Finalizing Stats collection flow");
-
                 var data = await GetExistingData<UsageStatisticsDto>();
+                var successful = await _client.SendDataToStatsServer(data);
 
-                _logger.LogDebug("Sending data to the Stats server");
-                await _client.SendDataToStatsServer(data);
-
-                _logger.LogDebug("Deleting the file from disk");
-                if (FileExists) File.Delete(StatsFilePath);
+                if (successful)
+                {
+                    ResetStats();
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error Finalizing Stats collection flow");
-                throw;
+                _logger.LogError(ex, "There was an exception while sending data to KavitaStats");
             }
         }
 
+        private static void ResetStats()
+        {
+            if (FileExists) File.Delete(StatsFilePath);
+        }
+
+        /// <summary>
+        /// Due to all instances firing this at the same time, we can DDOS our server. This task when fired will schedule the task to be run
+        /// randomly over a 6 hour spread
+        /// </summary>
         public async Task Send()
         {
             var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
@@ -83,6 +90,27 @@ namespace API.Services.Tasks
                 _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
+
+            var rnd = new Random();
+            var offset = rnd.Next(0, 6);
+            if (offset == 0)
+            {
+                await SendData();
+            }
+            else
+            {
+                _logger.LogInformation("KavitaStats upload has been schedule to run in {Offset} hours", offset);
+                BackgroundJob.Schedule(() => SendData(), DateTimeOffset.Now.AddHours(offset));
+            }
+        }
+
+        /// <summary>
+        /// This must be public for Hangfire. Do not call this directly.
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        public async Task SendData()
+        {
+            _logger.LogDebug("Sending data to the Stats server");
             await CollectRelevantData();
             await FinalizeStats();
         }

@@ -3,36 +3,46 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using API.DTOs.Stats;
+using Flurl.Http;
+using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Clients
 {
     public class StatsApiClient
     {
-        private readonly HttpClient _client;
         private readonly ILogger<StatsApiClient> _logger;
 #pragma warning disable S1075
         private const string ApiUrl = "http://stats.kavitareader.com";
 #pragma warning restore S1075
 
-        public StatsApiClient(HttpClient client, ILogger<StatsApiClient> logger)
+        public StatsApiClient(ILogger<StatsApiClient> logger)
         {
-            _client = client;
             _logger = logger;
-            _client.Timeout = TimeSpan.FromSeconds(30);
         }
 
-        public async Task SendDataToStatsServer(UsageStatisticsDto data)
+        public async Task<bool> SendDataToStatsServer(UsageStatisticsDto data)
         {
             var responseContent = string.Empty;
 
             try
             {
-                using var response = await _client.PostAsJsonAsync(ApiUrl + "/api/InstallationStats", data);
+                var response = await (ApiUrl + "/api/Stats")
+                    .WithHeader("Accept", "application/json")
+                    .WithHeader("User-Agent", "Kavita")
+                    .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                    .WithHeader("x-kavita-version", BuildInfo.Version)
+                    .WithTimeout(TimeSpan.FromSeconds(30))
+                    .PostJsonAsync(data);
 
-                responseContent = await response.Content.ReadAsStringAsync();
+                if (response.StatusCode != StatusCodes.Status200OK)
+                {
+                    _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
+                    return false;
+                }
 
-                response.EnsureSuccessStatusCode();
+                return true;
             }
             catch (HttpRequestException e)
             {
@@ -50,6 +60,8 @@ namespace API.Services.Clients
                 _logger.LogError(e, "An error happened during the request to KavitaStats");
                 throw;
             }
+
+            return false;
         }
     }
 }
