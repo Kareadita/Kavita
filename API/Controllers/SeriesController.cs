@@ -78,8 +78,9 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> DeleteSeries(int seriesId)
         {
             var username = User.GetUsername();
-            var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
+
+            var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
             if (result)
@@ -90,6 +91,34 @@ namespace API.Controllers
                 _taskScheduler.CleanupChapters(chapterIds);
             }
             return Ok(result);
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("delete-multiple")]
+        public async Task<ActionResult> DeleteMultipleSeries(DeleteSeriesDto dto)
+        {
+            var username = User.GetUsername();
+            _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
+
+            var chapterMappings =
+                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(dto.SeriesIds.ToArray());
+
+            var allChapterIds = new List<int>();
+            foreach (var mapping in chapterMappings)
+            {
+                allChapterIds.AddRange(mapping.Value);
+            }
+
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds);
+            _unitOfWork.SeriesRepository.Remove(series);
+
+            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+            {
+                await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+                _taskScheduler.CleanupChapters(allChapterIds.ToArray());
+            }
+            return Ok();
         }
 
         /// <summary>
