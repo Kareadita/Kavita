@@ -170,7 +170,7 @@ namespace API.Services.Tasks
             await SaveFile(data);
         }
 
-        private async ValueTask<UsageStatisticsDto> GetData()
+        private static async ValueTask<UsageStatisticsDto> GetData()
         {
             if (!FileExists) return new UsageStatisticsDto {InstallId = HashUtil.AnonymousToken()};
 
