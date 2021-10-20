@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
@@ -9,10 +10,11 @@ using API.Data;
 using API.DTOs.Stats;
 using API.Interfaces;
 using API.Interfaces.Services;
-using API.Services.Clients;
+using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -22,60 +24,23 @@ namespace API.Services.Tasks
     {
         private const string StatFileName = "app_stats.json";
 
-        private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
         private readonly ILogger<StatsService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger,
+#pragma warning disable S1075
+        private const string ApiUrl = "http://stats.kavitareader.com";
+#pragma warning restore S1075
+        private static readonly string StatsFilePath = Path.Combine(DirectoryService.StatsDirectory, StatFileName);
+
+        private static bool FileExists => File.Exists(StatsFilePath);
+
+        public StatsService(DataContext dbContext, ILogger<StatsService> logger,
             IUnitOfWork unitOfWork)
         {
-            _client = client;
             _dbContext = dbContext;
             _logger = logger;
             _unitOfWork = unitOfWork;
-        }
-
-        private static readonly string StatsFilePath = Path.Combine(DirectoryService.StatsDirectory, StatFileName);
-        private static bool FileExists => File.Exists(StatsFilePath);
-
-        public async Task RecordClientInfo(ClientInfoDto clientInfoDto)
-        {
-            var statisticsDto = await GetData();
-            statisticsDto.AddClientInfo(clientInfoDto);
-
-            await SaveFile(statisticsDto);
-        }
-
-        private async Task CollectRelevantData()
-        {
-            var usageInfo = await GetUsageInfo();
-            var serverInfo = GetServerInfo();
-
-            await PathData(serverInfo, usageInfo);
-        }
-
-        private async Task FinalizeStats()
-        {
-            try
-            {
-                var data = await GetExistingData<UsageStatisticsDto>();
-                var successful = await _client.SendDataToStatsServer(data);
-
-                if (successful)
-                {
-                    ResetStats();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception while sending data to KavitaStats");
-            }
-        }
-
-        private static void ResetStats()
-        {
-            if (FileExists) File.Delete(StatsFilePath);
         }
 
         /// <summary>
@@ -113,6 +78,85 @@ namespace API.Services.Tasks
             _logger.LogDebug("Sending data to the Stats server");
             await CollectRelevantData();
             await FinalizeStats();
+        }
+
+        public async Task RecordClientInfo(ClientInfoDto clientInfoDto)
+        {
+            var statisticsDto = await GetData();
+            statisticsDto.AddClientInfo(clientInfoDto);
+
+            await SaveFile(statisticsDto);
+        }
+
+        private async Task CollectRelevantData()
+        {
+            var usageInfo = await GetUsageInfo();
+            var serverInfo = GetServerInfo();
+
+            await PathData(serverInfo, usageInfo);
+        }
+
+        private async Task FinalizeStats()
+        {
+            try
+            {
+                var data = await GetExistingData<UsageStatisticsDto>();
+                var successful = await SendDataToStatsServer(data);
+
+                if (successful)
+                {
+                    ResetStats();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception while sending data to KavitaStats");
+            }
+        }
+
+        private async Task<bool> SendDataToStatsServer(UsageStatisticsDto data)
+        {
+            var responseContent = string.Empty;
+
+            try
+            {
+                var response = await (ApiUrl + "/api/Stats")
+                    .WithHeader("Accept", "application/json")
+                    .WithHeader("User-Agent", "Kavita")
+                    .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                    .WithHeader("x-kavita-version", BuildInfo.Version)
+                    .WithTimeout(TimeSpan.FromSeconds(30))
+                    .PostJsonAsync(data);
+
+                if (response.StatusCode != StatusCodes.Status200OK)
+                {
+                    _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
+                    return false;
+                }
+
+                return true;
+            }
+            catch (HttpRequestException e)
+            {
+                var info = new
+                {
+                    dataSent = data,
+                    response = responseContent
+                };
+
+                _logger.LogError(e, "KavitaStats did not respond successfully. {Content}", info);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An error happened during the request to KavitaStats");
+            }
+
+            return false;
+        }
+
+        private static void ResetStats()
+        {
+            if (FileExists) File.Delete(StatsFilePath);
         }
 
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)

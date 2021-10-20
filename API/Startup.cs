@@ -106,7 +106,6 @@ namespace API
 
             services.AddResponseCaching();
 
-            services.AddStatsClient(_config);
 
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
