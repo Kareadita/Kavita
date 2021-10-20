@@ -122,6 +122,7 @@ namespace API.Services.Tasks
                     .WithHeader("Accept", "application/json")
                     .WithHeader("User-Agent", "Kavita")
                     .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                    .WithHeader("api-key", "MsnvA2DfQqxSK5jh")
                     .WithHeader("x-kavita-version", BuildInfo.Version)
                     .WithTimeout(TimeSpan.FromSeconds(30))
                     .PostJsonAsync(data);
