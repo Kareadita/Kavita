@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
@@ -9,10 +10,11 @@ using API.Data;
 using API.DTOs.Stats;
 using API.Interfaces;
 using API.Interfaces.Services;
-using API.Services.Clients;
+using Flurl.Http;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -20,75 +22,36 @@ namespace API.Services.Tasks
 {
     public class StatsService : IStatsService
     {
-        private const string TempFilePath = "stats/";
-        private const string TempFileName = "app_stats.json";
+        private const string StatFileName = "app_stats.json";
 
-        private readonly StatsApiClient _client;
         private readonly DataContext _dbContext;
         private readonly ILogger<StatsService> _logger;
         private readonly IUnitOfWork _unitOfWork;
 
-        public StatsService(StatsApiClient client, DataContext dbContext, ILogger<StatsService> logger,
+#pragma warning disable S1075
+        private const string ApiUrl = "http://stats.kavitareader.com";
+#pragma warning restore S1075
+        private static readonly string StatsFilePath = Path.Combine(DirectoryService.StatsDirectory, StatFileName);
+
+        private static bool FileExists => File.Exists(StatsFilePath);
+
+        public StatsService(DataContext dbContext, ILogger<StatsService> logger,
             IUnitOfWork unitOfWork)
         {
-            _client = client;
             _dbContext = dbContext;
             _logger = logger;
             _unitOfWork = unitOfWork;
-        }
-
-        private static string FinalPath => Path.Combine(Directory.GetCurrentDirectory(), TempFilePath, TempFileName);
-        private static bool FileExists => File.Exists(FinalPath);
-
-        public async Task PathData(ClientInfoDto clientInfoDto)
-        {
-            _logger.LogDebug("Pathing client data to the file");
-
-            var statisticsDto = await GetData();
-
-            statisticsDto.AddClientInfo(clientInfoDto);
-
-            await SaveFile(statisticsDto);
-        }
-
-        private async Task CollectRelevantData()
-        {
-            _logger.LogDebug("Collecting data from the server and database");
-
-            _logger.LogDebug("Collecting usage info");
-            var usageInfo = await GetUsageInfo();
-
-            _logger.LogDebug("Collecting server info");
-            var serverInfo = GetServerInfo();
-
-            await PathData(serverInfo, usageInfo);
-        }
-
-        private async Task FinalizeStats()
-        {
-            try
-            {
-                var data = await GetExistingData<UsageStatisticsDto>();
-                await _client.SendDataToStatsServer(data);
-                if (FileExists) File.Delete(FinalPath);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error Finalizing Stats collection flow");
-                throw;
-            }
         }
 
         /// <summary>
         /// Due to all instances firing this at the same time, we can DDOS our server. This task when fired will schedule the task to be run
         /// randomly over a 6 hour spread
         /// </summary>
-        public async Task CollectAndSendStatsData()
+        public async Task Send()
         {
             var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
             if (!allowStatCollection)
             {
-                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
 
@@ -111,15 +74,92 @@ namespace API.Services.Tasks
         // ReSharper disable once MemberCanBePrivate.Global
         public async Task SendData()
         {
-            _logger.LogDebug("Sending data to the Stats server");
             await CollectRelevantData();
             await FinalizeStats();
         }
 
+        public async Task RecordClientInfo(ClientInfoDto clientInfoDto)
+        {
+            var statisticsDto = await GetData();
+            statisticsDto.AddClientInfo(clientInfoDto);
+
+            await SaveFile(statisticsDto);
+        }
+
+        private async Task CollectRelevantData()
+        {
+            var usageInfo = await GetUsageInfo();
+            var serverInfo = GetServerInfo();
+
+            await PathData(serverInfo, usageInfo);
+        }
+
+        private async Task FinalizeStats()
+        {
+            try
+            {
+                var data = await GetExistingData<UsageStatisticsDto>();
+                var successful = await SendDataToStatsServer(data);
+
+                if (successful)
+                {
+                    ResetStats();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception while sending data to KavitaStats");
+            }
+        }
+
+        private async Task<bool> SendDataToStatsServer(UsageStatisticsDto data)
+        {
+            var responseContent = string.Empty;
+
+            try
+            {
+                var response = await (ApiUrl + "/api/InstallationStats")
+                    .WithHeader("Accept", "application/json")
+                    .WithHeader("User-Agent", "Kavita")
+                    .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                    .WithHeader("api-key", "MsnvA2DfQqxSK5jh")
+                    .WithHeader("x-kavita-version", BuildInfo.Version)
+                    .WithTimeout(TimeSpan.FromSeconds(30))
+                    .PostJsonAsync(data);
+
+                if (response.StatusCode != StatusCodes.Status200OK)
+                {
+                    _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
+                    return false;
+                }
+
+                return true;
+            }
+            catch (HttpRequestException e)
+            {
+                var info = new
+                {
+                    dataSent = data,
+                    response = responseContent
+                };
+
+                _logger.LogError(e, "KavitaStats did not respond successfully. {Content}", info);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An error happened during the request to KavitaStats");
+            }
+
+            return false;
+        }
+
+        private static void ResetStats()
+        {
+            if (FileExists) File.Delete(StatsFilePath);
+        }
+
         private async Task PathData(ServerInfoDto serverInfoDto, UsageInfoDto usageInfoDto)
         {
-            _logger.LogDebug("Pathing server and usage info to the file");
-
             var data = await GetData();
 
             data.ServerInfo = serverInfoDto;
@@ -130,7 +170,7 @@ namespace API.Services.Tasks
             await SaveFile(data);
         }
 
-        private async ValueTask<UsageStatisticsDto> GetData()
+        private static async ValueTask<UsageStatisticsDto> GetData()
         {
             if (!FileExists) return new UsageStatisticsDto {InstallId = HashUtil.AnonymousToken()};
 
@@ -176,39 +216,17 @@ namespace API.Services.Tasks
             return serverInfo;
         }
 
-        private async Task<T> GetExistingData<T>()
+        private static async Task<T> GetExistingData<T>()
         {
-            _logger.LogInformation("Fetching existing data from file");
-            var existingDataJson = await GetFileDataAsString();
-
-            _logger.LogInformation("Deserializing data from file to object");
-            var existingData = JsonSerializer.Deserialize<T>(existingDataJson);
-
-            return existingData;
+            var json = await File.ReadAllTextAsync(StatsFilePath);
+            return JsonSerializer.Deserialize<T>(json);
         }
 
-        private async Task<string> GetFileDataAsString()
+        private static async Task SaveFile(UsageStatisticsDto statisticsDto)
         {
-            _logger.LogInformation("Reading file from disk");
-            return await File.ReadAllTextAsync(FinalPath);
-        }
+            DirectoryService.ExistOrCreate(DirectoryService.StatsDirectory);
 
-        private async Task SaveFile(UsageStatisticsDto statisticsDto)
-        {
-            _logger.LogDebug("Saving file");
-
-            var finalDirectory = FinalPath.Replace(TempFileName, string.Empty);
-            if (!Directory.Exists(finalDirectory))
-            {
-                _logger.LogDebug("Creating tmp directory");
-                Directory.CreateDirectory(finalDirectory);
-            }
-
-            _logger.LogDebug("Serializing data to write");
-            var dataJson = JsonSerializer.Serialize(statisticsDto);
-
-            _logger.LogDebug("Writing file to the disk");
-            await File.WriteAllTextAsync(FinalPath, dataJson);
+            await File.WriteAllTextAsync(StatsFilePath, JsonSerializer.Serialize(statisticsDto));
         }
     }
 }
