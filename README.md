@@ -56,7 +56,7 @@ Running your Kavita server in docker is super easy! Barely an inconvenience. You
 ```
 docker run --name kavita -p 5000:5000 \
 -v /your/manga/directory:/manga \
--v /kavita/data/directory:/kavita/data \
+-v /kavita/data/directory:/kavita/config \
 --restart unless-stopped \
 -d kizaing/kavita:latest
 ```
@@ -64,19 +64,20 @@ docker run --name kavita -p 5000:5000 \
 You can also run it via the docker-compose file:
 
 ```
-version: '3.9'
+version: '3'
 services:
     kavita:
         image: kizaing/kavita:latest
+        container_name: kavita
         volumes:
             - ./manga:/manga
-            - ./data:/kavita/data
+            - ./config:/kavita/config
         ports:
             - "5000:5000"
         restart: unless-stopped
 ```
 
-**Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release. There is also the `:alpine` tag if you want a smaller image, but it is only available for x64 systems.**
+**Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
 ## Feature Requests
 Got a great idea? Throw it up on the FeatHub or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
