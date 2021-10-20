@@ -23,10 +23,11 @@ RUN apt-get update \
   && apt-get install -y libicu-dev libssl1.1 libgdiplus \
   && rm -rf /var/lib/apt/lists/*
 
-RUN chmod +x /kavita/Kavita
+COPY entrypoint.sh /entrypoint.sh
 
 EXPOSE 5000
 
 WORKDIR /kavita
 
-CMD ["Kavita"]
+ENTRYPOINT [ "/bin/bash" ]
+CMD ["/entrypoint.sh"]
