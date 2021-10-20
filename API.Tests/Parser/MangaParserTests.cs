@@ -297,6 +297,7 @@ namespace API.Tests.Parser
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
         [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
+        [InlineData("/manga/Monster #8/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster #8~0~1")]
         public void ParseFromFallbackFoldersTest(string inputFile, string expectedParseInfo)
         {
           const string rootDirectory = "/manga/";
