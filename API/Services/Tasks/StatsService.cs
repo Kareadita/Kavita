@@ -118,7 +118,7 @@ namespace API.Services.Tasks
 
             try
             {
-                var response = await (ApiUrl + "/api/Stats")
+                var response = await (ApiUrl + "/api/InstallationStats")
                     .WithHeader("Accept", "application/json")
                     .WithHeader("User-Agent", "Kavita")
                     .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
