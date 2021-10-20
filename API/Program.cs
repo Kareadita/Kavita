@@ -54,10 +54,11 @@ namespace API
                 var context = services.GetRequiredService<DataContext>();
                 var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
-                if (migrateConfigFilesNeeded && new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+                if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker && new FileInfo("data/appsettings.json").Exists)
                 {
                     var logger = services.GetRequiredService<ILogger<Startup>>();
-                    logger.LogCritical("WARNING! You are upgrading and require manual intervention on your docker image. Please change your container mount from /kavita/data to /kavita/config");
+                    logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
+                    return;
                 }
 
 
