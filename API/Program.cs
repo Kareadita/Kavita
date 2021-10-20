@@ -8,6 +8,7 @@ using API.Data;
 using API.Entities;
 using API.Services;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -31,7 +32,7 @@ namespace API
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-            MigrateConfigFiles();
+            var migrateConfigFilesNeeded = MigrateConfigFiles();
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&
@@ -52,6 +53,13 @@ namespace API
             {
                 var context = services.GetRequiredService<DataContext>();
                 var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+
+                if (migrateConfigFilesNeeded && new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+                {
+                    var logger = services.GetRequiredService<ILogger<Startup>>();
+                    logger.LogCritical("WARNING! You are upgrading and require manual intervention on your docker image. Please change your container mount from /kavita/data to /kavita/config");
+                }
+
 
                 var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
                 try
@@ -114,9 +122,9 @@ namespace API
         /// In v0.4.8 we moved all config files to config/ to match with how docker was setup. This will move all config files from current directory
         /// to config/
         /// </summary>
-        private static void MigrateConfigFiles()
+        private static bool MigrateConfigFiles()
         {
-            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists) return;
+            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists) return false;
 
             Console.WriteLine(
                 "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
@@ -176,6 +184,7 @@ namespace API
 
             Console.WriteLine("Migration complete. All config files are now in config/ directory");
 
+            return true;
         }
 
 

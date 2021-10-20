@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -210,6 +211,8 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
+                var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
+                logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
         }
