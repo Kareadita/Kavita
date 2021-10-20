@@ -20,6 +20,7 @@ namespace API.Services
        public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
        public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
        public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "covers");
+       public static readonly string StatsDirectory = Path.Join(Directory.GetCurrentDirectory(), "stats");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
