@@ -52,7 +52,6 @@ namespace API.Services.Tasks
             var allowStatCollection = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
             if (!allowStatCollection)
             {
-                _logger.LogDebug("User has opted out of stat collection, not registering tasks");
                 return;
             }
 
@@ -75,7 +74,6 @@ namespace API.Services.Tasks
         // ReSharper disable once MemberCanBePrivate.Global
         public async Task SendData()
         {
-            _logger.LogDebug("Sending data to the Stats server");
             await CollectRelevantData();
             await FinalizeStats();
         }
