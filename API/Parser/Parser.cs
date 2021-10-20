@@ -608,8 +608,6 @@ namespace API.Parser
                   {
                     ret.Chapters = parsedChapter;
                   }
-
-                  continue;
                 }
 
                 var series = ParseSeries(folder);
