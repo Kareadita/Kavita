@@ -42,7 +42,7 @@ namespace Kavita.Common
 
         public static string DatabasePath
         {
-            set => SetDbPath(GetAppSettingFilename(), value);
+            set => SetDatabasePath(GetAppSettingFilename(), value);
         }
 
         private static string GetAppSettingFilename()
@@ -302,7 +302,7 @@ namespace Kavita.Common
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="updatedPath"></param>
-        private static void SetDbPath(string filePath, string updatedPath)
+        private static void SetDatabasePath(string filePath, string updatedPath)
         {
             try
             {

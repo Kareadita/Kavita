@@ -16,16 +16,14 @@ namespace API.Services.Tasks
         private readonly ILogger<CleanupService> _logger;
         private readonly IBackupService _backupService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IDirectoryService _directoryService;
 
         public CleanupService(ICacheService cacheService, ILogger<CleanupService> logger,
-            IBackupService backupService, IUnitOfWork unitOfWork, IDirectoryService directoryService)
+            IBackupService backupService, IUnitOfWork unitOfWork)
         {
             _cacheService = cacheService;
             _logger = logger;
             _backupService = backupService;
             _unitOfWork = unitOfWork;
-            _directoryService = directoryService;
         }
 
         public void CleanupCacheDirectory()

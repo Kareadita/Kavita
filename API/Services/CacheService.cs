@@ -21,7 +21,6 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
-        //public static readonly string CacheDirectory = Path.GetFullPath(DirectoryService.CacheDirectory);
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
             IDirectoryService directoryService, IBookService bookService)
