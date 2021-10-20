@@ -34,6 +34,12 @@ namespace Kavita.Common
             set => SetLogLevel(GetAppSettingFilename(), value);
         }
 
+        public static string LogPath
+        {
+            get => GetLoggingFile(GetAppSettingFilename());
+            set => SetLoggingFile(GetAppSettingFilename(), value);
+        }
+
         public static string DatabasePath
         {
             set => SetDbPath(GetAppSettingFilename(), value);
@@ -236,6 +242,53 @@ namespace Kavita.Common
                 var currentBranch = GetBranch(filePath);
                 var json = File.ReadAllText(filePath)
                     .Replace("\"Branch\": " + currentBranch, "\"Branch\": " + updatedBranch);
+                File.WriteAllText(filePath, json);
+            }
+            catch (Exception)
+            {
+                /* Swallow Exception */
+            }
+        }
+
+        private static string GetLoggingFile(string filePath)
+        {
+            const string defaultFile = "config/logs/kavita.log";
+
+            try
+            {
+                var json = File.ReadAllText(filePath);
+                var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+
+                if (jsonObj.TryGetProperty("File", out JsonElement tokenElement))
+                {
+                    foreach (var property in tokenElement.EnumerateObject())
+                    {
+                        if (!property.Name.Equals("File")) continue;
+                        foreach (var logProperty in property.Value.EnumerateObject())
+                        {
+                            if (logProperty.Name.Equals("Path"))
+                            {
+                                return logProperty.Value.GetString();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing app settings: " + ex.Message);
+            }
+
+            return defaultFile;
+        }
+
+        private static void SetLoggingFile(string filePath, string directory)
+        {
+            try
+            {
+                var currentFile = GetLoggingFile(filePath);
+                var json = File.ReadAllText(filePath)
+                    .Replace("\"Path\": " + currentFile, "\"Path\": " + directory);
                 File.WriteAllText(filePath, json);
             }
             catch (Exception)

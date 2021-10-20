@@ -163,6 +163,7 @@ namespace API
 
             // Then we need to update the config file to point to the new DB file
             Configuration.DatabasePath = "config//kavita.db";
+            Configuration.LogPath = "config//logs/kavita.log";
 
             // Finally delete everything in the source directory
             DirectoryService.DeleteFiles(configFiles.Select(f => f.FullName));
