@@ -46,10 +46,6 @@ namespace API.Tests.Comparers
             new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"},
             new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"}
         )]
-        // [InlineData(
-        //     new[] {"Jagaaaaaan - volume 01.cbz/001.png", "Jagaaaaaan - volume 01.cbz/001 - Shoot 'Em Up/001.jpg"},
-        //     new[] {"Jagaaaaaan - volume 01.cbz/001.png", "Jagaaaaaan - volume 01.cbz/001 - Shoot 'Em Up/001.jpg"}
-        // )]
         public void TestNaturalSortComparer(string[] input, string[] expected)
         {
             Array.Sort(input, _nc);
