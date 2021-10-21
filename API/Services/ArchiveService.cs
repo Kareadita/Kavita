@@ -123,12 +123,24 @@ namespace API.Services
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public string FirstFileEntry(IEnumerable<string> entryFullNames)
+        public static string FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
-            var result = entryFullNames.OrderBy(Path.GetFileName, new NaturalSortComparer())
-                .FirstOrDefault(x => !Parser.Parser.HasBlacklistedFolderInPath(x)
-                                     && Parser.Parser.IsImage(x)
-                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+            // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
+            // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
+            var fullNames = entryFullNames.Where(x =>!Parser.Parser.HasBlacklistedFolderInPath(x)
+                                                     && Parser.Parser.IsImage(x)
+                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)).ToList();
+            if (fullNames.Count == 0) return null;
+
+            var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
+                .OrderBy(Path.GetFullPath, new NaturalSortComparer())
+                .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
+
+            var result = fullNames
+                .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -158,7 +170,7 @@ namespace API.Services
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
+                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
@@ -169,7 +181,7 @@ namespace API.Services
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames);
+                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
                         using var stream = entry.OpenEntryStream();

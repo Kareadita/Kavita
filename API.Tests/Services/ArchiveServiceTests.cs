@@ -140,9 +140,10 @@ namespace API.Tests.Services
         [InlineData(new [] {"page 2.jpg", "page 10.jpg"}, "page 2.jpg")]
         [InlineData(new [] {"__MACOSX/cover.jpg", "vol1/page 01.jpg"}, "vol1/page 01.jpg")]
         [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg")]
+        [InlineData(new [] {"001.jpg", "001 - chapter 1/001.jpg"}, "001.jpg")]
         public void FindFirstEntry(string[] files, string expected)
         {
-            var foundFile = _archiveService.FirstFileEntry(files);
+            var foundFile = ArchiveService.FirstFileEntry(files, string.Empty);
             Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
         }
 
