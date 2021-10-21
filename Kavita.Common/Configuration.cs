@@ -307,8 +307,14 @@ namespace Kavita.Common
             try
             {
                 //"DefaultConnection": "Data source=
+                var existingString = "\"DefaultConnection\": \"Data source=kavita.db";
+                if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+                {
+                    existingString = "\"DefaultConnection\": \"Data source=data/kavita.db";
+                }
+
                 var json = File.ReadAllText(filePath)
-                    .Replace("\"DefaultConnection\": \"Data source=kavita.db",
+                    .Replace(existingString,
                         "\"DefaultConnection\": \"Data source=" + updatedPath);
                 File.WriteAllText(filePath, json);
             }

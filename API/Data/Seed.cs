@@ -69,6 +69,8 @@ namespace API.Data
                 Configuration.Port + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
+                DirectoryService.CacheDirectory + string.Empty;
 
             await context.SaveChangesAsync();
 
