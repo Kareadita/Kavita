@@ -56,6 +56,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl V2000 #57", "Batgirl")]
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire)", "Fables")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "2000 AD")]
+        [InlineData("Daredevil - v6 - 10 - (2019)", "Daredevil")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -93,6 +94,7 @@ namespace API.Tests.Parser
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "0")]
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
+        [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -134,6 +136,7 @@ namespace API.Tests.Parser
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "21")]
         [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
+        [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
@@ -169,6 +172,14 @@ namespace API.Tests.Parser
              {
                  Series = "Babe", Volumes = "0", Edition = "",
                  Chapters = "1", Filename = "Babe 01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
+             filepath = @"E:\Comics\Comics\Publisher\Batman the Detective (2021)\Batman the Detective - v6 - 11 - (2021).cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Batman the Detective", Volumes = "6", Edition = "",
+                 Chapters = "11", Filename = "Batman the Detective - v6 - 11 - (2021).cbr", Format = MangaFormat.Archive,
                  FullFilePath = filepath, IsSpecial = false
              });
 
