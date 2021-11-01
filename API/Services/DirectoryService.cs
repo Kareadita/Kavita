@@ -375,8 +375,11 @@ namespace API.Services
                IEnumerable<string> subDirs;
                string[] files;
 
-               try {
-                  subDirs = Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
+               try
+               {
+                   // Default EnumerationOptions will ignore system and hidden folders
+                   subDirs = Directory.GetDirectories(currentDir, "*", new EnumerationOptions())
+                       .Where(path => ExcludeDirectories.Matches(path).Count == 0);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
