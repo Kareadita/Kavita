@@ -57,6 +57,7 @@ namespace API.Tests.Parser
         [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire)", "Fables")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "2000 AD")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "Daredevil")]
+        [InlineData("Batman - The Man Who Laughs #1 (2005)", "Batman - The Man Who Laughs")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -183,10 +184,18 @@ namespace API.Tests.Parser
                  FullFilePath = filepath, IsSpecial = false
              });
 
+             filepath = @"E:\Comics\Comics\Batman - The Man Who Laughs #1 (2005)\Batman - The Man Who Laughs #1 (2005).cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Batman - The Man Who Laughs", Volumes = "0", Edition = "",
+                 Chapters = "1", Filename = "Batman - The Man Who Laughs #1 (2005).cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = API.Parser.Parser.Parse(file, rootPath);
+                var actual = API.Parser.Parser.Parse(file, rootPath, LibraryType.Comic);
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);
