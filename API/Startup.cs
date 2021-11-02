@@ -211,8 +211,15 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-                logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
+                try
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
+                    logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
+                }
+                catch (Exception)
+                {
+                    /* Swallow Exception */
+                }
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
         }

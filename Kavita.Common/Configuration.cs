@@ -259,7 +259,7 @@ namespace Kavita.Common
                 var json = File.ReadAllText(filePath);
                 var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
 
-                if (jsonObj.TryGetProperty("File", out JsonElement tokenElement))
+                if (jsonObj.TryGetProperty("Logging", out JsonElement tokenElement))
                 {
                     foreach (var property in tokenElement.EnumerateObject())
                     {
@@ -288,7 +288,7 @@ namespace Kavita.Common
             {
                 var currentFile = GetLoggingFile(filePath);
                 var json = File.ReadAllText(filePath)
-                    .Replace("\"Path\": " + currentFile, "\"Path\": " + directory);
+                    .Replace("\"Path\": \"" + currentFile + "\"", "\"Path\": \"" + directory + "\"");
                 File.WriteAllText(filePath, json);
             }
             catch (Exception)
