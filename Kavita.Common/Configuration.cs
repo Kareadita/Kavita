@@ -42,6 +42,7 @@ namespace Kavita.Common
 
         public static string DatabasePath
         {
+            get => GetDatabasePath(GetAppSettingFilename());
             set => SetDatabasePath(GetAppSettingFilename(), value);
         }
 
@@ -54,7 +55,7 @@ namespace Kavita.Common
 
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var isDevelopment = environment == Environments.Development;
-            return "appsettings" + (isDevelopment ? ".Development" : "") + ".json";
+            return "appsettings" + (isDevelopment ? ".Development" : string.Empty) + ".json";
         }
 
         #region JWT Token
@@ -282,6 +283,11 @@ namespace Kavita.Common
             return defaultFile;
         }
 
+        /// <summary>
+        /// This should NEVER be called except by <see cref="MigrateConfigFiles"/>
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="directory"></param>
         private static void SetLoggingFile(string filePath, string directory)
         {
             try
@@ -291,14 +297,41 @@ namespace Kavita.Common
                     .Replace("\"Path\": \"" + currentFile + "\"", "\"Path\": \"" + directory + "\"");
                 File.WriteAllText(filePath, json);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 /* Swallow Exception */
+                Console.WriteLine(ex);
             }
         }
 
+        private static string GetDatabasePath(string filePath)
+        {
+            const string defaultFile = "config/kavita.db";
+
+            try
+            {
+                var json = File.ReadAllText(filePath);
+                var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+
+                if (jsonObj.TryGetProperty("ConnectionStrings", out JsonElement tokenElement))
+                {
+                    foreach (var property in tokenElement.EnumerateObject())
+                    {
+                        if (!property.Name.Equals("DefaultConnection")) continue;
+                        return property.Value.GetString();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error writing app settings: " + ex.Message);
+            }
+
+            return defaultFile;
+        }
+
         /// <summary>
-        /// This should NEVER be called except by Program.MigrateConfigFiles().
+        /// This should NEVER be called except by <see cref="MigrateConfigFiles"/>
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="updatedPath"></param>
@@ -306,16 +339,10 @@ namespace Kavita.Common
         {
             try
             {
-                //"DefaultConnection": "Data source=
-                var existingString = "\"DefaultConnection\": \"Data source=kavita.db";
-                if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
-                {
-                    existingString = "\"DefaultConnection\": \"Data source=data/kavita.db";
-                }
-
+                var existingString = GetDatabasePath(filePath);
                 var json = File.ReadAllText(filePath)
                     .Replace(existingString,
-                        "\"DefaultConnection\": \"Data source=" + updatedPath);
+                        "Data source=" + updatedPath);
                 File.WriteAllText(filePath, json);
             }
             catch (Exception)

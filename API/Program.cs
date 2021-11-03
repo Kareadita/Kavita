@@ -33,7 +33,7 @@ namespace API
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
 
-            MigrateConfigFiles(isDocker);
+            MigrateConfigFiles.Migrate(isDocker);
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&
@@ -120,107 +120,7 @@ namespace API
                     webBuilder.UseStartup<Startup>();
                 });
 
-        /// <summary>
-        /// In v0.4.8 we moved all config files to config/ to match with how docker was setup. This will move all config files from current directory
-        /// to config/
-        /// </summary>
-        private static void MigrateConfigFiles(bool isDocker)
-        {
-            Console.WriteLine("Checking if migration to config/ is needed");
 
-            if (isDocker)
-            {
-                Console.WriteLine(
-                    "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
-
-                Console.WriteLine("Updating appsettings.json to new paths");
-                Configuration.DatabasePath = "config//kavita.db";
-                Configuration.LogPath = "config//logs/kavita.log";
-                Console.WriteLine("Updating appsettings.json to new paths...DONE");
-                DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), "data"));
-
-                Console.WriteLine("Migration complete. All config files are now in config/ directory");
-                return;
-            }
-
-            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists)
-            {
-                Console.WriteLine("Migration to config/ not needed");
-                return;
-            }
-
-            Console.WriteLine(
-                "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
-
-            var configDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
-            Console.WriteLine($"Creating {configDirectory}");
-            DirectoryService.ExistOrCreate(configDirectory);
-            var configFiles = new List<string>()
-            {
-                "appsettings.json",
-                "appsettings.Development.json",
-                "kavita.db",
-            }.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
-                .Where(f => f.Exists)
-                .ToList();
-            // First step is to move all the files
-            Console.WriteLine("Moving files to config/");
-            foreach (var fileInfo in configFiles)
-            {
-                try
-                {
-                    fileInfo.CopyTo(Path.Join(configDirectory, fileInfo.Name));
-                }
-                catch (Exception)
-                {
-                    /* Swallow exception when already exists */
-                }
-            }
-            Console.WriteLine("Moving files to config...DONE");
-
-            Console.WriteLine("Moving folders to config");
-            var foldersToMove = new List<string>()
-            {
-                "covers",
-                "stats",
-                "logs",
-                "backups",
-                "cache",
-                "temp"
-            };
-            foreach (var folderToMove in foldersToMove)
-            {
-                if (new DirectoryInfo(Path.Join(configDirectory, folderToMove)).Exists) continue;
-
-                DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                    Path.Join(configDirectory, folderToMove));
-            }
-            Console.WriteLine("Moving folders to config...DONE");
-
-            // Then we need to update the config file to point to the new DB file
-            Console.WriteLine("Updating appsettings.json to new paths");
-            Configuration.DatabasePath = "config//kavita.db";
-            Configuration.LogPath = "config//logs/kavita.log";
-            Console.WriteLine("Updating appsettings.json to new paths...DONE");
-
-            // Finally delete everything in the source directory
-            Console.WriteLine("Removing old files");
-            DirectoryService.DeleteFiles(configFiles.Select(f => f.FullName));
-            foreach (var folderToDelete in foldersToMove)
-            {
-                if (!new DirectoryInfo(Path.Join(Directory.GetCurrentDirectory(), folderToDelete)).Exists) continue;
-
-                DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToDelete));
-            }
-
-            // if (isDocker && new DirectoryInfo(Path.Join(Directory.GetCurrentDirectory(), "data")).Exists)
-            // {
-            //     DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), "data"));
-            // }
-            Console.WriteLine("Removing old files...DONE");
-
-            Console.WriteLine("Migration complete. All config files are now in config/ directory");
-        }
 
 
     }
