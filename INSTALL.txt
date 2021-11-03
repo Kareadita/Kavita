@@ -3,3 +3,5 @@
 2. (Linux only) Chmod and Chown so Kavita can write to the directory you placed in.
 3. Run Kavita executable.
 4. Open localhost:5000 and setup your account and libraries in the UI.
+
+If updating, copy everything but the config/ directory over. Restart Kavita.

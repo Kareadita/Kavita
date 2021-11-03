@@ -1,10 +1,11 @@
-version: '3.9'
+version: '3'
 services:
     kavita:
         image: kizaing/kavita:latest
+        container_name: kavita
         volumes:
             - ./manga:/manga
-            - ./data:/kavita/data
+            - ./config:/kavita/config
         ports:
             - "5000:5000"
         restart: unless-stopped

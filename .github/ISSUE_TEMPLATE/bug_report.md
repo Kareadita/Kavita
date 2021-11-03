@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: bug
+labels: needs-triage
 assignees: ''
 
 ---
@@ -24,7 +24,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. iOS]
+ - OS: [e.g. iOS, Docker]
  - Browser [e.g. chrome, safari]
  - Version [e.g. 22] (can be found on Server Settings -> System tab)
 

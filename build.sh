@@ -105,7 +105,7 @@ Package()
     fi
 
     echo "Copying appsettings.json"
-    cp appsettings.Development.json $lOutputFolder/appsettings.json
+    cp config/appsettings.Development.json $lOutputFolder/config/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

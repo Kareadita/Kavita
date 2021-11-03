@@ -20,13 +20,8 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 pwgen libgdiplus \
+  && apt-get install -y libicu-dev libssl1.1 libgdiplus \
   && rm -rf /var/lib/apt/lists/*
-
-#Creates the data directory
-RUN mkdir /kavita/data
-
-RUN sed -i 's/Data source=kavita.db/Data source=data\/kavita.db/g' /kavita/appsettings.json
 
 COPY entrypoint.sh /entrypoint.sh
 
@@ -34,5 +29,5 @@ EXPOSE 5000
 
 WORKDIR /kavita
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]

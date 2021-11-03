@@ -20,8 +20,8 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
-        private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-        private readonly string _logDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
+        private readonly string _tempDirectory = DirectoryService.TempDirectory;
+        private readonly string _logDirectory = DirectoryService.LogDirectory;
 
         private readonly IList<string> _backupFiles;
 
@@ -72,7 +72,7 @@ namespace API.Services.Tasks
             var fi = new FileInfo(logFileName);
 
             var files = maxRollingFiles > 0
-                ? _directoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
+                ? DirectoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
                 : new[] {"kavita.log"};
             return files;
         }
@@ -148,7 +148,7 @@ namespace API.Services.Tasks
                 // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
             }
 
-            if (!_directoryService.GetFiles(outputTempDir).Any())
+            if (!DirectoryService.GetFiles(outputTempDir).Any())
             {
                 DirectoryService.ClearAndDeleteDirectory(outputTempDir);
             }
@@ -164,7 +164,7 @@ namespace API.Services.Tasks
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
             if (!_directoryService.Exists(backupDirectory)) return;
             var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
-            var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
+            var allBackups = DirectoryService.GetFiles(backupDirectory).ToList();
             var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
                 .Where(f => f.CreationTime > deltaTime)
                 .ToList();

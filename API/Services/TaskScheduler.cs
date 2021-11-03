@@ -138,8 +138,7 @@ namespace API.Services
 
         public void CleanupTemp()
         {
-            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-            BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(tempDirectory));
+            BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(DirectoryService.TempDirectory));
         }
 
         public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)

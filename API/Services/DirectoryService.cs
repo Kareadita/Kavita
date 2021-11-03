@@ -16,11 +16,12 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
-       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
-       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
-       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "covers");
-       public static readonly string StatsDirectory = Path.Join(Directory.GetCurrentDirectory(), "stats");
+       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "temp");
+       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "logs");
+       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "cache");
+       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "covers");
+       public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
+       public static readonly string StatsDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "stats");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -46,7 +47,6 @@ namespace API.Services
              .Where(file =>
                 reSearchPattern.IsMatch(Path.GetExtension(file)) && !Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
        }
-
 
        /// <summary>
        /// Returns a list of folders from end of fullPath to rootPath. If a file is passed at the end of the fullPath, it will be ignored.
@@ -96,7 +96,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -132,10 +132,10 @@ namespace API.Services
        /// </summary>
        /// <param name="sourceDirName"></param>
        /// <param name="destDirName"></param>
-       /// <param name="searchPattern">Defaults to *, meaning all files</param>
+       /// <param name="searchPattern">Defaults to empty string, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -177,7 +177,13 @@ namespace API.Services
 
 
 
-       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       /// <summary>
+       /// Get files with a file extension
+       /// </summary>
+       /// <param name="path"></param>
+       /// <param name="searchPatternExpression">Regex to use for searching on regex. Defaults to empty string for all files</param>
+       /// <returns></returns>
+       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
