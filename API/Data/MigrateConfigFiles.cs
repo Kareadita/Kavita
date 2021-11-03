@@ -63,12 +63,20 @@ namespace API.Data
             Console.WriteLine($"Creating {ConfigDirectory}");
             DirectoryService.ExistOrCreate(ConfigDirectory);
 
-            CopyLooseLeafFiles();
+            try
+            {
+                CopyLooseLeafFiles();
 
-            CopyAppFolders();
+                CopyAppFolders();
 
-            // Then we need to update the config file to point to the new DB file
-            UpdateConfiguration();
+                // Then we need to update the config file to point to the new DB file
+                UpdateConfiguration();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("There was an exception during migration. Please move everything manually.");
+                return;
+            }
 
             // Finally delete everything in the source directory
             Console.WriteLine("Removing old files");
