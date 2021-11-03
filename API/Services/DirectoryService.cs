@@ -136,7 +136,7 @@ namespace API.Services
        /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -178,7 +178,7 @@ namespace API.Services
 
 
 
-       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
