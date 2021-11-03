@@ -97,7 +97,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -136,7 +136,7 @@ namespace API.Services
        /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -178,7 +178,7 @@ namespace API.Services
 
 
 
-       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
