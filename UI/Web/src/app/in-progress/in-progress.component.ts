@@ -112,10 +112,15 @@ export class InProgressComponent implements OnInit {
           this.loadPage();
           this.bulkSelectionService.deselectAll();
         });
-        
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.Delete:
+        this.actionService.deleteMultipleSeries(selectedSeries, () => {
           this.loadPage();
           this.bulkSelectionService.deselectAll();
         });

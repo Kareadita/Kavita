@@ -13,6 +13,7 @@ namespace API.Interfaces.Repositories
         void Attach(Series series);
         void Update(Series series);
         void Remove(Series series);
+        void Remove(IEnumerable<Series> series);
         Task<bool> DoesSeriesNameExistInLibrary(string name);
         /// <summary>
         /// Adds user information like progress, ratings, etc
@@ -33,6 +34,7 @@ namespace API.Interfaces.Repositories
         Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
         Task<bool> DeleteSeriesAsync(int seriesId);
         Task<Series> GetSeriesByIdAsync(int seriesId);
+        Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
         Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
         Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
         /// <summary>

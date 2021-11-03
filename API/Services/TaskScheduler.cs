@@ -89,7 +89,7 @@ namespace API.Services
             }
 
             _logger.LogDebug("Scheduling stat collection daily");
-            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.CollectAndSendStatsData(), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.Send(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         public void CancelStatsTasks()
@@ -102,7 +102,7 @@ namespace API.Services
         public void RunStatCollection()
         {
             _logger.LogInformation("Enqueuing stat collection");
-            BackgroundJob.Enqueue(() => _statsService.CollectAndSendStatsData());
+            BackgroundJob.Enqueue(() => _statsService.Send());
         }
 
         #endregion
