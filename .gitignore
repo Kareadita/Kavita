@@ -516,5 +516,6 @@ UI/Web/dist/
 API/config/covers/
 API/config/*.db
 API/config/stats/*
+API/config/stats/app_stats.json
 
 UI/Web/.vscode/settings.json
