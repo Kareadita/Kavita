@@ -44,14 +44,14 @@ namespace API.Data
 
                 CopyAppFolders();
                 DeleteAppFolders();
-                
+
                 UpdateConfiguration();
 
                 Console.WriteLine("Migration complete. All config files are now in config/ directory");
                 return;
             }
 
-            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists)
+            if (new FileInfo(Configuration.AppSettingsFilename).Exists)
             {
                 Console.WriteLine("Migration to config/ not needed");
                 return;
@@ -63,12 +63,20 @@ namespace API.Data
             Console.WriteLine($"Creating {ConfigDirectory}");
             DirectoryService.ExistOrCreate(ConfigDirectory);
 
-            CopyLooseLeafFiles();
+            try
+            {
+                CopyLooseLeafFiles();
 
-            CopyAppFolders();
+                CopyAppFolders();
 
-            // Then we need to update the config file to point to the new DB file
-            UpdateConfiguration();
+                // Then we need to update the config file to point to the new DB file
+                UpdateConfiguration();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("There was an exception during migration. Please move everything manually.");
+                return;
+            }
 
             // Finally delete everything in the source directory
             Console.WriteLine("Removing old files");
@@ -99,13 +107,15 @@ namespace API.Data
         private static void CopyAppFolders()
         {
             Console.WriteLine("Moving folders to config");
-            foreach (var folderToMove in AppFolders)
-            {
-                if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
 
-                DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                    Path.Join(ConfigDirectory, folderToMove));
-            }
+                foreach (var folderToMove in AppFolders)
+                {
+                    if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
+
+                    DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
+                        Path.Join(ConfigDirectory, folderToMove));
+                }
+
 
             Console.WriteLine("Moving folders to config...DONE");
         }
