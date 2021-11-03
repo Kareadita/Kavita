@@ -44,9 +44,7 @@ namespace API.Data
 
                 CopyAppFolders();
                 DeleteAppFolders();
-
-
-                //DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), "data"));
+                
                 UpdateConfiguration();
 
                 Console.WriteLine("Migration complete. All config files are now in config/ directory");
