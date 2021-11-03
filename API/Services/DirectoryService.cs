@@ -97,7 +97,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
