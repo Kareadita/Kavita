@@ -136,12 +136,9 @@ namespace API.Services
        /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
-
-         var di = new DirectoryInfo(sourceDirName);
-         if (!di.Exists) return false;
 
          // Get the subdirectories for the specified directory.
          var dir = new DirectoryInfo(sourceDirName);
@@ -156,7 +153,7 @@ namespace API.Services
          var dirs = dir.GetDirectories();
 
          // If the destination directory doesn't exist, create it.
-         Directory.CreateDirectory(destDirName);
+         ExistOrCreate(destDirName);
 
          // Get the files in the directory and copy them to the new location.
          var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => new FileInfo(n));

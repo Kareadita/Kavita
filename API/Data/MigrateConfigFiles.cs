@@ -99,13 +99,15 @@ namespace API.Data
         private static void CopyAppFolders()
         {
             Console.WriteLine("Moving folders to config");
-            foreach (var folderToMove in AppFolders)
-            {
-                if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
 
-                DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                    Path.Join(ConfigDirectory, folderToMove));
-            }
+                foreach (var folderToMove in AppFolders)
+                {
+                    if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
+
+                    DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
+                        Path.Join(ConfigDirectory, folderToMove));
+                }
+
 
             Console.WriteLine("Moving folders to config...DONE");
         }
