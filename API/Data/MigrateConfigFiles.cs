@@ -44,14 +44,14 @@ namespace API.Data
 
                 CopyAppFolders();
                 DeleteAppFolders();
-                
+
                 UpdateConfiguration();
 
                 Console.WriteLine("Migration complete. All config files are now in config/ directory");
                 return;
             }
 
-            if (!new FileInfo(Path.Join(Directory.GetCurrentDirectory(), "appsettings.json")).Exists)
+            if (new FileInfo(Configuration.AppSettingsFilename).Exists)
             {
                 Console.WriteLine("Migration to config/ not needed");
                 return;

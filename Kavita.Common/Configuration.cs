@@ -8,7 +8,7 @@ namespace Kavita.Common
 {
     public static class Configuration
     {
-        private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
+        public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
         public static string Branch
         {
