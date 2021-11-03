@@ -48,6 +48,7 @@ namespace API.Services
                 reSearchPattern.IsMatch(Path.GetExtension(file)) && !Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
        }
 
+
        /// <summary>
        /// Returns a list of folders from end of fullPath to rootPath. If a file is passed at the end of the fullPath, it will be ignored.
        ///
@@ -96,7 +97,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -132,10 +133,10 @@ namespace API.Services
        /// </summary>
        /// <param name="sourceDirName"></param>
        /// <param name="destDirName"></param>
-       /// <param name="searchPattern">Defaults to empty string, meaning all files</param>
+       /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
+       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -177,13 +178,7 @@ namespace API.Services
 
 
 
-       /// <summary>
-       /// Get files with a file extension
-       /// </summary>
-       /// <param name="path"></param>
-       /// <param name="searchPatternExpression">Regex to use for searching on regex. Defaults to empty string for all files</param>
-       /// <returns></returns>
-       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
@@ -381,11 +376,8 @@ namespace API.Services
                IEnumerable<string> subDirs;
                string[] files;
 
-               try
-               {
-                   // Default EnumerationOptions will ignore system and hidden folders
-                   subDirs = Directory.GetDirectories(currentDir, "*", new EnumerationOptions())
-                       .Where(path => ExcludeDirectories.Matches(path).Count == 0);
+               try {
+                  subDirs = Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
