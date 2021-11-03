@@ -111,11 +111,7 @@ export class ErrorInterceptor implements HttpInterceptor {
     // NOTE: Signin has error.error or error.statusText available. 
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.toastr.error(error.statusText === 'OK' ? 'Unauthorized' : error.statusText, error.status);
-      }
       this.accountService.logout();
     });
-
   }
 }

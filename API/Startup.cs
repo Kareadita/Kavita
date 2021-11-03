@@ -107,7 +107,11 @@ namespace API
 
             services.AddResponseCaching();
 
-            services.AddStatsClient(_config);
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.All;
+            });
 
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
@@ -140,7 +144,10 @@ namespace API
 
             app.UseResponseCompression();
 
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
 
             app.UseRouting();
 

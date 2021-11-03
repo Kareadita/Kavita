@@ -25,7 +25,7 @@ namespace API.Controllers
         {
             try
             {
-                await _statsService.PathData(clientInfoDto);
+                await _statsService.RecordClientInfo(clientInfoDto);
 
                 return Ok();
             }
