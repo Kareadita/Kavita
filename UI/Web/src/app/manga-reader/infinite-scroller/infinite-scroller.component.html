@@ -26,7 +26,7 @@
     </div>
 </div>
 <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-    <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+    <img src="{{item.src}}" style="display: block" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
 </ng-container>
 <div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadPrevChapter.emit()">
     <div>

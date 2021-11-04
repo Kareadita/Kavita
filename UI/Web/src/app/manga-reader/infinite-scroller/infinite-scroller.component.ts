@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, R
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -128,12 +129,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return Math.max(...Object.values(this.imagesLoaded));
   }
 
+  get areImagesWiderThanWindow() {
+    return this.webtoonImageWidth > (window.innerWidth || document.documentElement.clientWidth);
+  }
+
 
 
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, private toastr: ToastrService) {}
+  constructor(private readerService: ReaderService, private renderer: Renderer2, private utilityService: UtilityService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
@@ -204,6 +209,28 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.prevScrollPosition = verticalOffset;
 
+    // Idea: Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+    // to mark the current page and separate the prefetching code. 
+    const scrollTop = this.getScrollTop();
+    //console.log('[CurrentPage] scrollTop: ', scrollTop);
+    const visibleImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+    .filter(entry => {
+      return this.isElementVisible(entry);
+    })
+    ;
+    //console.log('[CurrentPage] visible images: ', visibleImages);
+    // console.log('[CurrentPage] midline images: ', visibleImages.filter(entry => {
+    //   return this.isElementMidline(entry);
+    // }));
+
+    const midlineImages = visibleImages.filter(entry => {
+      return this.isElementMidline(entry);
+    });
+    if (midlineImages.length > 0) {
+      this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+    }
+
+
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
 
@@ -237,7 +264,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
         // Scroll user back to original location
-        this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
+        this.previousScrollHeightMinusTop = this.getScrollTop();
         requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
@@ -277,6 +304,35 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           );
+  }
+
+  /**
+   * Is any part of the element visible in the scrollport and is it above the midline trigger.
+   * The midline trigger does not mean it is half of the screen. It may be top 25%. 
+   * @param elem HTML Element
+   * @returns If above midline
+   */
+   isElementMidline(elem: Element) {
+    if (elem === null || elem === undefined) { return false; }
+
+    var rect = elem.getBoundingClientRect();
+
+    if (rect.bottom >= 0 && 
+            rect.right >= 0 && 
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.left <= (window.innerWidth || document.documentElement.clientWidth)
+          ) {
+            const topX = (window.innerHeight || document.documentElement.clientHeight);
+            const bottomX = this.getScrollTop();
+
+            // Check if the image is mostly above the cuttoff point
+            const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
+            // without this, it will only trigger once you get the top of the image to the top of the screen: && rect.bottom > cuttoffPoint
+            // with it, it will trigger at half way
+            return rect.top <= cuttoffPoint ; // && rect.bottom > cuttoffPoint
+
+          }
+    return false;
   }
 
 
@@ -340,7 +396,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
-        this.setPageNum(imagePage);
+        //this.setPageNum(imagePage);
+        // ?! Changing this so that this just triggers a prefetch
+        this.prefetchWebtoonImages(imagePage);
       }
     });
   }
@@ -427,19 +485,23 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  calculatePrefetchIndecies() {
+  calculatePrefetchIndecies(pageNum: number = -1) {
+    if (pageNum == -1) {
+      pageNum = this.pageNum;
+    }
+
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
 
       if (startingIndex === this.totalPages) {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
     }
 
 
@@ -456,8 +518,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return [...Array(size).keys()].map(i => i + startAt);
   }
 
-  prefetchWebtoonImages() {
-    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+  prefetchWebtoonImages(pageNum: number = -1) {
+
+    if (pageNum === -1) {
+      pageNum = this.pageNum;
+    }
+
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies(pageNum);
     if (startingIndex === 0 && endingIndex === 0) { return; }
 
     this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);
