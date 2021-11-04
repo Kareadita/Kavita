@@ -947,6 +947,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
+  sliderDragUpdate(context: ChangeContext) {
+    // This will update the value for value except when in webtoon due to how the webtoon reader 
+    // responds to page changes
+    if (this.readerMode != READER_MODE.WEBTOON) {
+      this.setPageNum(context.value);
+    }
+  }
+
   sliderPageUpdate(context: ChangeContext) {
     const page = context.value;
     
