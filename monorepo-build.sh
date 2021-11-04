@@ -50,22 +50,22 @@ Package()
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
-    
+
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
     echo "Show API structure"
     find
-	
+
 	echo "Copying appsettings.json"
-    cp appsettings.Development.json $lOutputFolder/appsettings.json
+    cp ./config/appsettings.Development.json $lOutputFolder/config/appsettings.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
     tar -czvf ../kavita-$runtime.tar.gz Kavita
-    
-    ProgressEnd "Creating $runtime Package for $framework"  
-  
+
+    ProgressEnd "Creating $runtime Package for $framework"
+
 }
 
 dir=$PWD

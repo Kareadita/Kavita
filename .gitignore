@@ -500,4 +500,22 @@ _output/
 API/stats/
 UI/Web/dist/
 /API.Tests/Extensions/Test Data/modified on run.txt
-/API/covers/
+
+# All config files/folders in config except appsettings.json
+/API/config/covers/
+/API/config/logs/
+/API/config/backups/
+/API/config/cache/
+/API/config/temp/
+/API/config/stats/
+/API/config/kavita.db
+/API/config/kavita.db-shm
+/API/config/kavita.db-wal
+/API/config/Hangfire.db
+/API/config/Hangfire-log.db
+API/config/covers/
+API/config/*.db
+API/config/stats/*
+API/config/stats/app_stats.json
+
+UI/Web/.vscode/settings.json

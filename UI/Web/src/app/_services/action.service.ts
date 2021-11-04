@@ -467,4 +467,21 @@ export class ActionService implements OnDestroy {
     });
   }
 
+  /**
+   * Mark all chapters and the volumes as Read. All volumes and chapters must belong to a series
+   * @param seriesId Series Id
+   * @param volumes Volumes, should have id, chapters and pagesRead populated
+   * @param chapters? Chapters, should have id
+   * @param callback Optional callback to perform actions after API completes 
+   */
+   deleteMultipleSeries(seriesIds: Array<Series>, callback?: VoidActionCallback) {
+    this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
+      this.toastr.success('Series deleted');
+
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
 }

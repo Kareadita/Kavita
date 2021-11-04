@@ -42,6 +42,11 @@ namespace API.Data.Repositories
             _context.Series.Remove(series);
         }
 
+        public void Remove(IEnumerable<Series> series)
+        {
+            _context.Series.RemoveRange(series);
+        }
+
         public async Task<bool> DoesSeriesNameExistInLibrary(string name)
         {
             var libraries = _context.Series
@@ -170,6 +175,21 @@ namespace API.Data.Repositories
                 .ThenInclude(m => m.CollectionTags)
                 .Where(s => s.Id == seriesId)
                 .SingleOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns Volumes, Metadata, and Collection Tags
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        /// <returns></returns>
+        public async Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds)
+        {
+            return await _context.Series
+                .Include(s => s.Volumes)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags)
+                .Where(s => seriesIds.Contains(s.Id))
+                .ToListAsync();
         }
 
         public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)

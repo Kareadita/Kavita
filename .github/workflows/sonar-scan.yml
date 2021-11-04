@@ -115,7 +115,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Bump versions
-        uses: SiqiLu/dotnet-bump-version@master
+        uses: ThomasEg/dotnet-bump-version@patch-1
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}

@@ -5,7 +5,7 @@ namespace API.Interfaces.Services
 {
     public interface IStatsService
     {
-        Task PathData(ClientInfoDto clientInfoDto);
-        Task CollectAndSendStatsData();
+        Task RecordClientInfo(ClientInfoDto clientInfoDto);
+        Task Send();
     }
 }

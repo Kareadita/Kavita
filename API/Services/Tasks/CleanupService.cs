@@ -16,16 +16,14 @@ namespace API.Services.Tasks
         private readonly ILogger<CleanupService> _logger;
         private readonly IBackupService _backupService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IDirectoryService _directoryService;
 
         public CleanupService(ICacheService cacheService, ILogger<CleanupService> logger,
-            IBackupService backupService, IUnitOfWork unitOfWork, IDirectoryService directoryService)
+            IBackupService backupService, IUnitOfWork unitOfWork)
         {
             _cacheService = cacheService;
             _logger = logger;
             _backupService = backupService;
             _unitOfWork = unitOfWork;
-            _directoryService = directoryService;
         }
 
         public void CleanupCacheDirectory()
@@ -42,7 +40,7 @@ namespace API.Services.Tasks
         {
             _logger.LogInformation("Starting Cleanup");
             _logger.LogInformation("Cleaning temp directory");
-            var tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
+            var tempDirectory = DirectoryService.TempDirectory;
             DirectoryService.ClearDirectory(tempDirectory);
             CleanupCacheDirectory();
             _logger.LogInformation("Cleaning old database backups");
@@ -57,7 +55,7 @@ namespace API.Services.Tasks
         private async Task DeleteSeriesCoverImages()
         {
             var images = await _unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
+            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
             foreach (var file in files)
             {
                 if (images.Contains(Path.GetFileName(file))) continue;
@@ -69,7 +67,7 @@ namespace API.Services.Tasks
         private async Task DeleteChapterCoverImages()
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
+            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
             foreach (var file in files)
             {
                 if (images.Contains(Path.GetFileName(file))) continue;
@@ -81,7 +79,7 @@ namespace API.Services.Tasks
         private async Task DeleteTagCoverImages()
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
-            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
+            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
             foreach (var file in files)
             {
                 if (images.Contains(Path.GetFileName(file))) continue;

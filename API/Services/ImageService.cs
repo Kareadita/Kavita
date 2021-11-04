@@ -13,7 +13,6 @@ namespace API.Services
   public class ImageService : IImageService
   {
     private readonly ILogger<ImageService> _logger;
-    private readonly IDirectoryService _directoryService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"seres\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
@@ -24,10 +23,9 @@ namespace API.Services
     /// </summary>
     private const int ThumbnailWidth = 320;
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
+    public ImageService(ILogger<ImageService> logger)
     {
       _logger = logger;
-      _directoryService = directoryService;
     }
 
     /// <summary>
@@ -44,9 +42,9 @@ namespace API.Services
         return null;
       }
 
-      var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
+      var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
         .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
-      
+
       return firstImage;
     }
 

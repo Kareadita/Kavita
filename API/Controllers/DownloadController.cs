@@ -164,7 +164,7 @@ namespace API.Controllers
                     case MangaFormat.Archive:
                     case MangaFormat.Pdf:
                         _cacheService.ExtractChapterFiles(chapterExtractPath, mangaFiles.ToList());
-                        var originalFiles = _directoryService.GetFilesWithExtension(chapterExtractPath,
+                        var originalFiles = DirectoryService.GetFilesWithExtension(chapterExtractPath,
                             Parser.Parser.ImageFileExtensions);
                         _directoryService.CopyFilesToDirectory(originalFiles, chapterExtractPath, $"{chapterId}_");
                         DirectoryService.DeleteFiles(originalFiles);
@@ -175,7 +175,7 @@ namespace API.Controllers
                         return BadRequest("Series is not in a valid format. Please rescan series and try again.");
                 }
 
-                var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
+                var files = DirectoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
                 // Filter out images that aren't in bookmarks
                 Array.Sort(files, _numericComparer);
                 totalFilePaths.AddRange(files.Where((_, i) => chapterPages.Contains(i)));

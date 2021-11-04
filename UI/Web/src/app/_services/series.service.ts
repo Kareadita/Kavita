@@ -80,6 +80,10 @@ export class SeriesService {
     return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
   }
 
+  deleteMultipleSeries(seriesIds: Array<number>) {
+    return this.httpClient.post<boolean>(this.baseUrl + 'series/delete-multiple', {seriesIds});
+  }
+
   updateRating(seriesId: number, userRating: number, userReview: string) {
     return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
   }
