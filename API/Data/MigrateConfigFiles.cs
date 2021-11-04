@@ -39,6 +39,12 @@ namespace API.Data
 
             if (isDocker)
             {
+                if (Configuration.LogPath.Contains("config"))
+                {
+                    Console.WriteLine("Migration to config/ not needed");
+                    return;
+                }
+
                 Console.WriteLine(
                     "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
 
@@ -112,8 +118,16 @@ namespace API.Data
                 {
                     if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
 
-                    DirectoryService.CopyDirectoryToDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                        Path.Join(ConfigDirectory, folderToMove));
+                    try
+                    {
+                        DirectoryService.CopyDirectoryToDirectory(
+                            Path.Join(Directory.GetCurrentDirectory(), folderToMove),
+                            Path.Join(ConfigDirectory, folderToMove));
+                    }
+                    catch (Exception)
+                    {
+                        /* Swallow Exception */
+                    }
                 }
 
 
