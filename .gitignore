@@ -515,6 +515,7 @@ UI/Web/dist/
 /API/config/Hangfire-log.db
 API/config/covers/
 API/config/*.db
-
+API/config/stats/*
+API/config/stats/app_stats.json
 
 UI/Web/.vscode/settings.json
