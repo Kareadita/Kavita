@@ -500,8 +500,8 @@ _output/
 API/stats/
 UI/Web/dist/
 /API.Tests/Extensions/Test Data/modified on run.txt
-/API/covers/
-# All config files in config except appsettings.json
+
+# All config files/folders in config except appsettings.json
 /API/config/covers/
 /API/config/logs/
 /API/config/backups/
