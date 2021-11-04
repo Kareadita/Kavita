@@ -16,10 +16,11 @@ import { CardItemComponent } from './card-item/card-item.component';
 import { SharedModule } from '../shared/shared.module';
 import { RouterModule } from '@angular/router';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
-import { BrowserModule } from '@angular/platform-browser';
 import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layout.component';
 import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
 import { BulkOperationsComponent } from './bulk-operations/bulk-operations.component';
+import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
+import { PipeModule } from '../pipe/pipe.module';
 
 
 
@@ -36,11 +37,11 @@ import { BulkOperationsComponent } from './bulk-operations/bulk-operations.compo
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
-    BulkOperationsComponent
+    BulkOperationsComponent,
+    BulkAddToCollectionComponent
   ],
   imports: [
     CommonModule,
-    //BrowserModule,
     RouterModule,
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
@@ -58,6 +59,7 @@ import { BulkOperationsComponent } from './bulk-operations/bulk-operations.compo
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
+    PipeModule // filter for BulkAddToCollectionComponent
   ],
   exports: [
     CardItemComponent,

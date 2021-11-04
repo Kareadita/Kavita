@@ -21,7 +21,6 @@ namespace API.Services
         private readonly IDirectoryService _directoryService;
         private readonly IBookService _bookService;
         private readonly NumericComparer _numericComparer;
-        public static readonly string CacheDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "cache/"));
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
             IDirectoryService directoryService, IBookService bookService)
@@ -38,7 +37,7 @@ namespace API.Services
         {
             if (!DirectoryService.ExistOrCreate(DirectoryService.CacheDirectory))
             {
-                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", CacheDirectory);
+                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", DirectoryService.CacheDirectory);
             }
         }
 
@@ -102,7 +101,7 @@ namespace API.Services
                 }
                 else
                 {
-                    _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath,
+                    DirectoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath,
                         Parser.Parser.ImageFileExtensions);
                 }
 
@@ -147,7 +146,7 @@ namespace API.Services
 
             try
             {
-                DirectoryService.ClearDirectory(CacheDirectory);
+                DirectoryService.ClearDirectory(DirectoryService.CacheDirectory);
             }
             catch (Exception ex)
             {
@@ -198,7 +197,7 @@ namespace API.Services
                 if (page <= (mangaFile.Pages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
-                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
+                    var files = DirectoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
                     Array.Sort(files, _numericComparer);
 
                     if (files.Length == 0)

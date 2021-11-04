@@ -24,10 +24,24 @@ namespace API.Parser
         private const RegexOptions MatchOptions =
             RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
 
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(src:url\(.{1})" + "([^\"']*)" + @"(.{1}\))",
+        /// <summary>
+        /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
+        /// </summary>
+        /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(src:\s?)?url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(?<End>.{1}\))",
             MatchOptions, RegexTimeout);
-        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s[\"|'])(?<Filename>[\\w\\d/\\._-]+)([\"|'];?)",
+        /// <summary>
+        /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
+        /// </summary>
+        public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);",
+            MatchOptions | RegexOptions.Multiline, RegexTimeout);
+        /// <summary>
+        /// Misc css image references, like background-image: url(), border-image, or list-style-image
+        /// </summary>
+        /// Original prepend: (background|border|list-style)-image:\s?)?
+        public static readonly Regex CssImageUrlRegex = new Regex(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
             MatchOptions, RegexTimeout);
+
 
         private static readonly string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
@@ -212,7 +226,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
             new Regex(
-                @"^(?!Vol\.?)(?<Series>.+?)( |_|-)(?<!-)(ch)?\d+-?\d*",
+                @"^(?!Vol\.?)(?!Chapter)(?<Series>.+?)(\s|_|-)(?<!-)(ch|chapter)?\.?\d+-?\d*",
                 MatchOptions, RegexTimeout),
             // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
             new Regex(
@@ -533,14 +547,16 @@ namespace API.Parser
                 ret.Edition = edition;
             }
 
-            var isSpecial = ParseMangaSpecial(fileName);
+            var isSpecial = type == LibraryType.Comic ? ParseComicSpecial(fileName) : ParseMangaSpecial(fileName);
             // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
             // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
             if (ret.Chapters == DefaultChapter && ret.Volumes == DefaultVolume && !string.IsNullOrEmpty(isSpecial))
             {
                 ret.IsSpecial = true;
+                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
             }
 
+            // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
             if (HasSpecialMarker(fileName))
             {
                 ret.IsSpecial = true;
@@ -549,8 +565,6 @@ namespace API.Parser
 
                 ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
             }
-            // here is the issue. If we are a special with marker, we need to ensure we use the correct series name.
-            // we can do this by falling back
 
             if (string.IsNullOrEmpty(ret.Series))
             {
@@ -594,8 +608,6 @@ namespace API.Parser
                   {
                     ret.Chapters = parsedChapter;
                   }
-
-                  continue;
                 }
 
                 var series = ParseSeries(folder);

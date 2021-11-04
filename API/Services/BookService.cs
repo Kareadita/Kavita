@@ -140,14 +140,21 @@ namespace API.Services
             }
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
-            stylesheetHtml =
-                Parser.Parser.CssImportUrlRegex.Replace(stylesheetHtml, "$1" + apiBase + prepend + "$2" + "$3");
+            var importMatches = Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml);
+            foreach (Match match in importMatches)
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
+
+            // Check if there are any background images and rewrite those urls
+            EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
 
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
-            styleContent =
-                Parser.Parser.FontSrcUrlRegex.Replace(styleContent, "$1" + apiBase + "$2" + "$3");
-
             styleContent = styleContent.Replace("body", ".reading-section");
+
+            if (string.IsNullOrEmpty(styleContent)) return string.Empty;
 
             var stylesheet = await _cssParser.ParseAsync(styleContent);
             foreach (var styleRule in stylesheet.StyleRules)
@@ -163,6 +170,21 @@ namespace API.Services
                 styleRule.Text = ".reading-section " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+
+        private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
+        {
+            var matches = Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
+            foreach (Match match in matches)
+            {
+                if (!match.Success) continue;
+
+                var importFile = match.Groups["Filename"].Value;
+                var key = CleanContentKeys(importFile);
+                if (!book.Content.AllFiles.ContainsKey(key)) continue;
+
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + key);
+            }
         }
 
         public ComicInfo GetComicInfo(string filePath)
@@ -488,15 +510,29 @@ namespace API.Services
 
         private static string RemoveWhiteSpaceFromStylesheets(string body)
         {
+            if (string.IsNullOrEmpty(body))
+            {
+                return string.Empty;
+            }
+
+            // Remove comments from CSS
+            body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
+
             body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
             body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty);
             body = Regex.Replace(body, @"\s+", " ");
             body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1");
-            body = body.Replace(";}", "}");
+            try
+            {
+                body = body.Replace(";}", "}");
+            }
+            catch (Exception)
+            {
+                /* Swallow exception. Some css doesn't have style rules ending in ; */
+            }
+
             body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");
 
-            // Remove comments from CSS
-            body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
 
             return body;
         }

@@ -160,7 +160,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readerStyles: string = '';
   darkModeStyleElem!: HTMLElement;
   topOffset: number = 0; // Offset for drawer and rendering canvas
-  scrollbarNeeded = false; // Used for showing/hiding bottom action bar
+  /**
+   * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
+   * Will hide if all content in book is absolute positioned
+   */
+  scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
 
   private readonly onDestroy = new Subject<void>();
@@ -713,7 +717,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingSectionElemRef.nativeElement.scrollHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
@@ -993,6 +997,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             
     }
     return '';
+  }
+
+  /**
+   * Turns off Incognito mode. This can only happen once if the user clicks the icon. This will modify URL state
+   */
+   turnOffIncognito() {
+    this.incognitoMode = false;
+    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+    window.history.replaceState({}, '', newRoute);
+    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 
 }

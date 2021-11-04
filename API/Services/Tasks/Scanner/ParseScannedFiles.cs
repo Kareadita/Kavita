@@ -73,9 +73,13 @@ namespace API.Services.Tasks.Scanner
                 info = Parser.Parser.Parse(path, rootPath, type);
             }
 
+            // If we couldn't match, log. But don't log if the file parses as a cover image
             if (info == null)
             {
-                _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
+                {
+                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+                }
                 return;
             }
 
@@ -133,13 +137,11 @@ namespace API.Services.Tasks.Scanner
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
-            _logger.LogDebug("Checking if we can merge {NormalizedSeries}", normalizedSeries);
             var existingName =
                 _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries && p.Key.Format == info.Format)
                 .Key;
             if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
             {
-                _logger.LogDebug("Found duplicate parsed infos, merged {Original} into {Merged}", info.Series, existingName.Name);
                 return existingName.Name;
             }
 

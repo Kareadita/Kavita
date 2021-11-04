@@ -13,7 +13,7 @@
 
 <app-carousel-reel [items]="recentlyAdded" title="Recently Added" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadTags()" (dataChanged)="loadRecentlyAdded()"></app-series-card>
+        <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="loadRecentlyAdded()"></app-series-card>
     </ng-template>
 </app-carousel-reel>
 

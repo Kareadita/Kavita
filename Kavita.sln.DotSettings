@@ -2,4 +2,5 @@
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=1BC0273F_002DFEBE_002D4DA1_002DBC04_002D3A3167E4C86C_002Fd_003AData_002Fd_003AMigrations/@EntryIndexedValue">ExplicitlyExcluded</s:String>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/RunLongAnalysisInSwa/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/RunValueAnalysisInNullableWarningsEnabledContext2/@EntryValue">True</s:Boolean>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Opds/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Opds/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=rewinded/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

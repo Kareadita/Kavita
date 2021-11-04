@@ -34,6 +34,7 @@ namespace API.Data
         public IFileRepository FileRepository => new FileRepository(_context);
         public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
         public IReadingListRepository ReadingListRepository => new ReadingListRepository(_context, _mapper);
+        public ISeriesMetadataRepository SeriesMetadataRepository => new SeriesMetadataRepository(_context);
 
         /// <summary>
         /// Commits changes to the DB. Completes the open transaction.

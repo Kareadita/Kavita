@@ -16,10 +16,12 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
-       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
-       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "cache");
-       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "covers");
+       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "temp");
+       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "logs");
+       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "cache");
+       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "covers");
+       public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
+       public static readonly string StatsDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "stats");
 
        public DirectoryService(ILogger<DirectoryService> logger)
        {
@@ -95,7 +97,7 @@ namespace API.Services
           return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
@@ -134,12 +136,9 @@ namespace API.Services
        /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "*")
+       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
-
-         var di = new DirectoryInfo(sourceDirName);
-         if (!di.Exists) return false;
 
          // Get the subdirectories for the specified directory.
          var dir = new DirectoryInfo(sourceDirName);
@@ -154,7 +153,7 @@ namespace API.Services
          var dirs = dir.GetDirectories();
 
          // If the destination directory doesn't exist, create it.
-         Directory.CreateDirectory(destDirName);
+         ExistOrCreate(destDirName);
 
          // Get the files in the directory and copy them to the new location.
          var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => new FileInfo(n));
@@ -176,7 +175,7 @@ namespace API.Services
 
 
 
-       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {

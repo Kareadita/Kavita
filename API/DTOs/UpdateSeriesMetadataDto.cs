@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.CollectionTags;
 
 namespace API.DTOs
 {

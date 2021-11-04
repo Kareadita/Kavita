@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { ServerSettings } from './_models/server-settings';
 
@@ -37,6 +38,8 @@ export class SettingsService {
   }
 
   getAuthenticationEnabled() {
-    return this.http.get<boolean>(this.baseUrl + 'settings/authentication-enabled', {responseType: 'text' as 'json'});
+    return this.http.get<string>(this.baseUrl + 'settings/authentication-enabled', {responseType: 'text' as 'json'}).pipe(map((res: string) => {
+      return res === 'true';
+    }));
   }
 }

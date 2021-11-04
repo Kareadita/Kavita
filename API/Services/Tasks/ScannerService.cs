@@ -261,13 +261,15 @@ namespace API.Services.Tasks
           var totalTime = 0L;
 
           // Update existing series
-          _logger.LogDebug("[ScannerService] Updating existing series");
+          _logger.LogInformation("[ScannerService] Updating existing series for {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size",
+              library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
           for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
           {
               if (chunkInfo.TotalChunks == 0) continue;
               totalTime += stopwatch.ElapsedMilliseconds;
               stopwatch.Restart();
-              _logger.LogDebug($"[ScannerService] Processing chunk {chunk} / {chunkInfo.TotalChunks} with size {chunkInfo.ChunkSize} Series ({chunk * chunkInfo.ChunkSize} - {(chunk + 1) * chunkInfo.ChunkSize}");
+              _logger.LogInformation("[ScannerService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+                  chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
               var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
               {
                   PageNumber = chunk,
@@ -299,7 +301,21 @@ namespace API.Services.Tasks
                   UpdateSeries(series, parsedSeries);
               });
 
-              await _unitOfWork.CommitAsync();
+              try
+              {
+                  await _unitOfWork.CommitAsync();
+              }
+              catch (Exception ex)
+              {
+                  _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB. If debug mode, series to check will be printed", chunk);
+                  foreach (var series in nonLibrarySeries)
+                  {
+                      _logger.LogDebug("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
+                  }
+                  await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryError,
+                      MessageFactory.ScanLibraryError(library.Id));
+                  continue;
+              }
               _logger.LogInformation(
                   "[ScannerService] Processed {SeriesStart} - {SeriesEnd} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                   chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, totalTime, library.Name);
@@ -320,12 +336,14 @@ namespace API.Services.Tasks
           _logger.LogDebug("[ScannerService] Adding new series");
           var newSeries = new List<Series>();
           var allSeries = (await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id)).ToList();
+          _logger.LogDebug("[ScannerService] Fetched {AllSeriesCount} series for comparing new series with. There should be {DeltaToParsedSeries} new series",
+              allSeries.Count, parsedSeries.Count - allSeries.Count);
           foreach (var (key, infos) in parsedSeries)
           {
               // Key is normalized already
               Series existingSeries;
               try
-              {
+              {// NOTE: Maybe use .Equals() here
                   existingSeries = allSeries.SingleOrDefault(s =>
                       (s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName)
                       && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
@@ -386,7 +404,7 @@ namespace API.Services.Tasks
               }
           }
 
-          _logger.LogDebug(
+          _logger.LogInformation(
               "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
               newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
        }

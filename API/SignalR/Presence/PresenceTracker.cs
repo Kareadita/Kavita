@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Interfaces;
@@ -27,7 +28,7 @@ namespace API.SignalR.Presence
             _unitOfWork = unitOfWork;
         }
 
-        public Task UserConnected(string username, string connectionId)
+        public async Task UserConnected(string username, string connectionId)
         {
             lock (OnlineUsers)
             {
@@ -41,7 +42,10 @@ namespace API.SignalR.Presence
                 }
             }
 
-            return Task.CompletedTask;
+            // Update the last active for the user
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            user.LastActive = DateTime.Now;
+            await _unitOfWork.CommitAsync();
         }
 
         public Task UserDisconnected(string username, string connectionId)

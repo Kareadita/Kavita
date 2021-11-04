@@ -297,6 +297,7 @@ namespace API.Tests.Parser
         [Theory]
         [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
         [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
+        [InlineData("/manga/Monster #8/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster #8~0~1")]
         public void ParseFromFallbackFoldersTest(string inputFile, string expectedParseInfo)
         {
           const string rootDirectory = "/manga/";
@@ -437,6 +438,22 @@ namespace API.Tests.Parser
             // If an image is cover exclusively, ignore it
             filepath = @"E:\Manga\Seraph of the End\cover.png";
             expected.Add(filepath, null);
+
+            filepath = @"E:\Manga\The Beginning After the End\Chapter 001.cbz";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "The Beginning After the End", Volumes = "0", Edition = "",
+                Chapters = "1", Filename = "Chapter 001.cbz", Format = MangaFormat.Archive,
+                FullFilePath = filepath, IsSpecial = false
+            });
+
+            filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
+            expected.Add(filepath, new ParserInfo
+            {
+                Series = "Monster #8", Volumes = "0", Edition = "",
+                Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Archive,
+                FullFilePath = filepath, IsSpecial = false
+            });
 
 
             foreach (var file in expected.Keys)

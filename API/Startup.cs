@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace API
@@ -106,7 +107,11 @@ namespace API
 
             services.AddResponseCaching();
 
-            services.AddStatsClient(_config);
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders =
+                    ForwardedHeaders.All;
+            });
 
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
@@ -139,7 +144,10 @@ namespace API
 
             app.UseResponseCompression();
 
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
 
             app.UseRouting();
 
@@ -210,6 +218,15 @@ namespace API
             applicationLifetime.ApplicationStopping.Register(OnShutdown);
             applicationLifetime.ApplicationStarted.Register(() =>
             {
+                try
+                {
+                    var logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
+                    logger.LogInformation("Kavita - v{Version}", BuildInfo.Version);
+                }
+                catch (Exception)
+                {
+                    /* Swallow Exception */
+                }
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             });
         }

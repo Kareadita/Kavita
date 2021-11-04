@@ -55,6 +55,11 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
         });
         break;
+      case Action.AddToCollection:
+        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
           this.loadPage();
@@ -63,6 +68,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
+          this.loadPage();
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.Delete:
+        this.actionService.deleteMultipleSeries(selectedSeries, () => {
           this.loadPage();
           this.bulkSelectionService.deselectAll();
         });

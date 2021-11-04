@@ -9,6 +9,7 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Hangfire;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -19,8 +20,8 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
-        private readonly string _tempDirectory = Path.Join(Directory.GetCurrentDirectory(), "temp");
-        private readonly string _logDirectory = Path.Join(Directory.GetCurrentDirectory(), "logs");
+        private readonly string _tempDirectory = DirectoryService.TempDirectory;
+        private readonly string _logDirectory = DirectoryService.LogDirectory;
 
         private readonly IList<string> _backupFiles;
 
@@ -33,15 +34,32 @@ namespace API.Services.Tasks
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
             var files = LogFiles(maxRollingFiles, loggingSection);
-            _backupFiles = new List<string>()
+
+            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
             {
-                "appsettings.json",
-                "Hangfire.db",
-                "Hangfire-log.db",
-                "kavita.db",
-                "kavita.db-shm", // This wont always be there
-                "kavita.db-wal", // This wont always be there
-            };
+                _backupFiles = new List<string>()
+                {
+                    "data/appsettings.json",
+                    "data/Hangfire.db",
+                    "data/Hangfire-log.db",
+                    "data/kavita.db",
+                    "data/kavita.db-shm", // This wont always be there
+                    "data/kavita.db-wal" // This wont always be there
+                };
+            }
+            else
+            {
+                _backupFiles = new List<string>()
+                {
+                    "appsettings.json",
+                    "Hangfire.db",
+                    "Hangfire-log.db",
+                    "kavita.db",
+                    "kavita.db-shm", // This wont always be there
+                    "kavita.db-wal" // This wont always be there
+                };
+            }
+
             foreach (var file in files.Select(f => (new FileInfo(f)).Name).ToList())
             {
                 _backupFiles.Add(file);
@@ -54,7 +72,7 @@ namespace API.Services.Tasks
             var fi = new FileInfo(logFileName);
 
             var files = maxRollingFiles > 0
-                ? _directoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
+                ? DirectoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
                 : new[] {"kavita.log"};
             return files;
         }
@@ -129,6 +147,11 @@ namespace API.Services.Tasks
             {
                 // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
             }
+
+            if (!DirectoryService.GetFiles(outputTempDir).Any())
+            {
+                DirectoryService.ClearAndDeleteDirectory(outputTempDir);
+            }
         }
 
         /// <summary>
@@ -141,7 +164,7 @@ namespace API.Services.Tasks
             var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
             if (!_directoryService.Exists(backupDirectory)) return;
             var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
-            var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
+            var allBackups = DirectoryService.GetFiles(backupDirectory).ToList();
             var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
                 .Where(f => f.CreationTime > deltaTime)
                 .ToList();

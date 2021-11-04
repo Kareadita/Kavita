@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Interfaces.Repositories;
 using AutoMapper;
@@ -20,6 +21,11 @@ namespace API.Data.Repositories
         {
             _context = context;
             _mapper = mapper;
+        }
+
+        public void Add(CollectionTag tag)
+        {
+            _context.CollectionTag.Add(tag);
         }
 
         public void Remove(CollectionTag tag)

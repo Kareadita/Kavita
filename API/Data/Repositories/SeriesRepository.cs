@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Scanner;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
@@ -39,6 +40,11 @@ namespace API.Data.Repositories
         public void Remove(Series series)
         {
             _context.Series.Remove(series);
+        }
+
+        public void Remove(IEnumerable<Series> series)
+        {
+            _context.Series.RemoveRange(series);
         }
 
         public async Task<bool> DoesSeriesNameExistInLibrary(string name)
@@ -169,6 +175,21 @@ namespace API.Data.Repositories
                 .ThenInclude(m => m.CollectionTags)
                 .Where(s => s.Id == seriesId)
                 .SingleOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// Returns Volumes, Metadata, and Collection Tags
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        /// <returns></returns>
+        public async Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds)
+        {
+            return await _context.Series
+                .Include(s => s.Volumes)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags)
+                .Where(s => seriesIds.Contains(s.Id))
+                .ToListAsync();
         }
 
         public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
@@ -454,15 +475,15 @@ namespace API.Data.Repositories
             // TODO: Think about making this bigger depending on number of files a user has in said library
             // and number of cores and amount of memory. We can then make an optimal choice
             var totalSeries = await GetSeriesCount(libraryId);
-            var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
-
-            if (totalSeries < procCount * 2 || totalSeries < 50)
-            {
-                return new Tuple<int, int>(totalSeries, totalSeries);
-            }
-
-
-            return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
+            // var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
+            //
+            // if (totalSeries < procCount * 2 || totalSeries < 50)
+            // {
+            //     return new Tuple<int, int>(totalSeries, totalSeries);
+            // }
+            //
+            // return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
+            return new Tuple<int, int>(totalSeries, 50);
         }
 
         public async Task<Chunk> GetChunkInfo(int libraryId = 0)
@@ -484,6 +505,14 @@ namespace API.Data.Repositories
                 ChunkSize = chunkSize,
                 TotalChunks = totalChunks
             };
+        }
+
+        public async Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds)
+        {
+            return await _context.SeriesMetadata
+                .Where(sm => seriesIds.Contains(sm.SeriesId))
+                .Include(sm => sm.CollectionTags)
+                .ToListAsync();
         }
     }
 }

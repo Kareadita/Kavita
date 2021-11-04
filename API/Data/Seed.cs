@@ -41,11 +41,11 @@ namespace API.Data
 
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
-                new() {Key = ServerSettingKey.CacheDirectory, Value = CacheService.CacheDirectory},
+                new() {Key = ServerSettingKey.CacheDirectory, Value = DirectoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
-                new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "backups/"))},
+                new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
                 new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
@@ -69,6 +69,8 @@ namespace API.Data
                 Configuration.Port + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
+                DirectoryService.CacheDirectory + string.Empty;
 
             await context.SaveChangesAsync();
 

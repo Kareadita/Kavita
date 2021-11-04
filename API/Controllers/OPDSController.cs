@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.DTOs;
+using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
@@ -738,7 +739,7 @@ namespace API.Controllers
         [HttpGet("{apiKey}/favicon")]
         public async Task<ActionResult> GetFavicon(string apiKey)
         {
-            var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
+            var files = DirectoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
             if (files.Length == 0) return BadRequest("Cannot find icon");
             var path = files[0];
             var content = await _directoryService.ReadFileAsync(path);

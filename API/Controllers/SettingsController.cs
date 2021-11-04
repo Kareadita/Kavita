@@ -140,7 +140,7 @@ namespace API.Controllers
                 }
             }
 
-            if (!_unitOfWork.HasChanges()) return Ok("Nothing was updated");
+            if (!_unitOfWork.HasChanges()) return Ok(updateSettingsDto);
 
             try
             {
