@@ -336,9 +336,13 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.+?)(?:\s|_)#(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
+            // Batman 2016 - Chapter 01, Batman 2016 - Issue 01, Batman 2016 - Issue #01
+            new Regex(
+                @"^(?<Series>.+?)((c(hapter)?)|issue)(_|\s)#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                MatchOptions, RegexTimeout),
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
-                @"^(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                @"^(?<Series>.+?)(?:\s|_)(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(

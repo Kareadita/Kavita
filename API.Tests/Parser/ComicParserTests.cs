@@ -138,6 +138,7 @@ namespace API.Tests.Parser
         [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
+        [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
