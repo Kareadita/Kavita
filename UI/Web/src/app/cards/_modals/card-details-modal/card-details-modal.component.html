@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="row no-gutters">
-                <div class="col" *ngIf="utilityService.isVolume(data)">
+                <div class="col" *ngIf="data.hasOwnProperty('created')">
                     Added: {{(data.created | date: 'short') || '-'}}
                 </div>
                 <div class="col">

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace API.DTOs
 {
@@ -45,5 +46,9 @@ namespace API.DTOs
         /// Volume Id this Chapter belongs to
         /// </summary>
         public int VolumeId { get; init; }
+        /// <summary>
+        /// When chapter was created
+        /// </summary>
+        public DateTime Created { get; init; }
     }
 }
