@@ -107,6 +107,11 @@
     <EmbeddedResource Remove="logs\**" />
     <EmbeddedResource Remove="temp\**" />
     <EmbeddedResource Remove="covers\**" />
+    <EmbeddedResource Remove="config\covers\**" />
+    <EmbeddedResource Remove="config\backups\**" />
+    <EmbeddedResource Remove="config\logs\**" />
+    <EmbeddedResource Remove="config\temp\**" />
+    <EmbeddedResource Remove="config\stats\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -115,12 +120,18 @@
     <Content Remove="backups\**" />
     <Content Remove="logs\**" />
     <Content Remove="temp\**" />
-    <Content Remove="stats\**" />
+    <Content Remove="config\stats\**" />
+    <Content Remove="config\cache\**" />
+    <Content Remove="config\backups\**" />
+    <Content Remove="config\logs\**" />
+    <Content Remove="config\temp\**" />
+    <Content Remove="config\stats\**" />
     <Content Condition=" '$(Configuration)' == 'Release' " Remove="appsettings.Development.json" />
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Remove="covers\**" />
+    <Content Remove="config\covers\**" />
   </ItemGroup>
 
   <ItemGroup>

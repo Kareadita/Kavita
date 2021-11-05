@@ -147,6 +147,8 @@ jobs:
           body=${body//'%'/'%25'}
           body=${body//$'\n'/'%0A'}
           body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
           echo $body
           echo "::set-output name=BODY::$body"
 
@@ -249,6 +251,8 @@ jobs:
           body=${body//'%'/'%25'}
           body=${body//$'\n'/'%0A'}
           body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
           echo $body
           echo "::set-output name=BODY::$body"
 
