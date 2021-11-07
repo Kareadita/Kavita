@@ -119,7 +119,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -209,27 +209,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.prevScrollPosition = verticalOffset;
 
-    // Idea: Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+    // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
     // to mark the current page and separate the prefetching code. 
-    const scrollTop = this.getScrollTop();
-    //console.log('[CurrentPage] scrollTop: ', scrollTop);
-    const visibleImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
-    .filter(entry => {
-      return this.isElementVisible(entry);
-    })
-    ;
-    //console.log('[CurrentPage] visible images: ', visibleImages);
-    // console.log('[CurrentPage] midline images: ', visibleImages.filter(entry => {
-    //   return this.isElementMidline(entry);
-    // }));
+    const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+    .filter(entry => this.shouldElementCountAsCurrentPage(entry));
 
-    const midlineImages = visibleImages.filter(entry => {
-      return this.isElementMidline(entry);
-    });
     if (midlineImages.length > 0) {
       this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
     }
-
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
@@ -312,7 +299,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param elem HTML Element
    * @returns If above midline
    */
-   isElementMidline(elem: Element) {
+   shouldElementCountAsCurrentPage(elem: Element) {
     if (elem === null || elem === undefined) { return false; }
 
     var rect = elem.getBoundingClientRect();
@@ -329,8 +316,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
             // without this, it will only trigger once you get the top of the image to the top of the screen: && rect.bottom > cuttoffPoint
             // with it, it will trigger at half way
-            return rect.top <= cuttoffPoint ; // && rect.bottom > cuttoffPoint
+            //console.log('Cutoff point: ', cuttoffPoint);
+            //return rect.top <= cuttoffPoint ; // && rect.bottom > cuttoffPoint
+            // console.log('device height: ', topX);
+            // console.log('image ' + elem.getAttribute('page') + ' top: ', rect.top);
+            // console.log('amount scrolled down: ', rect.top / topX);
+            // console.log('cutoff point: ', cuttoffPoint);
 
+            return Math.abs(rect.top / topX) <= 0.25;
           }
     return false;
   }
