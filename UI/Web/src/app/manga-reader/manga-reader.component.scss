@@ -223,6 +223,7 @@ canvas {
 
   .webtoon-images {
       text-align: center;
+      width: 100%;
   }
 
   .highlight {
@@ -233,6 +234,20 @@ canvas {
     background-color: rgba(65, 105, 225, 0.5) !important;
     animation: fadein .5s both;
   }
+
+  
+.bookmark-effect {
+    animation: bookmark 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes bookmark {
+    0%, 100% {
+        filter: opacity(1);
+    }
+    50% {
+        filter: opacity(0.25);
+    }
+}
 
   // DEBUG
   .active-image {

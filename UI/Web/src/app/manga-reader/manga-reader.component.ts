@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
@@ -124,7 +124,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * An event emiter when a page change occurs. Used soley by the webtoon reader.
    */
    goToPageEvent: ReplaySubject<number> = new ReplaySubject<number>();
-
+   /**
+   * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
+   */
+   showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
   /**
    * If the menu is open/visible.
    */
@@ -267,7 +270,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService, 
               private toastr: ToastrService, private memberService: MemberService,
-              private libraryService: LibraryService, private utilityService: UtilityService) {
+              private libraryService: LibraryService, private utilityService: UtilityService, 
+              private renderer: Renderer2) {
                 this.navService.hideNavBar();
   }
 
@@ -354,6 +358,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.goToPageEvent.complete();
+    this.showBookmarkEffectEvent.complete();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -942,6 +947,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
+  sliderDragUpdate(context: ChangeContext) {
+    // This will update the value for value except when in webtoon due to how the webtoon reader 
+    // responds to page changes
+    if (this.readerMode != READER_MODE.WEBTOON) {
+      this.setPageNum(context.value);
+    }
+  }
+
   sliderPageUpdate(context: ChangeContext) {
     const page = context.value;
     
@@ -1057,50 +1070,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
 
-  saveSettings() {
-    // NOTE: This is not called anywhere
-    if (this.user === undefined) return;
-
-    const data: Preferences = {
-      readingDirection: this.readingDirection, 
-      scalingOption: this.scalingOption, 
-      pageSplitOption: this.pageSplitOption,
-      autoCloseMenu: this.autoCloseMenu,
-      readerMode: this.readerMode,
-
-      bookReaderDarkMode: this.user.preferences.bookReaderDarkMode,
-      bookReaderFontFamily: this.user.preferences.bookReaderFontFamily,
-      bookReaderFontSize: this.user.preferences.bookReaderFontSize,
-      bookReaderLineSpacing: this.user.preferences.bookReaderLineSpacing,
-      bookReaderMargin: this.user.preferences.bookReaderMargin,
-      bookReaderTapToPaginate: this.user.preferences.bookReaderTapToPaginate,
-      bookReaderReadingDirection: this.readingDirection,
-
-      siteDarkMode: this.user.preferences.siteDarkMode,
-    };
-    this.accountService.updatePreferences(data).pipe(take(1)).subscribe((updatedPrefs) => {
-      this.toastr.success('User settings updated');
-      if (this.user) {
-        this.user.preferences = updatedPrefs;
-      }
-      this.resetSettings();
-    });
-
-  }
-
-  resetSettings() {
-    this.generalSettingsForm.get('fittingOption')?.value.get('fittingOption')?.setValue(this.translateScalingOption(this.user.preferences.scalingOption));
-    this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption + '');
-    this.generalSettingsForm.get('autoCloseMenu')?.setValue(this.autoCloseMenu);
-
-    this.updateForm();
-  }
-
   /**
    * Bookmarks the current page for the chapter
    */
   bookmarkPage() {
-    // TODO: Show some sort of UI visual to show that a page was bookmarked
     const pageNum = this.pageNum;
     if (this.pageBookmarked) {
       this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
@@ -1111,7 +1084,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.bookmarks[pageNum] = 1;
       });
     }
-    
+
+    // Show an effect on the image to show that it was bookmarked
+    this.showBookmarkEffectEvent.next(pageNum);
+    if (this.readerMode != READER_MODE.WEBTOON) {
+      if (this.canvas) {
+        this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
+        setTimeout(() => {
+          this.renderer.removeClass(this.canvas?.nativeElement, 'bookmark-effect');
+        }, 1000);
+      }
+    }
   }
 
   /**

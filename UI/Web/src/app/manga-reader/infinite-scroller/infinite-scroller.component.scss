@@ -21,11 +21,29 @@
     }
 }
 
+.full-width {
+    width: 100% !important;
+}
+
+
 @keyframes move-up-down {
     0%, 100% {
       transform: translateY(0);
     }
     50% {
       transform: translateY(-10px);
+    }
+}
+
+.bookmark-effect {
+    animation: bookmark 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes bookmark {
+    0%, 100% {
+        filter: opacity(1);
+    }
+    50% {
+        filter: opacity(0.25);
     }
 }
