@@ -173,7 +173,15 @@ namespace API.Services
          return true;
        }
 
-
+       /// <summary>
+       /// Checks if the root path of a path exists or not.
+       /// </summary>
+       /// <param name="path"></param>
+       /// <returns></returns>
+       public static bool IsDriveMounted(string path)
+       {
+           return new DirectoryInfo(Path.GetPathRoot(path) ?? string.Empty).Exists;
+       }
 
        public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {

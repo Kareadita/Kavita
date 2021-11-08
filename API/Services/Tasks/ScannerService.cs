@@ -56,6 +56,14 @@ namespace API.Services.Tasks
            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
            var folderPaths = library.Folders.Select(f => f.Path).ToList();
+
+           // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
+           if (folderPaths.Any(f => !DirectoryService.IsDriveMounted(f)))
+           {
+               _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+               return;
+           }
+
            var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
@@ -194,6 +202,14 @@ namespace API.Services.Tasks
                _logger.LogError(ex, "[ScannerService] There was an issue fetching Library {LibraryId}", libraryId);
                return;
            }
+
+           // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
+           if (library.Folders.Any(f => !DirectoryService.IsDriveMounted(f.Path)))
+           {
+               _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+               return;
+           }
+
 
            _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
