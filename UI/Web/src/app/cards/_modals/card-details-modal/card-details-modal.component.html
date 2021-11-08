@@ -17,7 +17,8 @@
                 <div class="col">
                     Id: {{data.id}}
                 </div>
-                <div class="col">
+                <div class="col" *ngIf="series !== undefined">
+                    Format: <span class="badge badge-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
                 </div>
             </div>
             <div class="row no-gutters">
@@ -58,8 +59,8 @@
                                 <div class="col">
                                     Pages: {{file.pages}}
                                 </div>
-                                <div class="col">
-                                    Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                <div class="col" *ngIf="data.hasOwnProperty('created')">
+                                    Added: {{(data.created | date: 'short') || '-'}}
                                 </div>
                             </div>
                         </li>
