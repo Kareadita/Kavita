@@ -16,6 +16,7 @@ import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
@@ -182,8 +183,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
-        this.toastr.info('This series no longer exists');
-        this.router.navigateByUrl('/libraries');
+        const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
+        if (seriesRemovedEvent.seriesId === this.series.id) {
+          this.toastr.info('This series no longer exists');
+          this.router.navigateByUrl('/libraries');
+        }
       }
     });
 
