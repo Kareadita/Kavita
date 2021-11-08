@@ -371,7 +371,7 @@ namespace API.Services
                             FullFilePath = filePath,
                             IsSpecial = false,
                             Series = series.Trim(),
-                            Volumes = seriesIndex.Split(".")[0]
+                            Volumes = seriesIndex
                         };
                     }
                 }
