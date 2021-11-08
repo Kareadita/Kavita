@@ -16,6 +16,7 @@ export enum EVENTS {
   ScanSeries = 'ScanSeries',
   RefreshMetadata = 'RefreshMetadata',
   SeriesAdded = 'SeriesAdded',
+  SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
   SeriesAddedToCollection = 'SeriesAddedToCollection',
@@ -113,6 +114,13 @@ export class MessageHubService {
       if (this.isAdmin) {
         this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
       }
+    });
+
+    this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesRemoved,
+        payload: resp.body
+      });
     });
 
     this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
