@@ -26,7 +26,7 @@ import { ActionItem, ActionFactoryService, Action } from '../_services/action-fa
 import { ActionService } from '../_services/action.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -178,6 +178,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.loadSeries(seriesId);
       this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
       this.toastr.success('Scan series completed');
+    });
+
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+      if (event.event === EVENTS.SeriesRemoved) {
+        this.toastr.info('This series no longer exists');
+        this.router.navigateByUrl('/libraries');
+      }
     });
 
     const seriesId = parseInt(routeId, 10);
