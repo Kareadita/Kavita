@@ -198,15 +198,6 @@ namespace API.Controllers
                 });
             }
 
-            if (tags.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
-            }
-
             return CreateXmlResult(SerializeXml(feed));
         }
 
@@ -321,17 +312,6 @@ namespace API.Controllers
                 });
             }
 
-            if (items.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
-            }
-
-
-
             return CreateXmlResult(SerializeXml(feed));
         }
 
@@ -388,16 +368,6 @@ namespace API.Controllers
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
             }
 
-            if (recentlyAdded.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
-            }
-
-
             return CreateXmlResult(SerializeXml(feed));
         }
 
@@ -426,15 +396,6 @@ namespace API.Controllers
             foreach (var seriesDto in pagedList)
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
-            }
-
-            if (pagedList.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
             }
 
             return CreateXmlResult(SerializeXml(feed));
