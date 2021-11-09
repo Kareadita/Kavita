@@ -202,6 +202,7 @@ namespace API.Controllers
             {
                 feed.Entries.Add(new FeedEntry()
                 {
+                    Id = "0",
                     Title = "Nothing here",
                 });
             }
@@ -324,6 +325,7 @@ namespace API.Controllers
             {
                 feed.Entries.Add(new FeedEntry()
                 {
+                    Id = "0",
                     Title = "Nothing here",
                 });
             }
@@ -390,6 +392,7 @@ namespace API.Controllers
             {
                 feed.Entries.Add(new FeedEntry()
                 {
+                    Id = "0",
                     Title = "Nothing here",
                 });
             }
@@ -429,6 +432,7 @@ namespace API.Controllers
             {
                 feed.Entries.Add(new FeedEntry()
                 {
+                    Id = "0",
                     Title = "Nothing here",
                 });
             }
