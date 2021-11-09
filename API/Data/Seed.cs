@@ -71,6 +71,8 @@ namespace API.Data
                 Configuration.LogLevel + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
                 DirectoryService.CacheDirectory + string.Empty;
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
+                DirectoryService.BackupDirectory + string.Empty;
 
             await context.SaveChangesAsync();
 
