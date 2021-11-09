@@ -15,6 +15,8 @@ import { UploadService } from 'src/app/_services/upload.service';
 import { ChangeCoverImageModalComponent } from '../change-cover-image/change-cover-image-modal.component';
 import { LibraryType } from '../../../_models/library';
 import { LibraryService } from '../../../_services/library.service';
+import { SeriesService } from 'src/app/_services/series.service';
+import { Series } from 'src/app/_models/series';
 
 
 
@@ -42,6 +44,7 @@ export class CardDetailsModalComponent implements OnInit {
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
   libraryType: LibraryType = LibraryType.Manga; 
+  series: Series | undefined = undefined;
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -50,7 +53,8 @@ export class CardDetailsModalComponent implements OnInit {
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, private router: Router, private libraryService: LibraryService) { }
+    private actionService: ActionService, private router: Router, private libraryService: LibraryService,
+    private seriesService: SeriesService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -79,6 +83,10 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapters.forEach((c: Chapter) => {
       c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
     });
+
+    this.seriesService.getSeries(this.seriesId).subscribe(series => {
+      this.series = series;
+    })
   }
 
   close() {
