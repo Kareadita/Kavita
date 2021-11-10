@@ -32,7 +32,7 @@
             [bufferPages]="5" 
             [goToPage]="goToPageEvent" 
             (pageNumberChange)="handleWebtoonPageChange($event)" 
-            [totalPages]="maxPages - 1" 
+            [totalPages]="maxPages" 
             [urlProvider]="getPageUrl" 
             (loadNextChapter)="loadNextChapter()" 
             (loadPrevChapter)="loadPrevChapter()"

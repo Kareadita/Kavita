@@ -20,7 +20,7 @@ import { ChangeContext, LabelType, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChapterInfo } from './_models/chapter-info';
 import { COLOR_FILTER, FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
-import { Preferences, scalingOptions } from '../_models/preferences/preferences';
+import { scalingOptions } from '../_models/preferences/preferences';
 import { READER_MODE } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
@@ -950,7 +950,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   sliderDragUpdate(context: ChangeContext) {
     // This will update the value for value except when in webtoon due to how the webtoon reader 
     // responds to page changes
-    if (this.readerMode != READER_MODE.WEBTOON) {
+    if (this.readerMode !== READER_MODE.WEBTOON) {
       this.setPageNum(context.value);
     }
   }

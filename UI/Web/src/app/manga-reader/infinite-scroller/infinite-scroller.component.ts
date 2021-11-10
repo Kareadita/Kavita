@@ -1,8 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -119,7 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -138,7 +136,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, private utilityService: UtilityService) {}
+  constructor(private readerService: ReaderService, private renderer: Renderer2) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
@@ -197,11 +195,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       || document.documentElement.scrollTop 
       || document.body.scrollTop || 0);
 
-    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
-      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
-      this.isScrolling = false;
-    }
-
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
@@ -209,14 +202,22 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.prevScrollPosition = verticalOffset;
 
-    // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
-    // to mark the current page and separate the prefetching code. 
-    const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
-    .filter(entry => this.shouldElementCountAsCurrentPage(entry));
-
-    if (midlineImages.length > 0) {
-      this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
+      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
+      this.isScrolling = false;
     }
+
+    if (!this.isScrolling) {
+      // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+      // to mark the current page and separate the prefetching code. 
+      const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+      .filter(entry => this.shouldElementCountAsCurrentPage(entry));
+
+      if (midlineImages.length > 0) {
+        this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+      }
+    }
+    
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
@@ -389,8 +390,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
-        //this.setPageNum(imagePage);
-        // ?! Changing this so that this just triggers a prefetch
         this.prefetchWebtoonImages(imagePage);
       }
     });
@@ -414,10 +413,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (scrollToPage) {
       const currentImage = document.querySelector('img#page-' + this.pageNum);
-      if (currentImage !== null && !this.isElementVisible(currentImage)) {
-        this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
-        this.scrollToCurrentPage();
-      }
+      if (currentImage === null) return;
+      this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
+      this.scrollToCurrentPage();
     }
   }
 
@@ -478,6 +476,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Finds the ranges of indecies to load from backend. totalPages - 1 is due to backend will automatically return last page for any page number
+   * above totalPages. Webtoon reader might ask for that which results in duplicate last pages. 
+   * @param pageNum 
+   * @returns 
+   */
   calculatePrefetchIndecies(pageNum: number = -1) {
     if (pageNum == -1) {
       pageNum = this.pageNum;
@@ -486,15 +490,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
 
       if (startingIndex === this.totalPages) {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
     }
 
 
