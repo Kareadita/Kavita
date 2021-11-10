@@ -117,7 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline | DEBUG_MODES.Logs;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -390,8 +390,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
-        //this.setPageNum(imagePage);
-        // ?! Changing this so that this just triggers a prefetch
         this.prefetchWebtoonImages(imagePage);
       }
     });
@@ -479,6 +477,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Finds the ranges of indecies to load from backend. totalPages - 1 is due to backend will automatically return last page for any page number
+   * above totalPages. Webtoon reader might ask for that which results in duplicate last pages. 
+   * @param pageNum 
+   * @returns 
+   */
   calculatePrefetchIndecies(pageNum: number = -1) {
     if (pageNum == -1) {
       pageNum = this.pageNum;
@@ -487,15 +491,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
 
       if (startingIndex === this.totalPages) {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
     }
 
 
