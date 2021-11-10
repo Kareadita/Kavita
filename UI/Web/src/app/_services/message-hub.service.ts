@@ -1,4 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -49,7 +50,7 @@ export class MessageHubService {
 
   isAdmin: boolean = false;
 
-  constructor(private modalService: NgbModal, private toastr: ToastrService) {
+  constructor(private modalService: NgbModal, private toastr: ToastrService, private router: Router) {
     
   }
 
@@ -111,7 +112,8 @@ export class MessageHubService {
         payload: resp.body
       });
       this.seriesAdded.emit(resp.body);
-      if (this.isAdmin) {
+      // Don't show the toast when user has reader open
+      if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
         this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
       }
     });

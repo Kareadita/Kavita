@@ -17,6 +17,7 @@ using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -48,7 +49,6 @@ namespace API.Controllers
             _cacheService = cacheService;
             _readerService = readerService;
 
-
             _xmlSerializer = new XmlSerializer(typeof(Feed));
             _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
 
@@ -62,7 +62,7 @@ namespace API.Controllers
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
             var feed = CreateFeed("Kavita", string.Empty, apiKey);
-            feed.Id = "root";
+            SetFeedId(feed, "root");
             feed.Entries.Add(new FeedEntry()
             {
                 Id = "inProgress",
@@ -140,9 +140,8 @@ namespace API.Controllers
                 return BadRequest("OPDS is not enabled on this server");
             var userId = await GetUser(apiKey);
             var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
-
             var feed = CreateFeed("All Libraries", $"{apiKey}/libraries", apiKey);
-
+            SetFeedId(feed, "libraries");
             foreach (var library in libraries)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -181,7 +180,7 @@ namespace API.Controllers
 
 
             var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
-
+            SetFeedId(feed, "collections");
             foreach (var tag in tags)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -195,15 +194,6 @@ namespace API.Controllers
                         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}"),
                         CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}")
                     }
-                });
-            }
-
-            if (tags.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
                 });
             }
 
@@ -244,6 +234,7 @@ namespace API.Controllers
             });
 
             var feed = CreateFeed(tag.Title + " Collection", $"{apiKey}/collections/{collectionId}", apiKey);
+            SetFeedId(feed, $"collections-{collectionId}");
             AddPagination(feed, series, $"{Prefix}{apiKey}/collections/{collectionId}");
 
             foreach (var seriesDto in series)
@@ -270,7 +261,7 @@ namespace API.Controllers
 
 
             var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey);
-
+            SetFeedId(feed, "reading-list");
             foreach (var readingListDto in readingLists)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -305,6 +296,7 @@ namespace API.Controllers
             }
 
             var feed = CreateFeed(readingList.Title + " Reading List", $"{apiKey}/reading-list/{readingListId}", apiKey);
+            SetFeedId(feed, $"reading-list-{readingListId}");
 
             var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
             foreach (var item in items)
@@ -320,17 +312,6 @@ namespace API.Controllers
                     }
                 });
             }
-
-            if (items.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
-            }
-
-
 
             return CreateXmlResult(SerializeXml(feed));
         }
@@ -357,6 +338,7 @@ namespace API.Controllers
             }, _filterDto);
 
             var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey);
+            SetFeedId(feed, $"library-{library.Name}");
             AddPagination(feed, series, $"{Prefix}{apiKey}/libraries/{libraryId}");
 
             foreach (var seriesDto in series)
@@ -381,22 +363,13 @@ namespace API.Controllers
             }, _filterDto);
 
             var feed = CreateFeed("Recently Added", $"{apiKey}/recently-added", apiKey);
+            SetFeedId(feed, "recently-added");
             AddPagination(feed, recentlyAdded, $"{Prefix}{apiKey}/recently-added");
 
             foreach (var seriesDto in recentlyAdded)
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
             }
-
-            if (recentlyAdded.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
-            }
-
 
             return CreateXmlResult(SerializeXml(feed));
         }
@@ -421,20 +394,12 @@ namespace API.Controllers
             Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
             var feed = CreateFeed("In Progress", $"{apiKey}/in-progress", apiKey);
+            SetFeedId(feed, "in-progress");
             AddPagination(feed, pagedList, $"{Prefix}{apiKey}/in-progress");
 
             foreach (var seriesDto in pagedList)
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
-            }
-
-            if (pagedList.Count == 0)
-            {
-                feed.Entries.Add(new FeedEntry()
-                {
-                    Id = "0",
-                    Title = "Nothing here",
-                });
             }
 
             return CreateXmlResult(SerializeXml(feed));
@@ -460,13 +425,18 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), query);
 
             var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey);
-
+            SetFeedId(feed, "search-series");
             foreach (var seriesDto in series)
             {
                 feed.Entries.Add(CreateSeries(seriesDto, apiKey));
             }
 
             return CreateXmlResult(SerializeXml(feed));
+        }
+
+        private static void SetFeedId(Feed feed, string id)
+        {
+            feed.Id = id;
         }
 
         [HttpGet("{apiKey}/search")]
@@ -502,6 +472,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
             var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
             var feed = CreateFeed(series.Name + " - Volumes", $"{apiKey}/series/{series.Id}", apiKey);
+            SetFeedId(feed, $"series-{series.Id}");
             feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
             foreach (var volumeDto in volumes)
             {
@@ -525,6 +496,7 @@ namespace API.Controllers
                     _chapterSortComparer);
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
+            SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-chapters");
             foreach (var chapter in chapters)
             {
                 feed.Entries.Add(new FeedEntry()
@@ -555,6 +527,7 @@ namespace API.Controllers
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
             var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
+            SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-chapter-{chapter.Id}-files");
             foreach (var mangaFile in files)
             {
                 feed.Entries.Add(CreateChapter(seriesId, volumeId, chapterId, mangaFile, series, volume, chapter, apiKey));
