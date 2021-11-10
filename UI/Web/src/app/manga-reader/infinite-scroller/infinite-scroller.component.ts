@@ -1,8 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -119,7 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -138,7 +136,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, private utilityService: UtilityService) {}
+  constructor(private readerService: ReaderService, private renderer: Renderer2) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
