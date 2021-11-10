@@ -1065,12 +1065,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
-
-    // Webtoon reader has a maxPages - 1 concept of total pages, so if this comes in as that, we should adjust it for the reader
-    // if (updatedPageNum === this.maxPages - 1) {
-    //   updatedPageNum = this.maxPages;
-    // }
-
     this.setPageNum(updatedPageNum);
     if (this.incognitoMode) return;
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});

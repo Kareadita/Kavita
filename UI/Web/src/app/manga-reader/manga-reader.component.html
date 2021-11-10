@@ -28,7 +28,6 @@
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
-            <!-- TODO: I pass maxPages - 1 here because webtoon reader can request a duplicate last page. -->
             <app-infinite-scroller [pageNum]="pageNum" 
             [bufferPages]="5" 
             [goToPage]="goToPageEvent" 

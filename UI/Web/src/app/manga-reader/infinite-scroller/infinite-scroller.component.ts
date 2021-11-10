@@ -413,10 +413,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (scrollToPage) {
       const currentImage = document.querySelector('img#page-' + this.pageNum);
-      if (currentImage !== null && !this.isElementVisible(currentImage)) {
-        this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
-        this.scrollToCurrentPage();
-      }
+      if (currentImage === null) return;
+      this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
+      this.scrollToCurrentPage();
     }
   }
 
