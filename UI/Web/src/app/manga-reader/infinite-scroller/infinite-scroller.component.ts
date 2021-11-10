@@ -195,11 +195,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       || document.documentElement.scrollTop 
       || document.body.scrollTop || 0);
 
-    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
-      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
-      this.isScrolling = false;
-    }
-
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
@@ -207,14 +202,22 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.prevScrollPosition = verticalOffset;
 
-    // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
-    // to mark the current page and separate the prefetching code. 
-    const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
-    .filter(entry => this.shouldElementCountAsCurrentPage(entry));
-
-    if (midlineImages.length > 0) {
-      this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
+      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
+      this.isScrolling = false;
     }
+
+    if (!this.isScrolling) {
+      // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+      // to mark the current page and separate the prefetching code. 
+      const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+      .filter(entry => this.shouldElementCountAsCurrentPage(entry));
+
+      if (midlineImages.length > 0) {
+        this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+      }
+    }
+    
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
