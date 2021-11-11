@@ -65,15 +65,15 @@ namespace API.Controllers
             SetFeedId(feed, "root");
             feed.Entries.Add(new FeedEntry()
             {
-                Id = "inProgress",
-                Title = "In Progress",
+                Id = "onDeck",
+                Title = "On Deck",
                 Content = new FeedEntryContent()
                 {
-                    Text = "Browse by In Progress"
+                    Text = "Browse by On Deck"
                 },
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/in-progress"),
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/on-deck"),
                 }
             });
             feed.Entries.Add(new FeedEntry()
@@ -374,9 +374,9 @@ namespace API.Controllers
             return CreateXmlResult(SerializeXml(feed));
         }
 
-        [HttpGet("{apiKey}/in-progress")]
+        [HttpGet("{apiKey}/on-deck")]
         [Produces("application/xml")]
-        public async Task<IActionResult> GetInProgress(string apiKey, [FromQuery] int pageNumber = 1)
+        public async Task<IActionResult> GetOnDeck(string apiKey, [FromQuery] int pageNumber = 1)
         {
             if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
                 return BadRequest("OPDS is not enabled on this server");
@@ -386,16 +386,16 @@ namespace API.Controllers
                 PageNumber = pageNumber,
                 PageSize = 20
             };
-            var results = await _unitOfWork.SeriesRepository.GetInProgress(userId, 0, userParams, _filterDto);
+            var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, 0, userParams, _filterDto);
             var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
                 .Take(userParams.PageSize).ToList();
             var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
 
             Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-            var feed = CreateFeed("In Progress", $"{apiKey}/in-progress", apiKey);
-            SetFeedId(feed, "in-progress");
-            AddPagination(feed, pagedList, $"{Prefix}{apiKey}/in-progress");
+            var feed = CreateFeed("On Deck", $"{apiKey}/on-deck", apiKey);
+            SetFeedId(feed, "on-deck");
+            AddPagination(feed, pagedList, $"{Prefix}{apiKey}/on-deck");
 
             foreach (var seriesDto in pagedList)
             {

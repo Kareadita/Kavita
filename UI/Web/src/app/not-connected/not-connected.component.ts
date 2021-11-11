@@ -11,6 +11,7 @@ export class NotConnectedComponent implements OnInit {
   constructor(private memberService: MemberService, private router: Router) { }
 
   ngOnInit(): void {
+    // BUG: TODO: This causes an infinite reload loop on the UI when the API on backend doesn't exist
     // We make a call to backend on refresh so that if it's up, we can redirect to /home
     this.memberService.adminExists().subscribe((exists) => {
       const pageResume = localStorage.getItem('kavita--no-connection-url');
