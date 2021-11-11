@@ -10,6 +10,9 @@ namespace API.Entities.Enums
         CacheDirectory = 1,
         [Description("TaskBackup")]
         TaskBackup = 2,
+        /// <summary>
+        /// Logging level for Server
+        /// </summary>
         [Description("LoggingLevel")]
         LoggingLevel = 3,
         [Description("Port")]
