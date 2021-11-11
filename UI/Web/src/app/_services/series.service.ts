@@ -6,7 +6,6 @@ import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
-import { MangaFormat } from '../_models/manga-format';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { SeriesFilter } from '../_models/series-filter';
@@ -112,13 +111,13 @@ export class SeriesService {
     );
   }
 
-  getInProgress(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     const data = this.createSeriesFilter(filter);
 
     let params = new HttpParams();
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'series/in-progress?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/on-deck?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map(response => {
         return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
     }));

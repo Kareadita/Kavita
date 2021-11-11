@@ -10,13 +10,13 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-filter';
-import { Action, ActionFactoryService } from '../_services/action-factory.service';
+import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 /**
- * This component is used as a standard layout for any card detail. ie) series, in-progress, collections, etc.
+ * This component is used as a standard layout for any card detail. ie) series, on-deck, collections, etc.
  */
 @Component({
   selector: 'app-recently-added',

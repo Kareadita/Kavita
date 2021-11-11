@@ -7,7 +7,7 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { InProgressComponent } from './in-progress/in-progress.component';
+import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
@@ -54,7 +54,7 @@ const routes: Routes = [
     children: [
       {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
-      {path: 'in-progress', component: InProgressComponent},
+      {path: 'on-deck', component: OnDeckComponent},
     ]
   },
   {path: 'login', component: UserLoginComponent},

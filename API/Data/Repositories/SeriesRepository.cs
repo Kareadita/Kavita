@@ -312,14 +312,15 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// Returns Series that the user has some partial progress on
+        /// Returns Series that the user has some partial progress on. Sorts based on activity. Sort first by User progress, but if a series
+        /// has been updated recently, bump it to the front.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="userParams">Pagination information</param>
         /// <param name="filter">Optional (default null) filter on query</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
+        public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
         {
             var formats = filter.GetSqlFilter();
             IList<int> userLibraries;
@@ -352,6 +353,7 @@ namespace API.Data.Repositories
                                               && s.PagesRead > 0
                                               && s.PagesRead < s.Series.Pages)
                             .OrderByDescending(s => s.LastModified)
+                            .ThenByDescending(s => s.Series.LastModified)
                             .Select(s => s.Series)
                             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                             .AsSplitQuery()

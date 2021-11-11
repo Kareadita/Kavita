@@ -5,7 +5,7 @@
     <p>You haven't been granted access to any libraries.</p>
 </div>
 
-<app-carousel-reel [items]="inProgress" title="In Progress" (sectionClick)="handleSectionClick($event)">
+<app-carousel-reel [items]="inProgress" title="On Deck" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
         <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
     </ng-template>
