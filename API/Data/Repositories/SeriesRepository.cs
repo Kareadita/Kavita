@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
@@ -47,16 +48,22 @@ namespace API.Data.Repositories
             _context.Series.RemoveRange(series);
         }
 
-        public async Task<bool> DoesSeriesNameExistInLibrary(string name)
+        /// <summary>
+        /// Returns if a series name and format exists already in a library
+        /// </summary>
+        /// <param name="name">Name of series</param>
+        /// <param name="format">Format of series</param>
+        /// <returns></returns>
+        public async Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format)
         {
             var libraries = _context.Series
                 .AsNoTracking()
-                .Where(x => x.Name == name)
+                .Where(x => x.Name.Equals(name) && x.Format == format)
                 .Select(s => s.LibraryId);
 
             return await _context.Series
                 .AsNoTracking()
-                .Where(s => libraries.Contains(s.LibraryId) && s.Name == name)
+                .Where(s => libraries.Contains(s.LibraryId) && s.Name.Equals(name) && s.Format == format)
                 .CountAsync() > 1;
         }
 

@@ -251,6 +251,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
+        this.debugLog('At last page, saving last page ', this.totalPages);
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = this.getScrollTop();
         requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));

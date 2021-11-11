@@ -4,6 +4,7 @@ using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 
 namespace API.Interfaces.Repositories
@@ -14,7 +15,7 @@ namespace API.Interfaces.Repositories
         void Update(Series series);
         void Remove(Series series);
         void Remove(IEnumerable<Series> series);
-        Task<bool> DoesSeriesNameExistInLibrary(string name);
+        Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format);
         /// <summary>
         /// Adds user information like progress, ratings, etc
         /// </summary>

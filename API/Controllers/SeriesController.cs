@@ -180,7 +180,7 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
 
-            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
+            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name, series.Format))
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
