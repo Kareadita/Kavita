@@ -75,7 +75,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   reloadSeries() {
     this.loadRecentlyAdded();
-    this.loadInProgress();
+    this.loadOnDeck();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -88,10 +88,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadInProgress();
+    this.loadOnDeck();
   }
 
-  loadInProgress() {
+  loadOnDeck() {
     this.seriesService.getOnDeck().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
     });
