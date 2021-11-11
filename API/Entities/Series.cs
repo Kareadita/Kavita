@@ -23,7 +23,7 @@ namespace API.Entities
         /// </summary>
         public string SortName { get; set; }
         /// <summary>
-        /// Name in Japanese. By default, will be same as Name.
+        /// Name in original language (Japanese for Manga). By default, will be same as Name.
         /// </summary>
         public string LocalizedName { get; set; }
         /// <summary>

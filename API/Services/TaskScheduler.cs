@@ -26,6 +26,7 @@ namespace API.Services
         private const string SendDataTask = "finalize-stats";
 
         public static BackgroundJobServer Client => new BackgroundJobServer();
+        private static readonly Random Rnd = new Random();
 
 
         public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
@@ -73,7 +74,8 @@ namespace API.Services
 
             RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
 
-            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
+            // Schedule update check between noon and 6pm local time
+            RecurringJob.AddOrUpdate("check-for-updates", () => _scannerService.ScanLibraries(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
         }
 
         #region StatsTasks
