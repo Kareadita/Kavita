@@ -227,20 +227,28 @@ namespace API.Services.Tasks
            await UpdateLibrary(library, series);
 
            library.LastScanned = DateTime.Now;
-           _unitOfWork.LibraryRepository.Update(library);
-           if (await _unitOfWork.CommitAsync())
+           try
            {
-               _logger.LogInformation(
-                   "[ScannerService] Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                   totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+               _unitOfWork.LibraryRepository.Update(library);
+               if (await _unitOfWork.CommitAsync())
+               {
+                   _logger.LogInformation(
+                       "[ScannerService] Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                       totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+               }
+               else
+               {
+                   _logger.LogCritical(
+                       "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
+               }
+
+               await CleanupDbEntities();
            }
-           else
+           catch (Exception ex)
            {
-               _logger.LogCritical(
+               _logger.LogCritical(ex,
                    "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
            }
-
-           await CleanupDbEntities();
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
