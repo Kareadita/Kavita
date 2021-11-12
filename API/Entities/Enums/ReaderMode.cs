@@ -12,6 +12,9 @@ namespace API.Entities.Enums
         MANGA_UP = 1,
         [Description("Webtoon")]
         // ReSharper disable once InconsistentNaming
-        WEBTOON = 2
+        WEBTOON = 2,
+        [Description("Webtoon Horizontal")]
+        // ReSharper disable once InconsistentNaming
+        WEBTOON_HORIZONTAL = 3
     }
 }

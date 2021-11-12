@@ -25,6 +25,7 @@ import { READER_MODE } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
+import { ScrollDirection } from './infinite-scroller/infinite-scroller.component';
 
 const PREFETCH_PAGES = 5;
 
@@ -244,6 +245,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return 'fa-exchange-alt fa-rotate-90';
       case READER_MODE.WEBTOON:
         return 'fa-arrows-alt-v';
+      case READER_MODE.WEBTOON_HORIZONTAL:
+        return 'fa-arrows-alt-h';
     }
   }
 
@@ -256,6 +259,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case COLOR_FILTER.SEPIA:
         return 'Sepia';
     }
+  }
+
+  get direction() {
+    if (this.readerMode === READER_MODE.WEBTOON_HORIZONTAL) {
+      return ScrollDirection.Horizontal;
+    }
+    return ScrollDirection.Vertical;
   }
 
   get READER_MODE(): typeof READER_MODE {
@@ -291,7 +301,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
     
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
-    if (readingListId != null) {
+    if (readingListId !== null) {
       this.readingListMode = true;
       this.readingListId = parseInt(readingListId, 10);
     }
@@ -481,7 +491,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   render() {
-    if (this.readerMode === READER_MODE.WEBTOON) {
+    if (this.isWebtoonMode()) {
       this.isLoading = false;
     } else {
       this.loadPage();
@@ -494,6 +504,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.location.back();
     }
+  }
+
+  isWebtoonMode() {
+    return this.readerMode === READER_MODE.WEBTOON || this.readerMode === READER_MODE.WEBTOON_HORIZONTAL;
   }
 
   updateTitle(chapterInfo: ChapterInfo, type: LibraryType) {
@@ -664,7 +678,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handlePageChange(event: any, direction: string) {
-    if (this.readerMode === READER_MODE.WEBTOON) {
+    if (this.isWebtoonMode()) {
       if (direction === 'right') {
         this.nextPage(event);
       } else {
@@ -699,12 +713,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
-      if (this.readerMode !== READER_MODE.WEBTOON) {
+      if (!this.isWebtoonMode()) {
         this.canvasImage = this.cachedImages.next();
       }
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (!this.isWebtoonMode()) {
       this.loadPage();
     }    
   }
@@ -732,7 +746,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImage = this.cachedImages.prev();
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (!this.isWebtoonMode()) {
       this.loadPage();
     }  
   }
@@ -755,7 +769,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.continuousChaptersStack.pop();
     const prevChapter = this.continuousChaptersStack.peek();
-    if (prevChapter != this.chapterId) {
+    if (prevChapter !== this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
         this.init();
@@ -950,7 +964,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   sliderDragUpdate(context: ChangeContext) {
     // This will update the value for value except when in webtoon due to how the webtoon reader 
     // responds to page changes
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (!this.isWebtoonMode()) {
       this.setPageNum(context.value);
     }
   }
@@ -1045,8 +1059,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readerMode = READER_MODE.WEBTOON;
         break;
       case READER_MODE.WEBTOON:
-        this.readerMode = READER_MODE.MANGA_LR;
+        this.readerMode = READER_MODE.WEBTOON_HORIZONTAL;
         break;
+      case READER_MODE.WEBTOON_HORIZONTAL:
+          this.readerMode = READER_MODE.MANGA_LR;
+          break;
     }
 
     this.updateForm();
@@ -1055,7 +1072,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateForm() {
-    if ( this.readerMode === READER_MODE.WEBTOON) {
+    if (this.isWebtoonMode()) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
     } else {
@@ -1087,7 +1104,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
-    if (this.readerMode != READER_MODE.WEBTOON) {
+    if (!this.isWebtoonMode()) {
       if (this.canvas) {
         this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
         setTimeout(() => {

@@ -30,8 +30,14 @@ const enum DEBUG_MODES {
    * Turn on Page outline
    */
   Outline = 8
+}
 
-
+/**
+ * Represents the direction of scrolling that Infinite Scroller will use
+ */
+export enum ScrollDirection {
+  Vertical = 0,
+  Horizontal = 1
 }
 
 @Component({
@@ -41,6 +47,7 @@ const enum DEBUG_MODES {
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
+  @Input() direction: ScrollDirection = ScrollDirection.Vertical;
   /**
    * Current page number aka what's recorded on screen
    */
@@ -129,6 +136,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   get areImagesWiderThanWindow() {
     return this.webtoonImageWidth > (window.innerWidth || document.documentElement.clientWidth);
+  }
+
+  get ScrollDirection(): typeof ScrollDirection {
+    return ScrollDirection;
   }
 
 
@@ -239,6 +250,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
+    // TODO: Need Horizontal version
     if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
       const totalHeight = this.getTotalHeight();
       const totalScroll = this.getTotalScroll();
@@ -306,16 +318,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     var rect = elem.getBoundingClientRect();
 
+    // TODO: Need Horizontal version?
     if (rect.bottom >= 0 && 
             rect.right >= 0 && 
             rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           ) {
             const topX = (window.innerHeight || document.documentElement.clientHeight);
-            const bottomX = this.getScrollTop();
+            
+            //const bottomX = this.getScrollTop();
 
             // Check if the image is mostly above the cuttoff point
-            const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
+            //const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
             // without this, it will only trigger once you get the top of the image to the top of the screen: && rect.bottom > cuttoffPoint
             // with it, it will trigger at half way
             //console.log('Cutoff point: ', cuttoffPoint);
@@ -358,8 +372,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.webtoonImageWidth = event.target.width;
     }
 
+
     this.renderer.setAttribute(event.target, 'width', this.webtoonImageWidth + '');
     this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+    
 
     this.attachIntersectionObserverElem(event.target);
 

@@ -27,13 +27,14 @@
         <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} " 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
-        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
+        <div class="webtoon-images" *ngIf="isWebtoonMode() && !isLoading">
             <app-infinite-scroller [pageNum]="pageNum" 
             [bufferPages]="5" 
             [goToPage]="goToPageEvent" 
             (pageNumberChange)="handleWebtoonPageChange($event)" 
             [totalPages]="maxPages" 
             [urlProvider]="getPageUrl" 
+            [direction]="direction"
             (loadNextChapter)="loadNextChapter()" 
             (loadPrevChapter)="loadPrevChapter()"
             [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
@@ -66,7 +67,7 @@
         </div>
         <div class="row pt-4 ml-2 mr-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="isWebtoonMode() || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="sr-only">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
@@ -78,7 +79,7 @@
                 </button>
             </div>
             <div class="col">
-                <button class="btn btn-icon {{this.colorMode}}" [disabled]="readerMode === READER_MODE.WEBTOON" title="Color Options: {{colorOptionName}}" (click)="toggleColorMode();resetMenuCloseTimer();">
+                <button class="btn btn-icon {{this.colorMode}}" [disabled]="isWebtoonMode()" title="Color Options: {{colorOptionName}}" (click)="toggleColorMode();resetMenuCloseTimer();">
                     <i class="fa fa-palette" aria-hidden="true"></i>
                     <span class="sr-only"></span>
                 </button>

@@ -8,7 +8,11 @@ export enum READER_MODE {
      */
     MANGA_UD = 1,
     /**
-     * Webtoon reading (scroll) with optional areas to tap
+     * Infinite scroll vertical reading (scroll)
      */
-    WEBTOON = 2
+    WEBTOON = 2,
+    /**
+     * Infinite scroll horizontal reading (scroll)
+     */
+    WEBTOON_HORIZONTAL = 3
 }

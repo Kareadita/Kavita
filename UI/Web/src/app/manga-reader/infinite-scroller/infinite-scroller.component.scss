@@ -25,6 +25,21 @@
     width: 100% !important;
 }
 
+.vertical-scroll {
+    display: block;
+}
+
+.horizontal-scroll {
+    img {
+        //display: inline-block;
+        float: left;
+    }
+    overflow: hidden;
+    overflow-x: scroll;
+    //white-space: nowrap;
+    //direction: rtl;
+}
+
 
 @keyframes move-up-down {
     0%, 100% {
