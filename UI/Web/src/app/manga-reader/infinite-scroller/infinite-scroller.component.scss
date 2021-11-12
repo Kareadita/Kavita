@@ -27,17 +27,19 @@
 
 .vertical-scroll {
     display: block;
+
+    img {
+        display: block;
+    }
 }
 
 .horizontal-scroll {
     img {
-        //display: inline-block;
         float: left;
     }
     overflow: hidden;
     overflow-x: scroll;
-    //white-space: nowrap;
-    //direction: rtl;
+    display: inline-flex;
 }
 
 

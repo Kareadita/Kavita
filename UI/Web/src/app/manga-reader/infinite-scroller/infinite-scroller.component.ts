@@ -196,22 +196,41 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  getScrollOffset() {
+    if (this.direction === ScrollDirection.Horizontal) {
+      return (window.pageXOffset  
+        || document.documentElement.scrollLeft
+        || document.body.scrollLeft || 0);
+    }
+
+    return (window.pageYOffset 
+      || document.documentElement.scrollTop 
+      || document.body.scrollTop || 0);
+  }
+
+  handleHorizontalScroll(event: WheelEvent): void {
+    if (this.direction === ScrollDirection.Vertical) { return; }
+
+    //document.getElementsByClassName('horizontal-scroll')[0].scrollLeft -= event.deltaY;
+    //event.preventDefault();
+    //this.handleScrollEvent(event);
+  }
+
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely, 
    * and calculate the direction the scrolling is occuring. This is used for prefetching.
    * @param event Scroll Event
    */
-  handleScrollEvent(event?: any) {
-    const verticalOffset = (window.pageYOffset 
-      || document.documentElement.scrollTop 
-      || document.body.scrollTop || 0);
+  handleScrollEvent(event?: Event) {
+    console.log(event);
+    const scrollOffset = this.getScrollOffset();
 
-    if (verticalOffset > this.prevScrollPosition) {
+    if (scrollOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
       this.scrollingDirection = PAGING_DIRECTION.BACKWARDS;
     }
-    this.prevScrollPosition = verticalOffset;
+    this.prevScrollPosition = scrollOffset;
 
     if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
@@ -250,40 +269,43 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
 
-    // TODO: Need Horizontal version
-    if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-      const totalHeight = this.getTotalHeight();
-      const totalScroll = this.getTotalScroll();
-
-      // If we were at top but have started scrolling down past page 0, remove top spacer
-      if (this.atTop && this.pageNum > 0) {
-        this.atTop = false;
-      }
-      // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
-      if (totalScroll === totalHeight && !this.atBottom) {
-        this.atBottom = true;
-        this.setPageNum(this.totalPages);
-        this.debugLog('At last page, saving last page ', this.totalPages);
-        // Scroll user back to original location
-        this.previousScrollHeightMinusTop = this.getScrollTop();
-        requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
-      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
-        // This if statement will fire once we scroll into the spacer at all
-        this.loadNextChapter.emit();
+    if (this.direction === ScrollDirection.Vertical) {
+      if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+        const totalHeight = this.getTotalHeight();
+        const totalScroll = this.getTotalScroll();
+  
+        // If we were at top but have started scrolling down past page 0, remove top spacer
+        if (this.atTop && this.pageNum > 0) {
+          this.atTop = false;
+        }
+        // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
+        if (totalScroll === totalHeight && !this.atBottom) {
+          this.atBottom = true;
+          this.setPageNum(this.totalPages);
+          this.debugLog('At last page, saving last page ', this.totalPages);
+          // Scroll user back to original location
+          this.previousScrollHeightMinusTop = this.getScrollTop();
+          requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
+        } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+          // This if statement will fire once we scroll into the spacer at all
+          this.loadNextChapter.emit();
+        }
+      } else {
+        // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
+        if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
+          this.atBottom = false;
+  
+          this.atTop = true; 
+          // Scroll user back to original location
+          this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+          requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
+        } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
+          // If already at top, then we moving on
+          this.loadPrevChapter.emit();
+        }
       }
     } else {
-      // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
-      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
-        this.atBottom = false;
-
-        this.atTop = true; 
-        // Scroll user back to original location
-        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
-        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
-      } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
-        // If already at top, then we moving on
-        this.loadPrevChapter.emit();
-      }
+      // TODO: Implement Continuous Reader for Horizontal Reading mode
     }
 
   }
@@ -339,7 +361,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             // console.log('amount scrolled down: ', rect.top / topX);
             // console.log('cutoff point: ', cuttoffPoint);
 
-            return Math.abs(rect.top / topX) <= 0.25;
+            if (this.direction === ScrollDirection.Vertical) {
+              return Math.abs(rect.top / topX) <= 0.25;
+            } else {
+              return Math.abs(rect.top / topX) <= 0.25;
+            }
           }
     return false;
   }
@@ -348,7 +374,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initWebtoonReader() {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
-    this.atBottom = false;
+    this.atBottom = false; // TODO: Direction code
     this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
@@ -374,8 +400,17 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
 
     this.renderer.setAttribute(event.target, 'width', this.webtoonImageWidth + '');
-    this.renderer.setAttribute(event.target, 'height', event.target.height + '');
-    
+    if (this.direction === ScrollDirection.Vertical) {
+      this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+    } else {
+      // ?! BUG: This is not setting correctly for images already loaded from vertical mode
+      // this.renderer.setAttribute(event.target, 'height', (window.innerHeight || document.documentElement.clientHeight) + '');
+      // console.log('setting height: ', (window.innerHeight || document.documentElement.clientHeight) + 'px')
+      this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+      this.renderer.setAttribute(event.target, 'float', 'left');
+      this.renderer.setAttribute(event.target, 'display', 'inline-block');
+    }
+
 
     this.attachIntersectionObserverElem(event.target);
 
@@ -448,7 +483,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.currentPageElem) { return; }
     
     // Update prevScrollPosition, so the next scroll event properly calculates direction
-    this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
+    if (this.direction === ScrollDirection.Vertical) {
+      this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;  
+    } else {
+      this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().left;
+    }
     this.isScrolling = true;
 
     setTimeout(() => {
