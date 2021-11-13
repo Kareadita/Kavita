@@ -359,9 +359,9 @@ namespace API.Services.Tasks
               // Key is normalized already
               Series existingSeries;
               try
-              {// NOTE: Maybe use .Equals() here
+              {
                   existingSeries = allSeries.SingleOrDefault(s =>
-                      (s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName)
+                      (s.NormalizedName.Equals(key.NormalizedName) || Parser.Parser.Normalize(s.OriginalName).Equals(key.NormalizedName))
                       && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
               }
               catch (Exception e)
@@ -393,31 +393,23 @@ namespace API.Services.Tasks
                   series.Pages = series.Volumes.Sum(v => v.Pages);
                   series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
                   _unitOfWork.SeriesRepository.Attach(series);
-                  if (await _unitOfWork.CommitAsync())
-                  {
-                      _logger.LogInformation(
-                          "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                          newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+                  await _unitOfWork.CommitAsync();
+                  _logger.LogInformation(
+                      "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                      newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
 
-                      // Inform UI of new series added
-                      await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
-                      var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
-                      await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-                          MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
-                  }
-                  else
-                  {
-                      // This is probably not needed. Better to catch the exception.
-                      _logger.LogCritical(
-                          "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
-                  }
-
-                  i++;
+                  // Inform UI of new series added
+                  await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
               }
               catch (Exception ex)
               {
-                  _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
+                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName}", series.Name);
               }
+
+              var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
+              await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                  MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
+              i++;
           }
 
           _logger.LogInformation(
