@@ -124,7 +124,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -210,9 +210,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   handleHorizontalScroll(event: WheelEvent): void {
     if (this.direction === ScrollDirection.Vertical) { return; }
+    // console.log(event);
 
-    //document.getElementsByClassName('horizontal-scroll')[0].scrollLeft -= event.deltaY;
-    //event.preventDefault();
+    // //document.getElementsByClassName('horizontal-scroll')[0].scrollLeft -= event.deltaY;
+    // if (!this.atBottom && this.direction === ScrollDirection.Horizontal) {
+    //   event.preventDefault();
+    // }
     //this.handleScrollEvent(event);
   }
 
@@ -222,8 +225,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param event Scroll Event
    */
   handleScrollEvent(event?: Event) {
-    console.log(event);
     const scrollOffset = this.getScrollOffset();
+
+    // Idea is to prevent scroll event on vertical and do horizontal if we are fully scrolled
+    // if (!this.atBottom && this.direction === ScrollDirection.Horizontal && event !== undefined) {
+    //   event.preventDefault();
+    // }
+
+    console.log(event);
 
     if (scrollOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
@@ -346,7 +355,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           ) {
-            const topX = (window.innerHeight || document.documentElement.clientHeight);
+            const screenHeight = (window.innerHeight || document.documentElement.clientHeight);
+            const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
             
             //const bottomX = this.getScrollTop();
 
@@ -360,11 +370,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             // console.log('image ' + elem.getAttribute('page') + ' top: ', rect.top);
             // console.log('amount scrolled down: ', rect.top / topX);
             // console.log('cutoff point: ', cuttoffPoint);
-
+            console.log('Right: ', rect.right);
+            console.log('width: ', screenWidth);
             if (this.direction === ScrollDirection.Vertical) {
-              return Math.abs(rect.top / topX) <= 0.25;
+              return Math.abs(rect.top / screenHeight) <= 0.25;
             } else {
-              return Math.abs(rect.top / topX) <= 0.25;
+              return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75; // ?! This doesn't work perfectly, need to revist
             }
           }
     return false;
@@ -376,6 +387,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.webtoonImages.next([]);
     this.atBottom = false; // TODO: Direction code
     this.checkIfShouldTriggerContinuousReader();
+
+    // if (this.direction === ScrollDirection.Horizontal) {
+    //   Array.from(document.querySelectorAll('img')).forEach(elem => elem.height = (window.innerHeight || document.documentElement.clientHeight));
+    // }
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
@@ -406,7 +421,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       // ?! BUG: This is not setting correctly for images already loaded from vertical mode
       // this.renderer.setAttribute(event.target, 'height', (window.innerHeight || document.documentElement.clientHeight) + '');
       // console.log('setting height: ', (window.innerHeight || document.documentElement.clientHeight) + 'px')
-      this.renderer.setAttribute(event.target, 'height', event.target.height + '');
+      //this.renderer.setAttribute(event.target, 'height', window.innerHeight + '');
       this.renderer.setAttribute(event.target, 'float', 'left');
       this.renderer.setAttribute(event.target, 'display', 'inline-block');
     }
