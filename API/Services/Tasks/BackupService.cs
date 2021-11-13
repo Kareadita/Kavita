@@ -89,7 +89,7 @@ namespace API.Services.Tasks
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
             if (!DirectoryService.ExistOrCreate(backupDirectory))
             {
-                _logger.LogError("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
+                _logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
                 return;
             }
 
@@ -107,7 +107,7 @@ namespace API.Services.Tasks
             DirectoryService.ClearDirectory(tempDirectory);
 
             _directoryService.CopyFilesToDirectory(
-                _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
+                _backupFiles.Select(file => Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
             await CopyCoverImagesToBackupDirectory(tempDirectory);
 
