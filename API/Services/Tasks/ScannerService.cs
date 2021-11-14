@@ -386,13 +386,13 @@ namespace API.Services.Tasks
           var i = 0;
           foreach(var series in newSeries)
           {
+              _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
+              UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series));
+              series.Pages = series.Volumes.Sum(v => v.Pages);
+              series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
+              _unitOfWork.SeriesRepository.Attach(series);
               try
               {
-                  _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-                  UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
-                  series.Pages = series.Volumes.Sum(v => v.Pages);
-                  series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
-                  _unitOfWork.SeriesRepository.Attach(series);
                   await _unitOfWork.CommitAsync();
                   _logger.LogInformation(
                       "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
@@ -403,7 +403,7 @@ namespace API.Services.Tasks
               }
               catch (Exception ex)
               {
-                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName} with a duplicate index key: {IndexKey}",
+                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName} with a duplicate index key: {IndexKey} ",
                       series.Name, $"{series.Name}_{series.NormalizedName}_{series.LocalizedName}_{series.LibraryId}_{series.Format}");
               }
 
@@ -491,7 +491,7 @@ namespace API.Services.Tasks
        /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
        /// <param name="removeCount"></param>
        /// <returns>the updated existingSeries</returns>
-       public static IList<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
+       public static IEnumerable<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
        {
           var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
@@ -505,7 +505,7 @@ namespace API.Services.Tasks
           return existingSeries;
        }
 
-       private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
+       private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
        {
           var startingVolumeCount = series.Volumes.Count;
           // Add new volumes and update chapters per volume
@@ -559,7 +559,7 @@ namespace API.Services.Tasks
        /// </summary>
        /// <param name="volume"></param>
        /// <param name="parsedInfos"></param>
-       private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
+       private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
        {
           // Add new chapters
           foreach (var info in parsedInfos)
