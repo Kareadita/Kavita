@@ -4,7 +4,14 @@
     {
         public const string UpdateVersion = "UpdateVersion";
         public const string ScanSeries = "ScanSeries";
+        /// <summary>
+        /// Event during Refresh Metadata for cover image change
+        /// </summary>
         public const string RefreshMetadata = "RefreshMetadata";
+        /// <summary>
+        /// Event sent out during Refresh Metadata for progress tracking
+        /// </summary>
+        public const string RefreshMetadataProgress = "RefreshMetadataProgress";
         public const string ScanLibrary = "ScanLibrary";
         public const string SeriesAdded = "SeriesAdded";
         public const string SeriesRemoved = "SeriesRemoved";

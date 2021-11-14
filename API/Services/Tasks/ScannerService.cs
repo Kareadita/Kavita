@@ -360,14 +360,13 @@ namespace API.Services.Tasks
               Series existingSeries;
               try
               {
-                  existingSeries = allSeries.SingleOrDefault(s =>
-                      (s.NormalizedName.Equals(key.NormalizedName) || Parser.Parser.Normalize(s.OriginalName).Equals(key.NormalizedName))
-                      && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
+                  existingSeries = allSeries.SingleOrDefault(s => FindSeries(s, key));
               }
               catch (Exception e)
               {
+                  // NOTE: If I ever want to put Duplicates table, this is where it can go
                   _logger.LogCritical(e, "[ScannerService] There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it. This will be skipped", key.NormalizedName);
-                  var duplicateSeries = allSeries.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
+                  var duplicateSeries = allSeries.Where(s => FindSeries(s, key));
                   foreach (var series in duplicateSeries)
                   {
                       _logger.LogCritical("[ScannerService] Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
@@ -415,6 +414,12 @@ namespace API.Services.Tasks
           _logger.LogInformation(
               "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
               newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
+       }
+
+       private static bool FindSeries(Series series, ParsedSeries parsedInfoKey)
+       {
+           return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName) || Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName))
+                  && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
        }
 
        private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
