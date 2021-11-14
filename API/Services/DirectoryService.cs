@@ -266,7 +266,7 @@ namespace API.Services
        /// <param name="directoryPath"></param>
        /// <param name="prepend">An optional string to prepend to the target file's name</param>
        /// <returns></returns>
-       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
+       public static bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "", ILogger logger = null)
        {
            ExistOrCreate(directoryPath);
            string currentFile = null;
@@ -282,17 +282,22 @@ namespace API.Services
                    }
                    else
                    {
-                       _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
+                       logger?.LogWarning("Tried to copy {File} but it doesn't exist", file);
                    }
                }
            }
            catch (Exception ex)
            {
-               _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+               logger?.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
                return false;
            }
 
            return true;
+       }
+
+       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
+       {
+           return CopyFilesToDirectory(filePaths, directoryPath, prepend, _logger);
        }
 
        public IEnumerable<string> ListDirectory(string rootPath)
