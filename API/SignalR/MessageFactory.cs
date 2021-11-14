@@ -60,6 +60,20 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.RefreshMetadataProgress,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                    EventTime = DateTime.Now
+                }
+            };
+        }
+
 
 
         public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)

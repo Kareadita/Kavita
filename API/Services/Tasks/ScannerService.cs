@@ -360,14 +360,13 @@ namespace API.Services.Tasks
               Series existingSeries;
               try
               {
-                  existingSeries = allSeries.SingleOrDefault(s =>
-                      (s.NormalizedName.Equals(key.NormalizedName) || Parser.Parser.Normalize(s.OriginalName).Equals(key.NormalizedName))
-                      && (s.Format == key.Format || s.Format == MangaFormat.Unknown));
+                  existingSeries = allSeries.SingleOrDefault(s => FindSeries(s, key));
               }
               catch (Exception e)
               {
+                  // NOTE: If I ever want to put Duplicates table, this is where it can go
                   _logger.LogCritical(e, "[ScannerService] There are multiple series that map to normalized key {Key}. You can manually delete the entity via UI and rescan to fix it. This will be skipped", key.NormalizedName);
-                  var duplicateSeries = allSeries.Where(s => s.NormalizedName == key.NormalizedName || Parser.Parser.Normalize(s.OriginalName) == key.NormalizedName).ToList();
+                  var duplicateSeries = allSeries.Where(s => FindSeries(s, key));
                   foreach (var series in duplicateSeries)
                   {
                       _logger.LogCritical("[ScannerService] Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
@@ -378,21 +377,20 @@ namespace API.Services.Tasks
 
               if (existingSeries != null) continue;
 
-              existingSeries = DbFactory.Series(infos[0].Series);
-              existingSeries.Format = key.Format;
-              newSeries.Add(existingSeries);
+              var s = DbFactory.Series(infos[0].Series);
+              s.Format = key.Format;
+              s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
+              newSeries.Add(s);
           }
 
           var i = 0;
           foreach(var series in newSeries)
           {
+              _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
+              UpdateSeries(series, parsedSeries);
+              _unitOfWork.SeriesRepository.Attach(series);
               try
               {
-                  _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-                  UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray());
-                  series.Pages = series.Volumes.Sum(v => v.Pages);
-                  series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
-                  _unitOfWork.SeriesRepository.Attach(series);
                   await _unitOfWork.CommitAsync();
                   _logger.LogInformation(
                       "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
@@ -403,7 +401,7 @@ namespace API.Services.Tasks
               }
               catch (Exception ex)
               {
-                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName} with a duplicate index key: {IndexKey}",
+                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName} with a duplicate index key: {IndexKey} ",
                       series.Name, $"{series.Name}_{series.NormalizedName}_{series.LocalizedName}_{series.LibraryId}_{series.Format}");
               }
 
@@ -418,13 +416,19 @@ namespace API.Services.Tasks
               newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
        }
 
+       private static bool FindSeries(Series series, ParsedSeries parsedInfoKey)
+       {
+           return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName) || Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName))
+                  && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
+       }
+
        private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
        {
            try
            {
                _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
-               var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
+               var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
                UpdateVolumes(series, parsedInfos);
                series.Pages = series.Volumes.Sum(v => v.Pages);
 
@@ -491,7 +495,7 @@ namespace API.Services.Tasks
        /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
        /// <param name="removeCount"></param>
        /// <returns>the updated existingSeries</returns>
-       public static IList<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
+       public static IEnumerable<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
        {
           var existingCount = existingSeries.Count;
           var missingList = missingSeries.ToList();
@@ -505,7 +509,7 @@ namespace API.Services.Tasks
           return existingSeries;
        }
 
-       private void UpdateVolumes(Series series, ParserInfo[] parsedInfos)
+       private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
        {
           var startingVolumeCount = series.Volumes.Count;
           // Add new volumes and update chapters per volume
@@ -559,7 +563,7 @@ namespace API.Services.Tasks
        /// </summary>
        /// <param name="volume"></param>
        /// <param name="parsedInfos"></param>
-       private void UpdateChapters(Volume volume, ParserInfo[] parsedInfos)
+       private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
        {
           // Add new chapters
           foreach (var info in parsedInfos)

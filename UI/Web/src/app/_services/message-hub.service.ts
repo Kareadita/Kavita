@@ -16,6 +16,7 @@ export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
   RefreshMetadata = 'RefreshMetadata',
+  RefreshMetadataProgress = 'RefreshMetadataProgress',
   SeriesAdded = 'SeriesAdded',
   SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
@@ -87,6 +88,13 @@ export class MessageHubService {
         payload: resp.body
       });
       this.scanLibrary.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.RefreshMetadataProgress,
+        payload: resp.body
+      });
     });
 
     this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {

@@ -35,6 +35,11 @@ export class EditCollectionTagsComponent implements OnInit {
   imageUrls: Array<string> = [];
   selectedCover: string = '';
 
+  get hasSomeSelected() {
+    return this.selections != null && this.selections.hasSomeSelected();
+  }
+
+
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, 
     private collectionService: CollectionTagService, private toastr: ToastrService,
     private confirmSerivce: ConfirmService, private libraryService: LibraryService,
@@ -131,11 +136,6 @@ export class EditCollectionTagsComponent implements OnInit {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
       this.toastr.success('Tag updated');
     });
-  }
-
-  get someSelected() {
-    const selected = this.selections.selected();
-    return (selected.length !== this.series.length && selected.length !== 0);
   }
 
   updateSelectedIndex(index: number) {
