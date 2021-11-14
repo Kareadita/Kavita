@@ -378,18 +378,17 @@ namespace API.Services.Tasks
 
               if (existingSeries != null) continue;
 
-              existingSeries = DbFactory.Series(infos[0].Series);
-              existingSeries.Format = key.Format;
-              newSeries.Add(existingSeries);
+              var s = DbFactory.Series(infos[0].Series);
+              s.Format = key.Format;
+              s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
+              newSeries.Add(s);
           }
 
           var i = 0;
           foreach(var series in newSeries)
           {
               _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-              UpdateVolumes(series, ParseScannedFiles.GetInfosByName(parsedSeries, series));
-              series.Pages = series.Volumes.Sum(v => v.Pages);
-              series.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
+              UpdateSeries(series, parsedSeries);
               _unitOfWork.SeriesRepository.Attach(series);
               try
               {
@@ -424,7 +423,7 @@ namespace API.Services.Tasks
            {
                _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
-               var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series).ToArray();
+               var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
                UpdateVolumes(series, parsedInfos);
                series.Pages = series.Volumes.Sum(v => v.Pages);
 
