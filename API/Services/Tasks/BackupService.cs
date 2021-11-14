@@ -76,7 +76,7 @@ namespace API.Services.Tasks
                 return;
             }
 
-            var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
+            var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
             var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
             if (File.Exists(zipPath))
