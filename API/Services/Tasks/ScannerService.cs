@@ -403,7 +403,8 @@ namespace API.Services.Tasks
               }
               catch (Exception ex)
               {
-                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName}", series.Name);
+                  _logger.LogCritical(ex, "[ScannerService] There was a critical exception adding new series entry for {SeriesName} with a duplicate index key: {IndexKey}",
+                      series.Name, $"{series.Name}_{series.NormalizedName}_{series.LocalizedName}_{series.LibraryId}_{series.Format}");
               }
 
               var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
