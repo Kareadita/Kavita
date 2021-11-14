@@ -426,7 +426,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
       if (page > this.maxPages) {
-        page = this.maxPages - 1;
+        page = this.maxPages;
       }
       this.setPageNum(page);
       
@@ -1065,7 +1065,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
+    // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
+    let pageNum = updatedPageNum;
+    if (this.pageNum == this.maxPages - 1) {
+      pageNum = this.pageNum + 1;
+    }
+
     this.setPageNum(updatedPageNum);
+
     if (this.incognitoMode) return;
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
   }
