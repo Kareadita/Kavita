@@ -187,7 +187,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely, 
-   * and calculate the direction the scrolling is occuring. This is used for prefetching.
+   * and calculate the direction the scrolling is occuring. This is not used for prefetching.
    * @param event Scroll Event
    */
   handleScrollEvent(event?: any) {
@@ -247,11 +247,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
       }
-      // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
+      
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
-        this.debugLog('At last page, saving last page ', this.totalPages);
+
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = this.getScrollTop();
         requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
@@ -312,19 +312,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           ) {
             const topX = (window.innerHeight || document.documentElement.clientHeight);
-            const bottomX = this.getScrollTop();
-
-            // Check if the image is mostly above the cuttoff point
-            const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
-            // without this, it will only trigger once you get the top of the image to the top of the screen: && rect.bottom > cuttoffPoint
-            // with it, it will trigger at half way
-            //console.log('Cutoff point: ', cuttoffPoint);
-            //return rect.top <= cuttoffPoint ; // && rect.bottom > cuttoffPoint
-            // console.log('device height: ', topX);
-            // console.log('image ' + elem.getAttribute('page') + ' top: ', rect.top);
-            // console.log('amount scrolled down: ', rect.top / topX);
-            // console.log('cutoff point: ', cuttoffPoint);
-
             return Math.abs(rect.top / topX) <= 0.25;
           }
     return false;
@@ -428,6 +415,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * Performs the scroll for the current page element. Updates any state variables needed.
    */
   scrollToCurrentPage() {
+    this.debugLog('Scrolling to ', this.pageNum);
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
     

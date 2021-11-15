@@ -218,7 +218,7 @@ namespace API.Services
             var stopwatch = Stopwatch.StartNew();
             var totalTime = 0L;
             _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
-            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
 
             var i = 0;
@@ -281,11 +281,11 @@ namespace API.Services
                         chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
                 }
                 var progress =  Math.Max(0F, Math.Min(100F, i * 1F / chunkInfo.TotalChunks));
-                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
             }
 
-            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(library.Id, 100F));
 
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
