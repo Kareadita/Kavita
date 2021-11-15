@@ -280,13 +280,13 @@ namespace API.Services
                         "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                         chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
                 }
-                var progress =  Math.Max(0F, Math.Min(100F, i * 1F / chunkInfo.TotalChunks));
+                var progress =  Math.Max(0F, Math.Min(1F, i * 1F / chunkInfo.TotalChunks));
                 await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
             }
 
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
-                MessageFactory.RefreshMetadataProgressEvent(library.Id, 100F));
+                MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
 
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
         }

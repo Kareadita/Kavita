@@ -89,6 +89,31 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage BackupDatabaseProgressEvent(float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.BackupDatabaseProgress,
+                Body = new
+                {
+                    Progress = progress
+                }
+            };
+        }
+        public static SignalRMessage CleanupProgressEvent(float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.CleanupProgress,
+                Body = new
+                {
+                    Progress = progress
+                }
+            };
+        }
+
+
+
         public static SignalRMessage UpdateVersionEvent(UpdateNotificationDto update)
         {
             return new SignalRMessage

@@ -94,6 +94,17 @@ $dark-item-accent-bg: #292d32;
     border-color: $dark-form-border;
   }
 
+  .dark-menu {
+    background-color: $dark-form-background-no-opacity;
+    border-color: $dark-form-background;
+  }
+
+  .dark-menu-item {
+    color: $dark-text-color;
+    background-color: $dark-form-background-no-opacity;
+    border-color: $dark-form-background;
+  }
+
   .dropdown .list-group-item:hover {
     background-color: $dark-hover-color;
   }
@@ -175,6 +186,10 @@ $dark-item-accent-bg: #292d32;
 
   .error-banner, .dropdown-toggle {
     color: #efefef;
+  }
+
+  .nav-events, .nav-events .popover-body {
+    background-color: $dark-form-background-no-opacity;
   }
 
 }

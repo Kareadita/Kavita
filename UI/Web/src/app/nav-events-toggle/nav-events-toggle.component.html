@@ -1,0 +1,22 @@
+<ng-container>
+    
+    <button type="button" class="btn btn-icon {{progressEventsSource.getValue().length > 0 ? 'colored' : ''}}" 
+        [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
+        <i aria-hidden="true" class="fa fa-wave-square"></i>
+    </button>
+
+    <ng-template #popContent>
+        <ul class="list-group list-group-flush dark-menu">
+            <li class="list-group-item dark-menu-item" *ngFor="let event of progressEvents$ | async">
+                <div class="spinner-border text-primary small-spinner"
+                role="status" title="Started at {{event.timestamp | date: 'short'}}" 
+                attr.aria-valuetext="{{prettyPrintProgress(event.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(event.progress)">
+                    <span class="sr-only">Scan for {{event.libraryName}} in progress</span>
+                </div>
+                {{prettyPrintProgress(event.progress)}}%
+                {{prettyPrintEvent(event.eventType)}} {{event.libraryName}}
+            </li>
+            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0">Not much going on here</li>
+        </ul>
+    </ng-template>
+</ng-container>
