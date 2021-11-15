@@ -30,7 +30,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   /**
    * Events that come through and are merged (ie progress event gets merged into a progress event)
    */
-  private progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
+  progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
   progressEvents$ = this.progressEventsSource.asObservable();
 
   constructor(private messageHub: MessageHubService, private libraryService: LibraryService) { }
@@ -79,7 +79,9 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   prettyPrintEvent(eventType: string) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing '
+      case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
+      case (EVENTS.CleanupProgress): return 'Clearing Cache';
+      case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
       default: return eventType;
     }
   }

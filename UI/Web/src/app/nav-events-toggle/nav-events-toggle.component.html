@@ -1,6 +1,6 @@
 <ng-container>
     
-    <button type="button" class="btn btn-icon" [ngbPopover]="popContent" title="Activity" placement="bottom">
+    <button type="button" class="btn btn-icon {{progressEventsSource.getValue().length > 0 ? 'colored' : ''}}" [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
         <i aria-hidden="true" class="fa fa-wave-square"></i>
     </button>
 
