@@ -95,7 +95,7 @@ namespace API.Controllers
                 var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
                 if (!settings.EnableAuthentication && !registerDto.IsAdmin)
                 {
-                    _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password.", registerDto.Username);
+                    _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password", registerDto.Username);
                     registerDto.Password = AccountService.DefaultPassword;
                 }
 
