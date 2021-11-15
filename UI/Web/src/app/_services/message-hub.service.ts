@@ -7,7 +7,7 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
-import { ScanLibraryProgressEvent } from '../_models/events/scan-library-progress-event';
+import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { User } from '../_models/user';
@@ -45,7 +45,7 @@ export class MessageHubService {
   onlineUsers$ = this.onlineUsersSource.asObservable();
 
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
-  public scanLibrary: EventEmitter<ScanLibraryProgressEvent> = new EventEmitter<ScanLibraryProgressEvent>();
+  public scanLibrary: EventEmitter<ProgressEvent> = new EventEmitter<ProgressEvent>(); // TODO: Refactor this name to be generic
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
   public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 

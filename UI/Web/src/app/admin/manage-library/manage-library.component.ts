@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { ScanLibraryProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
+import { ProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
 import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -40,7 +40,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
       if (event.event !== EVENTS.ScanLibraryProgress) return;
       
-      const scanEvent = event.payload as ScanLibraryProgressEvent;
+      const scanEvent = event.payload as ProgressEvent;
       this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 100};
       if (scanEvent.progress === 0) {
         this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;

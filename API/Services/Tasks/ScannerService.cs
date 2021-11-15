@@ -244,7 +244,7 @@ namespace API.Services.Tasks
 
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
-               MessageFactory.ScanLibraryProgressEvent(libraryId, 100));
+               MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
        }
 
        /// <summary>
@@ -342,7 +342,7 @@ namespace API.Services.Tasks
                   await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
               }
 
-              var progress =  Math.Max(0, Math.Min(100, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
+              var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
                   MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
           }
@@ -405,7 +405,7 @@ namespace API.Services.Tasks
                       series.Name, $"{series.Name}_{series.NormalizedName}_{series.LocalizedName}_{series.LibraryId}_{series.Format}");
               }
 
-              var progress =  Math.Max(0F, Math.Min(100F, i * 1F / newSeries.Count));
+              var progress =  Math.Max(0F, Math.Min(1F, i * 1F / newSeries.Count));
               await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
                   MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
               i++;
