@@ -19,5 +19,13 @@
         public const string OnlineUsers = "OnlineUsers";
         public const string SeriesAddedToCollection = "SeriesAddedToCollection";
         public const string ScanLibraryError = "ScanLibraryError";
+        /// <summary>
+        /// Event sent out during backing up the database
+        /// </summary>
+        public const string BackupDatabaseProgress = "BackupDatabaseProgress";
+        /// <summary>
+        /// Event sent out during cleaning up temp and cache folders
+        /// </summary>
+        public const string CleanupProgress = "CleanupProgress";
     }
 }

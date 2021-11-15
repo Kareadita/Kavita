@@ -8,7 +8,9 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.SignalR;
 using Hangfire;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -19,14 +21,17 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly IHubContext<MessageHub> _messageHub;
 
         private readonly IList<string> _backupFiles;
 
-        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger, IDirectoryService directoryService, IConfiguration config)
+        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger,
+            IDirectoryService directoryService, IConfiguration config, IHubContext<MessageHub> messageHub)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _directoryService = directoryService;
+            _messageHub = messageHub;
 
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
@@ -76,6 +81,8 @@ namespace API.Services.Tasks
                 return;
             }
 
+            await SendProgress(0F);
+
             var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
             var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
@@ -92,7 +99,11 @@ namespace API.Services.Tasks
             _directoryService.CopyFilesToDirectory(
                 _backupFiles.Select(file => Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
+            await SendProgress(0.25F);
+
             await CopyCoverImagesToBackupDirectory(tempDirectory);
+
+            await SendProgress(0.75F);
 
             try
             {
@@ -105,6 +116,7 @@ namespace API.Services.Tasks
 
             DirectoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
+            await SendProgress(1F);
         }
 
         private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
@@ -135,6 +147,12 @@ namespace API.Services.Tasks
             {
                 DirectoryService.ClearAndDeleteDirectory(outputTempDir);
             }
+        }
+
+        private async Task SendProgress(float progress)
+        {
+            await _messageHub.Clients.All.SendAsync(SignalREvents.BackupDatabaseProgress,
+                MessageFactory.BackupDatabaseProgressEvent(progress));
         }
 
         /// <summary>

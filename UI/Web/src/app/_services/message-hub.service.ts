@@ -22,7 +22,9 @@ export enum EVENTS {
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
   SeriesAddedToCollection = 'SeriesAddedToCollection',
-  ScanLibraryError = 'ScanLibraryError'
+  ScanLibraryError = 'ScanLibraryError',
+  BackupDatabaseProgress = 'BackupDatabaseProgress',
+  CleanupProgress = 'CleanupProgress'
 }
 
 export interface Message<T> {
@@ -88,6 +90,20 @@ export class MessageHubService {
         payload: resp.body
       });
       this.scanLibrary.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.BackupDatabaseProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.CleanupProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.CleanupProgress,
+        payload: resp.body
+      });
     });
 
     this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {

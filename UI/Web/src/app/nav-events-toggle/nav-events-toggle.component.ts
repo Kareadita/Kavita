@@ -1,7 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
+import { User } from '../_models/user';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 
@@ -13,12 +14,16 @@ interface ProcessedEvent {
   libraryName: string;
 }
 
+type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
+
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './nav-events-toggle.component.html',
   styleUrls: ['./nav-events-toggle.component.scss']
 })
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
+
+  @Input() user!: User;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -27,9 +32,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
    */
   private progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
   progressEvents$ = this.progressEventsSource.asObservable();
-
-  private tasksEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
-  taskEvents$ = this.tasksEventsSource.asObservable();
 
   constructor(private messageHub: MessageHubService, private libraryService: LibraryService) { }
   
@@ -40,14 +42,14 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (event.event === EVENTS.ScanLibraryProgress || event.event === EVENTS.RefreshMetadataProgress) {
+      if (event.event === EVENTS.ScanLibraryProgress || event.event === EVENTS.RefreshMetadataProgress || event.event === EVENTS.BackupDatabaseProgress  || event.event === EVENTS.CleanupProgress) {
         this.processProgressEvent(event, event.event);
       }
     });
   }
 
 
-  processProgressEvent(event: Message<ProgressEvent>, eventType: EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress) {
+  processProgressEvent(event: Message<ProgressEvent>, eventType: string) {
     const scanEvent = event.payload as ProgressEvent;
     console.log(event.event, event.payload);
 
@@ -56,17 +58,15 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       const data = this.progressEventsSource.getValue();
       const index = data.findIndex(item => item.eventType === eventType && item.libraryId === event.payload.libraryId);
       if (index >= 0) {
-        console.log('Removing ', data[index]);
         data.splice(index, 1);
       }
 
       if (scanEvent.progress !== 1) {
-        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName: names[scanEvent.libraryId]};
+        const libraryName = names[scanEvent.libraryId] || '';
+        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName};
         data.push(newEvent);
-        console.log('Adding ', newEvent);
       }
 
-      
       
       this.progressEventsSource.next(data);
     });

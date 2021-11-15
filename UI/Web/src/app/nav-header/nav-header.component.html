@@ -62,8 +62,8 @@
         </button>
       </div>
 
-      <div class="nav-item">
-        <app-nav-events-toggle></app-nav-events-toggle>
+      <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
+        <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
       </div>
 
       <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
