@@ -105,6 +105,7 @@ namespace API.Services.Tasks
                 InstallId = installId.Value,
                 Os = RuntimeInformation.OSDescription,
                 KavitaVersion = BuildInfo.Version.ToString(),
+                DotnetVersion = Environment.Version.ToString(),
                 IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
                 NumOfCores = Math.Max(Environment.ProcessorCount, 1)
             };
