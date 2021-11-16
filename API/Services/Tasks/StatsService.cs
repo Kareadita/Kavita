@@ -1,22 +1,14 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs.Stats;
 using API.Entities.Enums;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Flurl.Http;
-using Hangfire;
-using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
@@ -27,7 +19,7 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
 
 #pragma warning disable S1075
-        private const string ApiUrl = "http://stats.kavitareader.com";
+        private const string ApiUrl = "http://stats2.kavitareader.com";
 #pragma warning restore S1075
 
         public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork)
