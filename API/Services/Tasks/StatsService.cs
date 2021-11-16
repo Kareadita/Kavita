@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Stats;
+using API.Entities.Enums;
 using API.Interfaces;
 using API.Interfaces.Services;
 using Flurl.Http;
@@ -56,7 +57,7 @@ namespace API.Services.Tasks
         // ReSharper disable once MemberCanBePrivate.Global
         public async Task SendData()
         {
-            var data = GetServerInfo();
+            var data = await GetServerInfo();
             await SendDataToStatsServer(data);
         }
 
@@ -96,11 +97,12 @@ namespace API.Services.Tasks
             }
         }
 
-        public static ServerInfoDto GetServerInfo()
+        public async Task<ServerInfoDto> GetServerInfo()
         {
+            var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
             var serverInfo = new ServerInfoDto
             {
-                InstallId = HashUtil.AnonymousToken(),
+                InstallId = installId.Value,
                 Os = RuntimeInformation.OSDescription,
                 KavitaVersion = BuildInfo.Version.ToString(),
                 IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
