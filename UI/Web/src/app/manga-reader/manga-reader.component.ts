@@ -20,7 +20,7 @@ import { ChangeContext, LabelType, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChapterInfo } from './_models/chapter-info';
 import { COLOR_FILTER, FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
-import { scalingOptions } from '../_models/preferences/preferences';
+import { pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
 import { READER_MODE } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
@@ -96,12 +96,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scalingOptions = scalingOptions;
   readingDirection = ReadingDirection.LeftToRight;
   scalingOption = ScalingOption.FitToHeight;
-  pageSplitOption = PageSplitOption.SplitRightToLeft;
+  pageSplitOption = PageSplitOption.FitSplit;
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
   colorMode: COLOR_FILTER = COLOR_FILTER.NONE;
   autoCloseMenu: boolean = true;
   readerMode: READER_MODE = READER_MODE.MANGA_LR;
+
+  pageSplitOptions = pageSplitOptions;
   
   isLoading = true; 
 
@@ -266,6 +268,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return ReadingDirection;
   }
 
+  get PageSplitOption(): typeof PageSplitOption {
+    return PageSplitOption;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService, 
@@ -313,7 +319,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.generalSettingsForm = this.formBuilder.group({
           autoCloseMenu: this.autoCloseMenu,
-          pageSplitOption: this.pageSplitOption + '',
+          pageSplitOption: this.pageSplitOption,
           fittingOption: this.translateScalingOption(this.scalingOption)
         });
 
@@ -619,11 +625,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isSplitLeftToRight() {
-    return (this.generalSettingsForm?.get('pageSplitOption')?.value + '') === (PageSplitOption.SplitLeftToRight + '');
+    return parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.SplitLeftToRight;
   }
 
+  /**
+   * 
+   * @returns If the current model reflects no split of fit split
+   */
   isNoSplit() {
-    return (this.generalSettingsForm?.get('pageSplitOption')?.value + '') === (PageSplitOption.NoSplit + '');
+    const splitValue = parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10);
+    return  splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
   }
 
   updateSplitPage() {
@@ -843,18 +854,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
+        const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+        const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
+
+        // Fit Split on a page that needs splitting
+        if (needsSplitting && parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.FitSplit) {
+          // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
+          // console.log('windowWidth: ', windowWidth);
+          // console.log('image width: ', this.canvasImage.width);
+          // if (windowWidth < this.canvasImage.width) {
+            
+          // }
+          // console.log('Using fit to screen code')
+          this.canvas.nativeElement.width = windowWidth;
+          this.canvas.nativeElement.height = windowHeight;
+        }
+
         if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
           
           let newScale = this.generalSettingsForm.get('fittingOption')?.value;
-          const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-          const windowHeight = window.innerHeight
-                    || document.documentElement.clientHeight
-                    || document.body.clientHeight;
-
           const widthRatio = windowWidth / this.canvasImage.width;
           const heightRatio = windowHeight / this.canvasImage.height;
+          const needsSplitting = this.canvasImage.width > this.canvasImage.height;
 
           // Given that we now have image dimensions, assuming this isn't a split image, 
           // Try to reset one time based on who's dimension (width/height) is smaller
@@ -864,9 +889,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             newScale = FITTING_OPTION.HEIGHT;
           }
 
-          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
+          // If first page needs splitting, 
+          // if (!needsSplitting) {
+            
+          // }
           this.firstPageRendered = true;
+          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
         }
+
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       // Reset scroll on non HEIGHT Fits

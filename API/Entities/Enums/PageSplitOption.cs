@@ -4,6 +4,7 @@
     {
         SplitLeftToRight = 0,
         SplitRightToLeft = 1,
-        NoSplit = 2
+        NoSplit = 2,
+        FitSplit = 3
     }
 }
