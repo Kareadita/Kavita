@@ -5,7 +5,6 @@ import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
-import { StatsService } from './_services/stats.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -17,8 +16,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 export class AppComponent implements OnInit {
 
   constructor(private accountService: AccountService, public navService: NavService, 
-    private statsService: StatsService, private messageHub: MessageHubService, 
-    private libraryService: LibraryService, private router: Router, private ngbModal: NgbModal) {
+    private messageHub: MessageHubService, private libraryService: LibraryService, 
+    private router: Router, private ngbModal: NgbModal) {
     
     // Close any open modals when a route change occurs
     router.events
@@ -32,10 +31,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.setCurrentUser();
-
-    this.statsService.getInfo().then(data => {
-      this.statsService.sendClientInfo(data).subscribe(() => {/* No Operation */});
-    });
   }
 
 

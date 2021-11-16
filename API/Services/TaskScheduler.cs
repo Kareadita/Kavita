@@ -89,7 +89,7 @@ namespace API.Services
             }
 
             _logger.LogDebug("Scheduling stat collection daily");
-            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.Send(), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(SendDataTask, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
         }
 
         public void CancelStatsTasks()
