@@ -26,10 +26,11 @@ namespace API.Controllers
         private readonly IArchiveService _archiveService;
         private readonly ICacheService _cacheService;
         private readonly IVersionUpdaterService _versionUpdaterService;
+        private readonly IStatsService _statsService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
             IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
-            IVersionUpdaterService versionUpdaterService)
+            IVersionUpdaterService versionUpdaterService, IStatsService statsService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
@@ -38,6 +39,7 @@ namespace API.Controllers
             _archiveService = archiveService;
             _cacheService = cacheService;
             _versionUpdaterService = versionUpdaterService;
+            _statsService = statsService;
         }
 
         /// <summary>
@@ -84,9 +86,9 @@ namespace API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("server-info")]
-        public ActionResult<ServerInfoDto> GetVersion()
+        public async Task<ActionResult<ServerInfoDto>> GetVersion()
         {
-           return Ok(StatsService.GetServerInfo());
+           return Ok(await _statsService.GetServerInfo());
         }
 
         [HttpGet("logs")]
