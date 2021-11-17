@@ -185,6 +185,10 @@
     background-color: $dark-form-background-no-opacity;
   }
 
+  .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
+    border-bottom-color: transparent;
+  }
+
 }
 
 
