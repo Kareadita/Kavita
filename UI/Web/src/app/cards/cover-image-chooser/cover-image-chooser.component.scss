@@ -1,4 +1,4 @@
-@import '../../../theme/colors';
+@use '../../../theme/colors';
 $image-height: 230px;
 $image-width: 160px;
 
@@ -14,7 +14,7 @@ $image-width: 160px;
 }
 
 .selected {
-    outline: 5px solid $primary-color;
+    outline: 5px solid colors.$primary-color;
     outline-width: medium;
     outline-offset: -1px;
 }
@@ -22,7 +22,7 @@ $image-width: 160px;
 ngx-file-drop ::ng-deep > div {
     // styling for the outer drop box
     width: 100%;
-    border: 2px solid $primary-color;
+    border: 2px solid colors.$primary-color;
     border-radius: 5px;
     height: 100px;
     margin: auto;

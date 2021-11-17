@@ -1,6 +1,6 @@
 // Import colors for overrides of bootstrap theme
-@import './theme/_colors.scss';
-@import './theme/_toastr.scss';
+@import './theme/colors';
+@import './theme/toastr';
 
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';

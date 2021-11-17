@@ -1,6 +1,6 @@
 // All dark style overrides should live here
 
-@import "../../theme/colors";
+@use "../../theme/colors";
 
 .bg-dark {
   color: $dark-text-color;
