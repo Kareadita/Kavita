@@ -327,8 +327,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
           this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-          // On change of splitting, re-render the page if the page is already split
           const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+          // If we need to split on a menu change, then we need to re-render. 
           if (needsSplitting) {
             this.loadPage();
           }
@@ -839,6 +839,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderPage() {
+    console.log('Render page called');
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
 
@@ -863,9 +864,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Fit Split on a page that needs splitting
         if (needsSplitting && parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.FitSplit) {
+          // ?! There is an issue where first load with Automatic scaling, will cause this to not render correctly (cuttof)
+          // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
           // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          // console.log('windowWidth: ', windowWidth);
-          // console.log('image width: ', this.canvasImage.width);
+          console.log('windowWidth: ', windowWidth);
+          console.log('image width: ', this.canvasImage.width);
           // if (windowWidth < this.canvasImage.width) {
             
           // }
@@ -876,25 +879,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
           
-          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
-          const widthRatio = windowWidth / this.canvasImage.width;
-          const heightRatio = windowHeight / this.canvasImage.height;
           const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+          const widthRatio = windowWidth / (this.canvasImage.width);
+          const heightRatio = windowHeight / (this.canvasImage.height);
 
           // Given that we now have image dimensions, assuming this isn't a split image, 
           // Try to reset one time based on who's dimension (width/height) is smaller
           if (widthRatio < heightRatio) {
+            console.log('Setting scale to width');
             newScale = FITTING_OPTION.WIDTH;
           } else if (widthRatio > heightRatio) {
+            console.log('Setting scale to height');
             newScale = FITTING_OPTION.HEIGHT;
           }
 
-          // If first page needs splitting, 
-          // if (!needsSplitting) {
-            
+          // if (needsSplitting) {
+          //   console.log('Setting scale to height');
+          //   newScale = FITTING_OPTION.HEIGHT;
           // }
-          this.firstPageRendered = true;
-          this.generalSettingsForm.get('fittingOption')?.setValue(newScale);
+
+          if (!needsSplitting) {
+            this.firstPageRendered = true;
+          }
+          this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
         }
 
         this.ctx.drawImage(this.canvasImage, 0, 0);

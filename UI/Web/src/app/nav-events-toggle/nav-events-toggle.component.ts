@@ -38,6 +38,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
+    this.progressEventsSource.complete();
   }
 
   ngOnInit(): void {
