@@ -38,6 +38,11 @@ namespace API.Services.Tasks
         /// </summary>
         // ReSharper disable once InconsistentNaming
         public string Html_Url { get; init; }
+        /// <summary>
+        /// Date Release was Published
+        /// </summary>
+        // ReSharper disable once InconsistentNaming
+        public string Published_At { get; init; }
     }
 
     public class UntrustedCertClientFactory : DefaultHttpClientFactory
@@ -109,7 +114,8 @@ namespace API.Services.Tasks
                 UpdateBody = _markdown.Transform(update.Body.Trim()),
                 UpdateTitle = update.Name,
                 UpdateUrl = update.Html_Url,
-                IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker
+                IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
+                PublishDate = update.Published_At
             };
         }
 

@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Update
+﻿using System;
+
+namespace API.DTOs.Update
 {
     /// <summary>
     /// Update Notification denoting a new release available for user to update to
@@ -34,5 +36,9 @@
         /// Is this a pre-release
         /// </summary>
         public bool IsPrerelease { get; init; }
+        /// <summary>
+        /// Date of the publish
+        /// </summary>
+        public string PublishDate { get; init; }
     }
 }
