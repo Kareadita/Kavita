@@ -12,7 +12,7 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService, Breakpoint } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
 import { Stack } from '../shared/data-structures/stack';
@@ -327,7 +327,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
           this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-          const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+          const needsSplitting = this.isCoverImage();
           // If we need to split on a menu change, then we need to re-render. 
           if (needsSplitting) {
             this.loadPage();
@@ -638,7 +638,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateSplitPage() {
-    const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+    const needsSplitting = this.isCoverImage();
     if (!needsSplitting || this.isNoSplit()) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
@@ -835,7 +835,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.height = this.canvasImage.height;
       }
     }
-    return true;
   }
 
   renderPage() {
@@ -843,9 +842,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
 
-      if (!this.setCanvasSize()) return;
+      this.setCanvasSize();
 
-      const needsSplitting = this.canvasImage.width > this.canvasImage.height;
+      const needsSplitting = this.isCoverImage();
       this.updateSplitPage();
 
       if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
@@ -855,58 +854,33 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
-        const windowWidth = window.innerWidth
+        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
+          this.updateScalingForFirstPageRender();
+        }
+
+        // Fit Split on a page that needs splitting
+        if (this.shouldRenderAsFitSplit()) {
+          console.log('Adjusting settings to render as fit split');
+          // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
+          const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
         const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
-
-        // Fit Split on a page that needs splitting
-        if (needsSplitting && parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.FitSplit) {
-          // ?! There is an issue where first load with Automatic scaling, will cause this to not render correctly (cuttof)
-          // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
-          // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          console.log('windowWidth: ', windowWidth);
+          console.log('window width: ', windowWidth);
           console.log('image width: ', this.canvasImage.width);
-          // if (windowWidth < this.canvasImage.width) {
-            
-          // }
-          // console.log('Using fit to screen code')
+
+          // ?! There is an issue here where on a tablet, the windowWidth is not correct on first pass here
+          //this.generalSettingsForm.get('fittingOption')?.setValue(FITTING_OPTION.WIDTH, {emitEvent: false});
           this.canvas.nativeElement.width = windowWidth;
           this.canvas.nativeElement.height = windowHeight;
         }
 
-        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
-          
-          const needsSplitting = this.canvasImage.width > this.canvasImage.height;
-          let newScale = this.generalSettingsForm.get('fittingOption')?.value;
-          const widthRatio = windowWidth / (this.canvasImage.width);
-          const heightRatio = windowHeight / (this.canvasImage.height);
-
-          // Given that we now have image dimensions, assuming this isn't a split image, 
-          // Try to reset one time based on who's dimension (width/height) is smaller
-          if (widthRatio < heightRatio) {
-            console.log('Setting scale to width');
-            newScale = FITTING_OPTION.WIDTH;
-          } else if (widthRatio > heightRatio) {
-            console.log('Setting scale to height');
-            newScale = FITTING_OPTION.HEIGHT;
-          }
-
-          // if (needsSplitting) {
-          //   console.log('Setting scale to height');
-          //   newScale = FITTING_OPTION.HEIGHT;
-          // }
-
-          if (!needsSplitting) {
-            this.firstPageRendered = true;
-          }
-          this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
-        }
-
+        console.log('First Page is already rendered: ', this.firstPageRendered);
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
+      
       // Reset scroll on non HEIGHT Fits
       if (this.getFit() !== FITTING_OPTION.HEIGHT) {
         window.scrollTo(0, 0);
@@ -914,6 +888,54 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }
     this.isLoading = false;
+  }
+
+  updateScalingForFirstPageRender() {
+    const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+    const windowHeight = window.innerHeight
+              || document.documentElement.clientHeight
+              || document.body.clientHeight;
+      
+      const needsSplitting = this.isCoverImage();
+      let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+      const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
+      const heightRatio = windowHeight / (this.canvasImage.height);
+
+      // Given that we now have image dimensions, assuming this isn't a split image, 
+      // Try to reset one time based on who's dimension (width/height) is smaller
+      if (widthRatio < heightRatio) {
+        newScale = FITTING_OPTION.WIDTH;
+      } else if (widthRatio > heightRatio) {
+        newScale = FITTING_OPTION.HEIGHT;
+      }
+
+      this.firstPageRendered = true;
+      console.log('Scale: ', newScale);
+      
+      this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
+  }
+
+  isCoverImage() {
+    return this.canvasImage.width > this.canvasImage.height;
+  }
+
+  // ?! There is an issue where first load with Automatic scaling, will cause this to not render correctly (cuttof)
+  // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
+  shouldRenderAsFitSplit() {
+    // NOTE: I Think fit split rendering adjustments also need to take into account FIT as HEIGHT and Tablet, as those 2 cause breakages
+    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return;
+
+    return (
+      //this.isCoverImage() && 
+      //        parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.FitSplit && 
+              this.firstPageRendered
+              && this.utilityService.getActiveBreakpoint() !== Breakpoint.Mobile)
+              //  || 
+              // (
+
+              // );
   }
 
 
