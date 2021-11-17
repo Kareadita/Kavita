@@ -216,6 +216,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
   libraryType: LibraryType = LibraryType.Manga;
+  /**
+   * Max width for images that we've seen. Will automatically cut cover images in 2 for calculations.
+   */
+  maxWidth: number = 0;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -858,6 +862,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.updateScalingForFirstPageRender();
         }
 
+        this.maxWidth = Math.max((this.isCoverImage() ? (this.canvasImage.width / 2) : this.canvasImage.width), this.maxWidth);
+        
+
         // Fit Split on a page that needs splitting
         if (this.shouldRenderAsFitSplit()) {
           console.log('Adjusting settings to render as fit split');
@@ -868,8 +875,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
-          console.log('window width: ', windowWidth);
-          console.log('image width: ', this.canvasImage.width);
+          //console.log('window width: ', windowWidth);
+          //console.log('image width: ', this.canvasImage.width);
 
           // ?! There is an issue here where on a tablet, the windowWidth is not correct on first pass here
           //this.generalSettingsForm.get('fittingOption')?.setValue(FITTING_OPTION.WIDTH, {emitEvent: false});
@@ -877,7 +884,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.canvas.nativeElement.height = windowHeight;
         }
 
-        console.log('First Page is already rendered: ', this.firstPageRendered);
         this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       
@@ -925,17 +931,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
   shouldRenderAsFitSplit() {
     // NOTE: I Think fit split rendering adjustments also need to take into account FIT as HEIGHT and Tablet, as those 2 cause breakages
-    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return;
+    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit || !this.firstPageRendered) return false;
 
+    const breakpoint = this.utilityService.getActiveBreakpoint();
+    console.log('breakpoitn: ', breakpoint);
     return (
-      //this.isCoverImage() && 
-      //        parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.FitSplit && 
               this.firstPageRendered
-              && this.utilityService.getActiveBreakpoint() !== Breakpoint.Mobile)
-              //  || 
-              // (
-
-              // );
+              && breakpoint !== Breakpoint.Mobile)
+               || 
+              (
+                breakpoint === Breakpoint.Tablet && 
+                this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT
+              );
   }
 
 
