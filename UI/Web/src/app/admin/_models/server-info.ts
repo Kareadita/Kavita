@@ -1,8 +1,9 @@
 export interface ServerInfo {
     os: string;
-    dotNetVersion: string;
+    dotnetVersion: string;
     runTimeVersion: string;
     kavitaVersion: string;
-    buildBranch: string;
-    culture: string;
+    NumOfCores: number;
+    installId: string;
+    isDocker: boolean;
 }
