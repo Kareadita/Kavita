@@ -136,7 +136,12 @@ export class ReadingListDetailComponent implements OnInit {
       return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
     }
 
-    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + item.chapterNumber;
+    let chapterNum = item.chapterNumber;
+    if (!item.chapterNumber.match(/^\d+$/)) {
+      chapterNum = this.utilityService.cleanSpecialTitle(item.chapterNumber);
+    }
+
+    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + chapterNum;
   }
 
   orderUpdated(event: IndexUpdateEvent) {

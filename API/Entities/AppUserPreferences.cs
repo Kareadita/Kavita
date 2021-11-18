@@ -16,7 +16,7 @@ namespace API.Entities
         /// <summary>
         /// Manga Reader Option: Which side of a split image should we show first
         /// </summary>
-        public PageSplitOption PageSplitOption { get; set; } = PageSplitOption.SplitRightToLeft;
+        public PageSplitOption PageSplitOption { get; set; } = PageSplitOption.FitSplit;
         /// <summary>
         /// Manga Reader Option: How the manga reader should perform paging or reading of the file
         /// <example>
@@ -25,14 +25,15 @@ namespace API.Entities
         /// </example>
         /// </summary>
         public ReaderMode ReaderMode { get; set; }
+
         /// <summary>
         /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
         /// </summary>
-        public bool AutoCloseMenu { get; set; }
+        public bool AutoCloseMenu { get; set; } = true;
         /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>
-        public bool BookReaderDarkMode { get; set; } = false;
+        public bool BookReaderDarkMode { get; set; } = true;
         /// <summary>
         /// Book Reader Option: Override extra Margin
         /// </summary>
@@ -62,9 +63,9 @@ namespace API.Entities
         /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
         /// </summary>
         public bool SiteDarkMode { get; set; } = true;
-        
-        
-        
+
+
+
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }
     }

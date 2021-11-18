@@ -1,15 +1,19 @@
-<ng-container *ngFor="let update of updates; let indx = index;">
+<div class="changelog">
+  <ng-container *ngFor="let update of updates; let indx = index;">
     <div class="card w-100 mb-2" style="width: 18rem;">
         <div class="card-body">
-          <h5 class="card-title">{{update.updateTitle}}&nbsp;
+          <h4 class="card-title">{{update.updateTitle}}&nbsp;
               <span class="badge badge-secondary" *ngIf="update.updateVersion === update.currentVersion">Installed</span>
               <span class="badge badge-secondary" *ngIf="update.updateVersion > update.currentVersion">Available</span>
-          </h5>
+          </h4>
+          <h6 class="card-subtitle mb-2 text-muted">Published: {{update.publishDate | date: 'short'}}</h6>
+          
           <pre class="card-text update-body" [innerHtml]="update.updateBody | safeHtml"></pre>
           <a *ngIf="!update.isDocker" href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-right" target="_blank">Download</a>
         </div>
       </div>
-</ng-container>
+  </ng-container>
+</div>
 
 
 <div class="spinner-border text-secondary" *ngIf="isLoading" role="status">

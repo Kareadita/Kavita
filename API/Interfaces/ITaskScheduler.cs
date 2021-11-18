@@ -17,6 +17,6 @@ namespace API.Interfaces
         void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
         void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
         void CancelStatsTasks();
-        void RunStatCollection();
+        Task RunStatCollection();
     }
 }

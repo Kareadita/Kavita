@@ -3,3 +3,19 @@
     word-wrap: break-word;
     white-space: pre-wrap;
 }
+
+
+
+::ng-deep .changelog  {
+
+    h1 {
+        font-size: 26px;    
+    }
+
+    p, ul {
+        margin-bottom: 0px;
+    }
+    
+    
+}
+

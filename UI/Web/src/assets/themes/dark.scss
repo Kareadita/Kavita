@@ -1,6 +1,6 @@
 // All dark style overrides should live here
 
-@import "../../theme/colors";
+@use "../../theme/colors";
 
 .bg-dark {
   color: $dark-text-color;
@@ -30,6 +30,10 @@
     background-color: $dark-form-background !important;
     color: lightgray !important;
     box-shadow: inset 0px 0px 8px 1px $dark-form-background !important;
+  }
+
+  .text-muted {
+    color: #d7d7d7 !important;
   }
 
   .breadcrumb {
@@ -179,6 +183,10 @@
 
   .nav-events, .nav-events .popover-body {
     background-color: $dark-form-background-no-opacity;
+  }
+
+  .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
+    border-bottom-color: transparent;
   }
 
 }
