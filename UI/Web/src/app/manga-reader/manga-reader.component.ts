@@ -754,6 +754,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled) { return; }
+    if (this.nextChapterDisabled) { return; }
     this.isLoading = true;
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -767,6 +768,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPrevChapter() {
     if (this.prevPageDisabled) { return; }
+    if (this.prevChapterDisabled) { return; }
     this.isLoading = true;
     this.continuousChaptersStack.pop();
     const prevChapter = this.continuousChaptersStack.peek();
