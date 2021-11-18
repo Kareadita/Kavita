@@ -836,6 +836,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (needsScaling) {
         this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
         this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
+      } else if (this.isCoverImage()) {
+        //this.canvas.nativeElement.width = this.canvasImage.width / 2;
+        //this.canvas.nativeElement.height = this.canvasImage.height;
       } else {
         this.canvas.nativeElement.width = this.canvasImage.width;
         this.canvas.nativeElement.height = this.canvasImage.height;
@@ -865,18 +868,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.maxWidth = Math.max((this.isCoverImage() ? (this.canvasImage.width / 2) : this.canvasImage.width), this.maxWidth);
+        const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+          const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
         
 
         // Fit Split on a page that needs splitting
         if (this.shouldRenderAsFitSplit()) {
           console.log('Adjusting settings to render as fit split');
           // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-        const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
+          
           //console.log('window width: ', windowWidth);
           //console.log('image width: ', this.canvasImage.width);
 
@@ -884,9 +888,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           //this.generalSettingsForm.get('fittingOption')?.setValue(FITTING_OPTION.WIDTH, {emitEvent: false});
           this.canvas.nativeElement.width = windowWidth;
           this.canvas.nativeElement.height = windowHeight;
+          const ratio = this.canvasImage.width / this.canvasImage.height;
+          let newWidth = windowWidth; // this.canvas.nativeElement.width
+          let newHeight = newWidth / ratio;
+          if (newHeight > windowHeight) { //this.canvas.nativeElement.height
+            newHeight = windowHeight; // this.canvas.nativeElement.height
+            newWidth = newHeight * ratio;
+          }
+          console.log('new width x height: ', newWidth, 'x', newHeight);
+          this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
+          //this.ctx.drawImage(this.canvasImage, 0, 0);
+        } else {
+          this.ctx.drawImage(this.canvasImage, 0, 0);
         }
-
-        this.ctx.drawImage(this.canvasImage, 0, 0);
       }
       
       // Reset scroll on non HEIGHT Fits
@@ -899,6 +913,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateScalingForFirstPageRender() {
+    console.log('Updating scale from automatic for first page render');
     const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
@@ -933,18 +948,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
   shouldRenderAsFitSplit() {
     // NOTE: I Think fit split rendering adjustments also need to take into account FIT as HEIGHT and Tablet, as those 2 cause breakages
-    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit || !this.firstPageRendered) return false;
+    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
+    // took  || !this.firstPageRendered off
 
-    const breakpoint = this.utilityService.getActiveBreakpoint();
-    console.log('breakpoitn: ', breakpoint);
-    return (
-              this.firstPageRendered
-              && breakpoint !== Breakpoint.Mobile)
-               || 
-              (
-                breakpoint === Breakpoint.Tablet && 
-                this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT
-              );
+    return true;
+    // const breakpoint = this.utilityService.getActiveBreakpoint();
+    // //if (breakpoint === Breakpoint.Tablet && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) return false;
+
+    
+    // console.log('breakpoitn: ', breakpoint);
+    // return (
+    //           this.firstPageRendered
+    //           && breakpoint !== Breakpoint.Mobile);
   }
 
 
