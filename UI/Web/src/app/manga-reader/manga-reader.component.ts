@@ -216,10 +216,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
   libraryType: LibraryType = LibraryType.Manga;
-  /**
-   * Max width for images that we've seen. Will automatically cut cover images in 2 for calculations.
-   */
-  maxWidth: number = 0;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -847,7 +843,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderPage() {
-    console.log('Render page called');
     if (this.ctx && this.canvas) {
       this.canvasImage.onload = null;
 
@@ -867,37 +862,31 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.updateScalingForFirstPageRender();
         }
 
-        this.maxWidth = Math.max((this.isCoverImage() ? (this.canvasImage.width / 2) : this.canvasImage.width), this.maxWidth);
-        const windowWidth = window.innerWidth
+        // Fit Split on a page that needs splitting
+        if (this.shouldRenderAsFitSplit()) {
+          const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
           const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
-        
-
-        // Fit Split on a page that needs splitting
-        if (this.shouldRenderAsFitSplit()) {
-          console.log('Adjusting settings to render as fit split');
           // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          
-          //console.log('window width: ', windowWidth);
-          //console.log('image width: ', this.canvasImage.width);
-
-          // ?! There is an issue here where on a tablet, the windowWidth is not correct on first pass here
-          //this.generalSettingsForm.get('fittingOption')?.setValue(FITTING_OPTION.WIDTH, {emitEvent: false});
           this.canvas.nativeElement.width = windowWidth;
           this.canvas.nativeElement.height = windowHeight;
           const ratio = this.canvasImage.width / this.canvasImage.height;
-          let newWidth = windowWidth; // this.canvas.nativeElement.width
+          let newWidth = windowWidth;
           let newHeight = newWidth / ratio;
-          if (newHeight > windowHeight) { //this.canvas.nativeElement.height
-            newHeight = windowHeight; // this.canvas.nativeElement.height
+          if (newHeight > windowHeight) {
+            newHeight = windowHeight; 
             newWidth = newHeight * ratio;
           }
-          console.log('new width x height: ', newWidth, 'x', newHeight);
-          this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-          //this.ctx.drawImage(this.canvasImage, 0, 0);
+
+          // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
+          if (windowWidth > newWidth) {
+            this.ctx.drawImage(this.canvasImage, 0, 0);  
+          } else {
+            this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
+          }
         } else {
           this.ctx.drawImage(this.canvasImage, 0, 0);
         }
@@ -913,7 +902,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateScalingForFirstPageRender() {
-    console.log('Updating scale from automatic for first page render');
     const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
@@ -935,8 +923,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.firstPageRendered = true;
-      console.log('Scale: ', newScale);
-      
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
@@ -944,22 +930,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.canvasImage.width > this.canvasImage.height;
   }
 
-  // ?! There is an issue where first load with Automatic scaling, will cause this to not render correctly (cuttof)
-  // ?! When the screen size is much longer than the image, then using NoSplit renders it much nicer (minor optimization)
+
   shouldRenderAsFitSplit() {
-    // NOTE: I Think fit split rendering adjustments also need to take into account FIT as HEIGHT and Tablet, as those 2 cause breakages
     if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
-    // took  || !this.firstPageRendered off
-
     return true;
-    // const breakpoint = this.utilityService.getActiveBreakpoint();
-    // //if (breakpoint === Breakpoint.Tablet && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) return false;
-
-    
-    // console.log('breakpoitn: ', breakpoint);
-    // return (
-    //           this.firstPageRendered
-    //           && breakpoint !== Breakpoint.Mobile);
   }
 
 
