@@ -137,8 +137,7 @@ namespace API.Services.Tasks
                await _unitOfWork.RollbackAsync();
            }
            // Tell UI that this series is done
-           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name),
-               cancellationToken: token);
+           await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name), token);
            await CleanupDbEntities();
            BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
            BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
