@@ -166,6 +166,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     fromEvent(window, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy)) 
     .subscribe((event) => this.handleScrollEvent(event));
+    
 
     if (this.goToPage) {
       this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
@@ -210,12 +211,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   handleHorizontalScroll(event: WheelEvent): void {
     if (this.direction === ScrollDirection.Vertical) { return; }
-    // console.log(event);
-
-    // //document.getElementsByClassName('horizontal-scroll')[0].scrollLeft -= event.deltaY;
-    // if (!this.atBottom && this.direction === ScrollDirection.Horizontal) {
-    //   event.preventDefault();
-    // }
     this.handleScrollEvent(event);
   }
 
@@ -226,13 +221,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   handleScrollEvent(event?: Event) {
     const scrollOffset = this.getScrollOffset();
-
-    // Idea is to prevent scroll event on vertical and do horizontal if we are fully scrolled
-    // if (!this.atBottom && this.direction === ScrollDirection.Horizontal && event !== undefined) {
-    //   event.preventDefault();
-    // }
-
-    console.log(event);
 
     if (scrollOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
@@ -302,6 +290,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       }
     } else {
       // TODO: Implement Continuous Reader for Horizontal Reading mode
+      
     }
 
   }
@@ -335,20 +324,31 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (elem === null || elem === undefined) { return false; }
 
     var rect = elem.getBoundingClientRect();
-
-    // TODO: Need Horizontal version?
+    const screenHeight = (window.innerHeight || document.documentElement.clientHeight);
+    console.log('Page: ', elem.getAttribute('page'))
     if (rect.bottom >= 0 && 
             rect.right >= 0 && 
-            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.top <= (screenHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           ) {
-            const screenHeight = (window.innerHeight || document.documentElement.clientHeight);
-            const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
+
+            console.log('Page: ', elem.getAttribute('page'))
+            console.log('rect: ', rect);
+            console.log('screenHeight: ', screenHeight);
+            
+            
             
             if (this.direction === ScrollDirection.Vertical) {
               const topX = (window.innerHeight || document.documentElement.clientHeight);
               return Math.abs(rect.top / topX) <= 0.25;
             } else {
+              const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
+              const offsetRight = (window.innerHeight || document.documentElement.clientHeight);
+              console.log('ratio: ', Math.abs(rect.right / offsetRight));
+
+              const isLeftEdgeNearMiddle = Math.abs((window.innerWidth || document.documentElement.clientWidth) - rect.left) >= 0.33;
+              const isRightEdgeNearMiddle = true; //Math.abs(screenWidth - rect.right) <= 0.77;
+              return isLeftEdgeNearMiddle && isRightEdgeNearMiddle
               return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75; // ?! This doesn't work perfectly, need to revist
             }
           }
