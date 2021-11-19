@@ -325,31 +325,19 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     var rect = elem.getBoundingClientRect();
     const screenHeight = (window.innerHeight || document.documentElement.clientHeight);
-    console.log('Page: ', elem.getAttribute('page'))
+
     if (rect.bottom >= 0 && 
             rect.right >= 0 && 
             rect.top <= (screenHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           ) {
-
-            console.log('Page: ', elem.getAttribute('page'))
-            console.log('rect: ', rect);
-            console.log('screenHeight: ', screenHeight);
-            
-            
-            
+ 
             if (this.direction === ScrollDirection.Vertical) {
               const topX = (window.innerHeight || document.documentElement.clientHeight);
               return Math.abs(rect.top / topX) <= 0.25;
             } else {
               const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
-              const offsetRight = (window.innerHeight || document.documentElement.clientHeight);
-              console.log('ratio: ', Math.abs(rect.right / offsetRight));
-
-              const isLeftEdgeNearMiddle = Math.abs((window.innerWidth || document.documentElement.clientWidth) - rect.left) >= 0.33;
-              const isRightEdgeNearMiddle = true; //Math.abs(screenWidth - rect.right) <= 0.77;
-              return isLeftEdgeNearMiddle && isRightEdgeNearMiddle
-              return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75; // ?! This doesn't work perfectly, need to revist
+              return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75;
             }
           }
     return false;
