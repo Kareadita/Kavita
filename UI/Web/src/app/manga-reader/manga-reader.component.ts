@@ -1141,6 +1141,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   handleWebtoonPageChange(updatedPageNum: number) {
     this.setPageNum(updatedPageNum);
+    this.refreshSlider.emit();
   }
 
   /**

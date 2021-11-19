@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
@@ -70,6 +70,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
+
+  @ViewChild('scrollContainer', {static: false}) scrollElem!: ElementRef<HTMLDivElement>;
   
   /**
    * Stores and emits all the src urls
@@ -124,7 +126,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline | DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -199,10 +201,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   getScrollOffset() {
     if (this.direction === ScrollDirection.Horizontal) {
-      return document.querySelector('.horizontal-scroll')?.scrollLeft || 0;
-      // return (window.scrollX  
-      //   || document.documentElement.scrollLeft
-      //   || document.body.scrollLeft || 0);
+      if (this.scrollElem === undefined) {
+        return  (window.scrollX  
+          || document.documentElement.scrollLeft
+          || document.body.scrollLeft || 0);
+      } else {
+        return this.scrollElem.nativeElement.scrollLeft;
+      }
     }
 
     return (window.scrollY 
@@ -257,8 +262,21 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
     return totalHeight;
   }
+  getTotalWidth() {
+    let total = 0;
+    document.querySelectorAll('img[id^="page-"]').forEach(img => total += img.getBoundingClientRect().width);
+    return total;
+  }
   getTotalScroll() {
-    return document.documentElement.offsetHeight + document.documentElement.scrollTop;
+    if (this.direction === ScrollDirection.Vertical) {
+      return document.documentElement.offsetHeight + document.documentElement.scrollTop;
+    } else {
+      if (this.scrollElem !== undefined) {
+        return this.scrollElem.nativeElement.offsetHeight + this.scrollElem.nativeElement.scrollTop;
+      } else {
+        return 0;
+      }
+    }
   }
   getScrollTop() {
     return document.documentElement.scrollTop;
@@ -267,33 +285,98 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
     
-    if (this.direction === ScrollDirection.Vertical) {
-      if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-        const totalHeight = this.getTotalHeight();
-        const totalScroll = this.getTotalScroll();
-
-        // If we were at top but have started scrolling down past page 0, remove top spacer
-        if (this.atTop && this.pageNum > 0) {
-          this.atTop = false;
-        }
-        
-        if (totalScroll === totalHeight && !this.atBottom) {
-          this.atBottom = true;
-          this.setPageNum(this.totalPages);
-
-          // Scroll user back to original location
-          this.previousScrollHeightMinusTop = this.getScrollTop();
-          requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
-        } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
-          // This if statement will fire once we scroll into the spacer at all
-          this.loadNextChapter.emit();
-        }
-      }
+    if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
+      this.handleCheckContinuousReadingForwards();
     } else {
-      // TODO: Implement Continuous Reader for Horizontal Reading mode
+      this.handleCheckContinuousReadingBackwards();
+    }
+  }
+
+  handleCheckContinuousReadingForwards() {
+    const pageNumCheck = (this.direction === ScrollDirection.Vertical) ? 0 : 2;
+
+    const totalPixels = (this.direction === ScrollDirection.Vertical) ? this.getTotalHeight() : this.getTotalWidth();
+    const totalScroll = this.getTotalScroll();
+
+    // If we were at top but have started scrolling down past page 0, remove top spacer
+    if (this.atTop && this.pageNum > pageNumCheck) {
+      this.atTop = false;
+    }
+    
+    if (totalScroll === totalPixels && !this.atBottom) {
+      this.atBottom = true;
+      this.setPageNum(this.totalPages);
+
+      // Scroll user back to original location
+      if (this.direction === ScrollDirection.Vertical) {
+        this.previousScrollHeightMinusTop = this.getScrollTop();
+        requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
+      } else {
+        // this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        // requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
+      }
+    } else if (totalScroll >= totalPixels + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+      // This if statement will fire once we scroll into the spacer at all
+      this.loadNextChapter.emit();
+    }
+  }
+
+  handleCheckContinuousReadingBackwards() {
+    const offset = (this.direction === ScrollDirection.Vertical) ? this.getScrollTop() : this.getScrollOffset();
+    const pageNumCheck = (this.direction === ScrollDirection.Vertical) ? 0 : 2;
+    
+    if (offset < 5 && this.pageNum <= pageNumCheck && !this.atTop) {
+      this.atBottom = false;
+      this.atTop = true; 
+
+      // Scroll user back to original location
       
+      if (this.direction === ScrollDirection.Vertical) {
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
+      } else {
+        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+        requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
+      }
+    } else if (offset < 5 && this.pageNum <= pageNumCheck && this.atTop) {
+      // If already at top, then we moving on
+      this.loadPrevChapter.emit();
     }
 
+
+
+    // if (this.direction === ScrollDirection.Vertical) {
+    //   if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
+    //     this.atBottom = false;
+
+    //     this.atTop = true; 
+    //     // Scroll user back to original location
+    //     this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
+    //     requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
+    //   } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
+    //     // If already at top, then we moving on
+    //     this.loadPrevChapter.emit();
+    //   }
+    // } else {
+    //   //const offset = this.getScrollOffset();
+    //   // We do a page num 2 check because the current page on desktop isn't very reliable
+    //   if (offset < 5 && this.pageNum <= 2 && !this.atTop) {
+    //     this.setPageNum(0);
+    //     this.atBottom = false;
+    //     this.atTop = true; 
+    //     // Scroll user back to original location
+    //     this.previousScrollHeightMinusTop = document.documentElement.scrollWidth - offset;
+    //     requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
+    //   } else if (offset < 5 && this.pageNum <= 2 && this.atTop) {
+    //     // If already at top, then we moving on
+    //     this.setPageNum(0);
+    //     this.loadPrevChapter.emit();
+    //   }
+    // }
+
+    
   }
 
   /**
@@ -337,6 +420,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
               const topX = (window.innerHeight || document.documentElement.clientHeight);
               return Math.abs(rect.top / topX) <= 0.25;
             } else {
+              // TODO: Check this with proper offset from scrollElem
               const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth;
               return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75;
             }

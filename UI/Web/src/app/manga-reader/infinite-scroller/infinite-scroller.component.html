@@ -12,37 +12,38 @@
     <strong>Scroll Top:</strong> {{getScrollTop()}}
 </div>
 
-<div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
-    <div style="height: 200px"></div>
-    <div>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="mx-auto text">Previous Chapter</span>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="sr-only">Scroll up to move to next chapter</span>
+<div [ngClass]="direction === ScrollDirection.Vertical ? 'vertical-scroll' : 'horizontal-scroll'" #scrollContainer (wheel)="handleHorizontalScroll($event)">
+    <div *ngIf="atTop" class="spacer {{direction === ScrollDirection.Vertical ? 'top' : 'left'}}" role="alert" (click)="loadPrevChapter.emit()">
+        <div style="height: 200px"></div>
+        <div>
+            <button class="btn btn-icon mx-auto">
+                <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+            </button>
+            <span class="mx-auto text">Previous Chapter</span>
+            <button class="btn btn-icon mx-auto">
+                <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+            </button>
+            <span class="sr-only">Scroll {{direction === ScrollDirection.Vertical ? 'up' : 'left'}} to move to previous chapter</span>
+        </div>
     </div>
-</div>
-<div [ngClass]="direction === ScrollDirection.Vertical ? 'vertical-scroll' : 'horizontal-scroll'" (wheel)="handleHorizontalScroll($event)">
     <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
         <img src="{{item.src}}" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" 
         *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" 
         rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" 
         [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
     </ng-container>
-</div>
-<div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
-    <div>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-        </button>
-        <span class="mx-auto text">Next Chapter</span>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-        </button>
-        <span class="sr-only">Scroll down to move to next chapter</span>
+    <div *ngIf="atBottom" class="spacer" role="alert" (click)="loadNextChapter.emit()">
+        <div class="{{direction === ScrollDirection.Vertical ? 'bottom' : 'right'}}">
+            <button class="btn btn-icon mx-auto">
+                <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+            </button>
+            <span class="mx-auto text">Next Chapter</span>
+            <button class="btn btn-icon mx-auto">
+                <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+            </button>
+            <span class="sr-only">Scroll down to move to next chapter</span>
+        </div>
+        <div style="height: 200px"></div>
     </div>
-    <div style="height: 200px"></div>
 </div>
+

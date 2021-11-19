@@ -17,8 +17,15 @@
 
     .text {
         z-index: 101;
-        
     }
+}
+
+.left {
+    transform: rotateZ(270deg);
+}
+
+.right {
+    transform: rotateZ(270deg);
 }
 
 .full-width {
