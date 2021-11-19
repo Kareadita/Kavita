@@ -1,6 +1,6 @@
 // Import colors for overrides of bootstrap theme
-@import './theme/_colors.scss';
-@import './theme/_toastr.scss';
+@import './theme/colors';
+@import './theme/toastr';
 
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
@@ -32,7 +32,7 @@ label, select, .clickable {
 
 @font-face {
   font-family: "EBGarmond";
-  src: url(assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf) format("truetype");
+  src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {

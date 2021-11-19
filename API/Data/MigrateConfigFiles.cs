@@ -26,8 +26,6 @@ namespace API.Data
             "temp"
         };
 
-        private static readonly string ConfigDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
-
 
         /// <summary>
         /// In v0.4.8 we moved all config files to config/ to match with how docker was setup. This will move all config files from current directory
@@ -66,8 +64,8 @@ namespace API.Data
             Console.WriteLine(
                 "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
 
-            Console.WriteLine($"Creating {ConfigDirectory}");
-            DirectoryService.ExistOrCreate(ConfigDirectory);
+            Console.WriteLine($"Creating {DirectoryService.ConfigDirectory}");
+            DirectoryService.ExistOrCreate(DirectoryService.ConfigDirectory);
 
             try
             {
@@ -116,13 +114,13 @@ namespace API.Data
 
                 foreach (var folderToMove in AppFolders)
                 {
-                    if (new DirectoryInfo(Path.Join(ConfigDirectory, folderToMove)).Exists) continue;
+                    if (new DirectoryInfo(Path.Join(DirectoryService.ConfigDirectory, folderToMove)).Exists) continue;
 
                     try
                     {
                         DirectoryService.CopyDirectoryToDirectory(
                             Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                            Path.Join(ConfigDirectory, folderToMove));
+                            Path.Join(DirectoryService.ConfigDirectory, folderToMove));
                     }
                     catch (Exception)
                     {
@@ -144,7 +142,7 @@ namespace API.Data
             {
                 try
                 {
-                    fileInfo.CopyTo(Path.Join(ConfigDirectory, fileInfo.Name));
+                    fileInfo.CopyTo(Path.Join(DirectoryService.ConfigDirectory, fileInfo.Name));
                 }
                 catch (Exception)
                 {

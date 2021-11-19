@@ -103,9 +103,7 @@
                     <div class="col-6">
                         <div class="form-group">
                             <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                                <option [value]="1">Right to Left</option>
-                                <option [value]="0">Left to Right</option>
-                                <option [value]="2">None</option>
+                                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
                             </select>
                         </div>
                     </div>

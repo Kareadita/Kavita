@@ -138,6 +138,22 @@ namespace API.Services
 
             if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
 
+            // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
+            // Get first folder, then sort within that
+            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, new NaturalSortComparer()).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstDirectoryFile))
+            {
+                var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
+                if (!string.IsNullOrEmpty(firstDirectory))
+                {
+                    var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
+                        .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
+                }
+            }
+
             var result = fullNames
                 .OrderBy(Path.GetFileName, new NaturalSortComparer())
                 .FirstOrDefault();
@@ -159,7 +175,7 @@ namespace API.Services
         /// <returns></returns>
         public string GetCoverImage(string archivePath, string fileName)
         {
-            if (archivePath == null || !IsValidArchive(archivePath)) return String.Empty;
+            if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
             try
             {
                 var libraryHandler = CanOpen(archivePath);

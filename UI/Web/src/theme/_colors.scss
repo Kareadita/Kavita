@@ -1,6 +1,19 @@
 $primary-color: #4ac694; //(74,198,148)
 $error-color: #ff4136; // #bb2929 good color for contrast rating
 
+$dark-bg-color: #343a40;
+$dark-primary-color: rgba(74, 198, 148, 0.9);
+$dark-text-color: #efefef;
+$dark-hover-color: #4ac694;
+$dark-form-background: rgba(1, 4, 9, 0.5);
+$dark-form-background-no-opacity: rgb(1, 4, 9);
+$dark-form-placeholder: #efefef;
+$dark-link-color: rgb(88, 166, 255);
+$dark-icon-color: white;
+$dark-form-border: rgba(239, 239, 239, 0.125);
+$dark-form-readonly: #434648;
+$dark-item-accent-bg: #292d32;
+
 $theme-colors: (
   "primary": $primary-color,
   "danger": $error-color 

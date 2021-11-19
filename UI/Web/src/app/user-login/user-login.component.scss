@@ -1,4 +1,4 @@
-@import "../../theme/_colors.scss";
+@use "../../theme/colors";
 
 .login {
     display: flex;
@@ -36,7 +36,7 @@
     }
 
     .card {
-        background-color: $primary-color;
+        background-color: colors.$primary-color;
         color: #fff;
         cursor: pointer;
         min-width: 300px;

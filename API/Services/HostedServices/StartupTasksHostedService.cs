@@ -29,7 +29,7 @@ namespace API.Services.HostedServices
                 // These methods will automatically check if stat collection is disabled to prevent sending any data regardless
                 // of when setting was changed
                 await taskScheduler.ScheduleStatsTasks();
-                taskScheduler.RunStatCollection();
+                await taskScheduler.RunStatCollection();
             }
             catch (Exception)
             {

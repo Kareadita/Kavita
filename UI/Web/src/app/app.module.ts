@@ -7,7 +7,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -32,6 +32,7 @@ import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
+import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
 
 
 @NgModule({
@@ -48,6 +49,7 @@ import { ConfigData } from './_models/config-data';
     RecentlyAddedComponent,
     OnDeckComponent,
     DashboardComponent,
+    NavEventsToggleComponent,
   ],
   imports: [
     HttpClientModule,
@@ -59,6 +61,7 @@ import { ConfigData } from './_models/config-data';
 
     NgbDropdownModule, // Nav
     AutocompleteLibModule, // Nav
+    NgbPopoverModule, // Nav Events toggle
     NgbRatingModule, // Series Detail
     NgbNavModule,
     NgbPaginationModule,

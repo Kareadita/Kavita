@@ -1,4 +1,4 @@
-export interface ScanLibraryProgressEvent {
+export interface ProgressEvent {
     libraryId: number;
     progress: number;
     eventTime: string;

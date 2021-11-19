@@ -1,9 +1,8 @@
-@import "../../../theme/colors";
-@import "../../../assets/themes/dark.scss";
+@use "../../../theme/colors";
 
 .bulk-select {
-    background-color: $dark-form-background-no-opacity;
-    border-bottom: 2px solid $primary-color;
+    background-color: colors.$dark-form-background-no-opacity;
+    border-bottom: 2px solid colors.$primary-color;
     color: white;
 }
 
@@ -12,5 +11,5 @@
 }
 
 .highlight {
-    color: $primary-color !important;
+    color: colors.$primary-color !important;
 }

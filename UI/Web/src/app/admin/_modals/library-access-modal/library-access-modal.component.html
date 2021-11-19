@@ -6,17 +6,24 @@
     </button>
 </div>
 <div class="modal-body">
-    <div class="list-group">
-        <li class="list-group-item" *ngFor="let library of selectedLibraries; let i = index">
-            <div class="form-check">
-                <input id="library-{{i}}" type="checkbox" attr.aria-label="Library {{library.data.name}}" class="form-check-input" 
-                     [(ngModel)]="library.selected" name="library">
-                <label attr.for="library-{{i}}" class="form-check-label">{{library.data.name}}</label>
-            </div>
-        </li>
-        <li class="list-group-item" *ngIf="selectedLibraries.length === 0">
-            There are no libraries setup yet.
-        </li>
+    <div class="list-group" *ngIf="!isLoading">
+        <div class="form-check">
+            <input id="selectall" type="checkbox" class="form-check-input" 
+                [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+            <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
+        </div>
+        <ul>
+            <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">
+                <div class="form-check">
+                    <input id="library-{{i}}" type="checkbox" class="form-check-input" attr.aria-label="Library {{library.name}}"
+                        [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+                    <label attr.for="library-{{i}}" class="form-check-label">{{library.name}}</label>
+                </div>
+            </li>
+            <li class="list-group-item" *ngIf="allLibraries.length === 0">
+                There are no libraries setup yet.
+            </li>
+        </ul>
     </div>
 </div>
 <div class="modal-footer">

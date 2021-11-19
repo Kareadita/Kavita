@@ -221,7 +221,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely, 
-   * and calculate the direction the scrolling is occuring. This is used for prefetching.
+   * and calculate the direction the scrolling is occuring. This is not used for prefetching.
    * @param event Scroll Event
    */
   handleScrollEvent(event?: Event) {
@@ -277,40 +277,27 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   checkIfShouldTriggerContinuousReader() {
     if (this.isScrolling) return;
-
+    
     if (this.direction === ScrollDirection.Vertical) {
       if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
         const totalHeight = this.getTotalHeight();
         const totalScroll = this.getTotalScroll();
-  
+
         // If we were at top but have started scrolling down past page 0, remove top spacer
         if (this.atTop && this.pageNum > 0) {
           this.atTop = false;
         }
-        // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
+        
         if (totalScroll === totalHeight && !this.atBottom) {
           this.atBottom = true;
           this.setPageNum(this.totalPages);
-          this.debugLog('At last page, saving last page ', this.totalPages);
+
           // Scroll user back to original location
           this.previousScrollHeightMinusTop = this.getScrollTop();
           requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
         } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
           // This if statement will fire once we scroll into the spacer at all
           this.loadNextChapter.emit();
-        }
-      } else {
-        // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
-        if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
-          this.atBottom = false;
-  
-          this.atTop = true; 
-          // Scroll user back to original location
-          this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
-          requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX));
-        } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
-          // If already at top, then we moving on
-          this.loadPrevChapter.emit();
         }
       }
     } else {
@@ -358,22 +345,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             const screenHeight = (window.innerHeight || document.documentElement.clientHeight);
             const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
             
-            //const bottomX = this.getScrollTop();
-
-            // Check if the image is mostly above the cuttoff point
-            //const cuttoffPoint = bottomX - ((bottomX - topX) / 2);
-            // without this, it will only trigger once you get the top of the image to the top of the screen: && rect.bottom > cuttoffPoint
-            // with it, it will trigger at half way
-            //console.log('Cutoff point: ', cuttoffPoint);
-            //return rect.top <= cuttoffPoint ; // && rect.bottom > cuttoffPoint
-            // console.log('device height: ', topX);
-            // console.log('image ' + elem.getAttribute('page') + ' top: ', rect.top);
-            // console.log('amount scrolled down: ', rect.top / topX);
-            // console.log('cutoff point: ', cuttoffPoint);
-            console.log('Right: ', rect.right);
-            console.log('width: ', screenWidth);
             if (this.direction === ScrollDirection.Vertical) {
-              return Math.abs(rect.top / screenHeight) <= 0.25;
+              const topX = (window.innerHeight || document.documentElement.clientHeight);
+              return Math.abs(rect.top / topX) <= 0.25;
             } else {
               return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75; // ?! This doesn't work perfectly, need to revist
             }
@@ -494,6 +468,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * Performs the scroll for the current page element. Updates any state variables needed.
    */
   scrollToCurrentPage() {
+    this.debugLog('Scrolling to ', this.pageNum);
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
     
