@@ -199,12 +199,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   getScrollOffset() {
     if (this.direction === ScrollDirection.Horizontal) {
-      return (window.pageXOffset  
-        || document.documentElement.scrollLeft
-        || document.body.scrollLeft || 0);
+      return document.querySelector('.horizontal-scroll')?.scrollLeft || 0;
+      // return (window.scrollX  
+      //   || document.documentElement.scrollLeft
+      //   || document.body.scrollLeft || 0);
     }
 
-    return (window.pageYOffset 
+    return (window.scrollY 
       || document.documentElement.scrollTop 
       || document.body.scrollTop || 0);
   }
@@ -336,7 +337,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
               const topX = (window.innerHeight || document.documentElement.clientHeight);
               return Math.abs(rect.top / topX) <= 0.25;
             } else {
-              const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth// + document.documentElement.scrollTop;
+              const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth;
               return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75;
             }
           }
@@ -349,10 +350,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.webtoonImages.next([]);
     this.atBottom = false; // TODO: Direction code
     this.checkIfShouldTriggerContinuousReader();
-
-    // if (this.direction === ScrollDirection.Horizontal) {
-    //   Array.from(document.querySelectorAll('img')).forEach(elem => elem.height = (window.innerHeight || document.documentElement.clientHeight));
-    // }
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
