@@ -12,7 +12,23 @@
     <strong>Scroll Top:</strong> {{getScrollTop()}}
 </div>
 
+<ng-container [ngTemplateOutlet]="startSpacer" *ngIf="direction === ScrollDirection.Vertical"></ng-container>
+
 <div [ngClass]="direction === ScrollDirection.Vertical ? 'vertical-scroll' : 'horizontal-scroll'" #scrollContainer (wheel)="handleHorizontalScroll($event)">
+    <ng-container [ngTemplateOutlet]="startSpacer" *ngIf="direction === ScrollDirection.Horizontal"></ng-container>
+    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+        <img src="{{item.src}}" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" 
+        *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" 
+        rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" 
+        [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+    </ng-container>
+    <ng-container [ngTemplateOutlet]="endSpacer" *ngIf="direction === ScrollDirection.Horizontal"></ng-container>
+</div>
+
+<ng-container [ngTemplateOutlet]="endSpacer" *ngIf="direction === ScrollDirection.Vertical"></ng-container>
+
+
+<ng-template #startSpacer>
     <div *ngIf="atTop" class="spacer {{direction === ScrollDirection.Vertical ? 'top' : 'left'}}" role="alert" (click)="loadPrevChapter.emit()">
         <div style="height: 200px"></div>
         <div>
@@ -26,12 +42,9 @@
             <span class="sr-only">Scroll {{direction === ScrollDirection.Vertical ? 'up' : 'left'}} to move to previous chapter</span>
         </div>
     </div>
-    <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-        <img src="{{item.src}}" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" 
-        *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" 
-        rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" 
-        [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
-    </ng-container>
+</ng-template>
+
+<ng-template #endSpacer>
     <div *ngIf="atBottom" class="spacer" role="alert" (click)="loadNextChapter.emit()">
         <div class="{{direction === ScrollDirection.Vertical ? 'bottom' : 'right'}}">
             <button class="btn btn-icon mx-auto">
@@ -45,5 +58,6 @@
         </div>
         <div style="height: 200px"></div>
     </div>
-</div>
+</ng-template>
+
 

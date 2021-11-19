@@ -272,7 +272,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       return document.documentElement.offsetHeight + document.documentElement.scrollTop;
     } else {
       if (this.scrollElem !== undefined) {
-        return this.scrollElem.nativeElement.offsetHeight + this.scrollElem.nativeElement.scrollTop;
+        return this.scrollElem.nativeElement.offsetWidth + this.scrollElem.nativeElement.scrollLeft;
       } else {
         return 0;
       }
@@ -317,7 +317,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
       }
-    } else if (totalScroll >= totalPixels + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+    } else if (totalScroll >= totalPixels + SPACER_SCROLL_INTO_PX && this.atBottom) { // NOTE: If we have the spacers in the scroller area, the math doesn't work and we need to remove spacer from the calc
       // This if statement will fire once we scroll into the spacer at all
       this.loadNextChapter.emit();
     }
