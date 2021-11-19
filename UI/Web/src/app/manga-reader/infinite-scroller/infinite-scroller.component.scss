@@ -36,7 +36,8 @@
 .horizontal-scroll {
     img {
         float: left;
-        height: 97vh;
+        max-height: 97vh;
+        width: 100%;
     }
     overflow: hidden;
     overflow-x: scroll;
