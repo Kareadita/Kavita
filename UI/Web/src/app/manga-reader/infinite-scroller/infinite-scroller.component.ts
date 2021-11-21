@@ -112,13 +112,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
    imagesLoaded: {[key: number]: number} = {};
   /**
-   * If the user has scrolled all the way to the bottom. This is used solely for continuous reading
+   * If the user has scrolled all the way to the bottom/right. This is used solely for continuous reading
    */
-   atBottom: boolean = false;   
+   atEnd: boolean = false;   
    /**
-   * If the user has scrolled all the way to the top. This is used solely for continuous reading
+   * If the user has scrolled all the way to the top/left. This is used solely for continuous reading
    */
-   atTop: boolean = false;
+   atStart: boolean = false;
    /**
     * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
     */
@@ -299,12 +299,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     const totalScroll = this.getTotalScroll();
 
     // If we were at top but have started scrolling down past page 0, remove top spacer
-    if (this.atTop && this.pageNum > pageNumCheck) {
-      this.atTop = false;
+    if (this.atStart && this.pageNum > pageNumCheck) {
+      this.atStart = false;
     }
     
-    if (totalScroll === totalPixels && !this.atBottom) {
-      this.atBottom = true;
+    if (totalScroll === totalPixels && !this.atEnd) {
+      this.atEnd = true;
       this.setPageNum(this.totalPages);
 
       // Scroll user back to original location
@@ -317,7 +317,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
       }
-    } else if (totalScroll >= totalPixels + SPACER_SCROLL_INTO_PX && this.atBottom) { // NOTE: If we have the spacers in the scroller area, the math doesn't work and we need to remove spacer from the calc
+    } else if (totalScroll >= totalPixels + SPACER_SCROLL_INTO_PX && this.atEnd) { // NOTE: If we have the spacers in the scroller area, the math doesn't work and we need to remove spacer from the calc
       // This if statement will fire once we scroll into the spacer at all
       this.loadNextChapter.emit();
     }
@@ -327,9 +327,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     const offset = (this.direction === ScrollDirection.Vertical) ? this.getScrollTop() : this.getScrollOffset();
     const pageNumCheck = (this.direction === ScrollDirection.Vertical) ? 0 : 2;
     
-    if (offset < 5 && this.pageNum <= pageNumCheck && !this.atTop) {
-      this.atBottom = false;
-      this.atTop = true; 
+    if (offset < 5 && this.pageNum <= pageNumCheck && !this.atStart) {
+      this.atEnd = false;
+      this.atStart = true; 
 
       // Scroll user back to original location
       
@@ -340,8 +340,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
         requestAnimationFrame(() => window.scrollTo(SPACER_SCROLL_INTO_PX, 0));
       }
-    } else if (offset < 5 && this.pageNum <= pageNumCheck && this.atTop) {
+    } else if (offset < 5 && this.pageNum <= pageNumCheck && this.atStart) {
       // If already at top, then we moving on
+//      this.setPageNum(0);
       this.loadPrevChapter.emit();
     }
 
@@ -432,7 +433,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initWebtoonReader() {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
-    this.atBottom = false; // TODO: Direction code
+    this.atEnd = false; // TODO: Direction code
     this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();

@@ -5,8 +5,8 @@
     <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
     <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
     <strong>Pages:</strong> {{pageNum}} / {{totalPages}}
-    <strong>At Top:</strong> {{atTop}}
-    <strong>At Bottom:</strong> {{atBottom}}
+    <strong>At Start:</strong> {{atStart}}
+    <strong>At End:</strong> {{atEnd}}
     <strong>Total Height:</strong> {{getTotalHeight()}}
     <strong>Total Scroll:</strong> {{getTotalScroll()}}
     <strong>Scroll Top:</strong> {{getScrollTop()}}
@@ -16,12 +16,14 @@
 
 <div [ngClass]="direction === ScrollDirection.Vertical ? 'vertical-scroll' : 'horizontal-scroll'" #scrollContainer (wheel)="handleHorizontalScroll($event)">
     <ng-container [ngTemplateOutlet]="startSpacer" *ngIf="direction === ScrollDirection.Horizontal"></ng-container>
+    
     <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
         <img src="{{item.src}}" class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" 
         *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" 
         rel="nofollow" alt="image" (load)="onImageLoad($event)" id="page-{{item.page}}" 
         [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
     </ng-container>
+    
     <ng-container [ngTemplateOutlet]="endSpacer" *ngIf="direction === ScrollDirection.Horizontal"></ng-container>
 </div>
 
@@ -29,7 +31,7 @@
 
 
 <ng-template #startSpacer>
-    <div *ngIf="atTop" class="spacer {{direction === ScrollDirection.Vertical ? 'top' : 'left'}}" role="alert" (click)="loadPrevChapter.emit()">
+    <div *ngIf="atStart" class="spacer {{direction === ScrollDirection.Vertical ? 'top' : 'left'}}" role="alert" (click)="loadPrevChapter.emit()">
         <div style="height: 200px"></div>
         <div>
             <button class="btn btn-icon mx-auto">
@@ -45,7 +47,7 @@
 </ng-template>
 
 <ng-template #endSpacer>
-    <div *ngIf="atBottom" class="spacer" role="alert" (click)="loadNextChapter.emit()">
+    <div *ngIf="atEnd" class="spacer {{direction === ScrollDirection.Vertical ? '' : 'right'}}" role="alert" (click)="loadNextChapter.emit()">
         <div class="{{direction === ScrollDirection.Vertical ? 'bottom' : 'right'}}">
             <button class="btn btn-icon mx-auto">
                 <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
