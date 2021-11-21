@@ -19,7 +19,7 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
 
 #pragma warning disable S1075
-        private const string ApiUrl = "http://stats2.kavitareader.com";
+        private const string ApiUrl = "https://stats2.kavitareader.com";
 #pragma warning restore S1075
 
         public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork)
