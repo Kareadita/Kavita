@@ -67,7 +67,7 @@ namespace API.Services.Tasks
            var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
            _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-           var scanner = new ParseScannedFiles(_bookService, _logger);
+           var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService);
            var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
            // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
@@ -115,7 +115,7 @@ namespace API.Services.Tasks
                    }
 
                    _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                   scanner = new ParseScannedFiles(_bookService, _logger);
+                   scanner = new ParseScannedFiles(_bookService, _logger, _archiveService);
                    parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                    totalFiles += totalFiles2;
                    scanElapsedTime += scanElapsedTime2;
@@ -214,7 +214,7 @@ namespace API.Services.Tasks
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
                MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
-           var scanner = new ParseScannedFiles(_bookService, _logger);
+           var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService);
            var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
            foreach (var folderPath in library.Folders)

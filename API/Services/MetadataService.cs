@@ -167,10 +167,11 @@ namespace API.Services
                 series.CoverImage = firstCover?.CoverImage ?? coverImage;
             }
 
-            return UpdateSeriesSummary(series, forceUpdate) || madeUpdate ;
+
+            return UpdateSeriesMetadata(series, forceUpdate) || madeUpdate;
         }
 
-        private bool UpdateSeriesSummary(Series series, bool forceUpdate)
+        private bool UpdateSeriesMetadata(Series series, bool forceUpdate)
         {
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
@@ -186,9 +187,21 @@ namespace API.Services
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return false;
 
             var comicInfo = GetComicInfo(series.Format, firstFile);
-            if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
 
+            // Summary Info
+            if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
             series.Summary = comicInfo.Summary;
+            series.Metadata.Summary = comicInfo.Summary;
+
+            // Get all Genres and perform matches against each genre. Then add new ones that didn't exist already
+            // and Attach the Genres so they get written on save.
+
+            // TODO: I need to do this with DB context.
+            // series.Metadata.Genres = comicInfo.Genre.Split(",").Select(genre => new Genre()
+            // {
+            //     Name = genre.Trim(),
+            //     NormalizedName = Parser.Parser.Normalize(genre)
+            // });
             return true;
         }
 

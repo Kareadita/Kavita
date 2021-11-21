@@ -14,7 +14,7 @@ namespace API.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.8");
+                .HasAnnotation("ProductVersion", "5.0.10");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -382,6 +382,26 @@ namespace API.Data.Migrations
                     b.ToTable("FolderPath");
                 });
 
+            modelBuilder.Entity("API.Entities.Genre", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique();
+
+                    b.ToTable("Genre");
+                });
+
             modelBuilder.Entity("API.Entities.Library", b =>
                 {
                     b.Property<int>("Id")
@@ -572,6 +592,9 @@ namespace API.Data.Migrations
                     b.Property<int>("SeriesId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SeriesId")
@@ -662,6 +685,21 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesMetadatasId");
 
                     b.ToTable("CollectionTagSeriesMetadata");
+                });
+
+            modelBuilder.Entity("GenreSeriesMetadata", b =>
+                {
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GenresId", "SeriesMetadatasId");
+
+                    b.HasIndex("SeriesMetadatasId");
+
+                    b.ToTable("GenreSeriesMetadata");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -943,6 +981,21 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.CollectionTag", null)
                         .WithMany()
                         .HasForeignKey("CollectionTagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GenreSeriesMetadata", b =>
+                {
+                    b.HasOne("API.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

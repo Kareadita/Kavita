@@ -33,7 +33,7 @@ namespace API.Entities
         /// <summary>
         /// Summary information related to the Series
         /// </summary>
-        public string Summary { get; set; } // NOTE: Migrate into SeriesMetdata (with Metadata update)
+        public string Summary { get; set; } // TODO: Migrate into SeriesMetdata (with Metadata update)
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         /// <summary>

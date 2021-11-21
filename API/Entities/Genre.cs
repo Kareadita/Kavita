@@ -1,22 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-using API.Entities.Interfaces;
+﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
-    public class Genre : IHasConcurrencyToken
+    [Index(nameof(NormalizedName), IsUnique = true)]
+    public class Genre
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string NormalizedName { get; set; }
         // MetadataUpdate add ProviderId
 
-        /// <inheritdoc />
-        [ConcurrencyCheck]
-        public uint RowVersion { get; private set; }
-
-        /// <inheritdoc />
-        public void OnSavingChanges()
-        {
-            RowVersion++;
-        }
+        public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
     }
 }

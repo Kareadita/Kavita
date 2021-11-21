@@ -85,6 +85,7 @@ namespace API.Data.Repositories
             var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .Include(s => s.Metadata)
+                .Include(s => s.Metadata)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)

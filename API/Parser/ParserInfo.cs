@@ -1,4 +1,6 @@
-﻿using API.Entities.Enums;
+﻿using System.Collections.Generic;
+using API.Data.Metadata;
+using API.Entities.Enums;
 
 namespace API.Parser
 {
@@ -55,15 +57,27 @@ namespace API.Parser
         /// <remarks>Manga does not use this field</remarks>
         /// </summary>
         public string Title { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// If the ParserInfo has the IsSpecial tag or both volumes and chapters are default aka 0
         /// </summary>
         /// <returns></returns>
         public bool IsSpecialInfo()
-        { 
+        {
             return (IsSpecial || (Volumes == "0" && Chapters == "0"));
         }
+
+        /// <summary>
+        /// Year range (TODO: Make this a ValueType). Has at least 1 year, maybe 2 representing a range
+        /// </summary>
+        // public string YearRange { get; set; }
+        // public IList<string> Genres { get; set; } = new List<string>();
+
+        /// <summary>
+        /// This will contain any EXTRA comicInfo information parsed from the epub or archive. If there is an archive with comicInfo.xml AND it contains
+        /// series, volume information, that will override what we parsed.
+        /// </summary>
+        public ComicInfo ComicInfo { get; set; }
 
         /// <summary>
         /// Merges non empty/null properties from info2 into this entity.

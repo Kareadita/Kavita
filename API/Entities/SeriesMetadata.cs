@@ -10,7 +10,14 @@ namespace API.Entities
     {
         public int Id { get; set; }
 
+        public string Summary { get; set; }
+        // TODO: AgeRating, CommunityRating,
+
+
         public ICollection<CollectionTag> CollectionTags { get; set; }
+
+        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+
 
         // Relationship
         public Series Series { get; set; }

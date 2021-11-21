@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
@@ -25,6 +26,11 @@ namespace API.Data
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
             };
+        }
+
+        public static SeriesMetadata SeriesMetadata(ComicInfo info)
+        {
+            return SeriesMetadata(Array.Empty<CollectionTag>());
         }
 
         public static Volume Volume(string volumeNumber)

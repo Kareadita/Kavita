@@ -25,6 +25,7 @@ namespace API.Services.Tasks.Scanner
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
         private readonly IBookService _bookService;
         private readonly ILogger _logger;
+        private readonly IArchiveService _archiveService;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -32,10 +33,11 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="bookService"></param>
         /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger)
+        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService)
         {
             _bookService = bookService;
             _logger = logger;
+            _archiveService = archiveService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         }
 
@@ -90,8 +92,23 @@ namespace API.Services.Tasks.Scanner
                 info.Merge(info2);
             }
 
+            if (Parser.Parser.IsArchive(path))
+            {
+                info.ComicInfo = _archiveService.GetComicInfo(path);
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                {
+                    info.Volumes = info.ComicInfo.Volume;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series;
+                }
+            }
+
             TrackSeries(info);
         }
+
 
         /// <summary>
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
