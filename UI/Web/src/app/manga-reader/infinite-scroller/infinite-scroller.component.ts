@@ -126,7 +126,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -421,7 +421,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
               const topX = (window.innerHeight || document.documentElement.clientHeight);
               return Math.abs(rect.top / topX) <= 0.25;
             } else {
-              // TODO: Check this with proper offset from scrollElem
+              // We use screen width instead of scrollElem width as scrollElem will have images not yet rendered on screen affecting it's width
               const screenWidth = (window.innerWidth || document.documentElement.clientWidth) + document.documentElement.offsetWidth;
               return Math.abs(rect.right / screenWidth) >= 0.25 && Math.abs(rect.right / screenWidth) <= 0.75;
             }
@@ -433,7 +433,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initWebtoonReader() {
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
-    this.atEnd = false; // TODO: Direction code
+    this.atEnd = false;
     this.checkIfShouldTriggerContinuousReader();
 
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
@@ -462,12 +462,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (this.direction === ScrollDirection.Vertical) {
       this.renderer.setAttribute(event.target, 'height', event.target.height + '');
     } else {
-      // ?! BUG: This is not setting correctly for images already loaded from vertical mode
-      // this.renderer.setAttribute(event.target, 'height', (window.innerHeight || document.documentElement.clientHeight) + '');
-      // console.log('setting height: ', (window.innerHeight || document.documentElement.clientHeight) + 'px')
-      //this.renderer.setAttribute(event.target, 'height', window.innerHeight + '');
       this.renderer.setAttribute(event.target, 'float', 'left');
       this.renderer.setAttribute(event.target, 'display', 'inline-block');
+      // TODO: We need a way to prevent layout shift when inserting elements before us
+      // const image = document.querySelector('img[id^="page-' + imagePage + '"]');
+      // if (image !== null && !this.isElementVisible(image) && imagePage < this.pageNum) {
+      //   // Adjust scrollLeft offset to prevent triggering scroll by browser
+      //   requestAnimationFrame(() => this.scrollElem.nativeElement.scrollLeft += this.webtoonImageWidth);
+      // }
     }
 
 
@@ -562,7 +564,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     let data = this.webtoonImages.value;
 
     if (this.imagesLoaded.hasOwnProperty(page)) {
-      this.debugLog('\t[PREFETCH] Skipping prefetch of ', page);
       return;
     }
     this.debugLog('\t[PREFETCH] Prefetching ', page);
@@ -586,7 +587,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   attachIntersectionObserverElem(elem: HTMLImageElement) {
     if (elem !== null) {
       this.intersectionObserver.observe(elem);
-      this.debugLog('Attached Intersection Observer to page', this.readerService.imageUrlToPageNum(elem.src));
     } else {
       console.error('Could not attach observer on elem'); // This never happens
     }

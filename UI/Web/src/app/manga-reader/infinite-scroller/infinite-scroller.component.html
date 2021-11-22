@@ -1,15 +1,18 @@
 
 <div class="fixed-top overlay" *ngIf="showDebugBar()">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
-    <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
+    <strong>All Images Loaded: </strong> {{this.allImagesLoaded}}
+    <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} ({{this.isScrolling}})
     <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
     <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
     <strong>Pages:</strong> {{pageNum}} / {{totalPages}}
     <strong>At Start:</strong> {{atStart}}
     <strong>At End:</strong> {{atEnd}}
-    <strong>Total Height:</strong> {{getTotalHeight()}}
+    <strong>Current Page:</strong> {{pageNum}}
+
+    <!-- <strong>Total Height:</strong> {{getTotalHeight()}}
     <strong>Total Scroll:</strong> {{getTotalScroll()}}
-    <strong>Scroll Top:</strong> {{getScrollTop()}}
+    <strong>Scroll Top:</strong> {{getScrollTop()}} -->
 </div>
 
 <ng-container [ngTemplateOutlet]="startSpacer" *ngIf="direction === ScrollDirection.Vertical"></ng-container>
