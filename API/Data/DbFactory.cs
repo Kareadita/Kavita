@@ -78,5 +78,14 @@ namespace API.Data
                 Promoted = promoted
             };
         }
+
+        public static ChapterMetadata ChapterMetadata(int chapterId)
+        {
+            return new ChapterMetadata()
+            {
+                ChapterId = chapterId,
+                People = new List<Person>()
+            };
+        }
     }
 }

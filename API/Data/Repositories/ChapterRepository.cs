@@ -43,6 +43,15 @@ namespace API.Data.Repositories
         {
             return await _context.Chapter
                 .Where(c => c.Id == chapterId)
+                .Join(_context.ChapterMetadata, c => c.Id, cm => cm.ChapterId, (chapter, metadata) => new
+                {
+                    ChapterNumber = chapter.Range,
+                    chapter.IsSpecial,
+                    chapter.Pages,
+                    chapter.VolumeId,
+                    chapter.Range,
+                    ChapterTitle = metadata.Title
+                })
                 .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
                 {
                     ChapterNumber = chapter.Range,
@@ -50,10 +59,12 @@ namespace API.Data.Repositories
                     VolumeId = volume.Id,
                     chapter.IsSpecial,
                     volume.SeriesId,
-                    chapter.Pages
+                    chapter.Pages,
+                    chapter.ChapterTitle
                 })
                 .Join(_context.Series, data => data.SeriesId, series => series.Id, (data, series) => new
                 {
+                    data.ChapterTitle,
                     data.ChapterNumber,
                     data.VolumeNumber,
                     data.VolumeId,
@@ -74,7 +85,8 @@ namespace API.Data.Repositories
                     SeriesFormat = data.SeriesFormat,
                     SeriesName = data.SeriesName,
                     LibraryId = data.LibraryId,
-                    Pages = data.Pages
+                    Pages = data.Pages,
+                    ChapterTitle = data.ChapterTitle
                 })
                 .AsNoTracking()
                 .SingleAsync();

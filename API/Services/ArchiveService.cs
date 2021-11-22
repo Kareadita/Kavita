@@ -322,7 +322,12 @@ namespace API.Services
             return null;
         }
 
-        public ComicInfo GetComicInfo(string archivePath)
+        /// <summary>
+        /// This can be null if nothing is found or any errors occur during access
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <returns></returns>
+        public ComicInfo? GetComicInfo(string archivePath)
         {
             if (!IsValidArchive(archivePath)) return null;
 

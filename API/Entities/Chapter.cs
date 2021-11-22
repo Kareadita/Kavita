@@ -42,12 +42,13 @@ namespace API.Entities
         /// </summary>
         public string Title { get; set; }
 
-        // TODO: Hook into a ChapterMetadata table to have information available like:
-        // ChapterTitle, Year, StoryArc, Writer (all comic stuff that is per issue)
 
         // Relationships
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
+
+        public ChapterMetadata ChapterMetadata { get; set; }
+        //public int SeriesMetadataId { get; set; }
 
         public void UpdateFrom(ParserInfo info)
         {

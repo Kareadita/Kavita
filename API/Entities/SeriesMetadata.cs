@@ -17,6 +17,10 @@ namespace API.Entities
         public ICollection<CollectionTag> CollectionTags { get; set; }
 
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        /// <summary>
+        /// All people attached at a Series level.
+        /// </summary>
+        public ICollection<Person> People { get; set; } = new List<Person>();
 
 
         // Relationship

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
@@ -99,18 +100,34 @@ namespace API.Services
         /// </summary>
         /// <param name="chapter"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public bool UpdateMetadata(Chapter chapter, bool forceUpdate)
+        public bool UpdateMetadata(Chapter chapter, ChapterMetadata metadata, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+            var updateMade = false;
 
             if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
             {
                 _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
                 chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
-                return true;
+                updateMade = true;
             }
 
-            return false;
+            // TODO: Hook in Chapter metadata code
+            if (firstFile != null && (forceUpdate || firstFile.HasFileBeenModified()))
+            {
+                var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
+                if (comicInfo == null) return false;
+
+                if (!string.IsNullOrEmpty(comicInfo.Title))
+                {
+                    metadata.Title = comicInfo.Title;
+                }
+
+                updateMade = true;
+            }
+
+
+            return updateMade;
         }
 
         /// <summary>
@@ -224,6 +241,7 @@ namespace API.Services
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
+            // TODO: This will need to be split so that CoverImages is one Task, Metadata (local) is another
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
@@ -251,10 +269,19 @@ namespace API.Services
                     });
                 _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
+                // TODO: Pull all Metadata's here and create if they don't exist.
+                // We will need them to calculate the tags for the Series itself
+
+                var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
+
+
                 Parallel.ForEach(nonLibrarySeries, series =>
                 {
                     try
                     {
+                        var chapterMetadatas = Task.Run(() => _unitOfWork.ChapterMetadataRepository.GetMetadataForChapterIds(chapterIds[series.Id]))
+                            .Result;
+
                         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
                         var volumeUpdated = false;
                         foreach (var volume in series.Volumes)
@@ -262,7 +289,13 @@ namespace API.Services
                             var chapterUpdated = false;
                             foreach (var chapter in volume.Chapters)
                             {
-                                chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                                if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
+                                {
+                                    var metadata = DbFactory.ChapterMetadata(chapter.Id);
+                                    _unitOfWork.ChapterMetadataRepository.Attach(metadata);
+                                    chapterMetadatas[chapter.Id].Add(metadata);
+                                }
+                                chapterUpdated = UpdateMetadata(chapter, chapterMetadatas[chapter.Id][0], forceUpdate);
                             }
 
                             volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
@@ -326,7 +359,13 @@ namespace API.Services
                 var chapterUpdated = false;
                 foreach (var chapter in volume.Chapters)
                 {
-                    chapterUpdated = UpdateMetadata(chapter, forceUpdate);
+                    var metadata = await _unitOfWork.ChapterMetadataRepository.GetMetadataForChapter(chapter.Id);
+                    if (metadata == null)
+                    {
+                        metadata = DbFactory.ChapterMetadata(chapter.Id);
+                        _unitOfWork.ChapterMetadataRepository.Attach(metadata);
+                    }
+                    chapterUpdated = UpdateMetadata(chapter, metadata, forceUpdate);
                 }
 
                 volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);

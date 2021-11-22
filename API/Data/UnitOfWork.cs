@@ -31,10 +31,10 @@ namespace API.Data
 
         public IAppUserProgressRepository AppUserProgressRepository => new AppUserProgressRepository(_context);
         public ICollectionTagRepository CollectionTagRepository => new CollectionTagRepository(_context, _mapper);
-        public IFileRepository FileRepository => new FileRepository(_context);
         public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
         public IReadingListRepository ReadingListRepository => new ReadingListRepository(_context, _mapper);
         public ISeriesMetadataRepository SeriesMetadataRepository => new SeriesMetadataRepository(_context);
+        public IChapterMetadataRepository ChapterMetadataRepository => new ChapterMetadataRepository(_context, _mapper);
 
         /// <summary>
         /// Commits changes to the DB. Completes the open transaction.

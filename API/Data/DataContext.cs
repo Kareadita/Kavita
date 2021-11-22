@@ -37,6 +37,7 @@ namespace API.Data
         public DbSet<AppUserBookmark> AppUserBookmark { get; set; }
         public DbSet<ReadingList> ReadingList { get; set; }
         public DbSet<ReadingListItem> ReadingListItem { get; set; }
+        public DbSet<ChapterMetadata> ChapterMetadata { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

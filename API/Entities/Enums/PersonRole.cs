@@ -20,7 +20,11 @@
         Letterer = 7,
         CoverArtist = 8,
         Editor = 9,
-        Publisher = 10
+        Publisher = 10,
+        /// <summary>
+        /// Represents a character/person within the story
+        /// </summary>
+        Character = 11
 
 
     }

@@ -294,6 +294,7 @@ namespace API.Controllers
                 else
                 {
                     series.Metadata.CollectionTags ??= new List<CollectionTag>();
+                    // TODO: Move this merging logic into a reusable code as it can be used for any Tag
                     var newTags = new List<CollectionTag>();
 
                     // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different

@@ -3,14 +3,16 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20211122175801_ChatperMetadata")]
+    partial class ChatperMetadata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -504,14 +506,9 @@ namespace API.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("SeriesMetadataId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ChapterMetadataId");
-
-                    b.HasIndex("SeriesMetadataId");
 
                     b.ToTable("Person");
                 });
@@ -955,10 +952,6 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.ChapterMetadata", null)
                         .WithMany("People")
                         .HasForeignKey("ChapterMetadataId");
-
-                    b.HasOne("API.Entities.SeriesMetadata", null)
-                        .WithMany("People")
-                        .HasForeignKey("SeriesMetadataId");
                 });
 
             modelBuilder.Entity("API.Entities.ReadingList", b =>
@@ -1170,11 +1163,6 @@ namespace API.Data.Migrations
                     b.Navigation("Metadata");
 
                     b.Navigation("Volumes");
-                });
-
-            modelBuilder.Entity("API.Entities.SeriesMetadata", b =>
-                {
-                    b.Navigation("People");
                 });
 
             modelBuilder.Entity("API.Entities.Volume", b =>

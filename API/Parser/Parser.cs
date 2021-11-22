@@ -862,7 +862,8 @@ namespace API.Parser
                 }
             }
 
-            // TODO: Since we have loops like this, think about using a method
+            // TODO: Since we have loops like this, think about using a method where you pass set of regex and Delegate to execute with
+            // string return type
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);

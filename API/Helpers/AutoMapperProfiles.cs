@@ -2,6 +2,7 @@
 using System.Linq;
 using API.DTOs;
 using API.DTOs.CollectionTags;
+using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Settings;
@@ -30,6 +31,7 @@ namespace API.Helpers
             CreateMap<SeriesMetadata, SeriesMetadataDto>();
 
             CreateMap<Person, PersonDto>();
+            CreateMap<Genre, GenreTagDto>();
 
             CreateMap<AppUserPreferences, UserPreferencesDto>();
 

@@ -89,6 +89,7 @@ namespace API.Controllers
                 LibraryId = dto.LibraryId,
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
+                ChapterTitle = dto.ChapterTitle
             });
         }
 
