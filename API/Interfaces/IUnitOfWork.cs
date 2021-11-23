@@ -16,6 +16,7 @@ namespace API.Interfaces
         IReadingListRepository ReadingListRepository { get; }
         ISeriesMetadataRepository SeriesMetadataRepository { get; }
         IChapterMetadataRepository ChapterMetadataRepository { get; }
+        IPersonRepository PersonRepository { get; }
         bool Commit();
         Task<bool> CommitAsync();
         bool HasChanges();

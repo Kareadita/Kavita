@@ -38,7 +38,7 @@
         /// <summary>
         /// This is the Author. For Books, we map creator tag in OPF to this field. Comma separated if multiple.
         /// </summary>
-        public string Writer { get; set; } // TODO: Validate if we should make this a list of writers
+        public string Writer { get; set; }
         public string Penciller { get; set; }
         public string Inker { get; set; }
         public string Colorist { get; set; }

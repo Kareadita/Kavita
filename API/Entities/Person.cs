@@ -8,6 +8,7 @@ namespace API.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string NormalizedName { get; set; }
         public PersonRole Role { get; set; }
 
         /// <inheritdoc />

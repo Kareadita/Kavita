@@ -30,6 +30,7 @@ namespace API.Services
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
+        private IDictionary<string, Person> _persons;
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
             IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
         {
@@ -100,7 +101,7 @@ namespace API.Services
         /// </summary>
         /// <param name="chapter"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public bool UpdateMetadata(Chapter chapter, ChapterMetadata metadata, bool forceUpdate)
+        private bool UpdateMetadata(Chapter chapter, ChapterMetadata metadata, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
             var updateMade = false;
@@ -112,22 +113,101 @@ namespace API.Services
                 updateMade = true;
             }
 
-            // TODO: Hook in Chapter metadata code
-            if (firstFile != null && (forceUpdate || firstFile.HasFileBeenModified()))
-            {
-                var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
-                if (comicInfo == null) return false;
-
-                if (!string.IsNullOrEmpty(comicInfo.Title))
-                {
-                    metadata.Title = comicInfo.Title;
-                }
-
-                updateMade = true;
-            }
+            // if (firstFile != null && (forceUpdate || firstFile.HasFileBeenModified()))
+            // {
+            //     var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
+            //     if (comicInfo == null) return false;
+            //
+            //     if (!string.IsNullOrEmpty(comicInfo.Title))
+            //     {
+            //         metadata.Title = comicInfo.Title;
+            //     }
+            //
+            //     if (!string.IsNullOrEmpty(comicInfo.Colorist))
+            //     {
+            //         var colorists = comicInfo.Colorist.Split(",");
+            //         // TODO: I need some sort of Person cache to during this to hold any new creations so that I can search against them
+            //
+            //
+            //     }
+            //
+            //     updateMade = true;
+            // }
 
 
             return updateMade;
+        }
+
+        private void UpdateChapterMetadata(Chapter chapter, ChapterMetadata chapterMetadata, IList<Person> allPeople, bool forceUpdate)
+        {
+            var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+
+            var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
+            if (comicInfo == null) return;
+
+            if (!string.IsNullOrEmpty(comicInfo.Title))
+            {
+                chapterMetadata.Title = comicInfo.Title;
+            }
+
+            if (!string.IsNullOrEmpty(comicInfo.Colorist))
+            {
+                UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Writer))
+            {
+                UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Editor))
+            {
+                UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Inker))
+            {
+                UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Letterer))
+            {
+                UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Penciller))
+            {
+                UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
+            {
+                UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist, person => chapterMetadata.People.Add(person));
+            }
+            if (!string.IsNullOrEmpty(comicInfo.Publisher))
+            {
+                UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher, person => chapterMetadata.People.Add(person));
+            }
+
+        }
+
+        private static void UpdatePeople(IEnumerable<Person> allPeople, IList<string> names, PersonRole role, Action<Person> action)
+        {
+            var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
+
+            foreach (var name in names)
+            {
+                var normalizedName = Parser.Parser.Normalize(name);
+                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                    p.NormalizedName.Equals(normalizedName));
+                if (person == null)
+                {
+                    person = new Person()
+                    {
+                        Name = name,
+                        NormalizedName = normalizedName,
+                        Role = PersonRole.Colorist
+                    };
+                    allPeopleTypeRole.Add(person);
+                }
+
+                action(person);
+            }
         }
 
         /// <summary>
@@ -135,7 +215,7 @@ namespace API.Services
         /// </summary>
         /// <param name="volume"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public bool UpdateMetadata(Volume volume, bool forceUpdate)
+        private bool UpdateMetadata(Volume volume, bool forceUpdate)
         {
             // We need to check if Volume coverImage matches first chapters if forceUpdate is false
             if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, forceUpdate)) return false;
@@ -153,7 +233,7 @@ namespace API.Services
         /// </summary>
         /// <param name="series"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        public bool UpdateMetadata(Series series, bool forceUpdate)
+        private bool UpdateSeriesCoverImage(Series series, bool forceUpdate)
         {
             var madeUpdate = false;
             if (series == null) return false;
@@ -184,8 +264,8 @@ namespace API.Services
                 series.CoverImage = firstCover?.CoverImage ?? coverImage;
             }
 
-
-            return UpdateSeriesMetadata(series, forceUpdate) || madeUpdate;
+            return madeUpdate;
+            //return UpdateSeriesMetadata(series, forceUpdate) || madeUpdate;
         }
 
         private bool UpdateSeriesMetadata(Series series, bool forceUpdate)
@@ -193,6 +273,8 @@ namespace API.Services
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
             // checking File last write time.
+
+
             if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return false;
 
             var isBook = series.Library.Type == LibraryType.Book;
@@ -207,7 +289,7 @@ namespace API.Services
 
             // Summary Info
             if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
-            series.Summary = comicInfo.Summary;
+            series.Summary = comicInfo.Summary; // TODO: Remove this field
             series.Metadata.Summary = comicInfo.Summary;
 
             // Get all Genres and perform matches against each genre. Then add new ones that didn't exist already
@@ -232,6 +314,52 @@ namespace API.Services
             return null;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>This cannot have any Async code within. It is used within Parallel.ForEach</remarks>
+        /// <param name="series"></param>
+        /// <param name="forceUpdate"></param>
+        private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, IList<Person> allPeople, bool forceUpdate)
+        {
+            _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
+            try
+            {
+                var chapterMetadatas = Task.Run(() => _unitOfWork.ChapterMetadataRepository.GetMetadataForChapterIds(chapterIds[series.Id])).Result;
+
+                var volumeUpdated = false;
+                foreach (var volume in series.Volumes)
+                {
+                    var chapterUpdated = false;
+                    foreach (var chapter in volume.Chapters)
+                    {
+                        ChapterMetadata metadata;
+                        if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
+                        {
+                            metadata = DbFactory.ChapterMetadata(chapter.Id);
+                            _unitOfWork.ChapterMetadataRepository.Attach(metadata);
+                            chapterMetadatas[chapter.Id].Add(metadata);
+                        }
+                        else
+                        {
+                            metadata = chapterMetadatas[chapter.Id][0];
+                        }
+                        chapterUpdated = UpdateMetadata(chapter, metadata, forceUpdate);
+                        UpdateChapterMetadata(chapter, metadata, allPeople, forceUpdate);
+                    }
+
+                    volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
+                }
+
+                UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
+                UpdateSeriesMetadata(series, forceUpdate);
+            }
+            catch (Exception)
+            {
+                /* Swallow exception */
+            }
+        }
+
 
         /// <summary>
         /// Refreshes Metadata for a whole library
@@ -241,7 +369,6 @@ namespace API.Services
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
         public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
         {
-            // TODO: This will need to be split so that CoverImages is one Task, Metadata (local) is another
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
@@ -258,6 +385,7 @@ namespace API.Services
                 if (chunkInfo.TotalChunks == 0) continue;
                 totalTime += stopwatch.ElapsedMilliseconds;
                 stopwatch.Restart();
+
                 _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
                     chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
 
@@ -269,44 +397,11 @@ namespace API.Services
                     });
                 _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
-                // TODO: Pull all Metadata's here and create if they don't exist.
-                // We will need them to calculate the tags for the Series itself
-
                 var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
-
-
+                var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
                 Parallel.ForEach(nonLibrarySeries, series =>
                 {
-                    try
-                    {
-                        var chapterMetadatas = Task.Run(() => _unitOfWork.ChapterMetadataRepository.GetMetadataForChapterIds(chapterIds[series.Id]))
-                            .Result;
-
-                        _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
-                        var volumeUpdated = false;
-                        foreach (var volume in series.Volumes)
-                        {
-                            var chapterUpdated = false;
-                            foreach (var chapter in volume.Chapters)
-                            {
-                                if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
-                                {
-                                    var metadata = DbFactory.ChapterMetadata(chapter.Id);
-                                    _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                                    chapterMetadatas[chapter.Id].Add(metadata);
-                                }
-                                chapterUpdated = UpdateMetadata(chapter, chapterMetadatas[chapter.Id][0], forceUpdate);
-                            }
-
-                            volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
-                        }
-
-                        UpdateMetadata(series, volumeUpdated || forceUpdate);
-                    }
-                    catch (Exception)
-                    {
-                        /* Swallow exception */
-                    }
+                    ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
                 });
 
                 if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
@@ -352,26 +447,10 @@ namespace API.Services
                 _logger.LogError("[MetadataService] Series {SeriesId} was not found on Library {LibraryId}", seriesId, libraryId);
                 return;
             }
-            _logger.LogInformation("[MetadataService] Beginning metadata refresh of {SeriesName}", series.Name);
-            var volumeUpdated = false;
-            foreach (var volume in series.Volumes)
-            {
-                var chapterUpdated = false;
-                foreach (var chapter in volume.Chapters)
-                {
-                    var metadata = await _unitOfWork.ChapterMetadataRepository.GetMetadataForChapter(chapter.Id);
-                    if (metadata == null)
-                    {
-                        metadata = DbFactory.ChapterMetadata(chapter.Id);
-                        _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                    }
-                    chapterUpdated = UpdateMetadata(chapter, metadata, forceUpdate);
-                }
 
-                volumeUpdated = UpdateMetadata(volume, chapterUpdated || forceUpdate);
-            }
-
-            UpdateMetadata(series, volumeUpdated || forceUpdate);
+            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
+            var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+            ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
 
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())

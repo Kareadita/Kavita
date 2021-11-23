@@ -23,7 +23,6 @@ namespace API.Data
 
         public DbSet<Library> Library { get; set; }
         public DbSet<Series> Series { get; set; }
-
         public DbSet<Chapter> Chapter { get; set; }
         public DbSet<Volume> Volume { get; set; }
         public DbSet<AppUser> AppUser { get; set; }
@@ -38,6 +37,8 @@ namespace API.Data
         public DbSet<ReadingList> ReadingList { get; set; }
         public DbSet<ReadingListItem> ReadingListItem { get; set; }
         public DbSet<ChapterMetadata> ChapterMetadata { get; set; }
+        public DbSet<Person> Person { get; set; }
+        public DbSet<Genre> Genre { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

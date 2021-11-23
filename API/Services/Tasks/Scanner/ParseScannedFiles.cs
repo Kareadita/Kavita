@@ -104,6 +104,10 @@ namespace API.Services.Tasks.Scanner
                 {
                     info.Series = info.ComicInfo.Series;
                 }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
             }
 
             TrackSeries(info);

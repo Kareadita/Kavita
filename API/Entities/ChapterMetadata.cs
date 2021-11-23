@@ -15,7 +15,7 @@ namespace API.Entities
         /// </summary>
         /// <remarks>This should not be confused with Chapter.Title which is used for special filenames.</remarks>
         public string Title { get; set; } = string.Empty;
-        public string Year { get; set; }
+        public string Year { get; set; } // Only time I can think this will be more than 1 year is for a volume which will be a spread
         public string StoryArc { get; set; } // This might be a list
 
         //public ICollection<Genre> Genres { get; set; } = new List<Genre>();
@@ -24,8 +24,6 @@ namespace API.Entities
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
 
-
-        // ChapterTitle, Year, StoryArc, Writer (all comic stuff that is per issue)
 
 
 
