@@ -6,7 +6,6 @@ using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
 using API.Interfaces.Services;
-using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

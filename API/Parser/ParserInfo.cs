@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using API.Data.Metadata;
+﻿using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Parser

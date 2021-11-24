@@ -17,7 +17,6 @@ using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {

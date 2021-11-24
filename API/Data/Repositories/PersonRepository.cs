@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
-using API.Extensions;
 using API.Interfaces.Repositories;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;

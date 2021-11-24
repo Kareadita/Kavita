@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace API.Entities
 {
@@ -18,7 +17,6 @@ namespace API.Entities
         public string Year { get; set; } // Only time I can think this will be more than 1 year is for a volume which will be a spread
         public string StoryArc { get; set; } // This might be a list
 
-        //public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         /// <summary>
         /// All people attached at a Chapter level. Usually Comics will have different people per issue.
         /// </summary>

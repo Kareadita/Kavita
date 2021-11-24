@@ -57,8 +57,13 @@ namespace API.Helpers
 
             CreateMap<RegisterDto, AppUser>();
 
+
+            CreateMap<Person, PersonDto>();
+            CreateMap<ChapterMetadata, ChapterMetadataDto>();
+
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();
+
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.DTOs.Metadata;
 using API.Entities;
 
 namespace API.Interfaces.Repositories
@@ -11,5 +12,6 @@ namespace API.Interfaces.Repositories
         Task<ChapterMetadata> GetMetadataForChapter(int chapterId);
 
         Task<IDictionary<int, IList<ChapterMetadata>>> GetMetadataForChapterIds(IList<int> chapterIds);
+        Task<ChapterMetadataDto> GetMetadataDtoForChapter(int chapterId);
     }
 }

@@ -96,17 +96,20 @@ namespace API.Services.Tasks.Scanner
             {
                 info.ComicInfo = _archiveService.GetComicInfo(path);
 
-                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                if (info.ComicInfo != null)
                 {
-                    info.Volumes = info.ComicInfo.Volume;
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-                {
-                    info.Series = info.ComicInfo.Series;
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-                {
-                    info.Chapters = info.ComicInfo.Number;
+                    if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                    {
+                        info.Volumes = info.ComicInfo.Volume;
+                    }
+                    if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                    {
+                        info.Series = info.ComicInfo.Series;
+                    }
+                    if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                    {
+                        info.Chapters = info.ComicInfo.Number;
+                    }
                 }
             }
 

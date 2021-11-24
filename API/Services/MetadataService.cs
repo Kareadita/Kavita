@@ -143,6 +143,18 @@ namespace API.Services
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
             if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
 
+            if (Parser.Parser.IsArchive(firstFile.FilePath))
+            {
+                UpdateChapterFromComicInfo(chapterMetadata, allPeople, firstFile);
+            }
+            else
+            {
+                // TODO: Update from epub
+            }
+        }
+
+        private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, IList<Person> allPeople, MangaFile firstFile)
+        {
             var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
             if (comicInfo == null) return;
 
@@ -153,40 +165,54 @@ namespace API.Services
 
             if (!string.IsNullOrEmpty(comicInfo.Colorist))
             {
-                UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Writer))
             {
-                UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Editor))
             {
-                UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Inker))
             {
-                UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Letterer))
             {
-                UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Penciller))
             {
-                UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
             {
-                UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
+                    person => chapterMetadata.People.Add(person));
             }
+
             if (!string.IsNullOrEmpty(comicInfo.Publisher))
             {
-                UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher, person => chapterMetadata.People.Add(person));
+                UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
+                    person => chapterMetadata.People.Add(person));
             }
-
         }
 
-        private static void UpdatePeople(IEnumerable<Person> allPeople, IList<string> names, PersonRole role, Action<Person> action)
+        private static void UpdatePeople(IEnumerable<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
         {
             var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
 
@@ -201,7 +227,7 @@ namespace API.Services
                     {
                         Name = name,
                         NormalizedName = normalizedName,
-                        Role = PersonRole.Colorist
+                        Role = role
                     };
                     allPeopleTypeRole.Add(person);
                 }
@@ -358,6 +384,8 @@ namespace API.Services
             {
                 /* Swallow exception */
             }
+
+            // TODO: Remove any People/Genre entries that no longer exist
         }
 
 

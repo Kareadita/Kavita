@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
@@ -391,6 +392,13 @@ namespace API.Controllers
             if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
+        }
+
+        [HttpGet("chapter-metadata")]
+        public async Task<ActionResult<ChapterMetadataDto>> GetChapterMetadata(int chapterId)
+        {
+            // TODO: Implement RBS
+            return await _unitOfWork.ChapterMetadataRepository.GetMetadataDtoForChapter(chapterId);
         }
 
 

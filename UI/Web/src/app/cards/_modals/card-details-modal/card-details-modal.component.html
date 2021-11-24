@@ -29,6 +29,9 @@
                     Pages: {{data.pages}}
                 </div>
             </div>
+            <ng-container *ngIf="utilityService.isChapter(data)">
+                <app-chapter-metadata-detail [chapter]="data"></app-chapter-metadata-detail>
+            </ng-container>
         </ng-container>
 
         <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>

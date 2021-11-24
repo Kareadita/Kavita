@@ -1,24 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
 using API.Entities.Enums;
-using API.Entities.Interfaces;
 
 namespace API.Entities
 {
-    public class Person : IHasConcurrencyToken
+    public class Person
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string NormalizedName { get; set; }
         public PersonRole Role { get; set; }
 
-        /// <inheritdoc />
-        [ConcurrencyCheck]
-        public uint RowVersion { get; private set; }
-
-        /// <inheritdoc />
-        public void OnSavingChanges()
-        {
-            RowVersion++;
-        }
+        // Relationships
+        public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
+        public ICollection<ChapterMetadata> ChapterMetadatas { get; set; }
     }
 }

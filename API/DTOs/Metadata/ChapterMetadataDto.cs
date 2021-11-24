@@ -6,7 +6,7 @@ namespace API.DTOs.Metadata
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public ICollection<GenreTagDto> Genres { get; set; }
+        //public ICollection<GenreTagDto> Genres { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();
@@ -14,7 +14,7 @@ namespace API.DTOs.Metadata
         public ICollection<PersonDto> Letterer { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> CoverArtist { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
         public int ChapterId { get; set; }
     }
 }

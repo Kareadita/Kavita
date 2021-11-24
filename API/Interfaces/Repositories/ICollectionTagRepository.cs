@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.Entities;
 
