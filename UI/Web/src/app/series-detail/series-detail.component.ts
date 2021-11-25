@@ -390,7 +390,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    if (this.seriesMetadata) {
+    if (this.seriesMetadata !== null) {
+      // ?! BUG: This is broken. Need undefined check
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     }
     

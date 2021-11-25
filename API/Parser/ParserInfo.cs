@@ -66,9 +66,7 @@ namespace API.Parser
             return (IsSpecial || (Volumes == "0" && Chapters == "0"));
         }
 
-        /// <summary>
-        /// Year range (TODO: Make this a ValueType). Has at least 1 year, maybe 2 representing a range
-        /// </summary>
+        // (TODO: Make this a ValueType). Has at least 1 year, maybe 2 representing a range
         // public string YearRange { get; set; }
         // public IList<string> Genres { get; set; } = new List<string>();
 

@@ -92,8 +92,9 @@ namespace API.Services.Tasks.Scanner
                 info.Merge(info2);
             }
 
-            if (Parser.Parser.IsArchive(path))
+            if (Parser.Parser.IsComicInfoExtension(path))
             {
+                var sw = Stopwatch.StartNew();
                 info.ComicInfo = _archiveService.GetComicInfo(path);
 
                 if (info.ComicInfo != null)
@@ -111,6 +112,7 @@ namespace API.Services.Tasks.Scanner
                         info.Chapters = info.ComicInfo.Number;
                     }
                 }
+                _logger.LogInformation("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
             }
 
             TrackSeries(info);

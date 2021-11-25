@@ -186,7 +186,7 @@ namespace API.Services
             }
         }
 
-        private static void UpdatePeople(IEnumerable<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
+        private static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
         {
             var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
 
@@ -203,8 +203,10 @@ namespace API.Services
                         NormalizedName = normalizedName,
                         Role = role
                     };
-                    allPeopleTypeRole.Add(person);
+                    allPeople.Add(person);
                 }
+
+
 
                 action(person);
             }
@@ -270,7 +272,7 @@ namespace API.Services
             // checking File last write time.
 
 
-            if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
+            if (!string.IsNullOrEmpty(series.Metadata.Summary) && !forceUpdate) return;
 
             var isBook = series.Library.Type == LibraryType.Book;
             var firstVolume = series.Volumes.FirstWithChapters(isBook);
@@ -308,6 +310,7 @@ namespace API.Services
             _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
             try
             {
+                if (!chapterIds.ContainsKey(series.Id)) return;
                 var chapterMetadatas = await
                     _unitOfWork.ChapterMetadataRepository.GetMetadataForChapterIds(chapterIds[series.Id]);
 

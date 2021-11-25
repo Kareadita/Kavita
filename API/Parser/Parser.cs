@@ -48,6 +48,8 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
             MatchOptions, RegexTimeout);
+        private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
+            MatchOptions, RegexTimeout);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
             MatchOptions, RegexTimeout);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
@@ -862,8 +864,6 @@ namespace API.Parser
                 }
             }
 
-            // TODO: Since we have loops like this, think about using a method where you pass set of regex and Delegate to execute with
-            // string return type
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);
@@ -997,6 +997,10 @@ namespace API.Parser
         public static bool IsArchive(string filePath)
         {
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
+        }
+        public static bool IsComicInfoExtension(string filePath)
+        {
+            return ComicInfoArchiveRegex.IsMatch(Path.GetExtension(filePath));
         }
         public static bool IsBook(string filePath)
         {

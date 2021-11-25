@@ -6,7 +6,6 @@ namespace API.DTOs.Metadata
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        //public ICollection<GenreTagDto> Genres { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();

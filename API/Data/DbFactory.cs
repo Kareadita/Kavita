@@ -22,7 +22,6 @@ namespace API.Data
                 LocalizedName = name,
                 NormalizedName = Parser.Parser.Normalize(name),
                 SortName = name,
-                Summary = string.Empty,
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
             };
@@ -63,7 +62,8 @@ namespace API.Data
         {
             return new SeriesMetadata()
             {
-                CollectionTags = collectionTags
+                CollectionTags = collectionTags,
+                Summary = string.Empty
             };
         }
 

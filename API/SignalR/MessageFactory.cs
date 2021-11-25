@@ -50,7 +50,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.ScanLibrary,
+                Name = SignalREvents.ScanLibraryProgress,
                 Body = new
                 {
                     LibraryId = libraryId,

@@ -494,6 +494,7 @@ namespace API.Services
 
         private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
+            // TODO: BUG: Most of this Bitmap code is only supported on Windows. Refactor.
             using var pageReader = docReader.GetPageReader(pageNumber);
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();
