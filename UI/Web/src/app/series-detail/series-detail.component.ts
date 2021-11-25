@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
@@ -334,11 +334,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
-    this.seriesService.getSeries(seriesId).subscribe(series => {
-      this.series = series;
+
+    forkJoin([
+      this.seriesService.getMetadata(seriesId),
+      this.seriesService.getSeries(seriesId)
+    ]).subscribe(results => {
+      this.seriesMetadata = results[0];
+      this.series = results[1];
+
       this.createHTML();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
@@ -387,7 +390,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    this.seriesSummary = (this.series.summary === null ? '' : this.series.summary).replace(/\n/g, '<br>');
+    if (this.seriesMetadata) {
+      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
+    }
+    
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 

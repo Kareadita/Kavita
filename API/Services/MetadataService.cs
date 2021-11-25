@@ -29,8 +29,6 @@ namespace API.Services
         private readonly IImageService _imageService;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-
-        private IDictionary<string, Person> _persons;
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
             IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
         {
@@ -66,7 +64,6 @@ namespace API.Services
             return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
         }
 
-
         private static bool HasCoverImage(string coverImage)
         {
             return HasCoverImage(coverImage, File.Exists(coverImage));
@@ -90,6 +87,7 @@ namespace API.Services
                     return _imageService.GetCoverImage(coverImage, ImageService.GetChapterFormat(chapterId, volumeId));
                 case MangaFormat.Archive:
                     return _archiveService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
+                case MangaFormat.Unknown:
                 default:
                     return string.Empty;
             }
@@ -104,38 +102,14 @@ namespace API.Services
         private bool UpdateMetadata(Chapter chapter, ChapterMetadata metadata, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            var updateMade = false;
 
-            if (ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
-            {
-                _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
-                chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
-                updateMade = true;
-            }
+            if (!ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
+                return false;
 
-            // if (firstFile != null && (forceUpdate || firstFile.HasFileBeenModified()))
-            // {
-            //     var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
-            //     if (comicInfo == null) return false;
-            //
-            //     if (!string.IsNullOrEmpty(comicInfo.Title))
-            //     {
-            //         metadata.Title = comicInfo.Title;
-            //     }
-            //
-            //     if (!string.IsNullOrEmpty(comicInfo.Colorist))
-            //     {
-            //         var colorists = comicInfo.Colorist.Split(",");
-            //         // TODO: I need some sort of Person cache to during this to hold any new creations so that I can search against them
-            //
-            //
-            //     }
-            //
-            //     updateMade = true;
-            // }
+            _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
+            chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
 
-
-            return updateMade;
+            return true;
         }
 
         private void UpdateChapterMetadata(Chapter chapter, ChapterMetadata chapterMetadata, IList<Person> allPeople, bool forceUpdate)
@@ -259,62 +233,56 @@ namespace API.Services
         /// </summary>
         /// <param name="series"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        private bool UpdateSeriesCoverImage(Series series, bool forceUpdate)
+        private void UpdateSeriesCoverImage(Series series, bool forceUpdate)
         {
-            var madeUpdate = false;
-            if (series == null) return false;
+            if (series == null) return;
 
             // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-            if (ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
+            if (!ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
+                return;
+
+            series.Volumes ??= new List<Volume>();
+            var firstCover = series.Volumes.GetCoverImage(series.Format);
+            string coverImage = null;
+            if (firstCover == null && series.Volumes.Any())
             {
-                series.Volumes ??= new List<Volume>();
-                var firstCover = series.Volumes.GetCoverImage(series.Format);
-                string coverImage = null;
-                if (firstCover == null && series.Volumes.Any())
+                // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
+                if (series.Volumes.Count == 1)
                 {
-                    // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
-                    if (series.Volumes.Count == 1)
-                    {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
-                            .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
-                        madeUpdate = true;
-                    }
-
-                    if (!HasCoverImage(coverImage))
-                    {
-                        coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
-                            .FirstOrDefault()?.CoverImage;
-                        madeUpdate = true;
-                    }
+                    coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
+                        .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
                 }
-                series.CoverImage = firstCover?.CoverImage ?? coverImage;
-            }
 
-            return madeUpdate;
-            //return UpdateSeriesMetadata(series, forceUpdate) || madeUpdate;
+                if (!HasCoverImage(coverImage))
+                {
+                    coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
+                        .FirstOrDefault()?.CoverImage;
+                }
+            }
+            series.CoverImage = firstCover?.CoverImage ?? coverImage;
         }
 
-        private bool UpdateSeriesMetadata(Series series, bool forceUpdate)
+        private void UpdateSeriesMetadata(Series series, bool forceUpdate)
         {
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
             // checking File last write time.
 
 
-            if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return false;
+            if (!string.IsNullOrEmpty(series.Summary) && !forceUpdate) return;
 
             var isBook = series.Library.Type == LibraryType.Book;
             var firstVolume = series.Volumes.FirstWithChapters(isBook);
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
             var firstFile = firstChapter?.Files.FirstOrDefault();
-            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return false;
-            if (Parser.Parser.IsPdf(firstFile.FilePath)) return false;
+            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+            if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
             var comicInfo = GetComicInfo(series.Format, firstFile);
 
             // Summary Info
-            if (string.IsNullOrEmpty(comicInfo?.Summary)) return false;
+            if (string.IsNullOrEmpty(comicInfo?.Summary)) return;
             series.Summary = comicInfo.Summary; // TODO: Remove this field
             series.Metadata.Summary = comicInfo.Summary;
 
@@ -327,7 +295,6 @@ namespace API.Services
             //     Name = genre.Trim(),
             //     NormalizedName = Parser.Parser.Normalize(genre)
             // });
-            return true;
         }
 
         private ComicInfo GetComicInfo(MangaFormat format, MangaFile firstFile)
@@ -380,9 +347,9 @@ namespace API.Services
                 UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
                 UpdateSeriesMetadata(series, forceUpdate);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                /* Swallow exception */
+                _logger.LogError(ex, "[MetadataService] There was an exception during updating metadata for {SeriesName} ", series.Name);
             }
 
             // TODO: Remove any People/Genre entries that no longer exist
@@ -432,23 +399,18 @@ namespace API.Services
                     ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
                 });
 
-                if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-                {
-                    _logger.LogInformation(
-                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                        chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
 
-                    foreach (var series in nonLibrarySeries)
-                    {
-                        await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
-                    }
-                }
-                else
+
+                await _unitOfWork.CommitAsync();
+                foreach (var series in nonLibrarySeries)
                 {
-                    _logger.LogInformation(
-                        "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                        chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
+                    await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
                 }
+                _logger.LogInformation(
+                    "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                    chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
+
+
                 var progress =  Math.Max(0F, Math.Min(1F, i * 1F / chunkInfo.TotalChunks));
                 await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));

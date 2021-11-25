@@ -69,7 +69,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
-      summary: new FormControl(this.series.summary, []),
+      summary: new FormControl('', []), 
       name: new FormControl(this.series.name, []),
       localizedName: new FormControl(this.series.localizedName, []),
       sortName: new FormControl(this.series.sortName, []),
@@ -88,6 +88,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.metadata = metadata;
         this.settings.savedData = metadata.tags;
         this.tags = metadata.tags;
+        this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
       }
     });
 

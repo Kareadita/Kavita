@@ -3,6 +3,7 @@ import { Person } from "./person";
 
 export interface SeriesMetadata {
     publisher: string;
+    summary: string;
     genres: Array<string>;
     tags: Array<CollectionTag>;
     persons: Array<Person>;

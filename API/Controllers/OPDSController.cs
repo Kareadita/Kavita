@@ -167,15 +167,8 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
 
-            IList<CollectionTagDto> tags;
-            if (isAdmin)
-            {
-                tags = (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList();
-            }
-            else
-            {
-                tags = (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
-            }
+            IList<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList()
+                : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
 
 
             var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
@@ -652,7 +645,7 @@ namespace API.Controllers
                 DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>()
                     {mangaFile.FilePath}));
             var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
-            var filename = Uri.EscapeUriString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
+            var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
             return new FeedEntry()
             {
                 Id = mangaFile.Id.ToString(),
