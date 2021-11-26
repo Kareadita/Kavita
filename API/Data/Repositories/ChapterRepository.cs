@@ -89,7 +89,7 @@ namespace API.Data.Repositories
                     ChapterTitle = data.ChapterTitle
                 })
                 .AsNoTracking()
-                .SingleAsync();
+                .SingleOrDefaultAsync();
         }
 
         public Task<int> GetChapterTotalPagesAsync(int chapterId)

@@ -33,9 +33,42 @@ namespace API.Helpers
                 .ForMember(dest => dest.Writers,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
+                .ForMember(dest => dest.Artists,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
+                .ForMember(dest => dest.Characters,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character)))
                 .ForMember(dest => dest.Publishers,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)));
+
+            CreateMap<ChapterMetadata, ChapterMetadataDto>()
+                .ForMember(dest => dest.Writers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
+                .ForMember(dest => dest.CoverArtist,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
+                .ForMember(dest => dest.Colorist,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))
+                .ForMember(dest => dest.Inker,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker)))
+                .ForMember(dest => dest.Letterer,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer)))
+                .ForMember(dest => dest.Penciller,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Penciller)))
+                .ForMember(dest => dest.Publisher,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)))
+                .ForMember(dest => dest.Editor,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
+
 
             CreateMap<Person, PersonDto>();
             CreateMap<Genre, GenreTagDto>();

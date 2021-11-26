@@ -112,7 +112,7 @@ namespace API.Services
             return true;
         }
 
-        private void UpdateChapterMetadata(Chapter chapter, ChapterMetadata chapterMetadata, IList<Person> allPeople, bool forceUpdate)
+        private void UpdateChapterMetadata(Chapter chapter, ChapterMetadata chapterMetadata, ICollection<Person> allPeople, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
             if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
@@ -127,7 +127,7 @@ namespace API.Services
             }
         }
 
-        private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, IList<Person> allPeople, MangaFile firstFile)
+        private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, ICollection<Person> allPeople, MangaFile firstFile)
         {
             var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
             if (comicInfo == null) return;
@@ -140,49 +140,49 @@ namespace API.Services
             if (!string.IsNullOrEmpty(comicInfo.Colorist))
             {
                 UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Writer))
             {
                 UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Editor))
             {
                 UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Inker))
             {
                 UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Letterer))
             {
                 UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Penciller))
             {
                 UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
             {
                 UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Publisher))
             {
                 UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
-                    person => chapterMetadata.People.Add(person));
+                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
         }
 
@@ -265,7 +265,7 @@ namespace API.Services
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
-        private void UpdateSeriesMetadata(Series series, bool forceUpdate)
+        private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
         {
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
@@ -289,6 +289,41 @@ namespace API.Services
             if (!string.IsNullOrEmpty(comicInfo.Summary))
             {
                 series.Metadata.Summary = comicInfo.Summary;
+            }
+
+            foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
+            {
+                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+            }
+
+            // if (!string.IsNullOrEmpty(comicInfo.Writer))
+            // {
+            //     UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
+            //         person => series.Metadata.People.Add(person));
+            // }
+            //
+            // if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
+            // {
+            //     UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
+            //         person => series.Metadata.People.Add(person));
+            // }
+            //
+            // if (!string.IsNullOrEmpty(comicInfo.Publisher))
+            // {
+            //     UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
+            //         person => series.Metadata.People.Add(person));
+            // }
+
+        }
+
+        private static void AddPersonIfNotOnMetadata(ICollection<Person> metadataPeople, Person person)
+        {
+            var existingPerson = metadataPeople.SingleOrDefault(p =>
+                p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+            if (existingPerson == null)
+            {
+                metadataPeople.Add(person);
             }
 
         }
@@ -335,6 +370,9 @@ namespace API.Services
                         {
                             metadata = chapterMetadatas[chapter.Id][0];
                         }
+
+                        chapter.ChapterMetadata = metadata;
+
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
                         UpdateChapterMetadata(chapter, metadata, allPeople, forceUpdate);
                     }
@@ -343,7 +381,7 @@ namespace API.Services
                 }
 
                 await UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
-                UpdateSeriesMetadata(series, forceUpdate);
+                UpdateSeriesMetadata(series, allPeople, forceUpdate);
             }
             catch (Exception ex)
             {
@@ -392,20 +430,24 @@ namespace API.Services
 
                 var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
                 var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-                // Parallel.ForEach(nonLibrarySeries, series =>
-                // {
-                //     ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
-                // });
 
-                // await Parallel.ForEachAsync(nonLibrarySeries, async (series, token) =>
-                // {
-                //     await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
-                //     await _unitOfWork.CommitAsync();
-                // });
 
+                var seriesIndex = 0;
                 foreach (var series in nonLibrarySeries)
                 {
-                    await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+                    try
+                    {
+                        await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                    }
+                    var index = chunk * seriesIndex;
+                    var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
+                    await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                        MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
+                    seriesIndex++;
                 }
 
 
@@ -420,9 +462,9 @@ namespace API.Services
                     chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
 
 
-                var progress =  Math.Max(0F, Math.Min(1F, i * 1F / chunkInfo.TotalChunks));
-                await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
-                    MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
+                // var progress =  Math.Max(0F, Math.Min(1F, i * 1F / chunkInfo.TotalChunks));
+                // await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                //     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
             }
 
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
@@ -447,9 +489,15 @@ namespace API.Services
                 return;
             }
 
+            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
+
             var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
             await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+
+            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));
 
 
             if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())

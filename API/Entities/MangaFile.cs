@@ -40,6 +40,17 @@ namespace API.Entities
         }
 
         /// <summary>
+        /// If the File on disk's last modified time is after passed time
+        /// </summary>
+        /// <remarks>This is useful to check if the file was modified </remarks>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        public bool HasFileBeenModifiedSince(DateTime time)
+        {
+            return File.GetLastWriteTime(FilePath) > time;
+        }
+
+        /// <summary>
         /// Updates the Last Modified time of the underlying file
         /// </summary>
         public void UpdateLastModified()

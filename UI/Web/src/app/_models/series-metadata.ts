@@ -6,6 +6,10 @@ export interface SeriesMetadata {
     summary: string;
     genres: Array<string>;
     tags: Array<CollectionTag>;
-    persons: Array<Person>;
+    writers: Array<Person>;
+    artists: Array<Person>;
+    publishers: Array<Person>;
+    characters: Array<Person>;
+
     seriesId: number;
 }
