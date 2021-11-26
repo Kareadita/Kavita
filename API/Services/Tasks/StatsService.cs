@@ -23,6 +23,9 @@ namespace API.Services.Tasks
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+
+            FlurlHttp.ConfigureClient(ApiUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
         }
 
         /// <summary>
