@@ -283,10 +283,14 @@ namespace API.Services
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
             var comicInfo = GetComicInfo(series.Format, firstFile);
+            if (comicInfo == null) return;
 
             // Summary Info
-            if (string.IsNullOrEmpty(comicInfo?.Summary)) return;
-            series.Metadata.Summary = comicInfo.Summary;
+            if (!string.IsNullOrEmpty(comicInfo.Summary))
+            {
+                series.Metadata.Summary = comicInfo.Summary;
+            }
+
         }
 
         private ComicInfo GetComicInfo(MangaFormat format, MangaFile firstFile)

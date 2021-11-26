@@ -76,6 +76,9 @@ export class ActionService implements OnDestroy {
     }
 
     if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(library);
+      }
       return;
     }
 
@@ -138,6 +141,9 @@ export class ActionService implements OnDestroy {
    */
   async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
     if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(series);
+      }
       return;
     }
 

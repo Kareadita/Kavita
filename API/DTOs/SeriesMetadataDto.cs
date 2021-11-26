@@ -7,6 +7,7 @@ namespace API.DTOs
     public class SeriesMetadataDto
     {
         public int Id { get; set; }
+        public string Summary { get; set; }
         public ICollection<CollectionTagDto> Tags { get; set; }
         public ICollection<GenreTagDto> Genres { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();

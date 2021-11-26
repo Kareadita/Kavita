@@ -209,7 +209,6 @@ namespace API.Services.Tasks
                return;
            }
 
-
            _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
                MessageFactory.ScanLibraryProgressEvent(libraryId, 0));

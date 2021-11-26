@@ -7,6 +7,7 @@ using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Settings;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers.Converters;
 using AutoMapper;
 
@@ -28,7 +29,13 @@ namespace API.Helpers
 
             CreateMap<CollectionTag, CollectionTagDto>();
 
-            CreateMap<SeriesMetadata, SeriesMetadataDto>();
+            CreateMap<SeriesMetadata, SeriesMetadataDto>()
+                .ForMember(dest => dest.Writers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
+                .ForMember(dest => dest.Publishers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)));
 
             CreateMap<Person, PersonDto>();
             CreateMap<Genre, GenreTagDto>();

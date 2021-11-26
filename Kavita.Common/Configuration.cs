@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Hosting;
@@ -193,12 +194,9 @@ namespace Kavita.Common
                     foreach (var property in tokenElement.EnumerateObject())
                     {
                         if (!property.Name.Equals("LogLevel")) continue;
-                        foreach (var logProperty in property.Value.EnumerateObject())
+                        foreach (var logProperty in property.Value.EnumerateObject().Where(logProperty => logProperty.Name.Equals("Default")))
                         {
-                            if (logProperty.Name.Equals("Default"))
-                            {
-                                return logProperty.Value.GetString();
-                            }
+                            return logProperty.Value.GetString();
                         }
                     }
                 }

@@ -20,11 +20,12 @@ namespace API.Benchmark
         private readonly ParseScannedFiles _parseScannedFiles;
         private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
         private readonly ILogger<BookService> _bookLogger = Substitute.For<ILogger<BookService>>();
+        private readonly IArchiveService _archiveService = Substitute.For<ArchiveService>();
 
         public ParseScannedFilesBenchmarks()
         {
             IBookService bookService = new BookService(_bookLogger);
-            _parseScannedFiles = new ParseScannedFiles(bookService, _logger);
+            _parseScannedFiles = new ParseScannedFiles(bookService, _logger, _archiveService);
         }
 
         // [Benchmark]

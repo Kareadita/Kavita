@@ -7,11 +7,11 @@ namespace API.Extensions
 {
     public static class VolumeListExtensions
     {
-        public static Volume FirstWithChapters(this IList<Volume> volumes, bool inBookSeries)
+        public static Volume FirstWithChapters(this IEnumerable<Volume> volumes, bool inBookSeries)
         {
             return inBookSeries
                 ? volumes.FirstOrDefault(v => v.Chapters.Any())
-                : volumes.FirstOrDefault(v => v.Chapters.Any() && (v.Number == 1));
+                : volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number > 0);
         }
 
         /// <summary>
