@@ -25,6 +25,8 @@ namespace API.Entities
         /// </summary>
         public DateTime LastModified { get; set; }
 
+        // NOTE: Should I add HasComicInfo.xml?
+
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }

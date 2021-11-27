@@ -78,10 +78,34 @@
                         <h5>Writers</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-person-badge *ngFor="let person of seriesMetadata.writers">
-                            <div name>{{person.name}}</div>
-                            <div role>{{person.role}}</div>
-                        </app-person-badge>
+                        <app-person-badge *ngFor="let person of seriesMetadata.writers" [person]="person"></app-person-badge>
+                    </div>
+                </div>
+
+                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.artists && seriesMetadata.artists.length > 0">
+                    <div class="col-md-4">
+                        <h5>Artists</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-person-badge *ngFor="let person of seriesMetadata.artists" [person]="person"></app-person-badge>
+                    </div>
+                </div>
+
+                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.publishers && seriesMetadata.publishers.length > 0">
+                    <div class="col-md-4">
+                        <h5>Publishers</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-person-badge *ngFor="let person of seriesMetadata.publishers" [person]="person"></app-person-badge>
+                    </div>
+                </div>
+
+                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.characters && seriesMetadata.characters.length > 0">
+                    <div class="col-md-4">
+                        <h5>Characters</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <app-person-badge *ngFor="let person of seriesMetadata.characters" [person]="person"></app-person-badge>
                     </div>
                 </div>
 

@@ -92,6 +92,7 @@ namespace API.Services.Tasks.Scanner
                 info.Merge(info2);
             }
 
+            // TODO: Think about doing this before the Fallback code to speed up
             if (Parser.Parser.IsComicInfoExtension(path))
             {
                 var sw = Stopwatch.StartNew();
@@ -112,6 +113,7 @@ namespace API.Services.Tasks.Scanner
                         info.Chapters = info.ComicInfo.Number;
                     }
                 }
+                // TODO: Move this to debug after Rider updates
                 _logger.LogInformation("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
             }
 

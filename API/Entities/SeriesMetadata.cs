@@ -11,7 +11,6 @@ namespace API.Entities
         public int Id { get; set; }
 
         public string Summary { get; set; }
-        // TODO: AgeRating, CommunityRating,
 
 
         public ICollection<CollectionTag> CollectionTags { get; set; }

@@ -271,11 +271,15 @@ namespace API.Services
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
             // checking File last write time.
 
+            // If a series is just a special, then the original code of
+            // var firstVolume = series.Volumes.FirstWithChapters(isBook);
+            // will fail.
+
 
             if (!string.IsNullOrEmpty(series.Metadata.Summary) && !forceUpdate) return;
 
             var isBook = series.Library.Type == LibraryType.Book;
-            var firstVolume = series.Volumes.FirstWithChapters(isBook);
+            var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
             var firstFile = firstChapter?.Files.FirstOrDefault();
@@ -294,6 +298,12 @@ namespace API.Services
             foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
             {
                 UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+
+                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
+                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+
+                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
             }
 

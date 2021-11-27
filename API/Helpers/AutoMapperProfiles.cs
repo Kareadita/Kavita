@@ -29,6 +29,10 @@ namespace API.Helpers
 
             CreateMap<CollectionTag, CollectionTagDto>();
 
+            CreateMap<Person, PersonDto>();
+
+            CreateMap<Genre, GenreTagDto>();
+
             CreateMap<SeriesMetadata, SeriesMetadataDto>()
                 .ForMember(dest => dest.Writers,
                     opt =>
@@ -70,8 +74,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
 
-            CreateMap<Person, PersonDto>();
-            CreateMap<Genre, GenreTagDto>();
+
 
             CreateMap<AppUserPreferences, UserPreferencesDto>();
 
@@ -97,9 +100,6 @@ namespace API.Helpers
 
             CreateMap<RegisterDto, AppUser>();
 
-
-            CreateMap<Person, PersonDto>();
-            CreateMap<ChapterMetadata, ChapterMetadataDto>();
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();

@@ -75,8 +75,7 @@ namespace API.Controllers
             if (chapter == null) return BadRequest("Could not find Chapter");
 
             var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
-            // TODO: BUG: There is an issue with this join
-            if (dto == null) return BadRequest("Could not find Chapter metadata");
+            if (dto == null) return BadRequest("Please perform a scan on this series or library and try again");
             var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
 
             return Ok(new ChapterInfoDto()

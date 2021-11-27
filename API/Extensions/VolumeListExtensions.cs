@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -11,7 +12,7 @@ namespace API.Extensions
         {
             return inBookSeries
                 ? volumes.FirstOrDefault(v => v.Chapters.Any())
-                : volumes.FirstOrDefault(v => v.Chapters.Any() && v.Number > 0);
+                : volumes.OrderBy(v => v.Number, new ChapterSortComparer()).FirstOrDefault(v => v.Chapters.Any());
         }
 
         /// <summary>

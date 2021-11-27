@@ -46,31 +46,11 @@ namespace API.Data.Repositories
             var metadata = await _context.ChapterMetadata
                 .Where(cm => cm.ChapterId == chapterId)
                 .Include(cm => cm.People)
-                .ProjectTo<ChapterMetadataDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .ProjectTo<ChapterMetadataDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
 
             return metadata;
-            // var personProjection = new Func<Person, PersonDto>((p) => new PersonDto()
-            // {
-            //     Name = p.Name,
-            //     Role = p.Role
-            // });
-            //
-            // return new ChapterMetadataDto()
-            // {
-            //     Title = metadata.Title,
-            //     Id = metadata.Id,
-            //     ChapterId = metadata.ChapterId,
-            //     Writers = metadata.People.Where(p => p.Role == PersonRole.Writer).Select(personProjection).ToList(),
-            //     Colorist = metadata.People.Where(p => p.Role == PersonRole.Colorist).Select(personProjection).ToList(),
-            //     Editor = metadata.People.Where(p => p.Role == PersonRole.Editor).Select(personProjection).ToList(),
-            //     Inker = metadata.People.Where(p => p.Role == PersonRole.Inker).Select(personProjection).ToList(),
-            //     Letterer = metadata.People.Where(p => p.Role == PersonRole.Letterer).Select(personProjection).ToList(),
-            //     Penciller = metadata.People.Where(p => p.Role == PersonRole.Penciller).Select(personProjection).ToList(),
-            //     Publisher = metadata.People.Where(p => p.Role == PersonRole.Publisher).Select(personProjection).ToList(),
-            //     CoverArtist = metadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(personProjection).ToList(),
-            // };
         }
 
         public async Task<IDictionary<int, IList<ChapterMetadata>>> GetMetadataForChapterIds(IList<int> chapterIds)

@@ -8,7 +8,7 @@ namespace API.Comparators
     public class ChapterSortComparer : IComparer<double>
     {
         /// <summary>
-        /// Normal sort for 2 doubles. 0 always comes before anything else
+        /// Normal sort for 2 doubles. 0 always comes last
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>

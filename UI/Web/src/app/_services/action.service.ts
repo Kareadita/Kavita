@@ -57,7 +57,7 @@ export class ActionService implements OnDestroy {
       return;
     }
     this.libraryService.scan(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -83,7 +83,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -127,7 +127,7 @@ export class ActionService implements OnDestroy {
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
+      this.toastr.success('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
       }

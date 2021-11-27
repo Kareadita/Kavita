@@ -140,7 +140,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   scanLibrary(series: Series) {
     this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
+      this.toastr.success('Scan queued for ' + series.name);
     });
   }
 

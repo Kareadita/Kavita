@@ -33,6 +33,7 @@ import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
+import { PersonRolePipe } from './person-role.pipe';
 
 
 @NgModule({
@@ -50,6 +51,7 @@ import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.
     OnDeckComponent,
     DashboardComponent,
     NavEventsToggleComponent,
+    PersonRolePipe,
   ],
   imports: [
     HttpClientModule,
