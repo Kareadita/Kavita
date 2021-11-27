@@ -13,11 +13,11 @@ import { ActionService } from '../_services/action.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
-  selector: 'app-in-progress',
-  templateUrl: './in-progress.component.html',
-  styleUrls: ['./in-progress.component.scss']
+  selector: 'app-on-deck',
+  templateUrl: './on-deck.component.html',
+  styleUrls: ['./on-deck.component.scss']
 })
-export class InProgressComponent implements OnInit {
+export class OnDeckComponent implements OnInit {
 
   isLoading: boolean = true;
   series: Series[] = [];
@@ -31,7 +31,7 @@ export class InProgressComponent implements OnInit {
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.titleService.setTitle('Kavita - In Progress');
+    this.titleService.setTitle('Kavita - On Deck');
     if (this.pagination === undefined || this.pagination === null) {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
@@ -79,7 +79,7 @@ export class InProgressComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.isLoading = true;
-    this.seriesService.getInProgress(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getOnDeck(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.isLoading = false;

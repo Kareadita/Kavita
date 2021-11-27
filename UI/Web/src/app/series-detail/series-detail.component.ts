@@ -16,6 +16,7 @@ import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
 import { Series } from '../_models/series';
@@ -26,7 +27,7 @@ import { ActionItem, ActionFactoryService, Action } from '../_services/action-fa
 import { ActionService } from '../_services/action.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -178,6 +179,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.loadSeries(seriesId);
       this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
       this.toastr.success('Scan series completed');
+    });
+
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+      if (event.event === EVENTS.SeriesRemoved) {
+        const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
+        if (seriesRemovedEvent.seriesId === this.series.id) {
+          this.toastr.info('This series no longer exists');
+          this.router.navigateByUrl('/libraries');
+        }
+      }
     });
 
     const seriesId = parseInt(routeId, 10);

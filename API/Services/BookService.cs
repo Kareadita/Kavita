@@ -30,6 +30,7 @@ namespace API.Services
         private readonly ILogger<BookService> _logger;
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
+        private const string CssScopeClass = ".book-content";
 
         public BookService(ILogger<BookService> logger)
         {
@@ -152,22 +153,23 @@ namespace API.Services
             EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
 
             var styleContent = RemoveWhiteSpaceFromStylesheets(stylesheetHtml);
-            styleContent = styleContent.Replace("body", ".reading-section");
+
+            styleContent = styleContent.Replace("body", CssScopeClass);
 
             if (string.IsNullOrEmpty(styleContent)) return string.Empty;
 
             var stylesheet = await _cssParser.ParseAsync(styleContent);
             foreach (var styleRule in stylesheet.StyleRules)
             {
-                if (styleRule.Selector.Text == ".reading-section") continue;
+                if (styleRule.Selector.Text == CssScopeClass) continue;
                 if (styleRule.Selector.Text.Contains(","))
                 {
                     styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
                         string.Join(", ",
-                            styleRule.Selector.Text.Split(",").Select(s => ".reading-section " + s)));
+                            styleRule.Selector.Text.Split(",").Select(s => $"{CssScopeClass} " + s)));
                     continue;
                 }
-                styleRule.Text = ".reading-section " + styleRule.Text;
+                styleRule.Text = $"{CssScopeClass} " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
@@ -371,7 +373,7 @@ namespace API.Services
                             FullFilePath = filePath,
                             IsSpecial = false,
                             Series = series.Trim(),
-                            Volumes = seriesIndex.Split(".")[0]
+                            Volumes = seriesIndex
                         };
                     }
                 }

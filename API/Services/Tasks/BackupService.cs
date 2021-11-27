@@ -8,8 +8,9 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
+using API.SignalR;
 using Hangfire;
-using Kavita.Common.EnvironmentInfo;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -20,45 +21,32 @@ namespace API.Services.Tasks
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackupService> _logger;
         private readonly IDirectoryService _directoryService;
-        private readonly string _tempDirectory = DirectoryService.TempDirectory;
-        private readonly string _logDirectory = DirectoryService.LogDirectory;
+        private readonly IHubContext<MessageHub> _messageHub;
 
         private readonly IList<string> _backupFiles;
 
-        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger, IDirectoryService directoryService, IConfiguration config)
+        public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger,
+            IDirectoryService directoryService, IConfiguration config, IHubContext<MessageHub> messageHub)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _directoryService = directoryService;
+            _messageHub = messageHub;
 
             var maxRollingFiles = config.GetMaxRollingFiles();
             var loggingSection = config.GetLoggingFileName();
             var files = LogFiles(maxRollingFiles, loggingSection);
 
-            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+
+            _backupFiles = new List<string>()
             {
-                _backupFiles = new List<string>()
-                {
-                    "data/appsettings.json",
-                    "data/Hangfire.db",
-                    "data/Hangfire-log.db",
-                    "data/kavita.db",
-                    "data/kavita.db-shm", // This wont always be there
-                    "data/kavita.db-wal" // This wont always be there
-                };
-            }
-            else
-            {
-                _backupFiles = new List<string>()
-                {
-                    "appsettings.json",
-                    "Hangfire.db",
-                    "Hangfire-log.db",
-                    "kavita.db",
-                    "kavita.db-shm", // This wont always be there
-                    "kavita.db-wal" // This wont always be there
-                };
-            }
+                "appsettings.json",
+                "Hangfire.db", // This is not used atm
+                "Hangfire-log.db", // This is not used atm
+                "kavita.db",
+                "kavita.db-shm", // This wont always be there
+                "kavita.db-wal" // This wont always be there
+            };
 
             foreach (var file in files.Select(f => (new FileInfo(f)).Name).ToList())
             {
@@ -72,7 +60,7 @@ namespace API.Services.Tasks
             var fi = new FileInfo(logFileName);
 
             var files = maxRollingFiles > 0
-                ? DirectoryService.GetFiles(_logDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
+                ? DirectoryService.GetFiles(DirectoryService.LogDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
                 : new[] {"kavita.log"};
             return files;
         }
@@ -89,11 +77,13 @@ namespace API.Services.Tasks
             _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
             if (!DirectoryService.ExistOrCreate(backupDirectory))
             {
-                _logger.LogError("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
+                _logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
                 return;
             }
 
-            var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
+            await SendProgress(0F);
+
+            var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
             var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
             if (File.Exists(zipPath))
@@ -102,14 +92,18 @@ namespace API.Services.Tasks
                 return;
             }
 
-            var tempDirectory = Path.Join(_tempDirectory, dateString);
+            var tempDirectory = Path.Join(DirectoryService.TempDirectory, dateString);
             DirectoryService.ExistOrCreate(tempDirectory);
             DirectoryService.ClearDirectory(tempDirectory);
 
             _directoryService.CopyFilesToDirectory(
-                _backupFiles.Select(file => Path.Join(Directory.GetCurrentDirectory(), file)).ToList(), tempDirectory);
+                _backupFiles.Select(file => Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
+
+            await SendProgress(0.25F);
 
             await CopyCoverImagesToBackupDirectory(tempDirectory);
+
+            await SendProgress(0.75F);
 
             try
             {
@@ -122,6 +116,7 @@ namespace API.Services.Tasks
 
             DirectoryService.ClearAndDeleteDirectory(tempDirectory);
             _logger.LogInformation("Database backup completed");
+            await SendProgress(1F);
         }
 
         private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
@@ -152,6 +147,12 @@ namespace API.Services.Tasks
             {
                 DirectoryService.ClearAndDeleteDirectory(outputTempDir);
             }
+        }
+
+        private async Task SendProgress(float progress)
+        {
+            await _messageHub.Clients.All.SendAsync(SignalREvents.BackupDatabaseProgress,
+                MessageFactory.BackupDatabaseProgressEvent(progress));
         }
 
         /// <summary>

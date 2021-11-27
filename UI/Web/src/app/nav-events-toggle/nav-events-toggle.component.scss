@@ -1,0 +1,23 @@
+@import "../../theme/colors";
+
+.small-spinner {
+    width: 1rem;
+    height: 1rem;
+}
+
+.nav-events {
+    background-color: white;
+}
+
+.nav-events .popover-body {
+    padding: 0px;
+}
+
+.btn-icon {
+    color: white;
+}
+
+.colored {
+    background-color: $primary-color;
+    border-radius: 60px;
+}

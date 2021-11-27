@@ -2,7 +2,7 @@
     <div class="fixed-top" #stickyTop>
         <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
-        <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="backgroundColor" (drawerClosed)="closeDrawer()">
+        <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor" (drawerClosed)="closeDrawer()">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
                     <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
@@ -100,7 +100,7 @@
     </div>
 
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px'}" [innerHtml]="page" *ngIf="page !== undefined"></div>
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
         </div>

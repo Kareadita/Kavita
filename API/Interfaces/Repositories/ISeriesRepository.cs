@@ -4,6 +4,7 @@ using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 
 namespace API.Interfaces.Repositories
@@ -14,7 +15,7 @@ namespace API.Interfaces.Repositories
         void Update(Series series);
         void Remove(Series series);
         void Remove(IEnumerable<Series> series);
-        Task<bool> DoesSeriesNameExistInLibrary(string name);
+        Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format);
         /// <summary>
         /// Adds user information like progress, ratings, etc
         /// </summary>
@@ -45,7 +46,7 @@ namespace API.Interfaces.Repositories
         /// <returns></returns>
         Task AddSeriesModifiers(int userId, List<SeriesDto> series);
         Task<string> GetSeriesCoverImageAsync(int seriesId);
-        Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter);
+        Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
         Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter); // NOTE: Probably put this in LibraryRepo
         Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
         Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);

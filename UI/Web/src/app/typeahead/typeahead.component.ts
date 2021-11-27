@@ -5,6 +5,8 @@ import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from './typeahead-settings';
 
+export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
+
 /**
    * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle. 
    * @param selectedState Optional state to set selectedOptions to. If not passed, defaults to false.
@@ -30,10 +32,16 @@ export class SelectionModel<T> {
   /**
    * Will toggle if the data item is selected or not. If data option is not tracked, will add it and set state to true.
    * @param data Item to toggle
+   * @param selectedState Force the state
+   * @param compareFn An optional function to use for the lookup, else will use shallowEqual implementation
    */
-  toggle(data: T, selectedState?: boolean) {
-    //const dataItem = this._data.filter(d => d.value == data);
-    const dataItem = this._data.filter(d => this.shallowEqual(d.value, data));
+  toggle(data: T, selectedState?: boolean, compareFn?: SelectionCompareFn<T>) {
+    let lookupMethod = this.shallowEqual;
+    if (compareFn != undefined || compareFn != null) {
+      lookupMethod = compareFn;
+    }
+    
+    const dataItem = this._data.filter(d => lookupMethod(d.value, data));
     if (dataItem.length > 0) {
       if (selectedState != undefined) {
         dataItem[0].selected = selectedState;
@@ -44,6 +52,7 @@ export class SelectionModel<T> {
       this._data.push({value: data, selected: (selectedState === undefined ? true : selectedState)});
     }
   }
+
 
   /**
    * Is the passed item selected
@@ -63,6 +72,15 @@ export class SelectionModel<T> {
       return dataItem[0].selected;
     }
     return false;
+  }
+
+  /**
+   * 
+   * @returns If some of the items are selected, but not all
+   */
+  hasSomeSelected(): boolean {
+    const selectedCount = this._data.filter(d => d.selected).length;
+    return (selectedCount !== this._data.length && selectedCount !== 0)
   }
 
   /**

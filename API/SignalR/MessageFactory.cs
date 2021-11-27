@@ -60,6 +60,20 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.RefreshMetadataProgress,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                    EventTime = DateTime.Now
+                }
+            };
+        }
+
 
 
         public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
@@ -74,6 +88,31 @@ namespace API.SignalR
                 }
             };
         }
+
+        public static SignalRMessage BackupDatabaseProgressEvent(float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.BackupDatabaseProgress,
+                Body = new
+                {
+                    Progress = progress
+                }
+            };
+        }
+        public static SignalRMessage CleanupProgressEvent(float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.CleanupProgress,
+                Body = new
+                {
+                    Progress = progress
+                }
+            };
+        }
+
+
 
         public static SignalRMessage UpdateVersionEvent(UpdateNotificationDto update)
         {

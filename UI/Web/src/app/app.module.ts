@@ -1,13 +1,13 @@
 import { BrowserModule, Title } from '@angular/platform-browser';
-import { APP_INITIALIZER, ErrorHandler, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { APP_BASE_HREF } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -25,13 +25,14 @@ import { CarouselModule } from './carousel/carousel.module';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
-import { InProgressComponent } from './in-progress/in-progress.component';
+import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
+import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
 
 
 @NgModule({
@@ -46,8 +47,9 @@ import { ConfigData } from './_models/config-data';
     ReviewSeriesModalComponent,
     PersonBadgeComponent,
     RecentlyAddedComponent,
-    InProgressComponent,
+    OnDeckComponent,
     DashboardComponent,
+    NavEventsToggleComponent,
   ],
   imports: [
     HttpClientModule,
@@ -59,6 +61,7 @@ import { ConfigData } from './_models/config-data';
 
     NgbDropdownModule, // Nav
     AutocompleteLibModule, // Nav
+    NgbPopoverModule, // Nav Events toggle
     NgbRatingModule, // Series Detail
     NgbNavModule,
     NgbPaginationModule,

@@ -1,19 +1,15 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
-import { EditCollectionTagsComponent } from '../cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import { CollectionTag } from '../_models/collection-tag';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { Series } from '../_models/series';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { CollectionTagService } from '../_services/collection-tag.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
@@ -44,14 +40,18 @@ export class LibraryComponent implements OnInit, OnDestroy {
     private titleService: Title, public imageService: ImageService, 
     private messageHub: MessageHubService) {
       this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
-        if (res.event == EVENTS.SeriesAdded) {
+        if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAdded.unshift(series);
           });
+        } else if (res.event === EVENTS.SeriesRemoved) {
+          const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
+          this.recentlyAdded = this.recentlyAdded.filter(item => item.id != seriesRemovedEvent.seriesId);
+          this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
         }
       });
-    }
+  }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
@@ -75,7 +75,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   reloadSeries() {
     this.loadRecentlyAdded();
-    this.loadInProgress();
+    this.loadOnDeck();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -88,11 +88,11 @@ export class LibraryComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadInProgress();
+    this.loadOnDeck();
   }
 
-  loadInProgress() {
-    this.seriesService.getInProgress().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+  loadOnDeck() {
+    this.seriesService.getOnDeck().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
     });
   }
@@ -108,8 +108,15 @@ export class LibraryComponent implements OnInit, OnDestroy {
       this.router.navigate(['collections']);
     } else if (sectionTitle.toLowerCase() === 'recently added') {
       this.router.navigate(['recently-added']);
-    } else if (sectionTitle.toLowerCase() === 'in progress') {
-      this.router.navigate(['in-progress']);
+    } else if (sectionTitle.toLowerCase() === 'on deck') {
+      this.router.navigate(['on-deck']);
     } 
+  }
+
+  removeFromArray(arr: Array<any>, element: any) {
+    const index = arr.indexOf(element);
+    if (index >= 0) {
+      arr.splice(index);
+    }
   }
 }

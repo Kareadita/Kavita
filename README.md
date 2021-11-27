@@ -80,15 +80,15 @@ services:
 **Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
 ## Feature Requests
-Got a great idea? Throw it up on the FeatHub or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
-
-[![Feature Requests](https://feathub.com/Kareadita/Kavita?format=svg)](https://feathub.com/Kareadita/Kavita)
+Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
 
 
 ## Contributors
 
 This project exists thanks to all the people who contribute. [Contribute](CONTRIBUTING.md).
-<a href="https://github.com/Kareadita/Kavita/graphs/contributors"><img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false" /></a>
+<a href="https://github.com/Kareadita/Kavita/graphs/contributors">
+<img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false&avatarHeight=42" />
+</a>
 
 
 ## Donate
@@ -99,7 +99,7 @@ expenses related to Kavita. Back us through [OpenCollective](https://opencollect
 
 Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/Kavita#backer)
 
-<img src="https://opencollective.com/Kavita/backers.svg?width=890"></a>
+<img src="https://opencollective.com/kavita/backers.svg?width=890&avatarHeight=42"></a>
 
 ## Sponsors
 
@@ -115,9 +115,6 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 
 * [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
 * [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
-
-## Sentry
-Thank you to [<img src="/Logo/sentry.svg" alt="" width="64">](https://sentry.io/welcome/) for providing us with free license to their software.
 
 ### License
 

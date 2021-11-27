@@ -1,4 +1,4 @@
-@import '../../theme/colors';
+@use '../../theme/colors';
 
 $center-width: 50%;
 $side-width: 25%;
@@ -178,7 +178,7 @@ canvas {
       height: 2px;
     }
     .custom-slider .ngx-slider .ngx-slider-selection {
-      background: $primary-color;
+      background: colors.$primary-color;
     }
   
     .custom-slider .ngx-slider .ngx-slider-pointer {
@@ -186,7 +186,7 @@ canvas {
       height: 16px;
       top: auto; /* to remove the default positioning */
       bottom: 0;
-      background-color: $primary-color; // #333;
+      background-color: colors.$primary-color; // #333;
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
@@ -217,12 +217,13 @@ canvas {
     }
   
     .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
-      background: $primary-color;
+      background: colors.$primary-color;
     }
   }
 
   .webtoon-images {
       text-align: center;
+      width: 100%;
   }
 
   .highlight {
@@ -234,7 +235,16 @@ canvas {
     animation: fadein .5s both;
   }
 
-  // DEBUG
-  .active-image {
-      border: 5px solid red;
-  }
+  
+.bookmark-effect {
+    animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@keyframes bookmark {
+    0%, 100% {
+        border: 0px;
+    }
+    50% {
+        border: 5px solid colors.$primary-color;
+    }
+}

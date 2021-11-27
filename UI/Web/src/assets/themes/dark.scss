@@ -1,17 +1,6 @@
 // All dark style overrides should live here
 
-$dark-bg-color: #343a40;
-$dark-primary-color: rgba(74, 198, 148, 0.9);
-$dark-text-color: #efefef;
-$dark-hover-color: #4ac694;
-$dark-form-background: rgba(1, 4, 9, 0.5);
-$dark-form-background-no-opacity: rgb(1, 4, 9);
-$dark-form-placeholder: #efefef;
-$dark-link-color: rgb(88, 166, 255);
-$dark-icon-color: white;
-$dark-form-border: rgba(239, 239, 239, 0.125);
-$dark-form-readonly: #434648;
-$dark-item-accent-bg: #292d32;
+@use "../../theme/colors";
 
 .bg-dark {
   color: $dark-text-color;
@@ -41,6 +30,10 @@ $dark-item-accent-bg: #292d32;
     background-color: $dark-form-background !important;
     color: lightgray !important;
     box-shadow: inset 0px 0px 8px 1px $dark-form-background !important;
+  }
+
+  .text-muted {
+    color: #d7d7d7 !important;
   }
 
   .breadcrumb {
@@ -92,6 +85,17 @@ $dark-item-accent-bg: #292d32;
     color: $dark-text-color;
     background-color: $dark-bg-color;
     border-color: $dark-form-border;
+  }
+
+  .dark-menu {
+    background-color: $dark-form-background-no-opacity;
+    border-color: $dark-form-background;
+  }
+
+  .dark-menu-item {
+    color: $dark-text-color;
+    background-color: $dark-form-background-no-opacity;
+    border-color: $dark-form-background;
   }
 
   .dropdown .list-group-item:hover {
@@ -166,7 +170,7 @@ $dark-item-accent-bg: #292d32;
   .card { 
     background-color: $dark-bg-color;
     color: $dark-text-color;
-    border-color: $dark-form-border; //#343a40
+    border-color: $dark-form-border;
   }
 
   .section-title {
@@ -175,6 +179,14 @@ $dark-item-accent-bg: #292d32;
 
   .error-banner, .dropdown-toggle {
     color: #efefef;
+  }
+
+  .nav-events, .nav-events .popover-body {
+    background-color: $dark-form-background-no-opacity;
+  }
+
+  .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
+    border-bottom-color: transparent;
   }
 
 }

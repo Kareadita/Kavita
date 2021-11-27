@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
@@ -47,16 +48,22 @@ namespace API.Data.Repositories
             _context.Series.RemoveRange(series);
         }
 
-        public async Task<bool> DoesSeriesNameExistInLibrary(string name)
+        /// <summary>
+        /// Returns if a series name and format exists already in a library
+        /// </summary>
+        /// <param name="name">Name of series</param>
+        /// <param name="format">Format of series</param>
+        /// <returns></returns>
+        public async Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format)
         {
             var libraries = _context.Series
                 .AsNoTracking()
-                .Where(x => x.Name == name)
+                .Where(x => x.Name.Equals(name) && x.Format == format)
                 .Select(s => s.LibraryId);
 
             return await _context.Series
                 .AsNoTracking()
-                .Where(s => libraries.Contains(s.LibraryId) && s.Name == name)
+                .Where(s => libraries.Contains(s.LibraryId) && s.Name.Equals(name) && s.Format == format)
                 .CountAsync() > 1;
         }
 
@@ -312,14 +319,15 @@ namespace API.Data.Repositories
         }
 
         /// <summary>
-        /// Returns Series that the user has some partial progress on
+        /// Returns Series that the user has some partial progress on. Sorts based on activity. Sort first by User progress, but if a series
+        /// has been updated recently, bump it to the front.
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
         /// <param name="userParams">Pagination information</param>
         /// <param name="filter">Optional (default null) filter on query</param>
         /// <returns></returns>
-        public async Task<IEnumerable<SeriesDto>> GetInProgress(int userId, int libraryId, UserParams userParams, FilterDto filter)
+        public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
         {
             var formats = filter.GetSqlFilter();
             IList<int> userLibraries;
@@ -352,6 +360,7 @@ namespace API.Data.Repositories
                                               && s.PagesRead > 0
                                               && s.PagesRead < s.Series.Pages)
                             .OrderByDescending(s => s.LastModified)
+                            .ThenByDescending(s => s.Series.LastModified)
                             .Select(s => s.Series)
                             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                             .AsSplitQuery()

@@ -5,4 +5,5 @@ export interface UpdateVersionEvent {
     updateTitle: string;
     updateUrl: string;
     isDocker: boolean;
+    publishDate: string;
 }

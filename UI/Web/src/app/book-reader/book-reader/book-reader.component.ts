@@ -229,6 +229,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  get drawerBackgroundColor() {
+    return this.darkMode ? '#010409': '#fff';
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
@@ -887,7 +891,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getDarkModeBackgroundColor() {
-    return this.darkMode ? '#010409' : '#fff';
+    return this.darkMode ? '#292929' : '#fff';
   }
 
   setOverrideStyles() {

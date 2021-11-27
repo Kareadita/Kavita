@@ -41,7 +41,7 @@ namespace API.Data
 
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
-                new() {Key = ServerSettingKey.CacheDirectory, Value = DirectoryService.CacheDirectory},
+                new () {Key = ServerSettingKey.CacheDirectory, Value = DirectoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
@@ -51,6 +51,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
                 new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
                 new () {Key = ServerSettingKey.BaseUrl, Value = "/"},
+                new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
             };
 
             foreach (var defaultSetting in defaultSettings)
@@ -71,6 +72,8 @@ namespace API.Data
                 Configuration.LogLevel + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
                 DirectoryService.CacheDirectory + string.Empty;
+            context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
+                DirectoryService.BackupDirectory + string.Empty;
 
             await context.SaveChangesAsync();
 

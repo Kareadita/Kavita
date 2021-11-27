@@ -258,19 +258,19 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v\d+",
+                @"^(?<Series>.+?)(?: |_)v\d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
-                @"^(?<Series>.*)(?: |_)c(hapter) \d+",
+                @"^(?<Series>.+?)(?: |_)c(hapter) \d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
-                @"^(?<Series>.*)(?: |_)i(ssue) #\d+",
+                @"^(?<Series>.+?)(?: |_)i(ssue) #\d+",
                 MatchOptions, RegexTimeout),
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
-                @"^(?<Series>.+?)(\s|_|-)?(?:Ep\.?)(\s|_|-)+\d+",
+                @"^(?<Series>.+?)(\s|_|-)(?:Ep\.?)(\s|_|-)+\d+",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
@@ -286,7 +286,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
-                @"^(?<Series>.*)(?: |_)(?<Volume>\d+)",
+                @"^(?<Series>.+?)(?: |_)(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
@@ -336,9 +336,13 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.+?)(?:\s|_)#(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
+            // Batman 2016 - Chapter 01, Batman 2016 - Issue 01, Batman 2016 - Issue #01
+            new Regex(
+                @"^(?<Series>.+?)((c(hapter)?)|issue)(_|\s)#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                MatchOptions, RegexTimeout),
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
-                @"^(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                @"^(?<Series>.+?)(?:\s|_)(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
@@ -883,7 +887,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "").Trim();
+                        title = title.Replace(match.Value, string.Empty).Trim();
                     }
                 }
             }
@@ -900,7 +904,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "").Trim();
+                        title = title.Replace(match.Value, string.Empty).Trim();
                     }
                 }
             }
@@ -946,7 +950,7 @@ namespace API.Parser
                 {
                     if (match.Success)
                     {
-                        title = title.Replace(match.Value, "");
+                        title = title.Replace(match.Value, string.Empty);
                     }
                 }
             }

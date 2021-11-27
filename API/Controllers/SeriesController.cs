@@ -180,7 +180,7 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
 
-            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name))
+            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name, series.Format))
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
@@ -230,12 +230,19 @@ namespace API.Controllers
             return Ok(series);
         }
 
-        [HttpPost("in-progress")]
-        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetInProgress(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+        /// <summary>
+        /// Fetches series that are on deck aka have progress on them.
+        /// </summary>
+        /// <param name="filterDto"></param>
+        /// <param name="userParams"></param>
+        /// <param name="libraryId">Default of 0 meaning all libraries</param>
+        /// <returns></returns>
+        [HttpPost("on-deck")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
             // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var results = await _unitOfWork.SeriesRepository.GetInProgress(userId, libraryId, userParams, filterDto);
+            var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
 
             var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
                 .Take(userParams.PageSize).ToList();

@@ -11,6 +11,7 @@ import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collecti
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
+import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
@@ -106,8 +107,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
 
     this.messageHub.messages$.pipe(takeWhile(event => event.event === EVENTS.SeriesAddedToCollection), takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
-      const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
-      if (collectionEvent.tagId === this.collectionTag.id) {
+      if (event.event == EVENTS.SeriesAddedToCollection) {
+        const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
+        if (collectionEvent.tagId === this.collectionTag.id) {
+          this.loadPage();
+        }
+      } else if (event.event === EVENTS.SeriesRemoved) {
         this.loadPage();
       }
     });

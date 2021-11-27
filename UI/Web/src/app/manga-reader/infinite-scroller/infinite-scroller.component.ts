@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
@@ -63,6 +62,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   
   /**
    * Stores and emits all the src urls
@@ -127,12 +127,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return Math.max(...Object.values(this.imagesLoaded));
   }
 
+  get areImagesWiderThanWindow() {
+    return this.webtoonImageWidth > (window.innerWidth || document.documentElement.clientWidth);
+  }
+
 
 
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, private toastr: ToastrService) {}
+  constructor(private readerService: ReaderService, private renderer: Renderer2) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
@@ -167,11 +171,23 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.setPageNum(page, true);
       });
     }
+
+    if (this.bookmarkPage) {
+      this.bookmarkPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+        const image = document.querySelector('img[id^="page-' + page + '"]');
+        if (image) {
+          this.renderer.addClass(image, 'bookmark-effect');
+          setTimeout(() => {
+            this.renderer.removeClass(image, 'bookmark-effect');
+          }, 1000);
+        }
+      });
+    }
   }
 
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely, 
-   * and calculate the direction the scrolling is occuring. This is used for prefetching.
+   * and calculate the direction the scrolling is occuring. This is not used for prefetching.
    * @param event Scroll Event
    */
   handleScrollEvent(event?: any) {
@@ -179,17 +195,29 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       || document.documentElement.scrollTop 
       || document.body.scrollTop || 0);
 
-    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
-      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
-      this.isScrolling = false;
-    }
-
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
     } else {
       this.scrollingDirection = PAGING_DIRECTION.BACKWARDS;
     }
     this.prevScrollPosition = verticalOffset;
+
+    if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
+      this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
+      this.isScrolling = false;
+    }
+
+    if (!this.isScrolling) {
+      // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
+      // to mark the current page and separate the prefetching code. 
+      const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
+      .filter(entry => this.shouldElementCountAsCurrentPage(entry));
+
+      if (midlineImages.length > 0) {
+        this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
+      }
+    }
+    
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
@@ -219,12 +247,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
       }
-      // debug mode will add an extra pixel from the image border + (this.debug ? 1 : 0) 
+      
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
+
         // Scroll user back to original location
-        this.previousScrollHeightMinusTop = document.documentElement.scrollTop;
+        this.previousScrollHeightMinusTop = this.getScrollTop();
         requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
@@ -264,6 +293,28 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
             rect.left <= (window.innerWidth || document.documentElement.clientWidth)
           );
+  }
+
+  /**
+   * Is any part of the element visible in the scrollport and is it above the midline trigger.
+   * The midline trigger does not mean it is half of the screen. It may be top 25%. 
+   * @param elem HTML Element
+   * @returns If above midline
+   */
+   shouldElementCountAsCurrentPage(elem: Element) {
+    if (elem === null || elem === undefined) { return false; }
+
+    var rect = elem.getBoundingClientRect();
+
+    if (rect.bottom >= 0 && 
+            rect.right >= 0 && 
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.left <= (window.innerWidth || document.documentElement.clientWidth)
+          ) {
+            const topX = (window.innerHeight || document.documentElement.clientHeight);
+            return Math.abs(rect.top / topX) <= 0.25;
+          }
+    return false;
   }
 
 
@@ -327,7 +378,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.debugLog('[Intersection] Page ' + imagePage + ' is visible: ', entry.isIntersecting);
       if (entry.isIntersecting) {
         this.debugLog('[Intersection] ! Page ' + imagePage + ' just entered screen');
-        this.setPageNum(imagePage);
+        this.prefetchWebtoonImages(imagePage);
       }
     });
   }
@@ -350,10 +401,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (scrollToPage) {
       const currentImage = document.querySelector('img#page-' + this.pageNum);
-      if (currentImage !== null && !this.isElementVisible(currentImage)) {
-        this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
-        this.scrollToCurrentPage();
-      }
+      if (currentImage === null) return;
+      this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
+      this.scrollToCurrentPage();
     }
   }
 
@@ -365,6 +415,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * Performs the scroll for the current page element. Updates any state variables needed.
    */
   scrollToCurrentPage() {
+    this.debugLog('Scrolling to ', this.pageNum);
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
     
@@ -414,19 +465,29 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  calculatePrefetchIndecies() {
+  /**
+   * Finds the ranges of indecies to load from backend. totalPages - 1 is due to backend will automatically return last page for any page number
+   * above totalPages. Webtoon reader might ask for that which results in duplicate last pages. 
+   * @param pageNum 
+   * @returns 
+   */
+  calculatePrefetchIndecies(pageNum: number = -1) {
+    if (pageNum == -1) {
+      pageNum = this.pageNum;
+    }
+
     let startingIndex = 0;
     let endingIndex = 0;
     if (this.isScrollingForwards()) {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
 
       if (startingIndex === this.totalPages) {
         return [0, 0];
       }
     } else {
-      startingIndex = Math.min(Math.max(this.pageNum - this.bufferPages, 0), this.totalPages);
-      endingIndex = Math.min(Math.max(this.pageNum + this.bufferPages, 0), this.totalPages);
+      startingIndex = Math.min(Math.max(pageNum - this.bufferPages, 0), this.totalPages - 1);
+      endingIndex = Math.min(Math.max(pageNum + this.bufferPages, 0), this.totalPages - 1);
     }
 
 
@@ -443,8 +504,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return [...Array(size).keys()].map(i => i + startAt);
   }
 
-  prefetchWebtoonImages() {
-    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
+  prefetchWebtoonImages(pageNum: number = -1) {
+
+    if (pageNum === -1) {
+      pageNum = this.pageNum;
+    }
+
+    const [startingIndex, endingIndex] = this.calculatePrefetchIndecies(pageNum);
     if (startingIndex === 0 && endingIndex === 0) { return; }
 
     this.debugLog('\t[PREFETCH] prefetching pages: ' + startingIndex + ' to ' + endingIndex);

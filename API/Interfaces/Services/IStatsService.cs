@@ -5,7 +5,7 @@ namespace API.Interfaces.Services
 {
     public interface IStatsService
     {
-        Task RecordClientInfo(ClientInfoDto clientInfoDto);
         Task Send();
+        Task<ServerInfoDto> GetServerInfo();
     }
 }

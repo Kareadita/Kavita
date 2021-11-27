@@ -24,11 +24,19 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}}" 
+        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} " 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
-            <app-infinite-scroller [pageNum]="pageNum" [bufferPages]="5" [goToPage]="goToPageEvent" (pageNumberChange)="handleWebtoonPageChange($event)" [totalPages]="maxPages - 1" [urlProvider]="getPageUrl" (loadNextChapter)="loadNextChapter()" (loadPrevChapter)="loadPrevChapter()"></app-infinite-scroller>
+            <app-infinite-scroller [pageNum]="pageNum" 
+            [bufferPages]="5" 
+            [goToPage]="goToPageEvent" 
+            (pageNumberChange)="handleWebtoonPageChange($event)" 
+            [totalPages]="maxPages" 
+            [urlProvider]="getPageUrl" 
+            (loadNextChapter)="loadNextChapter()" 
+            (loadPrevChapter)="loadPrevChapter()"
+            [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
             <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
@@ -43,7 +51,7 @@
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
                 <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
-                    <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
+                    <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                 </div>
                 <ng-template #noSlider>
                     <div class="col custom-slider">
@@ -94,9 +102,7 @@
                     <div class="col-6">
                         <div class="form-group">
                             <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                                <option [value]="1">Right to Left</option>
-                                <option [value]="0">Left to Right</option>
-                                <option [value]="2">None</option>
+                                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
                             </select>
                         </div>
                     </div>

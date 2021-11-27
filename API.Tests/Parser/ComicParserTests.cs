@@ -58,6 +58,11 @@ namespace API.Tests.Parser
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "2000 AD")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "Daredevil")]
         [InlineData("Batman - The Man Who Laughs #1 (2005)", "Batman - The Man Who Laughs")]
+        [InlineData("Demon 012 (Sep 1973) c2c", "Demon")]
+        [InlineData("Dragon Age - Until We Sleep 01 (of 03)", "Dragon Age - Until We Sleep")]
+        [InlineData("Green Lantern v2 017 - The Spy-Eye that doomed Green Lantern v2", "Green Lantern")]
+        [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire  - Adam Strange")]
+        [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis  - Rags Morales Sketches")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -138,6 +143,7 @@ namespace API.Tests.Parser
         [InlineData("Cyberpunk 2077 - Trauma Team #04.cbz", "4")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
+        [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

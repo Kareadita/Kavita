@@ -26,7 +26,7 @@
                     <h6>Applies to Series</h6>
                     <div class="form-check">
                         <input id="selectall" type="checkbox" class="form-check-input" 
-                            [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="someSelected">
+                            [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
                         <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
                     </div>
                     <ul>
