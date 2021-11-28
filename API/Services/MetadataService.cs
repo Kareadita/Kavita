@@ -118,14 +118,7 @@ namespace API.Services
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
             if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-            if (Parser.Parser.IsArchive(firstFile.FilePath))
-            {
-                UpdateChapterFromComicInfo(chapter.ChapterMetadata, allPeople, firstFile);
-            }
-            else
-            {
-                // TODO: Update from epub
-            }
+            UpdateChapterFromComicInfo(chapter.ChapterMetadata, allPeople, firstFile);
         }
 
         private static bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile)
@@ -135,7 +128,7 @@ namespace API.Services
 
         private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, ICollection<Person> allPeople, MangaFile firstFile)
         {
-            var comicInfo = _archiveService.GetComicInfo(firstFile.FilePath);
+            var comicInfo = GetComicInfo(firstFile);
             if (comicInfo == null) return;
 
             if (!string.IsNullOrEmpty(comicInfo.Title))
@@ -241,7 +234,7 @@ namespace API.Services
         /// </summary>
         /// <param name="series"></param>
         /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-        private async Task UpdateSeriesCoverImage(Series series, bool forceUpdate)
+        private void UpdateSeriesCoverImage(Series series, bool forceUpdate)
         {
             if (series == null) return;
 
@@ -268,20 +261,10 @@ namespace API.Services
                 }
             }
             series.CoverImage = firstCover?.CoverImage ?? coverImage;
-            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
         private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
         {
-            // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
-            // better to let the user kick off a refresh metadata on an individual Series than having overhead of
-            // checking File last write time.
-
-            // If a series is just a special, then the original code of
-            // var firstVolume = series.Volumes.FirstWithChapters(isBook);
-            // will fail.
-
-
             if (!string.IsNullOrEmpty(series.Metadata.Summary) && !forceUpdate) return;
 
             var isBook = series.Library.Type == LibraryType.Book;
@@ -292,7 +275,7 @@ namespace API.Services
             if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-            var comicInfo = GetComicInfo(series.Format, firstFile);
+            var comicInfo = GetComicInfo(firstFile);
             if (comicInfo == null) return;
 
             // BUG: At a series level, I need all the People to be saved already so I can properly match
@@ -326,12 +309,11 @@ namespace API.Services
             {
                 metadataPeople.Add(person);
             }
-
         }
 
-        private ComicInfo GetComicInfo(MangaFormat format, MangaFile firstFile)
+        private ComicInfo GetComicInfo(MangaFile firstFile)
         {
-            if (format is MangaFormat.Archive or MangaFormat.Epub)
+            if (firstFile.Format is MangaFormat.Archive or MangaFormat.Epub)
             {
                 return Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
             }
@@ -345,7 +327,7 @@ namespace API.Services
         /// <remarks>This cannot have any Async code within. It is used within Parallel.ForEach</remarks>
         /// <param name="series"></param>
         /// <param name="forceUpdate"></param>
-        private async Task ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, IList<Person> allPeople, bool forceUpdate)
+        private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, IList<Person> allPeople, bool forceUpdate)
         {
             _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
             try
@@ -356,14 +338,12 @@ namespace API.Services
                     var chapterUpdated = false;
                     foreach (var chapter in volume.Chapters)
                     {
-                        //GetChapterMetadataOrCreate(chapterMetadatas, chapter);
                         if (chapter.ChapterMetadata == null)
                         {
                             var metadata = DbFactory.ChapterMetadata(chapter.Id);
                             _unitOfWork.ChapterMetadataRepository.Attach(metadata);
                             chapter.ChapterMetadata ??= metadata;
                         }
-
 
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
                         UpdateChapterMetadata(chapter, allPeople, forceUpdate);
@@ -372,7 +352,7 @@ namespace API.Services
                     volumeUpdated = UpdateVolumeCoverImage(volume, chapterUpdated || forceUpdate);
                 }
 
-                await UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
+                UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
                 UpdateSeriesMetadata(series, allPeople, forceUpdate);
             }
             catch (Exception ex)
@@ -451,7 +431,7 @@ namespace API.Services
                 {
                     try
                     {
-                        await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+                        ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
                     }
                     catch (Exception ex)
                     {
@@ -459,12 +439,11 @@ namespace API.Services
                     }
                     var index = chunk * seriesIndex;
                     var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
+                    _logger.LogDebug("Progress: " + progress);
                     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                         MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
                     seriesIndex++;
                 }
-
-
 
                 await _unitOfWork.CommitAsync();
                 foreach (var series in nonLibrarySeries)
@@ -508,7 +487,7 @@ namespace API.Services
 
             var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            await ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+            ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
 
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));

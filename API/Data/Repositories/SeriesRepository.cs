@@ -110,6 +110,9 @@ namespace API.Data.Repositories
                 .Include(s => s.Library)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
+                .ThenInclude(c => c.ChapterMetadata)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
                 .AsSplitQuery()
                 .SingleOrDefaultAsync();
