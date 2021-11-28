@@ -271,7 +271,7 @@ namespace API.Services
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
-        private async Task UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
+        private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
         {
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
@@ -373,7 +373,7 @@ namespace API.Services
                 }
 
                 await UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
-                await UpdateSeriesMetadata(series, allPeople, forceUpdate);
+                UpdateSeriesMetadata(series, allPeople, forceUpdate);
             }
             catch (Exception ex)
             {
