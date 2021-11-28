@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Parser;

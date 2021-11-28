@@ -1,4 +1,5 @@
 ﻿using API.Entities;
+using API.Entities.Metadata;
 using API.Interfaces.Repositories;
 
 namespace API.Data.Repositories

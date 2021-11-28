@@ -8,6 +8,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Helpers.Converters;
 using AutoMapper;
 
@@ -39,7 +40,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
                 .ForMember(dest => dest.Artists,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
                 .ForMember(dest => dest.Characters,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character)))
@@ -53,7 +54,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
                 .ForMember(dest => dest.CoverArtist,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
                 .ForMember(dest => dest.Colorist,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))

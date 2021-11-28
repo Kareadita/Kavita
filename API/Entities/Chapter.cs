@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using API.Parser;
 
 namespace API.Entities

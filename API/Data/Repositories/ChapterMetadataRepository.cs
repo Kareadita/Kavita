@@ -6,6 +6,7 @@ using API.DTOs;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Interfaces.Repositories;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;

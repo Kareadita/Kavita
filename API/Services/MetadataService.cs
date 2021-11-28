@@ -11,6 +11,7 @@ using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -75,6 +76,14 @@ namespace API.Services
             return !string.IsNullOrEmpty(coverImage) && fileExists;
         }
 
+        /// <summary>
+        /// Gets the cover image for the file
+        /// </summary>
+        /// <remarks>Has side effect of marking the file as updated</remarks>
+        /// <param name="file"></param>
+        /// <param name="volumeId"></param>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
         {
             file.UpdateLastModified();
@@ -93,6 +102,12 @@ namespace API.Services
                     return string.Empty;
             }
 
+        }
+
+        private bool UpdateChapter(Chapter chapter, bool forceUpdate)
+        {
+            // TODO: Maybe move all the cache checks into one area so we don't have to check multiple times for each chapter
+            return false;
         }
 
         /// <summary>
@@ -138,51 +153,76 @@ namespace API.Services
 
             if (!string.IsNullOrEmpty(comicInfo.Colorist))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Colorist.Split(","), PersonRole.Colorist);
                 UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Writer))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Writer.Split(","), PersonRole.Writer);
                 UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Editor))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Editor.Split(","), PersonRole.Editor);
                 UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Inker))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Inker.Split(","), PersonRole.Inker);
                 UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Letterer))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Letterer.Split(","), PersonRole.Letterer);
                 UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Penciller))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Penciller.Split(","), PersonRole.Penciller);
                 UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist);
                 UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Publisher))
             {
+                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Publisher.Split(","), PersonRole.Publisher);
                 UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
                     person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
             }
+        }
+
+        /// <summary>
+        /// Remove people on a list
+        /// </summary>
+        /// <remarks>Used to remove before we update/add new people</remarks>
+        /// <param name="chapterMetadataPeople">Existing people on Entity</param>
+        /// <param name="people">People from metadata</param>
+        /// <param name="role">Role to filter on</param>
+        private static ICollection<Person> RemovePeople(IEnumerable<Person> chapterMetadataPeople, IEnumerable<string> people, PersonRole role)
+        {
+            // Think about using a Intersection here
+            //return chapterMetadataPeople;
+            var normalizedPeople = people.Select(Parser.Parser.Normalize).ToList();
+            var filteredList =  chapterMetadataPeople
+                .Where(p => p.Role == role && normalizedPeople.Contains(p.NormalizedName)).ToList();
+            return filteredList;
         }
 
         private static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
@@ -346,7 +386,7 @@ namespace API.Services
                         }
 
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
-                        UpdateChapterMetadata(chapter, allPeople, forceUpdate);
+                        UpdateChapterMetadata(chapter, allPeople, forceUpdate || chapterUpdated);
                     }
 
                     volumeUpdated = UpdateVolumeCoverImage(volume, chapterUpdated || forceUpdate);
@@ -359,30 +399,6 @@ namespace API.Services
             {
                 _logger.LogError(ex, "[MetadataService] There was an exception during updating metadata for {SeriesName} ", series.Name);
             }
-
-            // TODO: Remove any People/Genre entries that no longer exist
-        }
-
-        /// <summary>
-        /// Attempts to get an existing metadata entity else creates a new one and attatches to the chapter
-        /// </summary>
-        /// <param name="chapterMetadatas"></param>
-        /// <param name="chapter"></param>
-        private void GetChapterMetadataOrCreate(IDictionary<int, IList<ChapterMetadata>> chapterMetadatas, Chapter chapter)
-        {
-            ChapterMetadata metadata;
-            if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
-            {
-                metadata = DbFactory.ChapterMetadata(chapter.Id);
-                _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                chapterMetadatas[chapter.Id].Add(metadata); // This is causing the loop to break
-            }
-            else
-            {
-                metadata = chapterMetadatas[chapter.Id][0];
-            }
-
-            chapter.ChapterMetadata ??= metadata;
         }
 
 
@@ -404,8 +420,7 @@ namespace API.Services
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
 
-            var i = 0;
-            for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++, i++)
+            for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
             {
                 if (chunkInfo.TotalChunks == 0) continue;
                 totalTime += stopwatch.ElapsedMilliseconds;
@@ -439,7 +454,7 @@ namespace API.Services
                     }
                     var index = chunk * seriesIndex;
                     var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
-                    _logger.LogDebug("Progress: " + progress);
+
                     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                         MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
                     seriesIndex++;
@@ -453,15 +468,12 @@ namespace API.Services
                 _logger.LogInformation(
                     "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                     chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
-
-
-                // var progress =  Math.Max(0F, Math.Min(1F, i * 1F / chunkInfo.TotalChunks));
-                // await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
-                //     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
             }
 
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
+
+            // TODO: Remove any leftover People from DB
 
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
         }

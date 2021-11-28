@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using API.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace API.Entities
+namespace API.Entities.Metadata
 {
     [Index(nameof(Id), nameof(SeriesId), IsUnique = true)]
     public class SeriesMetadata : IHasConcurrencyToken

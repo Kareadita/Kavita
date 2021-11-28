@@ -49,6 +49,7 @@ namespace API.Entities
         /// <returns></returns>
         public bool HasFileBeenModifiedSince(DateTime? time)
         {
+            // BUG: This has some sort of difference.
             if (time == null) return true;
             return File.GetLastWriteTime(FilePath) > time;
         }

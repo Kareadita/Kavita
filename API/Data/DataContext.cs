@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

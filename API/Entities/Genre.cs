@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.Entities.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities

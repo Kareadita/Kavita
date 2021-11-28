@@ -674,7 +674,7 @@ namespace API.Services.Tasks
                 break;
           }
 
-           mangaFile?.UpdateLastModified();
+           //mangaFile?.UpdateLastModified();
            return mangaFile;
        }
 

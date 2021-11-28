@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
 using API.Entities;
+using API.Entities.Metadata;
 
 namespace API.Interfaces.Repositories
 {

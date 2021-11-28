@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.CollectionTags;
 using API.Entities;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;

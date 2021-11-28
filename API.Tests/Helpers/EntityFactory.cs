@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 
 namespace API.Tests.Helpers
 {

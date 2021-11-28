@@ -5,6 +5,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Helpers;
 
 namespace API.Interfaces.Repositories

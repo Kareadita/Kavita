@@ -8,6 +8,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
@@ -85,9 +86,11 @@ namespace API.Data.Repositories
             var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.ChapterMetadata)
+                .ThenInclude(cm => cm.People)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
@@ -107,10 +110,12 @@ namespace API.Data.Repositories
             return await _context.Series
                 .Where(s => s.Id == seriesId)
                 .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
                 .Include(s => s.Library)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.ChapterMetadata)
+                .ThenInclude(cm => cm.People)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)

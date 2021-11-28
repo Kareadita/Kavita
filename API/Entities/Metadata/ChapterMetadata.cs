@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace API.Entities
+namespace API.Entities.Metadata
 {
     /// <summary>
     /// Has a 1-to-1 relationship with a Chapter. Represents metadata about a chapter.
