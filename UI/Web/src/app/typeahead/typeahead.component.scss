@@ -1,4 +1,4 @@
-@import "../../theme/colors";
+@use "../../theme/colors";
 
 input {
     width: 15px;
@@ -39,12 +39,12 @@ input {
 
 ::ng-deep .bg-dark .typeahead-input {
     color: #efefef;
-    background-color: $dark-bg-color;
+    background-color: colors.$dark-bg-color;
 }
 
 // Causes bleedover
 ::ng-deep .bg-dark .dropdown .list-group-item.active {
-    background-color: $dark-hover-color;
+    background-color: colors.$dark-hover-color;
 }
 
 .dropdown {
