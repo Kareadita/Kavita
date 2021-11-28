@@ -10,6 +10,7 @@ using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -50,7 +51,7 @@ namespace API.Services
         /// <param name="isCoverLocked"></param>
         /// <param name="coverImageDirectory">Directory where cover images are. Defaults to <see cref="DirectoryService.CoverImageDirectory"/></param>
         /// <returns></returns>
-        public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, bool forceUpdate = false,
+        public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
             bool isCoverLocked = false, string coverImageDirectory = null)
         {
             if (string.IsNullOrEmpty(coverImageDirectory))
@@ -61,7 +62,7 @@ namespace API.Services
             var fileExists = File.Exists(Path.Join(coverImageDirectory, coverImage));
             if (isCoverLocked && fileExists) return false;
             if (forceUpdate) return true;
-            return (firstFile != null && firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
+            return (firstFile != null && (firstFile.HasFileBeenModifiedSince(chapterCreated) || firstFile.HasFileBeenModified())) || !HasCoverImage(coverImage, fileExists);
         }
 
         private static bool HasCoverImage(string coverImage)
@@ -103,7 +104,7 @@ namespace API.Services
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
-            if (!ShouldUpdateCoverImage(chapter.CoverImage, firstFile, forceUpdate, chapter.CoverImageLocked))
+            if (!ShouldUpdateCoverImage(chapter.CoverImage, firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
                 return false;
 
             _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
@@ -112,19 +113,24 @@ namespace API.Services
             return true;
         }
 
-        private void UpdateChapterMetadata(Chapter chapter, ChapterMetadata chapterMetadata, ICollection<Person> allPeople, bool forceUpdate)
+        private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+            if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
             if (Parser.Parser.IsArchive(firstFile.FilePath))
             {
-                UpdateChapterFromComicInfo(chapterMetadata, allPeople, firstFile);
+                UpdateChapterFromComicInfo(chapter.ChapterMetadata, allPeople, firstFile);
             }
             else
             {
                 // TODO: Update from epub
             }
+        }
+
+        private static bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile)
+        {
+            return firstFile == null || (!forceUpdate && !(!firstFile.HasFileBeenModifiedSince(chapter.Created) || firstFile.HasFileBeenModified()));
         }
 
         private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, ICollection<Person> allPeople, MangaFile firstFile)
@@ -220,7 +226,7 @@ namespace API.Services
         private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
         {
             // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-            if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, forceUpdate)) return false;
+            if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, volume.Created, forceUpdate)) return false;
 
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -240,7 +246,7 @@ namespace API.Services
             if (series == null) return;
 
             // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-            if (!ShouldUpdateCoverImage(series.CoverImage, null, forceUpdate, series.CoverImageLocked))
+            if (!ShouldUpdateCoverImage(series.CoverImage, null, series.Created, forceUpdate, series.CoverImageLocked))
                 return;
 
             series.Volumes ??= new List<Volume>();
@@ -265,7 +271,7 @@ namespace API.Services
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
-        private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
+        private async Task UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
         {
             // NOTE: This can be problematic when the file changes and a summary already exists, but it is likely
             // better to let the user kick off a refresh metadata on an individual Series than having overhead of
@@ -283,11 +289,15 @@ namespace API.Services
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
             var firstFile = firstChapter?.Files.FirstOrDefault();
-            if (firstFile == null || (!forceUpdate && !firstFile.HasFileBeenModified())) return;
+            if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
             var comicInfo = GetComicInfo(series.Format, firstFile);
             if (comicInfo == null) return;
+
+            // BUG: At a series level, I need all the People to be saved already so I can properly match
+
+
 
             // Summary Info
             if (!string.IsNullOrEmpty(comicInfo.Summary))
@@ -306,25 +316,6 @@ namespace API.Services
                 UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
             }
-
-            // if (!string.IsNullOrEmpty(comicInfo.Writer))
-            // {
-            //     UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
-            //         person => series.Metadata.People.Add(person));
-            // }
-            //
-            // if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
-            // {
-            //     UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
-            //         person => series.Metadata.People.Add(person));
-            // }
-            //
-            // if (!string.IsNullOrEmpty(comicInfo.Publisher))
-            // {
-            //     UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
-            //         person => series.Metadata.People.Add(person));
-            // }
-
         }
 
         private static void AddPersonIfNotOnMetadata(ICollection<Person> metadataPeople, Person person)
@@ -359,39 +350,30 @@ namespace API.Services
             _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
             try
             {
-                if (!chapterIds.ContainsKey(series.Id)) return;
-                var chapterMetadatas = await
-                    _unitOfWork.ChapterMetadataRepository.GetMetadataForChapterIds(chapterIds[series.Id]);
-
                 var volumeUpdated = false;
                 foreach (var volume in series.Volumes)
                 {
                     var chapterUpdated = false;
                     foreach (var chapter in volume.Chapters)
                     {
-                        ChapterMetadata metadata;
-                        if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
+                        //GetChapterMetadataOrCreate(chapterMetadatas, chapter);
+                        if (chapter.ChapterMetadata == null)
                         {
-                            metadata = DbFactory.ChapterMetadata(chapter.Id);
+                            var metadata = DbFactory.ChapterMetadata(chapter.Id);
                             _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                            chapterMetadatas[chapter.Id].Add(metadata);
-                        }
-                        else
-                        {
-                            metadata = chapterMetadatas[chapter.Id][0];
+                            chapter.ChapterMetadata ??= metadata;
                         }
 
-                        chapter.ChapterMetadata = metadata;
 
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
-                        UpdateChapterMetadata(chapter, metadata, allPeople, forceUpdate);
+                        UpdateChapterMetadata(chapter, allPeople, forceUpdate);
                     }
 
                     volumeUpdated = UpdateVolumeCoverImage(volume, chapterUpdated || forceUpdate);
                 }
 
                 await UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
-                UpdateSeriesMetadata(series, allPeople, forceUpdate);
+                await UpdateSeriesMetadata(series, allPeople, forceUpdate);
             }
             catch (Exception ex)
             {
@@ -399,6 +381,28 @@ namespace API.Services
             }
 
             // TODO: Remove any People/Genre entries that no longer exist
+        }
+
+        /// <summary>
+        /// Attempts to get an existing metadata entity else creates a new one and attatches to the chapter
+        /// </summary>
+        /// <param name="chapterMetadatas"></param>
+        /// <param name="chapter"></param>
+        private void GetChapterMetadataOrCreate(IDictionary<int, IList<ChapterMetadata>> chapterMetadatas, Chapter chapter)
+        {
+            ChapterMetadata metadata;
+            if (!chapterMetadatas.ContainsKey(chapter.Id) || chapterMetadatas[chapter.Id].Count == 0)
+            {
+                metadata = DbFactory.ChapterMetadata(chapter.Id);
+                _unitOfWork.ChapterMetadataRepository.Attach(metadata);
+                chapterMetadatas[chapter.Id].Add(metadata); // This is causing the loop to break
+            }
+            else
+            {
+                metadata = chapterMetadatas[chapter.Id][0];
+            }
+
+            chapter.ChapterMetadata ??= metadata;
         }
 
 

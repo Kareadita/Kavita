@@ -47,8 +47,9 @@ namespace API.Entities
         /// <remarks>This is useful to check if the file was modified </remarks>
         /// <param name="time"></param>
         /// <returns></returns>
-        public bool HasFileBeenModifiedSince(DateTime time)
+        public bool HasFileBeenModifiedSince(DateTime? time)
         {
+            if (time == null) return true;
             return File.GetLastWriteTime(FilePath) > time;
         }
 
