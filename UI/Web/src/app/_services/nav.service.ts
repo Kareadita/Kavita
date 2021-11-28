@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 
 @Injectable({
@@ -13,7 +13,10 @@ export class NavService {
   private darkModeSource = new ReplaySubject<boolean>(1);
   darkMode$ = this.darkModeSource.asObservable();
 
-  constructor() {
+  private renderer: Renderer2;
+
+  constructor(rendererFactory: RendererFactory2) {
+    this.renderer = rendererFactory.createRenderer(null, null);
     this.showNavBar();
   }
 
@@ -27,12 +30,22 @@ export class NavService {
 
   toggleDarkMode() {
     this.darkMode = !this.darkMode;
+    this.updateColorScheme();
     this.darkModeSource.next(this.darkMode);
   }
 
   setDarkMode(mode: boolean) {
     this.darkMode = mode;
+    this.updateColorScheme();
     this.darkModeSource.next(this.darkMode);
+  }
+
+  private updateColorScheme() {
+    if (this.darkMode) {
+      this.renderer.setStyle(document.querySelector('html'), 'color-scheme', 'dark');
+    } else {
+      this.renderer.setStyle(document.querySelector('html'), 'color-scheme', 'light');
+    }
   }
 
 
