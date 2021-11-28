@@ -8,13 +8,6 @@
 
 @import '~swiper/swiper.scss';
 
-
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-
 @import './assets/themes/dark.scss';
 
 // Global Styles
@@ -29,6 +22,14 @@ label, select, .clickable {
 .btn-primary {
   color: white;
 }
+
+:root {
+  color-scheme: light;
+}
+
+// :root .bg-dark {
+//   color-scheme: dark;
+// }
 
 @font-face {
   font-family: "EBGarmond";
@@ -63,6 +64,11 @@ body {
   .not-phone-hidden {
     display: none;
   }
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 // Debug styles
