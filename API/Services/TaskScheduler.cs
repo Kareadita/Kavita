@@ -120,7 +120,7 @@ namespace API.Services
         {
             _logger.LogInformation("Scheduling Auto-Update tasks");
             // Schedule update check between noon and 6pm local time
-            RecurringJob.AddOrUpdate("check-updates", () => _versionUpdaterService.CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
         }
         #endregion
 
