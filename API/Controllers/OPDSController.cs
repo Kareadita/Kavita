@@ -583,7 +583,7 @@ namespace API.Controllers
                 feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
             }
 
-            if (pageNumber + 1 < list.TotalPages)
+            if (pageNumber + 1 <= list.TotalPages)
             {
                 feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber + 1)));
             }
