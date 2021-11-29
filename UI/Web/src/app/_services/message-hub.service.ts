@@ -24,7 +24,8 @@ export enum EVENTS {
   SeriesAddedToCollection = 'SeriesAddedToCollection',
   ScanLibraryError = 'ScanLibraryError',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
-  CleanupProgress = 'CleanupProgress'
+  CleanupProgress = 'CleanupProgress',
+  DownloadProgress = 'DownloadProgress'
 }
 
 export interface Message<T> {
@@ -102,6 +103,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.CleanupProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.CleanupProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.DownloadProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.DownloadProgress,
         payload: resp.body
       });
     });

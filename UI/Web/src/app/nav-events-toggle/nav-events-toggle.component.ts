@@ -16,6 +16,8 @@ interface ProcessedEvent {
 
 type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
 
+const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress];
+
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './nav-events-toggle.component.html',
@@ -43,7 +45,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (event.event === EVENTS.ScanLibraryProgress || event.event === EVENTS.RefreshMetadataProgress || event.event === EVENTS.BackupDatabaseProgress  || event.event === EVENTS.CleanupProgress) {
+      if (acceptedEvents.includes(event.event)) {
         this.processProgressEvent(event, event.event);
       }
     });
@@ -64,7 +66,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
       if (scanEvent.progress !== 1) {
         const libraryName = names[scanEvent.libraryId] || '';
-        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName};
+        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName, rawBody: event.payload};
         data.push(newEvent);
       }
 
@@ -77,12 +79,13 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     return Math.trunc(progress * 100);
   }
 
-  prettyPrintEvent(eventType: string) {
+  prettyPrintEvent(eventType: string, event: any) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
       case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
       case (EVENTS.CleanupProgress): return 'Clearing Cache';
       case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
+      case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;
       default: return eventType;
     }
   }

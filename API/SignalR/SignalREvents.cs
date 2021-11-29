@@ -27,5 +27,10 @@
         /// Event sent out during cleaning up temp and cache folders
         /// </summary>
         public const string CleanupProgress = "CleanupProgress";
+        /// <summary>
+        /// Event sent out during downloading of files
+        /// </summary>
+        public const string DownloadProgress = "DownloadProgress";
+
     }
 }

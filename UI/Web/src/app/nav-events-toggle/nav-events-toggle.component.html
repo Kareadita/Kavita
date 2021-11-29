@@ -14,7 +14,7 @@
                     <span class="sr-only">Scan for {{event.libraryName}} in progress</span>
                 </div>
                 {{prettyPrintProgress(event.progress)}}%
-                {{prettyPrintEvent(event.eventType)}} {{event.libraryName}}
+                {{prettyPrintEvent(event.eventType, event)}} {{event.libraryName}}
             </li>
             <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0">Not much going on here</li>
         </ul>

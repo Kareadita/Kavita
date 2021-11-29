@@ -147,5 +147,19 @@ namespace API.SignalR
                 }
             };
         }
+
+        public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.DownloadProgress,
+                Body = new
+                {
+                    UserName = username,
+                    DownloadName = downloadName,
+                    Progress = progress
+                }
+            };
+        }
     }
 }
