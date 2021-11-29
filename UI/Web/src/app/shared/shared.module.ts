@@ -16,6 +16,7 @@ import { UpdateNotificationModalComponent } from './update-notification/update-n
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SentenceCasePipe } from './sentence-case.pipe';
+import { PersonBadgeComponent } from './person-badge/person-badge.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { SentenceCasePipe } from './sentence-case.pipe';
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
     SentenceCasePipe,
+    PersonBadgeComponent
   ],
   imports: [
     CommonModule,
@@ -53,6 +55,7 @@ import { SentenceCasePipe } from './sentence-case.pipe';
     SeriesFormatComponent,
     TagBadgeComponent,
     CircularLoaderComponent,
+    PersonBadgeComponent
   ],
 })
 export class SharedModule { }

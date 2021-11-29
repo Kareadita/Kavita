@@ -22,7 +22,6 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
-import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { OnDeckComponent } from './on-deck/on-deck.component';
@@ -46,7 +45,6 @@ import { PersonRolePipe } from './person-role.pipe';
     SeriesDetailComponent, 
     NotConnectedComponent, // Move into ExtrasModule
     ReviewSeriesModalComponent,
-    PersonBadgeComponent,
     RecentlyAddedComponent,
     OnDeckComponent,
     DashboardComponent,

@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Person } from '../_models/person';
+import { Person } from '../../_models/person';
 
 @Component({
   selector: 'app-person-badge',

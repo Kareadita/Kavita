@@ -1,1 +1,49 @@
-<p>chapter-metadata-detail works!</p>
+<div class="container-fluid" *ngIf="metadata !== undefined">
+    Chapter {{chapter.range}} {{metadata.title.length > 0 ? ' - ' + metadata.title : ''}}
+    Title: {{metadata.title || '-'}}
+    Year: {{metadata.year || '-'}}
+    Arc Information
+    <div class="row no-gutters">
+        <div class="col" *ngIf="chapter.hasOwnProperty('created')">
+            Added: {{(chapter.created | date: 'short') || '-'}}
+        </div>
+        <div class="col">
+            Pages: {{chapter.pages}}
+        </div>
+    </div>
+
+    <div class="row no-gutters">
+     
+        <div class="col">
+            Pages: {{chapter.pages}}
+        </div>
+    </div>
+    
+
+    <div class="row no-gutters mt-1"  *ngIf="metadata.writers && metadata.writers.length > 0">
+        <div class="col-md-4">
+            <h5>Writers</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of metadata.writers" [person]="person"></app-person-badge>
+        </div>
+    </div>
+
+    <div class="row no-gutters mt-1"  *ngIf="metadata.coverArtist && metadata.coverArtist.length > 0">
+        <div class="col-md-4">
+            <h5>Artists</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of metadata.coverArtist" [person]="person"></app-person-badge>
+        </div>
+    </div>
+
+    <div class="row no-gutters mt-1"  *ngIf="metadata.publishers && metadata.publishers.length > 0">
+        <div class="col-md-4">
+            <h5>Publishers</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of metadata.publishers" [person]="person"></app-person-badge>
+        </div>
+    </div>
+</div>

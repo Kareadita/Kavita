@@ -4,6 +4,7 @@ export interface ChapterMetadata {
     id: number;
     chapterId: number;
     title: string;
+    year: string;
     writers: Array<Person>;
     penciller: Array<Person>;
     inker: Array<Person>;

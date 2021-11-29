@@ -2,12 +2,11 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { PersonRole } from './_models/person';
 
 @Pipe({
-  name: 'personRole',
-  pure: true
+  name: 'personRole'
 })
 export class PersonRolePipe implements PipeTransform {
 
-  transform(value: number): string {
+  transform(value: PersonRole): string {
     switch (value) {
       case PersonRole.Artist: return 'Artist';
       case PersonRole.Character: return 'Character';

@@ -44,12 +44,14 @@ namespace API.Entities
         public string Title { get; set; }
 
 
+
+
         // Relationships
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
 
         public ChapterMetadata ChapterMetadata { get; set; }
-        //public int SeriesMetadataId { get; set; }
+        //public int ChapterMetadataId { get; set; }
 
         public void UpdateFrom(ParserInfo info)
         {
