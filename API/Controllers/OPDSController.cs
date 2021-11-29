@@ -583,7 +583,7 @@ namespace API.Controllers
                 feed.Links.Add(CreateLink(FeedLinkRelation.Prev, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber - 1)));
             }
 
-            if (pageNumber + 1 < list.TotalPages)
+            if (pageNumber + 1 <= list.TotalPages)
             {
                 feed.Links.Add(CreateLink(FeedLinkRelation.Next, FeedLinkType.AtomNavigation, url + "pageNumber=" + (pageNumber + 1)));
             }
@@ -596,7 +596,7 @@ namespace API.Controllers
             }
 
 
-            feed.Total = list.TotalPages * list.PageSize;
+            feed.Total = list.TotalCount;
             feed.ItemsPerPage = list.PageSize;
             feed.StartIndex = (Math.Max(list.CurrentPage - 1, 0) * list.PageSize) + 1;
         }

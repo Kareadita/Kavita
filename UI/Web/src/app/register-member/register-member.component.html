@@ -12,8 +12,12 @@
     </div>
     
     <div class="form-group" *ngIf="registerForm.get('isAdmin')?.value || !authDisabled">
-        <label for="password">Password</label>
-        <input id="password" class="form-control" formControlName="password" type="password">
+        <label for="password">Password</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
+        <ng-template #passwordTooltip>
+            Password must be between 6 and 32 characters in length
+        </ng-template>
+        <span class="sr-only" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
+        <input id="password" class="form-control" formControlName="password" type="password" aria-describedby="password-help">
     </div>
 
     <div class="form-check" *ngIf="!firstTimeFlow">

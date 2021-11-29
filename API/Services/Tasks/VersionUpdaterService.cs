@@ -86,10 +86,6 @@ namespace API.Services.Tasks
             return CreateDto(update);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
         public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
         {
             var updates = await GetGithubReleases();
@@ -140,13 +136,7 @@ namespace API.Services.Tasks
 
         private async Task SendEvent(UpdateNotificationDto update, IReadOnlyList<string> admins)
         {
-            var connections = new List<string>();
-            foreach (var admin in admins)
-            {
-                connections.AddRange(await _tracker.GetConnectionsForUser(admin));
-            }
-
-            await _messageHub.Clients.Users(admins).SendAsync(SignalREvents.UpdateVersion, MessageFactory.UpdateVersionEvent(update));
+            await _messageHub.Clients.Users(admins).SendAsync(SignalREvents.UpdateAvailable, MessageFactory.UpdateVersionEvent(update));
         }
 
 

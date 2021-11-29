@@ -23,6 +23,7 @@ export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
 export type ReadingListActionCallback = (readingList: ReadingList) => void;
 export type VoidActionCallback = () => void;
+export type BooleanActionCallback = (result: boolean) => void;
 
 /**
  * Responsible for executing actions
@@ -138,6 +139,9 @@ export class ActionService implements OnDestroy {
    */
   async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
     if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(series);
+      }
       return;
     }
 
@@ -480,6 +484,22 @@ export class ActionService implements OnDestroy {
 
       if (callback) {
         callback();
+      }
+    });
+  }
+
+  async deleteSeries(series: Series, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.seriesService.delete(series.id).subscribe((res: boolean) => {
+      if (callback) {
+        this.toastr.success('Series deleted');
+        callback(res);
       }
     });
   }

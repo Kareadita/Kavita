@@ -11,9 +11,11 @@ using API.Extensions;
 using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
@@ -25,16 +27,19 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly ICacheService _cacheService;
         private readonly IDownloadService _downloadService;
+        private readonly IHubContext<MessageHub> _messageHub;
         private readonly NumericComparer _numericComparer;
         private const string DefaultContentType = "application/octet-stream";
 
-        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService, ICacheService cacheService, IDownloadService downloadService)
+        public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
+            ICacheService cacheService, IDownloadService downloadService, IHubContext<MessageHub> messageHub)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
             _cacheService = cacheService;
             _downloadService = downloadService;
+            _messageHub = messageHub;
             _numericComparer = new NumericComparer();
         }
 
@@ -67,13 +72,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
-                if (files.Count == 1)
-                {
-                    return await GetFirstFileDownload(files);
-                }
-                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                    $"download_{User.GetUsername()}_v{volumeId}");
-                return File(fileBytes, DefaultContentType, $"{series.Name} - Volume {volume.Number}.zip");
+                return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series.Name} - Volume {volume.Number}.zip");
             }
             catch (KavitaException ex)
             {
@@ -96,18 +95,27 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
             try
             {
-                if (files.Count == 1)
-                {
-                    return await GetFirstFileDownload(files);
-                }
-                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                    $"download_{User.GetUsername()}_c{chapterId}");
-                return File(fileBytes, DefaultContentType, $"{series.Name} - Chapter {chapter.Number}.zip");
+                return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series.Name} - Chapter {chapter.Number}.zip");
             }
             catch (KavitaException ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
+        {
+            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(downloadName), 0F));
+            if (files.Count == 1)
+            {
+                return await GetFirstFileDownload(files);
+            }
+            var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
+                tempFolder);
+            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(downloadName), 1F));
+            return File(fileBytes, DefaultContentType, downloadName);
         }
 
         [HttpGet("series")]
@@ -117,13 +125,7 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             try
             {
-                if (files.Count == 1)
-                {
-                    return await GetFirstFileDownload(files);
-                }
-                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                    $"download_{User.GetUsername()}_s{seriesId}");
-                return File(fileBytes, DefaultContentType, $"{series.Name}.zip");
+                return await DownloadFiles(files, $"download_{User.GetUsername()}_s{seriesId}", $"{series.Name}.zip");
             }
             catch (KavitaException ex)
             {
@@ -187,5 +189,6 @@ namespace API.Controllers
             DirectoryService.ClearAndDeleteDirectory(fullExtractPath);
             return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
         }
+
     }
 }
