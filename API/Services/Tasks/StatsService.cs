@@ -17,15 +17,15 @@ namespace API.Services.Tasks
     {
         private readonly ILogger<StatsService> _logger;
         private readonly IUnitOfWork _unitOfWork;
-
-#pragma warning disable S1075
-        private const string ApiUrl = "https://stats2.kavitareader.com";
-#pragma warning restore S1075
+        private const string ApiUrl = "https://stats.kavitareader.com";
 
         public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+
+            FlurlHttp.ConfigureClient(ApiUrl, cli =>
+                cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
         }
 
         /// <summary>
@@ -65,6 +65,7 @@ namespace API.Services.Tasks
                     .WithHeader("User-Agent", "Kavita")
                     .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                     .WithHeader("x-kavita-version", BuildInfo.Version)
+                    .WithHeader("Content-Type", "application/json")
                     .WithTimeout(TimeSpan.FromSeconds(30))
                     .PostJsonAsync(data);
 

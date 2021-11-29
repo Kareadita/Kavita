@@ -1,6 +1,6 @@
 <ng-container>
     
-    <button type="button" class="btn btn-icon {{progressEventsSource.getValue().length > 0 ? 'colored' : ''}}" 
+    <button type="button" class="btn btn-icon {{(progressEventsSource.getValue().length > 0 || updateAvailable) ? 'colored' : ''}}" 
         [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
         <i aria-hidden="true" class="fa fa-wave-square"></i>
     </button>
@@ -14,9 +14,12 @@
                     <span class="sr-only">Scan for {{event.libraryName}} in progress</span>
                 </div>
                 {{prettyPrintProgress(event.progress)}}%
-                {{prettyPrintEvent(event.eventType)}} {{event.libraryName}}
+                {{prettyPrintEvent(event.eventType, event)}} {{event.libraryName}}
             </li>
-            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0">Not much going on here</li>
+            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable">Not much going on here</li>
+            <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">
+                <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
+            </li>
         </ul>
     </ng-template>
 </ng-container>

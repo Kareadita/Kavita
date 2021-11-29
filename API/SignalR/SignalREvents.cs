@@ -2,7 +2,7 @@
 {
     public static class SignalREvents
     {
-        public const string UpdateVersion = "UpdateVersion";
+        public const string UpdateAvailable = "UpdateAvailable";
         public const string ScanSeries = "ScanSeries";
         /// <summary>
         /// Event during Refresh Metadata for cover image change
@@ -44,5 +44,10 @@
         /// Event sent out during cleaning up temp and cache folders
         /// </summary>
         public const string CleanupProgress = "CleanupProgress";
+        /// <summary>
+        /// Event sent out during downloading of files
+        /// </summary>
+        public const string DownloadProgress = "DownloadProgress";
+
     }
 }

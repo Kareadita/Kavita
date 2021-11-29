@@ -1,4 +1,4 @@
-@import "../../theme/colors";
+@use "../../theme/colors";
 
 .small-spinner {
     width: 1rem;
@@ -18,6 +18,15 @@
 }
 
 .colored {
-    background-color: $primary-color;
+    background-color: colors.$primary-color;
     border-radius: 60px;
+}
+
+.update-available {
+    cursor: pointer;
+    
+    i.fa {
+        color: colors.$primary-color !important;
+    }
+    color: colors.$primary-color;
 }

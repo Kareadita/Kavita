@@ -118,7 +118,7 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateVersion,
+                Name = SignalREvents.UpdateAvailable,
                 Body = update
             };
         }
@@ -127,7 +127,7 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateVersion,
+                Name = SignalREvents.UpdateAvailable,
                 Body = new
                 {
                     TagId = tagId,
@@ -144,6 +144,20 @@ namespace API.SignalR
                 Body = new
                 {
                     LibraryId = libraryId,
+                }
+            };
+        }
+
+        public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.DownloadProgress,
+                Body = new
+                {
+                    UserName = username,
+                    DownloadName = downloadName,
+                    Progress = progress
                 }
             };
         }

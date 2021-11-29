@@ -302,17 +302,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
   async deleteSeries(series: Series) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+    this.actionService.deleteSeries(series, (result: boolean) => {
       this.actionInProgress = false;
-      return;
-    }
-
-    this.seriesService.delete(series.id).subscribe((res: boolean) => {
-      if (res) {
-        this.toastr.success('Series deleted');
+      if (result) {
         this.router.navigate(['library', this.libraryId]);
       }
-      this.actionInProgress = false;
     });
   }
 

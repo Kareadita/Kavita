@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { RegisterMemberComponent } from '../register-member/register-member.component';
@@ -37,6 +37,7 @@ import { SentenceCasePipe } from './sentence-case.pipe';
     RouterModule,
     ReactiveFormsModule,
     NgbCollapseModule,
+    NgbTooltipModule, // RegisterMemberComponent
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
