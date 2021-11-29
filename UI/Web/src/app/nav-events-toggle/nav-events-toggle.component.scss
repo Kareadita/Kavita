@@ -21,3 +21,12 @@
     background-color: colors.$primary-color;
     border-radius: 60px;
 }
+
+.update-available {
+    cursor: pointer;
+    
+    i.fa {
+        color: colors.$primary-color !important;
+    }
+    color: colors.$primary-color;
+}

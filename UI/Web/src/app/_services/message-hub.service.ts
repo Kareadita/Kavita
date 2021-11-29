@@ -39,7 +39,6 @@ export interface Message<T> {
 export class MessageHubService {
   hubUrl = environment.hubUrl;
   private hubConnection!: HubConnection;
-  private updateNotificationModalRef: NgbModalRef | null = null;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
   public messages$ = this.messagesSource.asObservable();
@@ -54,7 +53,7 @@ export class MessageHubService {
 
   isAdmin: boolean = false;
 
-  constructor(private modalService: NgbModal, private toastr: ToastrService, private router: Router) {
+  constructor(private toastr: ToastrService, private router: Router) {
     
   }
 
@@ -169,16 +168,6 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.UpdateAvailable,
         payload: resp.body
-      });
-      // Ensure only 1 instance of UpdateNotificationModal can be open at once
-      if (this.updateNotificationModalRef != null) { return; }
-      this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
-      this.updateNotificationModalRef.componentInstance.updateData = resp.body;
-      this.updateNotificationModalRef.closed.subscribe(() => {
-        this.updateNotificationModalRef = null;
-      });
-      this.updateNotificationModalRef.dismissed.subscribe(() => {
-        this.updateNotificationModalRef = null;
       });
     });
   }

@@ -2,7 +2,7 @@
 {
     public static class SignalREvents
     {
-        public const string UpdateVersion = "UpdateVersion";
+        public const string UpdateAvailable = "UpdateAvailable";
         public const string ScanSeries = "ScanSeries";
         /// <summary>
         /// Event during Refresh Metadata for cover image change

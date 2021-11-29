@@ -1,6 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { User } from '../_models/user';
 import { LibraryService } from '../_services/library.service';
@@ -35,7 +37,11 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
   progressEvents$ = this.progressEventsSource.asObservable();
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService) { }
+  updateAvailable: boolean = false;
+  updateBody: any;
+  private updateNotificationModalRef: NgbModalRef | null = null;
+
+  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal) { }
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -47,6 +53,9 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (acceptedEvents.includes(event.event)) {
         this.processProgressEvent(event, event.event);
+      } else if (event.event === EVENTS.UpdateAvailable) {
+        this.updateAvailable = true;
+        this.updateBody = event.payload;
       }
     });
   }
@@ -72,6 +81,18 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
       
       this.progressEventsSource.next(data);
+    });
+  }
+
+  handleUpdateAvailableClick() {
+    if (this.updateNotificationModalRef != null) { return; }
+    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+    this.updateNotificationModalRef.componentInstance.updateData = this.updateBody;
+    this.updateNotificationModalRef.closed.subscribe(() => {
+      this.updateNotificationModalRef = null;
+    });
+    this.updateNotificationModalRef.dismissed.subscribe(() => {
+      this.updateNotificationModalRef = null;
     });
   }
 

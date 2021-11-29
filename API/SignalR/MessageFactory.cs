@@ -118,7 +118,7 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateVersion,
+                Name = SignalREvents.UpdateAvailable,
                 Body = update
             };
         }
@@ -127,7 +127,7 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateVersion,
+                Name = SignalREvents.UpdateAvailable,
                 Body = new
                 {
                     TagId = tagId,
