@@ -22,6 +22,7 @@ import { BulkOperationsComponent } from './bulk-operations/bulk-operations.compo
 import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
+import { FileInfoComponent } from './file-info/file-info.component';
 
 
 
@@ -40,7 +41,8 @@ import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapte
     CardDetailsModalComponent,
     BulkOperationsComponent,
     BulkAddToCollectionComponent,
-    ChapterMetadataDetailComponent
+    ChapterMetadataDetailComponent,
+    FileInfoComponent
   ],
   imports: [
     CommonModule,

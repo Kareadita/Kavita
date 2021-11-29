@@ -9,7 +9,12 @@
         <span aria-hidden="true">&times;</span>
         </button>
     </div>
-    <div class="modal-body scrollable-modal">
+    <div class="modal-body scrollable-modal" *ngIf="utilityService.isChapter(data)">
+        <ng-container *ngIf="utilityService.isChapter(data)">
+            <app-chapter-metadata-detail [chapter]="data"></app-chapter-metadata-detail>
+        </ng-container>
+    </div>
+    <div class="modal-body scrollable-modal" *ngIf="utilityService.isVolume(data)">
         <h4 *ngIf="utilityService.isVolume(data)">Information</h4>
 
         <ng-container *ngIf="utilityService.isVolume(data) || utilityService.isChapter(data)">
@@ -29,9 +34,6 @@
                     Pages: {{data.pages}}
                 </div>
             </div>
-            <ng-container *ngIf="utilityService.isChapter(data)">
-                <app-chapter-metadata-detail [chapter]="data"></app-chapter-metadata-detail>
-            </ng-container>
         </ng-container>
 
         <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
