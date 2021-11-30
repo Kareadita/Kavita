@@ -75,7 +75,7 @@
                 </div>
                 <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.writers && seriesMetadata.writers.length > 0">
                     <div class="col-md-4">
-                        <h5>Writers</h5>
+                        <h5>Authors</h5>
                     </div>
                     <div class="col-md-8">
                         <app-person-badge *ngFor="let person of seriesMetadata.writers" [person]="person"></app-person-badge>
@@ -146,7 +146,7 @@
                                 [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                         </div>
                         <div *ngFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
-                            <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="utilityService.formatChapterName(libraryType, true, true) + chapter.range" (click)="openChapter(chapter)"
+                            <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="formatChapterTitle(chapter)" (click)="openChapter(chapter)"
                             [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
                         </div>

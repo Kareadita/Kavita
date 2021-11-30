@@ -12,6 +12,6 @@ namespace API.Entities
         public string NormalizedName { get; set; }
         public bool ExternalTag { get; set; }
 
-        public ICollection<Series> SeriesMetadatas { get; set; }
+        public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
     }
 }

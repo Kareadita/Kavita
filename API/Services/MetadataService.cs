@@ -229,6 +229,8 @@ namespace API.Services
         {
             foreach (var name in names)
             {
+                if (string.IsNullOrEmpty(name.Trim())) continue;
+
                 var normalizedName = Parser.Parser.Normalize(name);
                 var genre = allPeople.FirstOrDefault(p =>
                     p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
@@ -354,12 +356,89 @@ namespace API.Services
                 .SelectMany(volume => volume.Chapters)
                 .SelectMany(c => c.Files)
                 .Select(GetComicInfo)
-                .Where(ci => ci != null);
+                .Where(ci => ci != null)
+                .ToList();
 
-            var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct();
+            var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct().ToList();
+            var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
+
+
+            RemovePeopleNotOnComicInfo(series.Metadata.People,
+                people, person => series.Metadata.People.Remove(person));
 
             UpdateGenre(allGenres, genres, false, genre => AddGenreIfNotOnMetadata(series.Metadata.Genres, genre));
+            var existingGenresOnSeries = series.Metadata.Genres.ToList();
+            RemoveGenresNotOnComicInfo(existingGenresOnSeries, genres, false,
+                genre => series.Metadata.Genres.Remove(genre));
+
         }
+
+        private static void RemoveGenresNotOnComicInfo(ICollection<Genre> seriesGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
+        {
+            var normalizedNames = names.Select(s => Parser.Parser.Normalize(s.Trim()))
+                .Where(s => !string.IsNullOrEmpty(s)).ToList();
+            var localNamesNotInComicInfos = seriesGenres.Where(g =>
+                !normalizedNames.Contains(g.NormalizedName) && g.ExternalTag == isExternal);
+
+            foreach (var nonExisting in localNamesNotInComicInfos)
+            {
+                // TODO: Maybe I need to do a cleanup here
+                action(nonExisting);
+            }
+
+            // foreach (var name in names)
+            // {
+            //     if (string.IsNullOrEmpty(name.Trim())) continue;
+            //
+            //     var normalizedName = Parser.Parser.Normalize(name);
+            //     var genre = allPeople.FirstOrDefault(p =>
+            //         p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
+            //     if (genre == null)
+            //     {
+            //         genre = DbFactory.Genre(name, false);
+            //         allPeople.Add(genre);
+            //     }
+            //
+            //     action(genre);
+            // }
+        }
+
+        /// <summary>
+        /// This only needs to care about what's on the chapters because at this point, we've removed everything that isn't in a comic info
+        /// </summary>
+        /// <param name="seriesGenres"></param>
+        /// <param name="peopleOnChapters"></param>
+        /// <param name="action"></param>
+        private static void RemovePeopleNotOnComicInfo(ICollection<Person> seriesGenres, ICollection<Person> peopleOnChapters, Action<Person> action)
+        {
+            //var normalizedNames = names.Select(s => Parser.Parser.Normalize(s.Trim()))
+            //    .Where(s => !string.IsNullOrEmpty(s)).ToList();
+            var localNamesNotInComicInfos = seriesGenres.Where(g =>
+                !peopleOnChapters.Contains(g));
+
+            foreach (var nonExisting in localNamesNotInComicInfos)
+            {
+                // TODO: Maybe I need to do a cleanup here
+                action(nonExisting);
+            }
+
+            // foreach (var name in names)
+            // {
+            //     if (string.IsNullOrEmpty(name.Trim())) continue;
+            //
+            //     var normalizedName = Parser.Parser.Normalize(name);
+            //     var genre = allPeople.FirstOrDefault(p =>
+            //         p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
+            //     if (genre == null)
+            //     {
+            //         genre = DbFactory.Genre(name, false);
+            //         allPeople.Add(genre);
+            //     }
+            //
+            //     action(genre);
+            // }
+        }
+
 
         private static void AddGenreIfNotOnMetadata(ICollection<Genre> metadataGenres, Genre genre)
         {

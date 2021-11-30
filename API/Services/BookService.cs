@@ -201,11 +201,15 @@ namespace API.Services
 
                 var info =  new ComicInfo()
                 {
+                    // TODO: Summary is in html, we need to turn it into string
                     Summary = epubBook.Schema.Package.Metadata.Description,
-                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators),
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.SelectMany(c => c.Creator)),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                    Title = epubBook.Title,
+                    Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim()))
+
                 };
                 // Parse tags not exposed via Library
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)

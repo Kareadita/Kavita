@@ -572,4 +572,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         })).subscribe(() => {/* No Operation */});;
     });
   }
+
+  formatChapterTitle(chapter: Chapter) {
+    if (this.libraryType == LibraryType.Book && isNaN(parseFloat(chapter.range)) && chapter.titleName != '') {
+      return chapter.titleName;
+    }
+    return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
+  }
 }
