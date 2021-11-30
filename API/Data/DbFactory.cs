@@ -4,6 +4,7 @@ using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Parser;
 using API.Services.Tasks;
 
@@ -79,5 +80,26 @@ namespace API.Data
                 Promoted = promoted
             };
         }
+
+        public static Genre Genre(string name, bool external)
+        {
+            return new Genre()
+            {
+                Name = name.Trim().SentenceCase(),
+                NormalizedName = Parser.Parser.Normalize(name),
+                ExternalTag = external
+            };
+        }
+
+        public static Person Person(string name, PersonRole role)
+        {
+            return new Person()
+            {
+                Name = name.Trim(),
+                NormalizedName = Parser.Parser.Normalize(name),
+                Role = role
+            };
+        }
+
     }
 }

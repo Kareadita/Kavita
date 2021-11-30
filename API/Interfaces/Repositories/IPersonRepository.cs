@@ -10,8 +10,6 @@ namespace API.Interfaces.Repositories
         void Remove(Person person);
         // TODO: Put a filter here
         Task<Person> FindByNameAsync(string name);
-
-        //Task<IEnumerable<Person>> GetAllPeopleForSeriesId(int seriesId);
         Task<IList<Person>> GetAllPeople();
     }
 }

@@ -26,7 +26,7 @@ namespace API.Data.Repositories
 
         public void Remove(Person person)
         {
-            throw new System.NotImplementedException();
+            _context.Person.Remove(person);
         }
 
         public async Task<Person> FindByNameAsync(string name)

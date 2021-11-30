@@ -385,6 +385,7 @@ namespace API.Data.Repositories
         {
             var metadataDto = await _context.SeriesMetadata
                 .Where(metadata => metadata.SeriesId == seriesId)
+                .Include(m => m.Genres)
                 .AsNoTracking()
                 .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();

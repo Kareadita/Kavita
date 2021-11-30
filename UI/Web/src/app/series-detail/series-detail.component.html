@@ -60,7 +60,7 @@
                         <h5>Genres</h5>
                     </div>
                     <div class="col-md-8">
-                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres" [selectionMode]="TagBadgeCursor.Clickable">{{genre}}</app-tag-badge>
+                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres" [selectionMode]="TagBadgeCursor.Clickable">{{genre.name}}</app-tag-badge>
                     </div>
                 </div>
                 <div class="row no-gutters mt-1" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">

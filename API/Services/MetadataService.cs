@@ -225,6 +225,23 @@ namespace API.Services
             return filteredList;
         }
 
+        private static void UpdateGenre(ICollection<Genre> allPeople, IEnumerable<string> names, bool isExternal, Action<Genre> action)
+        {
+            foreach (var name in names)
+            {
+                var normalizedName = Parser.Parser.Normalize(name);
+                var genre = allPeople.FirstOrDefault(p =>
+                    p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
+                if (genre == null)
+                {
+                    genre = DbFactory.Genre(name, false);
+                    allPeople.Add(genre);
+                }
+
+                action(genre);
+            }
+        }
+
         private static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
         {
             var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
@@ -236,16 +253,9 @@ namespace API.Services
                     p.NormalizedName.Equals(normalizedName));
                 if (person == null)
                 {
-                    person = new Person()
-                    {
-                        Name = name,
-                        NormalizedName = normalizedName,
-                        Role = role
-                    };
+                    person = DbFactory.Person(name, role);
                     allPeople.Add(person);
                 }
-
-
 
                 action(person);
             }
@@ -303,7 +313,7 @@ namespace API.Services
             series.CoverImage = firstCover?.CoverImage ?? coverImage;
         }
 
-        private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, bool forceUpdate)
+        private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
         {
             if (!string.IsNullOrEmpty(series.Metadata.Summary) && !forceUpdate) return;
 
@@ -339,6 +349,26 @@ namespace API.Services
                 UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
             }
+
+            var comicInfos = series.Volumes
+                .SelectMany(volume => volume.Chapters)
+                .SelectMany(c => c.Files)
+                .Select(GetComicInfo)
+                .Where(ci => ci != null);
+
+            var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct();
+
+            UpdateGenre(allGenres, genres, false, genre => AddGenreIfNotOnMetadata(series.Metadata.Genres, genre));
+        }
+
+        private static void AddGenreIfNotOnMetadata(ICollection<Genre> metadataGenres, Genre genre)
+        {
+            var existingGenre = metadataGenres.FirstOrDefault(p =>
+                p.NormalizedName == Parser.Parser.Normalize(genre.Name) && p.ExternalTag == genre.ExternalTag);
+            if (existingGenre == null)
+            {
+                metadataGenres.Add(genre);
+            }
         }
 
         private static void AddPersonIfNotOnMetadata(ICollection<Person> metadataPeople, Person person)
@@ -353,7 +383,7 @@ namespace API.Services
 
         private ComicInfo GetComicInfo(MangaFile firstFile)
         {
-            if (firstFile.Format is MangaFormat.Archive or MangaFormat.Epub)
+            if (firstFile?.Format is MangaFormat.Archive or MangaFormat.Epub)
             {
                 return Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
             }
@@ -367,7 +397,7 @@ namespace API.Services
         /// <remarks>This cannot have any Async code within. It is used within Parallel.ForEach</remarks>
         /// <param name="series"></param>
         /// <param name="forceUpdate"></param>
-        private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, IList<Person> allPeople, bool forceUpdate)
+        private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
         {
             _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
             try
@@ -378,13 +408,6 @@ namespace API.Services
                     var chapterUpdated = false;
                     foreach (var chapter in volume.Chapters)
                     {
-                        // if (chapter.ChapterMetadata == null)
-                        // {
-                        //     var metadata = DbFactory.ChapterMetadata(chapter.Id);
-                        //     _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                        //     chapter.ChapterMetadata ??= metadata;
-                        // }
-
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
                         UpdateChapterMetadata(chapter, allPeople, forceUpdate || chapterUpdated);
                     }
@@ -393,7 +416,7 @@ namespace API.Services
                 }
 
                 UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
-                UpdateSeriesMetadata(series, allPeople, forceUpdate);
+                UpdateSeriesMetadata(series, allPeople, allGenres, forceUpdate);
             }
             catch (Exception ex)
             {
@@ -439,6 +462,7 @@ namespace API.Services
 
                 var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
                 var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+                var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
 
 
                 var seriesIndex = 0;
@@ -446,7 +470,7 @@ namespace API.Services
                 {
                     try
                     {
-                        ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+                        ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
                     }
                     catch (Exception ex)
                     {
@@ -479,6 +503,7 @@ namespace API.Services
         }
 
 
+        // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
         /// <summary>
         /// Refreshes Metadata for a Series. Will always force updates.
         /// </summary>
@@ -499,7 +524,9 @@ namespace API.Services
 
             var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, forceUpdate);
+            var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
+
+            ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
 
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
                 MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));
