@@ -8,6 +8,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
+using API.Data.Scanner;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -323,14 +324,6 @@ namespace API.Services
 
         }
 
-
-
-
-
-
-
-
-
         private ComicInfo GetComicInfo(MangaFile firstFile)
         {
             if (firstFile?.Format is MangaFormat.Archive or MangaFormat.Epub)
@@ -452,14 +445,70 @@ namespace API.Services
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
         }
 
-
         // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
+        private async Task PerformScan(Library library, bool forceUpdate, Action<int, Chunk> action)
+        {
+            var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
+            var stopwatch = Stopwatch.StartNew();
+            var totalTime = 0L;
+            _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
+
+            for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
+            {
+                if (chunkInfo.TotalChunks == 0) continue;
+                totalTime += stopwatch.ElapsedMilliseconds;
+                stopwatch.Restart();
+
+                action(chunk, chunkInfo);
+
+                // _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+                //     chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
+                // var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
+                //     new UserParams()
+                //     {
+                //         PageNumber = chunk,
+                //         PageSize = chunkInfo.ChunkSize
+                //     });
+                // _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
+                //
+                // var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
+                // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+                // var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
+                //
+                //
+                // var seriesIndex = 0;
+                // foreach (var series in nonLibrarySeries)
+                // {
+                //     try
+                //     {
+                //         ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
+                //     }
+                //     catch (Exception ex)
+                //     {
+                //         _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                //     }
+                //     var index = chunk * seriesIndex;
+                //     var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
+                //
+                //     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
+                //         MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
+                //     seriesIndex++;
+                // }
+
+                await _unitOfWork.CommitAsync();
+            }
+        }
+
+
+
         /// <summary>
         /// Refreshes Metadata for a Series. Will always force updates.
         /// </summary>
         /// <param name="libraryId"></param>
         /// <param name="seriesId"></param>
-        public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false)
+        public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
         {
             var sw = Stopwatch.StartNew();
             var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);

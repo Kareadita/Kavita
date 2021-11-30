@@ -7,7 +7,7 @@ using Xunit;
 
 namespace API.Tests.Helpers;
 
-public class PeopleHelperTests
+public class PersonHelperTests
 {
     [Fact]
     public void UpdatePeople_ShouldAddNewPeople()

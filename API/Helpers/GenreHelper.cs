@@ -54,14 +54,14 @@ public static class GenreHelper
     }
 
     /// <summary>
-    /// Adds the genre to the list if it's not already in there
+    /// Adds the genre to the list if it's not already in there. This will ignore the ExternalTag.
     /// </summary>
     /// <param name="metadataGenres"></param>
     /// <param name="genre"></param>
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedName == Parser.Parser.Normalize(genre.Name) && p.ExternalTag == genre.ExternalTag);
+            p.NormalizedName == Parser.Parser.Normalize(genre.Name));
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);
