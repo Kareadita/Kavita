@@ -41,4 +41,15 @@ public static class CacheHelper
     {
         return !string.IsNullOrEmpty(coverImage) && fileExists;
     }
+
+    /// <summary>
+    /// Determines if a given coverImage path exists
+    /// </summary>
+    /// <param name="path"></param>
+    /// <returns></returns>
+    public static bool CoverImageExists(string path)
+    {
+        return File.Exists(path);
+        //return !string.IsNullOrEmpty(path) && File.Exists(path);
+    }
 }

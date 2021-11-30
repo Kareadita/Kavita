@@ -8,7 +8,13 @@ namespace API.Helpers;
 
 public static class GenreHelper
 {
-
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="allPeople"></param>
+    /// <param name="names"></param>
+    /// <param name="isExternal"></param>
+    /// <param name="action"></param>
     public static void UpdateGenre(ICollection<Genre> allPeople, IEnumerable<string> names, bool isExternal, Action<Genre> action)
     {
         foreach (var name in names)
