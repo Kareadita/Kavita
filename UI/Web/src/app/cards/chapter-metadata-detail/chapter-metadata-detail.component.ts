@@ -15,7 +15,7 @@ export class ChapterMetadataDetailComponent implements OnInit {
 
   @Input() chapter!: Chapter;
   @Input() libraryType: LibraryType = LibraryType.Manga;
-  metadata!: ChapterMetadata;
+  //metadata!: ChapterMetadata;
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -24,10 +24,10 @@ export class ChapterMetadataDetailComponent implements OnInit {
   constructor(private metadataService: MetadataService, public utilityService: UtilityService) { }
 
   ngOnInit(): void {
-    this.metadataService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-      console.log('Chapter ', this.chapter.number, ' metadata: ', metadata);
-      this.metadata = metadata;
-    })
+    // this.metadataService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
+    //   console.log('Chapter ', this.chapter.number, ' metadata: ', metadata);
+    //   this.metadata = metadata;
+    // })
   }
 
   performAction(action: ActionItem<Chapter>, chapter: Chapter) {
@@ -37,16 +37,16 @@ export class ChapterMetadataDetailComponent implements OnInit {
   }
 
   readChapter(chapter: Chapter) {
-    if (chapter.pages === 0) {
-      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
-      return;
-    }
+    // if (chapter.pages === 0) {
+    //   this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+    //   return;
+    // }
 
-    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id]);
-    } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
-    }
+    // if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
+    //   this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id]);
+    // } else {
+    //   this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
+    // }
   }
 
 }

@@ -19,6 +19,6 @@ namespace API.Entities
 
         // Relationships
         public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
-        public ICollection<ChapterMetadata> ChapterMetadatas { get; set; }
+        public ICollection<Chapter> ChapterMetadatas { get; set; }
     }
 }

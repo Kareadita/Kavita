@@ -4,7 +4,6 @@ using API.Interfaces;
 using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
-using API.Services.Tasks.Metadata;
 using API.SignalR.Presence;
 using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
@@ -38,7 +37,6 @@ namespace API.Extensions
             services.AddScoped<IDownloadService, DownloadService>();
             services.AddScoped<IReaderService, ReaderService>();
             services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<ILocalMetadataService, LocalMetadataService>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 

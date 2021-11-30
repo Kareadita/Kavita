@@ -341,7 +341,7 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x =>
+                        var entry = archive.Entries.FirstOrDefault(x =>
                             !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
                             && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
                             && !Path.GetFileNameWithoutExtension(x.Name)

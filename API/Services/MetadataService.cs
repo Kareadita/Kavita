@@ -133,7 +133,7 @@ namespace API.Services
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
             if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-            UpdateChapterFromComicInfo(chapter.ChapterMetadata, allPeople, firstFile);
+            UpdateChapterFromComicInfo(chapter, allPeople, firstFile);
         }
 
         private static bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile)
@@ -141,70 +141,70 @@ namespace API.Services
             return firstFile == null || (!forceUpdate && !(!firstFile.HasFileBeenModifiedSince(chapter.Created) || firstFile.HasFileBeenModified()));
         }
 
-        private void UpdateChapterFromComicInfo(ChapterMetadata chapterMetadata, ICollection<Person> allPeople, MangaFile firstFile)
+        private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
         {
             var comicInfo = GetComicInfo(firstFile);
             if (comicInfo == null) return;
 
             if (!string.IsNullOrEmpty(comicInfo.Title))
             {
-                chapterMetadata.Title = comicInfo.Title;
+                chapter.TitleName = comicInfo.Title;
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Colorist))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Colorist.Split(","), PersonRole.Colorist);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Colorist.Split(","), PersonRole.Colorist);
                 UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Writer))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Writer.Split(","), PersonRole.Writer);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Writer.Split(","), PersonRole.Writer);
                 UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Editor))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Editor.Split(","), PersonRole.Editor);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Editor.Split(","), PersonRole.Editor);
                 UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Inker))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Inker.Split(","), PersonRole.Inker);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Inker.Split(","), PersonRole.Inker);
                 UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Letterer))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Letterer.Split(","), PersonRole.Letterer);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Letterer.Split(","), PersonRole.Letterer);
                 UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Penciller))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Penciller.Split(","), PersonRole.Penciller);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Penciller.Split(","), PersonRole.Penciller);
                 UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist);
+                chapter.People = RemovePeople(chapter.People, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist);
                 UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Publisher))
             {
-                chapterMetadata.People = RemovePeople(chapterMetadata.People, comicInfo.Publisher.Split(","), PersonRole.Publisher);
+                chapter.People = RemovePeople(chapter.People, comicInfo.Publisher.Split(","), PersonRole.Publisher);
                 UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
-                    person => AddPersonIfNotOnMetadata(chapterMetadata.People, person));
+                    person => AddPersonIfNotOnMetadata(chapter.People, person));
             }
         }
 
@@ -330,13 +330,13 @@ namespace API.Services
 
             foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
             {
-                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
 
-                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
+                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
 
-                UpdatePeople(allPeople, chapter.ChapterMetadata.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
+                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
                     person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
             }
         }
@@ -378,12 +378,12 @@ namespace API.Services
                     var chapterUpdated = false;
                     foreach (var chapter in volume.Chapters)
                     {
-                        if (chapter.ChapterMetadata == null)
-                        {
-                            var metadata = DbFactory.ChapterMetadata(chapter.Id);
-                            _unitOfWork.ChapterMetadataRepository.Attach(metadata);
-                            chapter.ChapterMetadata ??= metadata;
-                        }
+                        // if (chapter.ChapterMetadata == null)
+                        // {
+                        //     var metadata = DbFactory.ChapterMetadata(chapter.Id);
+                        //     _unitOfWork.ChapterMetadataRepository.Attach(metadata);
+                        //     chapter.ChapterMetadata ??= metadata;
+                        // }
 
                         chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
                         UpdateChapterMetadata(chapter, allPeople, forceUpdate || chapterUpdated);

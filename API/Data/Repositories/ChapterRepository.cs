@@ -50,6 +50,7 @@ namespace API.Data.Repositories
                     VolumeNumber = volume.Number,
                     VolumeId = volume.Id,
                     chapter.IsSpecial,
+                    chapter.TitleName,
                     volume.SeriesId,
                     chapter.Pages,
                 })
@@ -61,6 +62,7 @@ namespace API.Data.Repositories
                     data.IsSpecial,
                     data.SeriesId,
                     data.Pages,
+                    data.TitleName,
                     SeriesFormat = series.Format,
                     SeriesName = series.Name,
                     series.LibraryId
@@ -76,19 +78,10 @@ namespace API.Data.Repositories
                     SeriesName = data.SeriesName,
                     LibraryId = data.LibraryId,
                     Pages = data.Pages,
+                    ChapterTitle = data.TitleName
                 })
                 .AsNoTracking()
                 .SingleOrDefaultAsync();
-
-            if (chapterInfo != null)
-            {
-                var chapterTitle = await _context.ChapterMetadata
-                    .Where(cm => cm.ChapterId == chapterId)
-                    .AsNoTracking()
-                    .Select(cm => cm.Title)
-                    .SingleOrDefaultAsync();
-                chapterInfo.ChapterTitle = chapterTitle ?? string.Empty;
-            }
 
             return chapterInfo;
         }

@@ -393,14 +393,5 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
         }
-
-        [HttpGet("chapter-metadata")]
-        public async Task<ActionResult<ChapterMetadataDto>> GetChapterMetadata(int chapterId)
-        {
-            // TODO: Implement RBS
-            return await _unitOfWork.ChapterMetadataRepository.GetMetadataDtoForChapter(chapterId);
-        }
-
-
     }
 }

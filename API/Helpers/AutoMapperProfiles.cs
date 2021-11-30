@@ -24,7 +24,31 @@ namespace API.Helpers
 
             CreateMap<MangaFile, MangaFileDto>();
 
-            CreateMap<Chapter, ChapterDto>();
+            CreateMap<Chapter, ChapterDto>()
+                .ForMember(dest => dest.Writers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
+                .ForMember(dest => dest.CoverArtist,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
+                .ForMember(dest => dest.Colorist,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))
+                .ForMember(dest => dest.Inker,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker)))
+                .ForMember(dest => dest.Letterer,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer)))
+                .ForMember(dest => dest.Penciller,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Penciller)))
+                .ForMember(dest => dest.Publisher,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)))
+                .ForMember(dest => dest.Editor,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
             CreateMap<Series, SeriesDto>();
 

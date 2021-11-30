@@ -34,7 +34,6 @@ namespace API.Data
         public IChapterRepository ChapterRepository => new ChapterRepository(_context, _mapper);
         public IReadingListRepository ReadingListRepository => new ReadingListRepository(_context, _mapper);
         public ISeriesMetadataRepository SeriesMetadataRepository => new SeriesMetadataRepository(_context);
-        public IChapterMetadataRepository ChapterMetadataRepository => new ChapterMetadataRepository(_context, _mapper);
         public IPersonRepository PersonRepository => new PersonRepository(_context, _mapper);
 
         /// <summary>

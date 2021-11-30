@@ -37,7 +37,6 @@ namespace API.Data
         public DbSet<AppUserBookmark> AppUserBookmark { get; set; }
         public DbSet<ReadingList> ReadingList { get; set; }
         public DbSet<ReadingListItem> ReadingListItem { get; set; }
-        public DbSet<ChapterMetadata> ChapterMetadata { get; set; }
         public DbSet<Person> Person { get; set; }
         public DbSet<Genre> Genre { get; set; }
 

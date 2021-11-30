@@ -1,8 +1,8 @@
-<ng-container *ngIf="metadata !== undefined">
-    <div class="container-fluid" *ngIf="metadata !== undefined">
+<ng-container *ngIf="chapter !== undefined">
+    <div class="container-fluid">
         <h4>{{chapter.range}}</h4>
-        Title: {{metadata.title || '-'}}
-        Year: {{metadata.year || '-'}}
+        Title: {{chapter.titleName || '-'}}
+        <!-- Year: {{metadata.year || '-'}} -->
         Arc Information
         
     
@@ -51,30 +51,30 @@
     
     
                 <ng-container>
-                    <div class="row no-gutters mt-1"  *ngIf="metadata.writers && metadata.writers.length > 0">
+                    <div class="row no-gutters mt-1"  *ngIf="chapter.writers && chapter.writers.length > 0">
                         <div class="col-md-4">
                             <h5>Writers</h5>
                         </div>
                         <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of metadata.writers" [person]="person"></app-person-badge>
+                            <app-person-badge *ngFor="let person of chapter.writers" [person]="person"></app-person-badge>
                         </div>
                     </div>
                 
-                    <div class="row no-gutters mt-1"  *ngIf="metadata.coverArtist && metadata.coverArtist.length > 0">
+                    <div class="row no-gutters mt-1"  *ngIf="chapter.coverArtist && chapter.coverArtist.length > 0">
                         <div class="col-md-4">
                             <h5>Artists</h5>
                         </div>
                         <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of metadata.coverArtist" [person]="person"></app-person-badge>
+                            <app-person-badge *ngFor="let person of chapter.coverArtist" [person]="person"></app-person-badge>
                         </div>
                     </div>
                 
-                    <div class="row no-gutters mt-1"  *ngIf="metadata.publishers && metadata.publishers.length > 0">
+                    <div class="row no-gutters mt-1"  *ngIf="chapter.publisher && chapter.publisher.length > 0">
                         <div class="col-md-4">
                             <h5>Publishers</h5>
                         </div>
                         <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of metadata.publishers" [person]="person"></app-person-badge>
+                            <app-person-badge *ngFor="let person of chapter.publisher" [person]="person"></app-person-badge>
                         </div>
                     </div>
                 </ng-container>
