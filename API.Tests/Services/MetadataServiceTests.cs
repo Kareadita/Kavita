@@ -32,14 +32,14 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = DateTime.Now
-            }, false, false));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)), false, false));
         }
 
         [Fact]
         public void ShouldUpdateCoverImage_OnFirstRunSeries()
         {
             // Represents first run
-            Assert.True(MetadataService.ShouldUpdateCoverImage(null,null, false, false));
+            Assert.True(MetadataService.ShouldUpdateCoverImage(null,null, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false));
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime.Subtract(TimeSpan.FromDays(1))
-            }, false, false));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false));
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-            }, false, true));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, true));
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-            }, true, false));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),true, false));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-            }, false, false));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false));
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime + TimeSpan.FromDays(1)
-            }, false, false));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false));
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = new FileInfo(Path.Join(_testDirectory, "file in folder.zip")).LastWriteTime
-            }, false, false, _testCoverImageDirectory));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false, _testCoverImageDirectory));
         }
 
         [Fact]
@@ -116,7 +116,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = DateTime.Now
-            }, false, false, _testCoverImageDirectory));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, false, _testCoverImageDirectory));
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace API.Tests.Services
             {
                 FilePath = Path.Join(_testDirectory, "file in folder.zip"),
                 LastModified = DateTime.Now
-            }, false, true, _testCoverImageDirectory));
+            }, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),false, true, _testCoverImageDirectory));
         }
     }
 }

@@ -203,7 +203,7 @@ namespace API.Services
                 {
                     // TODO: Summary is in html, we need to turn it into string
                     Summary = epubBook.Schema.Package.Metadata.Description,
-                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.SelectMany(c => c.Creator)),
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,

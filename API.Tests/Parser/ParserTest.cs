@@ -140,6 +140,14 @@ namespace API.Tests.Parser
         }
 
         [Theory]
+        [InlineData("Joe Smo", "Joe Smo")]
+        [InlineData("Smo, Joe", "Joe Smo")]
+        public void CleanAuthorTest(string author, string expected)
+        {
+            Assert.Equal(expected, CleanAuthor(expected));
+        }
+
+        [Theory]
         [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
         [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
         [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]

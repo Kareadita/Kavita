@@ -143,125 +143,79 @@ namespace API.Services
 
         private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
         {
-            var comicInfo = GetComicInfo(firstFile);
+            var comicInfo = GetComicInfo(firstFile); // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
             if (comicInfo == null) return;
 
             if (!string.IsNullOrEmpty(comicInfo.Title))
             {
-                chapter.TitleName = comicInfo.Title;
+                chapter.TitleName = comicInfo.Title.Trim();
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Colorist))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Colorist.Split(","), PersonRole.Colorist);
-                UpdatePeople(allPeople, comicInfo.Colorist.Split(","), PersonRole.Colorist,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Colorist.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Writer))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Writer.Split(","), PersonRole.Writer);
-                UpdatePeople(allPeople, comicInfo.Writer.Split(","), PersonRole.Writer,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Writer.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Editor))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Editor.Split(","), PersonRole.Editor);
-                UpdatePeople(allPeople, comicInfo.Editor.Split(","), PersonRole.Editor,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Editor.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Inker))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Inker.Split(","), PersonRole.Inker);
-                UpdatePeople(allPeople, comicInfo.Inker.Split(","), PersonRole.Inker,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Inker.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Letterer))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Letterer.Split(","), PersonRole.Letterer);
-                UpdatePeople(allPeople, comicInfo.Letterer.Split(","), PersonRole.Letterer,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Letterer.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Penciller))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Penciller.Split(","), PersonRole.Penciller);
-                UpdatePeople(allPeople, comicInfo.Penciller.Split(","), PersonRole.Penciller,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Penciller.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist);
-                UpdatePeople(allPeople, comicInfo.CoverArtist.Split(","), PersonRole.CoverArtist,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.CoverArtist.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
 
             if (!string.IsNullOrEmpty(comicInfo.Publisher))
             {
-                chapter.People = RemovePeople(chapter.People, comicInfo.Publisher.Split(","), PersonRole.Publisher);
-                UpdatePeople(allPeople, comicInfo.Publisher.Split(","), PersonRole.Publisher,
-                    person => AddPersonIfNotOnMetadata(chapter.People, person));
+                var people = comicInfo.Publisher.Split(",");
+                PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
+                PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
+                    person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
             }
         }
 
-        /// <summary>
-        /// Remove people on a list
-        /// </summary>
-        /// <remarks>Used to remove before we update/add new people</remarks>
-        /// <param name="chapterMetadataPeople">Existing people on Entity</param>
-        /// <param name="people">People from metadata</param>
-        /// <param name="role">Role to filter on</param>
-        private static ICollection<Person> RemovePeople(IEnumerable<Person> chapterMetadataPeople, IEnumerable<string> people, PersonRole role)
-        {
-            // Think about using a Intersection here
-            //return chapterMetadataPeople;
-            var normalizedPeople = people.Select(Parser.Parser.Normalize).ToList();
-            var filteredList =  chapterMetadataPeople
-                .Where(p => p.Role == role && normalizedPeople.Contains(p.NormalizedName)).ToList();
-            return filteredList;
-        }
-
-        private static void UpdateGenre(ICollection<Genre> allPeople, IEnumerable<string> names, bool isExternal, Action<Genre> action)
-        {
-            foreach (var name in names)
-            {
-                if (string.IsNullOrEmpty(name.Trim())) continue;
-
-                var normalizedName = Parser.Parser.Normalize(name);
-                var genre = allPeople.FirstOrDefault(p =>
-                    p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
-                if (genre == null)
-                {
-                    genre = DbFactory.Genre(name, false);
-                    allPeople.Add(genre);
-                }
-
-                action(genre);
-            }
-        }
-
-        private static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
-        {
-            var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
-
-            foreach (var name in names)
-            {
-                var normalizedName = Parser.Parser.Normalize(name);
-                var person = allPeopleTypeRole.FirstOrDefault(p =>
-                    p.NormalizedName.Equals(normalizedName));
-                if (person == null)
-                {
-                    person = DbFactory.Person(name, role);
-                    allPeople.Add(person);
-                }
-
-                action(person);
-            }
-        }
 
         /// <summary>
         /// Updates the cover image for a Volume
@@ -317,7 +271,7 @@ namespace API.Services
 
         private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
         {
-            if (!string.IsNullOrEmpty(series.Metadata.Summary) && !forceUpdate) return;
+            if (!forceUpdate) return;
 
             var isBook = series.Library.Type == LibraryType.Book;
             var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
@@ -330,26 +284,23 @@ namespace API.Services
             var comicInfo = GetComicInfo(firstFile);
             if (comicInfo == null) return;
 
-            // BUG: At a series level, I need all the People to be saved already so I can properly match
-
-
 
             // Summary Info
             if (!string.IsNullOrEmpty(comicInfo.Summary))
             {
-                series.Metadata.Summary = comicInfo.Summary;
+                series.Metadata.Summary = comicInfo.Summary; // NOTE: I can move this to the bottom as I have a comicInfo selection, save me an extra read
             }
 
             foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
             {
-                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
-                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+                PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                    person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
 
-                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
-                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+                PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
+                    person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
 
-                UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
-                    person => AddPersonIfNotOnMetadata(series.Metadata.People, person));
+                PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
+                    person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
             }
 
             var comicInfos = series.Volumes
@@ -363,102 +314,22 @@ namespace API.Services
             var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
 
 
-            RemovePeopleNotOnComicInfo(series.Metadata.People,
+            PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
                 people, person => series.Metadata.People.Remove(person));
 
-            UpdateGenre(allGenres, genres, false, genre => AddGenreIfNotOnMetadata(series.Metadata.Genres, genre));
-            var existingGenresOnSeries = series.Metadata.Genres.ToList();
-            RemoveGenresNotOnComicInfo(existingGenresOnSeries, genres, false,
+            GenreHelper.UpdateGenre(allGenres, genres, false, genre => GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
+            GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),
                 genre => series.Metadata.Genres.Remove(genre));
 
         }
 
-        private static void RemoveGenresNotOnComicInfo(ICollection<Genre> seriesGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
-        {
-            var normalizedNames = names.Select(s => Parser.Parser.Normalize(s.Trim()))
-                .Where(s => !string.IsNullOrEmpty(s)).ToList();
-            var localNamesNotInComicInfos = seriesGenres.Where(g =>
-                !normalizedNames.Contains(g.NormalizedName) && g.ExternalTag == isExternal);
-
-            foreach (var nonExisting in localNamesNotInComicInfos)
-            {
-                // TODO: Maybe I need to do a cleanup here
-                action(nonExisting);
-            }
-
-            // foreach (var name in names)
-            // {
-            //     if (string.IsNullOrEmpty(name.Trim())) continue;
-            //
-            //     var normalizedName = Parser.Parser.Normalize(name);
-            //     var genre = allPeople.FirstOrDefault(p =>
-            //         p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
-            //     if (genre == null)
-            //     {
-            //         genre = DbFactory.Genre(name, false);
-            //         allPeople.Add(genre);
-            //     }
-            //
-            //     action(genre);
-            // }
-        }
-
-        /// <summary>
-        /// This only needs to care about what's on the chapters because at this point, we've removed everything that isn't in a comic info
-        /// </summary>
-        /// <param name="seriesGenres"></param>
-        /// <param name="peopleOnChapters"></param>
-        /// <param name="action"></param>
-        private static void RemovePeopleNotOnComicInfo(ICollection<Person> seriesGenres, ICollection<Person> peopleOnChapters, Action<Person> action)
-        {
-            //var normalizedNames = names.Select(s => Parser.Parser.Normalize(s.Trim()))
-            //    .Where(s => !string.IsNullOrEmpty(s)).ToList();
-            var localNamesNotInComicInfos = seriesGenres.Where(g =>
-                !peopleOnChapters.Contains(g));
-
-            foreach (var nonExisting in localNamesNotInComicInfos)
-            {
-                // TODO: Maybe I need to do a cleanup here
-                action(nonExisting);
-            }
-
-            // foreach (var name in names)
-            // {
-            //     if (string.IsNullOrEmpty(name.Trim())) continue;
-            //
-            //     var normalizedName = Parser.Parser.Normalize(name);
-            //     var genre = allPeople.FirstOrDefault(p =>
-            //         p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
-            //     if (genre == null)
-            //     {
-            //         genre = DbFactory.Genre(name, false);
-            //         allPeople.Add(genre);
-            //     }
-            //
-            //     action(genre);
-            // }
-        }
 
 
-        private static void AddGenreIfNotOnMetadata(ICollection<Genre> metadataGenres, Genre genre)
-        {
-            var existingGenre = metadataGenres.FirstOrDefault(p =>
-                p.NormalizedName == Parser.Parser.Normalize(genre.Name) && p.ExternalTag == genre.ExternalTag);
-            if (existingGenre == null)
-            {
-                metadataGenres.Add(genre);
-            }
-        }
 
-        private static void AddPersonIfNotOnMetadata(ICollection<Person> metadataPeople, Person person)
-        {
-            var existingPerson = metadataPeople.SingleOrDefault(p =>
-                p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
-            if (existingPerson == null)
-            {
-                metadataPeople.Add(person);
-            }
-        }
+
+
+
+
 
         private ComicInfo GetComicInfo(MangaFile firstFile)
         {

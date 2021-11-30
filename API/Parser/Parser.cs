@@ -1067,5 +1067,16 @@ namespace API.Parser
         {
            return Path.GetExtension(filePath).ToLower() == ".pdf";
         }
+
+        /// <summary>
+        /// Cleans an author's name
+        /// </summary>
+        /// <remarks>If the author is Last, First, this will reverse</remarks>
+        /// <param name="author"></param>
+        /// <returns></returns>
+        public static string CleanAuthor(string author)
+        {
+            return string.Join(" ", author.Split(",").Reverse().Select(s => s.Trim()));
+        }
     }
 }
