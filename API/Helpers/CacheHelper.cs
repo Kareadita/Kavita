@@ -8,9 +8,9 @@ namespace API.Helpers;
 
 public interface ICacheHelper
 {
-    bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, DateTime chapterCreated,
+    bool ShouldUpdateCoverImage(string coverPath, MangaFile firstFile, DateTime chapterCreated,
         bool forceUpdate = false,
-        bool isCoverLocked = false, string coverImageDirectory = null);
+        bool isCoverLocked = false);
 
     bool CoverImageExists(string path);
 
@@ -31,28 +31,20 @@ public class CacheHelper : ICacheHelper
     /// Determines whether an entity should regenerate cover image.
     /// </summary>
     /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
-    /// <param name="coverImage">This should just be the filename, no path information</param>
+    /// <param name="coverPath">This should just be the filename, no path information</param>
     /// <param name="firstFile"></param>
     /// <param name="forceUpdate">If the user has told us to force the refresh</param>
     /// <param name="isCoverLocked">If cover has been locked by user. This will force false</param>
-    /// <param name="coverImageDirectory">Directory where cover images are. Defaults to <see cref="DirectoryService.CoverImageDirectory"/>. Only time different is for unit tests</param>
     /// <returns></returns>
-    public bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
-        bool isCoverLocked = false, string coverImageDirectory = null)
+    public bool ShouldUpdateCoverImage(string coverPath, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
+        bool isCoverLocked = false)
     {
         if (firstFile == null) return true;
-        if (string.IsNullOrEmpty(coverImageDirectory))
-        {
-            coverImageDirectory = DirectoryService.CoverImageDirectory;
-        }
 
-
-        var filePath = Path.Join(coverImageDirectory, coverImage); // TODO: See if we can refactor the coverImageDirectory out
-        var fileExists = _fileService.Exists(filePath);
+        var fileExists = !string.IsNullOrEmpty(coverPath) && _fileService.Exists(coverPath);
         if (isCoverLocked && fileExists) return false;
         if (forceUpdate) return true;
-        return (_fileService.HasFileBeenModifiedSince(filePath, chapterCreated)) || !fileExists; // TODO: we need to handle a case where file has been modified since last update
-        //return (firstFile.HasFileBeenModifiedSince(chapterCreated) || firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
+        return (_fileService.HasFileBeenModifiedSince(coverPath, chapterCreated)) || !fileExists;
     }
 
     /// <summary>

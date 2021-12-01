@@ -13,6 +13,7 @@ public class CacheHelperTests
 {
     private const string TestCoverImageDirectory = @"c:\";
     private const string TestCoverImageFile = "thumbnail.jpg";
+    private readonly string _testCoverPath = Path.Join(TestCoverImageDirectory, TestCoverImageFile);
     private const string TestCoverArchive = @"file in folder.zip";
     private readonly ICacheHelper _cacheHelper;
 
@@ -50,14 +51,13 @@ public class CacheHelperTests
     [Fact]
     public void ShouldUpdateCoverImage_OnFirstRun()
     {
-        // Represents first run
         var file = new MangaFile()
         {
             FilePath = TestCoverArchive,
             LastModified = DateTime.Now
         };
         Assert.True(_cacheHelper.ShouldUpdateCoverImage(null, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false, TestCoverImageDirectory));
+            false, false));
     }
 
     [Fact]
@@ -69,8 +69,8 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = DateTime.Now
         };
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false, TestCoverImageDirectory));
+        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+            false, false));
     }
 
     [Fact]
@@ -82,8 +82,8 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = DateTime.Now
         };
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true, TestCoverImageDirectory));
+        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+            false, true));
     }
 
     [Fact]
@@ -92,11 +92,11 @@ public class CacheHelperTests
         // Represents first run
         var file = new MangaFile()
         {
-            FilePath = TestCoverArchive, // TODO: This needs to somehow be touched
+            FilePath = TestCoverArchive,
             LastModified = DateTime.Now
         };
-        Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true, TestCoverImageDirectory));
+        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+            false, true));
     }
 
     [Fact]
@@ -121,8 +121,8 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(1))
         };
-        Assert.True(cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, created,
-            false, false, TestCoverImageDirectory));
+        Assert.True(cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, created,
+            false, false));
     }
 
     [Fact]

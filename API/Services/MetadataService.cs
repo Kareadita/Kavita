@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -80,7 +81,7 @@ public class MetadataService : IMetadataService
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(chapter.CoverImage, firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return false;
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
@@ -182,7 +183,7 @@ public class MetadataService : IMetadataService
     private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(volume.CoverImage, null, volume.Created, forceUpdate)) return false;
+        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
 
         volume.Chapters ??= new List<Chapter>();
         var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -202,7 +203,7 @@ public class MetadataService : IMetadataService
         if (series == null) return;
 
         // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-        if (!_cacheHelper.ShouldUpdateCoverImage(series.CoverImage, null, series.Created, forceUpdate, series.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
             return;
 
         series.Volumes ??= new List<Volume>();

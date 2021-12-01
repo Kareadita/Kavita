@@ -36,7 +36,7 @@ public class FileService : IFileService
     /// <returns></returns>
     public bool HasFileBeenModifiedSince(string filePath, DateTime time)
     {
-        return _fileSystem.File.GetLastWriteTime(filePath).Truncate(TimeSpan.TicksPerMinute) > time.Truncate(TimeSpan.TicksPerMinute);
+        return !string.IsNullOrEmpty(filePath) && _fileSystem.File.GetLastWriteTime(filePath).Truncate(TimeSpan.TicksPerMinute) > time.Truncate(TimeSpan.TicksPerMinute);
     }
 
     public bool Exists(string filePath)
