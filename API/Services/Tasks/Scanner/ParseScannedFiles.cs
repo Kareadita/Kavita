@@ -112,7 +112,6 @@ namespace API.Services.Tasks.Scanner
             if (info.ComicInfo != null)
             {
                 var sw = Stopwatch.StartNew();
-                info.ComicInfo = _archiveService.GetComicInfo(path);
 
                 if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
                 {
