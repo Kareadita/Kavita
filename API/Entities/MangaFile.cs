@@ -31,28 +31,6 @@ namespace API.Entities
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
 
-        // Methods
-        /// <summary>
-        /// If the File on disk's last modified time is after what is stored in MangaFile
-        /// </summary>
-        /// <returns></returns>
-        public bool HasFileBeenModified()
-        {
-            return File.GetLastWriteTime(FilePath) > LastModified;
-        }
-
-        /// <summary>
-        /// If the File on disk's last modified time is after passed time
-        /// </summary>
-        /// <remarks>This is useful to check if the file was modified </remarks>
-        /// <param name="time"></param>
-        /// <returns></returns>
-        public bool HasFileBeenModifiedSince(DateTime? time)
-        {
-            // BUG: This has some sort of difference.
-            if (time == null) return true;
-            return File.GetLastWriteTime(FilePath) > time;
-        }
 
         /// <summary>
         /// Updates the Last Modified time of the underlying file

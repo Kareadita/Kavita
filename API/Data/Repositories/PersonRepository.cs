@@ -37,18 +37,23 @@ namespace API.Data.Repositories
                 .SingleOrDefaultAsync();
         }
 
-        // public Task<IEnumerable<Person>> GetAllPeopleForSeriesId(int seriesId)
-        // {
-        //     return await _context.SeriesMetadata
-        //         .Where(s => s.Id == seriesId)
-        //         .Include(s => s.People)
-        //         .Where(p => normalizedName.Equals(p.NormalizedName))
-        //         .SingleOrDefaultAsync();
-        // }
+        public async Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false)
+        {
+            var peopleWithNoConnections = await _context.Person
+                .Include(p => p.SeriesMetadatas)
+                .Include(p => p.ChapterMetadatas)
+                .Where(p => p.SeriesMetadatas.Count == 0 && p.ChapterMetadatas.Count == 0)
+                .ToListAsync();
+
+            _context.Person.RemoveRange(peopleWithNoConnections);
+
+            await _context.SaveChangesAsync();
+        }
+
+
         public async Task<IList<Person>> GetAllPeople()
         {
             return await _context.Person
-                //.DistinctBy(p => p.NormalizedName)
                 .ToListAsync();
         }
     }

@@ -38,7 +38,6 @@ namespace API.Tests.Services
         private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IImageService _imageService = Substitute.For<IImageService>();
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
-        private readonly ICacheHelper _cacheHelper;
         private readonly ICacheService _cacheService;
         private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
 
@@ -70,13 +69,13 @@ namespace API.Tests.Services
             });
 
             var fileService = new FileService(fileSystem);
-            _cacheHelper = new CacheHelper(fileService); // TODO: Refactor this test suite to use mocked filesystem
+            ICacheHelper cacheHelper = new CacheHelper(fileService);
 
 
             IMetadataService metadataService =
                 Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService,
-                    _bookService, _imageService, _messageHub, _cacheHelper);
-            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub);
+                    _bookService, _imageService, _messageHub, cacheHelper);
+            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub, fileService);
         }
 
         private async Task<bool> SeedDb()
@@ -96,6 +95,13 @@ namespace API.Tests.Services
                 }
             });
             return await _context.SaveChangesAsync() > 0;
+        }
+
+
+        [Fact]
+        public void AddOrUpdateFileForChapter()
+        {
+            // TODO: This can be tested, it has _filesystem mocked
         }
 
         [Fact]

@@ -8,8 +8,7 @@ namespace API.Interfaces.Repositories
     {
         void Attach(Person person);
         void Remove(Person person);
-        // TODO: Put a filter here
-        Task<Person> FindByNameAsync(string name);
         Task<IList<Person>> GetAllPeople();
+        Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
     }
 }

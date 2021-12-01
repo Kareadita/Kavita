@@ -32,10 +32,12 @@ namespace API.Services.Tasks
        private readonly IBookService _bookService;
        private readonly ICacheService _cacheService;
        private readonly IHubContext<MessageHub> _messageHub;
+       private readonly IFileService _fileService;
        private readonly NaturalSortComparer _naturalSort = new ();
 
        public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
-          IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub)
+          IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
+          IFileService fileService)
        {
           _unitOfWork = unitOfWork;
           _logger = logger;
@@ -44,6 +46,7 @@ namespace API.Services.Tasks
           _bookService = bookService;
           _cacheService = cacheService;
           _messageHub = messageHub;
+          _fileService = fileService;
        }
 
        [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -438,7 +441,9 @@ namespace API.Services.Tasks
                    series.Format = parsedInfos[0].Format;
                }
                series.OriginalName ??= parsedInfos[0].Series;
-               series.SortName ??= parsedInfos[0].SeriesSort;
+               // TODO: I need to figure out how to handle when the Series Name
+               // Essentially if all the seriesSort names are different, then don't set it. This is due to epub groups
+               series.SortName ??= parsedInfos[0].SeriesSort; // TODO: Should I do this in metadata as well?
            }
            catch (Exception ex)
            {
@@ -676,7 +681,7 @@ namespace API.Services.Tasks
                 break;
           }
 
-           //mangaFile?.UpdateLastModified();
+           mangaFile?.UpdateLastModified();
            return mangaFile;
        }
 
@@ -687,7 +692,7 @@ namespace API.Services.Tasks
           if (existingFile != null)
           {
              existingFile.Format = info.Format;
-             if (!existingFile.HasFileBeenModified() && existingFile.Pages != 0) return;
+             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
              switch (existingFile.Format)
              {
                  case MangaFormat.Epub:
@@ -704,7 +709,7 @@ namespace API.Services.Tasks
                      existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                      break;
              }
-             existingFile.LastModified = File.GetLastWriteTime(info.FullFilePath);
+             //existingFile.LastModified = File.GetLastWriteTime(info.FullFilePath); // This is messing up our logic on when last modified
           }
           else
           {

@@ -402,6 +402,7 @@ namespace API.Services
                 MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
 
             // TODO: Remove any leftover People from DB
+            await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
 
             _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
         }

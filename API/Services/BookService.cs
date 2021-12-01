@@ -330,6 +330,7 @@ namespace API.Services
                     var series = string.Empty;
                     var specialName = string.Empty;
                     var groupPosition = string.Empty;
+                    var titleSort = string.Empty;
 
 
                     foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -345,6 +346,7 @@ namespace API.Services
                                 break;
                             case "calibre:title_sort":
                                 specialName = metadataItem.Content;
+                                titleSort = metadataItem.Content;
                                 break;
                         }
 
@@ -370,18 +372,26 @@ namespace API.Services
                         {
                             specialName = epubBook.Title;
                         }
-                        return new ParserInfo()
+                        var info = new ParserInfo()
                         {
                             Chapters = Parser.Parser.DefaultChapter,
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
-                            Title = specialName.Trim(),
+                            Title = specialName?.Trim(),
                             FullFilePath = filePath,
                             IsSpecial = false,
                             Series = series.Trim(),
                             Volumes = seriesIndex
                         };
+
+                        // Don't set titleSort if the book belongs to a group
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(specialName))
+                        {
+                            info.SeriesSort = titleSort;
+                        }
+
+                        return info;
                     }
                 }
                 catch (Exception)
