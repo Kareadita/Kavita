@@ -215,10 +215,23 @@ namespace API.Tests.Services
         public void ShouldHaveComicInfo()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
-            var archive = Path.Join(testDirectory, "file in folder.zip");
+            var archive = Path.Join(testDirectory, "ComicInfo.zip");
             var summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
 
-            Assert.Equal(summaryInfo, _archiveService.GetComicInfo(archive).Summary);
+            var comicInfo = _archiveService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal(summaryInfo, comicInfo.Summary);
+        }
+
+        [Fact]
+        public void ShouldHaveComicInfo_WithAuthors()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+            var archive = Path.Join(testDirectory, "ComicInfo_authors.zip");
+
+            var comicInfo = _archiveService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal("Junya Inoue", comicInfo.Writer);
         }
 
         [Fact]

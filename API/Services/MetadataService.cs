@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -12,7 +11,6 @@ using API.Data.Scanner;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces;
@@ -31,9 +29,11 @@ namespace API.Services
         private readonly IBookService _bookService;
         private readonly IImageService _imageService;
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly ICacheHelper _cacheHelper;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
         public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-            IArchiveService archiveService, IBookService bookService, IImageService imageService, IHubContext<MessageHub> messageHub)
+            IArchiveService archiveService, IBookService bookService, IImageService imageService,
+            IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -41,40 +41,7 @@ namespace API.Services
             _bookService = bookService;
             _imageService = imageService;
             _messageHub = messageHub;
-        }
-
-        /// <summary>
-        /// Determines whether an entity should regenerate cover image.
-        /// </summary>
-        /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
-        /// <param name="coverImage"></param>
-        /// <param name="firstFile"></param>
-        /// <param name="forceUpdate"></param>
-        /// <param name="isCoverLocked"></param>
-        /// <param name="coverImageDirectory">Directory where cover images are. Defaults to <see cref="DirectoryService.CoverImageDirectory"/></param>
-        /// <returns></returns>
-        public static bool ShouldUpdateCoverImage(string coverImage, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
-            bool isCoverLocked = false, string coverImageDirectory = null)
-        {
-            if (string.IsNullOrEmpty(coverImageDirectory))
-            {
-                coverImageDirectory = DirectoryService.CoverImageDirectory;
-            }
-
-            var fileExists = File.Exists(Path.Join(coverImageDirectory, coverImage));
-            if (isCoverLocked && fileExists) return false;
-            if (forceUpdate) return true;
-            return (firstFile != null && (firstFile.HasFileBeenModifiedSince(chapterCreated) || firstFile.HasFileBeenModified())) || !HasCoverImage(coverImage, fileExists);
-        }
-
-        private static bool HasCoverImage(string coverImage)
-        {
-            return HasCoverImage(coverImage, File.Exists(coverImage));
-        }
-
-        private static bool HasCoverImage(string coverImage, bool fileExists)
-        {
-            return !string.IsNullOrEmpty(coverImage) && fileExists;
+            _cacheHelper = cacheHelper;
         }
 
         /// <summary>
@@ -108,6 +75,7 @@ namespace API.Services
         private bool UpdateChapter(Chapter chapter, bool forceUpdate)
         {
             // TODO: Maybe move all the cache checks into one area so we don't have to check multiple times for each chapter
+            // return shouldUpdateCoverImage, FileNeedsRefreshing
             return false;
         }
 
@@ -120,7 +88,7 @@ namespace API.Services
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
-            if (!ShouldUpdateCoverImage(chapter.CoverImage, firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+            if (!_cacheHelper.ShouldUpdateCoverImage(chapter.CoverImage, firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
                 return false;
 
             _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
@@ -132,14 +100,9 @@ namespace API.Services
         private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, bool forceUpdate)
         {
             var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
-            if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
+            if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
             UpdateChapterFromComicInfo(chapter, allPeople, firstFile);
-        }
-
-        private static bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile? firstFile)
-        {
-            return firstFile == null || (!forceUpdate && !(!firstFile.HasFileBeenModifiedSince(chapter.Created) || firstFile.HasFileBeenModified()));
         }
 
         private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
@@ -226,7 +189,7 @@ namespace API.Services
         private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
         {
             // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-            if (volume == null || !ShouldUpdateCoverImage(volume.CoverImage, null, volume.Created, forceUpdate)) return false;
+            if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(volume.CoverImage, null, volume.Created, forceUpdate)) return false;
 
             volume.Chapters ??= new List<Chapter>();
             var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -246,7 +209,7 @@ namespace API.Services
             if (series == null) return;
 
             // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-            if (!ShouldUpdateCoverImage(series.CoverImage, null, series.Created, forceUpdate, series.CoverImageLocked))
+            if (!_cacheHelper.ShouldUpdateCoverImage(series.CoverImage, null, series.Created, forceUpdate, series.CoverImageLocked))
                 return;
 
             series.Volumes ??= new List<Volume>();
@@ -261,7 +224,7 @@ namespace API.Services
                         .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
                 }
 
-                if (!HasCoverImage(coverImage))
+                if (!_cacheHelper.CoverImageExists(coverImage))
                 {
                     coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
                         .FirstOrDefault()?.CoverImage;
@@ -279,7 +242,7 @@ namespace API.Services
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
             var firstFile = firstChapter?.Files.FirstOrDefault();
-            if (firstFile == null || HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
+            if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
             if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
             var comicInfo = GetComicInfo(firstFile);

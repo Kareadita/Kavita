@@ -37,6 +37,9 @@ namespace API.Extensions
             services.AddScoped<IDownloadService, DownloadService>();
             services.AddScoped<IReaderService, ReaderService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IFileService, FileService>();
+
+            services.AddScoped<ICacheHelper, CacheHelper>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 

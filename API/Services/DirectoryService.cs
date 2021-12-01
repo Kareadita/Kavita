@@ -91,6 +91,11 @@ namespace API.Services
           return paths;
        }
 
+       /// <summary>
+       /// Does Directory Exist
+       /// </summary>
+       /// <param name="directory"></param>
+       /// <returns></returns>
        public bool Exists(string directory)
        {
           var di = new DirectoryInfo(directory);

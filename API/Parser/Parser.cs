@@ -1076,6 +1076,7 @@ namespace API.Parser
         /// <returns></returns>
         public static string CleanAuthor(string author)
         {
+            if (string.IsNullOrEmpty(author)) return string.Empty;
             return string.Join(" ", author.Split(",").Reverse().Select(s => s.Trim()));
         }
     }
