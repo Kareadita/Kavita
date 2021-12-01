@@ -11,9 +11,7 @@ namespace API.Tests.Helpers;
 
 public class CacheHelperTests
 {
-    //private static readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
-    private readonly string _testCoverImageDirectory = @"c:\";
-    //private readonly string ExistingCoverImage = Path.Join(Directory.GetCurrentDirectory(), @"../../../Services/Test Data/ArchiveService/CoverImages", "thumbnail.jpg");
+    private const string TestCoverImageDirectory = @"c:\";
     private const string TestCoverImageFile = "thumbnail.jpg";
     private const string TestCoverArchive = @"file in folder.zip";
     private readonly ICacheHelper _cacheHelper;
@@ -26,8 +24,8 @@ public class CacheHelperTests
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { Path.Join(_testCoverImageDirectory, TestCoverArchive), file },
-            { Path.Join(_testCoverImageDirectory, TestCoverImageFile), file }
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), file },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), file }
         });
 
         var fileService = new FileService(fileSystem);
@@ -59,7 +57,7 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
         Assert.True(_cacheHelper.ShouldUpdateCoverImage(null, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false, _testCoverImageDirectory));
+            false, false, TestCoverImageDirectory));
     }
 
     [Fact]
@@ -72,7 +70,7 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false, _testCoverImageDirectory));
+            false, false, TestCoverImageDirectory));
     }
 
     [Fact]
@@ -85,7 +83,7 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true, _testCoverImageDirectory));
+            false, true, TestCoverImageDirectory));
     }
 
     [Fact]
@@ -98,7 +96,7 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, true, _testCoverImageDirectory));
+            false, true, TestCoverImageDirectory));
     }
 
     [Fact]
@@ -110,8 +108,8 @@ public class CacheHelperTests
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { Path.Join(_testCoverImageDirectory, TestCoverArchive), filesystemFile },
-            { Path.Join(_testCoverImageDirectory, TestCoverImageFile), filesystemFile }
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
         });
 
         var fileService = new FileService(fileSystem);
@@ -124,6 +122,156 @@ public class CacheHelperTests
             LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(1))
         };
         Assert.True(cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-            false, false, _testCoverImageDirectory));
+            false, false, TestCoverImageDirectory));
+    }
+
+    [Fact]
+    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceCreated()
+    {
+        var filesystemFile = new MockFileData("")
+        {
+            LastWriteTime = DateTimeOffset.Now
+        };
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
+        });
+
+        var fileService = new FileService(fileSystem);
+        var cacheHelper = new CacheHelper(fileService);
+
+        var chapter = new Chapter()
+        {
+            Created = filesystemFile.LastWriteTime.DateTime,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+
+        var file = new MangaFile()
+        {
+            FilePath = TestCoverArchive,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+    }
+
+    [Fact]
+    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceLastModified()
+    {
+        var filesystemFile = new MockFileData("")
+        {
+            LastWriteTime = DateTimeOffset.Now
+        };
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
+        });
+
+        var fileService = new FileService(fileSystem);
+        var cacheHelper = new CacheHelper(fileService);
+
+        var chapter = new Chapter()
+        {
+            Created = filesystemFile.LastWriteTime.DateTime,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+
+        var file = new MangaFile()
+        {
+            FilePath = TestCoverArchive,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+    }
+
+    [Fact]
+    public void HasFileNotChangedSinceCreationOrLastScan_NotChangedSinceLastModified_ForceUpdate()
+    {
+        var filesystemFile = new MockFileData("")
+        {
+            LastWriteTime = DateTimeOffset.Now
+        };
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
+        });
+
+        var fileService = new FileService(fileSystem);
+        var cacheHelper = new CacheHelper(fileService);
+
+        var chapter = new Chapter()
+        {
+            Created = filesystemFile.LastWriteTime.DateTime,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+
+        var file = new MangaFile()
+        {
+            FilePath = TestCoverArchive,
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, true, file));
+    }
+
+    [Fact]
+    public void HasFileNotChangedSinceCreationOrLastScan_ModifiedSinceLastScan()
+    {
+        var filesystemFile = new MockFileData("")
+        {
+            LastWriteTime = DateTimeOffset.Now
+        };
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
+        });
+
+        var fileService = new FileService(fileSystem);
+        var cacheHelper = new CacheHelper(fileService);
+
+        var chapter = new Chapter()
+        {
+            Created = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10)),
+            LastModified = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10))
+        };
+
+        var file = new MangaFile()
+        {
+            FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+    }
+
+    [Fact]
+    public void HasFileNotChangedSinceCreationOrLastScan_ModifiedSinceLastScan_ButLastModifiedSame()
+    {
+        var filesystemFile = new MockFileData("")
+        {
+            LastWriteTime = DateTimeOffset.Now
+        };
+        var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { Path.Join(TestCoverImageDirectory, TestCoverArchive), filesystemFile },
+            { Path.Join(TestCoverImageDirectory, TestCoverImageFile), filesystemFile }
+        });
+
+        var fileService = new FileService(fileSystem);
+        var cacheHelper = new CacheHelper(fileService);
+
+        var chapter = new Chapter()
+        {
+            Created = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10)),
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+
+        var file = new MangaFile()
+        {
+            FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
+            LastModified = filesystemFile.LastWriteTime.DateTime
+        };
+        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
     }
 }

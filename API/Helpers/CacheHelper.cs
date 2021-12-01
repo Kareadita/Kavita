@@ -56,7 +56,7 @@ public class CacheHelper : ICacheHelper
     }
 
     /// <summary>
-    ///
+    /// Has the file been modified since last scan or is user forcing an update
     /// </summary>
     /// <param name="chapter"></param>
     /// <param name="forceUpdate"></param>
@@ -64,8 +64,10 @@ public class CacheHelper : ICacheHelper
     /// <returns></returns>
     public bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile firstFile)
     {
-
-        return firstFile == null || (!forceUpdate && !(!firstFile.HasFileBeenModifiedSince(chapter.Created) || firstFile.HasFileBeenModified()));
+        return firstFile != null &&
+               (!forceUpdate &&
+                !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, chapter.Created)
+                  || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
     }
 
     /// <summary>

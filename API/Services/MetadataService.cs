@@ -235,8 +235,6 @@ namespace API.Services
 
         private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
         {
-            if (!forceUpdate) return;
-
             var isBook = series.Library.Type == LibraryType.Book;
             var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
             var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
