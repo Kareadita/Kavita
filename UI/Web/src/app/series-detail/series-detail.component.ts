@@ -194,10 +194,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
-      this.libraryType = type;
-      this.loadSeries(seriesId);
-    });
+    this.loadSeries(seriesId);
   }
 
   ngOnDestroy() {
@@ -330,11 +327,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.coverImageOffset = 0;
 
     forkJoin([
+      this.libraryService.getLibraryType(this.libraryId),
       this.seriesService.getMetadata(seriesId),
       this.seriesService.getSeries(seriesId)
     ]).subscribe(results => {
-      this.seriesMetadata = results[0];
-      this.series = results[1];
+      this.libraryType = results[0];
+      this.seriesMetadata = results[1];
+      this.series = results[2];
 
       this.createHTML();
 
@@ -574,9 +573,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   formatChapterTitle(chapter: Chapter) {
-    if (this.libraryType == LibraryType.Book && isNaN(parseFloat(chapter.range)) && chapter.titleName != '') {
-      return chapter.titleName;
-    }
     return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
   }
+
+  formatVolumeTitle(volume: Volume) {
+    return 'Volume ' + volume.name;
+  }
+
 }

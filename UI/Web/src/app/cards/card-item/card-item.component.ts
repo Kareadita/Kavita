@@ -79,12 +79,18 @@ export class CardItemComponent implements OnInit, OnDestroy {
    * Format of the entity (only applies to Series)
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
+  chapterTitle: string = '';
   
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
   isShiftDown: boolean = false;
+
+  get tooltipTitle() {
+    if (this.chapterTitle === '') return this.title;
+    return this.chapterTitle;
+  }
   
 
   get MangaFormat(): typeof MangaFormat {
@@ -111,6 +117,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
       });
     }
     this.format = (this.entity as Series).format;
+
+    if (this.utilityService.isChapter(this.entity)) {
+      this.chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+    } else if (this.utilityService.isVolume(this.entity)) {
+      const vol = this.utilityService.asVolume(this.entity);
+      if (vol.chapters !== undefined && vol.chapters.length > 0) {
+        this.chapterTitle = vol.chapters[0].titleName;
+      }
+    }
   }
 
   ngOnDestroy() {
