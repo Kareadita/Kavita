@@ -27,5 +27,29 @@ namespace API.Tests.Services
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
         }
 
+        [Fact]
+        public void ShouldHaveComicInfo()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
+            var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
+            const string summaryInfo = "Book Description";
+
+            var comicInfo = _bookService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal(summaryInfo, comicInfo.Summary);
+            Assert.Equal("genre1, genre2", comicInfo.Genre);
+        }
+
+        [Fact]
+        public void ShouldHaveComicInfo_WithAuthors()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
+            var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
+
+            var comicInfo = _bookService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
+        }
+
     }
 }
