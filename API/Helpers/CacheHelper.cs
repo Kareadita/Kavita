@@ -51,7 +51,7 @@ public class CacheHelper : ICacheHelper
         var fileExists = _fileService.Exists(filePath);
         if (isCoverLocked && fileExists) return false;
         if (forceUpdate) return true;
-        return _fileService.HasFileBeenModifiedSince(filePath, chapterCreated) || !fileExists;
+        return (_fileService.HasFileBeenModifiedSince(filePath, chapterCreated)) || !fileExists; // TODO: we need to handle a case where file has been modified since last update
         //return (firstFile.HasFileBeenModifiedSince(chapterCreated) || firstFile.HasFileBeenModified()) || !HasCoverImage(coverImage, fileExists);
     }
 

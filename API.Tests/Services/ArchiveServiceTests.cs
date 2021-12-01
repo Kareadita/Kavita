@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using API.Archive;
 using API.Data.Metadata;
@@ -19,7 +20,7 @@ namespace API.Tests.Services
         private readonly ArchiveService _archiveService;
         private readonly ILogger<ArchiveService> _logger = Substitute.For<ILogger<ArchiveService>>();
         private readonly ILogger<DirectoryService> _directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
-        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>());
+        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
 
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
         {
@@ -159,7 +160,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger, new MockFileSystem()));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
@@ -191,7 +192,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger, new MockFileSystem()));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
 

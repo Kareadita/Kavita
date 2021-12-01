@@ -6,13 +6,14 @@ namespace API.Services;
 
 public interface IFileService
 {
+    IFileSystem GetFileSystem();
     bool HasFileBeenModifiedSince(string filePath, DateTime time);
     bool Exists(string filePath);
 }
 
 public class FileService : IFileService
 {
-    private readonly IFileSystem  _fileSystem;
+    private readonly IFileSystem _fileSystem;
 
     public FileService(IFileSystem fileSystem)
     {
@@ -20,6 +21,11 @@ public class FileService : IFileService
     }
 
     public FileService() : this(fileSystem: new FileSystem()) { }
+
+    public IFileSystem GetFileSystem()
+    {
+        return _fileSystem;
+    }
 
     /// <summary>
     /// If the File on disk's last modified time is after passed time

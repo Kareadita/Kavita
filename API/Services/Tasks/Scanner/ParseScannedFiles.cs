@@ -27,6 +27,7 @@ namespace API.Services.Tasks.Scanner
         private readonly IBookService _bookService;
         private readonly ILogger _logger;
         private readonly IArchiveService _archiveService;
+        private readonly IDirectoryService _directoryService;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -34,11 +35,13 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="bookService"></param>
         /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService)
+        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService,
+            IDirectoryService directoryService)
         {
             _bookService = bookService;
             _logger = logger;
             _archiveService = archiveService;
+            _directoryService = directoryService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         }
 
@@ -126,14 +129,6 @@ namespace API.Services.Tasks.Scanner
                     info.Chapters = info.ComicInfo.Number;
                 }
 
-                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-                {
-                    info.SeriesSort = info.ComicInfo.TitleSort;
-                }
-                else
-                {
-                    info.SeriesSort = info.Series;
-                }
                 _logger.LogDebug("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
             }
 
@@ -209,12 +204,12 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = GetLibrarySearchPattern();
+            var searchPattern = Parser.Parser.SupportedExtensions;
             foreach (var folderPath in folders)
             {
                 try
                 {
-                    totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath, (f) =>
+                    totalFiles += _directoryService.TraverseTreeParallelForEach(folderPath, (f) =>
                     {
                         try
                         {
@@ -237,11 +232,6 @@ namespace API.Services.Tasks.Scanner
                 scanElapsedTime);
 
             return SeriesWithInfos();
-        }
-
-        private static string GetLibrarySearchPattern()
-        {
-            return Parser.Parser.SupportedExtensions;
         }
 
         /// <summary>

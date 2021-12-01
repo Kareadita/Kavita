@@ -37,6 +37,7 @@ namespace API.Tests.Services
         private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
         private readonly IBookService _bookService = Substitute.For<IBookService>();
         private readonly IImageService _imageService = Substitute.For<IImageService>();
+        private readonly IDirectoryService _directoryService = Substitute.For<IDirectoryService>();
         private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
         private readonly ICacheService _cacheService;
         private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
@@ -75,7 +76,8 @@ namespace API.Tests.Services
             IMetadataService metadataService =
                 Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService,
                     _bookService, _imageService, _messageHub, cacheHelper);
-            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub, fileService);
+            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService,
+                _cacheService, _messageHub, fileService, _directoryService);
         }
 
         private async Task<bool> SeedDb()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;
+       private readonly IFileSystem _fileSystem;
+
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -23,9 +26,10 @@ namespace API.Services
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
        public static readonly string ConfigDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
 
-       public DirectoryService(ILogger<DirectoryService> logger)
+       public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
        {
-          _logger = logger;
+           _logger = logger;
+           _fileSystem = fileSystem;
        }
 
        /// <summary>
@@ -370,7 +374,7 @@ namespace API.Services
        /// <param name="searchPattern">Regex pattern to search against</param>
        /// <param name="logger"></param>
        /// <exception cref="ArgumentException"></exception>
-       public static int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
+       public int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
        {
           //Count of files traversed and timer for diagnostic output
             var fileCount = 0;

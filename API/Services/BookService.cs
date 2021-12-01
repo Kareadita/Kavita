@@ -312,8 +312,6 @@ namespace API.Services
            {
                 using var epubBook = EpubReader.OpenBook(filePath);
 
-                // If the epub has the following tags, we can group the books as Volumes
-                // <meta content="5.0" name="calibre:series_index"/>
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
                 // If all three are present, we can take that over dc:title and format as:
@@ -386,7 +384,7 @@ namespace API.Services
                         };
 
                         // Don't set titleSort if the book belongs to a group
-                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(specialName))
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex))
                         {
                             info.SeriesSort = titleSort;
                         }
@@ -409,7 +407,7 @@ namespace API.Services
                     FullFilePath = filePath,
                     IsSpecial = false,
                     Series = epubBook.Title.Trim(),
-                    Volumes = Parser.Parser.DefaultVolume
+                    Volumes = Parser.Parser.DefaultVolume,
                 };
            }
            catch (Exception ex)

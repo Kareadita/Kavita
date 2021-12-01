@@ -115,13 +115,13 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        // Represents first run
+        var created = DateTime.Now.Subtract(TimeSpan.FromHours(1));
         var file = new MangaFile()
         {
             FilePath = TestCoverArchive,
             LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(1))
         };
-        Assert.True(cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+        Assert.True(cacheHelper.ShouldUpdateCoverImage(TestCoverImageFile, file, created,
             false, false, TestCoverImageDirectory));
     }
 

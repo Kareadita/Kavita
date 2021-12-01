@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using API.Services;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ namespace API.Tests.Services
 
         public DirectoryServiceTests()
         {
-            _directoryService = new DirectoryService(_logger);
+            _directoryService = new DirectoryService(_logger, new MockFileSystem());
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace API.Tests.Services
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga");
             // ReSharper disable once CollectionNeverQueried.Local
             var files = new List<string>();
-            var fileCount = DirectoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
+            var fileCount = _directoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
                 API.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);

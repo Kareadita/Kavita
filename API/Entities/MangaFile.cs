@@ -25,7 +25,6 @@ namespace API.Entities
         /// </summary>
         public DateTime LastModified { get; set; }
 
-        // NOTE: Should I add HasComicInfo.xml?
 
         // Relationship Mapping
         public Chapter Chapter { get; set; }
@@ -37,6 +36,7 @@ namespace API.Entities
         /// </summary>
         public void UpdateLastModified()
         {
+            // Should this be DateTime.Now ?
             LastModified = File.GetLastWriteTime(FilePath);
         }
     }
