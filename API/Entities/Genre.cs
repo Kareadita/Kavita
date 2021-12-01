@@ -4,14 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
-    [Index(nameof(NormalizedName), nameof(ExternalTag), IsUnique = true)]
+    [Index(nameof(NormalizedTitle), nameof(ExternalTag), IsUnique = true)]
     public class Genre
     {
         public int Id { get; set; }
-        public string Name { get; set; } // TODO: Rename this to Title
-        public string NormalizedName { get; set; }
+        public string Title { get; set; } // TODO: Rename this to Title
+        public string NormalizedTitle { get; set; }
         public bool ExternalTag { get; set; }
 
         public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
+        public ICollection<Chapter> Chapters { get; set; }
     }
 }

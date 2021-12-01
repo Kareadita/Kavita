@@ -86,8 +86,8 @@ namespace API.Data
         {
             return new Genre()
             {
-                Name = name.Trim().SentenceCase(),
-                NormalizedName = Parser.Parser.Normalize(name),
+                Title = name.Trim().SentenceCase(),
+                NormalizedTitle = Parser.Parser.Normalize(name),
                 ExternalTag = external
             };
         }

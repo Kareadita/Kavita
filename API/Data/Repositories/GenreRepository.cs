@@ -33,7 +33,20 @@ public class GenreRepository : IGenreRepository
     {
         var normalizedName = Parser.Parser.Normalize(genreName);
         return await _context.Genre
-            .FirstOrDefaultAsync(g => g.NormalizedName.Equals(normalizedName));
+            .FirstOrDefaultAsync(g => g.NormalizedTitle.Equals(normalizedName));
+    }
+
+    public async Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false)
+    {
+        var genresWithNoConnections = await _context.Genre
+            .Include(p => p.SeriesMetadatas)
+            .Include(p => p.Chapters)
+            .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0 && p.ExternalTag == removeExternal)
+            .ToListAsync();
+
+        _context.Genre.RemoveRange(genresWithNoConnections);
+
+        await _context.SaveChangesAsync();
     }
 
     public async Task<IList<Genre>> GetAllGenres()

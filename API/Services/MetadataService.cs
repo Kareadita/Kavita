@@ -396,6 +396,8 @@ public class MetadataService : IMetadataService
 
         // TODO: Remove any leftover People from DB
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }

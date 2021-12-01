@@ -10,5 +10,6 @@ namespace API.Interfaces.Repositories
         void Remove(Genre genre);
         Task<Genre> FindByNameAsync(string genreName);
         Task<IList<Genre>> GetAllGenres();
+        Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
     }
 }

@@ -23,7 +23,7 @@ public static class GenreHelper
 
             var normalizedName = Parser.Parser.Normalize(name);
             var genre = allPeople.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName) && p.ExternalTag == isExternal);
+                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
             {
                 genre = DbFactory.Genre(name, false);
@@ -49,7 +49,7 @@ public static class GenreHelper
         var existing = existingGenres.ToList();
         foreach (var genre in existing)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => g.ExternalTag == genre.ExternalTag && genre.NormalizedName.Equals(g.NormalizedName));
+            var existingPerson = removeAllExcept.FirstOrDefault(g => g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
             if (existingPerson == null)
             {
                 existingGenres.Remove(genre);
@@ -67,7 +67,7 @@ public static class GenreHelper
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedName == Parser.Parser.Normalize(genre.Name));
+            p.NormalizedTitle == Parser.Parser.Normalize(genre.Title));
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);
