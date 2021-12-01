@@ -20,9 +20,9 @@ public interface ICacheHelper
 
 public class CacheHelper : ICacheHelper
 {
-    private readonly FileService _fileService;
+    private readonly IFileService _fileService;
 
-    public CacheHelper(FileService fileService)
+    public CacheHelper(IFileService fileService)
     {
         _fileService = fileService;
     }
