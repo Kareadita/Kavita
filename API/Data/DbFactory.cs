@@ -109,7 +109,7 @@ namespace API.Data
                 FilePath = filePath,
                 Format = format,
                 Pages = pages,
-                LastModified = File.GetLastWriteTime(filePath)
+                LastModified = DateTime.Now //File.GetLastWriteTime(filePath)
             };
         }
 
