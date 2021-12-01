@@ -303,7 +303,7 @@ public class ScannerService : IScannerService
                 _unitOfWork.SeriesRepository.Remove(missing);
             }
 
-            var cleanedSeries = RemoveMissingSeries(nonLibrarySeries, missingSeries, out var removeCount);
+            var cleanedSeries = SeriesHelper.RemoveMissingSeries(nonLibrarySeries, missingSeries, out var removeCount);
             if (removeCount > 0)
             {
                 _logger.LogInformation("[ScannerService] Removed {RemoveMissingSeries} series that are no longer on disk:", removeCount);
@@ -495,28 +495,6 @@ public class ScannerService : IScannerService
         return format == series.Format;
     }
 
-    /// <summary>
-    /// Removes all instances of missingSeries' Series from existingSeries Collection. Existing series is updated by
-    /// reference and the removed element count is returned.
-    /// </summary>
-    /// <param name="existingSeries">Existing Series in DB</param>
-    /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
-    /// <param name="removeCount"></param>
-    /// <returns>the updated existingSeries</returns>
-    public static IEnumerable<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
-    {
-        var existingCount = existingSeries.Count;
-        var missingList = missingSeries.ToList();
-
-        existingSeries = existingSeries.Where(
-            s => !missingList.Exists(
-                m => m.NormalizedName.Equals(s.NormalizedName) && m.Format == s.Format)).ToList();
-
-        removeCount = existingCount -  existingSeries.Count;
-
-        return existingSeries;
-    }
-
     private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
     {
         var startingVolumeCount = series.Volumes.Count;
@@ -566,11 +544,6 @@ public class ScannerService : IScannerService
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="volume"></param>
-    /// <param name="parsedInfos"></param>
     private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
     {
         // Add new chapters
@@ -645,47 +618,28 @@ public class ScannerService : IScannerService
 
     private MangaFile CreateMangaFile(ParserInfo info)
     {
-        MangaFile mangaFile = null;
+        var pages = 0;
         switch (info.Format)
         {
             case MangaFormat.Archive:
             {
-                mangaFile = new MangaFile()
-                {
-                    FilePath = info.FullFilePath,
-                    Format = info.Format,
-                    Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath)
-                };
+                pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
                 break;
             }
             case MangaFormat.Pdf:
             case MangaFormat.Epub:
             {
-                mangaFile = new MangaFile()
-                {
-                    FilePath = info.FullFilePath,
-                    Format = info.Format,
-                    Pages = _bookService.GetNumberOfPages(info.FullFilePath)
-                };
+                pages = _bookService.GetNumberOfPages(info.FullFilePath);
                 break;
             }
             case MangaFormat.Image:
             {
-                mangaFile = new MangaFile()
-                {
-                    FilePath = info.FullFilePath,
-                    Format = info.Format,
-                    Pages = 1
-                };
+                pages = 1;
                 break;
             }
-            default:
-                _logger.LogWarning("[Scanner] Ignoring {Filename}. File type is not supported", info.Filename);
-                break;
         }
 
-        mangaFile?.UpdateLastModified();
-        return mangaFile;
+        return DbFactory.MangaFile(info.FullFilePath, info.Format, pages);
     }
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)

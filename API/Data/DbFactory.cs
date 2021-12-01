@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
@@ -98,6 +99,17 @@ namespace API.Data
                 Name = name.Trim(),
                 NormalizedName = Parser.Parser.Normalize(name),
                 Role = role
+            };
+        }
+
+        public static MangaFile MangaFile(string filePath, MangaFormat format, int pages)
+        {
+            return new MangaFile()
+            {
+                FilePath = filePath,
+                Format = format,
+                Pages = pages,
+                LastModified = File.GetLastWriteTime(filePath)
             };
         }
 

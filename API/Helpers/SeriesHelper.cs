@@ -1,4 +1,6 @@
-﻿using API.Entities;
+﻿using System.Collections.Generic;
+using System.Linq;
+using API.Entities;
 using API.Entities.Enums;
 using API.Services.Tasks.Scanner;
 
@@ -16,5 +18,27 @@ public static class SeriesHelper
     {
         return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName) || Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName))
                && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
+    }
+
+    /// <summary>
+    /// Removes all instances of missingSeries' Series from existingSeries Collection. Existing series is updated by
+    /// reference and the removed element count is returned.
+    /// </summary>
+    /// <param name="existingSeries">Existing Series in DB</param>
+    /// <param name="missingSeries">Series not found on disk or can't be parsed</param>
+    /// <param name="removeCount"></param>
+    /// <returns>the updated existingSeries</returns>
+    public static IEnumerable<Series> RemoveMissingSeries(IList<Series> existingSeries, IEnumerable<Series> missingSeries, out int removeCount)
+    {
+        var existingCount = existingSeries.Count;
+        var missingList = missingSeries.ToList();
+
+        existingSeries = existingSeries.Where(
+            s => !missingList.Exists(
+                m => m.NormalizedName.Equals(s.NormalizedName) && m.Format == s.Format)).ToList();
+
+        removeCount = existingCount -  existingSeries.Count;
+
+        return existingSeries;
     }
 }

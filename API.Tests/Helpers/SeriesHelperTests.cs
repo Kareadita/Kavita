@@ -1,4 +1,7 @@
-﻿using API.Data;
+﻿using System.Collections.Generic;
+using System.Linq;
+using API.Data;
+using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Services.Tasks.Scanner;
@@ -101,4 +104,22 @@ public class SeriesHelperTests
     }
     #endregion
 
+    [Fact]
+    public void RemoveMissingSeries_Should_RemoveSeries()
+    {
+        var existingSeries = new List<Series>()
+        {
+            EntityFactory.CreateSeries("Darker than Black Vol 1"),
+            EntityFactory.CreateSeries("Darker than Black"),
+            EntityFactory.CreateSeries("Beastars"),
+        };
+        var missingSeries = new List<Series>()
+        {
+            EntityFactory.CreateSeries("Darker than Black Vol 1"),
+        };
+        existingSeries = SeriesHelper.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
+
+        Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
+        Assert.Equal(missingSeries.Count, removeCount);
+    }
 }

@@ -166,24 +166,24 @@ namespace API.Tests.Services
         //     Assert.Equal(expected, actualName);
         // }
 
-        [Fact]
-        public void RemoveMissingSeries_Should_RemoveSeries()
-        {
-            var existingSeries = new List<Series>()
-            {
-                EntityFactory.CreateSeries("Darker than Black Vol 1"),
-                EntityFactory.CreateSeries("Darker than Black"),
-                EntityFactory.CreateSeries("Beastars"),
-            };
-            var missingSeries = new List<Series>()
-            {
-                EntityFactory.CreateSeries("Darker than Black Vol 1"),
-            };
-            existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
-
-            Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
-            Assert.Equal(missingSeries.Count, removeCount);
-        }
+        // [Fact]
+        // public void RemoveMissingSeries_Should_RemoveSeries()
+        // {
+        //     var existingSeries = new List<Series>()
+        //     {
+        //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
+        //         EntityFactory.CreateSeries("Darker than Black"),
+        //         EntityFactory.CreateSeries("Beastars"),
+        //     };
+        //     var missingSeries = new List<Series>()
+        //     {
+        //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
+        //     };
+        //     existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
+        //
+        //     Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
+        //     Assert.Equal(missingSeries.Count, removeCount);
+        // }
 
         private void AddToParsedInfo(IDictionary<ParsedSeries, List<ParserInfo>> collectedSeries, ParserInfo info)
         {
