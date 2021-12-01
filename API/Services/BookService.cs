@@ -208,7 +208,7 @@ namespace API.Services
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
                     Title = epubBook.Title,
-                    Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim()))
+                    Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
 
                 };
                 // Parse tags not exposed via Library
@@ -218,6 +218,9 @@ namespace API.Services
                     {
                         case "calibre:rating":
                             info.UserRating = float.Parse(metadataItem.Content);
+                            break;
+                        case "calibre:title_sort":
+                            info.TitleSort = metadataItem.Content;
                             break;
                     }
                 }

@@ -376,6 +376,7 @@ namespace API.Services.Tasks
               if (existingSeries != null) continue;
 
               var s = DbFactory.Series(infos[0].Series);
+              s.SortName = infos[0].SeriesSort ?? s.Name;
               s.Format = key.Format;
               s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
               newSeries.Add(s);
