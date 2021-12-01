@@ -34,6 +34,14 @@
         public string AlternativeSeries { get; set; }
         public string AlternativeNumber { get; set; }
 
+        /// <summary>
+        /// This is Epub only: calibre:title_sort
+        /// Represents the sort order for the title
+        /// </summary>
+        public string TitleSort { get; set; }
+
+
+
 
         /// <summary>
         /// This is the Author. For Books, we map creator tag in OPF to this field. Comma separated if multiple.

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces.Services;
@@ -55,6 +56,20 @@ namespace API.Services.Tasks.Scanner
             return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
         }
 
+        private ComicInfo GetComicInfo(string path)
+        {
+            if (Parser.Parser.IsEpub(path))
+            {
+                return _bookService.GetComicInfo(path);
+            }
+
+            if (Parser.Parser.IsComicInfoExtension(path))
+            {
+                return _archiveService.GetComicInfo(path);
+            }
+            return null;
+        }
+
         /// <summary>
         /// Processes files found during a library scan.
         /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
@@ -93,28 +108,34 @@ namespace API.Services.Tasks.Scanner
             }
 
             // TODO: Think about doing this before the Fallback code to speed up
-            if (Parser.Parser.IsComicInfoExtension(path))
+            info.ComicInfo = GetComicInfo(path);
+            if (info.ComicInfo != null)
             {
                 var sw = Stopwatch.StartNew();
                 info.ComicInfo = _archiveService.GetComicInfo(path);
 
-                if (info.ComicInfo != null)
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
                 {
-                    if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-                    {
-                        info.Volumes = info.ComicInfo.Volume;
-                    }
-                    if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-                    {
-                        info.Series = info.ComicInfo.Series;
-                    }
-                    if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-                    {
-                        info.Chapters = info.ComicInfo.Number;
-                    }
+                    info.Volumes = info.ComicInfo.Volume;
                 }
-                // TODO: Move this to debug after Rider updates
-                _logger.LogInformation("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+                {
+                    info.SeriesSort = info.ComicInfo.TitleSort;
+                }
+                else
+                {
+                    info.SeriesSort = info.Series;
+                }
+                _logger.LogDebug("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
             }
 
             TrackSeries(info);

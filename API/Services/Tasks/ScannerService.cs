@@ -437,6 +437,7 @@ namespace API.Services.Tasks
                    series.Format = parsedInfos[0].Format;
                }
                series.OriginalName ??= parsedInfos[0].Series;
+               series.SortName ??= parsedInfos[0].SeriesSort;
            }
            catch (Exception ex)
            {

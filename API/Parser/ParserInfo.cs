@@ -16,7 +16,11 @@ namespace API.Parser
         /// <summary>
         /// Represents the parsed series from the file or folder
         /// </summary>
-        public string Series { get; set; } = "";
+        public string Series { get; set; } = string.Empty;
+        /// <summary>
+        /// This can be filled in from ComicInfo.xml/Epub during scanning. Will update the SortName field on <see cref="Entities.Series"/>
+        /// </summary>
+        public string SeriesSort { get; set; } = string.Empty;
         /// <summary>
         /// Represents the parsed volumes from a file. By default, will be 0 which means that nothing could be parsed.
         /// If Volumes is 0 and Chapters is 0, the file is a special. If Chapters is non-zero, then no volume could be parsed.
