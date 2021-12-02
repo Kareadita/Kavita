@@ -10,7 +10,6 @@ using API.Archive;
 using API.Comparators;
 using API.Data.Metadata;
 using API.Extensions;
-using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -19,6 +18,18 @@ using SharpCompress.Common;
 
 namespace API.Services
 {
+    public interface IArchiveService
+    {
+        void ExtractArchive(string archivePath, string extractPath);
+        int GetNumberOfPagesFromArchive(string archivePath);
+        string GetCoverImage(string archivePath, string fileName);
+        bool IsValidArchive(string archivePath);
+        ComicInfo GetComicInfo(string archivePath);
+        ArchiveLibrary CanOpen(string archivePath);
+        bool ArchiveNeedsFlattening(ZipArchive archive);
+        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+    }
+
     /// <summary>
     /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> and <see cref="ScannerService"/>
     /// </summary>

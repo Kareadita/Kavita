@@ -8,8 +8,6 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

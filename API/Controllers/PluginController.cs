@@ -1,7 +1,5 @@
 ﻿using System.Threading.Tasks;
 using API.DTOs;
-using API.Interfaces;
-using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 

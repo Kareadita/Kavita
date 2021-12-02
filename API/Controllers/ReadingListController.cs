@@ -6,7 +6,6 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

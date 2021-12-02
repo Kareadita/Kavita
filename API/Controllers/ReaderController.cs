@@ -8,8 +8,6 @@ using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 

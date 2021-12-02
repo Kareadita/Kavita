@@ -6,11 +6,24 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
+    public interface IDirectoryService
+    {
+        /// <summary>
+        /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
+        /// </summary>
+        /// <param name="rootPath">Absolute path of directory to scan.</param>
+        /// <returns>List of folder names</returns>
+        IEnumerable<string> ListDirectory(string rootPath);
+        Task<byte[]> ReadFileAsync(string path);
+        bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "");
+        bool Exists(string directory);
+        void CopyFileToDirectory(string fullFilePath, string targetDirectory);
+        int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger);
+    }
     public class DirectoryService : IDirectoryService
     {
        private readonly ILogger<DirectoryService> _logger;

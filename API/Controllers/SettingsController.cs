@@ -7,8 +7,6 @@ using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;

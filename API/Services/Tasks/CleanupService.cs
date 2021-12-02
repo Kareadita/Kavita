@@ -1,7 +1,5 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.SignalR;
@@ -9,6 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks
 {
+    public interface ICleanupService
+    {
+        Task Cleanup();
+        void CleanupCacheDirectory();
+    }
     /// <summary>
     /// Cleans up after operations on reoccurring basis
     /// </summary>

@@ -12,8 +12,6 @@ using API.DTOs.OPDS;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;

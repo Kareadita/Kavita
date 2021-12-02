@@ -8,8 +8,6 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.Entities;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;

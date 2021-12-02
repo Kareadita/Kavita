@@ -3,15 +3,31 @@ using System.IO;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
-using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
-namespace API.Services
-{
+namespace API.Services;
 
-  public class ImageService : IImageService
-  {
+public interface IImageService
+{
+    string GetCoverImage(string path, string fileName);
+    string GetCoverFile(MangaFile file);
+    /// <summary>
+    /// Creates a Thumbnail version of an image
+    /// </summary>
+    /// <param name="path">Path to the image file</param>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
+    public string CreateThumbnail(string path, string fileName);
+    /// <summary>
+    /// Creates a Thumbnail version of a base64 image
+    /// </summary>
+    /// <param name="encodedImage">base64 encoded image</param>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName);
+}
+
+public class ImageService : IImageService
+{
     private readonly ILogger<ImageService> _logger;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"seres\d+";
@@ -25,7 +41,7 @@ namespace API.Services
 
     public ImageService(ILogger<ImageService> logger)
     {
-      _logger = logger;
+        _logger = logger;
     }
 
     /// <summary>
@@ -35,33 +51,33 @@ namespace API.Services
     /// <returns></returns>
     public string GetCoverFile(MangaFile file)
     {
-      var directory = Path.GetDirectoryName(file.FilePath);
-      if (string.IsNullOrEmpty(directory))
-      {
-        _logger.LogError("Could not find Directory for {File}", file.FilePath);
-        return null;
-      }
+        var directory = Path.GetDirectoryName(file.FilePath);
+        if (string.IsNullOrEmpty(directory))
+        {
+            _logger.LogError("Could not find Directory for {File}", file.FilePath);
+            return null;
+        }
 
-      var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
-        .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
+        var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
+            .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
 
-      return firstImage;
+        return firstImage;
     }
 
     public string GetCoverImage(string path, string fileName)
     {
-      if (string.IsNullOrEmpty(path)) return string.Empty;
+        if (string.IsNullOrEmpty(path)) return string.Empty;
 
-      try
-      {
-          return CreateThumbnail(path,  fileName);
-      }
-      catch (Exception ex)
-      {
-        _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
-      }
+        try
+        {
+            return CreateThumbnail(path,  fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
+        }
 
-      return string.Empty;
+        return string.Empty;
     }
 
     /// <inheritdoc />
@@ -146,5 +162,4 @@ namespace API.Services
     {
         return $"tag{tagId}";
     }
-  }
 }

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using API.Extensions;
-using API.Interfaces;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 

@@ -5,8 +5,6 @@ using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
