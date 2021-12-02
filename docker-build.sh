@@ -25,7 +25,7 @@ Build()
     dotnet clean $slnFile -c Release
 
 	  dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID
-  
+
     ProgressEnd 'Build for $RID'
 }
 
@@ -37,7 +37,7 @@ BuildUI()
     npm run prod
     cd ../Kavita/ || exit
     ProgressEnd 'Building UI'
-    
+
     ProgressStart 'Building UI'
     echo 'Removing old wwwroot'
     rm -rf API/wwwroot/*
@@ -68,18 +68,18 @@ Package()
 
     echo "Copying Install information"
     cp ../INSTALL.txt "$lOutputFolder"/README.txt
-    
+
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
-    
+
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
     tar -czvf ../kavita-$runtime.tar.gz Kavita
-    
-    ProgressEnd "Creating $runtime Package for $framework"    
+
+    ProgressEnd "Creating $runtime Package for $framework"
 
 }
 
@@ -94,17 +94,17 @@ BuildUI
 
 #Build for x64
 Build "linux-x64"
-Package "net5.0" "linux-x64"
+Package "net6.0" "linux-x64"
 cd "$dir"
 
 #Build for arm
 Build "linux-arm"
-Package "net5.0" "linux-arm"
+Package "net6.0" "linux-arm"
 cd "$dir"
 
 #Build for arm64
 Build "linux-arm64"
-Package "net5.0" "linux-arm64"
+Package "net6.0" "linux-arm64"
 cd "$dir"
 
 #Builds Docker images
