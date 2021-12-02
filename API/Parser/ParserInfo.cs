@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using API.Data.Metadata;
+using API.Entities.Enums;
 
 namespace API.Parser
 {
@@ -15,7 +16,11 @@ namespace API.Parser
         /// <summary>
         /// Represents the parsed series from the file or folder
         /// </summary>
-        public string Series { get; set; } = "";
+        public string Series { get; set; } = string.Empty;
+        /// <summary>
+        /// This can be filled in from ComicInfo.xml/Epub during scanning. Will update the SortName field on <see cref="Entities.Series"/>
+        /// </summary>
+        public string SeriesSort { get; set; } = string.Empty;
         /// <summary>
         /// Represents the parsed volumes from a file. By default, will be 0 which means that nothing could be parsed.
         /// If Volumes is 0 and Chapters is 0, the file is a special. If Chapters is non-zero, then no volume could be parsed.
@@ -55,15 +60,25 @@ namespace API.Parser
         /// <remarks>Manga does not use this field</remarks>
         /// </summary>
         public string Title { get; set; } = string.Empty;
-        
+
         /// <summary>
         /// If the ParserInfo has the IsSpecial tag or both volumes and chapters are default aka 0
         /// </summary>
         /// <returns></returns>
         public bool IsSpecialInfo()
-        { 
+        {
             return (IsSpecial || (Volumes == "0" && Chapters == "0"));
         }
+
+        // (TODO: Make this a ValueType). Has at least 1 year, maybe 2 representing a range
+        // public string YearRange { get; set; }
+        // public IList<string> Genres { get; set; } = new List<string>();
+
+        /// <summary>
+        /// This will contain any EXTRA comicInfo information parsed from the epub or archive. If there is an archive with comicInfo.xml AND it contains
+        /// series, volume information, that will override what we parsed.
+        /// </summary>
+        public ComicInfo ComicInfo { get; set; }
 
         /// <summary>
         /// Merges non empty/null properties from info2 into this entity.

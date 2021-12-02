@@ -50,5 +50,17 @@ namespace API.DTOs
         /// When chapter was created
         /// </summary>
         public DateTime Created { get; init; }
+        /// <summary>
+        /// Title of the Chapter/Issue
+        /// </summary>
+        public string TitleName { get; set; }
+        public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Colorist { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Letterer { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> CoverArtist { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
     }
 }

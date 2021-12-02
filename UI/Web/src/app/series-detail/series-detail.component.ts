@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
@@ -15,6 +15,7 @@ import { DownloadService } from '../shared/_services/download.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
@@ -188,16 +189,21 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.toastr.info('This series no longer exists');
           this.router.navigateByUrl('/libraries');
         }
+      } else if (event.event === EVENTS.RefreshMetadata) {
+        const seriesRemovedEvent = event.payload as RefreshMetadataEvent;
+        if (seriesRemovedEvent.seriesId === this.series.id) {
+          this.seriesService.getMetadata(this.series.id).pipe(take(1)).subscribe(metadata => {
+            this.seriesMetadata = metadata;
+            this.createHTML();
+          })
+        }
       }
     });
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
-      this.libraryType = type;
-      this.loadSeries(seriesId);
-    });
+    this.loadSeries(seriesId);
   }
 
   ngOnDestroy() {
@@ -328,11 +334,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
-    this.seriesService.getSeries(seriesId).subscribe(series => {
-      this.series = series;
+
+    forkJoin([
+      this.libraryService.getLibraryType(this.libraryId),
+      this.seriesService.getMetadata(seriesId),
+      this.seriesService.getSeries(seriesId)
+    ]).subscribe(results => {
+      this.libraryType = results[0];
+      this.seriesMetadata = results[1];
+      this.series = results[2];
+
       this.createHTML();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
@@ -381,7 +392,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    this.seriesSummary = (this.series.summary === null ? '' : this.series.summary).replace(/\n/g, '<br>');
+    if (this.seriesMetadata !== null) {
+      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
+    }
+    
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 
@@ -565,5 +579,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.downloadInProgress = false;
         })).subscribe(() => {/* No Operation */});;
     });
+  }
+
+  formatChapterTitle(chapter: Chapter) {
+    return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
+  }
+
+  formatVolumeTitle(volume: Volume) {
+    return 'Volume ' + volume.name;
   }
 }

@@ -1,4 +1,5 @@
-﻿using API.Data;
+﻿using System.IO.Abstractions;
+using API.Data;
 using API.Helpers;
 using API.Interfaces;
 using API.Interfaces.Services;
@@ -37,6 +38,11 @@ namespace API.Extensions
             services.AddScoped<IDownloadService, DownloadService>();
             services.AddScoped<IReaderService, ReaderService>();
             services.AddScoped<IAccountService, AccountService>();
+
+
+            services.AddScoped<IFileSystem, FileSystem>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ICacheHelper, CacheHelper>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 

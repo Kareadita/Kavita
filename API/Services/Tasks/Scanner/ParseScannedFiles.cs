@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Interfaces.Services;
@@ -25,6 +26,8 @@ namespace API.Services.Tasks.Scanner
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
         private readonly IBookService _bookService;
         private readonly ILogger _logger;
+        private readonly IArchiveService _archiveService;
+        private readonly IDirectoryService _directoryService;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -32,10 +35,13 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="bookService"></param>
         /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger)
+        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService,
+            IDirectoryService directoryService)
         {
             _bookService = bookService;
             _logger = logger;
+            _archiveService = archiveService;
+            _directoryService = directoryService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         }
 
@@ -51,6 +57,20 @@ namespace API.Services.Tasks.Scanner
                 ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
 
             return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
+        }
+
+        private ComicInfo GetComicInfo(string path)
+        {
+            if (Parser.Parser.IsEpub(path))
+            {
+                return _bookService.GetComicInfo(path);
+            }
+
+            if (Parser.Parser.IsComicInfoExtension(path))
+            {
+                return _archiveService.GetComicInfo(path);
+            }
+            return null;
         }
 
         /// <summary>
@@ -90,8 +110,31 @@ namespace API.Services.Tasks.Scanner
                 info.Merge(info2);
             }
 
+            // TODO: Think about doing this before the Fallback code to speed up
+            info.ComicInfo = GetComicInfo(path);
+            if (info.ComicInfo != null)
+            {
+                var sw = Stopwatch.StartNew();
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                {
+                    info.Volumes = info.ComicInfo.Volume;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
+
+                _logger.LogDebug("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
+            }
+
             TrackSeries(info);
         }
+
 
         /// <summary>
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
@@ -161,12 +204,12 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = GetLibrarySearchPattern();
+            var searchPattern = Parser.Parser.SupportedExtensions;
             foreach (var folderPath in folders)
             {
                 try
                 {
-                    totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath, (f) =>
+                    totalFiles += _directoryService.TraverseTreeParallelForEach(folderPath, (f) =>
                     {
                         try
                         {
@@ -189,11 +232,6 @@ namespace API.Services.Tasks.Scanner
                 scanElapsedTime);
 
             return SeriesWithInfos();
-        }
-
-        private static string GetLibrarySearchPattern()
-        {
-            return Parser.Parser.SupportedExtensions;
         }
 
         /// <summary>

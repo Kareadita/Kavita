@@ -58,7 +58,7 @@ export class ActionService implements OnDestroy {
       return;
     }
     this.libraryService.scan(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -77,11 +77,14 @@ export class ActionService implements OnDestroy {
     }
 
     if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(library);
+      }
       return;
     }
 
     this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -125,7 +128,7 @@ export class ActionService implements OnDestroy {
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
+      this.toastr.success('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
       }

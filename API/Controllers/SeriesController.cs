@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
@@ -187,7 +188,7 @@ namespace API.Controllers
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
             series.SortName = updateSeries.SortName?.Trim();
-            series.Summary = updateSeries.Summary?.Trim();
+            series.Metadata.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset
@@ -294,6 +295,7 @@ namespace API.Controllers
                 else
                 {
                     series.Metadata.CollectionTags ??= new List<CollectionTag>();
+                    // TODO: Move this merging logic into a reusable code as it can be used for any Tag
                     var newTags = new List<CollectionTag>();
 
                     // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
@@ -391,7 +393,5 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
         }
-
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Abstractions;
 using API.Entities.Enums;
 using API.Interfaces.Services;
 using API.Parser;
@@ -20,11 +21,13 @@ namespace API.Benchmark
         private readonly ParseScannedFiles _parseScannedFiles;
         private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
         private readonly ILogger<BookService> _bookLogger = Substitute.For<ILogger<BookService>>();
+        private readonly IArchiveService _archiveService = Substitute.For<ArchiveService>();
 
         public ParseScannedFilesBenchmarks()
         {
             IBookService bookService = new BookService(_bookLogger);
-            _parseScannedFiles = new ParseScannedFiles(bookService, _logger);
+            _parseScannedFiles = new ParseScannedFiles(bookService, _logger, _archiveService,
+                new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
         }
 
         // [Benchmark]

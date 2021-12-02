@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -41,7 +42,7 @@ namespace API.Data.Repositories
         /// <returns></returns>
         public async Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId)
         {
-            return await _context.Chapter
+            var chapterInfo = await _context.Chapter
                 .Where(c => c.Id == chapterId)
                 .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
                 {
@@ -49,8 +50,9 @@ namespace API.Data.Repositories
                     VolumeNumber = volume.Number,
                     VolumeId = volume.Id,
                     chapter.IsSpecial,
+                    chapter.TitleName,
                     volume.SeriesId,
-                    chapter.Pages
+                    chapter.Pages,
                 })
                 .Join(_context.Series, data => data.SeriesId, series => series.Id, (data, series) => new
                 {
@@ -60,11 +62,12 @@ namespace API.Data.Repositories
                     data.IsSpecial,
                     data.SeriesId,
                     data.Pages,
+                    data.TitleName,
                     SeriesFormat = series.Format,
                     SeriesName = series.Name,
                     series.LibraryId
                 })
-                .Select(data => new BookInfoDto()
+                .Select(data => new ChapterInfoDto()
                 {
                     ChapterNumber = data.ChapterNumber,
                     VolumeNumber = data.VolumeNumber + string.Empty,
@@ -74,10 +77,13 @@ namespace API.Data.Repositories
                     SeriesFormat = data.SeriesFormat,
                     SeriesName = data.SeriesName,
                     LibraryId = data.LibraryId,
-                    Pages = data.Pages
+                    Pages = data.Pages,
+                    ChapterTitle = data.TitleName
                 })
                 .AsNoTracking()
-                .SingleAsync();
+                .SingleOrDefaultAsync();
+
+            return chapterInfo;
         }
 
         public Task<int> GetChapterTotalPagesAsync(int chapterId)

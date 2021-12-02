@@ -21,6 +21,8 @@ import { CardDetailsModalComponent } from './_modals/card-details-modal/card-det
 import { BulkOperationsComponent } from './bulk-operations/bulk-operations.component';
 import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { PipeModule } from '../pipe/pipe.module';
+import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
+import { FileInfoComponent } from './file-info/file-info.component';
 
 
 
@@ -38,7 +40,9 @@ import { PipeModule } from '../pipe/pipe.module';
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
     BulkOperationsComponent,
-    BulkAddToCollectionComponent
+    BulkAddToCollectionComponent,
+    ChapterMetadataDetailComponent,
+    FileInfoComponent
   ],
   imports: [
     CommonModule,
@@ -75,7 +79,8 @@ import { PipeModule } from '../pipe/pipe.module';
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
-    BulkOperationsComponent
+    BulkOperationsComponent,
+    ChapterMetadataDetailComponent
   ]
 })
 export class CardsModule { }

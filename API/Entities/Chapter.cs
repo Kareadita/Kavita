@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using API.Parser;
 
 namespace API.Entities
@@ -42,9 +43,29 @@ namespace API.Entities
         /// </summary>
         public string Title { get; set; }
 
+
+        /// <summary>
+        /// Chapter title
+        /// </summary>
+        /// <remarks>This should not be confused with Title which is used for special filenames.</remarks>
+        public string TitleName { get; set; } = string.Empty;
+        // public string Year { get; set; } // Only time I can think this will be more than 1 year is for a volume which will be a spread
+
+
+        /// <summary>
+        /// All people attached at a Chapter level. Usually Comics will have different people per issue.
+        /// </summary>
+        public ICollection<Person> People { get; set; } = new List<Person>();
+
+
+
+
         // Relationships
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
+
+        //public ChapterMetadata ChapterMetadata { get; set; }
+        //public int ChapterMetadataId { get; set; }
 
         public void UpdateFrom(ParserInfo info)
         {

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
+using API.Extensions;
 using API.Parser;
 using API.Services.Tasks;
 
@@ -21,10 +25,14 @@ namespace API.Data
                 LocalizedName = name,
                 NormalizedName = Parser.Parser.Normalize(name),
                 SortName = name,
-                Summary = string.Empty,
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
             };
+        }
+
+        public static SeriesMetadata SeriesMetadata(ComicInfo info)
+        {
+            return SeriesMetadata(Array.Empty<CollectionTag>());
         }
 
         public static Volume Volume(string volumeNumber)
@@ -57,7 +65,8 @@ namespace API.Data
         {
             return new SeriesMetadata()
             {
-                CollectionTags = collectionTags
+                CollectionTags = collectionTags,
+                Summary = string.Empty
             };
         }
 
@@ -72,5 +81,37 @@ namespace API.Data
                 Promoted = promoted
             };
         }
+
+        public static Genre Genre(string name, bool external)
+        {
+            return new Genre()
+            {
+                Title = name.Trim().SentenceCase(),
+                NormalizedTitle = Parser.Parser.Normalize(name),
+                ExternalTag = external
+            };
+        }
+
+        public static Person Person(string name, PersonRole role)
+        {
+            return new Person()
+            {
+                Name = name.Trim(),
+                NormalizedName = Parser.Parser.Normalize(name),
+                Role = role
+            };
+        }
+
+        public static MangaFile MangaFile(string filePath, MangaFormat format, int pages)
+        {
+            return new MangaFile()
+            {
+                FilePath = filePath,
+                Format = format,
+                Pages = pages,
+                LastModified = DateTime.Now //File.GetLastWriteTime(filePath)
+            };
+        }
+
     }
 }

@@ -22,7 +22,6 @@ import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
-import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { OnDeckComponent } from './on-deck/on-deck.component';
@@ -33,6 +32,8 @@ import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
+import { PersonRolePipe } from './person-role.pipe';
+import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 
 
 @NgModule({
@@ -45,11 +46,12 @@ import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.
     SeriesDetailComponent, 
     NotConnectedComponent, // Move into ExtrasModule
     ReviewSeriesModalComponent,
-    PersonBadgeComponent,
     RecentlyAddedComponent,
     OnDeckComponent,
     DashboardComponent,
     NavEventsToggleComponent,
+    PersonRolePipe,
+    SeriesMetadataDetailComponent,
   ],
   imports: [
     HttpClientModule,

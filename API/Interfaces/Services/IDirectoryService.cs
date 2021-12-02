@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace API.Interfaces.Services
 {
@@ -16,5 +17,6 @@ namespace API.Interfaces.Services
         bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "");
         bool Exists(string directory);
         void CopyFileToDirectory(string fullFilePath, string targetDirectory);
+        int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger);
     }
 }

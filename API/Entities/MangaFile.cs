@@ -25,25 +25,18 @@ namespace API.Entities
         /// </summary>
         public DateTime LastModified { get; set; }
 
+
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
 
-        // Methods
-        /// <summary>
-        /// If the File on disk's last modified time is after what is stored in MangaFile
-        /// </summary>
-        /// <returns></returns>
-        public bool HasFileBeenModified()
-        {
-            return File.GetLastWriteTime(FilePath) > LastModified;
-        }
 
         /// <summary>
         /// Updates the Last Modified time of the underlying file
         /// </summary>
         public void UpdateLastModified()
         {
+            // Should this be DateTime.Now ?
             LastModified = File.GetLastWriteTime(FilePath);
         }
     }

@@ -1,0 +1,11 @@
+<li class="list-group-item">
+    <span>{{file.filePath}}</span>
+    <div class="row no-gutters">
+        <div class="col">
+            Pages: {{file.pages}}
+        </div>
+        <div class="col" *ngIf="created != undefined">
+            Added: {{(created | date: 'short') || '-'}}
+        </div>
+    </div>
+</li>

@@ -48,6 +48,8 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
             MatchOptions, RegexTimeout);
+        private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
+            MatchOptions, RegexTimeout);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
             MatchOptions, RegexTimeout);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
@@ -862,7 +864,6 @@ namespace API.Parser
                 }
             }
 
-            // TODO: Since we have loops like this, think about using a method
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);
@@ -997,6 +998,10 @@ namespace API.Parser
         {
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
+        public static bool IsComicInfoExtension(string filePath)
+        {
+            return ComicInfoArchiveRegex.IsMatch(Path.GetExtension(filePath));
+        }
         public static bool IsBook(string filePath)
         {
             return BookFileRegex.IsMatch(Path.GetExtension(filePath));
@@ -1061,6 +1066,18 @@ namespace API.Parser
         public static bool IsPdf(string filePath)
         {
            return Path.GetExtension(filePath).ToLower() == ".pdf";
+        }
+
+        /// <summary>
+        /// Cleans an author's name
+        /// </summary>
+        /// <remarks>If the author is Last, First, this will reverse</remarks>
+        /// <param name="author"></param>
+        /// <returns></returns>
+        public static string CleanAuthor(string author)
+        {
+            if (string.IsNullOrEmpty(author)) return string.Empty;
+            return string.Join(" ", author.Split(",").Reverse().Select(s => s.Trim()));
         }
     }
 }

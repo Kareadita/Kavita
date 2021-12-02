@@ -201,11 +201,15 @@ namespace API.Services
 
                 var info =  new ComicInfo()
                 {
+                    // TODO: Summary is in html, we need to turn it into string
                     Summary = epubBook.Schema.Package.Metadata.Description,
-                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators),
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                    Title = epubBook.Title,
+                    Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
+
                 };
                 // Parse tags not exposed via Library
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -214,6 +218,9 @@ namespace API.Services
                     {
                         case "calibre:rating":
                             info.UserRating = float.Parse(metadataItem.Content);
+                            break;
+                        case "calibre:title_sort":
+                            info.TitleSort = metadataItem.Content;
                             break;
                     }
                 }
@@ -305,8 +312,6 @@ namespace API.Services
            {
                 using var epubBook = EpubReader.OpenBook(filePath);
 
-                // If the epub has the following tags, we can group the books as Volumes
-                // <meta content="5.0" name="calibre:series_index"/>
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
                 // If all three are present, we can take that over dc:title and format as:
@@ -323,6 +328,7 @@ namespace API.Services
                     var series = string.Empty;
                     var specialName = string.Empty;
                     var groupPosition = string.Empty;
+                    var titleSort = string.Empty;
 
 
                     foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -338,6 +344,7 @@ namespace API.Services
                                 break;
                             case "calibre:title_sort":
                                 specialName = metadataItem.Content;
+                                titleSort = metadataItem.Content;
                                 break;
                         }
 
@@ -363,18 +370,26 @@ namespace API.Services
                         {
                             specialName = epubBook.Title;
                         }
-                        return new ParserInfo()
+                        var info = new ParserInfo()
                         {
                             Chapters = Parser.Parser.DefaultChapter,
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
-                            Title = specialName.Trim(),
+                            Title = specialName?.Trim(),
                             FullFilePath = filePath,
                             IsSpecial = false,
                             Series = series.Trim(),
                             Volumes = seriesIndex
                         };
+
+                        // Don't set titleSort if the book belongs to a group
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex))
+                        {
+                            info.SeriesSort = titleSort;
+                        }
+
+                        return info;
                     }
                 }
                 catch (Exception)
@@ -392,7 +407,7 @@ namespace API.Services
                     FullFilePath = filePath,
                     IsSpecial = false,
                     Series = epubBook.Title.Trim(),
-                    Volumes = Parser.Parser.DefaultVolume
+                    Volumes = Parser.Parser.DefaultVolume,
                 };
            }
            catch (Exception ex)
@@ -494,6 +509,7 @@ namespace API.Services
 
         private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
+            // TODO: BUG: Most of this Bitmap code is only supported on Windows. Refactor.
             using var pageReader = docReader.GetPageReader(pageNumber);
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();

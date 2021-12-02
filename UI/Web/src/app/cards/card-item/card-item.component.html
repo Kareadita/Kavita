@@ -26,7 +26,7 @@
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
       <div>
-        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" ngbTooltip="{{title}}" (click)="handleClick()" tabindex="0">
+        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick()" tabindex="0">
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
             <span class="sr-only">(promoted)</span>

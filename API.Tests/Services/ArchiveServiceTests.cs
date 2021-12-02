@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using API.Archive;
 using API.Data.Metadata;
@@ -19,7 +20,7 @@ namespace API.Tests.Services
         private readonly ArchiveService _archiveService;
         private readonly ILogger<ArchiveService> _logger = Substitute.For<ILogger<ArchiveService>>();
         private readonly ILogger<DirectoryService> _directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
-        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>());
+        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
 
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
         {
@@ -159,7 +160,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger, new MockFileSystem()));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.Default);
@@ -191,7 +192,7 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger));
+            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger, new MockFileSystem()));
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
 
@@ -215,10 +216,23 @@ namespace API.Tests.Services
         public void ShouldHaveComicInfo()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
-            var archive = Path.Join(testDirectory, "file in folder.zip");
-            var summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
+            var archive = Path.Join(testDirectory, "ComicInfo.zip");
+            const string summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
 
-            Assert.Equal(summaryInfo, _archiveService.GetComicInfo(archive).Summary);
+            var comicInfo = _archiveService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal(summaryInfo, comicInfo.Summary);
+        }
+
+        [Fact]
+        public void ShouldHaveComicInfo_WithAuthors()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+            var archive = Path.Join(testDirectory, "ComicInfo_authors.zip");
+
+            var comicInfo = _archiveService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal("Junya Inoue", comicInfo.Writer);
         }
 
         [Fact]

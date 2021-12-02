@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using API.Entities;
 
 namespace API.Interfaces.Services
 {
@@ -11,10 +10,6 @@ namespace API.Interfaces.Services
         /// <param name="libraryId"></param>
         /// <param name="forceUpdate"></param>
         Task RefreshMetadata(int libraryId, bool forceUpdate = false);
-
-        public bool UpdateMetadata(Chapter chapter, bool forceUpdate);
-        public bool UpdateMetadata(Volume volume, bool forceUpdate);
-        public bool UpdateMetadata(Series series, bool forceUpdate);
         /// <summary>
         /// Performs a forced refresh of metatdata just for a series and it's nested entities
         /// </summary>

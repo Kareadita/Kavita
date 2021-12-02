@@ -8,6 +8,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Interfaces.Repositories;
@@ -85,6 +86,12 @@ namespace API.Data.Repositories
             var query = _context.Series
                 .Where(s => s.LibraryId == libraryId)
                 .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Genres)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(cm => cm.People)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
@@ -104,7 +111,13 @@ namespace API.Data.Repositories
             return await _context.Series
                 .Where(s => s.Id == seriesId)
                 .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Genres)
                 .Include(s => s.Library)
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters)
+                .ThenInclude(cm => cm.People)
                 .Include(s => s.Volumes)
                 .ThenInclude(v => v.Chapters)
                 .ThenInclude(c => c.Files)
@@ -180,6 +193,10 @@ namespace API.Data.Repositories
                 .Include(s => s.Volumes)
                 .Include(s => s.Metadata)
                 .ThenInclude(m => m.CollectionTags)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Genres)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
                 .Where(s => s.Id == seriesId)
                 .SingleOrDefaultAsync();
         }
@@ -374,6 +391,7 @@ namespace API.Data.Repositories
         {
             var metadataDto = await _context.SeriesMetadata
                 .Where(metadata => metadata.SeriesId == seriesId)
+                .Include(m => m.Genres)
                 .AsNoTracking()
                 .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync();
@@ -481,17 +499,7 @@ namespace API.Data.Repositories
         /// <returns></returns>
         private async Task<Tuple<int, int>> GetChunkSize(int libraryId = 0)
         {
-            // TODO: Think about making this bigger depending on number of files a user has in said library
-            // and number of cores and amount of memory. We can then make an optimal choice
             var totalSeries = await GetSeriesCount(libraryId);
-            // var procCount = Math.Max(Environment.ProcessorCount - 1, 1);
-            //
-            // if (totalSeries < procCount * 2 || totalSeries < 50)
-            // {
-            //     return new Tuple<int, int>(totalSeries, totalSeries);
-            // }
-            //
-            // return new Tuple<int, int>(totalSeries, Math.Max(totalSeries / procCount, 50));
             return new Tuple<int, int>(totalSeries, 50);
         }
 

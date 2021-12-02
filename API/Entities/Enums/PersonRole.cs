@@ -5,15 +5,27 @@
         /// <summary>
         /// Another role, not covered by other types
         /// </summary>
-        Other = 0,
-        /// <summary>
-        /// Author
-        /// </summary>
-        Author = 1,
+        Other = 1,
         /// <summary>
         /// Artist
         /// </summary>
-        Artist = 2,
-        
+        //Artist = 2,
+        /// <summary>
+        /// Author or Writer
+        /// </summary>
+        Writer = 3,
+        Penciller = 4,
+        Inker = 5,
+        Colorist = 6,
+        Letterer = 7,
+        CoverArtist = 8,
+        Editor = 9,
+        Publisher = 10,
+        /// <summary>
+        /// Represents a character/person within the story
+        /// </summary>
+        Character = 11
+
+
     }
 }
