@@ -257,6 +257,24 @@ public class MetadataService : IMetadataService
 
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
                 person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Name), PersonRole.Character,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Colorist).Select(p => p.Name), PersonRole.Colorist,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Editor).Select(p => p.Name), PersonRole.Editor,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Inker).Select(p => p.Name), PersonRole.Inker,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Letterer).Select(p => p.Name), PersonRole.Letterer,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
         }
 
         var comicInfos = series.Volumes

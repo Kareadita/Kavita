@@ -30,7 +30,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
                 .ForMember(dest => dest.CoverArtist,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
                 .ForMember(dest => dest.Colorist,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))
@@ -64,7 +64,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
                 .ForMember(dest => dest.Artists,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
                 .ForMember(dest => dest.Characters,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character)))
@@ -93,7 +93,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
                 .ForMember(dest => dest.CoverArtist,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Artist)))
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
                 .ForMember(dest => dest.Colorist,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))

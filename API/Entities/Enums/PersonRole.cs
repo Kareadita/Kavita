@@ -9,7 +9,7 @@
         /// <summary>
         /// Artist
         /// </summary>
-        Artist = 2,
+        //Artist = 2,
         /// <summary>
         /// Author or Writer
         /// </summary>

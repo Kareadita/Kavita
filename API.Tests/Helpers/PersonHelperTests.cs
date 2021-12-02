@@ -14,7 +14,7 @@ public class PersonHelperTests
     {
         var allPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer)
         };
         var peopleAdded = new List<Person>();
@@ -33,14 +33,14 @@ public class PersonHelperTests
     {
         var allPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer),
-            DbFactory.Person("Sally Ann", PersonRole.Artist),
+            DbFactory.Person("Sally Ann", PersonRole.CoverArtist),
 
         };
         var peopleAdded = new List<Person>();
 
-        PersonHelper.UpdatePeople(allPeople, new[] {"Joe Shmo", "Sally Ann"}, PersonRole.Artist, person =>
+        PersonHelper.UpdatePeople(allPeople, new[] {"Joe Shmo", "Sally Ann"}, PersonRole.CoverArtist, person =>
         {
             peopleAdded.Add(person);
         });
@@ -53,7 +53,7 @@ public class PersonHelperTests
     {
         var existingPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer)
         };
         var peopleRemoved = new List<Person>();
@@ -71,7 +71,7 @@ public class PersonHelperTests
     {
         var existingPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer)
         };
         var peopleRemoved = new List<Person>();
@@ -83,7 +83,7 @@ public class PersonHelperTests
         Assert.NotEqual(existingPeople, peopleRemoved);
         Assert.Equal(1, peopleRemoved.Count);
 
-        PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo"}, PersonRole.Artist, person =>
+        PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo"}, PersonRole.CoverArtist, person =>
         {
             peopleRemoved.Add(person);
         });
@@ -97,14 +97,14 @@ public class PersonHelperTests
     {
         var existingPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer),
             DbFactory.Person("Sally", PersonRole.Writer),
         };
 
         var peopleFromChapters = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
         };
 
         var peopleRemoved = new List<Person>();
@@ -122,19 +122,19 @@ public class PersonHelperTests
     {
         var existingPeople = new List<Person>
         {
-            DbFactory.Person("Joe Shmo", PersonRole.Artist),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist),
             DbFactory.Person("Joe Shmo", PersonRole.Writer),
             DbFactory.Person("Sally", PersonRole.Writer),
         };
 
 
-        PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo", PersonRole.Artist));
+        PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo", PersonRole.CoverArtist));
         Assert.Equal(3, existingPeople.Count);
 
         PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo", PersonRole.Writer));
         Assert.Equal(3, existingPeople.Count);
 
-        PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo Two", PersonRole.Artist));
+        PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo Two", PersonRole.CoverArtist));
         Assert.Equal(4, existingPeople.Count);
     }
 }
