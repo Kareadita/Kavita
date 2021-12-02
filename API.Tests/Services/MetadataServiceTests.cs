@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using API.Entities;
 using API.Helpers;
 using API.Services;
-using Xunit;
 
 namespace API.Tests.Services
 {
