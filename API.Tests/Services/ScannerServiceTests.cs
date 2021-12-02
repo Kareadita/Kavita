@@ -18,7 +18,6 @@ using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
-using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;

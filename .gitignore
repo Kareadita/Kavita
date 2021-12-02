@@ -517,5 +517,7 @@ API/config/covers/
 API/config/*.db
 API/config/stats/*
 API/config/stats/app_stats.json
+API/config/pre-metadata/
+API/config/post-metadata/
 
 UI/Web/.vscode/settings.json
