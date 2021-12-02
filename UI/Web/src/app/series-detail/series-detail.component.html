@@ -55,59 +55,7 @@
                 <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <div class="row no-gutters" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
-                    <div class="col-md-4">
-                        <h5>Genres</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-tag-badge *ngFor="let genre of seriesMetadata.genres" [selectionMode]="TagBadgeCursor.Clickable">{{genre.title}}</app-tag-badge>
-                    </div>
-                </div>
-                <div class="row no-gutters mt-1" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
-                    <div class="col-md-4">
-                        <h5>Collections</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-tag-badge *ngFor="let tag of seriesMetadata.tags" a11y-click="13,32" class="clickable" routerLink="/collections/{{tag.id}}"  [selectionMode]="TagBadgeCursor.Clickable">
-                            {{tag.title}}
-                        </app-tag-badge>
-                    </div>
-                </div>
-                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.writers && seriesMetadata.writers.length > 0">
-                    <div class="col-md-4">
-                        <h5>Authors</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-person-badge *ngFor="let person of seriesMetadata.writers" [person]="person"></app-person-badge>
-                    </div>
-                </div>
-
-                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.artists && seriesMetadata.artists.length > 0">
-                    <div class="col-md-4">
-                        <h5>Artists</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-person-badge *ngFor="let person of seriesMetadata.artists" [person]="person"></app-person-badge>
-                    </div>
-                </div>
-
-                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.publishers && seriesMetadata.publishers.length > 0">
-                    <div class="col-md-4">
-                        <h5>Publishers</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-person-badge *ngFor="let person of seriesMetadata.publishers" [person]="person"></app-person-badge>
-                    </div>
-                </div>
-
-                <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.characters && seriesMetadata.characters.length > 0">
-                    <div class="col-md-4">
-                        <h5>Characters</h5>
-                    </div>
-                    <div class="col-md-8">
-                        <app-person-badge *ngFor="let person of seriesMetadata.characters" [person]="person"></app-person-badge>
-                    </div>
-                </div>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata"></app-series-metadata-detail>
 
                 <div class="row no-gutters mt-1" *ngIf="series.format != MangaFormat.UNKNOWN">
                     <div class="col-md-4">
@@ -118,6 +66,8 @@
                     </div>
                 </div>
             </div>
+
+
         </div>
     </div>
 

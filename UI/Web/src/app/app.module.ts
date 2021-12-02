@@ -33,6 +33,7 @@ import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
 import { PersonRolePipe } from './person-role.pipe';
+import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 
 
 @NgModule({
@@ -50,6 +51,7 @@ import { PersonRolePipe } from './person-role.pipe';
     DashboardComponent,
     NavEventsToggleComponent,
     PersonRolePipe,
+    SeriesMetadataDetailComponent,
   ],
   imports: [
     HttpClientModule,

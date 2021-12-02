@@ -579,5 +579,4 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   formatVolumeTitle(volume: Volume) {
     return 'Volume ' + volume.name;
   }
-
 }

@@ -11,6 +11,11 @@ export interface SeriesMetadata {
     artists: Array<Person>;
     publishers: Array<Person>;
     characters: Array<Person>;
+    pencillers: Array<Person>;
+    inkers: Array<Person>;
+    colorists: Array<Person>;
+    letterers: Array<Person>;
+    editors: Array<Person>;
 
     seriesId: number;
 }

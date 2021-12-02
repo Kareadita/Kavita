@@ -70,7 +70,22 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Character)))
                 .ForMember(dest => dest.Publishers,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)));
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)))
+                .ForMember(dest => dest.Colorists,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Colorist)))
+                .ForMember(dest => dest.Inkers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Inker)))
+                .ForMember(dest => dest.Letterers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Letterer)))
+                .ForMember(dest => dest.Pencillers,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Penciller)))
+                .ForMember(dest => dest.Editors,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
             CreateMap<ChapterMetadata, ChapterMetadataDto>()
                 .ForMember(dest => dest.Writers,
