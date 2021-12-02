@@ -95,7 +95,7 @@ jobs:
 
   version:
     name: Bump version on Develop push
-    needs: [ build, test ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
@@ -122,7 +122,7 @@ jobs:
 
   develop:
     name: Build Nightly Docker if Develop push
-    needs: [ build, test, version ]
+    needs: [ build, version ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
@@ -225,7 +225,7 @@ jobs:
 
   stable:
     name: Build Stable Docker if Main push
-    needs: [ build, test ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
