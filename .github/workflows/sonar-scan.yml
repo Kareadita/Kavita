@@ -20,7 +20,8 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          include-prerelease: True
+          dotnet-version: '6.0'
 
       - name: Install dependencies
         run: dotnet restore
@@ -48,7 +49,8 @@ jobs:
 #      - name: Setup .NET Core
 #        uses: actions/setup-dotnet@v1
 #        with:
-#          dotnet-version: '6.0.x'
+#          include-prerelease: True
+#          dotnet-version: '6.0'
 #
 #      - name: Install dependencies
 #        run: dotnet restore
@@ -106,7 +108,8 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+            include-prerelease: True
+            dotnet-version: '6.0'
 
       - name: Install dependencies
         run: dotnet restore
@@ -186,7 +189,8 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          include-prerelease: True
+          dotnet-version: '6.0'
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
@@ -299,7 +303,8 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          include-prerelease: True
+          dotnet-version: '6.0'
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
