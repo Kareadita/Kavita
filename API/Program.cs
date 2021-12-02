@@ -39,7 +39,7 @@ namespace API
             {
                 Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
                 var rBytes = new byte[128];
-                using (var crypto = new RNGCryptoServiceProvider()) crypto.GetBytes(rBytes);
+                RandomNumberGenerator.Create().GetBytes(rBytes);
                 Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
             }
 
