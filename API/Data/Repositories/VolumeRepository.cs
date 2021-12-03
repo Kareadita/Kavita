@@ -97,6 +97,7 @@ public class VolumeRepository : IVolumeRepository
     /// Returns all volumes that contain a seriesId in passed array.
     /// </summary>
     /// <param name="seriesIds"></param>
+    /// <param name="includeChapters">Include chapter entities</param>
     /// <returns></returns>
     public async Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false)
     {

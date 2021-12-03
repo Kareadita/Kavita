@@ -8,6 +8,9 @@ using Kavita.Common;
 
 namespace API.Data
 {
+    /// <summary>
+    /// A Migration to migrate config related files to the config/ directory for installs prior to v0.4.9.
+    /// </summary>
     public static class MigrateConfigFiles
     {
         private static readonly List<string> LooseLeafFiles = new List<string>()
@@ -70,7 +73,7 @@ namespace API.Data
 
             try
             {
-                CopyLooseLeafFiles(directoryService);
+                CopyLooseLeafFiles();
 
                 CopyAppFolders(directoryService);
 
@@ -133,7 +136,7 @@ namespace API.Data
             Console.WriteLine("Moving folders to config...DONE");
         }
 
-        private static void CopyLooseLeafFiles(IDirectoryService directoryService)
+        private static void CopyLooseLeafFiles()
         {
             var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
                 .Where(f => f.Exists);

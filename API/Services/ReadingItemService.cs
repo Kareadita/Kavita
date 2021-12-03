@@ -116,7 +116,7 @@ public class ReadingItemService : IReadingItemService
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
-        };
+        }
     }
 
     public ParserInfo Parse(string path, string rootPath, LibraryType type)

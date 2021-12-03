@@ -283,10 +283,9 @@ public class MetadataService : IMetadataService
     /// <summary>
     ///
     /// </summary>
-    /// <remarks>This cannot have any Async code within. It is used within Parallel.ForEach</remarks>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
+    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -349,7 +348,6 @@ public class MetadataService : IMetadataService
                 });
             _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
-            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
             var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
 
@@ -359,7 +357,7 @@ public class MetadataService : IMetadataService
             {
                 try
                 {
-                    ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
+                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -470,11 +468,10 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
 
-        var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
 
-        ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
+        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
 
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));

@@ -59,6 +59,6 @@ public class GenreRepository : IGenreRepository
 
     public async Task<IList<Genre>> GetAllGenres()
     {
-        return await _context.Genre.ToListAsync();;
+        return await _context.Genre.ToListAsync();
     }
 }
