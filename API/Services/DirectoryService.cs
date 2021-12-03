@@ -36,8 +36,7 @@ namespace API.Services
 
         IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
 
-        IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
-            SearchOption searchOption = SearchOption.TopDirectoryOnly);
+        IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         bool ExistOrCreate(string directoryPath);
         void DeleteFiles(IEnumerable<string> files);
@@ -139,30 +138,49 @@ namespace API.Services
            return di.Exists;
        }
 
-       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
-          SearchOption searchOption = SearchOption.TopDirectoryOnly)
+       /// <summary>
+       /// Get files given a path.
+       /// </summary>
+       /// <remarks>This will automatically filter out restricted files, like MacOsMetadata files</remarks>
+       /// <param name="path"></param>
+       /// <param name="fileNameRegex">An optional regex string to search against. Will use file path to match against.</param>
+       /// <param name="searchOption">Defaults to top level directory only, can be given all to provide recursive searching</param>
+       /// <returns></returns>
+       public IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
            // TODO: Refactor this and GetFilesWithCertainExtensions to use same implementation
-          if (searchPatternExpression != string.Empty)
+           if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
+
+          if (fileNameRegex != string.Empty)
           {
-             if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
-             var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+              var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase);
              return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
-                   reSearchPattern.IsMatch(file) && !file.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+                {
+                    var fileName = FileSystem.Path.GetFileName(file);
+                    return reSearchPattern.IsMatch(fileName) &&
+                           !fileName.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith);
+                });
           }
 
-          return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
+          return FileSystem.Directory.EnumerateFiles(path, "*", searchOption).Where(file =>
+              !FileSystem.Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
        }
 
+       /// <summary>
+       /// Copies a file into a directory. Does not maintain parent folder of file.
+       /// Will create target directory if doesn't exist. Automatically overwrites what is there.
+       /// </summary>
+       /// <param name="fullFilePath"></param>
+       /// <param name="targetDirectory"></param>
        public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
        {
            try
            {
                var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
-               //var fileInfo = new FileInfo(fullFilePath);
                if (fileInfo.Exists)
                {
+                   ExistOrCreate(targetDirectory);
                    fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
                }
            }
@@ -173,19 +191,18 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Copies a Directory with all files and subdirectories to a target location
+       /// Copies all files and subdirectories within a directory to a target location
        /// </summary>
-       /// <param name="sourceDirName"></param>
-       /// <param name="destDirName"></param>
-       /// <param name="searchPattern">Defaults to *, meaning all files</param>
-       /// <returns></returns>
-       /// <exception cref="DirectoryNotFoundException"></exception>
+       /// <param name="sourceDirName">Directory to copy from. Does not copy the parent folder</param>
+       /// <param name="destDirName">Destination to copy to. Will be created if doesn't exist</param>
+       /// <param name="searchPattern">Defaults to all files</param>
+       /// <returns>If was successful</returns>
+       /// <exception cref="DirectoryNotFoundException">Thrown when source directory does not exist</exception>
        public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
          // Get the subdirectories for the specified directory.
-         //var dir = new DirectoryInfo(sourceDirName);
          var dir = FileSystem.DirectoryInfo.FromDirectoryName(sourceDirName);
 
          if (!dir.Exists)
@@ -226,11 +243,11 @@ namespace API.Services
        public bool IsDriveMounted(string path)
        {
            return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
-           //return new DirectoryInfo(Path.GetPathRoot(path) ?? string.Empty).Exists;
        }
 
        public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
+           // TODO: Use GitFiles instead
           if (searchPatternExpression != string.Empty)
           {
              return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
@@ -247,7 +264,6 @@ namespace API.Services
        public long GetTotalSize(IEnumerable<string> paths)
        {
            return paths.Sum(path => FileSystem.FileInfo.FromFileName(path).Length);
-          //return paths.Sum(path => new FileInfo(path).Length);
        }
 
        /// <summary>
@@ -257,18 +273,7 @@ namespace API.Services
        /// <returns></returns>
        public bool ExistOrCreate(string directoryPath)
        {
-          // var di = new DirectoryInfo(directoryPath);
-          // if (di.Exists) return true;
-          // try
-          // {
-          //    Directory.CreateDirectory(directoryPath);
-          // }
-          // catch (Exception)
-          // {
-          //    return false;
-          // }
-          // return true;
-          var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
+           var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
           if (di.Exists) return true;
           try
           {
@@ -288,9 +293,7 @@ namespace API.Services
        public void ClearAndDeleteDirectory(string directoryPath)
        {
            if (!FileSystem.Directory.Exists(directoryPath)) return;
-          //if (!Directory.Exists(directoryPath)) return;
 
-          //DirectoryInfo di = new DirectoryInfo(directoryPath);
           var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
 
           ClearDirectory(directoryPath);
@@ -305,8 +308,7 @@ namespace API.Services
        /// <returns></returns>
        public void ClearDirectory(string directoryPath)
        {
-          //var di = new DirectoryInfo(directoryPath);
-          var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
+           var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
           if (!di.Exists) return;
 
           foreach (var file in di.EnumerateFiles())
@@ -318,36 +320,6 @@ namespace API.Services
              dir.Delete(true);
           }
        }
-
-
-       // public static bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "", ILogger logger = null)
-       // {
-       //     ExistOrCreate(directoryPath);
-       //     string currentFile = null;
-       //     try
-       //     {
-       //         foreach (var file in filePaths)
-       //         {
-       //             currentFile = file;
-       //             var fileInfo = new FileInfo(file);
-       //             if (fileInfo.Exists)
-       //             {
-       //                 fileInfo.CopyTo(Path.Join(directoryPath, prepend + fileInfo.Name));
-       //             }
-       //             else
-       //             {
-       //                 logger?.LogWarning("Tried to copy {File} but it doesn't exist", file);
-       //             }
-       //         }
-       //     }
-       //     catch (Exception ex)
-       //     {
-       //         logger?.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
-       //         return false;
-       //     }
-       //
-       //     return true;
-       // }
 
        /// <summary>
        /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
@@ -365,7 +337,6 @@ namespace API.Services
                foreach (var file in filePaths)
                {
                    currentFile = file;
-                   //var fileInfo = new FileInfo(file);
                    var fileInfo = FileSystem.FileInfo.FromFileName(file);
                    if (fileInfo.Exists)
                    {
@@ -386,12 +357,15 @@ namespace API.Services
            return true;
        }
 
+       /// <summary>
+       /// Lists all directories in a root path. Will exclude Hidden or System directories.
+       /// </summary>
+       /// <param name="rootPath"></param>
+       /// <returns></returns>
        public IEnumerable<string> ListDirectory(string rootPath)
         {
             if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
-           //if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
 
-            //var di = new DirectoryInfo(rootPath);
             var di = FileSystem.DirectoryInfo.FromDirectoryName(rootPath);
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
@@ -400,18 +374,22 @@ namespace API.Services
             return dirs;
         }
 
+       /// <summary>
+       /// Reads a file's into byte[]. Returns empty array if file doesn't exist.
+       /// </summary>
+       /// <param name="path"></param>
+       /// <returns></returns>
        public async Task<byte[]> ReadFileAsync(string path)
        {
           if (!FileSystem.File.Exists(path)) return Array.Empty<byte>();
           return await FileSystem.File.ReadAllBytesAsync(path);
-          // if (!File.Exists(path)) return Array.Empty<byte>();
-          // return await File.ReadAllBytesAsync(path);
        }
 
 
        /// <summary>
-       /// Finds the highest directories from a set of MangaFiles
+       /// Finds the highest directories from a set of file paths. Does not return the root path, will always select the highest non-root path.
        /// </summary>
+       /// <remarks>If the file paths do not contain anything from libraryFolders, this returns an empty dictionary back</remarks>
        /// <param name="libraryFolders">List of top level folders which files belong to</param>
        /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
        /// <returns></returns>
@@ -470,9 +448,7 @@ namespace API.Services
             if (!FileSystem.Directory.Exists(root)) {
                 throw new ArgumentException("The directory doesn't exist");
             }
-            // if (!Directory.Exists(root)) {
-            //        throw new ArgumentException("The directory doesn't exist");
-            // }
+
             dirs.Push(root);
 
             while (dirs.Count > 0) {
@@ -497,6 +473,7 @@ namespace API.Services
                }
 
                try {
+                   // TODO: Replace this with GetFiles - It's the same code
                   files = GetFilesWithCertainExtensions(currentDir, searchPattern)
                      .ToArray();
                }

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -18,86 +21,571 @@ namespace API.Tests.Services
 
         public DirectoryServiceTests()
         {
-            _directoryService = new DirectoryService(_logger, new MockFileSystem());
+            var filesystem = new MockFileSystem()
+            {
+
+            };
+
+            _directoryService = new DirectoryService(_logger, filesystem);
         }
 
+
+        #region TraverseTreeParallelForEach
         [Fact]
-        public void GetFilesTest_Should_Be28()
+        public void TraverseTreeParallelForEach_JustArchives_ShouldBe28()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga");
-            // ReSharper disable once CollectionNeverQueried.Local
+            var testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 28; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
-            var fileCount = _directoryService.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
+            var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
                 API.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);
+            Assert.Equal(28, files.Count);
         }
 
         [Fact]
-        public void GetFiles_WithCustomRegex_ShouldPass_Test()
+        public void TraverseTreeParallelForEach_DontCountExcludedDirectories_ShouldBe28()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/regex");
-            var files = _directoryService.GetFiles(testDirectory, @"file\d*.txt");
-            Assert.Equal(2, files.Count());
+            var testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 28; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{Path.Join(testDirectory, "@eaDir")}file_{29}.jpg", new MockFileData(""));
+            fileSystem.AddFile($"{Path.Join(testDirectory, ".DS_Store")}file_{30}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = new List<string>();
+            var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
+                API.Parser.Parser.ArchiveFileExtensions, _logger);
+
+            Assert.Equal(28, fileCount);
+            Assert.Equal(28, files.Count);
+        }
+        #endregion
+
+        #region GetFilesWithCertainExtensions
+        [Fact]
+        public void GetFilesWithCertainExtensions_ShouldBe10()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFilesWithExtension(testDirectory, API.Parser.Parser.ArchiveFileExtensions);
+
+            Assert.Equal(10, files.Length);
+            Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
         }
 
         [Fact]
-        public void GetFiles_TopLevel_ShouldBeEmpty_Test()
+        public void GetFilesWithCertainExtensions_OnlyArchives()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService");
-            var files = _directoryService.GetFiles(testDirectory);
-            Assert.Empty(files);
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}file_{29}.rar", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFilesWithExtension(testDirectory, ".zip|.rar");
+
+            Assert.Equal(11, files.Length);
+        }
+        #endregion
+
+        #region GetFiles
+        [Fact]
+        public void GetFiles_ArchiveOnly_ShouldBe10()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory, API.Parser.Parser.ArchiveFileExtensions).ToList();
+
+            Assert.Equal(10, files.Count());
+            Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
         }
 
         [Fact]
-        public void GetFilesWithExtensions_ShouldBeEmpty_Test()
+        public void GetFiles_All_ShouldBe11()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/extensions");
-            var files = _directoryService.GetFiles(testDirectory, "*.txt");
-            Assert.Empty(files);
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory).ToList();
+
+            Assert.Equal(11, files.Count());
         }
 
         [Fact]
-        public void GetFilesWithExtensions_Test()
+        public void GetFiles_All_TopDirectoryOnly_ShouldBe10()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/extension");
-            var files = _directoryService.GetFiles(testDirectory, ".cbz|.rar");
-            Assert.Equal(3, files.Count());
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}/SubDir/file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory).ToList();
+
+            Assert.Equal(10, files.Count());
         }
 
         [Fact]
-        public void GetFilesWithExtensions_BadDirectory_ShouldBeEmpty_Test()
+        public void GetFiles_WithSubDirectories_ShouldCountOnlyTopLevel()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/doesntexist");
-            var files = _directoryService.GetFiles(testDirectory, ".cbz|.rar");
-            Assert.Empty(files);
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"{testDirectory}/SubDir/file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory).ToList();
+
+            Assert.Equal(10, files.Count());
         }
 
         [Fact]
-        public void ListDirectory_SubDirectory_Test()
+        public void GetFiles_ShouldNotReturnFilesThatAreExcluded()
         {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/");
-            var dirs = _directoryService.ListDirectory(testDirectory);
-            Assert.Contains(dirs, s => s.Contains("regex"));
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
 
+            fileSystem.AddFile($"{testDirectory}/._file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory).ToList();
+
+            Assert.Equal(10, files.Count());
         }
 
         [Fact]
-        public void ListDirectory_NoSubDirectory_Test()
+        public void GetFiles_WithCustomRegex_ShouldBe10()
         {
-            var dirs = _directoryService.ListDirectory("");
-            Assert.DoesNotContain(dirs, s => s.Contains("regex"));
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}data-{i}.txt", new MockFileData(""));
+            }
+            fileSystem.AddFile($"{testDirectory}joe.txt", new MockFileData(""));
+            fileSystem.AddFile($"{testDirectory}0d.txt", new MockFileData(""));
 
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory, @".*d.*\.txt");
+            Assert.Equal(11, files.Count());
         }
+
+        [Fact]
+        public void GetFiles_WithCustomRegexThatContainsFolder_ShouldBe10()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file/data-{i}.txt", new MockFileData(""));
+            }
+            fileSystem.AddFile($"{testDirectory}joe.txt", new MockFileData(""));
+            fileSystem.AddFile($"{testDirectory}0d.txt", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory, @".*d.*\.txt", SearchOption.AllDirectories);
+            Assert.Equal(11, files.Count());
+        }
+        #endregion
+
+        #region GetTotalSize
+        [Fact]
+        public void GetTotalSize_ShouldBeGreaterThan0()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file/data-{i}.txt", new MockFileData("abc"));
+            }
+            fileSystem.AddFile($"{testDirectory}joe.txt", new MockFileData(""));
+
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var fileSize = ds.GetTotalSize(fileSystem.AllFiles);
+            Assert.True(fileSize > 0);
+        }
+        #endregion
+
+        #region CopyFileToDirectory
+        [Fact]
+        public void CopyFileToDirectory_ShouldCopyFileToNonExistentDirectory()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFileToDirectory($"{testDirectory}file/data-0.txt", "/manga/output/");
+            Assert.True(fileSystem.FileExists("manga/output/data-0.txt"));
+            Assert.True(fileSystem.FileExists("manga/file/data-0.txt"));
+        }
+        [Fact]
+        public void CopyFileToDirectory_ShouldCopyFileToExistingDirectoryAndOverwrite()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}output/data-0.txt", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFileToDirectory($"{testDirectory}file/data-0.txt", "/manga/output/");
+            Assert.True(fileSystem.FileExists("/manga/output/data-0.txt"));
+            Assert.True(fileSystem.FileExists("/manga/file/data-0.txt"));
+            Assert.True(fileSystem.FileInfo.FromFileName("/manga/file/data-0.txt").Length == fileSystem.FileInfo.FromFileName("/manga/output/data-0.txt").Length);
+        }
+        #endregion
+
+        #region CopyDirectoryToDirectory
+        [Fact]
+        public void CopyDirectoryToDirectory_ShouldThrowWhenSourceDestinationDoesntExist()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}output/data-0.txt", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var ex = Assert.Throws<DirectoryNotFoundException>(() => ds.CopyDirectoryToDirectory("/comics/", "/manga/output/"));
+            Assert.Equal(ex.Message, "Source directory does not exist or could not be found: " + "/comics/");
+        }
+
+        [Fact]
+        public void CopyDirectoryToDirectory_ShouldCopyEmptyDirectory()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+            fileSystem.AddDirectory($"{testDirectory}empty/");
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyDirectoryToDirectory($"{testDirectory}empty/", "/manga/output/");
+            Assert.Empty(fileSystem.DirectoryInfo.FromDirectoryName("/manga/output/").GetFiles());
+        }
+
+        [Fact]
+        public void CopyDirectoryToDirectory_ShouldCopyAllFileAndNestedDirectoriesOver()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-1.txt", new MockFileData("abc"));
+            fileSystem.AddDirectory($"{testDirectory}empty/");
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyDirectoryToDirectory($"{testDirectory}", "/manga/output/");
+            Assert.Equal(2, ds.GetFiles("/manga/output/", searchOption: SearchOption.AllDirectories).Count());
+        }
+        #endregion
+
+        #region IsDriveMounted
+        [Fact]
+        public void IsDriveMounted_DriveIsNotMounted()
+        {
+            const string testDirectory = "c:/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}data-0.txt", new MockFileData("abc"));
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            Assert.False(ds.IsDriveMounted("d:/manga/"));
+        }
+
+        [Fact]
+        public void IsDriveMounted_DriveIsMounted()
+        {
+            const string testDirectory = "c:/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}data-0.txt", new MockFileData("abc"));
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            Assert.True(ds.IsDriveMounted("c:/manga/file"));
+        }
+        #endregion
+
+        #region ExistOrCreate
+        [Fact]
+        public void ExistOrCreate_ShouldCreate()
+        {
+            var fileSystem = new MockFileSystem();
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.ExistOrCreate("c:/manga/output/");
+
+            Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("c:/manga/output/").Exists);
+        }
+        #endregion
+
+        #region ClearAndDeleteDirectory
+        [Fact]
+        public void ClearAndDeleteDirectory_ShouldDeleteSelfAndAllFilesAndFolders()
+        {
+            const string testDirectory = "/manga/base/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file/data-{i}.txt", new MockFileData("abc"));
+            }
+            fileSystem.AddFile($"{testDirectory}data-a.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-b.txt", new MockFileData("abc"));
+            fileSystem.AddDirectory($"{testDirectory}empty/");
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.ClearAndDeleteDirectory($"{testDirectory}");
+            Assert.Empty(ds.GetFiles("/manga/", searchOption: SearchOption.AllDirectories));
+            Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").GetDirectories());
+            Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").Exists);
+            Assert.False(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/base").Exists);
+        }
+        #endregion
+
+        #region ClearDirectory
+        [Fact]
+        public void ClearDirectory_ShouldDeleteAllFilesAndFolders_LeaveSelf()
+        {
+            const string testDirectory = "/manga/base/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file/data-{i}.txt", new MockFileData("abc"));
+            }
+            fileSystem.AddFile($"{testDirectory}data-a.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-b.txt", new MockFileData("abc"));
+            fileSystem.AddDirectory($"{testDirectory}file/empty/");
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.ClearDirectory($"{testDirectory}file/");
+            Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").GetDirectories());
+            Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").Exists);
+            Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").Exists);
+        }
+        #endregion
+
+        #region CopyFilesToDirectory
+        [Fact]
+        public void CopyFilesToDirectory_ShouldMoveAllFiles()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip"}, "/manga/output/");
+            Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
+        }
+
+        [Fact]
+        public void CopyFilesToDirectory_ShouldMoveAllFiles_InclFilesInNestedFolders()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+            fileSystem.AddFile($"{testDirectory}nested/file_11.zip", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"}, "/manga/output/");
+            Assert.Equal(3, ds.GetFiles("/manga/output/").Count());
+        }
+
+        [Fact]
+        public void CopyFilesToDirectory_ShouldMoveAllFiles_WithPrepend()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"},
+                "/manga/output/", "mangarocks_");
+            Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
+            Assert.All(ds.GetFiles("/manga/output/"), filepath => ds.FileSystem.Path.GetFileName(filepath).StartsWith("mangarocks_"));
+        }
+
+        [Fact]
+        public void CopyFilesToDirectory_ShouldMoveOnlyFilesThatExist()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"},
+                "/manga/output/");
+            Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
+        }
+
+        #endregion
+
+        #region ListDirectory
+        [Fact]
+        public void ListDirectory_EmptyForNonExistent()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file_0.zip", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Empty(ds.ListDirectory("/comics/"));
+        }
+
+        [Fact]
+        public void ListDirectory_ListsAllDirectories()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory($"{testDirectory}dir1");
+            fileSystem.AddDirectory($"{testDirectory}dir2");
+            fileSystem.AddDirectory($"{testDirectory}dir3");
+            fileSystem.AddFile($"{testDirectory}file_0.zip", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(3, ds.ListDirectory(testDirectory).Count());
+        }
+
+        [Fact]
+        public void ListDirectory_ListsOnlyNonSystemAndHiddenOnly()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory($"{testDirectory}dir1");
+            var di = fileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}dir1");
+            di.Attributes |= FileAttributes.System;
+            fileSystem.AddDirectory($"{testDirectory}dir2");
+            di = fileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}dir2");
+            di.Attributes |= FileAttributes.Hidden;
+            fileSystem.AddDirectory($"{testDirectory}dir3");
+            fileSystem.AddFile($"{testDirectory}file_0.zip", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(1, ds.ListDirectory(testDirectory).Count());
+        }
+
+        #endregion
+
+        #region ReadFileAsync
+
+        [Fact]
+        public async Task ReadFileAsync_ShouldGetBytes()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file_1.zip", new MockFileData("Hello"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var bytes = await ds.ReadFileAsync($"{testDirectory}file_1.zip");
+            Assert.Equal(Encoding.UTF8.GetBytes("Hello"), bytes);
+        }
+
+        [Fact]
+        public async Task ReadFileAsync_ShouldReadNothingFromNonExistent()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file_1.zip", new MockFileData("Hello"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var bytes = await ds.ReadFileAsync($"{testDirectory}file_32123.zip");
+            Assert.Empty(bytes);
+        }
+
+
+        #endregion
+
+        #region FindHighestDirectoriesFromFiles
 
         [Theory]
         [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
-        public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] folders, string expectedDirectory)
+        [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"}, new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"}, "C:/Manga/Dir 1/Love Hina")]
+        [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"}, new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"}, "")]
+        public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
         {
-            var actual = _directoryService.FindHighestDirectoriesFromFiles(rootDirectories, folders);
-            var expected = new Dictionary<string, string> {{expectedDirectory, ""}};
+            var fileSystem = new MockFileSystem();
+            foreach (var directory in rootDirectories)
+            {
+                fileSystem.AddDirectory(directory);
+            }
+            foreach (var f in files)
+            {
+                fileSystem.AddFile(f, new MockFileData(""));
+            }
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var actual = ds.FindHighestDirectoriesFromFiles(rootDirectories, files);
+            var expected = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(expectedDirectory))
+            {
+                expected = new Dictionary<string, string> {{expectedDirectory, ""}};
+            }
+
             Assert.Equal(expected, actual);
         }
+
+        #endregion
+
+        #region GetFoldersTillRoot
 
         [Theory]
         [InlineData("C:/Manga/", "C:/Manga/Love Hina/Specials/Omake/", "Omake,Specials,Love Hina")]
@@ -115,12 +603,20 @@ namespace API.Tests.Services
         [InlineData(@"M:\", @"M:\Toukyou Akazukin\Vol. 01 Ch. 005.cbz", @"Toukyou Akazukin")]
         public void GetFoldersTillRoot_Test(string rootPath, string fullpath, string expectedArray)
         {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(rootPath);
+            fileSystem.AddFile(fullpath, new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
             var expected = expectedArray.Split(",");
             if (expectedArray.Equals(string.Empty))
             {
-              expected = Array.Empty<string>();
+                expected = Array.Empty<string>();
             }
-            Assert.Equal(expected, _directoryService.GetFoldersTillRoot(rootPath, fullpath));
+            Assert.Equal(expected, ds.GetFoldersTillRoot(rootPath, fullpath));
         }
+
+        #endregion
     }
 }
