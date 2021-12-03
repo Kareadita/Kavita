@@ -25,8 +25,8 @@ namespace API.Services.Tasks.Scanner
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
         private readonly IBookService _bookService;
         private readonly ILogger _logger;
-        private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IReadingItemService _readingItemService;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -35,12 +35,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="bookService"></param>
         /// <param name="logger"></param>
         public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService,
-            IDirectoryService directoryService)
+            IDirectoryService directoryService, IReadingItemService readingItemService)
         {
             _bookService = bookService;
             _logger = logger;
-            _archiveService = archiveService;
             _directoryService = directoryService;
+            _readingItemService = readingItemService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
         }
 
@@ -62,12 +62,12 @@ namespace API.Services.Tasks.Scanner
         {
             if (Parser.Parser.IsEpub(path))
             {
-                return _bookService.GetComicInfo(path);
+                return _readingItemService.GetComicInfo(path, MangaFormat.Epub);
             }
 
             if (Parser.Parser.IsComicInfoExtension(path))
             {
-                return _archiveService.GetComicInfo(path);
+                return _readingItemService.GetComicInfo(path, MangaFormat.Archive);
             }
             return null;
         }

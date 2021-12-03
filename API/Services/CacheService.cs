@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -49,19 +50,17 @@ namespace API.Services
     {
         private readonly ILogger<CacheService> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly IBookService _bookService;
+        private readonly IReadingItemService _readingItemService;
         private readonly NumericComparer _numericComparer;
 
-        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, IArchiveService archiveService,
-            IDirectoryService directoryService, IBookService bookService)
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, 
+            IDirectoryService directoryService, IReadingItemService readingItemService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _archiveService = archiveService;
             _directoryService = directoryService;
-            _bookService = bookService;
+            _readingItemService = readingItemService;
             _numericComparer = new NumericComparer();
         }
 
@@ -126,17 +125,7 @@ namespace API.Services
 
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
-                DirectoryService.ExistOrCreate(extractPath);
-                if (files.Count == 1)
-                {
-                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
-                }
-                else
-                {
-                    DirectoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(files[0].FilePath), extractPath,
-                        Parser.Parser.ImageFileExtensions);
-                }
-
+                _readingItemService.Extract(files[0].FilePath, extractPath, MangaFormat.Image, files.Count);
                 extractDi.Flatten();
             }
 
@@ -149,11 +138,11 @@ namespace API.Services
 
                 if (file.Format == MangaFormat.Archive)
                 {
-                    _archiveService.ExtractArchive(file.FilePath, Path.Join(extractPath, extraPath));
+                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
                 }
                 else if (file.Format == MangaFormat.Pdf)
                 {
-                    _bookService.ExtractPdfImages(file.FilePath, Path.Join(extractPath, extraPath));
+                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
                 }
                 else if (file.Format == MangaFormat.Epub)
                 {

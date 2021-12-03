@@ -52,14 +52,15 @@ namespace API.Services
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
+        private readonly IDirectoryService _directoryService;
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
 
-        public BookService(ILogger<BookService> logger)
+        public BookService(ILogger<BookService> logger, IDirectoryService directoryService)
         {
             _logger = logger;
-
+            _directoryService = directoryService;
         }
 
         private static bool HasClickableHrefPart(HtmlNode anchor)

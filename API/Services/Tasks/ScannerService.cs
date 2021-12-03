@@ -43,11 +43,12 @@ public class ScannerService : IScannerService
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly IFileService _fileService;
     private readonly IDirectoryService _directoryService;
+    private readonly IReadingItemService _readingItemService;
     private readonly NaturalSortComparer _naturalSort = new ();
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
         IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
-        IFileService fileService, IDirectoryService directoryService)
+        IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -58,6 +59,7 @@ public class ScannerService : IScannerService
         _messageHub = messageHub;
         _fileService = fileService;
         _directoryService = directoryService;
+        _readingItemService = readingItemService;
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -81,7 +83,7 @@ public class ScannerService : IScannerService
         var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
         var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
@@ -129,7 +131,7 @@ public class ScannerService : IScannerService
                 }
 
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+                scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
                 parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
@@ -227,7 +229,7 @@ public class ScannerService : IScannerService
         await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
         var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
         foreach (var folderPath in library.Folders)
@@ -627,28 +629,7 @@ public class ScannerService : IScannerService
 
     private MangaFile CreateMangaFile(ParserInfo info)
     {
-        var pages = 0;
-        switch (info.Format)
-        {
-            case MangaFormat.Archive:
-            {
-                pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
-                break;
-            }
-            case MangaFormat.Pdf:
-            case MangaFormat.Epub:
-            {
-                pages = _bookService.GetNumberOfPages(info.FullFilePath);
-                break;
-            }
-            case MangaFormat.Image:
-            {
-                pages = 1;
-                break;
-            }
-        }
-
-        return DbFactory.MangaFile(info.FullFilePath, info.Format, pages);
+        return DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
     }
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)

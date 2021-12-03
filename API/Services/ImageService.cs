@@ -10,25 +10,28 @@ namespace API.Services;
 
 public interface IImageService
 {
+    void ExtractImages(string fileFilePath, string targetDirectory, int fileCount);
     string GetCoverImage(string path, string fileName);
     string GetCoverFile(MangaFile file);
+
     /// <summary>
     /// Creates a Thumbnail version of an image
     /// </summary>
     /// <param name="path">Path to the image file</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string CreateThumbnail(string path, string fileName);
+    string CreateThumbnail(string path, string fileName);
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName);
 }
 
 public class ImageService : IImageService
 {
     private readonly ILogger<ImageService> _logger;
+    private readonly IDirectoryService _directoryService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"seres\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
@@ -39,9 +42,24 @@ public class ImageService : IImageService
     /// </summary>
     private const int ThumbnailWidth = 320;
 
-    public ImageService(ILogger<ImageService> logger)
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
         _logger = logger;
+        _directoryService = directoryService;
+    }
+
+    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
+    {
+        DirectoryService.ExistOrCreate(targetDirectory);
+        if (fileCount == 1)
+        {
+            _directoryService.CopyFileToDirectory(fileFilePath, targetDirectory);
+        }
+        else
+        {
+            DirectoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
+                Parser.Parser.ImageFileExtensions);
+        }
     }
 
     /// <summary>

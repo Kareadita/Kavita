@@ -1,4 +1,5 @@
-﻿using API.Data.Metadata;
+﻿using System;
+using API.Data.Metadata;
 using API.Entities.Enums;
 
 namespace API.Services;
@@ -6,20 +7,22 @@ namespace API.Services;
 public interface IReadingItemService
 {
     ComicInfo GetComicInfo(string filePath, MangaFormat format);
-    int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName);
-    void Extract(string fileFilePath, string targetDirectory);
+    int GetNumberOfPages(string filePath, MangaFormat format);
+    string GetCoverImage(string fileFilePath, string fileName, MangaFormat format);
+    void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
 }
 
 public class ReadingItemService : IReadingItemService
 {
     private readonly IArchiveService _archiveService;
     private readonly IBookService _bookService;
+    private readonly IImageService _imageService;
 
-    public ReadingItemService(IArchiveService archiveService, IBookService bookService)
+    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService)
     {
         _archiveService = archiveService;
         _bookService = bookService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -67,13 +70,47 @@ public class ReadingItemService : IReadingItemService
         }
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName)
+    public string GetCoverImage(string filePath, string fileName, MangaFormat format)
     {
-        throw new System.NotImplementedException();
+        if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(fileName))
+        {
+            return string.Empty;
+        }
+        return format switch
+        {
+            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName),
+            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName),
+            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName),
+            _ => string.Empty
+        };
     }
 
-    public void Extract(string fileFilePath, string targetDirectory)
+    /// <summary>
+    /// Extracts the reading item to the target directory using the appropriate method
+    /// </summary>
+    /// <param name="fileFilePath">File to extract</param>
+    /// <param name="targetDirectory">Where to extract to. Will be created if does not exist</param>
+    /// <param name="format">Format of the File</param>
+    /// <param name="imageCount">If the file is of type image, pass number of files needed. If > 0, will copy the whole directory.</param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
     {
-        throw new System.NotImplementedException();
+        switch (format)
+        {
+            case MangaFormat.Pdf:
+                _bookService.ExtractPdfImages(fileFilePath, targetDirectory);
+                break;
+            case MangaFormat.Archive:
+                _archiveService.ExtractArchive(fileFilePath, targetDirectory);
+                break;
+            case MangaFormat.Image:
+                _imageService.ExtractImages(fileFilePath, targetDirectory, imageCount);
+                break;
+            case MangaFormat.Unknown:
+            case MangaFormat.Epub:
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(format), format, null);
+        };
     }
 }

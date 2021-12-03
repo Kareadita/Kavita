@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
-using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
 using API.Entities;
@@ -39,51 +38,18 @@ public class MetadataService : IMetadataService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<MetadataService> _logger;
-    private readonly IArchiveService _archiveService;
-    private readonly IBookService _bookService;
-    private readonly IImageService _imageService;
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly ICacheHelper _cacheHelper;
+    private readonly IReadingItemService _readingItemService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-        IArchiveService archiveService, IBookService bookService, IImageService imageService,
-        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper)
+        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper, IReadingItemService readingItemService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _archiveService = archiveService;
-        _bookService = bookService;
-        _imageService = imageService;
         _messageHub = messageHub;
         _cacheHelper = cacheHelper;
-    }
-
-    /// <summary>
-    /// Gets the cover image for the file
-    /// </summary>
-    /// <remarks>Has side effect of marking the file as updated</remarks>
-    /// <param name="file"></param>
-    /// <param name="volumeId"></param>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
-    {
-        //file.UpdateLastModified();
-        switch (file.Format)
-        {
-            case MangaFormat.Pdf:
-            case MangaFormat.Epub:
-                return _bookService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Image:
-                var coverImage = _imageService.GetCoverFile(file);
-                return _imageService.GetCoverImage(coverImage, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Archive:
-                return _archiveService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Unknown:
-            default:
-                return string.Empty;
-        }
-
+        _readingItemService = readingItemService;
     }
 
     /// <summary>
@@ -98,8 +64,10 @@ public class MetadataService : IMetadataService
         if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return false;
 
+        if (firstFile == null) return false;
+
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
-        chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
+        chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
 
         return true;
     }
@@ -115,7 +83,8 @@ public class MetadataService : IMetadataService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
     {
-        var comicInfo = GetComicInfo(firstFile); // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
+        //var comicInfo = GetComicInfo(firstFile); // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
+        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
         if (!string.IsNullOrEmpty(comicInfo.Title))
@@ -251,7 +220,7 @@ public class MetadataService : IMetadataService
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
         if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-        var comicInfo = GetComicInfo(firstFile);
+        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
 
@@ -294,7 +263,7 @@ public class MetadataService : IMetadataService
         var comicInfos = series.Volumes
             .SelectMany(volume => volume.Chapters)
             .SelectMany(c => c.Files)
-            .Select(GetComicInfo)
+            .Select(file => _readingItemService.GetComicInfo(file.FilePath, file.Format))
             .Where(ci => ci != null)
             .ToList();
 
@@ -309,16 +278,6 @@ public class MetadataService : IMetadataService
         GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),
             genre => series.Metadata.Genres.Remove(genre));
 
-    }
-
-    private ComicInfo GetComicInfo(MangaFile firstFile)
-    {
-        if (firstFile?.Format is MangaFormat.Archive or MangaFormat.Epub)
-        {
-            return Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
-        }
-
-        return null;
     }
 
     /// <summary>
