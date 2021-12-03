@@ -142,6 +142,7 @@ namespace API.Services
        public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
+           // TODO: Refactor this and GetFilesWithCertainExtensions to use same implementation
           if (searchPatternExpression != string.Empty)
           {
              if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
