@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -11,7 +12,7 @@ namespace API.Controllers
 
         public FallbackController(ITaskScheduler taskScheduler)
         {
-            // This is used to load TaskScheduler on startup without having to navigate to a Controller that uses. 
+            // This is used to load TaskScheduler on startup without having to navigate to a Controller that uses.
             _taskScheduler = taskScheduler;
         }
 

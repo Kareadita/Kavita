@@ -4,7 +4,6 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using API.Archive;
 using API.Data.Metadata;
-using API.Interfaces.Services;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

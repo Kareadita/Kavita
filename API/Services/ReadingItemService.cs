@@ -1,6 +1,7 @@
 ﻿using System;
 using API.Data.Metadata;
 using API.Entities.Enums;
+using API.Parser;
 
 namespace API.Services;
 
@@ -10,6 +11,7 @@ public interface IReadingItemService
     int GetNumberOfPages(string filePath, MangaFormat format);
     string GetCoverImage(string fileFilePath, string fileName, MangaFormat format);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
+    ParserInfo Parse(string path, string rootPath, LibraryType type);
 }
 
 public class ReadingItemService : IReadingItemService
@@ -112,5 +114,10 @@ public class ReadingItemService : IReadingItemService
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
         };
+    }
+
+    public ParserInfo Parse(string path, string rootPath, LibraryType type)
+    {
+        return Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : Parser.Parser.Parse(path, rootPath, type);
     }
 }

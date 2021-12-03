@@ -9,6 +9,7 @@ using API.DTOs.Filtering;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;

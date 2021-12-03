@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Stats;
 using API.Entities.Enums;
 using Flurl.Http;

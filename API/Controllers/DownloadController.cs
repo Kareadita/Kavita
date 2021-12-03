@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
 using API.Entities.Enums;

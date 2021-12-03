@@ -23,7 +23,6 @@ namespace API.Services.Tasks.Scanner
     public class ParseScannedFiles
     {
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
-        private readonly IBookService _bookService;
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
@@ -32,12 +31,12 @@ namespace API.Services.Tasks.Scanner
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
         /// Each instance is separate from other threads, allowing for no cross over.
         /// </summary>
-        /// <param name="bookService"></param>
-        /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService,
-            IDirectoryService directoryService, IReadingItemService readingItemService)
+        /// <param name="logger">Logger of the parent class that invokes this</param>
+        /// <param name="directoryService">Directory Service</param>
+        /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
+        public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
+            IReadingItemService readingItemService)
         {
-            _bookService = bookService;
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
@@ -81,16 +80,16 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            ParserInfo info;
+            var info = _readingItemService.Parse(path, rootPath, type);
 
-            if (Parser.Parser.IsEpub(path))
-            {
-                info = _bookService.ParseInfo(path);
-            }
-            else
-            {
-                info = Parser.Parser.Parse(path, rootPath, type);
-            }
+            // if (Parser.Parser.IsEpub(path))
+            // {
+            //     info = _bookService.ParseInfo(path);
+            // }
+            // else
+            // {
+            //     info = Parser.Parser.Parse(path, rootPath, type);
+            // }
 
             // If we couldn't match, log. But don't log if the file parses as a cover image
             if (info == null)
@@ -105,7 +104,8 @@ namespace API.Services.Tasks.Scanner
             if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
             {
                 info = Parser.Parser.Parse(path, rootPath, type);
-                var info2 = _bookService.ParseInfo(path);
+                //var info2 = _bookService.ParseInfo(path);
+                var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }
 

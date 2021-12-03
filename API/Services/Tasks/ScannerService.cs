@@ -36,9 +36,7 @@ public class ScannerService : IScannerService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
-    private readonly IArchiveService _archiveService;
     private readonly IMetadataService _metadataService;
-    private readonly IBookService _bookService;
     private readonly ICacheService _cacheService;
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly IFileService _fileService;
@@ -46,15 +44,13 @@ public class ScannerService : IScannerService
     private readonly IReadingItemService _readingItemService;
     private readonly NaturalSortComparer _naturalSort = new ();
 
-    public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
-        IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
+    public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
+        IMetadataService metadataService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
         IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _archiveService = archiveService;
         _metadataService = metadataService;
-        _bookService = bookService;
         _cacheService = cacheService;
         _messageHub = messageHub;
         _fileService = fileService;
@@ -83,7 +79,7 @@ public class ScannerService : IScannerService
         var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
         var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
@@ -131,7 +127,7 @@ public class ScannerService : IScannerService
                 }
 
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
+                scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
                 parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
@@ -229,7 +225,7 @@ public class ScannerService : IScannerService
         await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService, _readingItemService);
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
         var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
         foreach (var folderPath in library.Folders)
@@ -640,23 +636,7 @@ public class ScannerService : IScannerService
         {
             existingFile.Format = info.Format;
             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
-            switch (existingFile.Format)
-            {
-                case MangaFormat.Epub:
-                case MangaFormat.Pdf:
-                    existingFile.Pages = _bookService.GetNumberOfPages(info.FullFilePath);
-                    break;
-                case MangaFormat.Image:
-                    existingFile.Pages = 1;
-                    break;
-                case MangaFormat.Unknown:
-                    existingFile.Pages = 0;
-                    break;
-                case MangaFormat.Archive:
-                    existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
-                    break;
-            }
-            //existingFile.LastModified = File.GetLastWriteTime(info.FullFilePath); // This is messing up our logic on when last modified
+            existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
         }
         else
         {

@@ -11,8 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks;
@@ -76,7 +74,7 @@ namespace API.Tests.Services
                 Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService,
                     _bookService, _imageService, _messageHub, cacheHelper);
             _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService,
-                _cacheService, _messageHub, fileService, _directoryService);
+                _cacheService, _messageHub, fileService, _directoryService, new ReadingItemService(_archiveService, _bookService, _imageService));
         }
 
         private async Task<bool> SeedDb()

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
 using API.SignalR;
