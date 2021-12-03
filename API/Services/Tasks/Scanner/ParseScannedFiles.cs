@@ -82,16 +82,16 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            var info = _readingItemService.Parse(path, rootPath, type);
+            ParserInfo info = null;
 
-            // if (Parser.Parser.IsEpub(path))
-            // {
-            //     info = _bookService.ParseInfo(path);
-            // }
-            // else
-            // {
-            //     info = Parser.Parser.Parse(path, rootPath, type);
-            // }
+            if (Parser.Parser.IsEpub(path))
+            {
+                info = _readingItemService.Parse(path, rootPath, type);
+            }
+            else
+            {
+                info = _readingItemService.Parse(path, rootPath, type);
+            }
 
             // If we couldn't match, log. But don't log if the file parses as a cover image
             if (info == null)
@@ -105,7 +105,7 @@ namespace API.Services.Tasks.Scanner
 
             if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
             {
-                info = _defaultParser.Parse(path, rootPath, type); // TODO: Why do I reparse?
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book); // TODO: Why do I reparse?
                 var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }
