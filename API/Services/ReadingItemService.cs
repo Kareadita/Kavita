@@ -19,12 +19,17 @@ public class ReadingItemService : IReadingItemService
     private readonly IArchiveService _archiveService;
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
+    private readonly DefaultParser _defaultParser;
 
-    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService)
+    public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService, IDirectoryService directoryService)
     {
         _archiveService = archiveService;
         _bookService = bookService;
         _imageService = imageService;
+        _directoryService = directoryService;
+
+        _defaultParser = new DefaultParser(_directoryService);
     }
 
     /// <summary>
@@ -118,6 +123,6 @@ public class ReadingItemService : IReadingItemService
 
     public ParserInfo Parse(string path, string rootPath, LibraryType type)
     {
-        return Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : Parser.Parser.Parse(path, rootPath, type);
+        return Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
     }
 }

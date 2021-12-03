@@ -2,6 +2,7 @@
 {
     public class CacheServiceTests
     {
+        // TODO: Tackle this with mocked filesystem
         // private readonly CacheService _cacheService;
         // private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
         // private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
@@ -12,11 +13,11 @@
         // {
         //     _cacheService = new CacheService(_logger, _unitOfWork, _archiveService, _directoryService);
         // }
-        
+
         // [Fact]
         // public async void Ensure_ShouldExtractArchive(int chapterId)
         // {
-        //     
+        //
         //     // CacheDirectory needs to be customized.
         //     _unitOfWork.VolumeRepository.GetChapterAsync(chapterId).Returns(new Chapter
         //     {
@@ -29,19 +30,19 @@
         //             }
         //         }
         //     });
-        //     
+        //
         //     await _cacheService.Ensure(1);
-        //     
+        //
         //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/CacheService/Archives");
         //
         // }
-        
+
         //string GetCachedPagePath(Volume volume, int page)
         // [Fact]
         // //[InlineData("", 0, "")]
         // public void GetCachedPagePathTest_Should()
         // {
-        //     
+        //
         //     // string archivePath = "flat file.zip";
         //     // int pageNum = 0;
         //     // string expected = "cache/1/pexels-photo-6551949.jpg";
@@ -110,6 +111,6 @@
         //     // Assert.NotStrictEqual(expected, _cacheService.GetOrderedChapters(files));
         // }
         //
-        
+
     }
 }

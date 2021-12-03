@@ -54,7 +54,7 @@ namespace API.Services
         private readonly IReadingItemService _readingItemService;
         private readonly NumericComparer _numericComparer;
 
-        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork, 
+        public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
             IDirectoryService directoryService, IReadingItemService readingItemService)
         {
             _logger = logger;
@@ -167,7 +167,7 @@ namespace API.Services
 
             try
             {
-                DirectoryService.ClearDirectory(DirectoryService.CacheDirectory);
+                _directoryService.ClearDirectory(DirectoryService.CacheDirectory);
             }
             catch (Exception ex)
             {
@@ -218,7 +218,7 @@ namespace API.Services
                 if (page <= (mangaFile.Pages + pagesSoFar))
                 {
                     var path = GetCachePath(chapter.Id);
-                    var files = DirectoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
+                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
                     Array.Sort(files, _numericComparer);
 
                     if (files.Length == 0)

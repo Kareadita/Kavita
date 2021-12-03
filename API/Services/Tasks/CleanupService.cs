@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.IO.Abstractions;
 using System.Threading.Tasks;
 using API.Data;
 using API.SignalR;
@@ -23,15 +24,20 @@ namespace API.Services.Tasks
         private readonly IBackupService _backupService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IDirectoryService _directoryService;
+        private readonly IFileSystem _fileSystem;
 
         public CleanupService(ICacheService cacheService, ILogger<CleanupService> logger,
-            IBackupService backupService, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
+            IBackupService backupService, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub,
+            IDirectoryService directoryService, IFileSystem fileSystem)
         {
             _cacheService = cacheService;
             _logger = logger;
             _backupService = backupService;
             _unitOfWork = unitOfWork;
             _messageHub = messageHub;
+            _directoryService = directoryService;
+            _fileSystem = fileSystem;
         }
 
         public void CleanupCacheDirectory()
@@ -49,7 +55,7 @@ namespace API.Services.Tasks
             _logger.LogInformation("Starting Cleanup");
             await SendProgress(0F);
             _logger.LogInformation("Cleaning temp directory");
-            DirectoryService.ClearDirectory(DirectoryService.TempDirectory);
+            _directoryService.ClearDirectory(DirectoryService.TempDirectory);
             await SendProgress(0.1F);
             CleanupCacheDirectory();
             await SendProgress(0.25F);
@@ -78,8 +84,8 @@ namespace API.Services.Tasks
             var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
             foreach (var file in files)
             {
-                if (images.Contains(Path.GetFileName(file))) continue;
-                File.Delete(file);
+                if (images.Contains(_fileSystem.Path.GetFileName(file))) continue;
+                _fileSystem.File.Delete(file);
 
             }
         }
@@ -90,8 +96,8 @@ namespace API.Services.Tasks
             var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
             foreach (var file in files)
             {
-                if (images.Contains(Path.GetFileName(file))) continue;
-                File.Delete(file);
+                if (images.Contains(_fileSystem.Path.GetFileName(file))) continue;
+                _fileSystem.File.Delete(file);
 
             }
         }
@@ -100,10 +106,12 @@ namespace API.Services.Tasks
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
+
+            // TODO: This is used in 3 different places in this file, refactor into a DirectoryService method
             foreach (var file in files)
             {
-                if (images.Contains(Path.GetFileName(file))) continue;
-                File.Delete(file);
+                if (images.Contains(_fileSystem.Path.GetFileName(file))) continue;
+                _fileSystem.File.Delete(file);
 
             }
         }

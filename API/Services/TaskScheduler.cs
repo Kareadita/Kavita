@@ -36,6 +36,7 @@ public class TaskScheduler : ITaskScheduler
 
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
+    private readonly IDirectoryService _directoryService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -43,7 +44,8 @@ public class TaskScheduler : ITaskScheduler
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService)
+        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
+        IDirectoryService directoryService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -54,6 +56,7 @@ public class TaskScheduler : ITaskScheduler
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
+        _directoryService = directoryService;
     }
 
     public void ScheduleTasks()
@@ -158,7 +161,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void CleanupTemp()
     {
-        BackgroundJob.Enqueue(() => DirectoryService.ClearDirectory(DirectoryService.TempDirectory));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(DirectoryService.TempDirectory));
     }
 
     public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)

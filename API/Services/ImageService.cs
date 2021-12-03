@@ -57,7 +57,7 @@ public class ImageService : IImageService
         }
         else
         {
-            DirectoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
+            _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
                 Parser.Parser.ImageFileExtensions);
         }
     }
@@ -76,7 +76,7 @@ public class ImageService : IImageService
             return null;
         }
 
-        var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
+        var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
             .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
 
         return firstImage;

@@ -519,5 +519,5 @@ API/config/stats/*
 API/config/stats/app_stats.json
 API/config/pre-metadata/
 API/config/post-metadata/
-
+API.Tests/TestResults/
 UI/Web/.vscode/settings.json

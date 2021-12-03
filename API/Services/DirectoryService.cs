@@ -12,6 +12,7 @@ namespace API.Services
 {
     public interface IDirectoryService
     {
+        IFileSystem FileSystem { get; }
         /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
@@ -23,11 +24,23 @@ namespace API.Services
         bool Exists(string directory);
         void CopyFileToDirectory(string fullFilePath, string targetDirectory);
         int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger);
+        bool IsDriveMounted(string path);
+        long GetTotalSize(IEnumerable<string> paths);
+        void ClearDirectory(string directoryPath);
+        void ClearAndDeleteDirectory(string directoryPath);
+        string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
+        bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "");
+
+        Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
+            IList<string> filePaths);
+
+        IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
+
     }
     public class DirectoryService : IDirectoryService
     {
-       private readonly ILogger<DirectoryService> _logger;
-       private readonly IFileSystem _fileSystem;
+        public IFileSystem FileSystem { get; }
+        private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
@@ -42,7 +55,7 @@ namespace API.Services
        public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
        {
            _logger = logger;
-           _fileSystem = fileSystem;
+           FileSystem = fileSystem;
        }
 
        /// <summary>
@@ -53,16 +66,16 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private static IEnumerable<string> GetFilesWithCertainExtensions(string path,
+       private IEnumerable<string> GetFilesWithCertainExtensions(string path,
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
-          if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
+          if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
           var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
 
-          return Directory.EnumerateFiles(path, "*", searchOption)
+          return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
              .Where(file =>
-                reSearchPattern.IsMatch(Path.GetExtension(file)) && !Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+                reSearchPattern.IsMatch(FileSystem.Path.GetExtension(file)) && !FileSystem.Path.GetFileName(file).StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
        }
 
 
@@ -74,17 +87,17 @@ namespace API.Services
        /// <param name="rootPath"></param>
        /// <param name="fullPath"></param>
        /// <returns></returns>
-       public static IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
+       public IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath)
        {
-           var separator = Path.AltDirectorySeparatorChar;
-          if (fullPath.Contains(Path.DirectorySeparatorChar))
+           var separator = FileSystem.Path.AltDirectorySeparatorChar;
+          if (fullPath.Contains(FileSystem.Path.DirectorySeparatorChar))
           {
-             fullPath = fullPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+             fullPath = fullPath.Replace(FileSystem.Path.DirectorySeparatorChar, FileSystem.Path.AltDirectorySeparatorChar);
           }
 
           if (rootPath.Contains(Path.DirectorySeparatorChar))
           {
-             rootPath = rootPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+             rootPath = rootPath.Replace(FileSystem.Path.DirectorySeparatorChar, FileSystem.Path.AltDirectorySeparatorChar);
           }
 
 
@@ -93,14 +106,15 @@ namespace API.Services
           var root = rootPath.EndsWith(separator) ? rootPath.Substring(0, rootPath.Length - 1) : rootPath;
           var paths = new List<string>();
           // If a file is at the end of the path, remove it before we start processing folders
-          if (Path.GetExtension(path) != string.Empty)
+          if (FileSystem.Path.GetExtension(path) != string.Empty)
           {
              path = path.Substring(0, path.LastIndexOf(separator));
           }
 
-          while (Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
+          while (FileSystem.Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
-             var folder = new DirectoryInfo(path).Name;
+             //var folder = new DirectoryInfo(path).Name;
+             var folder = FileSystem.DirectoryInfo.FromDirectoryName(path).Name;
              paths.Add(folder);
              path = path.Substring(0, path.LastIndexOf(separator));
           }
@@ -115,7 +129,7 @@ namespace API.Services
        /// <returns></returns>
        public bool Exists(string directory)
        {
-          var di = new DirectoryInfo(directory);
+           var di = FileSystem.DirectoryInfo.FromDirectoryName(directory);
           return di.Exists;
        }
 
@@ -138,10 +152,11 @@ namespace API.Services
        {
            try
            {
-               var fileInfo = new FileInfo(fullFilePath);
+               var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
+               //var fileInfo = new FileInfo(fullFilePath);
                if (fileInfo.Exists)
                {
-                   fileInfo.CopyTo(Path.Join(targetDirectory, fileInfo.Name), true);
+                   fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
                }
            }
            catch (Exception ex)
@@ -158,12 +173,13 @@ namespace API.Services
        /// <param name="searchPattern">Defaults to *, meaning all files</param>
        /// <returns></returns>
        /// <exception cref="DirectoryNotFoundException"></exception>
-       public static bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
+       public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
        {
          if (string.IsNullOrEmpty(sourceDirName)) return false;
 
          // Get the subdirectories for the specified directory.
-         var dir = new DirectoryInfo(sourceDirName);
+         //var dir = new DirectoryInfo(sourceDirName);
+         var dir = FileSystem.DirectoryInfo.FromDirectoryName(sourceDirName);
 
          if (!dir.Exists)
          {
@@ -178,17 +194,17 @@ namespace API.Services
          ExistOrCreate(destDirName);
 
          // Get the files in the directory and copy them to the new location.
-         var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => new FileInfo(n));
+         var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => FileSystem.FileInfo.FromFileName(n));
          foreach (var file in files)
          {
-           var tempPath = Path.Combine(destDirName, file.Name);
+           var tempPath = FileSystem.Path.Combine(destDirName, file.Name);
            file.CopyTo(tempPath, false);
          }
 
          // If copying subdirectories, copy them and their contents to new location.
          foreach (var subDir in dirs)
          {
-           var tempPath = Path.Combine(destDirName, subDir.Name);
+           var tempPath = FileSystem.Path.Combine(destDirName, subDir.Name);
            CopyDirectoryToDirectory(subDir.FullName, tempPath);
          }
 
@@ -200,19 +216,20 @@ namespace API.Services
        /// </summary>
        /// <param name="path"></param>
        /// <returns></returns>
-       public static bool IsDriveMounted(string path)
+       public bool IsDriveMounted(string path)
        {
-           return new DirectoryInfo(Path.GetPathRoot(path) ?? string.Empty).Exists;
+           return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
+           //return new DirectoryInfo(Path.GetPathRoot(path) ?? string.Empty).Exists;
        }
 
-       public static string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
           if (searchPatternExpression != string.Empty)
           {
              return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
           }
 
-          return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
+          return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
        }
 
        /// <summary>
@@ -220,9 +237,10 @@ namespace API.Services
        /// </summary>
        /// <param name="paths"></param>
        /// <returns>Total bytes</returns>
-       public static long GetTotalSize(IEnumerable<string> paths)
+       public long GetTotalSize(IEnumerable<string> paths)
        {
-          return paths.Sum(path => new FileInfo(path).Length);
+           return paths.Sum(path => FileSystem.FileInfo.FromFileName(path).Length);
+          //return paths.Sum(path => new FileInfo(path).Length);
        }
 
        /// <summary>
@@ -249,11 +267,13 @@ namespace API.Services
        /// Deletes all files within the directory, then the directory itself.
        /// </summary>
        /// <param name="directoryPath"></param>
-       public static void ClearAndDeleteDirectory(string directoryPath)
+       public void ClearAndDeleteDirectory(string directoryPath)
        {
-          if (!Directory.Exists(directoryPath)) return;
+           if (!FileSystem.Directory.Exists(directoryPath)) return;
+          //if (!Directory.Exists(directoryPath)) return;
 
-          DirectoryInfo di = new DirectoryInfo(directoryPath);
+          //DirectoryInfo di = new DirectoryInfo(directoryPath);
+          var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
 
           ClearDirectory(directoryPath);
 
@@ -265,9 +285,10 @@ namespace API.Services
        /// </summary>
        /// <param name="directoryPath"></param>
        /// <returns></returns>
-       public static void ClearDirectory(string directoryPath)
+       public void ClearDirectory(string directoryPath)
        {
-          var di = new DirectoryInfo(directoryPath);
+          //var di = new DirectoryInfo(directoryPath);
+          var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
           if (!di.Exists) return;
 
           foreach (var file in di.EnumerateFiles())
@@ -280,6 +301,36 @@ namespace API.Services
           }
        }
 
+
+       // public static bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "", ILogger logger = null)
+       // {
+       //     ExistOrCreate(directoryPath);
+       //     string currentFile = null;
+       //     try
+       //     {
+       //         foreach (var file in filePaths)
+       //         {
+       //             currentFile = file;
+       //             var fileInfo = new FileInfo(file);
+       //             if (fileInfo.Exists)
+       //             {
+       //                 fileInfo.CopyTo(Path.Join(directoryPath, prepend + fileInfo.Name));
+       //             }
+       //             else
+       //             {
+       //                 logger?.LogWarning("Tried to copy {File} but it doesn't exist", file);
+       //             }
+       //         }
+       //     }
+       //     catch (Exception ex)
+       //     {
+       //         logger?.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+       //         return false;
+       //     }
+       //
+       //     return true;
+       // }
+
        /// <summary>
        /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
        /// </summary>
@@ -287,7 +338,7 @@ namespace API.Services
        /// <param name="directoryPath"></param>
        /// <param name="prepend">An optional string to prepend to the target file's name</param>
        /// <returns></returns>
-       public static bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "", ILogger logger = null)
+       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
        {
            ExistOrCreate(directoryPath);
            string currentFile = null;
@@ -296,36 +347,34 @@ namespace API.Services
                foreach (var file in filePaths)
                {
                    currentFile = file;
-                   var fileInfo = new FileInfo(file);
+                   //var fileInfo = new FileInfo(file);
+                   var fileInfo = FileSystem.FileInfo.FromFileName(file);
                    if (fileInfo.Exists)
                    {
-                       fileInfo.CopyTo(Path.Join(directoryPath, prepend + fileInfo.Name));
+                       fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + fileInfo.Name));
                    }
                    else
                    {
-                       logger?.LogWarning("Tried to copy {File} but it doesn't exist", file);
+                       _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
                    }
                }
            }
            catch (Exception ex)
            {
-               logger?.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+               _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
                return false;
            }
 
            return true;
        }
 
-       public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
-       {
-           return CopyFilesToDirectory(filePaths, directoryPath, prepend, _logger);
-       }
-
        public IEnumerable<string> ListDirectory(string rootPath)
         {
-           if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+            if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+           //if (!Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
 
-            var di = new DirectoryInfo(rootPath);
+            //var di = new DirectoryInfo(rootPath);
+            var di = FileSystem.DirectoryInfo.FromDirectoryName(rootPath);
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
                 .Select(d => d.Name).ToImmutableList();
@@ -335,8 +384,10 @@ namespace API.Services
 
        public async Task<byte[]> ReadFileAsync(string path)
        {
-          if (!File.Exists(path)) return Array.Empty<byte>();
-          return await File.ReadAllBytesAsync(path);
+          if (!FileSystem.File.Exists(path)) return Array.Empty<byte>();
+          return await FileSystem.File.ReadAllBytesAsync(path);
+          // if (!File.Exists(path)) return Array.Empty<byte>();
+          // return await File.ReadAllBytesAsync(path);
        }
 
 
@@ -346,7 +397,7 @@ namespace API.Services
        /// <param name="libraryFolders">List of top level folders which files belong to</param>
        /// <param name="filePaths">List of file paths that belong to libraryFolders</param>
        /// <returns></returns>
-       public static Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
+       public Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders, IList<string> filePaths)
        {
            var stopLookingForDirectories = false;
            var dirs = new Dictionary<string, string>();
@@ -398,9 +449,12 @@ namespace API.Services
             // Data structure to hold names of subfolders to be examined for files.
             var dirs = new Stack<string>();
 
-            if (!Directory.Exists(root)) {
-                   throw new ArgumentException("The directory doesn't exist");
+            if (!FileSystem.Directory.Exists(root)) {
+                throw new ArgumentException("The directory doesn't exist");
             }
+            // if (!Directory.Exists(root)) {
+            //        throw new ArgumentException("The directory doesn't exist");
+            // }
             dirs.Push(root);
 
             while (dirs.Count > 0) {
@@ -409,7 +463,7 @@ namespace API.Services
                string[] files;
 
                try {
-                  subDirs = Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
+                  subDirs = FileSystem.Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
@@ -470,6 +524,7 @@ namespace API.Services
                                if (ex is UnauthorizedAccessException) {
                                   // Here we just output a message and go on.
                                   Console.WriteLine(ex.Message);
+                                  _logger.LogError(ex, "Unauthorized access on file");
                                   return true;
                                }
                                // Handle other exceptions here if necessary...

@@ -271,7 +271,7 @@ namespace API.Services
 
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
 
-            DirectoryService.ClearAndDeleteDirectory(tempLocation);
+            _directoryService.ClearAndDeleteDirectory(tempLocation);
             (new FileInfo(zipPath)).Delete();
 
             return Tuple.Create(fileBytes, zipPath);

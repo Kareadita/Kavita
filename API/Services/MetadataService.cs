@@ -83,7 +83,7 @@ public class MetadataService : IMetadataService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
     {
-        //var comicInfo = GetComicInfo(firstFile); // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
+        // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
         var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 

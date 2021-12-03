@@ -106,7 +106,7 @@ public class BackupService : IBackupService
 
         var tempDirectory = Path.Join(DirectoryService.TempDirectory, dateString);
         DirectoryService.ExistOrCreate(tempDirectory);
-        DirectoryService.ClearDirectory(tempDirectory);
+        _directoryService.ClearDirectory(tempDirectory);
 
         _directoryService.CopyFilesToDirectory(
             _backupFiles.Select(file => Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
@@ -126,7 +126,7 @@ public class BackupService : IBackupService
             _logger.LogError(ex, "There was an issue when archiving library backup");
         }
 
-        DirectoryService.ClearAndDeleteDirectory(tempDirectory);
+        _directoryService.ClearAndDeleteDirectory(tempDirectory);
         _logger.LogInformation("Database backup completed");
         await SendProgress(1F);
     }
@@ -157,7 +157,7 @@ public class BackupService : IBackupService
 
         if (!DirectoryService.GetFiles(outputTempDir).Any())
         {
-            DirectoryService.ClearAndDeleteDirectory(outputTempDir);
+            _directoryService.ClearAndDeleteDirectory(outputTempDir);
         }
     }
 

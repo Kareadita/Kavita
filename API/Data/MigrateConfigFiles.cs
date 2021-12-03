@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using API.Services;
 using Kavita.Common;
@@ -31,7 +32,7 @@ namespace API.Data
         /// In v0.4.8 we moved all config files to config/ to match with how docker was setup. This will move all config files from current directory
         /// to config/
         /// </summary>
-        public static void Migrate(bool isDocker)
+        public static void Migrate(bool isDocker, IDirectoryService directoryService)
         {
             Console.WriteLine("Checking if migration to config/ is needed");
 
@@ -46,8 +47,8 @@ namespace API.Data
                 Console.WriteLine(
                     "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
 
-                CopyAppFolders();
-                DeleteAppFolders();
+                CopyAppFolders(directoryService);
+                DeleteAppFolders(directoryService);
 
                 UpdateConfiguration();
 
@@ -69,9 +70,9 @@ namespace API.Data
 
             try
             {
-                CopyLooseLeafFiles();
+                CopyLooseLeafFiles(directoryService);
 
-                CopyAppFolders();
+                CopyAppFolders(directoryService);
 
                 // Then we need to update the config file to point to the new DB file
                 UpdateConfiguration();
@@ -84,31 +85,31 @@ namespace API.Data
 
             // Finally delete everything in the source directory
             Console.WriteLine("Removing old files");
-            DeleteLooseFiles();
-            DeleteAppFolders();
+            DeleteLooseFiles(directoryService);
+            DeleteAppFolders(directoryService);
             Console.WriteLine("Removing old files...DONE");
 
             Console.WriteLine("Migration complete. All config files are now in config/ directory");
         }
 
-        private static void DeleteAppFolders()
+        private static void DeleteAppFolders(IDirectoryService directoryService)
         {
             foreach (var folderToDelete in AppFolders)
             {
                 if (!new DirectoryInfo(Path.Join(Directory.GetCurrentDirectory(), folderToDelete)).Exists) continue;
 
-                DirectoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToDelete));
+                directoryService.ClearAndDeleteDirectory(Path.Join(Directory.GetCurrentDirectory(), folderToDelete));
             }
         }
 
-        private static void DeleteLooseFiles()
+        private static void DeleteLooseFiles(IDirectoryService directoryService)
         {
             var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
                 .Where(f => f.Exists);
             DirectoryService.DeleteFiles(configFiles.Select(f => f.FullName));
         }
 
-        private static void CopyAppFolders()
+        private static void CopyAppFolders(IDirectoryService directoryService)
         {
             Console.WriteLine("Moving folders to config");
 
@@ -118,7 +119,7 @@ namespace API.Data
 
                     try
                     {
-                        DirectoryService.CopyDirectoryToDirectory(
+                        directoryService.CopyDirectoryToDirectory(
                             Path.Join(Directory.GetCurrentDirectory(), folderToMove),
                             Path.Join(DirectoryService.ConfigDirectory, folderToMove));
                     }
@@ -132,7 +133,7 @@ namespace API.Data
             Console.WriteLine("Moving folders to config...DONE");
         }
 
-        private static void CopyLooseLeafFiles()
+        private static void CopyLooseLeafFiles(IDirectoryService directoryService)
         {
             var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
                 .Where(f => f.Exists);

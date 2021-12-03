@@ -107,15 +107,15 @@ namespace API.Tests.Services
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
             var extractDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives/Extraction");
 
-            DirectoryService.ClearAndDeleteDirectory(extractDirectory);
+            _directoryService.ClearAndDeleteDirectory(extractDirectory);
 
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
             var di1 = new DirectoryInfo(extractDirectory);
             Assert.Equal(expectedFileCount, di1.Exists ? di1.GetFiles().Length : 0);
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
 
-            DirectoryService.ClearAndDeleteDirectory(extractDirectory);
+            _directoryService.ClearAndDeleteDirectory(extractDirectory);
         }
 
 
@@ -166,7 +166,7 @@ namespace API.Tests.Services
             var sw = Stopwatch.StartNew();
 
             var outputDir = Path.Join(testDirectory, "output");
-            DirectoryService.ClearAndDeleteDirectory(outputDir);
+            _directoryService.ClearAndDeleteDirectory(outputDir);
             DirectoryService.ExistOrCreate(outputDir);
 
 
@@ -177,7 +177,7 @@ namespace API.Tests.Services
 
             Assert.Equal(expectedBytes, actual);
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
-            DirectoryService.ClearAndDeleteDirectory(outputDir);
+            _directoryService.ClearAndDeleteDirectory(outputDir);
         }
 
 

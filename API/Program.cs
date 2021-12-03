@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.IO.Abstractions;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
@@ -31,7 +32,19 @@ namespace API
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
 
-            MigrateConfigFiles.Migrate(isDocker);
+            var migrateLogger = LoggerFactory.Create(builder =>
+            {
+                builder
+                    //.AddConfiguration(Configuration.GetSection("Logging"))
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("SampleApp.Program", LogLevel.Debug)
+                    .AddConsole()
+                    .AddEventLog();
+            });
+            var mLogger = migrateLogger.CreateLogger<DirectoryService>();
+
+            MigrateConfigFiles.Migrate(isDocker, new DirectoryService(mLogger, new FileSystem()));
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&

@@ -641,7 +641,7 @@ public class OpdsController : BaseApiController
     private FeedEntry CreateChapter(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, Volume volume, ChapterDto chapter, string apiKey)
     {
         var fileSize =
-            DirectoryService.GetHumanReadableBytes(DirectoryService.GetTotalSize(new List<string>()
+            DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
                 {mangaFile.FilePath}));
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
         var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
@@ -707,7 +707,7 @@ public class OpdsController : BaseApiController
     [HttpGet("{apiKey}/favicon")]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
-        var files = DirectoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
+        var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
         if (files.Length == 0) return BadRequest("Cannot find icon");
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);

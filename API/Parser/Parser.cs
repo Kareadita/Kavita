@@ -491,146 +491,146 @@ namespace API.Parser
         );
 
 
-        /// <summary>
-        /// Parses information out of a file path. Will fallback to using directory name if Series couldn't be parsed
-        /// from filename.
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="rootPath">Root folder</param>
-        /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
-        /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(filePath);
-            ParserInfo ret;
-
-            if (IsEpub(filePath))
-            {
-                ret = new ParserInfo()
-                {
-                    Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
-                    Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
-                    Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
-                    Filename = Path.GetFileName(filePath),
-                    Format = ParseFormat(filePath),
-                    FullFilePath = filePath
-                };
-            }
-            else
-            {
-                ret = new ParserInfo()
-                {
-                    Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
-                    Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
-                    Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
-                    Filename = Path.GetFileName(filePath),
-                    Format = ParseFormat(filePath),
-                    Title = Path.GetFileNameWithoutExtension(fileName),
-                    FullFilePath = filePath
-                };
-            }
-
-            if (IsImage(filePath) && IsCoverImage(filePath)) return null;
-
-            if (IsImage(filePath))
-            {
-              // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
-              ret.Volumes = DefaultVolume;
-              ret.Chapters = DefaultChapter;
-              ret.Series = string.Empty;
-            }
-
-            if (ret.Series == string.Empty || IsImage(filePath))
-            {
-                // Try to parse information out of each folder all the way to rootPath
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            var edition = ParseEdition(fileName);
-            if (!string.IsNullOrEmpty(edition))
-            {
-                ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
-                ret.Edition = edition;
-            }
-
-            var isSpecial = type == LibraryType.Comic ? ParseComicSpecial(fileName) : ParseMangaSpecial(fileName);
-            // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
-            // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-            if (ret.Chapters == DefaultChapter && ret.Volumes == DefaultVolume && !string.IsNullOrEmpty(isSpecial))
-            {
-                ret.IsSpecial = true;
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
-            if (HasSpecialMarker(fileName))
-            {
-                ret.IsSpecial = true;
-                ret.Chapters = DefaultChapter;
-                ret.Volumes = DefaultVolume;
-
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            if (string.IsNullOrEmpty(ret.Series))
-            {
-                ret.Series = CleanTitle(fileName, type is LibraryType.Comic);
-            }
-
-            // Pdfs may have .pdf in the series name, remove that
-            if (IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
-            {
-                ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
-            }
-
-            return ret.Series == string.Empty ? null : ret;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="rootPath"></param>
-        /// <param name="type"></param>
-        /// <param name="ret">Expects a non-null ParserInfo which this method will populate</param>
-        public static void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
-        {
-          var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, filePath).ToList();
-            for (var i = 0; i < fallbackFolders.Count; i++)
-            {
-                var folder = fallbackFolders[i];
-                if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
-
-                var parsedVolume = type is LibraryType.Manga ? ParseVolume(folder) : ParseComicVolume(folder);
-                var parsedChapter = type is LibraryType.Manga ? ParseChapter(folder) : ParseComicChapter(folder);
-
-                if (!parsedVolume.Equals(DefaultVolume) || !parsedChapter.Equals(DefaultChapter))
-                {
-                  if ((ret.Volumes.Equals(DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !parsedVolume.Equals(DefaultVolume))
-                  {
-                    ret.Volumes = parsedVolume;
-                  }
-                  if ((ret.Chapters.Equals(DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !parsedChapter.Equals(DefaultChapter))
-                  {
-                    ret.Chapters = parsedChapter;
-                  }
-                }
-
-                var series = ParseSeries(folder);
-
-                if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
-                {
-                    ret.Series = CleanTitle(folder, type is LibraryType.Comic);
-                    break;
-                }
-
-                if (!string.IsNullOrEmpty(series))
-                {
-                    ret.Series = series;
-                    break;
-                }
-            }
-        }
+        // /// <summary>
+        // /// Parses information out of a file path. Will fallback to using directory name if Series couldn't be parsed
+        // /// from filename.
+        // /// </summary>
+        // /// <param name="filePath"></param>
+        // /// <param name="rootPath">Root folder</param>
+        // /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
+        // /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
+        // public static ParserInfo Parse(string filePath, string rootPath, IDirectoryService directoryService, LibraryType type = LibraryType.Manga)
+        // {
+        //     var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        //     ParserInfo ret;
+        //
+        //     if (IsEpub(filePath))
+        //     {
+        //         ret = new ParserInfo()
+        //         {
+        //             Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
+        //             Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
+        //             Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
+        //             Filename = Path.GetFileName(filePath),
+        //             Format = ParseFormat(filePath),
+        //             FullFilePath = filePath
+        //         };
+        //     }
+        //     else
+        //     {
+        //         ret = new ParserInfo()
+        //         {
+        //             Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
+        //             Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
+        //             Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
+        //             Filename = Path.GetFileName(filePath),
+        //             Format = ParseFormat(filePath),
+        //             Title = Path.GetFileNameWithoutExtension(fileName),
+        //             FullFilePath = filePath
+        //         };
+        //     }
+        //
+        //     if (IsImage(filePath) && IsCoverImage(filePath)) return null;
+        //
+        //     if (IsImage(filePath))
+        //     {
+        //       // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
+        //       ret.Volumes = DefaultVolume;
+        //       ret.Chapters = DefaultChapter;
+        //       ret.Series = string.Empty;
+        //     }
+        //
+        //     if (ret.Series == string.Empty || IsImage(filePath))
+        //     {
+        //         // Try to parse information out of each folder all the way to rootPath
+        //         ParseFromFallbackFolders(filePath, rootPath, type, directoryService, ref ret);
+        //     }
+        //
+        //     var edition = ParseEdition(fileName);
+        //     if (!string.IsNullOrEmpty(edition))
+        //     {
+        //         ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
+        //         ret.Edition = edition;
+        //     }
+        //
+        //     var isSpecial = type == LibraryType.Comic ? ParseComicSpecial(fileName) : ParseMangaSpecial(fileName);
+        //     // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
+        //     // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
+        //     if (ret.Chapters == DefaultChapter && ret.Volumes == DefaultVolume && !string.IsNullOrEmpty(isSpecial))
+        //     {
+        //         ret.IsSpecial = true;
+        //         ParseFromFallbackFolders(filePath, rootPath, type, directoryService, ref ret);
+        //     }
+        //
+        //     // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
+        //     if (HasSpecialMarker(fileName))
+        //     {
+        //         ret.IsSpecial = true;
+        //         ret.Chapters = DefaultChapter;
+        //         ret.Volumes = DefaultVolume;
+        //
+        //         ParseFromFallbackFolders(filePath, rootPath, type, directoryService, ref ret);
+        //     }
+        //
+        //     if (string.IsNullOrEmpty(ret.Series))
+        //     {
+        //         ret.Series = CleanTitle(fileName, type is LibraryType.Comic);
+        //     }
+        //
+        //     // Pdfs may have .pdf in the series name, remove that
+        //     if (IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
+        //     {
+        //         ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
+        //     }
+        //
+        //     return ret.Series == string.Empty ? null : ret;
+        // }
+        //
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <param name="filePath"></param>
+        // /// <param name="rootPath"></param>
+        // /// <param name="type"></param>
+        // /// <param name="ret">Expects a non-null ParserInfo which this method will populate</param>
+        // public static void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, IDirectoryService directoryService, ref ParserInfo ret)
+        // {
+        //   var fallbackFolders = directoryService.GetFoldersTillRoot(rootPath, filePath).ToList();
+        //     for (var i = 0; i < fallbackFolders.Count; i++)
+        //     {
+        //         var folder = fallbackFolders[i];
+        //         if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
+        //
+        //         var parsedVolume = type is LibraryType.Manga ? ParseVolume(folder) : ParseComicVolume(folder);
+        //         var parsedChapter = type is LibraryType.Manga ? ParseChapter(folder) : ParseComicChapter(folder);
+        //
+        //         if (!parsedVolume.Equals(DefaultVolume) || !parsedChapter.Equals(DefaultChapter))
+        //         {
+        //           if ((ret.Volumes.Equals(DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !parsedVolume.Equals(DefaultVolume))
+        //           {
+        //             ret.Volumes = parsedVolume;
+        //           }
+        //           if ((ret.Chapters.Equals(DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !parsedChapter.Equals(DefaultChapter))
+        //           {
+        //             ret.Chapters = parsedChapter;
+        //           }
+        //         }
+        //
+        //         var series = ParseSeries(folder);
+        //
+        //         if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+        //         {
+        //             ret.Series = CleanTitle(folder, type is LibraryType.Comic);
+        //             break;
+        //         }
+        //
+        //         if (!string.IsNullOrEmpty(series))
+        //         {
+        //             ret.Series = series;
+        //             break;
+        //         }
+        //     }
+        // }
 
         public static MangaFormat ParseFormat(string filePath)
         {

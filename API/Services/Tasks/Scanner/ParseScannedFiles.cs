@@ -26,6 +26,7 @@ namespace API.Services.Tasks.Scanner
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
+        private readonly DefaultParser _defaultParser;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -41,6 +42,7 @@ namespace API.Services.Tasks.Scanner
             _directoryService = directoryService;
             _readingItemService = readingItemService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            _defaultParser = new DefaultParser(_directoryService);
         }
 
         /// <summary>
@@ -103,8 +105,7 @@ namespace API.Services.Tasks.Scanner
 
             if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
             {
-                info = Parser.Parser.Parse(path, rootPath, type);
-                //var info2 = _bookService.ParseInfo(path);
+                info = _defaultParser.Parse(path, rootPath, type); // TODO: Why do I reparse?
                 var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }

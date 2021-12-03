@@ -70,13 +70,13 @@ public class ScannerService : IScannerService
         var folderPaths = library.Folders.Select(f => f.Path).ToList();
 
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (folderPaths.Any(f => !DirectoryService.IsDriveMounted(f)))
+        if (folderPaths.Any(f => !_directoryService.IsDriveMounted(f)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
-        var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+        var dirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
@@ -215,7 +215,7 @@ public class ScannerService : IScannerService
         }
 
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (library.Folders.Any(f => !DirectoryService.IsDriveMounted(f.Path)))
+        if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
