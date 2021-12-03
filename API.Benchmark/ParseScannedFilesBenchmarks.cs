@@ -25,10 +25,10 @@ namespace API.Benchmark
         public ParseScannedFilesBenchmarks()
         {
             var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-            IBookService bookService = new BookService(_bookLogger, directoryService);
-            _parseScannedFiles = new ParseScannedFiles(bookService, _logger, _archiveService,
+            _parseScannedFiles = new ParseScannedFiles(
+                Substitute.For<ILogger>(),
                 directoryService,
-                new ReadingItemService(_archiveService, Substitute.For<BookService>(), Substitute.For<ImageService>()));
+                new ReadingItemService(_archiveService, new BookService(_bookLogger, directoryService), Substitute.For<ImageService>(), directoryService));
         }
 
         // [Benchmark]

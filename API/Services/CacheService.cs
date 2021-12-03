@@ -66,7 +66,7 @@ namespace API.Services
 
         public void EnsureCacheDirectory()
         {
-            if (!DirectoryService.ExistOrCreate(DirectoryService.CacheDirectory))
+            if (!_directoryService.ExistOrCreate(DirectoryService.CacheDirectory))
             {
                 _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", DirectoryService.CacheDirectory);
             }
@@ -147,7 +147,7 @@ namespace API.Services
                 else if (file.Format == MangaFormat.Epub)
                 {
                     removeNonImages = false;
-                    DirectoryService.ExistOrCreate(extractPath);
+                    _directoryService.ExistOrCreate(extractPath);
                     _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
                 }
             }

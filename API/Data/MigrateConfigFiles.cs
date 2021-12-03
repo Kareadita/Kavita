@@ -66,7 +66,7 @@ namespace API.Data
                 "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
 
             Console.WriteLine($"Creating {DirectoryService.ConfigDirectory}");
-            DirectoryService.ExistOrCreate(DirectoryService.ConfigDirectory);
+            directoryService.ExistOrCreate(DirectoryService.ConfigDirectory);
 
             try
             {
@@ -106,7 +106,7 @@ namespace API.Data
         {
             var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
                 .Where(f => f.Exists);
-            DirectoryService.DeleteFiles(configFiles.Select(f => f.FullName));
+            directoryService.DeleteFiles(configFiles.Select(f => f.FullName));
         }
 
         private static void CopyAppFolders(IDirectoryService directoryService)

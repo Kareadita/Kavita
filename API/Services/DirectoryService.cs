@@ -36,6 +36,12 @@ namespace API.Services
 
         IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
 
+        IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+            SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
+        bool ExistOrCreate(string directoryPath);
+        void DeleteFiles(IEnumerable<string> files);
+
     }
     public class DirectoryService : IDirectoryService
     {
@@ -130,22 +136,22 @@ namespace API.Services
        public bool Exists(string directory)
        {
            var di = FileSystem.DirectoryInfo.FromDirectoryName(directory);
-          return di.Exists;
+           return di.Exists;
        }
 
-       public static IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
+       public IEnumerable<string> GetFiles(string path, string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
           if (searchPatternExpression != string.Empty)
           {
-             if (!Directory.Exists(path)) return ImmutableList<string>.Empty;
+             if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
              var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
-             return Directory.EnumerateFiles(path, "*", searchOption)
+             return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
                    reSearchPattern.IsMatch(file) && !file.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
           }
 
-          return !Directory.Exists(path) ? Array.Empty<string>() : Directory.GetFiles(path);
+          return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
        }
 
        public void CopyFileToDirectory(string fullFilePath, string targetDirectory)
@@ -248,13 +254,24 @@ namespace API.Services
        /// </summary>
        /// <param name="directoryPath"></param>
        /// <returns></returns>
-       public static bool ExistOrCreate(string directoryPath)
+       public bool ExistOrCreate(string directoryPath)
        {
-          var di = new DirectoryInfo(directoryPath);
+          // var di = new DirectoryInfo(directoryPath);
+          // if (di.Exists) return true;
+          // try
+          // {
+          //    Directory.CreateDirectory(directoryPath);
+          // }
+          // catch (Exception)
+          // {
+          //    return false;
+          // }
+          // return true;
+          var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
           if (di.Exists) return true;
           try
           {
-             Directory.CreateDirectory(directoryPath);
+              FileSystem.Directory.CreateDirectory(directoryPath);
           }
           catch (Exception)
           {
@@ -546,13 +563,13 @@ namespace API.Services
        /// Attempts to delete the files passed to it. Swallows exceptions.
        /// </summary>
        /// <param name="files">Full path of files to delete</param>
-       public static void DeleteFiles(IEnumerable<string> files)
+       public void DeleteFiles(IEnumerable<string> files)
        {
            foreach (var file in files)
            {
                try
                {
-                   new FileInfo(file).Delete();
+                   FileSystem.FileInfo.FromFileName(file).Delete();
                }
                catch (Exception)
                {

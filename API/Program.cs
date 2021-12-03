@@ -80,7 +80,7 @@ namespace API
                     // If this is a new install, tables wont exist yet
                     if (requiresCoverImageMigration)
                     {
-                        MigrateCoverImages.ExtractToImages(context);
+                        MigrateCoverImages.ExtractToImages(context, new DirectoryService(services.GetRequiredService<ILogger<DirectoryService>>(), new FileSystem()));
                     }
                 }
                 catch (Exception)

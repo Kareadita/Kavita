@@ -251,7 +251,7 @@ namespace API.Services
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
             var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
-            DirectoryService.ExistOrCreate(tempLocation);
+            _directoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
@@ -424,9 +424,9 @@ namespace API.Services
         }
 
 
-        private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
+        private void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
-            DirectoryService.ExistOrCreate(extractPath);
+            _directoryService.ExistOrCreate(extractPath);
             foreach (var entry in entries)
             {
                 entry.WriteToDirectory(extractPath, new ExtractionOptions()

@@ -75,7 +75,7 @@ namespace API.Tests.Services
                     _bookService, _imageService, _messageHub, cacheHelper);
             _scannerService = new ScannerService(unitOfWork, _logger, metadataService,
                 _cacheService, _messageHub, fileService, _directoryService,
-                new ReadingItemService(_archiveService, _bookService, _imageService));
+                new ReadingItemService(_archiveService, _bookService, _imageService, _directoryService));
         }
 
         private async Task<bool> SeedDb()

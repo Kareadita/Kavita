@@ -81,7 +81,7 @@ namespace API.Services.Tasks
         private async Task DeleteSeriesCoverImages()
         {
             var images = await _unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
-            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
             foreach (var file in files)
             {
                 if (images.Contains(_fileSystem.Path.GetFileName(file))) continue;
@@ -93,7 +93,7 @@ namespace API.Services.Tasks
         private async Task DeleteChapterCoverImages()
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
-            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
             foreach (var file in files)
             {
                 if (images.Contains(_fileSystem.Path.GetFileName(file))) continue;
@@ -105,7 +105,7 @@ namespace API.Services.Tasks
         private async Task DeleteTagCoverImages()
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
-            var files = DirectoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
+            var files = _directoryService.GetFiles(DirectoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
 
             // TODO: This is used in 3 different places in this file, refactor into a DirectoryService method
             foreach (var file in files)

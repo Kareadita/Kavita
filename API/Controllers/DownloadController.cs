@@ -146,7 +146,7 @@ namespace API.Controllers
                 return BadRequest(
                     "Server is currently processing this exact download. Please try again in a few minutes.");
             }
-            DirectoryService.ExistOrCreate(fullExtractPath);
+            _directoryService.ExistOrCreate(fullExtractPath);
 
             var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
 
@@ -159,7 +159,7 @@ namespace API.Controllers
                 switch (series.Format)
                 {
                     case MangaFormat.Image:
-                        DirectoryService.ExistOrCreate(chapterExtractPath);
+                        _directoryService.ExistOrCreate(chapterExtractPath);
                         _directoryService.CopyFilesToDirectory(mangaFiles.Select(f => f.FilePath), chapterExtractPath, $"{chapterId}_");
                         break;
                     case MangaFormat.Archive:
@@ -168,7 +168,7 @@ namespace API.Controllers
                         var originalFiles = _directoryService.GetFilesWithExtension(chapterExtractPath,
                             Parser.Parser.ImageFileExtensions);
                         _directoryService.CopyFilesToDirectory(originalFiles, chapterExtractPath, $"{chapterId}_");
-                        DirectoryService.DeleteFiles(originalFiles);
+                        _directoryService.DeleteFiles(originalFiles);
                         break;
                     case MangaFormat.Epub:
                         return BadRequest("Series is not in a valid format.");

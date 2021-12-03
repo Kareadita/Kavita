@@ -167,7 +167,7 @@ namespace API.Tests.Services
 
             var outputDir = Path.Join(testDirectory, "output");
             _directoryService.ClearAndDeleteDirectory(outputDir);
-            DirectoryService.ExistOrCreate(outputDir);
+            _directoryService.ExistOrCreate(outputDir);
 
 
             var coverImagePath = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),

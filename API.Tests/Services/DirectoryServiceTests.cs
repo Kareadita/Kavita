@@ -37,7 +37,7 @@ namespace API.Tests.Services
         public void GetFiles_WithCustomRegex_ShouldPass_Test()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/regex");
-            var files = DirectoryService.GetFiles(testDirectory, @"file\d*.txt");
+            var files = _directoryService.GetFiles(testDirectory, @"file\d*.txt");
             Assert.Equal(2, files.Count());
         }
 
@@ -45,7 +45,7 @@ namespace API.Tests.Services
         public void GetFiles_TopLevel_ShouldBeEmpty_Test()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService");
-            var files = DirectoryService.GetFiles(testDirectory);
+            var files = _directoryService.GetFiles(testDirectory);
             Assert.Empty(files);
         }
 
@@ -53,7 +53,7 @@ namespace API.Tests.Services
         public void GetFilesWithExtensions_ShouldBeEmpty_Test()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/extensions");
-            var files = DirectoryService.GetFiles(testDirectory, "*.txt");
+            var files = _directoryService.GetFiles(testDirectory, "*.txt");
             Assert.Empty(files);
         }
 
@@ -61,7 +61,7 @@ namespace API.Tests.Services
         public void GetFilesWithExtensions_Test()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/extension");
-            var files = DirectoryService.GetFiles(testDirectory, ".cbz|.rar");
+            var files = _directoryService.GetFiles(testDirectory, ".cbz|.rar");
             Assert.Equal(3, files.Count());
         }
 
@@ -69,7 +69,7 @@ namespace API.Tests.Services
         public void GetFilesWithExtensions_BadDirectory_ShouldBeEmpty_Test()
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/DirectoryService/doesntexist");
-            var files = DirectoryService.GetFiles(testDirectory, ".cbz|.rar");
+            var files = _directoryService.GetFiles(testDirectory, ".cbz|.rar");
             Assert.Empty(files);
         }
 
@@ -94,7 +94,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] folders, string expectedDirectory)
         {
-            var actual = DirectoryService.FindHighestDirectoriesFromFiles(rootDirectories, folders);
+            var actual = _directoryService.FindHighestDirectoriesFromFiles(rootDirectories, folders);
             var expected = new Dictionary<string, string> {{expectedDirectory, ""}};
             Assert.Equal(expected, actual);
         }
@@ -120,7 +120,7 @@ namespace API.Tests.Services
             {
               expected = Array.Empty<string>();
             }
-            Assert.Equal(expected, DirectoryService.GetFoldersTillRoot(rootPath, fullpath));
+            Assert.Equal(expected, _directoryService.GetFoldersTillRoot(rootPath, fullpath));
         }
     }
 }

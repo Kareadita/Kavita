@@ -60,7 +60,7 @@ public class BackupService : IBackupService
             "kavita.db-wal" // This wont always be there
         };
 
-        foreach (var file in files.Select(f => (new FileInfo(f)).Name).ToList())
+        foreach (var file in files.Select(f => (_directoryService.FileSystem.FileInfo.FromFileName(f)).Name).ToList())
         {
             _backupFiles.Add(file);
         }
@@ -69,10 +69,11 @@ public class BackupService : IBackupService
     public IEnumerable<string> LogFiles(int maxRollingFiles, string logFileName)
     {
         var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
-        var fi = new FileInfo(logFileName);
+        var fi = _directoryService.FileSystem.FileInfo.FromFileName(logFileName);
 
         var files = maxRollingFiles > 0
-            ? DirectoryService.GetFiles(DirectoryService.LogDirectory, $@"{Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
+            ? _directoryService.GetFiles(DirectoryService.LogDirectory,
+                $@"{_directoryService.FileSystem.Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
             : new[] {"kavita.log"};
         return files;
     }
@@ -87,7 +88,7 @@ public class BackupService : IBackupService
         var backupDirectory = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;
 
         _logger.LogDebug("Backing up to {BackupDirectory}", backupDirectory);
-        if (!DirectoryService.ExistOrCreate(backupDirectory))
+        if (!_directoryService.ExistOrCreate(backupDirectory))
         {
             _logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
             return;
@@ -96,7 +97,7 @@ public class BackupService : IBackupService
         await SendProgress(0F);
 
         var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
-        var zipPath = Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
+        var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
         if (File.Exists(zipPath))
         {
@@ -105,11 +106,11 @@ public class BackupService : IBackupService
         }
 
         var tempDirectory = Path.Join(DirectoryService.TempDirectory, dateString);
-        DirectoryService.ExistOrCreate(tempDirectory);
+        _directoryService.ExistOrCreate(tempDirectory);
         _directoryService.ClearDirectory(tempDirectory);
 
         _directoryService.CopyFilesToDirectory(
-            _backupFiles.Select(file => Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
+            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
         await SendProgress(0.25F);
 
@@ -134,28 +135,28 @@ public class BackupService : IBackupService
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
     {
         var outputTempDir = Path.Join(tempDirectory, "covers");
-        DirectoryService.ExistOrCreate(outputTempDir);
+        _directoryService.ExistOrCreate(outputTempDir);
 
         try
         {
             var seriesImages = await _unitOfWork.SeriesRepository.GetLockedCoverImagesAsync();
             _directoryService.CopyFilesToDirectory(
-                seriesImages.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                seriesImages.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
 
             var collectionTags = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             _directoryService.CopyFilesToDirectory(
-                collectionTags.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                collectionTags.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
 
             var chapterImages = await _unitOfWork.ChapterRepository.GetCoverImagesForLockedChaptersAsync();
             _directoryService.CopyFilesToDirectory(
-                chapterImages.Select(s => Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                chapterImages.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
         }
         catch (IOException)
         {
             // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
         }
 
-        if (!DirectoryService.GetFiles(outputTempDir).Any())
+        if (!_directoryService.GetFiles(outputTempDir).Any())
         {
             _directoryService.ClearAndDeleteDirectory(outputTempDir);
         }
@@ -176,11 +177,13 @@ public class BackupService : IBackupService
         _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
         var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
         if (!_directoryService.Exists(backupDirectory)) return;
+
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
-        var allBackups = DirectoryService.GetFiles(backupDirectory).ToList();
+        var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
         var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
             .Where(f => f.CreationTime > deltaTime)
             .ToList();
+
         if (expiredBackups.Count == allBackups.Count)
         {
             _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);

@@ -456,7 +456,7 @@ namespace API.Services
 
         public void ExtractPdfImages(string fileFilePath, string targetDirectory)
         {
-            DirectoryService.ExistOrCreate(targetDirectory);
+            _directoryService.ExistOrCreate(targetDirectory);
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();

@@ -1,6 +1,10 @@
 using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
 using API.Entities.Enums;
 using API.Parser;
+using API.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -9,10 +13,14 @@ namespace API.Tests.Parser
     public class ComicParserTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly DefaultParser _defaultParser;
 
         public ComicParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            _defaultParser =
+                new DefaultParser(new DirectoryService(Substitute.For<ILogger<DirectoryService>>(),
+                    new MockFileSystem()));
         }
 
         [Theory]
@@ -200,7 +208,7 @@ namespace API.Tests.Parser
             foreach (var file in expected.Keys)
             {
                 var expectedInfo = expected[file];
-                var actual = API.Parser.Parser.Parse(file, rootPath, LibraryType.Comic);
+                var actual = _defaultParser.Parse(file, rootPath, LibraryType.Comic);
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);

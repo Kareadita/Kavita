@@ -29,10 +29,10 @@ namespace API.Data
         /// <summary>
         /// Run first. Will extract byte[]s from DB and write them to the cover directory.
         /// </summary>
-        public static void ExtractToImages(DbContext context)
+        public static void ExtractToImages(DbContext context, IDirectoryService directoryService)
         {
                 Console.WriteLine("Migrating Cover Images to disk. Expect delay.");
-                DirectoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
+                directoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
 
                 Console.WriteLine("Extracting cover images for Series");
                 var lockedSeries = SqlHelper.RawSqlQuery(context, "Select Id, CoverImage From Series Where CoverImage IS NOT NULL", x =>

@@ -50,7 +50,7 @@ public class ImageService : IImageService
 
     public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
     {
-        DirectoryService.ExistOrCreate(targetDirectory);
+        _directoryService.ExistOrCreate(targetDirectory);
         if (fileCount == 1)
         {
             _directoryService.CopyFileToDirectory(fileFilePath, targetDirectory);
