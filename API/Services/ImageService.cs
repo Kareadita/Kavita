@@ -34,7 +34,7 @@ public class ImageService : IImageService
 {
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
-    public const string ChapterCoverImageRegex = @"v_\d+_c\d+";
+    public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series_\d+";
     public const string CollectionTagCoverImageRegex = @"tag_\d+";
 

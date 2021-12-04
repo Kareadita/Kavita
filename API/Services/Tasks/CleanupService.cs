@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -17,7 +15,9 @@ namespace API.Services.Tasks
         Task Cleanup();
         void CleanupCacheDirectory();
         Task DeleteSeriesCoverImages();
-        void CleanupBackups();
+        Task DeleteChapterCoverImages();
+        Task DeleteTagCoverImages();
+        Task CleanupBackups();
     }
     /// <summary>
     /// Cleans up after operations on reoccurring basis
@@ -54,7 +54,7 @@ namespace API.Services.Tasks
             CleanupCacheDirectory();
             await SendProgress(0.25F);
             _logger.LogInformation("Cleaning old database backups");
-            CleanupBackups();
+            await CleanupBackups();
             await SendProgress(0.50F);
             _logger.LogInformation("Cleaning deleted cover images");
             await DeleteSeriesCoverImages();
@@ -73,7 +73,7 @@ namespace API.Services.Tasks
         }
 
         /// <summary>
-        /// Removes all series images that are not in the database
+        /// Removes all series images that are not in the database. They must follow <see cref="ImageService.SeriesCoverImageRegex"/> filename pattern.
         /// </summary>
         public async Task DeleteSeriesCoverImages()
         {
@@ -87,7 +87,10 @@ namespace API.Services.Tasks
             }
         }
 
-        private async Task DeleteChapterCoverImages()
+        /// <summary>
+        /// Removes all chapter/volume images that are not in the database. They must follow <see cref="ImageService.ChapterCoverImageRegex"/> filename pattern.
+        /// </summary>
+        public async Task DeleteChapterCoverImages()
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
@@ -99,13 +102,15 @@ namespace API.Services.Tasks
             }
         }
 
-        private async Task DeleteTagCoverImages()
+        /// <summary>
+        /// Removes all collection tag images that are not in the database. They must follow <see cref="ImageService.CollectionTagCoverImageRegex"/> filename pattern.
+        /// </summary>
+        public async Task DeleteTagCoverImages()
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
 
             // TODO: This is used in 3 different places in this file, refactor into a DirectoryService method
-            //_directoryService.DeleteFiles(images);
             foreach (var file in files)
             {
                 if (images.Contains(_directoryService.FileSystem.Path.GetFileName(file))) continue;
@@ -114,6 +119,9 @@ namespace API.Services.Tasks
             }
         }
 
+        /// <summary>
+        /// Removes all files and directories in the cache directory
+        /// </summary>
         public void CleanupCacheDirectory()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
@@ -134,49 +142,29 @@ namespace API.Services.Tasks
         /// <summary>
         /// Removes Database backups older than 30 days. If all backups are older than 30 days, the latest is kept.
         /// </summary>
-        public void CleanupBackups()
+        public async Task CleanupBackups()
         {
             const int dayThreshold = 30;
             _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
-            var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
+            var backupDirectory =
+                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;
             if (!_directoryService.Exists(backupDirectory)) return;
 
             var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
             var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
-            var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
-                .Where(f => f.CreationTime > deltaTime)
+            var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+                .Where(f => f.CreationTime < deltaTime)
                 .ToList();
 
             if (expiredBackups.Count == allBackups.Count)
             {
                 _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
                 var toDelete = expiredBackups.OrderByDescending(f => f.CreationTime).ToList();
-                for (var i = 1; i < toDelete.Count; i++)
-                {
-                    try
-                    {
-                        toDelete[i].Delete();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "There was an issue deleting {FileName}", toDelete[i].Name);
-                    }
-                }
+                _directoryService.DeleteFiles(toDelete.Take(toDelete.Count - 1).Select(f => f.FullName));
             }
             else
             {
-                foreach (var file in expiredBackups)
-                {
-                    try
-                    {
-                        file.Delete();
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "There was an issue deleting {FileName}", file.Name);
-                    }
-                }
-
+                _directoryService.DeleteFiles(expiredBackups.Select(f => f.FullName));
             }
             _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
         }
