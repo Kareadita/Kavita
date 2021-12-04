@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -6,6 +7,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Comparators;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -15,6 +17,9 @@ namespace API.Services
         IFileSystem FileSystem { get; }
         string CacheDirectory { get; }
         string CoverImageDirectory { get; }
+        string LogDirectory { get; }
+        string TempDirectory { get; }
+        string ConfigDirectory { get; }
         /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
@@ -42,6 +47,8 @@ namespace API.Services
 
         bool ExistOrCreate(string directoryPath);
         void DeleteFiles(IEnumerable<string> files);
+        void RemoveNonImages(string directoryName);
+        void Flatten(string directoryName);
 
     }
     public class DirectoryService : IDirectoryService
@@ -49,16 +56,15 @@ namespace API.Services
         public IFileSystem FileSystem { get; }
         public string CacheDirectory { get; }
         public string CoverImageDirectory { get; }
+        public string LogDirectory { get; }
+        public string TempDirectory { get; }
+        public string ConfigDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
-       public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "temp");
-       public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "logs");
-       //public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "covers");
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
-       public static readonly string ConfigDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
 
        public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
        {
@@ -66,6 +72,9 @@ namespace API.Services
            FileSystem = fileSystem;
            CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
            CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
+           LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
+           TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
+           ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
        }
 
        /// <summary>
@@ -615,5 +624,78 @@ namespace API.Services
            // Return formatted number with suffix
            return readable.ToString("0.## ") + suffix;
        }
+
+        /// <summary>
+        /// Removes all files except images from the directory. Includes sub directories.
+        /// </summary>
+        /// <param name="directoryName">Fully qualified directory</param>
+        public void RemoveNonImages(string directoryName)
+        {
+            DeleteFiles(GetFiles(directoryName, searchOption:SearchOption.AllDirectories).Where(file => !Parser.Parser.IsImage(file)));
+        }
+
+
+        /// <summary>
+        /// Flattens all files in subfolders to the passed directory recursively.
+        ///
+        ///
+        /// foo<para />
+        /// ├── 1.txt<para />
+        /// ├── 2.txt<para />
+        /// ├── 3.txt<para />
+        /// ├── 4.txt<para />
+        /// └── bar<para />
+        ///     ├── 1.txt<para />
+        ///     ├── 2.txt<para />
+        ///     └── 5.txt<para />
+        ///
+        /// becomes:<para />
+        /// foo<para />
+        /// ├── 1.txt<para />
+        /// ├── 2.txt<para />
+        /// ├── 3.txt<para />
+        /// ├── 4.txt<para />
+        ///     ├── bar_1.txt<para />
+        ///     ├── bar_2.txt<para />
+        ///     └── bar_5.txt<para />
+        /// </summary>
+        /// <param name="directoryName">Fully qualified Directory name</param>
+        public void Flatten(string directoryName)
+        {
+            if (string.IsNullOrEmpty(directoryName) || !FileSystem.Directory.Exists(directoryName)) return;
+
+            var directory = FileSystem.DirectoryInfo.FromDirectoryName(directoryName);
+
+            var index = 0;
+            FlattenDirectory(directory, directory, ref index);
+        }
+
+
+        private void FlattenDirectory(IDirectoryInfo root, IDirectoryInfo directory, ref int directoryIndex)
+        {
+            if (!root.FullName.Equals(directory.FullName))
+            {
+                var fileIndex = 1;
+
+                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, new NaturalSortComparer()))
+                {
+                    if (file.Directory == null) continue;
+                    var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
+                    // We need to rename the files so that after flattening, they are in the order we found them
+                    var newName = $"{paddedIndex}_{Parser.Parser.PadZeros(fileIndex + "")}{file.Extension}";
+                    var newPath = Path.Join(root.FullName, newName);
+                    if (!File.Exists(newPath)) file.MoveTo(newPath);
+                    fileIndex++;
+                }
+
+                directoryIndex++;
+            }
+
+            var sort = new NaturalSortComparer();
+            foreach (var subDirectory in directory.EnumerateDirectories().OrderBy(d => d.FullName, sort))
+            {
+                FlattenDirectory(root, subDirectory, ref directoryIndex);
+            }
+        }
     }
 }

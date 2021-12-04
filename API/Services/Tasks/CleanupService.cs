@@ -49,7 +49,7 @@ namespace API.Services.Tasks
             _logger.LogInformation("Starting Cleanup");
             await SendProgress(0F);
             _logger.LogInformation("Cleaning temp directory");
-            _directoryService.ClearDirectory(DirectoryService.TempDirectory);
+            _directoryService.ClearDirectory(_directoryService.TempDirectory);
             await SendProgress(0.1F);
             CleanupCacheDirectory();
             await SendProgress(0.25F);

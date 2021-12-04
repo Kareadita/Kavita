@@ -35,7 +35,7 @@ public class BackupService : IBackupService
 
     private readonly IList<string> _backupFiles;
 
-    public BackupService(IUnitOfWork unitOfWork, ILogger<BackupService> logger,
+    public BackupService(ILogger<BackupService> logger, IUnitOfWork unitOfWork,
         IDirectoryService directoryService, IConfiguration config, IHubContext<MessageHub> messageHub)
     {
         _unitOfWork = unitOfWork;
@@ -70,7 +70,7 @@ public class BackupService : IBackupService
         var fi = _directoryService.FileSystem.FileInfo.FromFileName(logFileName);
 
         var files = maxRollingFiles > 0
-            ? _directoryService.GetFiles(DirectoryService.LogDirectory,
+            ? _directoryService.GetFiles(_directoryService.LogDirectory,
                 $@"{_directoryService.FileSystem.Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
             : new[] {"kavita.log"};
         return files;
@@ -103,12 +103,12 @@ public class BackupService : IBackupService
             return;
         }
 
-        var tempDirectory = Path.Join(DirectoryService.TempDirectory, dateString);
+        var tempDirectory = Path.Join(_directoryService.TempDirectory, dateString);
         _directoryService.ExistOrCreate(tempDirectory);
         _directoryService.ClearDirectory(tempDirectory);
 
         _directoryService.CopyFilesToDirectory(
-            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(DirectoryService.ConfigDirectory, file)).ToList(), tempDirectory);
+            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
         await SendProgress(0.25F);
 

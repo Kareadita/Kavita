@@ -252,14 +252,14 @@ namespace API.Services
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
-            var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
+            var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
             _directoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
 
-            var zipPath = Path.Join(DirectoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
                 ZipFile.CreateFromDirectory(tempLocation, zipPath);
@@ -449,7 +449,7 @@ namespace API.Services
             if (!needsFlattening) return;
 
             _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
-            new DirectoryInfo(extractPath).Flatten();
+            _directoryService.Flatten(extractPath);
         }
 
         /// <summary>

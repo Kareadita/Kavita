@@ -68,12 +68,12 @@ namespace API.Data
             Console.WriteLine(
                 "Migrating files from pre-v0.4.8. All Kavita config files are now located in config/");
 
-            Console.WriteLine($"Creating {DirectoryService.ConfigDirectory}");
-            directoryService.ExistOrCreate(DirectoryService.ConfigDirectory);
+            Console.WriteLine($"Creating {directoryService.ConfigDirectory}");
+            directoryService.ExistOrCreate(directoryService.ConfigDirectory);
 
             try
             {
-                CopyLooseLeafFiles();
+                CopyLooseLeafFiles(directoryService);
 
                 CopyAppFolders(directoryService);
 
@@ -118,13 +118,13 @@ namespace API.Data
 
                 foreach (var folderToMove in AppFolders)
                 {
-                    if (new DirectoryInfo(Path.Join(DirectoryService.ConfigDirectory, folderToMove)).Exists) continue;
+                    if (new DirectoryInfo(Path.Join(directoryService.ConfigDirectory, folderToMove)).Exists) continue;
 
                     try
                     {
                         directoryService.CopyDirectoryToDirectory(
-                            Path.Join(Directory.GetCurrentDirectory(), folderToMove),
-                            Path.Join(DirectoryService.ConfigDirectory, folderToMove));
+                            Path.Join(directoryService.FileSystem.Directory.GetCurrentDirectory(), folderToMove),
+                            Path.Join(directoryService.ConfigDirectory, folderToMove));
                     }
                     catch (Exception)
                     {
@@ -136,9 +136,9 @@ namespace API.Data
             Console.WriteLine("Moving folders to config...DONE");
         }
 
-        private static void CopyLooseLeafFiles()
+        private static void CopyLooseLeafFiles(IDirectoryService directoryService)
         {
-            var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(Directory.GetCurrentDirectory(), file)))
+            var configFiles = LooseLeafFiles.Select(file => new FileInfo(Path.Join(directoryService.FileSystem.Directory.GetCurrentDirectory(), file)))
                 .Where(f => f.Exists);
             // First step is to move all the files
             Console.WriteLine("Moving files to config/");
@@ -146,7 +146,7 @@ namespace API.Data
             {
                 try
                 {
-                    fileInfo.CopyTo(Path.Join(DirectoryService.ConfigDirectory, fileInfo.Name));
+                    fileInfo.CopyTo(Path.Join(directoryService.ConfigDirectory, fileInfo.Name));
                 }
                 catch (Exception)
                 {

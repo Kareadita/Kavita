@@ -140,8 +140,8 @@ namespace API.Controllers
             var totalFilePaths = new List<string>();
 
             var tempFolder = $"download_{series.Id}_bookmarks";
-            var fullExtractPath = Path.Join(DirectoryService.TempDirectory, tempFolder);
-            if (new DirectoryInfo(fullExtractPath).Exists)
+            var fullExtractPath = Path.Join(_directoryService.TempDirectory, tempFolder);
+            if (_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(fullExtractPath).Exists)
             {
                 return BadRequest(
                     "Server is currently processing this exact download. Please try again in a few minutes.");

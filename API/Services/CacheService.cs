@@ -23,11 +23,6 @@ namespace API.Services
         Task<Chapter> Ensure(int chapterId);
 
         /// <summary>
-        /// Clears cache directory of all folders and files.
-        /// </summary>
-        //void Cleanup();
-
-        /// <summary>
         /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
         /// </summary>
         /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
@@ -96,11 +91,12 @@ namespace API.Services
         /// <returns>This will always return the Chapter for the chpaterId</returns>
         public async Task<Chapter> Ensure(int chapterId)
         {
-            EnsureCacheDirectory();
+            //EnsureCacheDirectory();
+            _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var extractPath = GetCachePath(chapterId);
 
-            if (!Directory.Exists(extractPath))
+            if (!_directoryService.Exists(extractPath))
             {
                 var files = chapter.Files.ToList();
                 ExtractChapterFiles(extractPath, files);
@@ -121,12 +117,12 @@ namespace API.Services
             var removeNonImages = true;
             var fileCount = files.Count;
             var extraPath = "";
-            var extractDi = new DirectoryInfo(extractPath);
+            var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
 
             if (files.Count > 0 && files[0].Format == MangaFormat.Image)
             {
                 _readingItemService.Extract(files[0].FilePath, extractPath, MangaFormat.Image, files.Count);
-                extractDi.Flatten();
+                _directoryService.Flatten(extractDi.FullName);
             }
 
             foreach (var file in files)
@@ -152,30 +148,12 @@ namespace API.Services
                 }
             }
 
-            extractDi.Flatten();
+            _directoryService.Flatten(extractDi.FullName);
             if (removeNonImages)
             {
-                extractDi.RemoveNonImages();
+                _directoryService.RemoveNonImages(extractDi.FullName);
             }
         }
-
-
-        // public void Cleanup()
-        // {
-        //     _logger.LogInformation("Performing cleanup of Cache directory");
-        //     EnsureCacheDirectory();
-        //
-        //     try
-        //     {
-        //         _directoryService.ClearDirectory(DirectoryService.CacheDirectory);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
-        //     }
-        //
-        //     _logger.LogInformation("Cache directory purged");
-        // }
 
         /// <summary>
         /// Removes the cached files and folders for a set of chapterIds
@@ -205,7 +183,7 @@ namespace API.Services
         /// <returns></returns>
         private string GetCachePath(int chapterId)
         {
-            return Path.GetFullPath(Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
+            return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
         }
 
         public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)

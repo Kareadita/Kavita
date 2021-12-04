@@ -636,5 +636,63 @@ namespace API.Tests.Services
         }
 
         #endregion
+
+        #region RemoveNonImages
+
+        [Fact]
+        public void RemoveNonImages()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
+            fileSystem.AddFile($"{testDirectory}file/data-0.txt", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-1.jpg", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-2.png", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-3.webp", new MockFileData("abc"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.RemoveNonImages($"{testDirectory}");
+            Assert.False(fileSystem.FileExists($"{testDirectory}file/data-0.txt"));
+            Assert.Equal(3, ds.GetFiles($"{testDirectory}", searchOption:SearchOption.AllDirectories).Count());
+        }
+
+        #endregion
+
+        #region Flatten
+
+        [Fact]
+        public void Flatten_ShouldDoNothing()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
+            fileSystem.AddFile($"{testDirectory}data-1.jpg", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-2.png", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}data-3.webp", new MockFileData("abc"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.Flatten($"{testDirectory}");
+            Assert.True(fileSystem.FileExists($"{testDirectory}data-1.jpg"));
+            Assert.True(fileSystem.FileExists($"{testDirectory}data-2.png"));
+            Assert.True(fileSystem.FileExists($"{testDirectory}data-3.webp"));
+        }
+
+        [Fact]
+        public void Flatten_ShouldFlatten()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
+            fileSystem.AddFile($"{testDirectory}data-1.jpg", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}subdir/data-3.webp", new MockFileData("abc"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.Flatten($"{testDirectory}");
+            Assert.Equal(2, ds.GetFiles(testDirectory).Count());
+            Assert.False(fileSystem.FileExists($"{testDirectory}subdir/data-3.webp"));
+            Assert.True(fileSystem.Directory.Exists($"{testDirectory}subdir/"));
+        }
+
+        #endregion
     }
 }

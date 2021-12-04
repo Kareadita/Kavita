@@ -18,7 +18,6 @@ public interface ITaskScheduler
     void ScanLibrary(int libraryId, bool forceUpdate = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
-    void CleanupTemp();
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
     void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void CancelStatsTasks();
@@ -157,11 +156,6 @@ public class TaskScheduler : ITaskScheduler
     {
         _logger.LogInformation("Enqueuing library metadata refresh for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
-    }
-
-    public void CleanupTemp()
-    {
-        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(DirectoryService.TempDirectory));
     }
 
     public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)
