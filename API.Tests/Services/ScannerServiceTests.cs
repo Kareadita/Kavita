@@ -81,7 +81,7 @@ namespace API.Tests.Services
         private async Task<bool> SeedDb()
         {
             await _context.Database.MigrateAsync();
-            await Seed.SeedSettings(_context);
+            await Seed.SeedSettings(_context, _directoryService);
 
             _context.Library.Add(new Library()
             {

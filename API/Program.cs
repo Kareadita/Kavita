@@ -16,6 +16,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API
 {
@@ -73,14 +74,16 @@ namespace API
                     return;
                 }
 
+                var directoryService = services.GetRequiredService<DirectoryService>();
 
-                var requiresCoverImageMigration = !Directory.Exists(DirectoryService.CoverImageDirectory);
+
+                var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
                 try
                 {
                     // If this is a new install, tables wont exist yet
                     if (requiresCoverImageMigration)
                     {
-                        MigrateCoverImages.ExtractToImages(context, new DirectoryService(services.GetRequiredService<ILogger<DirectoryService>>(), new FileSystem()));
+                        MigrateCoverImages.ExtractToImages(context, directoryService, services.GetRequiredService<ImageService>());
                     }
                 }
                 catch (Exception)
@@ -93,11 +96,11 @@ namespace API
 
                 if (requiresCoverImageMigration)
                 {
-                    await MigrateCoverImages.UpdateDatabaseWithImages(context);
+                    await MigrateCoverImages.UpdateDatabaseWithImages(context, directoryService);
                 }
 
                 await Seed.SeedRoles(roleManager);
-                await Seed.SeedSettings(context);
+                await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedUserApiKeys(context);
             }
             catch (Exception ex)

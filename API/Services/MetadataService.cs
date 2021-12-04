@@ -41,15 +41,18 @@ public class MetadataService : IMetadataService
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly ICacheHelper _cacheHelper;
     private readonly IReadingItemService _readingItemService;
+    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper, IReadingItemService readingItemService)
+        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper,
+        IReadingItemService readingItemService, IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _messageHub = messageHub;
         _cacheHelper = cacheHelper;
         _readingItemService = readingItemService;
+        _directoryService = directoryService;
     }
 
     /// <summary>
@@ -61,7 +64,7 @@ public class MetadataService : IMetadataService
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return false;
 
         if (firstFile == null) return false;
@@ -166,7 +169,7 @@ public class MetadataService : IMetadataService
     private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
+        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
 
         volume.Chapters ??= new List<Chapter>();
         var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -186,7 +189,7 @@ public class MetadataService : IMetadataService
         if (series == null) return;
 
         // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
             return;
 
         series.Volumes ??= new List<Volume>();

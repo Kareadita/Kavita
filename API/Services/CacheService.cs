@@ -25,7 +25,7 @@ namespace API.Services
         /// <summary>
         /// Clears cache directory of all folders and files.
         /// </summary>
-        void Cleanup();
+        //void Cleanup();
 
         /// <summary>
         /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
@@ -66,9 +66,9 @@ namespace API.Services
 
         public void EnsureCacheDirectory()
         {
-            if (!_directoryService.ExistOrCreate(DirectoryService.CacheDirectory))
+            if (!_directoryService.ExistOrCreate(_directoryService.CacheDirectory))
             {
-                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", DirectoryService.CacheDirectory);
+                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", _directoryService.CacheDirectory);
             }
         }
 
@@ -160,22 +160,22 @@ namespace API.Services
         }
 
 
-        public void Cleanup()
-        {
-            _logger.LogInformation("Performing cleanup of Cache directory");
-            EnsureCacheDirectory();
-
-            try
-            {
-                _directoryService.ClearDirectory(DirectoryService.CacheDirectory);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
-            }
-
-            _logger.LogInformation("Cache directory purged");
-        }
+        // public void Cleanup()
+        // {
+        //     _logger.LogInformation("Performing cleanup of Cache directory");
+        //     EnsureCacheDirectory();
+        //
+        //     try
+        //     {
+        //         _directoryService.ClearDirectory(DirectoryService.CacheDirectory);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
+        //     }
+        //
+        //     _logger.LogInformation("Cache directory purged");
+        // }
 
         /// <summary>
         /// Removes the cached files and folders for a set of chapterIds
@@ -205,7 +205,7 @@ namespace API.Services
         /// <returns></returns>
         private string GetCachePath(int chapterId)
         {
-            return Path.GetFullPath(Path.Join(DirectoryService.CacheDirectory, $"{chapterId}/"));
+            return Path.GetFullPath(Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
         }
 
         public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)

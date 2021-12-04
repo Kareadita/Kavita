@@ -19,22 +19,24 @@ public interface IImageService
     /// </summary>
     /// <param name="path">Path to the image file</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string CreateThumbnail(string path, string fileName);
+    //string CreateThumbnail(string path, string fileName);
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
+
+    string WriteCoverThumbnail(Stream stream, string fileName);
 }
 
 public class ImageService : IImageService
 {
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
-    public const string ChapterCoverImageRegex = @"v\d+_c\d+";
-    public const string SeriesCoverImageRegex = @"seres\d+";
-    public const string CollectionTagCoverImageRegex = @"tag\d+";
+    public const string ChapterCoverImageRegex = @"v_\d+_c\d+";
+    public const string SeriesCoverImageRegex = @"series_\d+";
+    public const string CollectionTagCoverImageRegex = @"tag_\d+";
 
 
     /// <summary>
@@ -88,7 +90,11 @@ public class ImageService : IImageService
 
         try
         {
-            return CreateThumbnail(path,  fileName);
+            //return CreateThumbnail(path,  fileName);
+            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
+            var filename = fileName + ".png";
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+            return filename;
         }
         catch (Exception ex)
         {
@@ -99,22 +105,22 @@ public class ImageService : IImageService
     }
 
     /// <inheritdoc />
-    public string CreateThumbnail(string path, string fileName)
-    {
-        try
-        {
-            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
-            var filename = fileName + ".png";
-            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, filename));
-            return filename;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error creating thumbnail from url");
-        }
-
-        return string.Empty;
-    }
+    // public string CreateThumbnail(string path, string fileName)
+    // {
+    //     try
+    //     {
+    //         using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
+    //         var filename = fileName + ".png";
+    //         thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+    //         return filename;
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         _logger.LogError(e, "Error creating thumbnail from url");
+    //     }
+    //
+    //     return string.Empty;
+    // }
 
     /// <summary>
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
@@ -123,11 +129,11 @@ public class ImageService : IImageService
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public static string WriteCoverThumbnail(Stream stream, string fileName)
+    public string WriteCoverThumbnail(Stream stream, string fileName)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
-        thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
         return filename;
     }
 
@@ -139,7 +145,7 @@ public class ImageService : IImageService
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
             return filename;
         }
         catch (Exception e)

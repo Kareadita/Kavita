@@ -53,14 +53,16 @@ namespace API.Services
     {
         private readonly ILogger<BookService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
 
-        public BookService(ILogger<BookService> logger, IDirectoryService directoryService)
+        public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
             _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -498,7 +500,7 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {
@@ -519,7 +521,7 @@ namespace API.Services
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
 
             }
             catch (Exception ex)

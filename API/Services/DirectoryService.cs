@@ -13,6 +13,8 @@ namespace API.Services
     public interface IDirectoryService
     {
         IFileSystem FileSystem { get; }
+        string CacheDirectory { get; }
+        string CoverImageDirectory { get; }
         /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
@@ -45,6 +47,8 @@ namespace API.Services
     public class DirectoryService : IDirectoryService
     {
         public IFileSystem FileSystem { get; }
+        public string CacheDirectory { get; }
+        public string CoverImageDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -52,8 +56,7 @@ namespace API.Services
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
        public static readonly string TempDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "temp");
        public static readonly string LogDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "logs");
-       public static readonly string CacheDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "cache");
-       public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "covers");
+       //public static readonly string CoverImageDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "covers");
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
        public static readonly string ConfigDirectory = Path.Join(Directory.GetCurrentDirectory(), "config");
 
@@ -61,6 +64,8 @@ namespace API.Services
        {
            _logger = logger;
            FileSystem = fileSystem;
+           CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
+           CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
        }
 
        /// <summary>

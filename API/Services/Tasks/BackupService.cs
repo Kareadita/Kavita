@@ -24,9 +24,7 @@ public interface IBackupService
     /// <param name="maxRollingFiles"></param>
     /// <param name="logFileName"></param>
     /// <returns></returns>
-    IEnumerable<string> LogFiles(int maxRollingFiles, string logFileName);
-
-    void CleanupBackups();
+    IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName);
 }
 public class BackupService : IBackupService
 {
@@ -47,7 +45,7 @@ public class BackupService : IBackupService
 
         var maxRollingFiles = config.GetMaxRollingFiles();
         var loggingSection = config.GetLoggingFileName();
-        var files = LogFiles(maxRollingFiles, loggingSection);
+        var files = GetLogFiles(maxRollingFiles, loggingSection);
 
 
         _backupFiles = new List<string>()
@@ -66,7 +64,7 @@ public class BackupService : IBackupService
         }
     }
 
-    public IEnumerable<string> LogFiles(int maxRollingFiles, string logFileName)
+    public IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName)
     {
         var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
         var fi = _directoryService.FileSystem.FileInfo.FromFileName(logFileName);
@@ -141,15 +139,15 @@ public class BackupService : IBackupService
         {
             var seriesImages = await _unitOfWork.SeriesRepository.GetLockedCoverImagesAsync();
             _directoryService.CopyFilesToDirectory(
-                seriesImages.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                seriesImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
 
             var collectionTags = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             _directoryService.CopyFilesToDirectory(
-                collectionTags.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                collectionTags.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
 
             var chapterImages = await _unitOfWork.ChapterRepository.GetCoverImagesForLockedChaptersAsync();
             _directoryService.CopyFilesToDirectory(
-                chapterImages.Select(s => _directoryService.FileSystem.Path.Join(DirectoryService.CoverImageDirectory, s)), outputTempDir);
+                chapterImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
         }
         catch (IOException)
         {
@@ -168,54 +166,54 @@ public class BackupService : IBackupService
             MessageFactory.BackupDatabaseProgressEvent(progress));
     }
 
-    /// <summary>
-    /// Removes Database backups older than 30 days. If all backups are older than 30 days, the latest is kept.
-    /// </summary>
-    public void CleanupBackups()
-    {
-        const int dayThreshold = 30;
-        _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
-        var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
-        if (!_directoryService.Exists(backupDirectory)) return;
-
-        var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
-        var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
-        var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
-            .Where(f => f.CreationTime > deltaTime)
-            .ToList();
-
-        if (expiredBackups.Count == allBackups.Count)
-        {
-            _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
-            var toDelete = expiredBackups.OrderByDescending(f => f.CreationTime).ToList();
-            for (var i = 1; i < toDelete.Count; i++)
-            {
-                try
-                {
-                    toDelete[i].Delete();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was an issue deleting {FileName}", toDelete[i].Name);
-                }
-            }
-        }
-        else
-        {
-            foreach (var file in expiredBackups)
-            {
-                try
-                {
-                    file.Delete();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was an issue deleting {FileName}", file.Name);
-                }
-            }
-
-        }
-        _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
-    }
+    // /// <summary>
+    // /// Removes Database backups older than 30 days. If all backups are older than 30 days, the latest is kept.
+    // /// </summary>
+    // public void CleanupBackups()
+    // {
+    //     const int dayThreshold = 30;
+    //     _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
+    //     var backupDirectory = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Result.Value;
+    //     if (!_directoryService.Exists(backupDirectory)) return;
+    //
+    //     var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
+    //     var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
+    //     var expiredBackups = allBackups.Select(filename => new FileInfo(filename))
+    //         .Where(f => f.CreationTime > deltaTime)
+    //         .ToList();
+    //
+    //     if (expiredBackups.Count == allBackups.Count)
+    //     {
+    //         _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
+    //         var toDelete = expiredBackups.OrderByDescending(f => f.CreationTime).ToList();
+    //         for (var i = 1; i < toDelete.Count; i++)
+    //         {
+    //             try
+    //             {
+    //                 toDelete[i].Delete();
+    //             }
+    //             catch (Exception ex)
+    //             {
+    //                 _logger.LogError(ex, "There was an issue deleting {FileName}", toDelete[i].Name);
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         foreach (var file in expiredBackups)
+    //         {
+    //             try
+    //             {
+    //                 file.Delete();
+    //             }
+    //             catch (Exception ex)
+    //             {
+    //                 _logger.LogError(ex, "There was an issue deleting {FileName}", file.Name);
+    //             }
+    //         }
+    //
+    //     }
+    //     _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
+    // }
 
 }

@@ -38,12 +38,14 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private const string ComicInfoFilename = "comicinfo";
 
-        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
+        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
             _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace API.Services
         /// <returns></returns>
         public virtual ArchiveLibrary CanOpen(string archivePath)
         {
-            if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
+            if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
             try
             {
@@ -281,7 +283,7 @@ namespace API.Services
         {
             try
             {
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {

@@ -14,7 +14,8 @@ namespace API.Tests.Services
 
         public BookServiceTests()
         {
-            _bookService = new BookService(_logger, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()));
+            var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+            _bookService = new BookService(_logger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService));
         }
 
         [Theory]

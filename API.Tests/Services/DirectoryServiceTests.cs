@@ -153,6 +153,24 @@ namespace API.Tests.Services
         }
 
         [Fact]
+        public void GetFiles_All_MixedPathSeparators()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            fileSystem.AddFile($"/manga\\file_{29}.jpg", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = ds.GetFiles(testDirectory).ToList();
+
+            Assert.Equal(11, files.Count());
+        }
+
+        [Fact]
         public void GetFiles_All_TopDirectoryOnly_ShouldBe10()
         {
             const string testDirectory = "/manga/";

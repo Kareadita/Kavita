@@ -24,7 +24,7 @@ namespace API.Tests.Services
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
-            _archiveService = new ArchiveService(_logger, _directoryService);
+            _archiveService = new ArchiveService(_logger, _directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService));
         }
 
         [Theory]
