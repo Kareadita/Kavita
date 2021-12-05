@@ -74,7 +74,10 @@ namespace API
                     return;
                 }
 
-                var directoryService = services.GetRequiredService<DirectoryService>();
+                // This doesn't work either
+                //var directoryService = services.GetRequiredService<DirectoryService>();
+                var directoryService = new DirectoryService(null, new FileSystem());
+
 
 
                 var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
