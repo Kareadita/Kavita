@@ -13,7 +13,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
 
-  isCollapsed: boolean = false;
+  isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
   get MangaFormat(): typeof MangaFormat {
