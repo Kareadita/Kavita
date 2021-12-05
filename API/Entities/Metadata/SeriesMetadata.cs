@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,8 @@ namespace API.Entities.Metadata
         /// All people attached at a Series level.
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
+
+        public AgeRating AgeRating { get; set; }
 
 
         // Relationship
