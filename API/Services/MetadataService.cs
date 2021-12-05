@@ -230,7 +230,10 @@ public class MetadataService : IMetadataService
         // Summary Info
         if (!string.IsNullOrEmpty(comicInfo.Summary))
         {
-            series.Metadata.Summary = comicInfo.Summary; // NOTE: I can move this to the bottom as I have a comicInfo selection, save me an extra read
+            // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
+            series.Metadata.Summary = comicInfo.Summary;
+            // TODO: Update Year, Age Rating (AppUserRating)
+            series.Metadata.AgeRating = comicInfo.AgeRating;
         }
 
         foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
@@ -270,6 +273,8 @@ public class MetadataService : IMetadataService
             .Where(ci => ci != null)
             .ToList();
 
+        //var firstComicInfo = comicInfos.First(i => i.)
+
         var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct().ToList();
         var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
 
@@ -280,7 +285,6 @@ public class MetadataService : IMetadataService
         GenreHelper.UpdateGenre(allGenres, genres, false, genre => GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
         GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),
             genre => series.Metadata.Genres.Remove(genre));
-
     }
 
     /// <summary>
