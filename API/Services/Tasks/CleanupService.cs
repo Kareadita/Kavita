@@ -79,12 +79,7 @@ namespace API.Services.Tasks
         {
             var images = await _unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
-            foreach (var file in files)
-            {
-                if (images.Contains(_directoryService.FileSystem.Path.GetFileName(file))) continue;
-                _directoryService.FileSystem.File.Delete(file);
-
-            }
+            _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
         }
 
         /// <summary>
@@ -94,12 +89,7 @@ namespace API.Services.Tasks
         {
             var images = await _unitOfWork.ChapterRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.ChapterCoverImageRegex);
-            foreach (var file in files)
-            {
-                if (images.Contains(_directoryService.FileSystem.Path.GetFileName(file))) continue;
-                _directoryService.FileSystem.File.Delete(file);
-
-            }
+            _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
         }
 
         /// <summary>
@@ -109,14 +99,7 @@ namespace API.Services.Tasks
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
-
-            // TODO: This is used in 3 different places in this file, refactor into a DirectoryService method
-            foreach (var file in files)
-            {
-                if (images.Contains(_directoryService.FileSystem.Path.GetFileName(file))) continue;
-                _directoryService.FileSystem.File.Delete(file);
-
-            }
+            _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
         }
 
         /// <summary>

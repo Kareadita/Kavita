@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
+using System.Linq;
 using API.Archive;
 using API.Data.Metadata;
 using API.Services;
@@ -19,7 +21,7 @@ namespace API.Tests.Services
         private readonly ArchiveService _archiveService;
         private readonly ILogger<ArchiveService> _logger = Substitute.For<ILogger<ArchiveService>>();
         private readonly ILogger<DirectoryService> _directoryServiceLogger = Substitute.For<ILogger<DirectoryService>>();
-        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem());
+        private readonly IDirectoryService _directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
 
         public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
         {
@@ -112,7 +114,7 @@ namespace API.Tests.Services
             var sw = Stopwatch.StartNew();
             _archiveService.ExtractArchive(Path.Join(testDirectory, archivePath), extractDirectory);
             var di1 = new DirectoryInfo(extractDirectory);
-            Assert.Equal(expectedFileCount, di1.Exists ? di1.GetFiles().Length : 0);
+            Assert.Equal(expectedFileCount, di1.Exists ? _directoryService.GetFiles(extractDirectory, searchOption:SearchOption.AllDirectories).Count() : 0);
             _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
 
             _directoryService.ClearAndDeleteDirectory(extractDirectory);

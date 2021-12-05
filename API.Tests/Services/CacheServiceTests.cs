@@ -8,7 +8,6 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
-using API.Services.Tasks;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
@@ -17,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.Extensions;
 using Xunit;
 
 namespace API.Tests.Services
