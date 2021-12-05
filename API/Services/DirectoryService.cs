@@ -316,7 +316,7 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Deletes all files within the directory.
+       /// Deletes all files and folders within the directory path
        /// </summary>
        /// <param name="directoryPath"></param>
        /// <returns></returns>

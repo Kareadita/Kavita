@@ -50,7 +50,7 @@ namespace API.Controllers
 
             try
             {
-                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+                var path = _cacheService.GetCachedPagePath(chapter, page);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 

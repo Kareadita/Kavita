@@ -88,7 +88,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   isShiftDown: boolean = false;
 
   get tooltipTitle() {
-    if (this.chapterTitle === '') return this.title;
+    if (this.chapterTitle === '' || this.chapterTitle === null) return this.title;
     return this.chapterTitle;
   }
   

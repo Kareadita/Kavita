@@ -172,7 +172,7 @@ public class VolumeRepository : IVolumeRepository
         var volumes =  await _context.Volume
             .Where(vol => vol.SeriesId == seriesId)
             .Include(vol => vol.Chapters)
-            .ThenInclude(c => c.People) // TODO: Measure cost of this
+            .ThenInclude(c => c.People)
             .OrderBy(volume => volume.Number)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()

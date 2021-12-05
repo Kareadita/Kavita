@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Extensions;
 using Xunit;
 
 namespace API.Tests.Services
@@ -150,142 +151,292 @@ namespace API.Tests.Services
             Assert.Empty(ds.GetFiles(filesystem.Path.Join(CacheDirectory, "1"), searchOption:SearchOption.AllDirectories));
         }
 
+        // [Fact]
+        // public async Task Ensure_DirectoryAlreadyExists_ExtractsImages()
+        // {
+        //     // TODO: Figure out a way to test this
+        //     var filesystem = CreateFileSystem();
+        //     filesystem.AddFile($"{DataDirectory}Test v1.zip", new MockFileData(""));
+        //     filesystem.AddDirectory($"{CacheDirectory}1/");
+        //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        //     var archiveService = Substitute.For<IArchiveService>();
+        //     archiveService.ExtractArchive($"{DataDirectory}Test v1.zip",
+        //         filesystem.Path.Join(CacheDirectory, "1"));
+        //     var cleanupService = new CacheService(_logger, _unitOfWork, ds,
+        //         new ReadingItemService(archiveService, Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+        //
+        //     await ResetDB();
+        //     var s = DbFactory.Series("Test");
+        //     var v = DbFactory.Volume("1");
+        //     var c = new Chapter()
+        //     {
+        //         Number = "1",
+        //         Files = new List<MangaFile>()
+        //         {
+        //             new MangaFile()
+        //             {
+        //                 Format = MangaFormat.Archive,
+        //                 FilePath = $"{DataDirectory}Test v1.zip",
+        //             }
+        //         }
+        //     };
+        //     v.Chapters.Add(c);
+        //     s.Volumes.Add(v);
+        //     s.LibraryId = 1;
+        //     _context.Series.Add(s);
+        //
+        //     await _context.SaveChangesAsync();
+        //
+        //     await cleanupService.Ensure(1);
+        //     Assert.Empty(ds.GetFiles(filesystem.Path.Join(CacheDirectory, "1"), searchOption:SearchOption.AllDirectories));
+        // }
+
+
+        #endregion
+
+        #region CleanupChapters
+
         [Fact]
-        public async Task Ensure_DirectoryAlreadyExists_ExtractsImages()
+        public void CleanupChapters_AllFilesShouldBeDeleted()
         {
             var filesystem = CreateFileSystem();
-            filesystem.AddFile($"{DataDirectory}Test v1.zip", new MockFileData(""));
             filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{CacheDirectory}1/001.jpg", new MockFileData(""));
+            filesystem.AddFile($"{CacheDirectory}1/002.jpg", new MockFileData(""));
+            filesystem.AddFile($"{CacheDirectory}3/003.jpg", new MockFileData(""));
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
             var cleanupService = new CacheService(_logger, _unitOfWork, ds,
                 new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
 
-            await ResetDB();
-            var s = DbFactory.Series("Test");
-            var v = DbFactory.Volume("1");
-            var c = new Chapter()
-            {
-                Number = "1",
-                Files = new List<MangaFile>()
-                {
-                    new MangaFile()
-                    {
-                        Format = MangaFormat.Archive,
-                        FilePath = $"{DataDirectory}Test v1.zip",
-                    }
-                }
-            };
-            v.Chapters.Add(c);
-            s.Volumes.Add(v);
-            s.LibraryId = 1;
-            _context.Series.Add(s);
-
-            await _context.SaveChangesAsync();
-
-            await cleanupService.Ensure(1);
-            Assert.Empty(ds.GetFiles(filesystem.Path.Join(CacheDirectory, "1"), searchOption:SearchOption.AllDirectories));
+            cleanupService.CleanupChapters(new []{1, 3});
+            Assert.Empty(ds.GetFiles(CacheDirectory, searchOption:SearchOption.AllDirectories));
         }
 
 
         #endregion
 
-        // [Fact]
-        // public async void Ensure_ShouldExtractArchive(int chapterId)
-        // {
-        //
-        //     // CacheDirectory needs to be customized.
-        //     _unitOfWork.VolumeRepository.GetChapterAsync(chapterId).Returns(new Chapter
-        //     {
-        //         Id = 1,
-        //         Files = new List<MangaFile>()
-        //         {
-        //             new MangaFile()
-        //             {
-        //                 FilePath = ""
-        //             }
-        //         }
-        //     });
-        //
-        //     await _cacheService.Ensure(1);
-        //
-        //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/CacheService/Archives");
-        //
-        // }
+        #region GetCachedEpubFile
 
-        //string GetCachedPagePath(Volume volume, int page)
-        // [Fact]
-        // //[InlineData("", 0, "")]
-        // public void GetCachedPagePathTest_Should()
-        // {
-        //
-        //     // string archivePath = "flat file.zip";
-        //     // int pageNum = 0;
-        //     // string expected = "cache/1/pexels-photo-6551949.jpg";
-        //     //
-        //     // var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
-        //     // var file = Path.Join(testDirectory, archivePath);
-        //     // var volume = new Volume
-        //     // {
-        //     //     Id = 1,
-        //     //     Files = new List<MangaFile>()
-        //     //     {
-        //     //         new()
-        //     //         {
-        //     //             Id = 1,
-        //     //             Chapter = 0,
-        //     //             FilePath = archivePath,
-        //     //             Format = MangaFormat.Archive,
-        //     //             Pages = 1,
-        //     //         }
-        //     //     },
-        //     //     Name = "1",
-        //     //     Number = 1
-        //     // };
-        //     //
-        //     // var cacheService = Substitute.ForPartsOf<CacheService>();
-        //     // cacheService.Configure().CacheDirectoryIsAccessible().Returns(true);
-        //     // cacheService.Configure().GetVolumeCachePath(1, volume.Files.ElementAt(0)).Returns("cache/1/");
-        //     // _directoryService.Configure().GetFilesWithExtension("cache/1/").Returns(new string[] {"pexels-photo-6551949.jpg"});
-        //     // Assert.Equal(expected, _cacheService.GetCachedPagePath(volume, pageNum));
-        //     //Assert.True(true);
-        // }
-        //
-        // [Fact]
-        // public void GetOrderedChaptersTest()
-        // {
-        //     // var files = new List<Chapter>()
-        //     // {
-        //     //     new()
-        //     //     {
-        //     //         Number = "1"
-        //     //     },
-        //     //     new()
-        //     //     {
-        //     //         Chapter = 2
-        //     //     },
-        //     //     new()
-        //     //     {
-        //     //         Chapter = 0
-        //     //     },
-        //     // };
-        //     // var expected = new List<MangaFile>()
-        //     // {
-        //     //     new()
-        //     //     {
-        //     //         Chapter = 1
-        //     //     },
-        //     //     new()
-        //     //     {
-        //     //         Chapter = 2
-        //     //     },
-        //     //     new()
-        //     //     {
-        //     //         Chapter = 0
-        //     //     },
-        //     // };
-        //     // Assert.NotStrictEqual(expected, _cacheService.GetOrderedChapters(files));
-        // }
-        //
+        [Fact]
+        public void GetCachedEpubFile_ShouldReturnFirstEpub()
+        {
+            var filesystem = CreateFileSystem();
+            filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{DataDirectory}1.epub", new MockFileData(""));
+            filesystem.AddFile($"{DataDirectory}2.epub", new MockFileData(""));
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+            var cs = new CacheService(_logger, _unitOfWork, ds,
+                new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+
+            var c = new Chapter()
+            {
+                Files = new List<MangaFile>()
+                {
+                    new MangaFile()
+                    {
+                        FilePath = $"{DataDirectory}1.epub"
+                    },
+                    new MangaFile()
+                    {
+                        FilePath = $"{DataDirectory}2.epub"
+                    }
+                }
+            };
+            cs.GetCachedEpubFile(1, c);
+            Assert.Same($"{DataDirectory}1.epub", cs.GetCachedEpubFile(1, c));
+        }
+
+        #endregion
+
+        #region GetCachedPagePath
+
+        [Fact]
+        public void GetCachedPagePath_ReturnNullIfNoFiles()
+        {
+            var filesystem = CreateFileSystem();
+            filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
+            filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
+
+            var c = new Chapter()
+            {
+                Id = 1,
+                Files = new List<MangaFile>()
+            };
+
+            var fileIndex = 0;
+            foreach (var file in c.Files)
+            {
+                for (var i = 0; i < file.Pages - 1; i++)
+                {
+                    filesystem.AddFile($"{CacheDirectory}1/{fileIndex}/{i+1}.jpg", new MockFileData(""));
+                }
+
+                fileIndex++;
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+            var cs = new CacheService(_logger, _unitOfWork, ds,
+                new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+
+            // Flatten to prepare for how GetFullPath expects
+            ds.Flatten($"{CacheDirectory}1/");
+
+            var path = cs.GetCachedPagePath(c, 11);
+            Assert.Equal(string.Empty, path);
+        }
+
+        [Fact]
+        public void GetCachedPagePath_GetFileFromFirstFile()
+        {
+            var filesystem = CreateFileSystem();
+            filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
+            filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
+
+            var c = new Chapter()
+            {
+                Id = 1,
+                Files = new List<MangaFile>()
+                {
+                    new MangaFile()
+                    {
+                        Id = 1,
+                        FilePath = $"{DataDirectory}1.zip",
+                        Pages = 10
+
+                    },
+                    new MangaFile()
+                    {
+                        Id = 2,
+                        FilePath = $"{DataDirectory}2.zip",
+                        Pages = 5
+                    }
+                }
+            };
+
+            var fileIndex = 0;
+            foreach (var file in c.Files)
+            {
+                for (var i = 0; i < file.Pages; i++)
+                {
+                    filesystem.AddFile($"{CacheDirectory}1/00{fileIndex}_00{i+1}.jpg", new MockFileData(""));
+                }
+
+                fileIndex++;
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+            var cs = new CacheService(_logger, _unitOfWork, ds,
+                new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+
+            // Flatten to prepare for how GetFullPath expects
+            ds.Flatten($"{CacheDirectory}1/");
+
+            Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/000_001.jpg"), ds.FileSystem.Path.GetFullPath(cs.GetCachedPagePath(c, 0)));
+
+        }
+
+
+        [Fact]
+        public void GetCachedPagePath_GetLastPageFromSingleFile()
+        {
+            var filesystem = CreateFileSystem();
+            filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
+
+            var c = new Chapter()
+            {
+                Id = 1,
+                Files = new List<MangaFile>()
+                {
+                    new MangaFile()
+                    {
+                        Id = 1,
+                        FilePath = $"{DataDirectory}1.zip",
+                        Pages = 10
+
+                    }
+                }
+            };
+            c.Pages = c.Files.Sum(f => f.Pages);
+
+            var fileIndex = 0;
+            foreach (var file in c.Files)
+            {
+                for (var i = 0; i < file.Pages; i++)
+                {
+                    filesystem.AddFile($"{CacheDirectory}1/{fileIndex}/{i+1}.jpg", new MockFileData(""));
+                }
+
+                fileIndex++;
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+            var cs = new CacheService(_logger, _unitOfWork, ds,
+                new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+
+            // Flatten to prepare for how GetFullPath expects
+            ds.Flatten($"{CacheDirectory}1/");
+
+            // Remember that we start at 0, so this is the 10th file
+            var path = cs.GetCachedPagePath(c, c.Pages);
+            Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/000_0{c.Pages}.jpg"), ds.FileSystem.Path.GetFullPath(path));
+        }
+
+        [Fact]
+        public void GetCachedPagePath_GetFileFromSecondFile()
+        {
+            var filesystem = CreateFileSystem();
+            filesystem.AddDirectory($"{CacheDirectory}1/");
+            filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
+            filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
+
+            var c = new Chapter()
+            {
+                Id = 1,
+                Files = new List<MangaFile>()
+                {
+                    new MangaFile()
+                    {
+                        Id = 1,
+                        FilePath = $"{DataDirectory}1.zip",
+                        Pages = 10
+
+                    },
+                    new MangaFile()
+                    {
+                        Id = 2,
+                        FilePath = $"{DataDirectory}2.zip",
+                        Pages = 5
+                    }
+                }
+            };
+
+            var fileIndex = 0;
+            foreach (var file in c.Files)
+            {
+                for (var i = 0; i < file.Pages; i++)
+                {
+                    filesystem.AddFile($"{CacheDirectory}1/{fileIndex}/{i+1}.jpg", new MockFileData(""));
+                }
+
+                fileIndex++;
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+            var cs = new CacheService(_logger, _unitOfWork, ds,
+                new ReadingItemService(Substitute.For<IArchiveService>(), Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
+
+            // Flatten to prepare for how GetFullPath expects
+            ds.Flatten($"{CacheDirectory}1/");
+
+            // Remember that we start at 0, so this is the page + 1 file
+            var path = cs.GetCachedPagePath(c, 10);
+            Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/001_001.jpg"), ds.FileSystem.Path.GetFullPath(path));
+        }
+
+        #endregion
 
     }
 }

@@ -273,7 +273,7 @@ namespace API.Services
 
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
 
-            _directoryService.ClearAndDeleteDirectory(tempLocation);
+            _directoryService.ClearAndDeleteDirectory(tempLocation); // NOTE: For sending back just zip, just schedule this to be called after the file is returned or let next temp storage cleanup take care of it
             (new FileInfo(zipPath)).Delete();
 
             return Tuple.Create(fileBytes, zipPath);
@@ -441,7 +441,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // NOTE: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 

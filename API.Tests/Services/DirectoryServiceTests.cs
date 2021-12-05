@@ -428,6 +428,23 @@ namespace API.Tests.Services
             Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").Exists);
             Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").Exists);
         }
+
+        [Fact]
+        public void ClearDirectory_ShouldDeleteFoldersWithOneFileInside()
+        {
+            const string testDirectory = "/manga/base/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file/data-{i}.txt", new MockFileData("abc"));
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.ClearDirectory($"{testDirectory}");
+            Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}").GetDirectories());
+            Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName(testDirectory).Exists);
+            Assert.False(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").Exists);
+        }
         #endregion
 
         #region CopyFilesToDirectory

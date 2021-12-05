@@ -36,25 +36,13 @@ public static class GenreHelper
 
     public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre> action = null)
     {
-        // var normalizedNames = names.Select(s => Parser.Parser.Normalize(s.Trim()))
-        //     .Where(s => !string.IsNullOrEmpty(s)).ToList();
-        // var localNamesNotInComicInfos = seriesGenres.Where(g =>
-        //     !normalizedNames.Contains(g.NormalizedName) && g.ExternalTag == isExternal);
-        //
-        // foreach (var nonExisting in localNamesNotInComicInfos)
-        // {
-        //     // TODO: Maybe I need to do a cleanup here
-        //     action(nonExisting);
-        // }
         var existing = existingGenres.ToList();
         foreach (var genre in existing)
         {
             var existingPerson = removeAllExcept.FirstOrDefault(g => g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
-            if (existingPerson == null)
-            {
-                existingGenres.Remove(genre);
-                action?.Invoke(genre);
-            }
+            if (existingPerson != null) continue;
+            existingGenres.Remove(genre);
+            action?.Invoke(genre);
         }
 
     }

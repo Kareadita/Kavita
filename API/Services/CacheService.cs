@@ -21,23 +21,12 @@ namespace API.Services
         /// <param name="chapterId"></param>
         /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
         Task<Chapter> Ensure(int chapterId);
-
         /// <summary>
         /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
         /// </summary>
         /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
         void CleanupChapters(IEnumerable<int> chapterIds);
-
-
-        /// <summary>
-        /// Returns the absolute path of a cached page.
-        /// </summary>
-        /// <param name="chapter">Chapter entity with Files populated.</param>
-        /// <param name="page">Page number to look for</param>
-        /// <returns></returns>
-        Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page);
-
-        void EnsureCacheDirectory();
+        string GetCachedPagePath(Chapter chapter, int page);
         string GetCachedEpubFile(int chapterId, Chapter chapter);
         public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
     }
@@ -59,14 +48,6 @@ namespace API.Services
             _numericComparer = new NumericComparer();
         }
 
-        public void EnsureCacheDirectory()
-        {
-            if (!_directoryService.ExistOrCreate(_directoryService.CacheDirectory))
-            {
-                _logger.LogError("Cache directory {CacheDirectory} is not accessible or does not exist. Creating...", _directoryService.CacheDirectory);
-            }
-        }
-
         /// <summary>
         /// Returns the full path to the cached epub file. If the file does not exist, will fallback to the original.
         /// </summary>
@@ -76,8 +57,8 @@ namespace API.Services
         public string GetCachedEpubFile(int chapterId, Chapter chapter)
         {
             var extractPath = GetCachePath(chapterId);
-            var path = Path.Join(extractPath, Path.GetFileName(chapter.Files.First().FilePath));
-            if (!(new FileInfo(path).Exists))
+            var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(chapter.Files.First().FilePath));
+            if (!(_directoryService.FileSystem.FileInfo.FromFileName(path).Exists))
             {
                 path = chapter.Files.First().FilePath;
             }
@@ -88,10 +69,9 @@ namespace API.Services
         /// Caches the files for the given chapter to CacheDirectory
         /// </summary>
         /// <param name="chapterId"></param>
-        /// <returns>This will always return the Chapter for the chpaterId</returns>
+        /// <returns>This will always return the Chapter for the chapterId</returns>
         public async Task<Chapter> Ensure(int chapterId)
         {
-            //EnsureCacheDirectory();
             _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var extractPath = GetCachePath(chapterId);
@@ -161,18 +141,10 @@ namespace API.Services
         /// <param name="chapterIds"></param>
         public void CleanupChapters(IEnumerable<int> chapterIds)
         {
-            _logger.LogInformation("Running Cache cleanup on Chapters");
-
             foreach (var chapter in chapterIds)
             {
-                var di = new DirectoryInfo(GetCachePath(chapter));
-                if (di.Exists)
-                {
-                    di.Delete(true);
-                }
-
+                _directoryService.ClearDirectory(GetCachePath(chapter));
             }
-            _logger.LogInformation("Cache directory purged");
         }
 
 
@@ -186,43 +158,26 @@ namespace API.Services
             return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
         }
 
-        public async Task<(string path, MangaFile file)> GetCachedPagePath(Chapter chapter, int page)
+        /// <summary>
+        /// Returns the absolute path of a cached page.
+        /// </summary>
+        /// <param name="chapter">Chapter entity with Files populated.</param>
+        /// <param name="page">Page number to look for</param>
+        /// <returns>Page filepath or empty if no files found.</returns>
+        public string GetCachedPagePath(Chapter chapter, int page)
         {
             // Calculate what chapter the page belongs to
-            var pagesSoFar = 0;
-            var chapterFiles = chapter.Files ?? await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-            foreach (var mangaFile in chapterFiles)
+            var path = GetCachePath(chapter.Id);
+            var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
+            Array.Sort(files, _numericComparer);
+
+            if (files.Length == 0)
             {
-                if (page <= (mangaFile.Pages + pagesSoFar))
-                {
-                    var path = GetCachePath(chapter.Id);
-                    var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
-                    Array.Sort(files, _numericComparer);
-
-                    if (files.Length == 0)
-                    {
-                        return (files.ElementAt(0), mangaFile);
-                    }
-
-                    // Since array is 0 based, we need to keep that in account (only affects last image)
-                    if (page == files.Length)
-                    {
-                        return (files.ElementAt(page - 1 - pagesSoFar), mangaFile);
-                    }
-
-                    if (mangaFile.Format == MangaFormat.Image && mangaFile.Pages == 1)
-                    {
-                      // Each file is one page, meaning we should just get element at page
-                      return (files.ElementAt(page), mangaFile);
-                    }
-
-                    return (files.ElementAt(page - pagesSoFar), mangaFile);
-                }
-
-                pagesSoFar += mangaFile.Pages;
+                return string.Empty;
             }
 
-            return (string.Empty, null);
+            // Since array is 0 based, we need to keep that in account (only affects last image)
+            return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
         }
     }
 }
