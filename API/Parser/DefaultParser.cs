@@ -113,7 +113,7 @@ public class DefaultParser
     }
 
     /// <summary>
-    ///
+    /// Fills out <see cref="ParserInfo"/> by trying to parse volume, chapters, and series from folders
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="rootPath"></param>

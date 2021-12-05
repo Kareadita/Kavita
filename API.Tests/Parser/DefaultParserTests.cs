@@ -22,11 +22,13 @@ public class DefaultParserTests
         _defaultParser = new DefaultParser(directoryService);
     }
 
+
+    #region ParseFromFallbackFolders
     [Theory]
     [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
     [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
     [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
-    public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
+    public void ParseFromFallbackFolders_FallbackShouldParseSeries(string rootDir, string inputPath, string expectedSeries)
     {
         var actual = _defaultParser.Parse(inputPath, rootDir);
         if (actual == null)
@@ -42,19 +44,24 @@ public class DefaultParserTests
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
     [InlineData("/manga/Monster #8/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster #8~0~1")]
-    public void ParseFromFallbackFoldersTest(string inputFile, string expectedParseInfo)
+    public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string expectedParseInfo)
     {
-      const string rootDirectory = "/manga/";
-      var tokens = expectedParseInfo.Split("~");
-      var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
-      _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
-      Assert.Equal(tokens[0], actual.Series);
-      Assert.Equal(tokens[1], actual.Volumes);
-      Assert.Equal(tokens[2], actual.Chapters);
+        const string rootDirectory = "/manga/";
+        var tokens = expectedParseInfo.Split("~");
+        var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
+        _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
+        Assert.Equal(tokens[0], actual.Series);
+        Assert.Equal(tokens[1], actual.Volumes);
+        Assert.Equal(tokens[2], actual.Chapters);
     }
 
+    #endregion
+
+
+    #region Parse
+
     [Fact]
-    public void ParseInfoTest_Manga()
+    public void Parse_ParseInfo_Manga()
     {
         const string rootPath = @"E:/Manga/";
         var expected = new Dictionary<string, ParserInfo>();
@@ -226,4 +233,71 @@ public class DefaultParserTests
             _testOutputHelper.WriteLine("FullFilePath ✓");
         }
     }
+
+    [Fact]
+    public void Parse_ParseInfo_Comic()
+        {
+            const string rootPath = @"E:/Comics/";
+            var expected = new Dictionary<string, ParserInfo>();
+            var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Teen Titans", Volumes = "0",
+                 Chapters = "0", Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath
+             });
+
+             // Fallback test with bad naming
+             filepath = @"E:\Comics\Comics\Babe\Babe Vol.1 #1-4\Babe 01.cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Babe", Volumes = "0", Edition = "",
+                 Chapters = "1", Filename = "Babe 01.cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
+             filepath = @"E:\Comics\Comics\Publisher\Batman the Detective (2021)\Batman the Detective - v6 - 11 - (2021).cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Batman the Detective", Volumes = "6", Edition = "",
+                 Chapters = "11", Filename = "Batman the Detective - v6 - 11 - (2021).cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
+             filepath = @"E:\Comics\Comics\Batman - The Man Who Laughs #1 (2005)\Batman - The Man Who Laughs #1 (2005).cbr";
+             expected.Add(filepath, new ParserInfo
+             {
+                 Series = "Batman - The Man Who Laughs", Volumes = "0", Edition = "",
+                 Chapters = "1", Filename = "Batman - The Man Who Laughs #1 (2005).cbr", Format = MangaFormat.Archive,
+                 FullFilePath = filepath, IsSpecial = false
+             });
+
+            foreach (var file in expected.Keys)
+            {
+                var expectedInfo = expected[file];
+                var actual = _defaultParser.Parse(file, rootPath, LibraryType.Comic);
+                if (expectedInfo == null)
+                {
+                    Assert.Null(actual);
+                    return;
+                }
+                Assert.NotNull(actual);
+                _testOutputHelper.WriteLine($"Validating {file}");
+                Assert.Equal(expectedInfo.Format, actual.Format);
+                _testOutputHelper.WriteLine("Format ✓");
+                Assert.Equal(expectedInfo.Series, actual.Series);
+                _testOutputHelper.WriteLine("Series ✓");
+                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
+                _testOutputHelper.WriteLine("Chapters ✓");
+                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
+                _testOutputHelper.WriteLine("Volumes ✓");
+                Assert.Equal(expectedInfo.Edition, actual.Edition);
+                _testOutputHelper.WriteLine("Edition ✓");
+                Assert.Equal(expectedInfo.Filename, actual.Filename);
+                _testOutputHelper.WriteLine("Filename ✓");
+                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
+                _testOutputHelper.WriteLine("FullFilePath ✓");
+            }
+        }
+    #endregion
 }
