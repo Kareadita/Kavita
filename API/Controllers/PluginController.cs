@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
-using API.Interfaces;
-using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 

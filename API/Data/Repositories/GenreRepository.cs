@@ -2,11 +2,19 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
-using API.Interfaces.Repositories;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+public interface IGenreRepository
+{
+    void Attach(Genre genre);
+    void Remove(Genre genre);
+    Task<Genre> FindByNameAsync(string genreName);
+    Task<IList<Genre>> GetAllGenres();
+    Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
+}
 
 public class GenreRepository : IGenreRepository
 {
@@ -51,6 +59,6 @@ public class GenreRepository : IGenreRepository
 
     public async Task<IList<Genre>> GetAllGenres()
     {
-        return await _context.Genre.ToListAsync();;
+        return await _context.Genre.ToListAsync();
     }
 }

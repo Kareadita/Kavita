@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using API.Interfaces.Services;
+using System.IO.Abstractions;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -14,7 +14,8 @@ namespace API.Tests.Services
 
         public BookServiceTests()
         {
-            _bookService = new BookService(_logger);
+            var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+            _bookService = new BookService(_logger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService));
         }
 
         [Theory]

@@ -6,70 +6,53 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
-using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
+public interface IMetadataService
+{
+    /// <summary>
+    /// Recalculates metadata for all entities in a library.
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="forceUpdate"></param>
+    Task RefreshMetadata(int libraryId, bool forceUpdate = false);
+    /// <summary>
+    /// Performs a forced refresh of metatdata just for a series and it's nested entities
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false);
+}
+
 public class MetadataService : IMetadataService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<MetadataService> _logger;
-    private readonly IArchiveService _archiveService;
-    private readonly IBookService _bookService;
-    private readonly IImageService _imageService;
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly ICacheHelper _cacheHelper;
+    private readonly IReadingItemService _readingItemService;
+    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
-        IArchiveService archiveService, IBookService bookService, IImageService imageService,
-        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper)
+        IHubContext<MessageHub> messageHub, ICacheHelper cacheHelper,
+        IReadingItemService readingItemService, IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _archiveService = archiveService;
-        _bookService = bookService;
-        _imageService = imageService;
         _messageHub = messageHub;
         _cacheHelper = cacheHelper;
-    }
-
-    /// <summary>
-    /// Gets the cover image for the file
-    /// </summary>
-    /// <remarks>Has side effect of marking the file as updated</remarks>
-    /// <param name="file"></param>
-    /// <param name="volumeId"></param>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    private string GetCoverImage(MangaFile file, int volumeId, int chapterId)
-    {
-        //file.UpdateLastModified();
-        switch (file.Format)
-        {
-            case MangaFormat.Pdf:
-            case MangaFormat.Epub:
-                return _bookService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Image:
-                var coverImage = _imageService.GetCoverFile(file);
-                return _imageService.GetCoverImage(coverImage, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Archive:
-                return _archiveService.GetCoverImage(file.FilePath, ImageService.GetChapterFormat(chapterId, volumeId));
-            case MangaFormat.Unknown:
-            default:
-                return string.Empty;
-        }
-
+        _readingItemService = readingItemService;
+        _directoryService = directoryService;
     }
 
     /// <summary>
@@ -81,11 +64,13 @@ public class MetadataService : IMetadataService
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return false;
 
+        if (firstFile == null) return false;
+
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
-        chapter.CoverImage = GetCoverImage(firstFile, chapter.VolumeId, chapter.Id);
+        chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
 
         return true;
     }
@@ -101,7 +86,8 @@ public class MetadataService : IMetadataService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
     {
-        var comicInfo = GetComicInfo(firstFile); // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
+        // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
+        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
         if (!string.IsNullOrEmpty(comicInfo.Title))
@@ -183,7 +169,7 @@ public class MetadataService : IMetadataService
     private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
+        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
 
         volume.Chapters ??= new List<Chapter>();
         var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -203,7 +189,7 @@ public class MetadataService : IMetadataService
         if (series == null) return;
 
         // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
-        if (!_cacheHelper.ShouldUpdateCoverImage(Path.Join(DirectoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
             return;
 
         series.Volumes ??= new List<Volume>();
@@ -237,7 +223,7 @@ public class MetadataService : IMetadataService
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
         if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-        var comicInfo = GetComicInfo(firstFile);
+        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
 
@@ -280,7 +266,7 @@ public class MetadataService : IMetadataService
         var comicInfos = series.Volumes
             .SelectMany(volume => volume.Chapters)
             .SelectMany(c => c.Files)
-            .Select(GetComicInfo)
+            .Select(file => _readingItemService.GetComicInfo(file.FilePath, file.Format))
             .Where(ci => ci != null)
             .ToList();
 
@@ -297,23 +283,12 @@ public class MetadataService : IMetadataService
 
     }
 
-    private ComicInfo GetComicInfo(MangaFile firstFile)
-    {
-        if (firstFile?.Format is MangaFormat.Archive or MangaFormat.Epub)
-        {
-            return Parser.Parser.IsEpub(firstFile.FilePath) ? _bookService.GetComicInfo(firstFile.FilePath) : _archiveService.GetComicInfo(firstFile.FilePath);
-        }
-
-        return null;
-    }
-
     /// <summary>
     ///
     /// </summary>
-    /// <remarks>This cannot have any Async code within. It is used within Parallel.ForEach</remarks>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private void ProcessSeriesMetadataUpdate(Series series, IDictionary<int, IList<int>> chapterIds, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
+    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -376,7 +351,6 @@ public class MetadataService : IMetadataService
                 });
             _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
-            var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
             var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
 
@@ -386,7 +360,7 @@ public class MetadataService : IMetadataService
             {
                 try
                 {
-                    ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
+                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -497,11 +471,10 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
 
-        var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(new [] { seriesId });
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
 
-        ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
+        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
 
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));

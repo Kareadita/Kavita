@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
+using API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -50,7 +50,7 @@ namespace API.Controllers
 
             try
             {
-                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+                var path = _cacheService.GetCachedPagePath(chapter, page);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
@@ -90,7 +90,7 @@ namespace API.Controllers
                 LibraryId = dto.LibraryId,
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
-                ChapterTitle = dto.ChapterTitle
+                ChapterTitle = dto.ChapterTitle ?? string.Empty
             });
         }
 

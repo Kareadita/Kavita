@@ -12,8 +12,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Parser;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
@@ -22,33 +20,42 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
+public interface IScannerService
+{
+    /// <summary>
+    /// Given a library id, scans folders for said library. Parses files and generates DB updates. Will overwrite
+    /// cover images if forceUpdate is true.
+    /// </summary>
+    /// <param name="libraryId">Library to scan against</param>
+    Task ScanLibrary(int libraryId);
+    Task ScanLibraries();
+    Task ScanSeries(int libraryId, int seriesId, CancellationToken token);
+}
 
 public class ScannerService : IScannerService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
-    private readonly IArchiveService _archiveService;
     private readonly IMetadataService _metadataService;
-    private readonly IBookService _bookService;
     private readonly ICacheService _cacheService;
     private readonly IHubContext<MessageHub> _messageHub;
     private readonly IFileService _fileService;
     private readonly IDirectoryService _directoryService;
+    private readonly IReadingItemService _readingItemService;
     private readonly NaturalSortComparer _naturalSort = new ();
 
-    public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger, IArchiveService archiveService,
-        IMetadataService metadataService, IBookService bookService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
-        IFileService fileService, IDirectoryService directoryService)
+    public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
+        IMetadataService metadataService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
+        IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _archiveService = archiveService;
         _metadataService = metadataService;
-        _bookService = bookService;
         _cacheService = cacheService;
         _messageHub = messageHub;
         _fileService = fileService;
         _directoryService = directoryService;
+        _readingItemService = readingItemService;
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -63,16 +70,16 @@ public class ScannerService : IScannerService
         var folderPaths = library.Folders.Select(f => f.Path).ToList();
 
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (folderPaths.Any(f => !DirectoryService.IsDriveMounted(f)))
+        if (folderPaths.Any(f => !_directoryService.IsDriveMounted(f)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
-        var dirs = DirectoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+        var dirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
         var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
@@ -120,7 +127,7 @@ public class ScannerService : IScannerService
                 }
 
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+                scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
                 parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
@@ -208,7 +215,7 @@ public class ScannerService : IScannerService
         }
 
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (library.Folders.Any(f => !DirectoryService.IsDriveMounted(f.Path)))
+        if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
@@ -218,7 +225,7 @@ public class ScannerService : IScannerService
         await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
-        var scanner = new ParseScannedFiles(_bookService, _logger, _archiveService, _directoryService);
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
         var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
 
         foreach (var folderPath in library.Folders)
@@ -618,28 +625,7 @@ public class ScannerService : IScannerService
 
     private MangaFile CreateMangaFile(ParserInfo info)
     {
-        var pages = 0;
-        switch (info.Format)
-        {
-            case MangaFormat.Archive:
-            {
-                pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
-                break;
-            }
-            case MangaFormat.Pdf:
-            case MangaFormat.Epub:
-            {
-                pages = _bookService.GetNumberOfPages(info.FullFilePath);
-                break;
-            }
-            case MangaFormat.Image:
-            {
-                pages = 1;
-                break;
-            }
-        }
-
-        return DbFactory.MangaFile(info.FullFilePath, info.Format, pages);
+        return DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
     }
 
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
@@ -650,23 +636,7 @@ public class ScannerService : IScannerService
         {
             existingFile.Format = info.Format;
             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
-            switch (existingFile.Format)
-            {
-                case MangaFormat.Epub:
-                case MangaFormat.Pdf:
-                    existingFile.Pages = _bookService.GetNumberOfPages(info.FullFilePath);
-                    break;
-                case MangaFormat.Image:
-                    existingFile.Pages = 1;
-                    break;
-                case MangaFormat.Unknown:
-                    existingFile.Pages = 0;
-                    break;
-                case MangaFormat.Archive:
-                    existingFile.Pages = _archiveService.GetNumberOfPagesFromArchive(info.FullFilePath);
-                    break;
-            }
-            //existingFile.LastModified = File.GetLastWriteTime(info.FullFilePath); // This is messing up our logic on when last modified
+            existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
         }
         else
         {

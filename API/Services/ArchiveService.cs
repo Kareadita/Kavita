@@ -10,7 +10,6 @@ using API.Archive;
 using API.Comparators;
 using API.Data.Metadata;
 using API.Extensions;
-using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -19,6 +18,18 @@ using SharpCompress.Common;
 
 namespace API.Services
 {
+    public interface IArchiveService
+    {
+        void ExtractArchive(string archivePath, string extractPath);
+        int GetNumberOfPagesFromArchive(string archivePath);
+        string GetCoverImage(string archivePath, string fileName);
+        bool IsValidArchive(string archivePath);
+        ComicInfo GetComicInfo(string archivePath);
+        ArchiveLibrary CanOpen(string archivePath);
+        bool ArchiveNeedsFlattening(ZipArchive archive);
+        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+    }
+
     /// <summary>
     /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> and <see cref="ScannerService"/>
     /// </summary>
@@ -27,12 +38,14 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private const string ComicInfoFilename = "comicinfo";
 
-        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
+        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
             _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -42,7 +55,7 @@ namespace API.Services
         /// <returns></returns>
         public virtual ArchiveLibrary CanOpen(string archivePath)
         {
-            if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
+            if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
             try
             {
@@ -239,14 +252,14 @@ namespace API.Services
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
-            var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
-            DirectoryService.ExistOrCreate(tempLocation);
+            var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+            _directoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
 
-            var zipPath = Path.Join(DirectoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
                 ZipFile.CreateFromDirectory(tempLocation, zipPath);
@@ -260,7 +273,7 @@ namespace API.Services
 
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
 
-            DirectoryService.ClearAndDeleteDirectory(tempLocation);
+            _directoryService.ClearAndDeleteDirectory(tempLocation); // NOTE: For sending back just zip, just schedule this to be called after the file is returned or let next temp storage cleanup take care of it
             (new FileInfo(zipPath)).Delete();
 
             return Tuple.Create(fileBytes, zipPath);
@@ -270,7 +283,7 @@ namespace API.Services
         {
             try
             {
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {
@@ -413,9 +426,9 @@ namespace API.Services
         }
 
 
-        private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
+        private void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
-            DirectoryService.ExistOrCreate(extractPath);
+            _directoryService.ExistOrCreate(extractPath);
             foreach (var entry in entries)
             {
                 entry.WriteToDirectory(extractPath, new ExtractionOptions()
@@ -428,7 +441,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // NOTE: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
@@ -436,7 +449,7 @@ namespace API.Services
             if (!needsFlattening) return;
 
             _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
-            new DirectoryInfo(extractPath).Flatten();
+            _directoryService.Flatten(extractPath);
         }
 
         /// <summary>

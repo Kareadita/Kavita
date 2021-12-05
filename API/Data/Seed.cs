@@ -35,13 +35,13 @@ namespace API.Data
             }
         }
 
-        public static async Task SeedSettings(DataContext context)
+        public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)
         {
             await context.Database.EnsureCreatedAsync();
 
             IList<ServerSetting> defaultSettings = new List<ServerSetting>()
             {
-                new () {Key = ServerSettingKey.CacheDirectory, Value = DirectoryService.CacheDirectory},
+                new () {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
@@ -71,7 +71,7 @@ namespace API.Data
             context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
-                DirectoryService.CacheDirectory + string.Empty;
+                directoryService.CacheDirectory + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
                 DirectoryService.BackupDirectory + string.Empty;
 

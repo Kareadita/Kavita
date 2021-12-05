@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System;
+using API.Entities.Enums;
 
 namespace API.DTOs.Reader
 {
@@ -12,7 +13,7 @@ namespace API.DTOs.Reader
         public MangaFormat SeriesFormat { get; set; }
         public int SeriesId { get; set; }
         public int LibraryId { get; set; }
-        public string ChapterTitle { get; set; } = "";
+        public string ChapterTitle { get; set; } = string.Empty;
         public int Pages { get; set; }
         public string FileName { get; set; }
         public bool IsSpecial { get; set; }

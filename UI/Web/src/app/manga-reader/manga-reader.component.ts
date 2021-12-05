@@ -504,7 +504,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateTitle(chapterInfo: ChapterInfo, type: LibraryType) {
       this.title = chapterInfo.seriesName;
-      if (chapterInfo.chapterTitle.length > 0) {
+      if (chapterInfo.chapterTitle != null && chapterInfo.chapterTitle.length > 0) {
         this.title += ' - ' + chapterInfo.chapterTitle;
       }
 

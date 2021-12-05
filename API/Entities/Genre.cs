@@ -8,7 +8,7 @@ namespace API.Entities
     public class Genre
     {
         public int Id { get; set; }
-        public string Title { get; set; } // TODO: Rename this to Title
+        public string Title { get; set; }
         public string NormalizedTitle { get; set; }
         public bool ExternalTag { get; set; }
 

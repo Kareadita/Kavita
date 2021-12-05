@@ -11,8 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks;
@@ -29,76 +27,8 @@ using Xunit;
 
 namespace API.Tests.Services
 {
-    public class ScannerServiceTests : IDisposable
+    public class ScannerServiceTests
     {
-        private readonly ScannerService _scannerService;
-        private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
-        private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
-        private readonly IBookService _bookService = Substitute.For<IBookService>();
-        private readonly IImageService _imageService = Substitute.For<IImageService>();
-        private readonly IDirectoryService _directoryService = Substitute.For<IDirectoryService>();
-        private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
-        private readonly ICacheService _cacheService;
-        private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
-
-        private readonly DbConnection _connection;
-        private readonly DataContext _context;
-
-
-        public ScannerServiceTests()
-        {
-            var contextOptions = new DbContextOptionsBuilder()
-                .UseSqlite(CreateInMemoryDatabase())
-                .Options;
-            _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-            _context = new DataContext(contextOptions);
-            Task.Run(SeedDb).GetAwaiter().GetResult();
-
-            IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
-
-            var file = new MockFileData("")
-            {
-                LastWriteTime = DateTimeOffset.Now.Subtract(TimeSpan.FromMinutes(1))
-            };
-            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
-            {
-                { "/data/Darker than Black.zip", file },
-                { "/data/Cage of Eden - v10.cbz", file },
-                { "/data/Cage of Eden - v1.cbz", file },
-            });
-
-            var fileService = new FileService(fileSystem);
-            ICacheHelper cacheHelper = new CacheHelper(fileService);
-
-
-            IMetadataService metadataService =
-                Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService,
-                    _bookService, _imageService, _messageHub, cacheHelper);
-            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService,
-                _cacheService, _messageHub, fileService, _directoryService);
-        }
-
-        private async Task<bool> SeedDb()
-        {
-            await _context.Database.MigrateAsync();
-            await Seed.SeedSettings(_context);
-
-            _context.Library.Add(new Library()
-            {
-                Name = "Manga",
-                Folders = new List<FolderPath>()
-                {
-                    new FolderPath()
-                    {
-                        Path = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga")
-                    }
-                }
-            });
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-
         [Fact]
         public void AddOrUpdateFileForChapter()
         {
@@ -227,16 +157,5 @@ namespace API.Tests.Services
             }
 
         }
-
-        private static DbConnection CreateInMemoryDatabase()
-        {
-            var connection = new SqliteConnection("Filename=:memory:");
-
-            connection.Open();
-
-            return connection;
-        }
-
-        public void Dispose() => _connection.Dispose();
     }
 }

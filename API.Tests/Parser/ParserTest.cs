@@ -6,6 +6,7 @@ namespace API.Tests.Parser
     public class ParserTests
     {
 
+
         [Theory]
         [InlineData("Beastars - SP01", true)]
         [InlineData("Beastars SP01", true)]
@@ -147,21 +148,7 @@ namespace API.Tests.Parser
             Assert.Equal(expected, CleanAuthor(expected));
         }
 
-        [Theory]
-        [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
-        public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
-        {
-            var actual = Parse(inputPath, rootDir);
-            if (actual == null)
-            {
-                Assert.NotNull(actual);
-                return;
-            }
 
-            Assert.Equal(expectedSeries, actual.Series);
-        }
 
         [Theory]
         [InlineData("Love Hina - Special.jpg", false)]

@@ -29,10 +29,10 @@ namespace API.Data
         /// <summary>
         /// Run first. Will extract byte[]s from DB and write them to the cover directory.
         /// </summary>
-        public static void ExtractToImages(DbContext context)
+        public static void ExtractToImages(DbContext context, IDirectoryService directoryService, IImageService imageService)
         {
                 Console.WriteLine("Migrating Cover Images to disk. Expect delay.");
-                DirectoryService.ExistOrCreate(DirectoryService.CoverImageDirectory);
+                directoryService.ExistOrCreate(directoryService.CoverImageDirectory);
 
                 Console.WriteLine("Extracting cover images for Series");
                 var lockedSeries = SqlHelper.RawSqlQuery(context, "Select Id, CoverImage From Series Where CoverImage IS NOT NULL", x =>
@@ -45,14 +45,14 @@ namespace API.Data
                 foreach (var series in lockedSeries)
                 {
                     if (series.CoverImage == null || !series.CoverImage.Any()) continue;
-                    if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                    if (File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                         $"{ImageService.GetSeriesFormat(int.Parse(series.Id))}.png"))) continue;
 
                     try
                     {
                         var stream = new MemoryStream(series.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, ImageService.GetSeriesFormat(int.Parse(series.Id)));
+                        imageService.WriteCoverThumbnail(stream, ImageService.GetSeriesFormat(int.Parse(series.Id)));
                     }
                     catch (Exception e)
                     {
@@ -71,14 +71,14 @@ namespace API.Data
                 foreach (var chapter in chapters)
                 {
                     if (chapter.CoverImage == null || !chapter.CoverImage.Any()) continue;
-                    if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                    if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                         $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}.png"))) continue;
 
                     try
                     {
                         var stream = new MemoryStream(chapter.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}");
+                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}");
                     }
                     catch (Exception e)
                     {
@@ -97,13 +97,13 @@ namespace API.Data
                 foreach (var tag in tags)
                 {
                     if (tag.CoverImage == null || !tag.CoverImage.Any()) continue;
-                    if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                    if (directoryService.FileSystem.File.Exists(Path.Join(directoryService.CoverImageDirectory,
                         $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}.png"))) continue;
                     try
                     {
                         var stream = new MemoryStream(tag.CoverImage);
                         stream.Position = 0;
-                        ImageService.WriteCoverThumbnail(stream, $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}");
+                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}");
                     }
                     catch (Exception e)
                     {
@@ -116,13 +116,13 @@ namespace API.Data
         /// Run after <see cref="ExtractToImages"/>. Will update the DB with names of files that were extracted.
         /// </summary>
         /// <param name="context"></param>
-        public static async Task UpdateDatabaseWithImages(DataContext context)
+        public static async Task UpdateDatabaseWithImages(DataContext context, IDirectoryService directoryService)
         {
             Console.WriteLine("Updating Series entities");
             var seriesCovers = await context.Series.Where(s => !string.IsNullOrEmpty(s.CoverImage)).ToListAsync();
             foreach (var series in seriesCovers)
             {
-                if (!File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                if (!directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                     $"{ImageService.GetSeriesFormat(series.Id)}.png"))) continue;
                 series.CoverImage = $"{ImageService.GetSeriesFormat(series.Id)}.png";
             }
@@ -133,7 +133,7 @@ namespace API.Data
             var chapters = await context.Chapter.ToListAsync();
             foreach (var chapter in chapters)
             {
-                if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                     $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}.png")))
                 {
                     chapter.CoverImage = $"{ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId)}.png";
@@ -149,7 +149,7 @@ namespace API.Data
             {
                 var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), ChapterSortComparerForInChapterSorting).FirstOrDefault();
                 if (firstChapter == null) continue;
-                if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                     $"{ImageService.GetChapterFormat(firstChapter.Id, firstChapter.VolumeId)}.png")))
                 {
                     volume.CoverImage = $"{ImageService.GetChapterFormat(firstChapter.Id, firstChapter.VolumeId)}.png";
@@ -163,7 +163,7 @@ namespace API.Data
             var tags = await context.CollectionTag.ToListAsync();
             foreach (var tag in tags)
             {
-                if (File.Exists(Path.Join(DirectoryService.CoverImageDirectory,
+                if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                     $"{ImageService.GetCollectionTagFormat(tag.Id)}.png")))
                 {
                     tag.CoverImage = $"{ImageService.GetCollectionTagFormat(tag.Id)}.png";

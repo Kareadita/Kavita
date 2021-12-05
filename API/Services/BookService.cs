@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Web;
 using API.Data.Metadata;
 using API.Entities.Enums;
-using API.Interfaces.Services;
 using API.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -25,17 +24,45 @@ using VersOne.Epub;
 
 namespace API.Services
 {
+    public interface IBookService
+    {
+        int GetNumberOfPages(string filePath);
+        string GetCoverImage(string fileFilePath, string fileName);
+        Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
+
+        /// <summary>
+        /// Scopes styles to .reading-section and replaces img src to the passed apiBase
+        /// </summary>
+        /// <param name="stylesheetHtml"></param>
+        /// <param name="apiBase"></param>
+        /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
+        /// <param name="book">Book Reference, needed for if you expect Import statements</param>
+        /// <returns></returns>
+        Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
+        ComicInfo GetComicInfo(string filePath);
+        ParserInfo ParseInfo(string filePath);
+        /// <summary>
+        /// Extracts a PDF file's pages as images to an target directory
+        /// </summary>
+        /// <param name="fileFilePath"></param>
+        /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
+        void ExtractPdfImages(string fileFilePath, string targetDirectory);
+    }
+
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
+        private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
 
-        public BookService(ILogger<BookService> logger)
+        public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
-
+            _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -431,7 +458,7 @@ namespace API.Services
 
         public void ExtractPdfImages(string fileFilePath, string targetDirectory)
         {
-            DirectoryService.ExistOrCreate(targetDirectory);
+            _directoryService.ExistOrCreate(targetDirectory);
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();
@@ -473,7 +500,7 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
             }
             catch (Exception ex)
             {
@@ -494,7 +521,7 @@ namespace API.Services
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName);
 
             }
             catch (Exception ex)

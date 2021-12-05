@@ -4,12 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
@@ -47,21 +46,21 @@ namespace API.Controllers
         public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
         {
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
-            return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
+            return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-            return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
+            return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
         [HttpGet("series-size")]
         public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
         {
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
-            return Ok(DirectoryService.GetTotalSize(files.Select(c => c.FilePath)));
+            return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
         [HttpGet("volume")]
@@ -141,13 +140,13 @@ namespace API.Controllers
             var totalFilePaths = new List<string>();
 
             var tempFolder = $"download_{series.Id}_bookmarks";
-            var fullExtractPath = Path.Join(DirectoryService.TempDirectory, tempFolder);
-            if (new DirectoryInfo(fullExtractPath).Exists)
+            var fullExtractPath = Path.Join(_directoryService.TempDirectory, tempFolder);
+            if (_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(fullExtractPath).Exists)
             {
                 return BadRequest(
                     "Server is currently processing this exact download. Please try again in a few minutes.");
             }
-            DirectoryService.ExistOrCreate(fullExtractPath);
+            _directoryService.ExistOrCreate(fullExtractPath);
 
             var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
 
@@ -160,16 +159,16 @@ namespace API.Controllers
                 switch (series.Format)
                 {
                     case MangaFormat.Image:
-                        DirectoryService.ExistOrCreate(chapterExtractPath);
+                        _directoryService.ExistOrCreate(chapterExtractPath);
                         _directoryService.CopyFilesToDirectory(mangaFiles.Select(f => f.FilePath), chapterExtractPath, $"{chapterId}_");
                         break;
                     case MangaFormat.Archive:
                     case MangaFormat.Pdf:
                         _cacheService.ExtractChapterFiles(chapterExtractPath, mangaFiles.ToList());
-                        var originalFiles = DirectoryService.GetFilesWithExtension(chapterExtractPath,
+                        var originalFiles = _directoryService.GetFilesWithExtension(chapterExtractPath,
                             Parser.Parser.ImageFileExtensions);
                         _directoryService.CopyFilesToDirectory(originalFiles, chapterExtractPath, $"{chapterId}_");
-                        DirectoryService.DeleteFiles(originalFiles);
+                        _directoryService.DeleteFiles(originalFiles);
                         break;
                     case MangaFormat.Epub:
                         return BadRequest("Series is not in a valid format.");
@@ -177,7 +176,7 @@ namespace API.Controllers
                         return BadRequest("Series is not in a valid format. Please rescan series and try again.");
                 }
 
-                var files = DirectoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
+                var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
                 // Filter out images that aren't in bookmarks
                 Array.Sort(files, _numericComparer);
                 totalFilePaths.AddRange(files.Where((_, i) => chapterPages.Contains(i)));
@@ -186,7 +185,7 @@ namespace API.Controllers
 
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(totalFilePaths,
                 tempFolder);
-            DirectoryService.ClearAndDeleteDirectory(fullExtractPath);
+            _directoryService.ClearAndDeleteDirectory(fullExtractPath);
             return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
         }
 

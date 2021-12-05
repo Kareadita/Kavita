@@ -7,7 +7,6 @@ using System.Linq;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
-using API.Interfaces.Services;
 using API.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -24,25 +23,26 @@ namespace API.Services.Tasks.Scanner
     public class ParseScannedFiles
     {
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
-        private readonly IBookService _bookService;
         private readonly ILogger _logger;
-        private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
+        private readonly IReadingItemService _readingItemService;
+        private readonly DefaultParser _defaultParser;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
         /// Each instance is separate from other threads, allowing for no cross over.
         /// </summary>
-        /// <param name="bookService"></param>
-        /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger, IArchiveService archiveService,
-            IDirectoryService directoryService)
+        /// <param name="logger">Logger of the parent class that invokes this</param>
+        /// <param name="directoryService">Directory Service</param>
+        /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
+        public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
+            IReadingItemService readingItemService)
         {
-            _bookService = bookService;
             _logger = logger;
-            _archiveService = archiveService;
             _directoryService = directoryService;
+            _readingItemService = readingItemService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            _defaultParser = new DefaultParser(_directoryService);
         }
 
         /// <summary>
@@ -63,12 +63,12 @@ namespace API.Services.Tasks.Scanner
         {
             if (Parser.Parser.IsEpub(path))
             {
-                return _bookService.GetComicInfo(path);
+                return _readingItemService.GetComicInfo(path, MangaFormat.Epub);
             }
 
             if (Parser.Parser.IsComicInfoExtension(path))
             {
-                return _archiveService.GetComicInfo(path);
+                return _readingItemService.GetComicInfo(path, MangaFormat.Archive);
             }
             return null;
         }
@@ -82,15 +82,15 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            ParserInfo info;
+            ParserInfo info = null;
 
             if (Parser.Parser.IsEpub(path))
             {
-                info = _bookService.ParseInfo(path);
+                info = _readingItemService.Parse(path, rootPath, type);
             }
             else
             {
-                info = Parser.Parser.Parse(path, rootPath, type);
+                info = _readingItemService.Parse(path, rootPath, type);
             }
 
             // If we couldn't match, log. But don't log if the file parses as a cover image
@@ -105,8 +105,8 @@ namespace API.Services.Tasks.Scanner
 
             if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
             {
-                info = Parser.Parser.Parse(path, rootPath, type);
-                var info2 = _bookService.ParseInfo(path);
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book); // TODO: Why do I reparse?
+                var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }
 
