@@ -42,7 +42,7 @@ Username: demouser
 Password: Demouser64
 ```
 
-## Setup
+## Installation
 ### Non-Docker
 - Unzip the archive for your target OS
 - Place in a directory that is writable. If on windows, do not place in Program Files
@@ -76,6 +76,10 @@ services:
             - "5000:5000"
         restart: unless-stopped
 ```
+
+## Build Dependencies
+- npm 
+- dotnet
 
 **Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
