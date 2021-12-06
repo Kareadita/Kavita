@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       <img *ngIf="total > 0 || supressArchiveWarning" class="img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
