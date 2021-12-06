@@ -33,19 +33,19 @@ namespace API
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
 
-            var migrateLogger = LoggerFactory.Create(builder =>
-            {
-                builder
-                    //.AddConfiguration(Configuration.GetSection("Logging"))
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)
-                    .AddFilter("SampleApp.Program", LogLevel.Debug)
-                    .AddConsole()
-                    .AddEventLog();
-            });
-            var mLogger = migrateLogger.CreateLogger<DirectoryService>();
-
-            MigrateConfigFiles.Migrate(isDocker, new DirectoryService(mLogger, new FileSystem()));
+            // var migrateLogger = LoggerFactory.Create(builder =>
+            // {
+            //     builder
+            //         //.AddConfiguration(Configuration.GetSection("Logging"))
+            //         .AddFilter("Microsoft", LogLevel.Warning)
+            //         .AddFilter("System", LogLevel.Warning)
+            //         .AddFilter("SampleApp.Program", LogLevel.Debug)
+            //         .AddConsole()
+            //         .AddEventLog();
+            // });
+            // var mLogger = migrateLogger.CreateLogger<DirectoryService>();
+            // TODO: Figure out a solution for this migration and logger.
+            MigrateConfigFiles.Migrate(isDocker, new DirectoryService(null, new FileSystem()));
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&
@@ -74,7 +74,10 @@ namespace API
                     return;
                 }
 
-                var directoryService = services.GetRequiredService<DirectoryService>();
+                // This doesn't work either
+                //var directoryService = services.GetRequiredService<DirectoryService>();
+                var directoryService = new DirectoryService(null, new FileSystem());
+
 
 
                 var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
