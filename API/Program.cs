@@ -45,7 +45,8 @@ namespace API
             // });
             // var mLogger = migrateLogger.CreateLogger<DirectoryService>();
             // TODO: Figure out a solution for this migration and logger.
-            MigrateConfigFiles.Migrate(isDocker, new DirectoryService(null, new FileSystem()));
+            var directoryService = new DirectoryService(null, new FileSystem());
+            MigrateConfigFiles.Migrate(isDocker, directoryService);
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&
@@ -76,7 +77,7 @@ namespace API
 
                 // This doesn't work either
                 //var directoryService = services.GetRequiredService<DirectoryService>();
-                var directoryService = new DirectoryService(null, new FileSystem());
+
 
 
 
