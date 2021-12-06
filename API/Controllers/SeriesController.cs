@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -391,6 +394,14 @@ namespace API.Controllers
             if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
+        }
+
+        [HttpGet("age-rating")]
+        public ActionResult<string> GetAgeRating(int ageRating)
+        {
+            var val = (AgeRating) ageRating;
+
+            return Ok(val.ToDescription());
         }
     }
 }

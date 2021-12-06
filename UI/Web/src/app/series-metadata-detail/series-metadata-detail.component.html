@@ -1,3 +1,14 @@
+<!-- This first row will have random information about the series-->
+<div class="row no-gutters" *ngIf="seriesMetadata.ageRating">
+    <app-tag-badge>{{ageRatingName}}</app-tag-badge>
+    <ng-container *ngIf="series">
+        <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">
+            <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
+        </app-tag-badge>
+        <!-- Maybe we can put the library this resides in to make it easier to get back -->
+    </ng-container>
+</div>
+
 <div class="row no-gutters" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
     <div class="col-md-4">
         <h5>Genres</h5>
@@ -31,7 +42,6 @@
 </div>
 
 <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
-    Stuff
     <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.artists && seriesMetadata.artists.length > 0">
         <div class="col-md-4">
             <h5>Artists</h5>

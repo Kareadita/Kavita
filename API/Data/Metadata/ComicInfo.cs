@@ -21,6 +21,9 @@ namespace API.Data.Metadata
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
         public string LanguageISO { get; set; }
+        /// <summary>
+        /// This is the link to where the data was scraped from
+        /// </summary>
         public string Web { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
@@ -70,7 +73,7 @@ namespace API.Data.Metadata
         public static AgeRating ConvertAgeRatingToEnum(string value)
         {
             return Enum.GetValues<AgeRating>()
-                .Single(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()));
+                .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
         }
 
     }

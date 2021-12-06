@@ -335,6 +335,33 @@ namespace API.Services
             return null;
         }
 
+        public static void CleanComicInfo(ComicInfo info)
+        {
+            if (info != null)
+            {
+                info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+                info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+                info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+                info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+                info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+                info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+                info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+
+                if (!string.IsNullOrEmpty(info.Web))
+                {
+                    // TODO: Validate this works through testing
+                    // ComicVine stores the Issue number in Number field and does not use Volume.
+                    if (info.Web.Contains("https://comicvine.gamespot.com/"))
+                    {
+                        if (info.Volume.Equals("1"))
+                        {
+                            info.Volume = Parser.Parser.DefaultVolume;
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// This can be null if nothing is found or any errors occur during access
         /// </summary>
@@ -365,16 +392,7 @@ namespace API.Services
                             using var stream = entry.Open();
                             var serializer = new XmlSerializer(typeof(ComicInfo));
                             var info = (ComicInfo) serializer.Deserialize(stream);
-                            if (info != null)
-                            {
-                                info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-                                info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-                                info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-                                info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-                                info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-                                info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-                                info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-                            }
+                            CleanComicInfo(info);
                             return info;
                         }
 
@@ -394,16 +412,7 @@ namespace API.Services
                                                                                        .Parser
                                                                                        .MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
-                        if (info != null)
-                        {
-                            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-                            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-                            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-                            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-                            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-                            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-                            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-                        }
+                        CleanComicInfo(info);
 
                         return info;
                     }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {
@@ -19,6 +20,7 @@ namespace API.DTOs
         public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
+        public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
         public int SeriesId { get; set; }
     }

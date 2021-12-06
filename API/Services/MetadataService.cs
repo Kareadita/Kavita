@@ -233,9 +233,11 @@ public class MetadataService : IMetadataService
         {
             // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
             series.Metadata.Summary = comicInfo.Summary;
-            // TODO: Update Year, Age Rating (AppUserRating)
-            series.Metadata.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+            // TODO: Update Year, Age Rating
+
+
         }
+        series.Metadata.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
 
         foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
         {

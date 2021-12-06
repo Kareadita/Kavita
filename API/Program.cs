@@ -16,7 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API
 {
@@ -33,17 +32,7 @@ namespace API
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
 
-            // var migrateLogger = LoggerFactory.Create(builder =>
-            // {
-            //     builder
-            //         //.AddConfiguration(Configuration.GetSection("Logging"))
-            //         .AddFilter("Microsoft", LogLevel.Warning)
-            //         .AddFilter("System", LogLevel.Warning)
-            //         .AddFilter("SampleApp.Program", LogLevel.Debug)
-            //         .AddConsole()
-            //         .AddEventLog();
-            // });
-            // var mLogger = migrateLogger.CreateLogger<DirectoryService>();
+
             // TODO: Figure out a solution for this migration and logger.
             var directoryService = new DirectoryService(null, new FileSystem());
             MigrateConfigFiles.Migrate(isDocker, directoryService);

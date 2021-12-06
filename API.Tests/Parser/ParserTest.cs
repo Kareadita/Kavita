@@ -1,3 +1,4 @@
+using API.Entities.Enums;
 using Xunit;
 using static API.Parser.Parser;
 
@@ -5,7 +6,14 @@ namespace API.Tests.Parser
 {
     public class ParserTests
     {
-
+        [Theory]
+        [InlineData("Joe Shmo, Green Blue", "Joe Shmo, Green Blue")]
+        [InlineData("Shmo, Joe",  "Shmo, Joe")]
+        [InlineData("  Joe Shmo  ",  "Joe Shmo")]
+        public void CleanAuthorTest(string input, string expected)
+        {
+            Assert.Equal(expected, CleanAuthor(input));
+        }
 
         [Theory]
         [InlineData("Beastars - SP01", true)]
@@ -138,14 +146,6 @@ namespace API.Tests.Parser
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));
-        }
-
-        [Theory]
-        [InlineData("Joe Smo", "Joe Smo")]
-        [InlineData("Smo, Joe", "Joe Smo")]
-        public void CleanAuthorTest(string author, string expected)
-        {
-            Assert.Equal(expected, CleanAuthor(expected));
         }
 
 
