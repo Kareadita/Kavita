@@ -41,6 +41,10 @@ namespace API.Entities
         /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
         /// </summary>
         public string Title { get; set; }
+        /// <summary>
+        /// Age Rating for the issue/chapter
+        /// </summary>
+        public AgeRating AgeRating { get; set; }
 
 
         /// <summary>
@@ -48,7 +52,10 @@ namespace API.Entities
         /// </summary>
         /// <remarks>This should not be confused with Title which is used for special filenames.</remarks>
         public string TitleName { get; set; } = string.Empty;
-        // public string Year { get; set; } // Only time I can think this will be more than 1 year is for a volume which will be a spread
+        /// <summary>
+        /// Date which chapter was released
+        /// </summary>
+        public DateTime ReleaseDate { get; set; }
 
 
         /// <summary>

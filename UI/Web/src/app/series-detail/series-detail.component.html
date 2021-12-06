@@ -55,16 +55,16 @@
                 <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <app-series-metadata-detail [seriesMetadata]="seriesMetadata"></app-series-metadata-detail>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [series]="series"></app-series-metadata-detail>
 
-                <div class="row no-gutters mt-1" *ngIf="series.format != MangaFormat.UNKNOWN">
+                <!-- <div class="row no-gutters mt-1" *ngIf="series.format != MangaFormat.UNKNOWN">
                     <div class="col-md-4">
                         <h5>Type</h5>
                     </div>
                     <div class="col-md-8">
                         <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed"><app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format></app-tag-badge>
                     </div>
-                </div>
+                </div> -->
             </div>
 
 

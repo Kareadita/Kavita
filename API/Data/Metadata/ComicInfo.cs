@@ -1,4 +1,9 @@
-﻿namespace API.Data.Metadata
+﻿using System;
+using System.Linq;
+using API.Entities.Enums;
+using Kavita.Common.Extensions;
+
+namespace API.Data.Metadata
 {
     /// <summary>
     /// A representation of a ComicInfo.xml file
@@ -16,13 +21,25 @@
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
         public string LanguageISO { get; set; }
+        /// <summary>
+        /// This is the link to where the data was scraped from
+        /// </summary>
         public string Web { get; set; }
+        public int Day { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
+
+
         /// <summary>
-        /// Rating based on the content. Think PG-13, R for movies
+        /// Rating based on the content. Think PG-13, R for movies. See <see cref="AgeRating"/> for valid types
         /// </summary>
         public string AgeRating { get; set; }
+
+        // public AgeRating AgeRating
+        // {
+        //     get => ConvertAgeRatingToEnum(_AgeRating);
+        //     set => ConvertAgeRatingToEnum(value);
+        // }
         /// <summary>
         /// User's rating of the content
         /// </summary>
@@ -54,6 +71,12 @@
         public string CoverArtist { get; set; }
         public string Editor { get; set; }
         public string Publisher { get; set; }
+
+        public static AgeRating ConvertAgeRatingToEnum(string value)
+        {
+            return Enum.GetValues<AgeRating>()
+                .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
+        }
 
     }
 }

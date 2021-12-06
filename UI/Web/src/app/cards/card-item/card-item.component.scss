@@ -38,6 +38,9 @@ $image-width: 160px;
     margin-bottom: 0px;
 }
 
+.selected-highlight {
+    outline: 2px solid colors.$primary-color;
+}
 
 
 .img-top {

@@ -1071,13 +1071,13 @@ namespace API.Parser
         /// <summary>
         /// Cleans an author's name
         /// </summary>
-        /// <remarks>If the author is Last, First, this will reverse</remarks>
+        /// <remarks>If the author is Last, First, this will not reverse</remarks>
         /// <param name="author"></param>
         /// <returns></returns>
         public static string CleanAuthor(string author)
         {
             if (string.IsNullOrEmpty(author)) return string.Empty;
-            return string.Join(" ", author.Split(",").Reverse().Select(s => s.Trim()));
+            return author.Trim();
         }
     }
 }

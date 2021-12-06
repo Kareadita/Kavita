@@ -2,7 +2,9 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { UtilityService } from '../shared/_services/utility.service';
 import { MangaFormat } from '../_models/manga-format';
+import { Series } from '../_models/series';
 import { SeriesMetadata } from '../_models/series-metadata';
+import { MetadataService } from '../_services/metadata.service';
 
 @Component({
   selector: 'app-series-metadata-detail',
@@ -12,9 +14,15 @@ import { SeriesMetadata } from '../_models/series-metadata';
 export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
+  @Input() series!: Series;
 
-  isCollapsed: boolean = false;
+  isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
+
+  /**
+   * String representation of AgeRating enum
+   */
+  ageRatingName: string = '';
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -24,7 +32,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return TagBadgeCursor;
   }
 
-  constructor(public utilityService: UtilityService) { }
+  constructor(public utilityService: UtilityService, private metadataService: MetadataService) { }
   
   ngOnChanges(changes: SimpleChanges): void {
     this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
@@ -34,6 +42,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
                                   this.seriesMetadata.publishers.length > 0;
+
+    this.metadataService.getAgeRating(this.seriesMetadata.ageRating).subscribe(rating => {
+      this.ageRatingName = rating;
+    });
   }
 
   ngOnInit(): void {
@@ -42,5 +54,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
   }
+
 
 }

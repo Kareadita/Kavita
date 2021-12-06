@@ -51,8 +51,14 @@ namespace API.DTOs
         /// </summary>
         public DateTime Created { get; init; }
         /// <summary>
+        /// When the chapter was released.
+        /// </summary>
+        /// <remarks>Metadata field</remarks>
+        public DateTime ReleaseDate { get; init; }
+        /// <summary>
         /// Title of the Chapter/Issue
         /// </summary>
+        /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();

@@ -133,7 +133,8 @@ public class ImageService : IImageService
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
+        _directoryService.ExistOrCreate(_directoryService.CoverImageDirectory);
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
         return filename;
     }
 

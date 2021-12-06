@@ -1,3 +1,16 @@
+<!-- This first row will have random information about the series-->
+<div class="row no-gutters" *ngIf="seriesMetadata.ageRating">
+    <app-tag-badge title="Age Rating">{{ageRatingName}}</app-tag-badge>
+    <ng-container *ngIf="series">
+        <!-- Maybe we can put the library this resides in to make it easier to get back -->
+        <!-- tooltip here explaining how this is year of first issue -->
+        <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date">{{seriesMetadata.releaseYear}}</app-tag-badge>
+        <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">
+            <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
+        </app-tag-badge>
+    </ng-container>
+</div>
+
 <div class="row no-gutters" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
     <div class="col-md-4">
         <h5>Genres</h5>
@@ -31,22 +44,12 @@
 </div>
 
 <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
-    Stuff
     <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.artists && seriesMetadata.artists.length > 0">
         <div class="col-md-4">
             <h5>Artists</h5>
         </div>
         <div class="col-md-8">
             <app-person-badge *ngFor="let person of seriesMetadata.artists" [person]="person"></app-person-badge>
-        </div>
-    </div>
-    
-    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.publishers && seriesMetadata.publishers.length > 0">
-        <div class="col-md-4">
-            <h5>Publishers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-person-badge *ngFor="let person of seriesMetadata.publishers" [person]="person"></app-person-badge>
         </div>
     </div>
     
@@ -58,25 +61,7 @@
             <app-person-badge *ngFor="let person of seriesMetadata.characters" [person]="person"></app-person-badge>
         </div>
     </div>
-    
-    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.pencillers && seriesMetadata.pencillers.length > 0">
-        <div class="col-md-4">
-            <h5>Pencillers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-person-badge *ngFor="let person of seriesMetadata.pencillers" [person]="person"></app-person-badge>
-        </div>
-    </div>
-    
-    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.inkers && seriesMetadata.inkers.length > 0">
-        <div class="col-md-4">
-            <h5>Inkers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-person-badge *ngFor="let person of seriesMetadata.inkers" [person]="person"></app-person-badge>
-        </div>
-    </div>
-    
+
     <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.colorists && seriesMetadata.colorists.length > 0">
         <div class="col-md-4">
             <h5>Colorists</h5>
@@ -85,7 +70,25 @@
             <app-person-badge *ngFor="let person of seriesMetadata.colorists" [person]="person"></app-person-badge>
         </div>
     </div>
-    
+
+    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.editors && seriesMetadata.editors.length > 0">
+        <div class="col-md-4">
+            <h5>Editors</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of seriesMetadata.editors" [person]="person"></app-person-badge>
+        </div>
+    </div>
+
+    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.inkers && seriesMetadata.inkers.length > 0">
+        <div class="col-md-4">
+            <h5>Inkers</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of seriesMetadata.inkers" [person]="person"></app-person-badge>
+        </div>
+    </div>
+
     <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.letterers && seriesMetadata.letterers.length > 0">
         <div class="col-md-4">
             <h5>Letterers</h5>
@@ -95,12 +98,21 @@
         </div>
     </div>
     
-    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.editors && seriesMetadata.editors.length > 0">
+    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.pencillers && seriesMetadata.pencillers.length > 0">
         <div class="col-md-4">
-            <h5>Editors</h5>
+            <h5>Pencillers</h5>
         </div>
         <div class="col-md-8">
-            <app-person-badge *ngFor="let person of seriesMetadata.editors" [person]="person"></app-person-badge>
+            <app-person-badge *ngFor="let person of seriesMetadata.pencillers" [person]="person"></app-person-badge>
+        </div>
+    </div>
+
+    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.publishers && seriesMetadata.publishers.length > 0">
+        <div class="col-md-4">
+            <h5>Publishers</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of seriesMetadata.publishers" [person]="person"></app-person-badge>
         </div>
     </div>
 </div>

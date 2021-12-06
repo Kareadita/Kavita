@@ -19,7 +19,10 @@ export interface Chapter {
     created: string;
 
     titleName: string;
-    year: string;
+    /**
+     * This is only Year and Month, Day is not supported from underlying sources
+     */
+    releaseDate: string;
     writers: Array<Person>;
     penciller: Array<Person>;
     inker: Array<Person>;

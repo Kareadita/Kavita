@@ -1,5 +1,6 @@
 import { CollectionTag } from "./collection-tag";
 import { Genre } from "./genre";
+import { AgeRating } from "./metadata/age-rating";
 import { Person } from "./person";
 
 export interface SeriesMetadata {
@@ -16,6 +17,7 @@ export interface SeriesMetadata {
     colorists: Array<Person>;
     letterers: Array<Person>;
     editors: Array<Person>;
-
+    ageRating: AgeRating;
+    releaseYear: number;
     seriesId: number;
 }
