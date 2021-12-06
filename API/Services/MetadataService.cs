@@ -91,9 +91,18 @@ public class MetadataService : IMetadataService
         var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
+        chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+
         if (!string.IsNullOrEmpty(comicInfo.Title))
         {
             chapter.TitleName = comicInfo.Title.Trim();
+        }
+
+        if (comicInfo.Year > 0 && comicInfo.Month > 0)
+        {
+            var day = Math.Max(comicInfo.Day, 1);
+            var month = Math.Max(comicInfo.Month, 1);
+            chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
         }
 
         if (!string.IsNullOrEmpty(comicInfo.Colorist))
@@ -233,11 +242,7 @@ public class MetadataService : IMetadataService
         {
             // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
             series.Metadata.Summary = comicInfo.Summary;
-            // TODO: Update Year, Age Rating
-
-
         }
-        series.Metadata.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
 
         foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
         {
@@ -277,6 +282,11 @@ public class MetadataService : IMetadataService
             .ToList();
 
         //var firstComicInfo = comicInfos.First(i => i.)
+
+        // Set the AgeRating as highest in all the comicInfos
+        series.Metadata.AgeRating = comicInfos.Max(i => ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating));
+        series.Metadata.ReleaseYear = series.Volumes
+            .SelectMany(volume => volume.Chapters).Min(c => c.ReleaseDate.Year);
 
         var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct().ToList();
         var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
@@ -331,6 +341,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
     {
+        // TODO: Think about splitting the comicinfo stuff into a separate task
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
         _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 

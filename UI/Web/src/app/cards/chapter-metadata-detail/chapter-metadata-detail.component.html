@@ -1,14 +1,14 @@
 <ng-container *ngIf="chapter !== undefined">
     <div class="container-fluid">
-        <h4>{{chapter.range}}</h4>
-        Title: {{chapter.titleName || '-'}}
-        <!-- Year: {{metadata.year || '-'}} -->
-        Arc Information
+        <!-- <h4>{{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}} <span title="Id">({{chapter.id}})</span></h4> -->
+        
+        
+        <!-- Arc Information -->
         
     
         <div class="row no-gutters">
             <div class="col">
-                Id: {{chapter.id}}
+                Title: {{chapter.titleName || '-'}} 
             </div>
             <div class="col">
                 Pages: {{chapter.pages}}
@@ -20,7 +20,7 @@
                 Added: {{(chapter.created | date: 'short') || '-'}}
             </div>
             <div class="col">
-                Pages: {{chapter.pages}}
+                Release Date: {{(chapter.releaseDate | date: 'shortDate') || '-'}}
             </div>
         </div>
     </div>
@@ -33,7 +33,8 @@
             <div class="media-body">
                 <h5 class="mt-0 mb-1">
                     <span *ngIf="chapter.number !== '0'; else specialHeader">
-                        <!-- <span>
+                        <!-- TODO: Add back in 
+                        <span>
                             <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
                             {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                         </span> -->

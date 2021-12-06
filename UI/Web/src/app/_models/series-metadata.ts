@@ -18,5 +18,6 @@ export interface SeriesMetadata {
     letterers: Array<Person>;
     editors: Array<Person>;
     ageRating: AgeRating;
+    releaseYear: number;
     seriesId: number;
 }

@@ -22,8 +22,14 @@ namespace API.Entities.Metadata
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
 
+        /// <summary>
+        /// Highest Age Rating from all Chapters
+        /// </summary>
         public AgeRating AgeRating { get; set; }
-
+        /// <summary>
+        /// Earliest Year from all chapters
+        /// </summary>
+        public int ReleaseYear { get; set; }
 
         // Relationship
         public Series Series { get; set; }

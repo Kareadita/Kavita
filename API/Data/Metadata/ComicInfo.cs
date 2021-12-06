@@ -25,13 +25,15 @@ namespace API.Data.Metadata
         /// This is the link to where the data was scraped from
         /// </summary>
         public string Web { get; set; }
+        public int Day { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
+
 
         /// <summary>
         /// Rating based on the content. Think PG-13, R for movies. See <see cref="AgeRating"/> for valid types
         /// </summary>
-        public string AgeRating;
+        public string AgeRating { get; set; }
 
         // public AgeRating AgeRating
         // {
