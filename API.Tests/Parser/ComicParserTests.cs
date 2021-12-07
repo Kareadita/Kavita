@@ -70,6 +70,12 @@ namespace API.Tests.Parser
         [InlineData("Green Lantern v2 017 - The Spy-Eye that doomed Green Lantern v2", "Green Lantern")]
         [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire  - Adam Strange")]
         [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis  - Rags Morales Sketches")]
+        [InlineData("Daredevil - t6 - 10 - (2019)", "Daredevil")]
+        [InlineData("Batgirl T2000 #57", "Batgirl")]
+        [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
+        [InlineData("Conquistador_-Tome_2", "Conquistador")]
+        [InlineData("Max_l_explorateur-_Tome_0", "Max l explorateur")]
+        [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -108,6 +114,13 @@ namespace API.Tests.Parser
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
+        // Tome Tests
+        [InlineData("Daredevil - t6 - 10 - (2019)", "6")]
+        [InlineData("Batgirl T2000 #57", "2000")]
+        [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        [InlineData("Conquistador_Tome_2", "2")]
+        [InlineData("Max_l_explorateur-_Tome_0", "0")]
+        [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));

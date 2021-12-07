@@ -240,7 +240,7 @@ namespace API.Parser
         {
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)((vol|tome|t)\.?)( |_)(?<Volume>\d+(-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -260,7 +260,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.+?)(?: |_)v\d+",
+                @"^(?<Series>.+?)(?: |_)(v|t)\d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
@@ -308,11 +308,11 @@ namespace API.Parser
         {
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)vol\.?\s?(?<Volume>\d+)",
+                @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
         };
 
