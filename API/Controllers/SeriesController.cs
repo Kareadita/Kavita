@@ -233,6 +233,23 @@ namespace API.Controllers
             return Ok(series);
         }
 
+        [HttpPost("all")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
+
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series");
+
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+            return Ok(series);
+        }
+
         /// <summary>
         /// Fetches series that are on deck aka have progress on them.
         /// </summary>

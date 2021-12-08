@@ -206,6 +206,14 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         });
 
+        filepath = @"E:\Manga\Air Gear\Air Gear Omnibus v01 (2016) (Digital) (Shadowcat-Empire).cbz";
+        expected.Add(filepath, new ParserInfo
+        {
+            Series = "Air Gear", Volumes = "1", Edition = "Omnibus",
+            Chapters = "0", Filename = "Air Gear Omnibus v01 (2016) (Digital) (Shadowcat-Empire).cbz", Format = MangaFormat.Archive,
+            FullFilePath = filepath, IsSpecial = false
+        });
+
 
         foreach (var file in expected.Keys)
         {
