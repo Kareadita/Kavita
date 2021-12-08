@@ -40,22 +40,24 @@ namespace API.Tests.Comparers
         )]
         [InlineData(
             new[] {"3and4.cbz", "The World God Only Knows - Oneshot.cbz", "5.cbz", "1and2.cbz"},
-            new[] {"1and2.cbz", "3and4.cbz", "5.cbz", "The World God Only Knows - Oneshot.cbz"}
+            new[] {"The World God Only Knows - Oneshot.cbz", "1and2.cbz", "3and4.cbz", "5.cbz"}
         )]
         [InlineData(
             new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"},
             new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"}
         )]
+        [InlineData(
+            new[] {"Marvel2In1-7", "Marvel2In1-7-01", "Marvel2In1-7-02"},
+            new[] {"Marvel2In1-7", "Marvel2In1-7-01", "Marvel2In1-7-02"}
+        )]
+        [InlineData(
+            new[] {"!001", "001", "002"},
+            new[] {"!001", "001", "002"}
+        )]
         public void TestNaturalSortComparer(string[] input, string[] expected)
         {
             Array.Sort(input, _nc);
-
-            var i = 0;
-            foreach (var s in input)
-            {
-                Assert.Equal(s, expected[i]);
-                i++;
-            }
+            Assert.Equal(expected, input);
         }
 
 

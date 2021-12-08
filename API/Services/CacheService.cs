@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -169,7 +170,9 @@ namespace API.Services
             // Calculate what chapter the page belongs to
             var path = GetCachePath(chapter.Id);
             var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
-            Array.Sort(files, _numericComparer);
+            using var nc = new NaturalSortComparer();
+            files = files.ToList().OrderBy(Path.GetFileNameWithoutExtension, nc).ToArray();
+
 
             if (files.Length == 0)
             {

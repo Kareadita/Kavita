@@ -74,6 +74,7 @@ namespace API.Data.Metadata
 
         public static AgeRating ConvertAgeRatingToEnum(string value)
         {
+            if (string.IsNullOrEmpty(value)) return Entities.Enums.AgeRating.Unknown;
             return Enum.GetValues<AgeRating>()
                 .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
         }

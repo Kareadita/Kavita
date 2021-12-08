@@ -237,13 +237,6 @@ public class MetadataService : IMetadataService
         if (comicInfo == null) return;
 
 
-        // Summary Info
-        if (!string.IsNullOrEmpty(comicInfo.Summary))
-        {
-            // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
-            series.Metadata.Summary = comicInfo.Summary;
-        }
-
         foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
         {
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
@@ -282,6 +275,12 @@ public class MetadataService : IMetadataService
             .ToList();
 
         //var firstComicInfo = comicInfos.First(i => i.)
+        // Summary Info
+        if (!string.IsNullOrEmpty(comicInfo.Summary))
+        {
+            // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
+            series.Metadata.Summary = comicInfo.Summary;
+        }
 
         // Set the AgeRating as highest in all the comicInfos
         series.Metadata.AgeRating = comicInfos.Max(i => ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating));

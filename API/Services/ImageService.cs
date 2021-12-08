@@ -78,8 +78,9 @@ public class ImageService : IImageService
             return null;
         }
 
+        using var nc = new NaturalSortComparer();
         var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
-            .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
+            .OrderBy(Path.GetFileNameWithoutExtension, nc).FirstOrDefault();
 
         return firstImage;
     }

@@ -28,6 +28,7 @@ public class DefaultParserTests
     [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
     [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
     [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
+    [InlineData("C:/", "C:/Something Random/Mujaki no Rakuen SP01.cbz", "Something Random")]
     public void ParseFromFallbackFolders_FallbackShouldParseSeries(string rootDir, string inputPath, string expectedSeries)
     {
         var actual = _defaultParser.Parse(inputPath, rootDir);

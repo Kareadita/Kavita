@@ -167,6 +167,8 @@ namespace API.Tests.Parser
         [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
         [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
         [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
+        [InlineData("Kaiju No. 8 036 (2021) (Digital)", "Kaiju No. 8")]
+        [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -240,6 +242,7 @@ namespace API.Tests.Parser
         [InlineData("Deku_&_Bakugo_-_Rising_v1_c1.1.cbz", "1.1")]
         [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
         [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
+        [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));

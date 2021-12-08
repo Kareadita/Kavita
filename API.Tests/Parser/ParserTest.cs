@@ -49,6 +49,8 @@ namespace API.Tests.Parser
         [InlineData("Hello_I_am_here   ",  false, "Hello I am here")]
         [InlineData("[ReleaseGroup] The Title", false, "The Title")]
         [InlineData("[ReleaseGroup]_The_Title", false, "The Title")]
+        [InlineData("-The Title", false, "The Title")]
+        [InlineData("- The Title", false, "The Title")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
         public void CleanTitleTest(string input, bool isComic, string expected)

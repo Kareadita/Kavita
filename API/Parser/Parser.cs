@@ -166,7 +166,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ",
+                @"(?<Series>.*)\s+(?<Chapter>\d+)\s+(?:\(\d{4}\))\s",
                 MatchOptions, RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
@@ -209,7 +209,6 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
                 MatchOptions, RegexTimeout),
-
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
@@ -240,7 +239,7 @@ namespace API.Parser
         {
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.*)(\b|_)((vol|tome|t)\.?)( |_)(?<Volume>\d+(-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -258,9 +257,9 @@ namespace API.Parser
             new Regex(
             @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
                 MatchOptions, RegexTimeout),
-            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             new Regex(
-                @"^(?<Series>.+?)(?: |_)v\d+",
+                @"^(?<Series>.+?)(?: |_|-)(v|t)\d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
@@ -308,11 +307,11 @@ namespace API.Parser
         {
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)vol\.?\s?(?<Volume>\d+)",
+                @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -409,7 +408,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)(?<!Vol)\.?\s(?<Chapter>\d+(?:.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+                @"^(?!Vol)(?<Series>.+?)(?<!Vol)\.?\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
@@ -480,7 +479,15 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side( |_)Stories|Bonus)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                MatchOptions, RegexTimeout),
+        };
+
+        private static readonly Regex[] EuropeanComicRegex =
+        {
+            // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+            new Regex(
+                @"(?<Special>Bd(\s|_|-)Fr)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -896,6 +903,23 @@ namespace API.Parser
             return title;
         }
 
+        private static string RemoveEuropeanTags(string title)
+        {
+            foreach (var regex in EuropeanComicRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, string.Empty).Trim();
+                    }
+                }
+            }
+
+            return title;
+        }
+
         private static string RemoveComicSpecialTags(string title)
         {
             foreach (var regex in ComicSpecialRegex)
@@ -932,11 +956,26 @@ namespace API.Parser
 
             title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
 
+            if (isComic)
+            {
+                title = RemoveComicSpecialTags(title);
+                title = RemoveEuropeanTags(title);
+            }
+            else
+            {
+                title = RemoveMangaSpecialTags(title);
+            }
+
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-") || title.EndsWith(","))
             {
                 title = title.Substring(0, title.Length - 1);
+            }
+
+            if (title.StartsWith("-") || title.StartsWith(","))
+            {
+                title = title.Substring(1);
             }
 
             return title.Trim();
