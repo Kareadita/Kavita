@@ -258,9 +258,9 @@ namespace API.Parser
             new Regex(
             @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
                 MatchOptions, RegexTimeout),
-            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             new Regex(
-                @"^(?<Series>.+?)(?: |_)(v|t)\d+",
+                @"^(?<Series>.+?)(?: |_|-)(v|t)\d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
@@ -480,7 +480,15 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side( |_)Stories|Bonus)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                MatchOptions, RegexTimeout),
+        };
+
+        private static readonly Regex[] EuropeanComicRegex =
+        {
+            // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+            new Regex(
+                @"(?<Special>Bd(\s|_|-)Fr)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -896,6 +904,23 @@ namespace API.Parser
             return title;
         }
 
+        private static string RemoveEuropeanTags(string title)
+        {
+            foreach (var regex in EuropeanComicRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, string.Empty).Trim();
+                    }
+                }
+            }
+
+            return title;
+        }
+
         private static string RemoveComicSpecialTags(string title)
         {
             foreach (var regex in ComicSpecialRegex)
@@ -932,11 +957,26 @@ namespace API.Parser
 
             title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
 
+            if (isComic)
+            {
+                title = RemoveComicSpecialTags(title);
+                title = RemoveEuropeanTags(title);
+            }
+            else
+            {
+                title = RemoveMangaSpecialTags(title);
+            }
+
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-") || title.EndsWith(","))
             {
                 title = title.Substring(0, title.Length - 1);
+            }
+
+            if (title.StartsWith("-") || title.StartsWith(","))
+            {
+                title = title.Substring(1);
             }
 
             return title.Trim();

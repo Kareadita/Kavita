@@ -76,6 +76,7 @@ namespace API.Tests.Parser
         [InlineData("Conquistador_-Tome_2", "Conquistador")]
         [InlineData("Max_l_explorateur-_Tome_0", "Max l explorateur")]
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
+        [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -175,6 +176,10 @@ namespace API.Tests.Parser
         [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", true)]
         [InlineData("Baldwin the Brave & Other Tales Special SP1.cbr", true)]
         [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", true)]
+        [InlineData("Boule et Bill - THS -Bill à disparu", true)]
+        [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
+        [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
+        [InlineData("laughs", false)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
