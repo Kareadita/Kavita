@@ -44,17 +44,18 @@ namespace API.Comparators
             for (var i = 0; i < x1.Length && i < y1.Length; i++)
             {
                 if (x1[i] == y1[i]) continue;
+                if (x1[i] == Empty || y1[i] == Empty) continue;
                 returnVal = PartCompare(x1[i], y1[i]);
                 return _isAscending ? returnVal : -returnVal;
             }
 
             if (y1.Length > x1.Length)
             {
-                returnVal = 1;
+                returnVal = -1;
             }
             else if (x1.Length > y1.Length)
             {
-                returnVal = -1;
+                returnVal = 1;
             }
             else
             {
