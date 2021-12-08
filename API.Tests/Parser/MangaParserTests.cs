@@ -168,6 +168,7 @@ namespace API.Tests.Parser
         [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
         [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "Kaiju No. 8")]
+        [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

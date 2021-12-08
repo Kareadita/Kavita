@@ -166,7 +166,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ",
+                @"(?<Series>.*)\s+(?<Chapter>\d+)\s+(?:\(\d{4}\))\s",
                 MatchOptions, RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
@@ -209,7 +209,6 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
                 MatchOptions, RegexTimeout),
-
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
