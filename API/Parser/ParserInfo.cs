@@ -48,6 +48,7 @@ namespace API.Parser
         /// <summary>
         /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
         /// </summary>
+        /// <remarks>Not Used in Database</remarks>
         public string Edition { get; set; } = "";
 
         /// <summary>
@@ -70,10 +71,6 @@ namespace API.Parser
             return (IsSpecial || (Volumes == "0" && Chapters == "0"));
         }
 
-        // (TODO: Make this a ValueType). Has at least 1 year, maybe 2 representing a range
-        // public string YearRange { get; set; }
-        // public IList<string> Genres { get; set; } = new List<string>();
-
         /// <summary>
         /// This will contain any EXTRA comicInfo information parsed from the epub or archive. If there is an archive with comicInfo.xml AND it contains
         /// series, volume information, that will override what we parsed.
@@ -93,6 +90,7 @@ namespace API.Parser
             Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
             Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;
             IsSpecial = IsSpecial || info2.IsSpecial;
+            // TODO: Merge ComicInfos?
         }
     }
 }

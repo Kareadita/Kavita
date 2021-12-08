@@ -144,23 +144,23 @@ namespace API.Services
                                                      && Parser.Parser.IsImage(x)
                                                      && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)).ToList();
             if (fullNames.Count == 0) return null;
-
+            using var nc = new NaturalSortComparer();
             var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
-                .OrderBy(Path.GetFullPath, new NaturalSortComparer())
+                .OrderBy(f => f.GetFullPathWithoutExtension(), nc) // BUG: This shouldn't take into account extension
                 .FirstOrDefault();
 
             if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
 
             // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
             // Get first folder, then sort within that
-            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, new NaturalSortComparer()).FirstOrDefault();
+            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, nc).FirstOrDefault();
             if (!string.IsNullOrEmpty(firstDirectoryFile))
             {
                 var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
                 if (!string.IsNullOrEmpty(firstDirectory))
                 {
                     var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
-                        .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                        .OrderBy(Path.GetFileNameWithoutExtension, nc)
                         .FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
@@ -168,7 +168,7 @@ namespace API.Services
             }
 
             var result = fullNames
-                .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                .OrderBy(Path.GetFileNameWithoutExtension, nc)
                 .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;
