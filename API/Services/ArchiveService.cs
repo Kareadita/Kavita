@@ -497,10 +497,10 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogWarning("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] This archive cannot be read: {ArchivePath}", archivePath);
                         return;
                     default:
-                        _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}", archivePath);
                         return;
                 }
 

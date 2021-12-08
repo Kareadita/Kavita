@@ -677,7 +677,8 @@ namespace API.Services
             {
                 var fileIndex = 1;
 
-                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, new NaturalSortComparer()))
+                using var nc = new NaturalSortComparer();
+                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, nc))
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
