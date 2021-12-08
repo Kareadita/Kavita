@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -109,32 +110,12 @@ namespace API.Controllers
                         }
                     }
 
-                    if (navigationItem.Link == null)
-                    {
-                        var item = new BookChapterItem()
-                        {
-                            Title = navigationItem.Title,
-                            Children = nestedChapters
-                        };
-                        if (nestedChapters.Count > 0)
-                        {
-                            item.Page = nestedChapters[0].Page;
-                        }
-                        chaptersList.Add(item);
-                    }
-                    else
-                    {
-                        var groupKey = BookService.CleanContentKeys(navigationItem.Link.ContentFileName);
-                        if (mappings.ContainsKey(groupKey))
-                        {
-                            chaptersList.Add(new BookChapterItem()
-                            {
-                                Title = navigationItem.Title,
-                                Page = mappings[groupKey],
-                                Children = nestedChapters
-                            });
-                        }
-                    }
+                    CreateToCChapter(navigationItem, nestedChapters, chaptersList, mappings);
+                }
+
+                if (navigationItem.NestedItems.Count == 0)
+                {
+                    CreateToCChapter(navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
                 }
             }
 
@@ -185,6 +166,38 @@ namespace API.Controllers
 
             }
             return Ok(chaptersList);
+        }
+
+        private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters, IList<BookChapterItem> chaptersList,
+            IReadOnlyDictionary<string, int> mappings)
+        {
+            if (navigationItem.Link == null)
+            {
+                var item = new BookChapterItem()
+                {
+                    Title = navigationItem.Title,
+                    Children = nestedChapters
+                };
+                if (nestedChapters.Count > 0)
+                {
+                    item.Page = nestedChapters[0].Page;
+                }
+
+                chaptersList.Add(item);
+            }
+            else
+            {
+                var groupKey = BookService.CleanContentKeys(navigationItem.Link.ContentFileName);
+                if (mappings.ContainsKey(groupKey))
+                {
+                    chaptersList.Add(new BookChapterItem()
+                    {
+                        Title = navigationItem.Title,
+                        Page = mappings[groupKey],
+                        Children = nestedChapters
+                    });
+                }
+            }
         }
 
         [HttpGet("{chapterId}/book-page")]
