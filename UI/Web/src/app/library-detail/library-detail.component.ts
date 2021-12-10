@@ -32,7 +32,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   actions: ActionItem<Library>[] = [];
   filters: Array<FilterItem> = mangaFormatFilters;
   filter: SeriesFilter = {
-    mangaFormat: null
+    formats: []
   };
   onDestroy: Subject<void> = new Subject<void>();
 
@@ -135,7 +135,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+    this.filter.formats = [data.filterItem.value];
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);

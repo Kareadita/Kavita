@@ -7,7 +7,7 @@ export interface FilterItem {
 }
 
 export interface SeriesFilter {
-    mangaFormat: MangaFormat | null;
+    formats: Array<MangaFormat>;
 }
 
 export const mangaFormatFilters = [

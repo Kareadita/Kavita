@@ -41,7 +41,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   isAdmin: boolean = false;
   filters: Array<FilterItem> = mangaFormatFilters;
   filter: SeriesFilter = {
-    mangaFormat: null
+    formats: []
   };
 
   private onDestory: Subject<void> = new Subject<void>();
@@ -175,7 +175,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+    this.filter.formats = [data.filterItem.value];
     if (this.seriesPagination !== undefined && this.seriesPagination !== null) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);

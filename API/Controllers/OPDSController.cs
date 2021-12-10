@@ -11,6 +11,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -33,7 +34,7 @@ public class OpdsController : BaseApiController
     private const string Prefix = "/api/opds/";
     private readonly FilterDto _filterDto = new FilterDto()
     {
-        MangaFormat = null
+        Formats = new List<MangaFormat>()
     };
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 

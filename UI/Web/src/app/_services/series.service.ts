@@ -177,11 +177,13 @@ export class SeriesService {
 
   createSeriesFilter(filter?: SeriesFilter) {
     const data: SeriesFilter = {
-      mangaFormat: null
+      formats: []
     };
 
     if (filter) {
-      data.mangaFormat = filter.mangaFormat;
+      if (filter.formats != null) {
+        data.formats = filter.formats;
+      }
     }
 
     return data;

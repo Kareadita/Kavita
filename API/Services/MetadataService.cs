@@ -287,7 +287,7 @@ public class MetadataService : IMetadataService
         series.Metadata.ReleaseYear = series.Volumes
             .SelectMany(volume => volume.Chapters).Min(c => c.ReleaseDate.Year);
 
-        var genres = comicInfos.SelectMany(i => i.Genre.Split(",")).Distinct().ToList();
+        var genres = comicInfos.SelectMany(i => i?.Genre.Split(",")).Distinct().ToList();
         var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
 
 

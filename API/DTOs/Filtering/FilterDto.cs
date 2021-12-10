@@ -1,13 +1,15 @@
-﻿using API.Entities.Enums;
+﻿using System.Collections;
+using System.Collections.Generic;
+using API.Entities.Enums;
 
 namespace API.DTOs.Filtering
 {
     public class FilterDto
     {
         /// <summary>
-        /// Pass null if you want all formats
+        /// The type of Formats you want to be returned. An empty list will return all formats back
         /// </summary>
-        public MangaFormat? MangaFormat { get; init; } = null;
+        public IList<MangaFormat> Formats { get; init; } = new List<MangaFormat>();
 
     }
 }

@@ -178,13 +178,34 @@ public class SeriesRepository : ISeriesRepository
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
         var formats = filter.GetSqlFilter();
+
+        var userLibraries = await GetUserLibraries(libraryId, userId);
+
         var query =  _context.Series
-            .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
+            .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
             .OrderBy(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    private async Task<List<int>> GetUserLibraries(int libraryId, int userId)
+    {
+        if (libraryId == 0)
+        {
+            return await _context.Library
+                .Include(l => l.AppUsers)
+                .Where(library => library.AppUsers.Any(user => user.Id == userId))
+                .AsNoTracking()
+                .Select(library => library.Id)
+                .ToListAsync();
+        }
+
+        return new List<int>()
+        {
+            libraryId
+        };
     }
 
     public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
@@ -357,26 +378,10 @@ public class SeriesRepository : ISeriesRepository
     {
         var formats = filter.GetSqlFilter();
 
-        if (libraryId == 0)
-        {
-            var userLibraries = _context.Library
-                .Include(l => l.AppUsers)
-                .Where(library => library.AppUsers.Any(user => user.Id == userId))
-                .AsNoTracking()
-                .Select(library => library.Id)
-                .ToList();
-
-            var allQuery = _context.Series
-                .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
-                .OrderByDescending(s => s.Created)
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .AsNoTracking();
-
-            return await PagedList<SeriesDto>.CreateAsync(allQuery, userParams.PageNumber, userParams.PageSize);
-        }
+        var userLibraries = await GetUserLibraries(libraryId, userId);
 
         var query = _context.Series
-            .Where(s => s.LibraryId == libraryId && formats.Contains(s.Format))
+            .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
             .OrderByDescending(s => s.Created)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -397,20 +402,8 @@ public class SeriesRepository : ISeriesRepository
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
         var formats = filter.GetSqlFilter();
-        IList<int> userLibraries;
-        if (libraryId == 0)
-        {
-            userLibraries = _context.Library
-                .Include(l => l.AppUsers)
-                .Where(library => library.AppUsers.Any(user => user.Id == userId))
-                .AsNoTracking()
-                .Select(library => library.Id)
-                .ToList();
-        }
-        else
-        {
-            userLibraries = new List<int>() {libraryId};
-        }
+
+        var userLibraries = await GetUserLibraries(libraryId, userId);
 
         var series = _context.Series
             .Where(s => formats.Contains(s.Format) && userLibraries.Contains(s.LibraryId))
