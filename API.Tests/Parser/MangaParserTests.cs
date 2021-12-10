@@ -169,6 +169,7 @@ namespace API.Tests.Parser
         [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "Kaiju No. 8")]
         [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
+        [InlineData("Love Hina - Volume 01 [Scans].pdf", "Love Hina")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -258,6 +259,7 @@ namespace API.Tests.Parser
         [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
         [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
+        [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseEdition(input));

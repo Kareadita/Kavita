@@ -33,7 +33,8 @@ public class OpdsController : BaseApiController
     private const string Prefix = "/api/opds/";
     private readonly FilterDto _filterDto = new FilterDto()
     {
-        MangaFormat = null
+        MangaFormat = null,
+        //Formats = null
     };
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 

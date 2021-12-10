@@ -12,8 +12,9 @@ namespace API.Extensions
         public static IList<MangaFormat> GetSqlFilter(this FilterDto filter)
         {
             var format = filter.MangaFormat;
-            if (format != null)
+            if (format != null) /*   || filter.Formats != null*/
             {
+
                 return new List<MangaFormat>()
                 {
                     (MangaFormat) format
