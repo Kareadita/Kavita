@@ -25,7 +25,7 @@ export class OnDeckComponent implements OnInit {
   libraryId!: number;
   filters: Array<FilterItem> = mangaFormatFilters;
   filter: SeriesFilter = {
-    mangaFormat: null
+    formats: []
   };
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
@@ -64,7 +64,7 @@ export class OnDeckComponent implements OnInit {
   }
 
   updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+    this.filter.formats = [data.filterItem.value];
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);

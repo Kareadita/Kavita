@@ -32,7 +32,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   filters: Array<FilterItem> = mangaFormatFilters;
   filter: SeriesFilter = {
-    mangaFormat: null
+    formats: []
   };
 
   onDestroy: Subject<void> = new Subject();
@@ -82,7 +82,8 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+    // TODO: Move this into card-layout component. It's the same except for callback
+    this.filter.formats = [data.filterItem.value];
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
