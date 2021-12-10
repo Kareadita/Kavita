@@ -237,9 +237,13 @@ namespace API.Parser
 
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
+            // Tintin - T22 Vol 714 pour Sydney
+            new Regex(
+                @"(?<Series>.+?)\s?(\b|_|-)\s?((vol|tome|t)\.?)(?<Volume>\d+(-\d+)?)",
+                MatchOptions, RegexTimeout),
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
-                @"(?<Series>.*)(\b|_)((vol|tome|t)\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.+?)(\b|_)((vol|tome|t)\.?)(\s|_)(?<Volume>\d+(-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
