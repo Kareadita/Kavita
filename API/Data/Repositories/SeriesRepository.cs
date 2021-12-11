@@ -380,6 +380,11 @@ public class SeriesRepository : ISeriesRepository
 
         var userLibraries = await GetUserLibraries(libraryId, userId);
 
+        if (filter.Libraries.Count > 0)
+        {
+            userLibraries = userLibraries.Where(l => filter.Libraries.Contains(l)).ToList();
+        }
+
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
             .OrderByDescending(s => s.Created)

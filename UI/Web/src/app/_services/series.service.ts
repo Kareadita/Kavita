@@ -8,7 +8,7 @@ import { CollectionTag } from '../_models/collection-tag';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { ReadStatus, SeriesFilter } from '../_models/series-filter';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
@@ -177,13 +177,19 @@ export class SeriesService {
 
   createSeriesFilter(filter?: SeriesFilter) {
     const data: SeriesFilter = {
-      formats: []
+      formats: [],
+      libraries: [],
+      readStatus: ReadStatus.All
     };
 
     if (filter) {
       if (filter.formats != null) {
         data.formats = filter.formats;
       }
+      if (filter.libraries != null) {
+        data.libraries = filter.libraries;
+      }
+      data.readStatus = filter.readStatus;
     }
 
     return data;

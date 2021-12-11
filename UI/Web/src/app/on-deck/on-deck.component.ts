@@ -7,7 +7,7 @@ import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layou
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterItem, SeriesFilter, mangaFormatFilters } from '../_models/series-filter';
+import { FilterItem, SeriesFilter, mangaFormatFilters, ReadStatus } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { SeriesService } from '../_services/series.service';
@@ -23,10 +23,7 @@ export class OnDeckComponent implements OnInit {
   series: Series[] = [];
   pagination!: Pagination;
   libraryId!: number;
-  filters: Array<FilterItem> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    formats: []
-  };
+  filter: SeriesFilter | undefined = undefined;
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
@@ -63,8 +60,8 @@ export class OnDeckComponent implements OnInit {
     this.loadPage();
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    this.filter.formats = [data.filterItem.value];
+  updateFilter(data: SeriesFilter) {
+    this.filter = data;
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);

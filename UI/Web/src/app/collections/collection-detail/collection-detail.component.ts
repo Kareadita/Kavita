@@ -12,9 +12,10 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
 import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
+import { MangaFormat } from 'src/app/_models/manga-format';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterItem, mangaFormatFilters, ReadStatus, SeriesFilter } from 'src/app/_models/series-filter';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
@@ -39,9 +40,11 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   isAdmin: boolean = false;
-  filters: Array<FilterItem> = mangaFormatFilters;
+  filters: Array<FilterItem<MangaFormat>> = mangaFormatFilters;
   filter: SeriesFilter = {
-    formats: []
+    formats: [],
+    libraries: [],
+    readStatus: ReadStatus.All
   };
 
   private onDestory: Subject<void> = new Subject<void>();
@@ -174,8 +177,9 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    this.filter.formats = [data.filterItem.value];
+  updateFilter(data: SeriesFilter) {
+    //this.filter.formats = [data.filterItem.value];
+    // TODO: Filter
     if (this.seriesPagination !== undefined && this.seriesPagination !== null) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);
