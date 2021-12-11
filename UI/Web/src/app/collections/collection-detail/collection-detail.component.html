@@ -33,7 +33,6 @@
     [items]="series"
     [pagination]="seriesPagination"
     (pageChange)="onPageChange($event)"
-    [filters]="filters"
     (applyFilter)="updateFilter($event)"
     >
         <ng-template #cardItem let-item let-position="idx">

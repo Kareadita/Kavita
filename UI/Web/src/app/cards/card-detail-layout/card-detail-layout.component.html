@@ -10,24 +10,69 @@
             </h2>
         </div>
         
-        <button *ngIf="filters !== undefined && filters.length > 0" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+        <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
-    <div class="row no-gutters filter-section" #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
-        <div class="col">
-            <form class="ml-2" [formGroup]="filterForm">
-                <div class="form-group" *ngIf="filters.length > 0">
-                    <label for="series-filter">Filter</label>
-                    <select class="form-control" id="series-filter" formControlName="filter" (ngModelChange)="handleFilterChange($event)" style="max-width: 200px;">
-                        <option [value]="i" *ngFor="let opt of filters; let i = index">{{opt.title}}</option>
-                    </select>
+    <div class="filter-section" #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
+        <div class="row no-gutters">
+            <div class="col">
+                <div class="form-group">
+                    <label for="format">Format</label>
+                    <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
                 </div>
-            </form>
+            </div>
+            <!-- <div class="col">
+                <button class="btn btn-outline-primary">AND</button>
+            </div> -->
+    
+            <div class="col">
+                <label>Read Progress</label>
+                <form class="ml-2">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                        <label class="form-check-label" for="inlineCheckbox1">Unread</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+                        <label class="form-check-label" for="inlineCheckbox2">In Progress</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
+                        <label class="form-check-label" for="inlineCheckbox3">Read</label>
+                      </div>
+                </form>
+            </div>
+
+            <div class="col">
+                <div class="form-group">
+                    <label for="libraries">Libraries</label>
+                    <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+            </div>
         </div>
-        
+        <div class="row no-gutters">
+            <div class="col">
+                <button class="btn btn-primary" (click)="apply()">Apply</button>
+            </div>
+        </div>
     </div>
+    
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
