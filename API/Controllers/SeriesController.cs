@@ -334,7 +334,7 @@ namespace API.Controllers
                         var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
                         if (existingTag != null)
                         {
-                            if (!series.Metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                            if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
                             {
                                 newTags.Add(existingTag);
                             }

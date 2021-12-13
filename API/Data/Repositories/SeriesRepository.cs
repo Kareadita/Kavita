@@ -386,7 +386,11 @@ public class SeriesRepository : ISeriesRepository
         }
 
         var query = _context.Series
-            .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
+            .Include(s => s.Metadata)
+            .Where(s => userLibraries.Contains(s.LibraryId) &&
+                        formats.Contains(s.Format) &&
+                        s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id))
+            )
             .OrderByDescending(s => s.Created)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()

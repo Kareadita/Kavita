@@ -20,6 +20,10 @@ namespace API.DTOs.Filtering
         /// A list of library ids to restrict search to. Defaults to all libraries by passing empty list
         /// </summary>
         public IList<int> Libraries { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Genre ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> Genres { get; init; } = new List<int>();
 
     }
 }

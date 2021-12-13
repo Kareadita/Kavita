@@ -34,7 +34,8 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   filter: SeriesFilter = {
     formats: [],
     libraries: [],
-    readStatus: ReadStatus.All
+    readStatus: ReadStatus.All,
+    genres: []
   };
 
   onDestroy: Subject<void> = new Subject();

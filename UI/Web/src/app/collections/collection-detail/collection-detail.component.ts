@@ -40,12 +40,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   isAdmin: boolean = false;
-  filters: Array<FilterItem<MangaFormat>> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    formats: [],
-    libraries: [],
-    readStatus: ReadStatus.All
-  };
+  filter: SeriesFilter | undefined = undefined;
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -178,8 +173,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: SeriesFilter) {
-    //this.filter.formats = [data.filterItem.value];
-    // TODO: Filter
+    this.filter = data;
     if (this.seriesPagination !== undefined && this.seriesPagination !== null) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);

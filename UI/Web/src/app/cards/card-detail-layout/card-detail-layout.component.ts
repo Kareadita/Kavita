@@ -3,12 +3,14 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
+import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterItem, mangaFormatFilters, ReadStatus, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { MetadataService } from 'src/app/_services/metadata.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
 
@@ -65,6 +67,7 @@ export class CardDetailLayoutComponent implements OnInit {
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
+  genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
 
   /**
    * Controls the visiblity of extended controls that sit below the main header.
@@ -74,31 +77,54 @@ export class CardDetailLayoutComponent implements OnInit {
   filter: SeriesFilter = {
     formats: [],
     libraries: [],
-    readStatus: ReadStatus.All
+    readStatus: ReadStatus.All,
+    genres: []
   }
   libraries: Array<FilterItem<Library>> = [];
+  genres: Array<FilterItem<Genre>> = [];
 
   updateApplied: number = 0;
 
-  constructor(private libraryService: LibraryService) { }
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService) { }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`; // `${this.header}_${this.pagination?.currentPage}_${this.filterToString()}_${item.id}_${index}`;
+    // BUG: TrackByIdentity isn't working
+    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`;
     this.setupFormatTypeahead();
-    this.setupLibraryTypeahead();
+    
+
+    this.metadataService.getAllGenres().subscribe(genres => {
+      this.genres = genres.map(genre => {
+        return {
+          title: genre.title,
+          value: genre,
+          selected: false,
+        }
+      });
+      this.setupGenreTypeahead();
+
+    });
+
+    this.libraryService.getLibrariesForMember().subscribe(libs => {
+      this.libraries = libs.map(lib => {
+        return {
+          title: lib.name,
+          value: lib,
+          selected: true,
+        }
+      });
+      this.setupLibraryTypeahead();
+    });
   }
 
-  filterToString() {
-    return `formats_${this.filter.formats.join('_')}_libraries_${this.filter.libraries.join('_')}_${this.filter.readStatus}`
-  }
 
   setupFormatTypeahead() {
     this.formatSettings.minCharacters = 0;
     this.formatSettings.multiple = true;
     this.formatSettings.id = 'format';
     this.formatSettings.unique = true;
-    this.formatSettings.addIfNonExisting = true;
-    this.formatSettings.fetchFn = (filter: string) => this.fetchFilters(filter);
+    this.formatSettings.addIfNonExisting = false;
+    this.formatSettings.fetchFn = (filter: string) => of(mangaFormatFilters);
     this.formatSettings.compareFn = (options: FilterItem<MangaFormat>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
@@ -111,7 +137,7 @@ export class CardDetailLayoutComponent implements OnInit {
     this.librarySettings.multiple = true;
     this.librarySettings.id = 'libraries';
     this.librarySettings.unique = true;
-    this.librarySettings.addIfNonExisting = true;
+    this.librarySettings.addIfNonExisting = false;
     this.librarySettings.fetchFn = (filter: string) => {
       return of (this.libraries)
     };
@@ -119,21 +145,26 @@ export class CardDetailLayoutComponent implements OnInit {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.libraryService.getLibrariesForMember().subscribe(libs => {
-      this.libraries = libs.map(lib => {
-        return {
-          title: lib.name,
-          value: lib,
-          selected: false,
-        }
-      });
-      this.librarySettings.savedData = this.libraries;
-    });
+    this.librarySettings.savedData = this.libraries;
+    console.log('libraries: ', this.libraries);
   }
 
-  fetchFilters(filter: string = '') {
-    return of(mangaFormatFilters);
+  setupGenreTypeahead() {
+    this.genreSettings.minCharacters = 0;
+    this.genreSettings.multiple = true;
+    this.genreSettings.id = 'genres';
+    this.genreSettings.unique = true;
+    this.genreSettings.addIfNonExisting = false;
+    this.genreSettings.fetchFn = (filter: string) => {
+      return of (this.genres)
+    };
+    this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f);
+    }
+    this.genreSettings.savedData = this.genres;
   }
+
 
   onPageChange(page: number) {
     this.pageChange.emit(this.pagination);
@@ -161,6 +192,10 @@ export class CardDetailLayoutComponent implements OnInit {
 
   updateLibraryFilters(libraries: FilterItem<Library>[]) {
     this.filter.libraries = libraries.map(item => item.value.id) || [];
+  }
+
+  updateGenreFilters(genres: FilterItem<Genre>[]) {
+    this.filter.genres = genres.map(item => item.value.id) || [];
   }
 
   apply() {

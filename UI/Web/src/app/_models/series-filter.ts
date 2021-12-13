@@ -10,6 +10,7 @@ export interface SeriesFilter {
     formats: Array<MangaFormat>;
     libraries: Array<number>,
     readStatus: ReadStatus;
+    genres: Array<number>;
 }
 
 export enum ReadStatus {
@@ -20,11 +21,6 @@ export enum ReadStatus {
 }
 
 export const mangaFormatFilters = [
-    // {
-    //   title: 'All',
-    //   value: null,
-    //   selected: false
-    // },
     {
       title: 'Images',
       value: MangaFormat.IMAGE,

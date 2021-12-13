@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using API.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Helpers
@@ -26,5 +27,24 @@ namespace API.Helpers
 
             return entities;
         }
+
+        // public static async PagedList<T> RawSqlQuery<T>(DbContext context, string query, Func<DbDataReader, T> map, UserParams userParams)
+        // {
+        //     await using var command = context.Database.GetDbConnection().CreateCommand();
+        //     command.CommandText = query;
+        //     command.CommandType = CommandType.Text;
+        //
+        //     context.Database.OpenConnection();
+        //
+        //     await using var result = await command.ExecuteReaderAsync();
+        //     // var entities = new List<T>();
+        //     //
+        //     // while (result.Read())
+        //     // {
+        //     //     entities.Add(map(result));
+        //     // }
+        //
+        //     return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        // }
     }
 }

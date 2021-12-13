@@ -176,10 +176,12 @@ export class SeriesService {
   }
 
   createSeriesFilter(filter?: SeriesFilter) {
+    // TODO: Remove this and have filter component manage everything
     const data: SeriesFilter = {
       formats: [],
       libraries: [],
-      readStatus: ReadStatus.All
+      readStatus: ReadStatus.All,
+      genres: []
     };
 
     if (filter) {
@@ -190,6 +192,7 @@ export class SeriesService {
         data.libraries = filter.libraries;
       }
       data.readStatus = filter.readStatus;
+      data.genres = filter.genres;
     }
 
     return data;
