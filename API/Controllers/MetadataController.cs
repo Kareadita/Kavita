@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.Metadata;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,5 +21,11 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres()
     {
         return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync());
+    }
+
+    [HttpGet("people")]
+    public async Task<ActionResult<IList<PersonDto>>> GetAllPeople()
+    {
+        return Ok(await _unitOfWork.PersonRepository.GetAllPeople());
     }
 }

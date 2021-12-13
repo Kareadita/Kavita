@@ -88,6 +88,12 @@ export class UtilityService {
     return cleaned;
   }
 
+  filter(input: string, filter: string): boolean {
+    if (input === null || filter === null) return false;
+    const reg = /[_\.\-]/gi;
+    return input.toUpperCase().replace(reg, '').includes(filter.toUpperCase().replace(reg, ''));
+  }
+
   mangaFormat(format: MangaFormat): string {
     switch (format) {
       case MangaFormat.EPUB:

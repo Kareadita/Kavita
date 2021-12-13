@@ -1,7 +1,8 @@
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { of } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
@@ -66,7 +67,8 @@ export class CardDetailLayoutComponent implements OnInit {
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
-  personSettings: TypeaheadSettings<FilterItem<Person>> = new TypeaheadSettings();
+
+  peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
 
   /**
    * Controls the visiblity of extended controls that sit below the main header.
@@ -76,7 +78,8 @@ export class CardDetailLayoutComponent implements OnInit {
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
   genres: Array<FilterItem<Genre>> = [];
-  people: Array<FilterItem<Person>> = [];
+
+  persons: Array<FilterItem<Person>> = [];
 
   updateApplied: number = 0;
 
@@ -84,7 +87,8 @@ export class CardDetailLayoutComponent implements OnInit {
     return PersonRole;
   }
 
-  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService) {
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
+    private utilityService: UtilityService) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -116,6 +120,17 @@ export class CardDetailLayoutComponent implements OnInit {
       });
       this.setupLibraryTypeahead();
     });
+
+    this.metadataService.getAllPeople().subscribe(res => {
+      this.persons = res.map(lib => {
+        return {
+          title: lib.name,
+          value: lib,
+          selected: true,
+        }
+      });
+      this.setupPersonTypeahead();
+    })
   }
 
 
@@ -147,7 +162,6 @@ export class CardDetailLayoutComponent implements OnInit {
       return options.filter(m => m.title.toLowerCase() === f);
     }
     this.librarySettings.savedData = this.libraries;
-    console.log('libraries: ', this.libraries);
   }
 
   setupGenreTypeahead() {
@@ -167,19 +181,87 @@ export class CardDetailLayoutComponent implements OnInit {
   }
 
   setupPersonTypeahead() {
-    this.genreSettings.minCharacters = 0;
-    this.genreSettings.multiple = true;
-    this.genreSettings.id = 'genres';
-    this.genreSettings.unique = true;
-    this.genreSettings.addIfNonExisting = false;
-    this.genreSettings.fetchFn = (filter: string) => {
-      return of (this.genres)
+    this.peopleSettings = {};
+
+    var personSettings = this.createBlankPersonSettings('writers');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
     };
-    this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Writer);
+    this.peopleSettings[PersonRole.Writer] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('character');
+    personSettings.fetchFn = (filter: string) => {
+
+      return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Character);
+    this.peopleSettings[PersonRole.Character] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('colorist');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Colorist);
+    this.peopleSettings[PersonRole.Colorist] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('cover-artist');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.CoverArtist);
+    this.peopleSettings[PersonRole.CoverArtist] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('editor');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Editor);
+    this.peopleSettings[PersonRole.Editor] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('inker');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Inker);
+    this.peopleSettings[PersonRole.Inker] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('letterer');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Letterer);
+    this.peopleSettings[PersonRole.Letterer] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('penciller');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Penciller);
+    this.peopleSettings[PersonRole.Penciller] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('publisher');
+    personSettings.fetchFn = (filter: string) => {
+      return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
+    };
+    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Publisher);
+    this.peopleSettings[PersonRole.Publisher] = personSettings;
+
+    console.log(this.peopleSettings);
+  }
+
+  createBlankPersonSettings(id: string) {
+    var personSettings = new TypeaheadSettings<FilterItem<Person>>();
+    personSettings.minCharacters = 0;
+    personSettings.multiple = true;
+    personSettings.unique = true;
+    personSettings.addIfNonExisting = false;
+    personSettings.id = id;
+    personSettings.compareFn = (options: FilterItem<Person>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.genreSettings.savedData = this.genres;
+    return personSettings;
   }
 
 
@@ -213,6 +295,46 @@ export class CardDetailLayoutComponent implements OnInit {
 
   updateGenreFilters(genres: FilterItem<Genre>[]) {
     this.filter.genres = genres.map(item => item.value.id) || [];
+  }
+
+  updatePersonFilters(persons: FilterItem<Person>[], role: PersonRole) {
+    switch (role) {
+      case PersonRole.CoverArtist:
+        this.filter.coverArtist = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Character:
+        this.filter.character = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Colorist:
+        this.filter.colorist = persons.map(p => p.value.id);
+        break;
+      // case PersonRole.Artist:
+      //   this.filter.artist = persons.map(p => p.value.id);
+      //   break;
+      case PersonRole.Editor:
+        this.filter.editor = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Inker:
+        this.filter.inker = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Letterer:
+        this.filter.letterer = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Penciller:
+        this.filter.penciller = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Publisher:
+        this.filter.publisher = persons.map(p => p.value.id);
+        break;
+      case PersonRole.Writer:
+        this.filter.writers = persons.map(p => p.value.id);
+        break;
+
+    }
+  }
+
+  getPersonsSettings(role: PersonRole) {
+    return this.peopleSettings[role];
   }
 
   apply() {

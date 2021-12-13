@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { ChapterMetadata } from '../_models/chapter-metadata';
 import { Genre } from '../_models/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
+import { Person } from '../_models/person';
 
 @Injectable({
   providedIn: 'root'
@@ -38,5 +39,9 @@ export class MetadataService {
 
   getAllGenres() {
     return this.httpClient.get<Genre[]>(this.baseUrl + 'metadata/genres');
+  }
+
+  getAllPeople() {
+    return this.httpClient.get<Person[]>(this.baseUrl + 'metadata/people');
   }
 }

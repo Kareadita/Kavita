@@ -13,6 +13,7 @@ export enum PersonRole {
 }
 
 export interface Person {
+    id: number;
     name: string;
     role: PersonRole;
 }
