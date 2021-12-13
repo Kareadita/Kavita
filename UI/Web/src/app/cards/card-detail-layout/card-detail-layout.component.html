@@ -35,6 +35,7 @@
             </div> -->
     
             <div class="col">
+                <!-- Not sure how to do this on the backend, might have to be a UI control -->
                 <label>Read Progress</label>
                 <form class="ml-2">
                     <div class="form-check form-check-inline">
@@ -70,6 +71,22 @@
                 <div class="form-group">
                     <label for="genres">Genres</label>
                     <app-typeahead (selectedData)="updateGenreFilters($event)" [settings]="genreSettings">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+            </div>
+        </div>
+        <div class="row no-gutters">
+            <!-- The People row -->
+            <div class="col">
+                <div class="form-group">
+                    <label for="genres">Writers</label>
+                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="personSettings">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.title}}
                         </ng-template>

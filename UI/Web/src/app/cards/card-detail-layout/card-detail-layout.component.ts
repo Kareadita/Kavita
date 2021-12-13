@@ -7,10 +7,12 @@ import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Pagination } from 'src/app/_models/pagination';
+import { Person, PersonRole } from 'src/app/_models/person';
 import { FilterItem, mangaFormatFilters, ReadStatus, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
+import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
 
@@ -53,10 +55,6 @@ export class CardDetailLayoutComponent implements OnInit {
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
-  /**
-   * A list of Filters which can filter the data of the page. If nothing is passed, the control will not show.
-   */
-  //filters: Array<FilterItem<MangaFormat>> = [];
   @Input() trackByIdentity!: (index: number, item: any) => string;
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
@@ -68,24 +66,27 @@ export class CardDetailLayoutComponent implements OnInit {
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
+  personSettings: TypeaheadSettings<FilterItem<Person>> = new TypeaheadSettings();
 
   /**
    * Controls the visiblity of extended controls that sit below the main header.
    */
   filteringCollapsed: boolean = true;
 
-  filter: SeriesFilter = {
-    formats: [],
-    libraries: [],
-    readStatus: ReadStatus.All,
-    genres: []
-  }
+  filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
   genres: Array<FilterItem<Genre>> = [];
+  people: Array<FilterItem<Person>> = [];
 
   updateApplied: number = 0;
 
-  constructor(private libraryService: LibraryService, private metadataService: MetadataService) { }
+  get PersonRole(): typeof PersonRole {
+    return PersonRole;
+  }
+
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService) {
+    this.filter = this.seriesService.createSeriesFilter();
+  }
 
   ngOnInit(): void {
     // BUG: TrackByIdentity isn't working
@@ -150,6 +151,22 @@ export class CardDetailLayoutComponent implements OnInit {
   }
 
   setupGenreTypeahead() {
+    this.genreSettings.minCharacters = 0;
+    this.genreSettings.multiple = true;
+    this.genreSettings.id = 'genres';
+    this.genreSettings.unique = true;
+    this.genreSettings.addIfNonExisting = false;
+    this.genreSettings.fetchFn = (filter: string) => {
+      return of (this.genres)
+    };
+    this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f);
+    }
+    this.genreSettings.savedData = this.genres;
+  }
+
+  setupPersonTypeahead() {
     this.genreSettings.minCharacters = 0;
     this.genreSettings.multiple = true;
     this.genreSettings.id = 'genres';

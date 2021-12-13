@@ -31,12 +31,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   pagination!: Pagination;
   libraryId!: number;
 
-  filter: SeriesFilter = {
-    formats: [],
-    libraries: [],
-    readStatus: ReadStatus.All,
-    genres: []
-  };
+  filter: SeriesFilter | undefined = undefined;
 
   onDestroy: Subject<void> = new Subject();
 

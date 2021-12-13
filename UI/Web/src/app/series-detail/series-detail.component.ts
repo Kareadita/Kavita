@@ -63,7 +63,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   activeTabId = 2;
   hasNonSpecialVolumeChapters = true;
 
-  seriesSummary: string = '';
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -392,10 +391,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    if (this.seriesMetadata !== null) {
-      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
-    }
-    
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 

@@ -11,6 +11,15 @@ export interface SeriesFilter {
     libraries: Array<number>,
     readStatus: ReadStatus;
     genres: Array<number>;
+    writers: Array<number>;
+    penciller: Array<number>;
+    inker: Array<number>;
+    colorist: Array<number>;
+    letterer: Array<number>;
+    coverArtist: Array<number>;
+    editor: Array<number>;
+    publisher: Array<number>;
+    character: Array<number>;
 }
 
 export enum ReadStatus {

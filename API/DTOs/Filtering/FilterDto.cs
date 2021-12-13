@@ -24,6 +24,18 @@ namespace API.DTOs.Filtering
         /// A list of Genre ids to restrict search to. Defaults to all genres by passing an empty list
         /// </summary>
         public IList<int> Genres { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Writers to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> Writers { get; init; } = new List<int>();
+        public IList<int> Penciller { get; init; } = new List<int>();
+        public IList<int> Inker { get; init; } = new List<int>();
+        public IList<int> Colorist { get; init; } = new List<int>();
+        public IList<int> Letterer { get; init; } = new List<int>();
+        public IList<int> CoverArtist { get; init; } = new List<int>();
+        public IList<int> Editor { get; init; } = new List<int>();
+        public IList<int> Publisher { get; init; } = new List<int>();
+        public IList<int> Character { get; init; } = new List<int>();
 
     }
 }

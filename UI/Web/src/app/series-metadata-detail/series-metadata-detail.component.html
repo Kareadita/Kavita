@@ -1,3 +1,7 @@
+<div class="row no-gutters {{series?.userReview ? '' : 'mt-2'}}">
+    <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
+</div>
+
 <!-- This first row will have random information about the series-->
 <div class="row no-gutters" *ngIf="seriesMetadata.ageRating">
     <app-tag-badge title="Age Rating">{{ageRatingName}}</app-tag-badge>

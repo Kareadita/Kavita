@@ -385,16 +385,53 @@ public class SeriesRepository : ISeriesRepository
             userLibraries = userLibraries.Where(l => filter.Libraries.Contains(l)).ToList();
         }
 
+
+        //var checkProgress = filter.ReadStatus == ReadStatus.Read || ReadStatus.NotRead;
+        /*&&
+                        _context.AppUserProgresses.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead) != s.Pages*/
+
+        var allPeopleIds = new List<int>();
+        allPeopleIds.AddRange(filter.Writers);
+        allPeopleIds.AddRange(filter.Character);
+        allPeopleIds.AddRange(filter.Colorist);
+        allPeopleIds.AddRange(filter.Editor);
+        allPeopleIds.AddRange(filter.Inker);
+        allPeopleIds.AddRange(filter.Letterer);
+        allPeopleIds.AddRange(filter.Penciller);
+        allPeopleIds.AddRange(filter.Publisher);
+        allPeopleIds.AddRange(filter.CoverArtist);
+
+        var hasPeopleFilter = allPeopleIds.Count > 0;
+        var hasGenresFilter = filter.Genres.Count > 0;
+
         var query = _context.Series
             .Include(s => s.Metadata)
-            .Where(s => userLibraries.Contains(s.LibraryId) &&
-                        formats.Contains(s.Format) &&
-                        s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id))
-            )
+            .Where(s => userLibraries.Contains(s.LibraryId)
+                        && formats.Contains(s.Format)
+                        && (!hasGenresFilter || s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
+                        && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+                        )
             .OrderByDescending(s => s.Created)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
+
+        // var userProgress = await _context.AppUserProgresses
+        //     .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
+        //     .ToListAsync();
+        //
+        // var userRatings = await _context.AppUserRating
+        //     .Where(r => r.AppUserId == userId && series.Select(s => s.Id).Contains(r.SeriesId))
+        //     .ToListAsync();
+        //
+        // foreach (var s in series)
+        // {
+        //     s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
+        //     var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
+        //     if (rating == null) continue;
+        //     s.UserRating = rating.Rating;
+        //     s.UserReview = rating.Review;
+        // }
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }

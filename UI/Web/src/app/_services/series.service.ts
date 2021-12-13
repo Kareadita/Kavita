@@ -181,20 +181,29 @@ export class SeriesService {
       formats: [],
       libraries: [],
       readStatus: ReadStatus.All,
-      genres: []
+      genres: [],
+      writers: [],
+      penciller: [],
+      inker: [],
+      colorist: [],
+      letterer: [],
+      coverArtist: [],
+      editor: [],
+      publisher: [],
+      character: [],
     };
 
-    if (filter) {
-      if (filter.formats != null) {
-        data.formats = filter.formats;
-      }
-      if (filter.libraries != null) {
-        data.libraries = filter.libraries;
-      }
-      data.readStatus = filter.readStatus;
-      data.genres = filter.genres;
-    }
+    if (filter === undefined) return data;
 
-    return data;
+    // if (filter.formats != null) {
+    //   data.formats = filter.formats;
+    // }
+    // if (filter.libraries != null) {
+    //   data.libraries = filter.libraries;
+    // }
+    // data.readStatus = filter.readStatus;
+    // data.genres = filter.genres;
+
+    return filter;
   }
 }

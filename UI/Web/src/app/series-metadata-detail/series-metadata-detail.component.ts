@@ -23,6 +23,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
    * String representation of AgeRating enum
    */
   ageRatingName: string = '';
+  /**
+   * Html representation of Series Summary
+   */
+  seriesSummary: string = '';
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -46,6 +50,11 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     this.metadataService.getAgeRating(this.seriesMetadata.ageRating).subscribe(rating => {
       this.ageRatingName = rating;
     });
+
+    if (this.seriesMetadata !== null) {
+      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
+    }
+    
   }
 
   ngOnInit(): void {
