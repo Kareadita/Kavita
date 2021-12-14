@@ -1,6 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { of, Subject } from 'rxjs';
+import { of, ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
@@ -10,7 +10,7 @@ import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterItem, mangaFormatFilters, ReadStatus, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { LibraryService } from 'src/app/_services/library.service';
@@ -20,6 +20,16 @@ import { SeriesService } from 'src/app/_services/series.service';
 const FILTER_PAG_REGEX = /[^0-9]/g;
 
 const ANIMATION_SPEED = 300;
+
+export class FilterSettings {
+  libraryDisabled = false;
+  formatDisabled = false;
+  collectionDisabled = false;
+  genresDisabled = false;
+  peopleDisabled = false;
+  readProgressDisabled = false;
+  ratingDisabled = false;
+}
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -37,6 +47,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
    */
   @Input() actions: ActionItem<any>[] = [];
   @Input() trackByIdentity!: (index: number, item: any) => string;
+  @Input() filterSettings!: FilterSettings;
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
   @Output() applyFilter: EventEmitter<SeriesFilter> = new EventEmitter();
@@ -49,6 +60,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
   collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
+  resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
   /**
    * Controls the visiblity of extended controls that sit below the main header.
@@ -90,6 +102,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`;
     this.setupFormatTypeahead();
+
+    if (this.filterSettings === undefined) {
+      this.filterSettings = new FilterSettings();
+    }
     
 
     this.metadataService.getAllGenres().subscribe(genres => {
@@ -171,7 +187,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.librarySettings.savedData = this.libraries;
   }
 
   setupGenreTypeahead() {
@@ -369,9 +384,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     return this.peopleSettings[role];
   }
 
-  // hasStatus(readStatus: ReadStatus) {
-  //   return (this.filter.readStatus & readStatus) === readStatus;
-  // }
+  clear() {
+    this.filter = this.seriesService.createSeriesFilter();
+    this.resetTypeaheads.next(true);
+    this.applyFilter.emit(this.filter);
+    this.updateApplied++;
+  }
 
   apply() {
     this.applyFilter.emit(this.filter);
