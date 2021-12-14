@@ -31,30 +31,25 @@
                     </app-typeahead>
                 </div>
             </div>
-    
-            <div class="col">
-                <!-- Not sure how to do this on the backend, might have to be a UI control -->
-                <label>Read Progress</label>
-                <form class="ml-2">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                        <label class="form-check-label" for="inlineCheckbox1">Unread</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                        <label class="form-check-label" for="inlineCheckbox2">In Progress</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                        <label class="form-check-label" for="inlineCheckbox3">Read</label>
-                      </div>
-                </form>
-            </div>
 
             <div class="col">
                 <div class="form-group">
                     <label for="libraries">Libraries</label>
                     <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="form-group">
+                    <label for="collections">Collections</label>
+                    <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.title}}
                         </ng-template>
@@ -208,10 +203,50 @@
             </div>
         </div>
         <div class="row no-gutters">
+            <!-- Rating/Review/Progress -->
+            <div class="col">
+                <!-- Not sure how to do this on the backend, might have to be a UI control -->
+                <label>Read Progress</label>
+                <form [formGroup]="readProgressGroup" class="ml-2">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
+                        <label class="form-check-label" for="notread">Unread</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inprogress" formControlName="inProgress">
+                        <label class="form-check-label" for="inprogress">In Progress</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="read" formControlName="read">
+                        <label class="form-check-label" for="read">Read</label>
+                      </div>
+                </form>
+            </div>
+
+            <div class="col">
+                <label for="ratings">Rating</label>
+                <form class="form-inline ml-2">
+                    <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
+                        <ng-template let-fill="fill" let-index="index">
+                            <span class="star" [class.filled]="(index >= (filter.rating - 1)) && filter.rating > 0" [ngbTooltip]="(index + 1) + ' and up'">&#9733;</span>
+                          </ng-template>
+                    </ngb-rating>
+                </form>
+            </div>
+
             <div class="col">
                 <button class="btn btn-primary" (click)="apply()">Apply</button>
             </div>
+            
         </div>
+        <div class="row no-gutters">
+            <!-- Sort by functionalities -->
+        </div>
+        <!-- <div class="row no-gutters">
+            <div class="col">
+                <button class="btn btn-primary" (click)="apply()">Apply</button>
+            </div>
+        </div> -->
     </div>
     
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>

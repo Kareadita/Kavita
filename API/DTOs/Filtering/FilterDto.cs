@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using API.Data.Migrations;
+using API.Entities;
 using API.Entities.Enums;
 
 namespace API.DTOs.Filtering
@@ -14,7 +16,7 @@ namespace API.DTOs.Filtering
         /// <summary>
         /// The progress you want to be returned. This can be bitwise manipulated. Defaults to all applicable states.
         /// </summary>
-        public ReadStatus ReadStatus { get; init; } = ReadStatus.All;
+        public ReadStatus ReadStatus { get; init; } = new ReadStatus();
 
         /// <summary>
         /// A list of library ids to restrict search to. Defaults to all libraries by passing empty list
@@ -28,14 +30,47 @@ namespace API.DTOs.Filtering
         /// A list of Writers to restrict search to. Defaults to all genres by passing an empty list
         /// </summary>
         public IList<int> Writers { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Penciller ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Penciller { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Inker ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Inker { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Colorist ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Colorist { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Letterer ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Letterer { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of CoverArtist ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> CoverArtist { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Editor ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Editor { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Publisher ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Publisher { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Character ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
         public IList<int> Character { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Collection Tag ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> CollectionTags { get; init; } = new List<int>();
+        /// <summary>
+        /// Will return back everything with the rating and above
+        /// <see cref="AppUserRating.Rating"/>
+        /// </summary>
+        public int Rating { get; init; }
 
     }
 }

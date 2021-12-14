@@ -1,9 +1,10 @@
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { of, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
+import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -11,33 +12,12 @@ import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
 import { FilterItem, mangaFormatFilters, ReadStatus, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
-
-export enum FilterAction {
-  /**
-   * If an option is selected on a multi select component
-   */
-  Added = 0,
-  /**
-   * If an option is unselected on a multi select component
-   */
-  Removed = 1,
-  /**
-   * If an option is selected on a single select component
-   */
-  Selected = 2
-}
-
-export interface UpdateFilterEvent {
-  //filterItem: FilterItem;
-  //action: FilterAction; // Do I need this?
-
-  formatFilter?: FilterItem<MangaFormat>[];
-}
 
 const ANIMATION_SPEED = 300;
 
@@ -46,7 +26,7 @@ const ANIMATION_SPEED = 300;
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false; 
@@ -67,7 +47,7 @@ export class CardDetailLayoutComponent implements OnInit {
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
-
+  collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
 
   /**
@@ -78,22 +58,36 @@ export class CardDetailLayoutComponent implements OnInit {
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
   genres: Array<FilterItem<Genre>> = [];
-
   persons: Array<FilterItem<Person>> = [];
+  collectionTags: Array<FilterItem<CollectionTag>> = [];
+
+  readProgressGroup!: FormGroup;
 
   updateApplied: number = 0;
+
+  private onDestory: Subject<void> = new Subject();
 
   get PersonRole(): typeof PersonRole {
     return PersonRole;
   }
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
-    private utilityService: UtilityService) {
+    private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
     this.filter = this.seriesService.createSeriesFilter();
+    this.readProgressGroup = new FormGroup({
+      read: new FormControl(this.filter.readStatus.read, []),
+      notRead: new FormControl(this.filter.readStatus.notRead, []),
+      inProgress: new FormControl(this.filter.readStatus.inProgress, []),
+    });
+
+    this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+      this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
+      this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
+      this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
+    });
   }
 
   ngOnInit(): void {
-    // BUG: TrackByIdentity isn't working
     this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`;
     this.setupFormatTypeahead();
     
@@ -130,7 +124,23 @@ export class CardDetailLayoutComponent implements OnInit {
         }
       });
       this.setupPersonTypeahead();
-    })
+    });
+
+    this.collectionTagService.allTags().subscribe(tags => {
+      this.collectionTags = tags.map(lib => {
+        return {
+          title: lib.title,
+          value: lib,
+          selected: false,
+        }
+      });
+      this.setupCollectionTagTypeahead();
+    });
+  }
+
+  ngOnDestroy() {
+    this.onDestory.next();
+    this.onDestory.complete();
   }
 
 
@@ -177,7 +187,21 @@ export class CardDetailLayoutComponent implements OnInit {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.genreSettings.savedData = this.genres;
+  }
+
+  setupCollectionTagTypeahead() {
+    this.collectionSettings.minCharacters = 0;
+    this.collectionSettings.multiple = true;
+    this.collectionSettings.id = 'collections';
+    this.collectionSettings.unique = true;
+    this.collectionSettings.addIfNonExisting = false;
+    this.collectionSettings.fetchFn = (filter: string) => {
+      return of (this.collectionTags)
+    };
+    this.collectionSettings.compareFn = (options: FilterItem<CollectionTag>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f);
+    }
   }
 
   setupPersonTypeahead() {
@@ -187,7 +211,6 @@ export class CardDetailLayoutComponent implements OnInit {
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Writer);
     this.peopleSettings[PersonRole.Writer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('character');
@@ -195,59 +218,49 @@ export class CardDetailLayoutComponent implements OnInit {
 
       return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Character);
     this.peopleSettings[PersonRole.Character] = personSettings;
 
     personSettings = this.createBlankPersonSettings('colorist');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Colorist);
     this.peopleSettings[PersonRole.Colorist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('cover-artist');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.CoverArtist);
     this.peopleSettings[PersonRole.CoverArtist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('editor');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Editor);
     this.peopleSettings[PersonRole.Editor] = personSettings;
 
     personSettings = this.createBlankPersonSettings('inker');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Inker);
     this.peopleSettings[PersonRole.Inker] = personSettings;
 
     personSettings = this.createBlankPersonSettings('letterer');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Letterer);
     this.peopleSettings[PersonRole.Letterer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('penciller');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Penciller);
     this.peopleSettings[PersonRole.Penciller] = personSettings;
 
     personSettings = this.createBlankPersonSettings('publisher');
     personSettings.fetchFn = (filter: string) => {
       return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
     };
-    //personSettings.savedData = this.persons.filter(p => p.value.role == PersonRole.Publisher);
     this.peopleSettings[PersonRole.Publisher] = personSettings;
-
-    console.log(this.peopleSettings);
   }
 
   createBlankPersonSettings(id: string) {
@@ -333,9 +346,32 @@ export class CardDetailLayoutComponent implements OnInit {
     }
   }
 
+  updateCollectionFilters(tags: FilterItem<CollectionTag>[]) {
+    this.filter.collectionTags = tags.map(item => item.value.id) || [];
+  }
+
+  updateRating(rating: any) {
+    this.filter.rating = rating;
+  }
+
+  updateReadStatus(status: string) {
+    console.log('readstatus: ', this.filter.readStatus);
+    if (status === 'read') {
+      this.filter.readStatus.read = !this.filter.readStatus.read;
+    } else if (status === 'inProgress') {
+      this.filter.readStatus.inProgress = !this.filter.readStatus.inProgress;
+    } else if (status === 'notRead') {
+      this.filter.readStatus.notRead = !this.filter.readStatus.notRead;
+    }
+  }
+
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
+
+  // hasStatus(readStatus: ReadStatus) {
+  //   return (this.filter.readStatus & readStatus) === readStatus;
+  // }
 
   apply() {
     this.applyFilter.emit(this.filter);

@@ -20,13 +20,14 @@ export interface SeriesFilter {
     editor: Array<number>;
     publisher: Array<number>;
     character: Array<number>;
+    collectionTags: Array<number>;
+    rating: number;
 }
 
-export enum ReadStatus {
-  NotRead = 1,
-  InProgress = 2,
-  Read = 4,
-  All = NotRead | InProgress | Read
+export interface ReadStatus {
+  notRead: boolean,
+  inProgress: boolean,
+  read: boolean,
 }
 
 export const mangaFormatFilters = [

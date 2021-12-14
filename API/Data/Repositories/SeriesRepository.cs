@@ -177,17 +177,15 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
-        var formats = filter.GetSqlFilter();
+        var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
-        var userLibraries = await GetUserLibraries(libraryId, userId);
-
-        var query =  _context.Series
-            .Where(s => userLibraries.Contains(s.LibraryId) && formats.Contains(s.Format))
-            .OrderBy(s => s.SortName)
+        var retSeries = query
+            .OrderByDescending(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .AsNoTracking();
 
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
     }
 
     private async Task<List<int>> GetUserLibraries(int libraryId, int userId)
@@ -247,7 +245,7 @@ public class SeriesRepository : ISeriesRepository
     public async Task<bool> DeleteSeriesAsync(int seriesId)
     {
         var series = await _context.Series.Where(s => s.Id == seriesId).SingleOrDefaultAsync();
-        _context.Series.Remove(series);
+        if (series != null) _context.Series.Remove(series);
 
         return await _context.SaveChangesAsync() > 0;
     }
@@ -376,21 +374,29 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
-        var formats = filter.GetSqlFilter();
+        var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
-        var userLibraries = await GetUserLibraries(libraryId, userId);
+        var retSeries = query
+            .OrderByDescending(s => s.Created)
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+    }
+
+    private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
+        out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
+        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds)
+    {
+        var formats = filter.GetSqlFilter();
 
         if (filter.Libraries.Count > 0)
         {
             userLibraries = userLibraries.Where(l => filter.Libraries.Contains(l)).ToList();
         }
 
-
-        //var checkProgress = filter.ReadStatus == ReadStatus.Read || ReadStatus.NotRead;
-        /*&&
-                        _context.AppUserProgresses.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead) != s.Pages*/
-
-        var allPeopleIds = new List<int>();
+        allPeopleIds = new List<int>();
         allPeopleIds.AddRange(filter.Writers);
         allPeopleIds.AddRange(filter.Character);
         allPeopleIds.AddRange(filter.Colorist);
@@ -401,39 +407,51 @@ public class SeriesRepository : ISeriesRepository
         allPeopleIds.AddRange(filter.Publisher);
         allPeopleIds.AddRange(filter.CoverArtist);
 
-        var hasPeopleFilter = allPeopleIds.Count > 0;
-        var hasGenresFilter = filter.Genres.Count > 0;
+        hasPeopleFilter = allPeopleIds.Count > 0;
+        hasGenresFilter = filter.Genres.Count > 0;
+        hasCollectionTagFilter = filter.CollectionTags.Count > 0;
+        hasRatingFilter = filter.Rating > 0;
+        hasProgressFilter = !filter.ReadStatus.Read || !filter.ReadStatus.InProgress || !filter.ReadStatus.NotRead;
 
-        var query = _context.Series
-            .Include(s => s.Metadata)
-            .Where(s => userLibraries.Contains(s.LibraryId)
-                        && formats.Contains(s.Format)
-                        && (!hasGenresFilter || s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-                        && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
-                        )
-            .OrderByDescending(s => s.Created)
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsSplitQuery()
-            .AsNoTracking();
 
-        // var userProgress = await _context.AppUserProgresses
-        //     .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
-        //     .ToListAsync();
-        //
-        // var userRatings = await _context.AppUserRating
-        //     .Where(r => r.AppUserId == userId && series.Select(s => s.Id).Contains(r.SeriesId))
-        //     .ToListAsync();
-        //
-        // foreach (var s in series)
-        // {
-        //     s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
-        //     var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
-        //     if (rating == null) continue;
-        //     s.UserRating = rating.Rating;
-        //     s.UserReview = rating.Review;
-        // }
+        Func<int, int, bool> progressComparison = (pagesRead, totalPages) =>
+        {
+            var result = false;
+            if (filter.ReadStatus.NotRead)
+            {
+                result = (pagesRead == 0);
+            }
 
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+            if (filter.ReadStatus.Read)
+            {
+                result = result || (pagesRead == totalPages);
+            }
+
+            if (filter.ReadStatus.InProgress)
+            {
+                result = result || (pagesRead > 0 && pagesRead < totalPages);
+            }
+
+            return result;
+        };
+
+        seriesIds = new List<int>();
+        if (hasProgressFilter)
+        {
+            seriesIds = _context.Series
+                .Include(s => s.Progress)
+                .Select(s => new
+                {
+                    Series = s,
+                    PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
+                })
+                .ToList()
+                .Where(s => progressComparison(s.PagesRead, s.Series.Pages))
+                .Select(s => s.Series.Id)
+                .ToList();
+        }
+
+        return formats;
     }
 
     /// <summary>
@@ -447,24 +465,23 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
-        var formats = filter.GetSqlFilter();
+        var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
+            .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
+                new
+                {
+                    Series = s,
+                    PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
+                        .Sum(s1 => s1.PagesRead),
+                    progress.AppUserId,
+                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
+                        .Max(p => p.LastModified)
+                });
 
-        var userLibraries = await GetUserLibraries(libraryId, userId);
 
-        var series = _context.Series
-            .Where(s => formats.Contains(s.Format) && userLibraries.Contains(s.LibraryId))
-            .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-            {
-                Series = s,
-                PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId).Sum(s1 => s1.PagesRead),
-                progress.AppUserId,
-                LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId).Max(p => p.LastModified)
-            })
-            .AsNoTracking();
 
-        var retSeries = series.Where(s => s.AppUserId == userId
-                                          && s.PagesRead > 0
-                                          && s.PagesRead < s.Series.Pages)
+        var retSeries = query.Where(s => s.AppUserId == userId
+                                         && s.PagesRead > 0
+                                         && s.PagesRead < s.Series.Pages)
             .OrderByDescending(s => s.LastModified)
             .ThenByDescending(s => s.Series.LastModified)
             .Select(s => s.Series)
@@ -474,6 +491,72 @@ public class SeriesRepository : ISeriesRepository
 
         // Pagination does not work for this query as when we pull the data back, we get multiple rows of the same series. See controller for pagination code
         return await retSeries.ToListAsync();
+    }
+
+    // private class FilterableQuery
+    // {
+    //     public Series Series { get; init; }
+    //     public int PagesRead { get; init; }
+    //     public DateTime LastModified { get; init; }
+    //     public int AppUserId { get; init; }
+    //
+    // }
+
+    private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter)
+    {
+        var userLibraries = await GetUserLibraries(libraryId, userId);
+        var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
+            out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
+            out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
+            out var seriesIds);
+
+        var query = _context.Series
+            .Where(s => userLibraries.Contains(s.LibraryId)
+                        && formats.Contains(s.Format)
+                        && (!hasGenresFilter || s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
+                        && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+                        && (!hasCollectionTagFilter ||
+                            s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
+                        && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating))
+                        && (!hasProgressFilter || seriesIds.Contains(s.Id))
+            )
+            .AsNoTracking();
+        // IQueryable<FilterableQuery> newFilter = null;
+        // if (hasProgressFilter)
+        // {
+        //     newFilter = query
+        //         .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
+        //         new
+        //         {
+        //             Series = s,
+        //             PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
+        //                 .Sum(s1 => s1.PagesRead),
+        //             progress.AppUserId,
+        //             LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
+        //                 .Max(p => p.LastModified)
+        //         })
+        //         .Select(d => new FilterableQuery()
+        //         {
+        //             Series = d.Series,
+        //             AppUserId = d.AppUserId,
+        //             LastModified = d.LastModified,
+        //             PagesRead = d.PagesRead
+        //         })
+        //         .Where(d => seriesIds.Contains(d.Series.Id));
+        // }
+        // else
+        // {
+        //     newFilter = query.Select(s => new FilterableQuery()
+        //     {
+        //         Series = s,
+        //         LastModified = DateTime.Now, // TODO: Figure this out
+        //         AppUserId = userId,
+        //         PagesRead = 0
+        //     });
+        // }
+
+
+        return query;
     }
 
     public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)

@@ -176,11 +176,9 @@ export class SeriesService {
   }
 
   createSeriesFilter(filter?: SeriesFilter) {
-    // TODO: Remove this and have filter component manage everything
     const data: SeriesFilter = {
       formats: [],
       libraries: [],
-      readStatus: ReadStatus.All,
       genres: [],
       writers: [],
       penciller: [],
@@ -191,18 +189,16 @@ export class SeriesService {
       editor: [],
       publisher: [],
       character: [],
+      collectionTags: [],
+      rating: 0,
+      readStatus: {
+        read: true,
+        inProgress: true,
+        notRead: true
+      }
     };
 
     if (filter === undefined) return data;
-
-    // if (filter.formats != null) {
-    //   data.formats = filter.formats;
-    // }
-    // if (filter.libraries != null) {
-    //   data.libraries = filter.libraries;
-    // }
-    // data.readStatus = filter.readStatus;
-    // data.genres = filter.genres;
 
     return filter;
   }
