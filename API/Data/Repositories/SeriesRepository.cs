@@ -493,15 +493,6 @@ public class SeriesRepository : ISeriesRepository
         return await retSeries.ToListAsync();
     }
 
-    // private class FilterableQuery
-    // {
-    //     public Series Series { get; init; }
-    //     public int PagesRead { get; init; }
-    //     public DateTime LastModified { get; init; }
-    //     public int AppUserId { get; init; }
-    //
-    // }
-
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter)
     {
         var userLibraries = await GetUserLibraries(libraryId, userId);
