@@ -16,234 +16,258 @@
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
-    <div class="filter-section" #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
-        <div class="row no-gutters">
-            <div class="col" *ngIf="!filterSettings.formatDisabled">
-                <div class="form-group">
-                    <label for="format">Format</label>
-                    <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col"*ngIf="!filterSettings.libraryDisabled">
-                <div class="form-group">
-                    <label for="libraries">Libraries</label>
-                    <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="!filterSettings.collectionDisabled">
-                <div class="form-group">
-                    <label for="collections">Collections</label>
-                    <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="!filterSettings.genresDisabled">
-                <div class="form-group">
-                    <label for="genres">Genres</label>
-                    <app-typeahead (selectedData)="updateGenreFilters($event)" [settings]="genreSettings" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-        </div>
-        <div class="row no-gutters">
-            <!-- The People row -->
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
-                <div class="form-group">
-                    <label for="cover-artist">(Cover) Artists</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
-                <div class="form-group">
-                    <label for="writers">Writers</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
-                <div class="form-group">
-                    <label for="publisher">Publisher</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
-                <div class="form-group">
-                    <label for="Penciller">Penciller</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
-                <div class="form-group">
-                    <label for="letterer">Letterer</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
-                <div class="form-group">
-                    <label for="inker">Inker</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
-                <div class="form-group">
-                    <label for="editor">Editor</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
-                <div class="form-group">
-                    <label for="colorist">Colorist</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-
-            <div class="col" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
-                <div class="form-group">
-                    <label for="character">Character</label>
-                    <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead>
-                </div>
-            </div>
-        </div>
-        <div class="row no-gutters" *ngIf="!filterSettings.readProgressDisabled">
-            <!-- Rating/Review/Progress -->
-            <div class="col">
-                <!-- Not sure how to do this on the backend, might have to be a UI control -->
-                <label>Read Progress</label>
-                <form [formGroup]="readProgressGroup" class="ml-2">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
-                        <label class="form-check-label" for="notread">Unread</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inprogress" formControlName="inProgress">
-                        <label class="form-check-label" for="inprogress">In Progress</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="read" formControlName="read">
-                        <label class="form-check-label" for="read">Read</label>
-                      </div>
-                </form>
-            </div>
-
-            <div class="col" *ngIf="!filterSettings.ratingDisabled">
-                <label for="ratings">Rating</label>
-                <form class="form-inline ml-2">
-                    <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
-                        <ng-template let-fill="fill" let-index="index">
-                            <span class="star" [class.filled]="(index >= (filter.rating - 1)) && filter.rating > 0" [ngbTooltip]="(index + 1) + ' and up'">&#9733;</span>
-                          </ng-template>
-                    </ngb-rating>
-                </form>
-            </div>
-
-            <div class="col">
-                <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
-                <button class="btn btn-primary" (click)="apply()">Apply</button>
-            </div>
-            
-        </div>
-        <div class="row no-gutters">
-            <!-- Sort by functionalities -->
+    <div class="phone-hidden">
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
+            <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
         </div>
     </div>
+
+    <div class="not-phone-hidden">
+        <app-drawer #commentDrawer="drawer" [isOpen]="filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
+            <div header>
+                <h2 style="margin-top: 0.5rem">Book Settings
+                    <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </h2>
+                
+            </div>
+            <div body class="drawer-body">
+                <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
+            </div>
+        </app-drawer>
+    </div>
+
+    <ng-template #filterSection>
+        <div class="filter-section">
+            <div class="row no-gutters">
+                <div class="col-md-3" *ngIf="!filterSettings.formatDisabled">
+                    <div class="form-group">
+                        <label for="format">Format</label>
+                        <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3"*ngIf="!filterSettings.libraryDisabled">
+                    <div class="form-group">
+                        <label for="libraries">Libraries</label>
+                        <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="!filterSettings.collectionDisabled">
+                    <div class="form-group">
+                        <label for="collections">Collections</label>
+                        <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="!filterSettings.genresDisabled">
+                    <div class="form-group">
+                        <label for="genres">Genres</label>
+                        <app-typeahead (selectedData)="updateGenreFilters($event)" [settings]="genreSettings" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <!-- The People row -->
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
+                    <div class="form-group">
+                        <label for="cover-artist">(Cover) Artists</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
+                    <div class="form-group">
+                        <label for="writers">Writers</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
+                    <div class="form-group">
+                        <label for="publisher">Publisher</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
+                    <div class="form-group">
+                        <label for="Penciller">Penciller</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
+                    <div class="form-group">
+                        <label for="letterer">Letterer</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
+                    <div class="form-group">
+                        <label for="inker">Inker</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
+                    <div class="form-group">
+                        <label for="editor">Editor</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
+                    <div class="form-group">
+                        <label for="colorist">Colorist</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+    
+                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
+                    <div class="form-group">
+                        <label for="character">Character</label>
+                        <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
+                            <ng-template #badgeItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                            <ng-template #optionItem let-item let-position="idx">
+                                {{item.title}}
+                            </ng-template>
+                        </app-typeahead>
+                    </div>
+                </div>
+            </div>
+            <div class="row no-gutters">
+                <!-- Rating/Review/Progress -->
+                <div class="col" *ngIf="!filterSettings.readProgressDisabled">
+                    <!-- Not sure how to do this on the backend, might have to be a UI control -->
+                    <label>Read Progress</label>
+                    <form [formGroup]="readProgressGroup" class="ml-2">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
+                            <label class="form-check-label" for="notread">Unread</label>
+                          </div>
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="inprogress" formControlName="inProgress">
+                            <label class="form-check-label" for="inprogress">In Progress</label>
+                          </div>
+                          <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="read" formControlName="read">
+                            <label class="form-check-label" for="read">Read</label>
+                          </div>
+                    </form>
+                </div>
+    
+                <div class="col" *ngIf="!filterSettings.ratingDisabled">
+                    <label for="ratings">Rating</label>
+                    <form class="form-inline ml-2">
+                        <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
+                            <ng-template let-fill="fill" let-index="index">
+                                <span class="star" [class.filled]="(index >= (filter.rating - 1)) && filter.rating > 0" [ngbTooltip]="(index + 1) + ' and up'">&#9733;</span>
+                              </ng-template>
+                        </ngb-rating>
+                    </form>
+                </div>
+    
+                <div class="col">
+                    <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
+                    <button class="btn btn-primary" (click)="apply()">Apply</button>
+                </div>
+                
+            </div>
+            <div class="row no-gutters">
+                <!-- Sort by functionalities -->
+            </div>
+        </div>
+    </ng-template>
     
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 

@@ -3,6 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
+import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -23,6 +24,7 @@ export class OnDeckComponent implements OnInit {
   pagination!: Pagination;
   libraryId!: number;
   filter: SeriesFilter | undefined = undefined;
+  filterSettings: FilterSettings = new FilterSettings();
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
@@ -31,6 +33,7 @@ export class OnDeckComponent implements OnInit {
     if (this.pagination === undefined || this.pagination === null) {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
+    this.filterSettings.readProgressDisabled = true;
     this.loadPage();
   }
 
