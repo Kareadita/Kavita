@@ -257,14 +257,16 @@
                 </div>
 
                 <div class="col">
-                    <form>
+                    <form [formGroup]="sortGroup">
                         <div class="form-group">
                             <label for="sort-options">Sort By</label>
-                            <button class="btn btn-secondary-outline">
-                                <i class="fa fa-arrow-down" title="Ascending"></i>
-                                <!-- <i class="fa fa-arrow-up" title="Descending"></i> -->
+                            <button class="btn btn-secondary-outline" (click)="updateSortOrder()">
+                                <i class="fa fa-arrow-down" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                                <ng-template #descSort>
+                                    <i class="fa fa-arrow-up" title="Descending"></i>
+                                </ng-template>
                             </button>
-                            <select id="sort-options" class="form-control" formControlName="loggingLevel">
+                            <select id="sort-options" class="form-control" formControlName="sortField">
                                 <option value="sortName">Sort Name</option>
                                 <option>Created</option>
                                 <option>Last Modified</option> 
@@ -274,6 +276,7 @@
                 </div>
     
                 <div class="col">
+                    <!-- TODO: Make this float right -->
                     <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
                     <button class="btn btn-primary" (click)="apply()">Apply</button>
                 </div>

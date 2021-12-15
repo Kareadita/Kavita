@@ -29,6 +29,7 @@ export class FilterSettings {
   peopleDisabled = false;
   readProgressDisabled = false;
   ratingDisabled = false;
+  presetLibraryId = 0;
 }
 
 @Component({
@@ -74,6 +75,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   collectionTags: Array<FilterItem<CollectionTag>> = [];
 
   readProgressGroup!: FormGroup;
+  sortGroup!: FormGroup;
+  isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
 
@@ -92,10 +95,24 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       inProgress: new FormControl(this.filter.readStatus.inProgress, []),
     });
 
+    this.sortGroup = new FormGroup({
+      sortField: new FormControl(this.filter.sortOptions?.sortField, []),
+    });
+
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
+    });
+
+    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+      if (this.filter.sortOptions == null) {
+        this.filter.sortOptions = {
+          isAscending: this.isAscendingSort,
+          sortField: this.readProgressGroup.get('sortField')?.value
+        };
+      }
+      this.filter.sortOptions.sortField = this.readProgressGroup.get('sortField')?.value;
     });
   }
 
@@ -171,7 +188,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.formatSettings.savedData = mangaFormatFilters;
   }
 
   setupLibraryTypeahead() {
@@ -186,6 +202,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.librarySettings.compareFn = (options: FilterItem<Library>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
+    }
+
+    if (this.filterSettings.presetLibraryId > 0) {
+      this.librarySettings.savedData = this.libraries.filter(item => item.value.id === this.filterSettings.presetLibraryId);
+      this.filter.libraries = this.librarySettings.savedData.map(item => item.value.id);
+      this.resetTypeaheads.next(true); // For some reason library just doesn't update properly with savedData
     }
   }
 
@@ -377,6 +399,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.filter.readStatus.inProgress = !this.filter.readStatus.inProgress;
     } else if (status === 'notRead') {
       this.filter.readStatus.notRead = !this.filter.readStatus.notRead;
+    }
+  }
+
+  updateSortOrder() {
+    this.isAscendingSort = !this.isAscendingSort;
+    if (this.filter.sortOptions !== null) {
+      this.filter.sortOptions.isAscending = this.isAscendingSort;
     }
   }
 

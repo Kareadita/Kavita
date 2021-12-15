@@ -179,8 +179,12 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
+        if (filter.SortOptions == null)
+        {
+            query = query.OrderBy(s => s.SortName);
+        }
+
         var retSeries = query
-            .OrderBy(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
@@ -512,6 +516,36 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
             )
             .AsNoTracking();
+
+        if (filter.SortOptions != null)
+        {
+            if (filter.SortOptions.IsAscending)
+            {
+                if (filter.SortOptions.SortField == SortField.SortName)
+                {
+                    query = query.OrderBy(s => s.SortName);
+                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
+                {
+                    query = query.OrderBy(s => s.Created);
+                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
+                {
+                    query = query.OrderBy(s => s.LastModified);
+                }
+            }
+            else
+            {
+                if (filter.SortOptions.SortField == SortField.SortName)
+                {
+                    query = query.OrderByDescending(s => s.SortName);
+                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
+                {
+                    query = query.OrderByDescending(s => s.Created);
+                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
+                {
+                    query = query.OrderByDescending(s => s.LastModified);
+                }
+            }
+        }
 
         return query;
     }

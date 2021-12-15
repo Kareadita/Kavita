@@ -71,6 +71,10 @@ namespace API.DTOs.Filtering
         /// <see cref="AppUserRating.Rating"/>
         /// </summary>
         public int Rating { get; init; }
+        /// <summary>
+        /// Sorting Options for a query. Defaults to null, which uses the queries natural sorting order
+        /// </summary>
+        public SortOptions SortOptions { get; init; } = null;
 
     }
 }
