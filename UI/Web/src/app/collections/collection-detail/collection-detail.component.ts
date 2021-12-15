@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
+import { FilterSettings } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -38,6 +39,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   isAdmin: boolean = false;
   filter: SeriesFilter | undefined = undefined;
+  filterSettings: FilterSettings = new FilterSettings();
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -95,6 +97,9 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       const tagId = parseInt(routeId, 10);
+
+      this.filterSettings.presetCollectionId = tagId;
+      
       this.updateTag(tagId);
   }
 

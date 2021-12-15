@@ -22,6 +22,18 @@ export interface SeriesFilter {
     character: Array<number>;
     collectionTags: Array<number>;
     rating: number;
+    sortOptions: SortOptions | null;
+}
+
+export interface SortOptions {
+  sortField: SortField;
+  isAscending: boolean;
+}
+
+export enum SortField {
+  SortName = 1,
+  Created = 2,
+  LastModified = 3
 }
 
 export interface ReadStatus {

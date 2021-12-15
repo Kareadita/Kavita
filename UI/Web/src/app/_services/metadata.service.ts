@@ -41,7 +41,15 @@ export class MetadataService {
     return this.httpClient.get<Genre[]>(this.baseUrl + 'metadata/genres');
   }
 
+  getGenresForLibraries(libraries: Array<number>) {
+    return this.httpClient.get<Genre[]>(this.baseUrl + 'metadata/genres?libraryIds=' + libraries.join(','));
+  }
+
   getAllPeople() {
     return this.httpClient.get<Person[]>(this.baseUrl + 'metadata/people');
+  }
+
+  getPeopleForLibraries(libraries: Array<number>) {
+    return this.httpClient.get<Person[]>(this.baseUrl + 'metadata/people?libraryIds=' + libraries.join(','));
   }
 }

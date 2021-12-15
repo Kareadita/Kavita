@@ -256,7 +256,7 @@
                     </form>
                 </div>
 
-                <div class="col">
+                <div class="col" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="form-group">
                             <label for="sort-options">Sort By</label>

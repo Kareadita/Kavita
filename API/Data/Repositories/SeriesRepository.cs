@@ -177,6 +177,10 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
+        if (filter.Libraries.Count > 0)
+        {
+            libraryId = 0;
+        }
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
         if (filter.SortOptions == null)

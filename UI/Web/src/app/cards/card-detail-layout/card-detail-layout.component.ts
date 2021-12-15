@@ -1,7 +1,7 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { of, ReplaySubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -30,6 +30,8 @@ export class FilterSettings {
   readProgressDisabled = false;
   ratingDisabled = false;
   presetLibraryId = 0;
+  presetCollectionId = 0;
+  sortDisabled = false;
 }
 
 @Component({
@@ -124,8 +126,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.filterSettings = new FilterSettings();
     }
     
+    let apiCall;
+    if (this.filter.libraries.length > 0) {
+      apiCall = this.metadataService.getGenresForLibraries(this.filter.libraries);
+    } else {
+      apiCall = this.metadataService.getAllGenres();
+    }
 
-    this.metadataService.getAllGenres().subscribe(genres => {
+    apiCall.subscribe(genres => {
       this.genres = genres.map(genre => {
         return {
           title: genre.title,
@@ -218,7 +226,22 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.genreSettings.unique = true;
     this.genreSettings.addIfNonExisting = false;
     this.genreSettings.fetchFn = (filter: string) => {
-      return of (this.genres)
+      let apiCall;
+      if (this.filter.libraries.length > 0) {
+        apiCall = this.metadataService.getGenresForLibraries(this.filter.libraries);
+      } else {
+        apiCall = this.metadataService.getAllGenres();
+      }
+      return apiCall.pipe(map(genres => {
+        return genres.map(genre => {
+          return {
+            title: genre.title,
+            value: genre,
+            selected: false,
+          }
+        })
+      }));
+     // return of (this.genres)
     };
     this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
       const f = filter.toLowerCase();
@@ -239,6 +262,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
+    if (this.filterSettings.presetCollectionId > 0) {
+      this.collectionSettings.savedData = this.collectionTags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
+      this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.value.id);
+      this.resetTypeaheads.next(true);
+    }
   }
 
   setupPersonTypeahead() {
@@ -246,58 +274,84 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
     var personSettings = this.createBlankPersonSettings('writers');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
+      return this.fetchPeople(PersonRole.Writer, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
     };
     this.peopleSettings[PersonRole.Writer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('character');
     personSettings.fetchFn = (filter: string) => {
-
-      return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Character, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Character] = personSettings;
 
     personSettings = this.createBlankPersonSettings('colorist');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Colorist, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Colorist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('cover-artist');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.CoverArtist, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.CoverArtist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('editor');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Editor, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Editor] = personSettings;
 
     personSettings = this.createBlankPersonSettings('inker');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Inker, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Inker] = personSettings;
 
     personSettings = this.createBlankPersonSettings('letterer');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Letterer, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Letterer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('penciller');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Penciller, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Penciller] = personSettings;
 
     personSettings = this.createBlankPersonSettings('publisher');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Publisher, filter);
+      //return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Publisher] = personSettings;
+  }
+
+  fetchPeople(role: PersonRole, filter: string): Observable<FilterItem<Person>[]> {
+    let apiCall;
+    if (this.filter.libraries.length > 0) {
+      apiCall = this.metadataService.getPeopleForLibraries(this.filter.libraries);
+    } else {
+      apiCall = this.metadataService.getAllPeople();
+    }
+    return apiCall.pipe(map(people => {
+      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter)).map((p: Person) => {
+        return {
+          title: p.name,
+          value: p,
+          selected: false,
+        }
+      });
+    }));
   }
 
   createBlankPersonSettings(id: string) {

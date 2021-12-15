@@ -39,6 +39,18 @@ export class SeriesService {
     return paginatedVariable;
   }
 
+  getAllSeries(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+    let params = new HttpParams();
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    const data = this.createSeriesFilter(filter);
+
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this._cachePaginatedResults(response, this.paginatedResults);
+      })
+    );
+  }
+
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
@@ -195,7 +207,8 @@ export class SeriesService {
         read: true,
         inProgress: true,
         notRead: true
-      }
+      },
+      sortOptions: null
     };
 
     if (filter === undefined) return data;
