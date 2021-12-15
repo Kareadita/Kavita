@@ -108,7 +108,7 @@ public class BackupService : IBackupService
         _directoryService.ClearDirectory(tempDirectory);
 
         _directoryService.CopyFilesToDirectory(
-            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
+            _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.LogDirectory, file)).ToList(), tempDirectory);
 
         await SendProgress(0.25F);
 
