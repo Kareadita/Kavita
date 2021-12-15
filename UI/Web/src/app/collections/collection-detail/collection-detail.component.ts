@@ -6,15 +6,13 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { UpdateFilterEvent } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
-import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
+import { SeriesFilter } from 'src/app/_models/series-filter';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
@@ -39,10 +37,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   isAdmin: boolean = false;
-  filters: Array<FilterItem> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    formats: []
-  };
+  filter: SeriesFilter | undefined = undefined;
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -174,8 +169,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    this.filter.formats = [data.filterItem.value];
+  updateFilter(data: SeriesFilter) {
+    this.filter = data;
     if (this.seriesPagination !== undefined && this.seriesPagination !== null) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);

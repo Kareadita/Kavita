@@ -1,6 +1,6 @@
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable, of, Subject } from 'rxjs';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from './typeahead-settings';
@@ -143,6 +143,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   
 
   @Input() settings!: TypeaheadSettings<any>;
+  /**
+   * When true, component will re-init and set back to false.
+   */
+  @Input() reset: Subject<boolean> = new ReplaySubject(1);
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
 
@@ -167,6 +171,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
+    this.reset.pipe(takeUntil(this.onDestroy)).subscribe((reset: boolean) => {
+      this.init();
+    });
+
+    this.init();
+  }
+
+  init() {
     if (this.settings.compareFn === undefined && this.settings.multiple) {
       console.error('A compare function must be defined');
       return;

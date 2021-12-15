@@ -244,6 +244,7 @@ namespace API.Tests.Parser
         [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
         [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
+        [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));

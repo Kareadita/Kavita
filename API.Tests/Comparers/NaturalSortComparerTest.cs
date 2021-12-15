@@ -54,6 +54,18 @@ namespace API.Tests.Comparers
             new[] {"!001", "001", "002"},
             new[] {"!001", "001", "002"}
         )]
+        [InlineData(
+            new[] {"001", "", null},
+            new[] {"", "001", null}
+        )]
+        [InlineData(
+            new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.020/001.jpg"},
+            new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.020/001.jpg"}
+        )]
+        [InlineData(
+            new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"},
+            new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"}
+        )]
         public void TestNaturalSortComparer(string[] input, string[] expected)
         {
             Array.Sort(input, _nc);
@@ -93,6 +105,10 @@ namespace API.Tests.Comparers
         [InlineData(
             new[] {"Batman - Black white vol 1 #04.cbr", "Batman - Black white vol 1 #03.cbr", "Batman - Black white vol 1 #01.cbr", "Batman - Black white vol 1 #02.cbr"},
             new[] {"Batman - Black white vol 1 #01.cbr", "Batman - Black white vol 1 #02.cbr", "Batman - Black white vol 1 #03.cbr", "Batman - Black white vol 1 #04.cbr"}
+        )]
+        [InlineData(
+            new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg"},
+            new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg"}
         )]
         public void TestNaturalSortComparerLinq(string[] input, string[] expected)
         {

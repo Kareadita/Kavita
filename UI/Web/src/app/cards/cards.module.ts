@@ -8,7 +8,7 @@ import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit
 import { ChangeCoverImageModalComponent } from './_modals/change-cover-image/change-cover-image-modal.component';
 import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
 import { LazyLoadImageModule } from 'ng-lazyload-image';
-import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbAccordionModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbAccordionModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxFileDropModule } from 'ngx-file-drop';
@@ -56,6 +56,7 @@ import { FileInfoComponent } from './file-info/file-info.component';
     NgbNavModule,
     NgbTooltipModule, // Card item
     NgbCollapseModule,
+    NgbRatingModule,
 
     NgbNavModule, //Series Detail
     LazyLoadImageModule,

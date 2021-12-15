@@ -63,7 +63,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   activeTabId = 2;
   hasNonSpecialVolumeChapters = true;
 
-  seriesSummary: string = '';
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -148,7 +147,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router,
+              private router: Router, public bulkSelectionService: BulkSelectionService,
               private modalService: NgbModal, public readerService: ReaderService,
               public utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
@@ -156,8 +155,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService, 
-              public bulkSelectionService: BulkSelectionService) {
-    ratingConfig.max = 5;
+              ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -392,10 +390,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    if (this.seriesMetadata !== null) {
-      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
-    }
-    
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 

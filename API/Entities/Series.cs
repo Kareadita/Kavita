@@ -53,6 +53,8 @@ namespace API.Entities
         public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
         public SeriesMetadata Metadata { get; set; }
+        public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
+        public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();
 
         // Relationships
         public List<Volume> Volumes { get; set; }

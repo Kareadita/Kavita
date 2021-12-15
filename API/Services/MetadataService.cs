@@ -369,7 +369,7 @@ public class MetadataService : IMetadataService
             _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
+            var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
 
 
             var seriesIndex = 0;
@@ -489,7 +489,7 @@ public class MetadataService : IMetadataService
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
 
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
+        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
 
         ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
 

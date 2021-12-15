@@ -4,12 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-filter';
+import { SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { MessageHubService } from '../_services/message-hub.service';
@@ -30,10 +29,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   pagination!: Pagination;
   libraryId!: number;
 
-  filters: Array<FilterItem> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    formats: []
-  };
+  filter: SeriesFilter | undefined = undefined;
 
   onDestroy: Subject<void> = new Subject();
 
@@ -81,9 +77,8 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    // TODO: Move this into card-layout component. It's the same except for callback
-    this.filter.formats = [data.filterItem.value];
+  applyFilter(data: SeriesFilter) {
+    this.filter = data;
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);

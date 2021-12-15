@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs.Metadata;
 using API.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -12,7 +14,8 @@ public interface IGenreRepository
     void Attach(Genre genre);
     void Remove(Genre genre);
     Task<Genre> FindByNameAsync(string genreName);
-    Task<IList<Genre>> GetAllGenres();
+    Task<IList<Genre>> GetAllGenresAsync();
+    Task<IList<GenreTagDto>> GetAllGenreDtosAsync();
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
 }
 
@@ -57,8 +60,15 @@ public class GenreRepository : IGenreRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IList<Genre>> GetAllGenres()
+    public async Task<IList<Genre>> GetAllGenresAsync()
     {
         return await _context.Genre.ToListAsync();
+    }
+
+    public async Task<IList<GenreTagDto>> GetAllGenreDtosAsync()
+    {
+        return await _context.Genre
+            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }

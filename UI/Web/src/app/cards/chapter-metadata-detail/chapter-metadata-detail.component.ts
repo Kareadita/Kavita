@@ -49,4 +49,5 @@ export class ChapterMetadataDetailComponent implements OnInit {
     // }
   }
 
+
 }
