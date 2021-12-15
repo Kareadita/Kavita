@@ -10,7 +10,7 @@ import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { LibraryService } from 'src/app/_services/library.service';
@@ -88,6 +88,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     return PersonRole;
   }
 
+  get SortField(): typeof SortField {
+    return SortField;
+  }
+
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
     this.filter = this.seriesService.createSeriesFilter();
@@ -98,7 +102,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     });
 
     this.sortGroup = new FormGroup({
-      sortField: new FormControl(this.filter.sortOptions?.sortField, []),
+      sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
@@ -111,10 +115,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       if (this.filter.sortOptions == null) {
         this.filter.sortOptions = {
           isAscending: this.isAscendingSort,
-          sortField: this.readProgressGroup.get('sortField')?.value
+          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
         };
       }
-      this.filter.sortOptions.sortField = this.readProgressGroup.get('sortField')?.value;
+      this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
     });
   }
 
@@ -275,63 +279,54 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     var personSettings = this.createBlankPersonSettings('writers');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Writer, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
     };
     this.peopleSettings[PersonRole.Writer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('character');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Character, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Character] = personSettings;
 
     personSettings = this.createBlankPersonSettings('colorist');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Colorist, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Colorist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('cover-artist');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.CoverArtist, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.CoverArtist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('editor');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Editor, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Editor] = personSettings;
 
     personSettings = this.createBlankPersonSettings('inker');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Inker, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Inker] = personSettings;
 
     personSettings = this.createBlankPersonSettings('letterer');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Letterer, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Letterer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('penciller');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Penciller, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Penciller] = personSettings;
 
     personSettings = this.createBlankPersonSettings('publisher');
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(PersonRole.Publisher, filter);
-      //return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
     };
     this.peopleSettings[PersonRole.Publisher] = personSettings;
   }
