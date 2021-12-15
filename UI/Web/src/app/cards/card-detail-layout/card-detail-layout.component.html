@@ -255,15 +255,29 @@
                         </ngb-rating>
                     </form>
                 </div>
+
+                <div class="col">
+                    <form>
+                        <div class="form-group">
+                            <label for="sort-options">Sort By</label>
+                            <button class="btn btn-secondary-outline">
+                                <i class="fa fa-arrow-down" title="Ascending"></i>
+                                <!-- <i class="fa fa-arrow-up" title="Descending"></i> -->
+                            </button>
+                            <select id="sort-options" class="form-control" formControlName="loggingLevel">
+                                <option value="sortName">Sort Name</option>
+                                <option>Created</option>
+                                <option>Last Modified</option> 
+                            </select>
+                        </div>
+                    </form>
+                </div>
     
                 <div class="col">
                     <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
                     <button class="btn btn-primary" (click)="apply()">Apply</button>
                 </div>
                 
-            </div>
-            <div class="row no-gutters">
-                <!-- Sort by functionalities -->
             </div>
         </div>
     </ng-template>

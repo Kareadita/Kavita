@@ -87,7 +87,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
-
+        RecurringJob.AddOrUpdate("cleanup-db", () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
     }
 
     #region StatsTasks

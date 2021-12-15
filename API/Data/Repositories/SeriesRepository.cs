@@ -180,7 +180,7 @@ public class SeriesRepository : ISeriesRepository
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
         var retSeries = query
-            .OrderByDescending(s => s.SortName)
+            .OrderBy(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
@@ -512,40 +512,6 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
             )
             .AsNoTracking();
-        // IQueryable<FilterableQuery> newFilter = null;
-        // if (hasProgressFilter)
-        // {
-        //     newFilter = query
-        //         .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
-        //         new
-        //         {
-        //             Series = s,
-        //             PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
-        //                 .Sum(s1 => s1.PagesRead),
-        //             progress.AppUserId,
-        //             LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
-        //                 .Max(p => p.LastModified)
-        //         })
-        //         .Select(d => new FilterableQuery()
-        //         {
-        //             Series = d.Series,
-        //             AppUserId = d.AppUserId,
-        //             LastModified = d.LastModified,
-        //             PagesRead = d.PagesRead
-        //         })
-        //         .Where(d => seriesIds.Contains(d.Series.Id));
-        // }
-        // else
-        // {
-        //     newFilter = query.Select(s => new FilterableQuery()
-        //     {
-        //         Series = s,
-        //         LastModified = DateTime.Now, // TODO: Figure this out
-        //         AppUserId = userId,
-        //         PagesRead = 0
-        //     });
-        // }
-
 
         return query;
     }
