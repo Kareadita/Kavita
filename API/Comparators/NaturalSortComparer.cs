@@ -27,6 +27,10 @@ namespace API.Comparators
         {
             if (x == y) return 0;
 
+            if (x != null && y == null) return -1;
+            if (x == null) return 1;
+
+
             if (!_table.TryGetValue(x ?? Empty, out var x1))
             {
                 x1 = Regex.Split(x ?? Empty, "([0-9]+)");

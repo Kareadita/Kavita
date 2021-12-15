@@ -10,7 +10,6 @@
             </h2>
         </div>
         
-        <!-- TODO: On mobile, make sure the filtering section opens in a drawer -->
         <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
@@ -23,7 +22,7 @@
     </div>
 
     <div class="not-phone-hidden">
-        <app-drawer #commentDrawer="drawer" [isOpen]="filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
+        <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
                     <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">

@@ -414,7 +414,7 @@ public class SeriesRepository : ISeriesRepository
         hasProgressFilter = !filter.ReadStatus.Read || !filter.ReadStatus.InProgress || !filter.ReadStatus.NotRead;
 
 
-        Func<int, int, bool> progressComparison = (pagesRead, totalPages) =>
+        bool ProgressComparison(int pagesRead, int totalPages)
         {
             var result = false;
             if (filter.ReadStatus.NotRead)
@@ -433,7 +433,7 @@ public class SeriesRepository : ISeriesRepository
             }
 
             return result;
-        };
+        }
 
         seriesIds = new List<int>();
         if (hasProgressFilter)
@@ -446,7 +446,7 @@ public class SeriesRepository : ISeriesRepository
                     PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
                 })
                 .ToList()
-                .Where(s => progressComparison(s.PagesRead, s.Series.Pages))
+                .Where(s => ProgressComparison(s.PagesRead, s.Series.Pages))
                 .Select(s => s.Series.Id)
                 .ToList();
         }

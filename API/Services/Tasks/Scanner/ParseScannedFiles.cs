@@ -128,8 +128,6 @@ namespace API.Services.Tasks.Scanner
                 {
                     info.Chapters = info.ComicInfo.Number;
                 }
-
-                _logger.LogDebug("ComicInfo read added {Time} ms to processing", sw.ElapsedMilliseconds);
             }
 
             TrackSeries(info);
