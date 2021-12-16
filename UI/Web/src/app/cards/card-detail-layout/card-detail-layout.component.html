@@ -255,7 +255,7 @@
             <div class="row justify-content-between no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.readProgressDisabled">
                     <label>Read Progress</label>
-                    <form [formGroup]="readProgressGroup" class="ml-2">
+                    <form [formGroup]="readProgressGroup">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
                             <label class="form-check-label" for="notread">Unread</label>
@@ -273,7 +273,7 @@
     
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.ratingDisabled">
                     <label for="ratings">Rating</label>
-                    <form class="form-inline ml-2">
+                    <form class="form-inline">
                         <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
                             <ng-template let-fill="fill" let-index="index">
                                 <span class="star" [class.filled]="(index >= (filter.rating - 1)) && filter.rating > 0" [ngbTooltip]="(index + 1) + ' and up'">&#9733;</span>
