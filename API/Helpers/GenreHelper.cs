@@ -11,23 +11,23 @@ public static class GenreHelper
     /// <summary>
     ///
     /// </summary>
-    /// <param name="allPeople"></param>
+    /// <param name="allGenres"></param>
     /// <param name="names"></param>
     /// <param name="isExternal"></param>
     /// <param name="action"></param>
-    public static void UpdateGenre(ICollection<Genre> allPeople, IEnumerable<string> names, bool isExternal, Action<Genre> action)
+    public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var normalizedName = Parser.Parser.Normalize(name);
-            var genre = allPeople.FirstOrDefault(p =>
+            var genre = allGenres.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
             {
                 genre = DbFactory.Genre(name, false);
-                allPeople.Add(genre);
+                allGenres.Add(genre);
             }
 
             action(genre);

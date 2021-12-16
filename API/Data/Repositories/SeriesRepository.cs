@@ -135,13 +135,23 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
+
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
@@ -168,6 +178,14 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(cm => cm.Tags)
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
@@ -555,13 +573,15 @@ public class SeriesRepository : ISeriesRepository
         var metadataDto = await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
             .Include(m => m.Genres)
+            .Include(m => m.Tags)
+            .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
 
         if (metadataDto != null)
         {
-            metadataDto.Tags = await _context.CollectionTag
+            metadataDto.CollectionTags = await _context.CollectionTag
                 .Include(t => t.SeriesMetadatas)
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)

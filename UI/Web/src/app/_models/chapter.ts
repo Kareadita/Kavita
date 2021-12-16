@@ -1,5 +1,6 @@
 import { MangaFile } from './manga-file';
 import { Person } from './person';
+import { Tag } from './tag';
 
 export interface Chapter {
     id: number;
@@ -31,4 +32,5 @@ export interface Chapter {
     coverArtist: Array<Person>;
     editor: Array<Person>;
     publisher: Array<Person>;
+    tags: Array<Tag>;
 }

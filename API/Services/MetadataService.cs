@@ -76,16 +76,16 @@ public class MetadataService : IMetadataService
         return true;
     }
 
-    private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, bool forceUpdate)
+    private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, bool forceUpdate)
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-        UpdateChapterFromComicInfo(chapter, allPeople, firstFile);
+        UpdateChapterFromComicInfo(chapter, allPeople, allTags, firstFile);
         firstFile.UpdateLastModified();
     }
 
-    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, MangaFile firstFile)
+    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, MangaFile firstFile)
     {
         // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
         var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
@@ -121,12 +121,17 @@ public class MetadataService : IMetadataService
                 person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.Translator))
+        if (!string.IsNullOrEmpty(comicInfo.Tags))
         {
-            var people = comicInfo.Translator.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+            var tags = comicInfo.Tags.Split(",").Select(s => s.Trim()).ToList();
+            //TagHelper.RemoveTags(chapter.Tags, tags, false, tag => chapter.Tags.Remove(tag));
+            // Remove all tags that aren't matching between chapter tags and metadata
+            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
+            TagHelper.UpdateTag(allTags, tags, false,
+                (tag, added) =>
+                {
+                    chapter.Tags.Add(tag);
+                });
         }
 
         if (!string.IsNullOrEmpty(comicInfo.Writer))
@@ -239,7 +244,7 @@ public class MetadataService : IMetadataService
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
     }
 
-    private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
+    private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
     {
         var isBook = series.Library.Type == LibraryType.Book;
         var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
@@ -281,6 +286,12 @@ public class MetadataService : IMetadataService
 
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
                 person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
+                TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
         }
 
         var comicInfos = series.Volumes
@@ -304,11 +315,15 @@ public class MetadataService : IMetadataService
             .SelectMany(volume => volume.Chapters).Min(c => c.ReleaseDate.Year);
 
         var genres = comicInfos.SelectMany(i => i?.Genre.Split(",")).Distinct().ToList();
+        var tags = comicInfos.SelectMany(i => i?.Tags.Split(",")).Distinct().ToList();
         var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
 
 
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
             people, person => series.Metadata.People.Remove(person));
+
+        // TagHelper.KeepOnlySameTagBetweenLists(series.Metadata.Tags, tags.Select(g => DbFactory.Tag(g, false)).ToList(),
+        //     tag => series.Metadata.Tags.Remove(tag));
 
         GenreHelper.UpdateGenre(allGenres, genres, false, genre => GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
         GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),
@@ -320,7 +335,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, bool forceUpdate)
+    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -332,14 +347,14 @@ public class MetadataService : IMetadataService
                 foreach (var chapter in volume.Chapters)
                 {
                     chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
-                    UpdateChapterMetadata(chapter, allPeople, forceUpdate || chapterUpdated);
+                    UpdateChapterMetadata(chapter, allPeople, allTags, forceUpdate || chapterUpdated);
                 }
 
                 volumeUpdated = UpdateVolumeCoverImage(volume, chapterUpdated || forceUpdate);
             }
 
             UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
-            UpdateSeriesMetadata(series, allPeople, allGenres, forceUpdate);
+            UpdateSeriesMetadata(series, allPeople, allGenres, allTags, forceUpdate);
         }
         catch (Exception ex)
         {
@@ -386,6 +401,7 @@ public class MetadataService : IMetadataService
 
             var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
             var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+            var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
 
             var seriesIndex = 0;
@@ -393,7 +409,7 @@ public class MetadataService : IMetadataService
             {
                 try
                 {
-                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
+                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -420,12 +436,17 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
 
-        // TODO: Remove any leftover People from DB
-        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
-        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+        await RemoveAbandonedMetadataKeys();
 
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
+    }
+
+    private async Task RemoveAbandonedMetadataKeys()
+    {
+        await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
+        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
     }
 
     // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
@@ -506,8 +527,9 @@ public class MetadataService : IMetadataService
 
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
-        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, forceUpdate);
+        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
 
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));
@@ -517,6 +539,8 @@ public class MetadataService : IMetadataService
         {
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
+
+        await RemoveAbandonedMetadataKeys();
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }

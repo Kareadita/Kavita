@@ -45,7 +45,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
                                   this.seriesMetadata.inkers.length > 0 ||
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
-                                  this.seriesMetadata.publishers.length > 0;
+                                  this.seriesMetadata.publishers.length > 0 || 
+                                  this.seriesMetadata.translators.length > 0 ||
+                                  this.seriesMetadata.tags.length > 0;
 
     this.metadataService.getAgeRating(this.seriesMetadata.ageRating).subscribe(rating => {
       this.ageRatingName = rating;

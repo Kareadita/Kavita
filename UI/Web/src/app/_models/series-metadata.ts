@@ -2,12 +2,14 @@ import { CollectionTag } from "./collection-tag";
 import { Genre } from "./genre";
 import { AgeRating } from "./metadata/age-rating";
 import { Person } from "./person";
+import { Tag } from "./tag";
 
 export interface SeriesMetadata {
     publisher: string;
     summary: string;
     genres: Array<Genre>;
-    tags: Array<CollectionTag>;
+    tags: Array<Tag>;
+    collectionTags: Array<CollectionTag>;
     writers: Array<Person>;
     artists: Array<Person>;
     publishers: Array<Person>;

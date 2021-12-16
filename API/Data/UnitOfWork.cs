@@ -20,6 +20,7 @@ public interface IUnitOfWork
     ISeriesMetadataRepository SeriesMetadataRepository { get; }
     IPersonRepository PersonRepository { get; }
     IGenreRepository GenreRepository { get; }
+    ITagRepository TagRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -54,6 +55,7 @@ public class UnitOfWork : IUnitOfWork
     public ISeriesMetadataRepository SeriesMetadataRepository => new SeriesMetadataRepository(_context);
     public IPersonRepository PersonRepository => new PersonRepository(_context, _mapper);
     public IGenreRepository GenreRepository => new GenreRepository(_context, _mapper);
+    public ITagRepository TagRepository => new TagRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

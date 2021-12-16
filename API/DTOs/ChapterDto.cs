@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.DTOs.Metadata;
+using API.Entities;
 
 namespace API.DTOs
 {
@@ -69,5 +71,6 @@ namespace API.DTOs
         public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
+        public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     }
 }

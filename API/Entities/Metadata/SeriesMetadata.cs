@@ -17,6 +17,7 @@ namespace API.Entities.Metadata
         public ICollection<CollectionTag> CollectionTags { get; set; }
 
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
         /// <summary>
         /// All people attached at a Series level.
         /// </summary>

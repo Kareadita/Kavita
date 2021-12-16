@@ -91,6 +91,16 @@ namespace API.Data
             };
         }
 
+        public static Tag Tag(string name, bool external)
+        {
+            return new Tag()
+            {
+                Title = name.Trim().SentenceCase(),
+                NormalizedTitle = Parser.Parser.Normalize(name),
+                ExternalTag = external
+            };
+        }
+
         public static Person Person(string name, PersonRole role)
         {
             return new Person()

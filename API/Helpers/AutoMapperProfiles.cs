@@ -54,12 +54,10 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Translator)));
 
             CreateMap<Series, SeriesDto>();
-
             CreateMap<CollectionTag, CollectionTagDto>();
-
             CreateMap<Person, PersonDto>();
-
             CreateMap<Genre, GenreTagDto>();
+            CreateMap<Tag, TagDto>();
 
             CreateMap<SeriesMetadata, SeriesMetadataDto>()
                 .ForMember(dest => dest.Writers,

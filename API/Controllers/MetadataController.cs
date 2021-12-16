@@ -50,4 +50,20 @@ public class MetadataController : BaseApiController
         }
         return Ok(await _unitOfWork.PersonRepository.GetAllPeople());
     }
+
+    /// <summary>
+    /// Fetches all tags from the instance
+    /// </summary>
+    /// <param name="libraryIds">String separated libraryIds or null for all tags</param>
+    /// <returns></returns>
+    [HttpGet("tags")]
+    public async Task<ActionResult<IList<PersonDto>>> GetAllTags(string? libraryIds)
+    {
+        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        if (ids != null && ids.Count > 0)
+        {
+            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids));
+        }
+        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync());
+    }
 }
