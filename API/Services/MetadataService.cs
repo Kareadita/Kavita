@@ -124,7 +124,6 @@ public class MetadataService : IMetadataService
         if (!string.IsNullOrEmpty(comicInfo.Tags))
         {
             var tags = comicInfo.Tags.Split(",").Select(s => s.Trim()).ToList();
-            //TagHelper.RemoveTags(chapter.Tags, tags, false, tag => chapter.Tags.Remove(tag));
             // Remove all tags that aren't matching between chapter tags and metadata
             TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
             TagHelper.UpdateTag(allTags, tags, false,
