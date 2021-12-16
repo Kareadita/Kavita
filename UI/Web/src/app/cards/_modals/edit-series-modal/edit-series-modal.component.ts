@@ -86,8 +86,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
       if (metadata) {
         this.metadata = metadata;
-        this.settings.savedData = metadata.tags;
-        this.tags = metadata.tags;
+        this.settings.savedData = metadata.collectionTags;
+        this.tags = metadata.collectionTags;
         this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
       }
     });

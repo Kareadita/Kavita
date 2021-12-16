@@ -7,7 +7,6 @@ export interface Series {
     originalName: string; // This is not shown to user
     localizedName: string;
     sortName: string;
-    //summary: string;
     coverImageLocked: boolean;
     volumes: Volume[];
     pages: number; // Total pages in series

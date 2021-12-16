@@ -39,6 +39,18 @@ export class SeriesService {
     return paginatedVariable;
   }
 
+  getAllSeries(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+    let params = new HttpParams();
+    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    const data = this.createSeriesFilter(filter);
+
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this._cachePaginatedResults(response, this.paginatedResults);
+      })
+    );
+  }
+
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
@@ -137,7 +149,7 @@ export class SeriesService {
 
   getMetadata(seriesId: number) {
     return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId).pipe(map(items => {
-      items?.tags.forEach(tag => tag.coverImage = this.imageService.getCollectionCoverImage(tag.id));
+      items?.collectionTags.forEach(tag => tag.coverImage = this.imageService.getCollectionCoverImage(tag.id));
       return items;
     }));
   }
@@ -189,13 +201,18 @@ export class SeriesService {
       editor: [],
       publisher: [],
       character: [],
+      translators: [],
       collectionTags: [],
       rating: 0,
       readStatus: {
         read: true,
         inProgress: true,
         notRead: true
-      }
+      },
+      sortOptions: null,
+      ageRating: [],
+      tags: [],
+      languages: []
     };
 
     if (filter === undefined) return data;

@@ -35,6 +35,9 @@ input {
         line-height: inherit !important;
         box-shadow: none !important;
     }
+    input:empty {
+        padding-top: 6px !important;
+    }
 }
 
 ::ng-deep .bg-dark .typeahead-input {
@@ -62,7 +65,7 @@ input {
     overflow-x: hidden;
 
     .list-group-item {
-        padding: 5px 5px;
+        padding: 5px 10px;
     }
 
 

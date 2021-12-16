@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -17,6 +18,7 @@ namespace API.Entities.Metadata
         public ICollection<CollectionTag> CollectionTags { get; set; }
 
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
         /// <summary>
         /// All people attached at a Series level.
         /// </summary>
@@ -30,6 +32,10 @@ namespace API.Entities.Metadata
         /// Earliest Year from all chapters
         /// </summary>
         public int ReleaseYear { get; set; }
+        /// <summary>
+        /// Language of the content (ISO 639-1 code)
+        /// </summary>
+        public string Language { get; set; } = string.Empty;
 
         // Relationship
         public Series Series { get; set; }

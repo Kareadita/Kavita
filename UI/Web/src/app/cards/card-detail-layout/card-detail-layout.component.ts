@@ -1,16 +1,20 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { of, ReplaySubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { AgeRating } from 'src/app/_models/metadata/age-rating';
+import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
+import { Language } from 'src/app/_models/metadata/language';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { Tag } from 'src/app/_models/tag';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { LibraryService } from 'src/app/_services/library.service';
@@ -29,6 +33,12 @@ export class FilterSettings {
   peopleDisabled = false;
   readProgressDisabled = false;
   ratingDisabled = false;
+  presetLibraryId = 0;
+  presetCollectionId = 0;
+  sortDisabled = false;
+  ageRatingDisabled = false;
+  tagsDisabled = false;
+  languageDisabled = false;
 }
 
 @Component({
@@ -59,6 +69,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
   collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
+  ageRatingSettings: TypeaheadSettings<FilterItem<AgeRatingDto>> = new TypeaheadSettings();
+  tagsSettings: TypeaheadSettings<FilterItem<Tag>> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<FilterItem<Language>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
   resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
@@ -74,6 +87,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   collectionTags: Array<FilterItem<CollectionTag>> = [];
 
   readProgressGroup!: FormGroup;
+  sortGroup!: FormGroup;
+  isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
 
@@ -81,6 +96,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   get PersonRole(): typeof PersonRole {
     return PersonRole;
+  }
+
+  get SortField(): typeof SortField {
+    return SortField;
   }
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
@@ -92,10 +111,39 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       inProgress: new FormControl(this.filter.readStatus.inProgress, []),
     });
 
+    this.sortGroup = new FormGroup({
+      sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
+    });
+
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
+
+      let sum = 0;
+      sum += (this.filter.readStatus.read ? 1 : 0);
+      sum += (this.filter.readStatus.inProgress ? 1 : 0);
+      sum += (this.filter.readStatus.notRead ? 1 : 0);
+
+      if (sum === 1) {
+        if (this.filter.readStatus.read) this.readProgressGroup.get('read')?.disable({ emitEvent: false });
+        if (this.filter.readStatus.notRead) this.readProgressGroup.get('notRead')?.disable({ emitEvent: false });
+        if (this.filter.readStatus.inProgress) this.readProgressGroup.get('inProgress')?.disable({ emitEvent: false });
+      } else {
+        this.readProgressGroup.get('read')?.enable({ emitEvent: false });
+        this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
+        this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
+      }
+    });
+
+    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+      if (this.filter.sortOptions == null) {
+        this.filter.sortOptions = {
+          isAscending: this.isAscendingSort,
+          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
+        };
+      }
+      this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
     });
   }
 
@@ -107,18 +155,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.filterSettings = new FilterSettings();
     }
     
-
-    this.metadataService.getAllGenres().subscribe(genres => {
-      this.genres = genres.map(genre => {
-        return {
-          title: genre.title,
-          value: genre,
-          selected: false,
-        }
-      });
-      this.setupGenreTypeahead();
-
-    });
+    this.setupGenreTypeahead();
 
     this.libraryService.getLibrariesForMember().subscribe(libs => {
       this.libraries = libs.map(lib => {
@@ -131,27 +168,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.setupLibraryTypeahead();
     });
 
-    this.metadataService.getAllPeople().subscribe(res => {
-      this.persons = res.map(lib => {
-        return {
-          title: lib.name,
-          value: lib,
-          selected: true,
-        }
-      });
-      this.setupPersonTypeahead();
-    });
-
-    this.collectionTagService.allTags().subscribe(tags => {
-      this.collectionTags = tags.map(lib => {
-        return {
-          title: lib.title,
-          value: lib,
-          selected: false,
-        }
-      });
-      this.setupCollectionTagTypeahead();
-    });
+    this.setupCollectionTagTypeahead();
+    this.setupPersonTypeahead();
+    this.setupAgeRatingSettings();
+    this.setupTagSettings();
+    this.setupLanguageSettings();
   }
 
   ngOnDestroy() {
@@ -171,7 +192,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
-    this.formatSettings.savedData = mangaFormatFilters;
   }
 
   setupLibraryTypeahead() {
@@ -187,6 +207,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
+
+    if (this.filterSettings.presetLibraryId > 0) {
+      this.librarySettings.savedData = this.libraries.filter(item => item.value.id === this.filterSettings.presetLibraryId);
+      this.filter.libraries = this.librarySettings.savedData.map(item => item.value.id);
+      this.resetTypeaheads.next(true); // For some reason library just doesn't update properly with savedData
+    }
   }
 
   setupGenreTypeahead() {
@@ -196,11 +222,88 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.genreSettings.unique = true;
     this.genreSettings.addIfNonExisting = false;
     this.genreSettings.fetchFn = (filter: string) => {
-      return of (this.genres)
+      return this.metadataService.getAllGenres(this.filter.libraries).pipe(map(genres => {
+        return genres.map(genre => {
+          return {
+            title: genre.title,
+            value: genre,
+            selected: false,
+          }
+        })
+      }));
     };
     this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
+    }
+  }
+
+  setupAgeRatingSettings() {
+    this.ageRatingSettings.minCharacters = 0;
+    this.ageRatingSettings.multiple = true;
+    this.ageRatingSettings.id = 'age-rating';
+    this.ageRatingSettings.unique = true;
+    this.ageRatingSettings.addIfNonExisting = false;
+    this.ageRatingSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllAgeRatings(this.filter.libraries).pipe(map(ratings => {
+        return ratings.map(rating => {
+          return {
+            title: rating.title,
+            value: rating,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.ageRatingSettings.compareFn = (options: FilterItem<AgeRatingDto>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+    }
+  }
+
+  setupTagSettings() {
+    this.tagsSettings.minCharacters = 0;
+    this.tagsSettings.multiple = true;
+    this.tagsSettings.id = 'tags';
+    this.tagsSettings.unique = true;
+    this.tagsSettings.addIfNonExisting = false;
+    this.tagsSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllTags(this.filter.libraries).pipe(map(tags => {
+        return tags.map(tag => {
+          return {
+            title: tag.title,
+            value: tag,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.tagsSettings.compareFn = (options: FilterItem<Tag>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+    }
+  }
+
+  setupLanguageSettings() {
+    this.languageSettings.minCharacters = 0;
+    this.languageSettings.multiple = true;
+    this.languageSettings.id = 'languages';
+    this.languageSettings.unique = true;
+    this.languageSettings.addIfNonExisting = false;
+    this.languageSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllLanguages(this.filter.libraries).pipe(map(tags => {
+        return tags.map(tag => {
+          return {
+            title: tag.title,
+            value: tag,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.languageSettings.compareFn = (options: FilterItem<Language>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
     }
   }
 
@@ -211,11 +314,24 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.collectionSettings.unique = true;
     this.collectionSettings.addIfNonExisting = false;
     this.collectionSettings.fetchFn = (filter: string) => {
-      return of (this.collectionTags)
+      return this.collectionTagService.allTags().pipe(map(tags => {
+        return tags.map(lib => {
+          return {
+            title: lib.title,
+            value: lib,
+            selected: false,
+          }
+        });
+      }));
     };
     this.collectionSettings.compareFn = (options: FilterItem<CollectionTag>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
+    }
+    if (this.filterSettings.presetCollectionId > 0) {
+      this.collectionSettings.savedData = this.collectionTags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
+      this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.value.id);
+      this.resetTypeaheads.next(true);
     }
   }
 
@@ -224,58 +340,75 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
     var personSettings = this.createBlankPersonSettings('writers');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Writer && this.utilityService.filter(p.value.name, filter)));
+      return this.fetchPeople(PersonRole.Writer, filter);
     };
     this.peopleSettings[PersonRole.Writer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('character');
     personSettings.fetchFn = (filter: string) => {
-
-      return of (this.persons.filter(p => p.value.role == PersonRole.Character && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Character, filter);
     };
     this.peopleSettings[PersonRole.Character] = personSettings;
 
     personSettings = this.createBlankPersonSettings('colorist');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Colorist && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Colorist, filter);
     };
     this.peopleSettings[PersonRole.Colorist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('cover-artist');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.CoverArtist && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.CoverArtist, filter);
     };
     this.peopleSettings[PersonRole.CoverArtist] = personSettings;
 
     personSettings = this.createBlankPersonSettings('editor');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Editor && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Editor, filter);
     };
     this.peopleSettings[PersonRole.Editor] = personSettings;
 
     personSettings = this.createBlankPersonSettings('inker');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Inker && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Inker, filter);
     };
     this.peopleSettings[PersonRole.Inker] = personSettings;
 
     personSettings = this.createBlankPersonSettings('letterer');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Letterer && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Letterer, filter);
     };
     this.peopleSettings[PersonRole.Letterer] = personSettings;
 
     personSettings = this.createBlankPersonSettings('penciller');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Penciller && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Penciller, filter);
     };
     this.peopleSettings[PersonRole.Penciller] = personSettings;
 
     personSettings = this.createBlankPersonSettings('publisher');
     personSettings.fetchFn = (filter: string) => {
-      return of (this.persons.filter(p => p.value.role == PersonRole.Publisher && this.utilityService.filter(p.title, filter)))
+      return this.fetchPeople(PersonRole.Publisher, filter);
     };
     this.peopleSettings[PersonRole.Publisher] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('translators');
+    personSettings.fetchFn = (filter: string) => {
+      return this.fetchPeople(PersonRole.Translator, filter);
+    };
+    this.peopleSettings[PersonRole.Translator] = personSettings;
+  }
+
+  fetchPeople(role: PersonRole, filter: string): Observable<FilterItem<Person>[]> {
+    return this.metadataService.getAllPeople(this.filter.libraries).pipe(map(people => {
+      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter)).map((p: Person) => {
+        return {
+          title: p.name,
+          value: p,
+          selected: false,
+        }
+      });
+    }));
   }
 
   createBlankPersonSettings(id: string) {
@@ -325,6 +458,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.filter.genres = genres.map(item => item.value.id) || [];
   }
 
+  updateTagFilters(tags: FilterItem<Tag>[]) {
+    this.filter.tags = tags.map(item => item.value.id) || [];
+  }
+
   updatePersonFilters(persons: FilterItem<Person>[], role: PersonRole) {
     switch (role) {
       case PersonRole.CoverArtist:
@@ -357,6 +494,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       case PersonRole.Writer:
         this.filter.writers = persons.map(p => p.value.id);
         break;
+      case PersonRole.Translator:
+        this.filter.translators = persons.map(p => p.value.id);
 
     }
   }
@@ -367,6 +506,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateRating(rating: any) {
     this.filter.rating = rating;
+  }
+
+  updateAgeRating(ratingDtos: FilterItem<AgeRatingDto>[]) {
+    this.filter.ageRating = ratingDtos.map(item => item.value.value) || [];
+  }
+
+  updateLanguageRating(languages: FilterItem<Language>[]) {
+    this.filter.languages = languages.map(item => item.value.isoCode) || [];
   }
 
   updateReadStatus(status: string) {
@@ -380,13 +527,26 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  updateSortOrder() {
+    this.isAscendingSort = !this.isAscendingSort;
+    if (this.filter.sortOptions !== null) {
+      this.filter.sortOptions.isAscending = this.isAscendingSort;
+    }
+  }
+
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
 
   clear() {
     this.filter = this.seriesService.createSeriesFilter();
+    this.readProgressGroup.get('read')?.setValue(true);
+    this.readProgressGroup.get('notRead')?.setValue(true);
+    this.readProgressGroup.get('inProgress')?.setValue(true);
+    this.sortGroup.get('sortField')?.setValue(SortField.SortName);
+    this.isAscendingSort = true;
     this.resetTypeaheads.next(true);
+
     this.applyFilter.emit(this.filter);
     this.updateApplied++;
   }

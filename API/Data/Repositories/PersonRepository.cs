@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -13,6 +15,7 @@ public interface IPersonRepository
     void Remove(Person person);
     Task<IList<Person>> GetAllPeople();
     Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
+    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds);
 }
 
 public class PersonRepository : IPersonRepository
@@ -55,6 +58,16 @@ public class PersonRepository : IPersonRepository
         _context.Person.RemoveRange(peopleWithNoConnections);
 
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .SelectMany(s => s.Metadata.People)
+            .Distinct()
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
 

@@ -110,6 +110,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
       this.router.navigate(['recently-added']);
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       this.router.navigate(['on-deck']);
+    } else if (sectionTitle.toLowerCase() === 'libraries') {
+      this.router.navigate(['all-series']);
     } 
   }
 

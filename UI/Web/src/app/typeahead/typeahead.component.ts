@@ -254,7 +254,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
 
   @HostListener('window:click', ['$event'])
-  handleDocumentClick() {
+  handleDocumentClick(event: any) {
     this.hasFocus = false;
   }
 
@@ -370,6 +370,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
 
     if (this.inputElem) {
+      // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
+      document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
     }

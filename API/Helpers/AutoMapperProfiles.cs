@@ -48,15 +48,16 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Publisher)))
                 .ForMember(dest => dest.Editor,
                     opt =>
-                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)))
+                .ForMember(dest => dest.Translators,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Translator)));
 
             CreateMap<Series, SeriesDto>();
-
             CreateMap<CollectionTag, CollectionTagDto>();
-
             CreateMap<Person, PersonDto>();
-
             CreateMap<Genre, GenreTagDto>();
+            CreateMap<Tag, TagDto>();
 
             CreateMap<SeriesMetadata, SeriesMetadataDto>()
                 .ForMember(dest => dest.Writers,
@@ -83,6 +84,9 @@ namespace API.Helpers
                 .ForMember(dest => dest.Pencillers,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Penciller)))
+                .ForMember(dest => dest.Translators,
+                    opt =>
+                        opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Translator)))
                 .ForMember(dest => dest.Editors,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));

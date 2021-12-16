@@ -173,6 +173,8 @@ public class VolumeRepository : IVolumeRepository
             .Where(vol => vol.SeriesId == seriesId)
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.People)
+            .Include(vol => vol.Chapters)
+            .ThenInclude(c => c.Tags)
             .OrderBy(volume => volume.Number)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()

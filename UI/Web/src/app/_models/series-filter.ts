@@ -20,8 +20,24 @@ export interface SeriesFilter {
     editor: Array<number>;
     publisher: Array<number>;
     character: Array<number>;
+    translators: Array<number>;
     collectionTags: Array<number>;
     rating: number;
+    ageRating: Array<number>;
+    sortOptions: SortOptions | null;
+    tags: Array<number>;
+    languages: Array<string>;
+}
+
+export interface SortOptions {
+  sortField: SortField;
+  isAscending: boolean;
+}
+
+export enum SortField {
+  SortName = 1,
+  Created = 2,
+  LastModified = 3
 }
 
 export interface ReadStatus {

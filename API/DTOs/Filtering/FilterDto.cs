@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using API.Data.Migrations;
+﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -63,14 +61,34 @@ namespace API.DTOs.Filtering
         /// </summary>
         public IList<int> Character { get; init; } = new List<int>();
         /// <summary>
+        /// A list of Translator ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> Translators { get; init; } = new List<int>();
+        /// <summary>
         /// A list of Collection Tag ids to restrict search to. Defaults to all genres by passing an empty list
         /// </summary>
         public IList<int> CollectionTags { get; init; } = new List<int>();
+        /// <summary>
+        /// A list of Tag ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> Tags { get; init; } = new List<int>();
         /// <summary>
         /// Will return back everything with the rating and above
         /// <see cref="AppUserRating.Rating"/>
         /// </summary>
         public int Rating { get; init; }
+        /// <summary>
+        /// Sorting Options for a query. Defaults to null, which uses the queries natural sorting order
+        /// </summary>
+        public SortOptions SortOptions { get; init; } = null;
+        /// <summary>
+        /// Age Ratings. Empty list will return everything back
+        /// </summary>
+        public IList<AgeRating> AgeRating { get; init; } = new List<AgeRating>();
+        /// <summary>
+        /// Languages (ISO 639-1 code) to filter by. Empty list will return everything back
+        /// </summary>
+        public IList<string> Languages { get; init; } = new List<string>();
 
     }
 }

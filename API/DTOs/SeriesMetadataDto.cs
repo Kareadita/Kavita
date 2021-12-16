@@ -9,8 +9,18 @@ namespace API.DTOs
     {
         public int Id { get; set; }
         public string Summary { get; set; }
-        public ICollection<CollectionTagDto> Tags { get; set; }
+        /// <summary>
+        /// Collections the Series belongs to
+        /// </summary>
+        public ICollection<CollectionTagDto> CollectionTags { get; set; }
+        /// <summary>
+        /// Genres for the Series
+        /// </summary>
         public ICollection<GenreTagDto> Genres { get; set; }
+        /// <summary>
+        /// Collection of all Tags from underlying chapters for a Series
+        /// </summary>
+        public ICollection<TagDto> Tags { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Artists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
@@ -20,6 +30,7 @@ namespace API.DTOs
         public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
         /// <summary>
         /// Highest Age Rating from all Chapters
         /// </summary>
@@ -28,6 +39,10 @@ namespace API.DTOs
         /// Earliest Year from all chapters
         /// </summary>
         public int ReleaseYear { get; set; }
+        /// <summary>
+        /// Language of the content (ISO 639-1 code)
+        /// </summary>
+        public string Language { get; set; } = string.Empty;
 
         public int SeriesId { get; set; }
     }

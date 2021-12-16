@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
+import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
@@ -31,6 +32,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
+  filterSettings: FilterSettings = new FilterSettings();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -85,6 +87,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+    this.filterSettings.presetLibraryId = this.libraryId;
+    
     this.loadPage();
   }
 
@@ -147,7 +151,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
     this.loadingSeries = true;
 
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    if (this.filter == undefined) {
+      this.filter = this.seriesService.createSeriesFilter();
+      this.filter.libraries.push(this.libraryId);
+    }
+
+    this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;

@@ -24,7 +24,11 @@
         /// <summary>
         /// Represents a character/person within the story
         /// </summary>
-        Character = 11
+        Character = 11,
+        /// <summary>
+        /// The Translator
+        /// </summary>
+        Translator = 12
 
 
     }

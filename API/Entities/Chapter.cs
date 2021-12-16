@@ -62,6 +62,7 @@ namespace API.Entities
         /// All people attached at a Chapter level. Usually Comics will have different people per issue.
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
 
 

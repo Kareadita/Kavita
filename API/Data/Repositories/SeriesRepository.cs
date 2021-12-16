@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -14,6 +16,7 @@ using API.Helpers;
 using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -67,6 +70,8 @@ public interface ISeriesRepository
     Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
+    Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -135,13 +140,23 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
+
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
@@ -168,6 +183,14 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(cm => cm.Tags)
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
@@ -179,8 +202,12 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
+        if (filter.SortOptions == null)
+        {
+            query = query.OrderBy(s => s.SortName);
+        }
+
         var retSeries = query
-            .OrderByDescending(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
@@ -387,7 +414,8 @@ public class SeriesRepository : ISeriesRepository
 
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
-        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds)
+        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
+        out bool hasLanguageFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -406,12 +434,16 @@ public class SeriesRepository : ISeriesRepository
         allPeopleIds.AddRange(filter.Penciller);
         allPeopleIds.AddRange(filter.Publisher);
         allPeopleIds.AddRange(filter.CoverArtist);
+        allPeopleIds.AddRange(filter.Translators);
 
         hasPeopleFilter = allPeopleIds.Count > 0;
         hasGenresFilter = filter.Genres.Count > 0;
         hasCollectionTagFilter = filter.CollectionTags.Count > 0;
         hasRatingFilter = filter.Rating > 0;
         hasProgressFilter = !filter.ReadStatus.Read || !filter.ReadStatus.InProgress || !filter.ReadStatus.NotRead;
+        hasAgeRating = filter.AgeRating.Count > 0;
+        hasTagsFilter = filter.Tags.Count > 0;
+        hasLanguageFilter = filter.Languages.Count > 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -499,7 +531,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -510,42 +542,41 @@ public class SeriesRepository : ISeriesRepository
                             s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
                         && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating))
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
+                        && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
+                        && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
+                        && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
             )
             .AsNoTracking();
-        // IQueryable<FilterableQuery> newFilter = null;
-        // if (hasProgressFilter)
-        // {
-        //     newFilter = query
-        //         .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
-        //         new
-        //         {
-        //             Series = s,
-        //             PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
-        //                 .Sum(s1 => s1.PagesRead),
-        //             progress.AppUserId,
-        //             LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
-        //                 .Max(p => p.LastModified)
-        //         })
-        //         .Select(d => new FilterableQuery()
-        //         {
-        //             Series = d.Series,
-        //             AppUserId = d.AppUserId,
-        //             LastModified = d.LastModified,
-        //             PagesRead = d.PagesRead
-        //         })
-        //         .Where(d => seriesIds.Contains(d.Series.Id));
-        // }
-        // else
-        // {
-        //     newFilter = query.Select(s => new FilterableQuery()
-        //     {
-        //         Series = s,
-        //         LastModified = DateTime.Now, // TODO: Figure this out
-        //         AppUserId = userId,
-        //         PagesRead = 0
-        //     });
-        // }
 
+        if (filter.SortOptions != null)
+        {
+            if (filter.SortOptions.IsAscending)
+            {
+                if (filter.SortOptions.SortField == SortField.SortName)
+                {
+                    query = query.OrderBy(s => s.SortName);
+                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
+                {
+                    query = query.OrderBy(s => s.Created);
+                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
+                {
+                    query = query.OrderBy(s => s.LastModified);
+                }
+            }
+            else
+            {
+                if (filter.SortOptions.SortField == SortField.SortName)
+                {
+                    query = query.OrderByDescending(s => s.SortName);
+                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
+                {
+                    query = query.OrderByDescending(s => s.Created);
+                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
+                {
+                    query = query.OrderByDescending(s => s.LastModified);
+                }
+            }
+        }
 
         return query;
     }
@@ -555,13 +586,15 @@ public class SeriesRepository : ISeriesRepository
         var metadataDto = await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
             .Include(m => m.Genres)
+            .Include(m => m.Tags)
+            .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
 
         if (metadataDto != null)
         {
-            metadataDto.Tags = await _context.CollectionTag
+            metadataDto.CollectionTags = await _context.CollectionTag
                 .Include(t => t.SeriesMetadatas)
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
@@ -693,5 +726,36 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .Include(sm => sm.CollectionTags)
             .ToListAsync();
+    }
+
+    public async Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.AgeRating)
+            .Distinct()
+            .Select(s => new AgeRatingDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
+    {
+        var ret = await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.Language)
+            .Distinct()
+            .ToListAsync();
+
+        return ret
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => new LanguageDto()
+            {
+                Title = CultureInfo.GetCultureInfo(s).DisplayName,
+                IsoCode = s
+            }).ToList();
     }
 }

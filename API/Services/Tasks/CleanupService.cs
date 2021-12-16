@@ -13,6 +13,7 @@ namespace API.Services.Tasks
     public interface ICleanupService
     {
         Task Cleanup();
+        Task CleanupDbEntries();
         void CleanupCacheDirectory();
         Task DeleteSeriesCoverImages();
         Task DeleteChapterCoverImages();
@@ -64,6 +65,17 @@ namespace API.Services.Tasks
             await DeleteTagCoverImages();
             await SendProgress(1F);
             _logger.LogInformation("Cleanup finished");
+        }
+
+        /// <summary>
+        /// Cleans up abandon rows in the DB
+        /// </summary>
+        public async Task CleanupDbEntries()
+        {
+            await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+            await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+            await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+            await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
         }
 
         private async Task SendProgress(float progress)

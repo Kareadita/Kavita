@@ -20,10 +20,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   hasExtendedProperites: boolean = false;
 
   /**
-   * String representation of AgeRating enum
-   */
-  ageRatingName: string = '';
-  /**
    * Html representation of Series Summary
    */
   seriesSummary: string = '';
@@ -36,7 +32,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return TagBadgeCursor;
   }
 
-  constructor(public utilityService: UtilityService, private metadataService: MetadataService) { }
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService) { }
   
   ngOnChanges(changes: SimpleChanges): void {
     this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
@@ -45,11 +41,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
                                   this.seriesMetadata.inkers.length > 0 ||
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
-                                  this.seriesMetadata.publishers.length > 0;
-
-    this.metadataService.getAgeRating(this.seriesMetadata.ageRating).subscribe(rating => {
-      this.ageRatingName = rating;
-    });
+                                  this.seriesMetadata.publishers.length > 0 || 
+                                  this.seriesMetadata.translators.length > 0 ||
+                                  this.seriesMetadata.tags.length > 0;
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');

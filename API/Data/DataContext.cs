@@ -39,6 +39,7 @@ namespace API.Data
         public DbSet<ReadingListItem> ReadingListItem { get; set; }
         public DbSet<Person> Person { get; set; }
         public DbSet<Genre> Genre { get; set; }
+        public DbSet<Tag> Tag { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

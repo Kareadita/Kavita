@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -490,6 +490,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Language")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ReleaseYear")
                         .HasColumnType("INTEGER");
 
@@ -668,6 +671,29 @@ namespace API.Data.Migrations
                     b.ToTable("ServerSetting");
                 });
 
+            modelBuilder.Entity("API.Entities.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ExternalTag")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NormalizedTitle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedTitle", "ExternalTag")
+                        .IsUnique();
+
+                    b.ToTable("Tag");
+                });
+
             modelBuilder.Entity("API.Entities.Volume", b =>
                 {
                     b.Property<int>("Id")
@@ -730,6 +756,21 @@ namespace API.Data.Migrations
                     b.HasIndex("PeopleId");
 
                     b.ToTable("ChapterPerson");
+                });
+
+            modelBuilder.Entity("ChapterTag", b =>
+                {
+                    b.Property<int>("ChaptersId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ChaptersId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("ChapterTag");
                 });
 
             modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
@@ -859,6 +900,21 @@ namespace API.Data.Migrations
                     b.HasIndex("SeriesMetadatasId");
 
                     b.ToTable("PersonSeriesMetadata");
+                });
+
+            modelBuilder.Entity("SeriesMetadataTag", b =>
+                {
+                    b.Property<int>("SeriesMetadatasId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SeriesMetadatasId", "TagsId");
+
+                    b.HasIndex("TagsId");
+
+                    b.ToTable("SeriesMetadataTag");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserBookmark", b =>
@@ -1082,6 +1138,21 @@ namespace API.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ChapterTag", b =>
+                {
+                    b.HasOne("API.Entities.Chapter", null)
+                        .WithMany()
+                        .HasForeignKey("ChaptersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CollectionTagSeriesMetadata", b =>
                 {
                     b.HasOne("API.Entities.CollectionTag", null)
@@ -1159,6 +1230,21 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
                         .WithMany()
                         .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SeriesMetadataTag", b =>
+                {
+                    b.HasOne("API.Entities.Metadata.SeriesMetadata", null)
+                        .WithMany()
+                        .HasForeignKey("SeriesMetadatasId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
