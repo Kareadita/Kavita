@@ -38,8 +38,8 @@
     </div>
 
     <ng-template #filterSection>
-        <div class="filter-section pb-3">
-            <div class="row justify-content-between no-gutters">
+        <div class="filter-section mx-auto pb-3">
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
                         <label for="format">Format</label>
@@ -110,7 +110,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-between no-gutters">
+            <div class="row justify-content-center no-gutters">
                 <!-- The People row -->
                 <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
@@ -252,7 +252,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-between no-gutters">
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.readProgressDisabled">
                     <label>Read Progress</label>
                     <form [formGroup]="readProgressGroup">
@@ -328,11 +328,11 @@
                 
                 
             </div>
-            <div class="row justify-content-between no-gutters">
-                <div class="col-md-5">
+            <div class="row justify-content-center no-gutters">
+                <div class="col-md-3 mr-3">
                     <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
                 </div>
-                <div class="col-md-5 pr-3">
+                <div class="col-md-3">
                     <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
                 </div>
 
