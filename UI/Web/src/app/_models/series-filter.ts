@@ -25,6 +25,7 @@ export interface SeriesFilter {
     rating: number;
     ageRating: Array<number>;
     sortOptions: SortOptions | null;
+    tags: Array<number>;
 }
 
 export interface SortOptions {

@@ -412,7 +412,7 @@ public class SeriesRepository : ISeriesRepository
 
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
-        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds)
+        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -438,6 +438,8 @@ public class SeriesRepository : ISeriesRepository
         hasCollectionTagFilter = filter.CollectionTags.Count > 0;
         hasRatingFilter = filter.Rating > 0;
         hasProgressFilter = !filter.ReadStatus.Read || !filter.ReadStatus.InProgress || !filter.ReadStatus.NotRead;
+        hasAgeRating = filter.AgeRating.Count > 0;
+        hasTagsFilter = filter.Tags.Count > 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -525,7 +527,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -536,6 +538,8 @@ public class SeriesRepository : ISeriesRepository
                             s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
                         && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating))
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
+                        && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
+                        && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
             )
             .AsNoTracking();
 

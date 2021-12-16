@@ -152,24 +152,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.filterSettings = new FilterSettings();
     }
     
-    let apiCall;
-    if (this.filter.libraries.length > 0) {
-      apiCall = this.metadataService.getGenresForLibraries(this.filter.libraries);
-    } else {
-      apiCall = this.metadataService.getAllGenres();
-    }
-
-    apiCall.subscribe(genres => {
-      this.genres = genres.map(genre => {
-        return {
-          title: genre.title,
-          value: genre,
-          selected: false,
-        }
-      });
-      this.setupGenreTypeahead();
-
-    });
+    this.setupGenreTypeahead();
 
     this.libraryService.getLibrariesForMember().subscribe(libs => {
       this.libraries = libs.map(lib => {
@@ -182,29 +165,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.setupLibraryTypeahead();
     });
 
-    this.metadataService.getAllPeople().subscribe(res => {
-      this.persons = res.map(lib => {
-        return {
-          title: lib.name,
-          value: lib,
-          selected: true,
-        }
-      });
-      this.setupPersonTypeahead();
-    });
-
-    this.collectionTagService.allTags().subscribe(tags => {
-      this.collectionTags = tags.map(lib => {
-        return {
-          title: lib.title,
-          value: lib,
-          selected: false,
-        }
-      });
-      this.setupCollectionTagTypeahead();
-    });
-
-
+    this.setupCollectionTagTypeahead();
+    this.setupPersonTypeahead();
     this.setupAgeRatingSettings();
     this.setupTagSettings();
     
@@ -326,7 +288,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.collectionSettings.unique = true;
     this.collectionSettings.addIfNonExisting = false;
     this.collectionSettings.fetchFn = (filter: string) => {
-      return of (this.collectionTags)
+      return this.collectionTagService.allTags().pipe(map(tags => {
+        return tags.map(lib => {
+          return {
+            title: lib.title,
+            value: lib,
+            selected: false,
+          }
+        });
+      }));
     };
     this.collectionSettings.compareFn = (options: FilterItem<CollectionTag>[], filter: string) => {
       const f = filter.toLowerCase();
@@ -460,6 +430,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateGenreFilters(genres: FilterItem<Genre>[]) {
     this.filter.genres = genres.map(item => item.value.id) || [];
+  }
+
+  updateTagFilters(tags: FilterItem<Tag>[]) {
+    this.filter.tags = tags.map(item => item.value.id) || [];
   }
 
   updatePersonFilters(persons: FilterItem<Person>[], role: PersonRole) {

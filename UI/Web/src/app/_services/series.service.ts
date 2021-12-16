@@ -210,7 +210,8 @@ export class SeriesService {
         notRead: true
       },
       sortOptions: null,
-      ageRating: []
+      ageRating: [],
+      tags: []
     };
 
     if (filter === undefined) return data;

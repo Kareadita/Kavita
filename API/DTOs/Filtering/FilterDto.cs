@@ -69,6 +69,10 @@ namespace API.DTOs.Filtering
         /// </summary>
         public IList<int> CollectionTags { get; init; } = new List<int>();
         /// <summary>
+        /// A list of Tag ids to restrict search to. Defaults to all genres by passing an empty list
+        /// </summary>
+        public IList<int> Tags { get; init; } = new List<int>();
+        /// <summary>
         /// Will return back everything with the rating and above
         /// <see cref="AppUserRating.Rating"/>
         /// </summary>
