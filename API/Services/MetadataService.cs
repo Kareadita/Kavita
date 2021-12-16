@@ -113,6 +113,22 @@ public class MetadataService : IMetadataService
                 person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Translator))
+        {
+            var people = comicInfo.Translator.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Translator))
+        {
+            var people = comicInfo.Translator.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
         if (!string.IsNullOrEmpty(comicInfo.Writer))
         {
             var people = comicInfo.Writer.Split(",");

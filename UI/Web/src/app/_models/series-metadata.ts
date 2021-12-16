@@ -17,6 +17,7 @@ export interface SeriesMetadata {
     colorists: Array<Person>;
     letterers: Array<Person>;
     editors: Array<Person>;
+    translators: Array<Person>;
     ageRating: AgeRating;
     releaseYear: number;
     seriesId: number;

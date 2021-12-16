@@ -101,6 +101,15 @@
             <app-person-badge *ngFor="let person of seriesMetadata.letterers" [person]="person"></app-person-badge>
         </div>
     </div>
+
+    <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.translators && seriesMetadata.translators.length > 0">
+        <div class="col-md-4">
+            <h5>Translators</h5>
+        </div>
+        <div class="col-md-8">
+            <app-person-badge *ngFor="let person of seriesMetadata.translators" [person]="person"></app-person-badge>
+        </div>
+    </div>
     
     <div class="row no-gutters mt-1"  *ngIf="seriesMetadata.pencillers && seriesMetadata.pencillers.length > 0">
         <div class="col-md-4">

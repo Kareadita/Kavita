@@ -68,5 +68,6 @@ namespace API.DTOs
         public ICollection<PersonDto> CoverArtist { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
     }
 }

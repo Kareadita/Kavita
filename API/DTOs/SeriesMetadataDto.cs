@@ -20,6 +20,7 @@ namespace API.DTOs
         public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
         /// <summary>
         /// Highest Age Rating from all Chapters
         /// </summary>
