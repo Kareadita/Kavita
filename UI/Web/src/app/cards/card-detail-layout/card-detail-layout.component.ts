@@ -529,9 +529,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateSortOrder() {
     this.isAscendingSort = !this.isAscendingSort;
-    if (this.filter.sortOptions !== null) {
-      this.filter.sortOptions.isAscending = this.isAscendingSort;
+    if (this.filter.sortOptions === null) {
+      this.filter.sortOptions = {
+        isAscending: this.isAscendingSort,
+        sortField: SortField.SortName
+      }
     }
+
+    this.filter.sortOptions.isAscending = this.isAscendingSort;
   }
 
   getPersonsSettings(role: PersonRole) {
