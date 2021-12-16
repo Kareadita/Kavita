@@ -464,7 +464,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   clear() {
     this.filter = this.seriesService.createSeriesFilter();
+    this.readProgressGroup.get('read')?.setValue(true);
+    this.readProgressGroup.get('notRead')?.setValue(true);
+    this.readProgressGroup.get('inProgress')?.setValue(true);
+    this.sortGroup.get('sortField')?.setValue(SortField.SortName);
+    this.isAscendingSort = true;
     this.resetTypeaheads.next(true);
+    
     this.applyFilter.emit(this.filter);
     this.updateApplied++;
   }

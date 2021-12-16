@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
+import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
@@ -30,6 +31,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   libraryId!: number;
 
   filter: SeriesFilter | undefined = undefined;
+  filterSettings: FilterSettings = new FilterSettings();
 
   onDestroy: Subject<void> = new Subject();
 
@@ -40,6 +42,8 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     if (this.pagination === undefined || this.pagination === null) {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
+    this.filterSettings.sortDisabled = true;
+
     this.loadPage();
   }
 

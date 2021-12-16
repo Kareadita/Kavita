@@ -34,6 +34,7 @@ export class OnDeckComponent implements OnInit {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
     this.filterSettings.readProgressDisabled = true;
+    this.filterSettings.sortDisabled = true;
     this.loadPage();
   }
 

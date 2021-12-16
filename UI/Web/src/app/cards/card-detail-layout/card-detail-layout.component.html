@@ -242,7 +242,18 @@
                             <input class="form-check-input" type="checkbox" id="read" formControlName="read">
                             <label class="form-check-label" for="read">Read</label>
                           </div>
+                          <div class="alert alert-warning" *ngIf="!readProgressGroup.get('read')?.value && !readProgressGroup.get('unread')?.value && !readProgressGroup.get('inProgress')?.value">
+                            You must select at least one to get results
+                          </div>
                     </form>
+                    <!-- <app-typeahead (selectedData)="updateReadStatusFilters($event)" [settings]="readStatusSettings" [reset]="resetTypeaheads">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead> -->
                 </div>
     
                 <div class="col" *ngIf="!filterSettings.ratingDisabled">
