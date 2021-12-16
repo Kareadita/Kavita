@@ -22,5 +22,6 @@ export interface SeriesMetadata {
     translators: Array<Person>;
     ageRating: AgeRating;
     releaseYear: number;
+    language: string;
     seriesId: number;
 }

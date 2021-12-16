@@ -20,6 +20,9 @@ namespace API.Data.Metadata
         public string Genre { get; set; } = string.Empty;
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
+        /// <summary>
+        /// ISO 639-1 Code to represent the language of the content
+        /// </summary>
         public string LanguageISO { get; set; } = string.Empty;
         /// <summary>
         /// This is the link to where the data was scraped from

@@ -3,12 +3,13 @@
 </div>
 
 <!-- This first row will have random information about the series-->
-<div class="row no-gutters mb-2" *ngIf="seriesMetadata.ageRating">
-    <app-tag-badge title="Age Rating">{{ageRatingName}}</app-tag-badge>
+<div class="row no-gutters mb-2">
+    <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating">{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
     <ng-container *ngIf="series">
         <!-- Maybe we can put the library this resides in to make it easier to get back -->
         <!-- tooltip here explaining how this is year of first issue -->
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date">{{seriesMetadata.releaseYear}}</app-tag-badge>
+        <app-tag-badge *ngIf="seriesMetadata.language !== ''" title="Language">{{seriesMetadata.language}}</app-tag-badge>
         <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">
             <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
         </app-tag-badge>

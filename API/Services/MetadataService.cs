@@ -98,7 +98,7 @@ public class MetadataService : IMetadataService
             chapter.TitleName = comicInfo.Title.Trim();
         }
 
-        if (comicInfo.Year > 0 && comicInfo.Month > 0)
+        if (comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
             var month = Math.Max(comicInfo.Month, 1);
@@ -218,7 +218,6 @@ public class MetadataService : IMetadataService
     {
         if (series == null) return;
 
-        // NOTE: This will fail if we replace the cover of the first volume on a first scan. Because the series will already have a cover image
         if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
             return;
 
@@ -252,10 +251,6 @@ public class MetadataService : IMetadataService
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
         if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
-
-        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
-        if (comicInfo == null) return;
-
 
         foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
         {
@@ -295,21 +290,25 @@ public class MetadataService : IMetadataService
 
         var comicInfos = series.Volumes
             .SelectMany(volume => volume.Chapters)
+            .OrderBy(c => double.Parse(c.Number), new ChapterSortComparer())
             .SelectMany(c => c.Files)
             .Select(file => _readingItemService.GetComicInfo(file.FilePath, file.Format))
             .Where(ci => ci != null)
             .ToList();
 
-        //var firstComicInfo = comicInfos.First(i => i.)
-        // Summary Info
-        if (!string.IsNullOrEmpty(comicInfo.Summary))
+        var comicInfo = comicInfos.FirstOrDefault();
+        if (!string.IsNullOrEmpty(comicInfo?.Summary))
         {
-            // PERF: I can move this to the bottom as I have a comicInfo selection, save me an extra read
             series.Metadata.Summary = comicInfo.Summary;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo?.LanguageISO))
+        {
+            series.Metadata.Language = comicInfo.LanguageISO;
+        }
+
         // Set the AgeRating as highest in all the comicInfos
-        series.Metadata.AgeRating = comicInfos.Max(i => ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating));
+        series.Metadata.AgeRating = comicInfos.Max(i => ComicInfo.ConvertAgeRatingToEnum(comicInfo?.AgeRating));
         series.Metadata.ReleaseYear = series.Volumes
             .SelectMany(volume => volume.Chapters).Min(c => c.ReleaseDate.Year);
 
@@ -320,9 +319,6 @@ public class MetadataService : IMetadataService
 
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
             people, person => series.Metadata.People.Remove(person));
-
-        // TagHelper.KeepOnlySameTagBetweenLists(series.Metadata.Tags, tags.Select(g => DbFactory.Tag(g, false)).ToList(),
-        //     tag => series.Metadata.Tags.Remove(tag));
 
         GenreHelper.UpdateGenre(allGenres, genres, false, genre => GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
         GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),

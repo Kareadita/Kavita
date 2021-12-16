@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
 using Kavita.Common.Extensions;
@@ -89,5 +91,29 @@ public class MetadataController : BaseApiController
             Title = t.ToDescription(),
             Value = t
         }));
+    }
+
+    /// <summary>
+    /// Fetches all age ratings from the instance
+    /// </summary>
+    /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
+    /// <returns></returns>
+    [HttpGet("languages")]
+    public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
+    {
+        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        if (ids != null && ids.Count > 0)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetAllLanguagesForLibrariesAsync(ids));
+        }
+
+        return Ok(new List<LanguageDto>()
+        {
+            new ()
+            {
+                Title = CultureInfo.GetCultureInfo("en").DisplayName,
+                IsoCode = "en"
+            }
+        });
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Scanner;
@@ -70,6 +71,7 @@ public interface ISeriesRepository
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -412,7 +414,8 @@ public class SeriesRepository : ISeriesRepository
 
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
-        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter)
+        out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
+        out bool hasLanguageFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -440,6 +443,7 @@ public class SeriesRepository : ISeriesRepository
         hasProgressFilter = !filter.ReadStatus.Read || !filter.ReadStatus.InProgress || !filter.ReadStatus.NotRead;
         hasAgeRating = filter.AgeRating.Count > 0;
         hasTagsFilter = filter.Tags.Count > 0;
+        hasLanguageFilter = filter.Languages.Count > 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -527,7 +531,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -540,6 +544,7 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
+                        && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
             )
             .AsNoTracking();
 
@@ -735,5 +740,22 @@ public class SeriesRepository : ISeriesRepository
                 Title = s.ToDescription()
             })
             .ToListAsync();
+    }
+
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
+    {
+        var ret = await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.Language)
+            .Distinct()
+            .ToListAsync();
+
+        return ret
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => new LanguageDto()
+            {
+                Title = CultureInfo.GetCultureInfo(s).DisplayName,
+                IsoCode = s
+            }).ToList();
     }
 }

@@ -10,6 +10,7 @@ import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
+import { Language } from 'src/app/_models/metadata/language';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
 import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
@@ -37,6 +38,7 @@ export class FilterSettings {
   sortDisabled = false;
   ageRatingDisabled = false;
   tagsDisabled = false;
+  languageDisabled = false;
 }
 
 @Component({
@@ -69,6 +71,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
   ageRatingSettings: TypeaheadSettings<FilterItem<AgeRatingDto>> = new TypeaheadSettings();
   tagsSettings: TypeaheadSettings<FilterItem<Tag>> = new TypeaheadSettings();
+  languageSettings: TypeaheadSettings<FilterItem<Language>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
   resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
@@ -169,7 +172,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.setupPersonTypeahead();
     this.setupAgeRatingSettings();
     this.setupTagSettings();
-    
+    this.setupLanguageSettings();
   }
 
   ngOnDestroy() {
@@ -276,6 +279,29 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       }));
     };
     this.tagsSettings.compareFn = (options: FilterItem<Tag>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+    }
+  }
+
+  setupLanguageSettings() {
+    this.languageSettings.minCharacters = 0;
+    this.languageSettings.multiple = true;
+    this.languageSettings.id = 'languages';
+    this.languageSettings.unique = true;
+    this.languageSettings.addIfNonExisting = false;
+    this.languageSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllLanguages(this.filter.libraries).pipe(map(tags => {
+        return tags.map(tag => {
+          return {
+            title: tag.title,
+            value: tag,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.languageSettings.compareFn = (options: FilterItem<Language>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
     }
@@ -484,6 +510,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateAgeRating(ratingDtos: FilterItem<AgeRatingDto>[]) {
     this.filter.ageRating = ratingDtos.map(item => item.value.value) || [];
+  }
+
+  updateLanguageRating(languages: FilterItem<Language>[]) {
+    this.filter.languages = languages.map(item => item.value.isoCode) || [];
   }
 
   updateReadStatus(status: string) {

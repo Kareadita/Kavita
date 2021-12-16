@@ -85,6 +85,10 @@ namespace API.DTOs.Filtering
         /// Age Ratings. Empty list will return everything back
         /// </summary>
         public IList<AgeRating> AgeRating { get; init; } = new List<AgeRating>();
+        /// <summary>
+        /// Languages (ISO 639-1 code) to filter by. Empty list will return everything back
+        /// </summary>
+        public IList<string> Languages { get; init; } = new List<string>();
 
     }
 }

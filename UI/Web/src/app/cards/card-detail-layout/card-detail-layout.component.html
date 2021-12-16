@@ -294,6 +294,18 @@
                     </app-typeahead>
                 </div>
 
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.languageDisabled">
+                    <label for="languages">Language</label>
+                    <app-typeahead (selectedData)="updateLanguageRating($event)" [settings]="languageSettings" [reset]="resetTypeaheads">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="form-group">
@@ -313,12 +325,15 @@
                     </form>
                 </div>
     
+                
+                
+            </div>
+            <div class="row no-gutters">
                 <div class="col">
                     <!-- TODO: Make this float right -->
                     <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
                     <button class="btn btn-primary" (click)="apply()">Apply</button>
                 </div>
-                
             </div>
         </div>
     </ng-template>
