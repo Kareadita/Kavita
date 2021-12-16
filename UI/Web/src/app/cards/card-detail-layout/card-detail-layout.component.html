@@ -38,8 +38,8 @@
     </div>
 
     <ng-template #filterSection>
-        <div class="filter-section">
-            <div class="row no-gutters">
+        <div class="filter-section mx-auto pb-3">
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
                         <label for="format">Format</label>
@@ -110,7 +110,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row justify-content-center no-gutters">
                 <!-- The People row -->
                 <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
@@ -252,10 +252,10 @@
                     </div>
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.readProgressDisabled">
                     <label>Read Progress</label>
-                    <form [formGroup]="readProgressGroup" class="ml-2">
+                    <form [formGroup]="readProgressGroup">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
                             <label class="form-check-label" for="notread">Unread</label>
@@ -273,7 +273,7 @@
     
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.ratingDisabled">
                     <label for="ratings">Rating</label>
-                    <form class="form-inline ml-2">
+                    <form class="form-inline">
                         <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
                             <ng-template let-fill="fill" let-index="index">
                                 <span class="star" [class.filled]="(index >= (filter.rating - 1)) && filter.rating > 0" [ngbTooltip]="(index + 1) + ' and up'">&#9733;</span>
@@ -328,11 +328,12 @@
                 
                 
             </div>
-            <div class="row no-gutters">
-                <div class="col">
-                    <!-- TODO: Make this float right -->
-                    <button class="btn btn-secondary mr-2" (click)="clear()">Clear</button>
-                    <button class="btn btn-primary" (click)="apply()">Apply</button>
+            <div class="row justify-content-center no-gutters">
+                <div class="col-md-3 mr-3">
+                    <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
                 </div>
             </div>
         </div>
