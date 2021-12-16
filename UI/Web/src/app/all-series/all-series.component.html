@@ -9,6 +9,6 @@
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" (reload)="loadPage()" (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+        <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
     </ng-template>
 </app-card-detail-layout>
