@@ -1,9 +1,8 @@
 <div class="badge-expander">
-    <div class="content {{isCollapsed ? 'collapsed' : ''}}">
+    <div class="content">
         <ng-container *ngFor="let item of visibleItems; index as i;" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        <button type="button" *ngIf="!isCollapsed && itemsLeft !== 0" class="btn btn-outline-primary" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
+            and {{itemsLeft}} more
+        </button>
     </div>
-
-    <button type="button" class="btn btn-outline-primary" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed">
-        and {{items.length - 4}} more
-    </button>
 </div>
