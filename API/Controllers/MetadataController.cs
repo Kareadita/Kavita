@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Metadata;
+using API.Entities.Enums;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -65,5 +68,26 @@ public class MetadataController : BaseApiController
             return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids));
         }
         return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync());
+    }
+
+    /// <summary>
+    /// Fetches all age ratings from the instance
+    /// </summary>
+    /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
+    /// <returns></returns>
+    [HttpGet("age-ratings")]
+    public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
+    {
+        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        if (ids != null && ids.Count > 0)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
+        }
+
+        return Ok(Enum.GetValues<AgeRating>().Select(t => new AgeRatingDto()
+        {
+            Title = t.ToDescription(),
+            Value = t
+        }));
     }
 }

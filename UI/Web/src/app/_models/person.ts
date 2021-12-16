@@ -9,7 +9,8 @@ export enum PersonRole {
     CoverArtist = 8,
     Editor = 9,
     Publisher = 10,
-    Character = 11
+    Character = 11,
+    Translator = 12
 }
 
 export interface Person {

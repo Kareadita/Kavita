@@ -10,11 +10,19 @@ export class BadgeExpanderComponent implements OnInit {
   @Input() items: Array<any> = [];
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
 
+  visibleItems: Array<any> = [];
+
   isCollapsed: boolean = false;
   constructor() { }
 
   ngOnInit(): void {
-    console.log(this.items);
+    this.visibleItems = this.items.slice(0, 4);
+  }
+
+  toggleVisible() {
+    this.isCollapsed = !this.isCollapsed;
+
+    this.visibleItems = this.items;
   }
 
 }

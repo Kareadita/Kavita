@@ -6,6 +6,7 @@ using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -14,6 +15,7 @@ using API.Helpers;
 using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -67,6 +69,7 @@ public interface ISeriesRepository
     Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
+    Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -428,6 +431,7 @@ public class SeriesRepository : ISeriesRepository
         allPeopleIds.AddRange(filter.Penciller);
         allPeopleIds.AddRange(filter.Publisher);
         allPeopleIds.AddRange(filter.CoverArtist);
+        allPeopleIds.AddRange(filter.Translators);
 
         hasPeopleFilter = allPeopleIds.Count > 0;
         hasGenresFilter = filter.Genres.Count > 0;
@@ -712,6 +716,20 @@ public class SeriesRepository : ISeriesRepository
         return await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .Include(sm => sm.CollectionTags)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.AgeRating)
+            .Distinct()
+            .Select(s => new AgeRatingDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
             .ToListAsync();
     }
 }

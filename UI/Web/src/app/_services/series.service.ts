@@ -201,6 +201,7 @@ export class SeriesService {
       editor: [],
       publisher: [],
       character: [],
+      translators: [],
       collectionTags: [],
       rating: 0,
       readStatus: {
@@ -208,7 +209,8 @@ export class SeriesService {
         inProgress: true,
         notRead: true
       },
-      sortOptions: null
+      sortOptions: null,
+      ageRating: []
     };
 
     if (filter === undefined) return data;

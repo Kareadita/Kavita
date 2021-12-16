@@ -1,17 +1,9 @@
-<!-- 
-<div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed">
-    
-</div>
-<button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!isCollapsed">
-    <i class="fa fa-arrow-{{isCollapsed ? 'up' : 'down'}}"></i>
-</button> -->
-
-
 <div class="badge-expander">
     <div class="content {{isCollapsed ? 'collapsed' : ''}}">
-        <ng-container *ngFor="let item of items; index as i;" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        <ng-container *ngFor="let item of visibleItems; index as i;" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
     </div>
+
     <button type="button" class="btn btn-outline-primary" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed">
-        <!-- <i class="fa fa-arrow-{{isCollapsed ? 'up' : 'down'}}"></i> -->...
+        and {{items.length - 4}} more
     </button>
 </div>

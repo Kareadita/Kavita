@@ -20,8 +20,10 @@ export interface SeriesFilter {
     editor: Array<number>;
     publisher: Array<number>;
     character: Array<number>;
+    translators: Array<number>;
     collectionTags: Array<number>;
     rating: number;
+    ageRating: Array<number>;
     sortOptions: SortOptions | null;
 }
 

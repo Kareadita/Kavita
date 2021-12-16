@@ -8,9 +8,12 @@ import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Genre } from 'src/app/_models/genre';
 import { Library } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { AgeRating } from 'src/app/_models/metadata/age-rating';
+import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
 import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { Tag } from 'src/app/_models/tag';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { LibraryService } from 'src/app/_services/library.service';
@@ -32,6 +35,8 @@ export class FilterSettings {
   presetLibraryId = 0;
   presetCollectionId = 0;
   sortDisabled = false;
+  ageRatingDisabled = false;
+  tagsDisabled = false;
 }
 
 @Component({
@@ -62,6 +67,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   librarySettings: TypeaheadSettings<FilterItem<Library>> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
   collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
+  ageRatingSettings: TypeaheadSettings<FilterItem<AgeRatingDto>> = new TypeaheadSettings();
+  tagsSettings: TypeaheadSettings<FilterItem<Tag>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
   resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
@@ -196,6 +203,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       });
       this.setupCollectionTagTypeahead();
     });
+
+
+    this.setupAgeRatingSettings();
+    this.setupTagSettings();
+    
   }
 
   ngOnDestroy() {
@@ -245,13 +257,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.genreSettings.unique = true;
     this.genreSettings.addIfNonExisting = false;
     this.genreSettings.fetchFn = (filter: string) => {
-      let apiCall;
-      if (this.filter.libraries.length > 0) {
-        apiCall = this.metadataService.getGenresForLibraries(this.filter.libraries);
-      } else {
-        apiCall = this.metadataService.getAllGenres();
-      }
-      return apiCall.pipe(map(genres => {
+      return this.metadataService.getAllGenres(this.filter.libraries).pipe(map(genres => {
         return genres.map(genre => {
           return {
             title: genre.title,
@@ -260,11 +266,56 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
           }
         })
       }));
-     // return of (this.genres)
     };
     this.genreSettings.compareFn = (options: FilterItem<Genre>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
+    }
+  }
+
+  setupAgeRatingSettings() {
+    this.ageRatingSettings.minCharacters = 0;
+    this.ageRatingSettings.multiple = true;
+    this.ageRatingSettings.id = 'age-rating';
+    this.ageRatingSettings.unique = true;
+    this.ageRatingSettings.addIfNonExisting = false;
+    this.ageRatingSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllAgeRatings(this.filter.libraries).pipe(map(ratings => {
+        return ratings.map(rating => {
+          return {
+            title: rating.title,
+            value: rating,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.ageRatingSettings.compareFn = (options: FilterItem<AgeRatingDto>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+    }
+  }
+
+  setupTagSettings() {
+    this.tagsSettings.minCharacters = 0;
+    this.tagsSettings.multiple = true;
+    this.tagsSettings.id = 'tags';
+    this.tagsSettings.unique = true;
+    this.tagsSettings.addIfNonExisting = false;
+    this.tagsSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllTags(this.filter.libraries).pipe(map(tags => {
+        return tags.map(tag => {
+          return {
+            title: tag.title,
+            value: tag,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.tagsSettings.compareFn = (options: FilterItem<Tag>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
     }
   }
 
@@ -344,16 +395,16 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       return this.fetchPeople(PersonRole.Publisher, filter);
     };
     this.peopleSettings[PersonRole.Publisher] = personSettings;
+
+    personSettings = this.createBlankPersonSettings('translators');
+    personSettings.fetchFn = (filter: string) => {
+      return this.fetchPeople(PersonRole.Translator, filter);
+    };
+    this.peopleSettings[PersonRole.Translator] = personSettings;
   }
 
   fetchPeople(role: PersonRole, filter: string): Observable<FilterItem<Person>[]> {
-    let apiCall;
-    if (this.filter.libraries.length > 0) {
-      apiCall = this.metadataService.getPeopleForLibraries(this.filter.libraries);
-    } else {
-      apiCall = this.metadataService.getAllPeople();
-    }
-    return apiCall.pipe(map(people => {
+    return this.metadataService.getAllPeople(this.filter.libraries).pipe(map(people => {
       return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter)).map((p: Person) => {
         return {
           title: p.name,
@@ -443,6 +494,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       case PersonRole.Writer:
         this.filter.writers = persons.map(p => p.value.id);
         break;
+      case PersonRole.Translator:
+        this.filter.translators = persons.map(p => p.value.id);
 
     }
   }
@@ -453,6 +506,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateRating(rating: any) {
     this.filter.rating = rating;
+  }
+
+  updateAgeRating(ratingDtos: FilterItem<AgeRatingDto>[]) {
+    this.filter.ageRating = ratingDtos.map(item => item.value.value) || [];
   }
 
   updateReadStatus(status: string) {

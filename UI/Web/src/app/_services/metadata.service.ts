@@ -6,7 +6,9 @@ import { environment } from 'src/environments/environment';
 import { ChapterMetadata } from '../_models/chapter-metadata';
 import { Genre } from '../_models/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
+import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 import { Person } from '../_models/person';
+import { Tag } from '../_models/tag';
 
 @Injectable({
   providedIn: 'root'
@@ -37,19 +39,35 @@ export class MetadataService {
     }));
   }
 
-  getAllGenres() {
+  getAllAgeRatings(libraries?: Array<number>) {
+    let method = 'metadata/age-ratings'
+    if (libraries != undefined && libraries.length > 0) {
+      method += '?libraryIds=' + libraries.join(',');
+    }
+    return this.httpClient.get<Array<AgeRatingDto>>(this.baseUrl + method);;
+  }
+
+  getAllTags(libraries?: Array<number>) {
+    let method = 'metadata/tags'
+    if (libraries != undefined && libraries.length > 0) {
+      method += '?libraryIds=' + libraries.join(',');
+    }
+    return this.httpClient.get<Array<Tag>>(this.baseUrl + method);;
+  }
+
+  getAllGenres(libraries?: Array<number>) {
+    let method = 'metadata/genres'
+    if (libraries != undefined && libraries.length > 0) {
+      method += '?libraryIds=' + libraries.join(',');
+    }
     return this.httpClient.get<Genre[]>(this.baseUrl + 'metadata/genres');
   }
 
-  getGenresForLibraries(libraries: Array<number>) {
-    return this.httpClient.get<Genre[]>(this.baseUrl + 'metadata/genres?libraryIds=' + libraries.join(','));
-  }
-
-  getAllPeople() {
+  getAllPeople(libraries?: Array<number>) {
+    let method = 'metadata/people'
+    if (libraries != undefined && libraries.length > 0) {
+      method += '?libraryIds=' + libraries.join(',');
+    }
     return this.httpClient.get<Person[]>(this.baseUrl + 'metadata/people');
-  }
-
-  getPeopleForLibraries(libraries: Array<number>) {
-    return this.httpClient.get<Person[]>(this.baseUrl + 'metadata/people?libraryIds=' + libraries.join(','));
   }
 }
