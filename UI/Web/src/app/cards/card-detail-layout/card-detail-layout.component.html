@@ -40,7 +40,7 @@
     <ng-template #filterSection>
         <div class="filter-section">
             <div class="row no-gutters">
-                <div class="col-md-3" *ngIf="!filterSettings.formatDisabled">
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
                         <label for="format">Format</label>
                         <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
@@ -54,7 +54,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3"*ngIf="!filterSettings.libraryDisabled">
+                <div class="col-md-2 mr-3"*ngIf="!filterSettings.libraryDisabled">
                     <div class="form-group">
                         <label for="libraries">Libraries</label>
                         <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
@@ -68,7 +68,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="!filterSettings.collectionDisabled">
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.collectionDisabled">
                     <div class="form-group">
                         <label for="collections">Collections</label>
                         <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
@@ -82,7 +82,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="!filterSettings.genresDisabled">
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.genresDisabled">
                     <div class="form-group">
                         <label for="genres">Genres</label>
                         <app-typeahead (selectedData)="updateGenreFilters($event)" [settings]="genreSettings" [reset]="resetTypeaheads">
@@ -98,7 +98,7 @@
             </div>
             <div class="row no-gutters">
                 <!-- The People row -->
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
                         <label for="cover-artist">(Cover) Artists</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
@@ -112,7 +112,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
                     <div class="form-group">
                         <label for="writers">Writers</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
@@ -126,7 +126,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
                     <div class="form-group">
                         <label for="publisher">Publisher</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
@@ -140,7 +140,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
                     <div class="form-group">
                         <label for="Penciller">Penciller</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
@@ -154,7 +154,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
                     <div class="form-group">
                         <label for="letterer">Letterer</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
@@ -168,7 +168,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
                     <div class="form-group">
                         <label for="inker">Inker</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
@@ -182,7 +182,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
                     <div class="form-group">
                         <label for="editor">Editor</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
@@ -196,7 +196,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
                     <div class="form-group">
                         <label for="colorist">Colorist</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
@@ -210,7 +210,7 @@
                     </div>
                 </div>
     
-                <div class="col-md-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
+                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
                     <div class="form-group">
                         <label for="character">Character</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
@@ -225,9 +225,7 @@
                 </div>
             </div>
             <div class="row no-gutters">
-                <!-- Rating/Review/Progress -->
                 <div class="col" *ngIf="!filterSettings.readProgressDisabled">
-                    <!-- Not sure how to do this on the backend, might have to be a UI control -->
                     <label>Read Progress</label>
                     <form [formGroup]="readProgressGroup" class="ml-2">
                         <div class="form-check form-check-inline">
@@ -242,18 +240,7 @@
                             <input class="form-check-input" type="checkbox" id="read" formControlName="read">
                             <label class="form-check-label" for="read">Read</label>
                           </div>
-                          <div class="alert alert-warning" *ngIf="!readProgressGroup.get('read')?.value && !readProgressGroup.get('unread')?.value && !readProgressGroup.get('inProgress')?.value">
-                            You must select at least one to get results
-                          </div>
                     </form>
-                    <!-- <app-typeahead (selectedData)="updateReadStatusFilters($event)" [settings]="readStatusSettings" [reset]="resetTypeaheads">
-                        <ng-template #badgeItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                        <ng-template #optionItem let-item let-position="idx">
-                            {{item.title}}
-                        </ng-template>
-                    </app-typeahead> -->
                 </div>
     
                 <div class="col" *ngIf="!filterSettings.ratingDisabled">

@@ -51,8 +51,16 @@ namespace API.Data.Metadata
         /// </summary>
         public string TitleSort { get; set; } = string.Empty;
 
-
-
+        /// <summary>
+        /// The translator, can be comma separated. This is part of ComicInfo.xml draft v2.1
+        /// </summary>
+        /// See https://github.com/anansi-project/comicinfo/issues/2 for information about this tag
+        public string Translator { get; set; } = string.Empty;
+        /// <summary>
+        /// Misc tags. This is part of ComicInfo.xml draft v2.1
+        /// </summary>
+        /// See https://github.com/anansi-project/comicinfo/issues/1 for information about this tag
+        public string Tags { get; set; } = string.Empty;
 
         /// <summary>
         /// This is the Author. For Books, we map creator tag in OPF to this field. Comma separated if multiple.

@@ -109,6 +109,21 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
+
+      let sum = 0;
+      sum += (this.filter.readStatus.read ? 1 : 0);
+      sum += (this.filter.readStatus.inProgress ? 1 : 0);
+      sum += (this.filter.readStatus.notRead ? 1 : 0);
+
+      if (sum === 1) {
+        if (this.filter.readStatus.read) this.readProgressGroup.get('read')?.disable({ emitEvent: false });
+        if (this.filter.readStatus.notRead) this.readProgressGroup.get('notRead')?.disable({ emitEvent: false });
+        if (this.filter.readStatus.inProgress) this.readProgressGroup.get('inProgress')?.disable({ emitEvent: false });
+      } else {
+        this.readProgressGroup.get('read')?.enable({ emitEvent: false });
+        this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
+        this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
+      }
     });
 
     this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
@@ -470,7 +485,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
     this.resetTypeaheads.next(true);
-    
+
     this.applyFilter.emit(this.filter);
     this.updateApplied++;
   }
