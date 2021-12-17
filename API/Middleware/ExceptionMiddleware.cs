@@ -14,7 +14,7 @@ namespace API.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly IHostEnvironment _env;
-        
+
 
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
         {
@@ -34,14 +34,14 @@ namespace API.Middleware
                 _logger.LogError(ex, "There was an exception");
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-                
-                var response = _env.IsDevelopment() 
+
+                var response = _env.IsDevelopment()
                     ? new ApiException(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                    : new ApiException(context.Response.StatusCode, "Internal Server Error");
-                
+                    : new ApiException(context.Response.StatusCode, "Internal Server Error", ex.StackTrace);
+
                 var options = new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = 
+                    PropertyNamingPolicy =
                         JsonNamingPolicy.CamelCase
                 };
 
