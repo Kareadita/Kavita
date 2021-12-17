@@ -1,11 +1,13 @@
 using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Services;
+using API.Services.Tasks;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -64,12 +66,6 @@ namespace API
                     return;
                 }
 
-                // This doesn't work either
-                //var directoryService = services.GetRequiredService<DirectoryService>();
-
-
-
-
                 var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
                 try
                 {
@@ -85,6 +81,16 @@ namespace API
                 }
 
                 // Apply all migrations on startup
+                // If we have pending migrations, make a backup first
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogInformation("Performing backup as migrations are needed");
+                    // var backupService = services.GetRequiredService<BackupService>();
+                    // await backupService.BackupDatabase();
+                }
+
                 await context.Database.MigrateAsync();
 
                 if (requiresCoverImageMigration)
@@ -99,7 +105,7 @@ namespace API
             catch (Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(ex, "An error occurred during migration");
+                logger.LogCritical(ex, "An error occurred during migration");
             }
 
             await host.RunAsync();

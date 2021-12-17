@@ -44,7 +44,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
-                new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
+                new () {Key = ServerSettingKey.TaskBackup, Value = "daily"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},

@@ -4,10 +4,16 @@
 
 namespace API.Data.Migrations
 {
-    public partial class seriesAndChapterTags : Migration
+    public partial class filteringChanges : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<string>(
+                name: "Language",
+                table: "SeriesMetadata",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "Tag",
                 columns: table => new
@@ -72,6 +78,16 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUserRating_SeriesId",
+                table: "AppUserRating",
+                column: "SeriesId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserProgresses_SeriesId",
+                table: "AppUserProgresses",
+                column: "SeriesId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChapterTag_TagsId",
                 table: "ChapterTag",
                 column: "TagsId");
@@ -86,10 +102,34 @@ namespace API.Data.Migrations
                 table: "Tag",
                 columns: new[] { "NormalizedTitle", "ExternalTag" },
                 unique: true);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AppUserProgresses_Series_SeriesId",
+                table: "AppUserProgresses",
+                column: "SeriesId",
+                principalTable: "Series",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_AppUserRating_Series_SeriesId",
+                table: "AppUserRating",
+                column: "SeriesId",
+                principalTable: "Series",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_AppUserProgresses_Series_SeriesId",
+                table: "AppUserProgresses");
+
+            migrationBuilder.DropForeignKey(
+                name: "FK_AppUserRating_Series_SeriesId",
+                table: "AppUserRating");
+
             migrationBuilder.DropTable(
                 name: "ChapterTag");
 
@@ -98,6 +138,18 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tag");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AppUserRating_SeriesId",
+                table: "AppUserRating");
+
+            migrationBuilder.DropIndex(
+                name: "IX_AppUserProgresses_SeriesId",
+                table: "AppUserProgresses");
+
+            migrationBuilder.DropColumn(
+                name: "Language",
+                table: "SeriesMetadata");
         }
     }
 }

@@ -34,7 +34,26 @@ public class OpdsController : BaseApiController
     private const string Prefix = "/api/opds/";
     private readonly FilterDto _filterDto = new FilterDto()
     {
-        Formats = new List<MangaFormat>()
+        Formats = new List<MangaFormat>(),
+        Character = new List<int>(),
+        Colorist = new List<int>(),
+        Editor = new List<int>(),
+        Genres = new List<int>(),
+        Inker = new List<int>(),
+        Languages = new List<string>(),
+        Letterer = new List<int>(),
+        Penciller = new List<int>(),
+        Libraries = new List<int>(),
+        Publisher = new List<int>(),
+        Rating = 0,
+        Tags = new List<int>(),
+        Translators = new List<int>(),
+        Writers = new List<int>(),
+        AgeRating = new List<AgeRating>(),
+        CollectionTags = new List<int>(),
+        CoverArtist = new List<int>(),
+        ReadStatus = new ReadStatus(),
+        SortOptions = null
     };
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 

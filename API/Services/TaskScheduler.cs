@@ -12,7 +12,7 @@ namespace API.Services;
 
 public interface ITaskScheduler
 {
-    void ScheduleTasks();
+    Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
     void ScanLibrary(int libraryId, bool forceUpdate = false);
@@ -58,11 +58,11 @@ public class TaskScheduler : ITaskScheduler
         _directoryService = directoryService;
     }
 
-    public void ScheduleTasks()
+    public async Task ScheduleTasks()
     {
         _logger.LogInformation("Scheduling reoccurring tasks");
 
-        var setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).GetAwaiter().GetResult().Value;
+        var setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskScan)).Value;
         if (setting != null)
         {
             var scanLibrarySetting = setting;
@@ -75,7 +75,7 @@ public class TaskScheduler : ITaskScheduler
             RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
         }
 
-        setting = Task.Run(() => _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Result.Value;
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
