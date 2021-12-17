@@ -7,5 +7,6 @@
         public int VolumeId { get; set; }
         public int SeriesId { get; set; }
         public int ChapterId { get; set; }
+        public string FileName { get; set; }
     }
 }

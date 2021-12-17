@@ -12,6 +12,10 @@ namespace API.Entities
         public int VolumeId { get; set; }
         public int SeriesId { get; set; }
         public int ChapterId { get; set; }
+        /// <summary>
+        /// Filename in the Bookmark Directory
+        /// </summary>
+        public string FileName { get; set; }
 
 
         // Relationships
