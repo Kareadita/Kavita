@@ -113,6 +113,14 @@ public class MetadataService : IMetadataService
                 person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Characters))
+        {
+            var people = comicInfo.Characters.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
         if (!string.IsNullOrEmpty(comicInfo.Translator))
         {
             var people = comicInfo.Translator.Split(",");
@@ -199,7 +207,9 @@ public class MetadataService : IMetadataService
     private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
-        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage), null, volume.Created, forceUpdate)) return false;
+        if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
+                _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
+                null, volume.Created, forceUpdate)) return false;
 
         volume.Chapters ??= new List<Chapter>();
         var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
@@ -218,7 +228,8 @@ public class MetadataService : IMetadataService
     {
         if (series == null) return;
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage), null, series.Created, forceUpdate, series.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage),
+                null, series.Created, forceUpdate, series.CoverImageLocked))
             return;
 
         series.Volumes ??= new List<Volume>();

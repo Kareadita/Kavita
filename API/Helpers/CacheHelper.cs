@@ -38,11 +38,11 @@ public class CacheHelper : ICacheHelper
     public bool ShouldUpdateCoverImage(string coverPath, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
         bool isCoverLocked = false)
     {
-        if (firstFile == null) return true;
 
         var fileExists = !string.IsNullOrEmpty(coverPath) && _fileService.Exists(coverPath);
         if (isCoverLocked && fileExists) return false;
         if (forceUpdate) return true;
+        if (firstFile == null) return true;
         return (_fileService.HasFileBeenModifiedSince(coverPath, chapterCreated)) || !fileExists;
     }
 

@@ -86,6 +86,7 @@ public class ReadingItemService : IReadingItemService
             MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName),
             MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName),
             MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName),
+            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName),
             _ => string.Empty
         };
     }

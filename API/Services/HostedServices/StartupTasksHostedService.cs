@@ -20,7 +20,7 @@ namespace API.Services.HostedServices
             using var scope = _provider.CreateScope();
 
             var taskScheduler = scope.ServiceProvider.GetRequiredService<ITaskScheduler>();
-            taskScheduler.ScheduleTasks();
+            await taskScheduler.ScheduleTasks();
             taskScheduler.ScheduleUpdaterTasks();
 
             try

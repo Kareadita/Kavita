@@ -9,7 +9,7 @@
         <!-- Maybe we can put the library this resides in to make it easier to get back -->
         <!-- tooltip here explaining how this is year of first issue -->
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date">{{seriesMetadata.releaseYear}}</app-tag-badge>
-        <app-tag-badge *ngIf="seriesMetadata.language !== ''" title="Language">{{seriesMetadata.language}}</app-tag-badge>
+        <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language">{{seriesMetadata.language}}</app-tag-badge>
         <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">
             <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
         </app-tag-badge>
