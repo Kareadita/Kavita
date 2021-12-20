@@ -76,6 +76,7 @@ namespace API.Data.Metadata
         public string CoverArtist { get; set; } = string.Empty;
         public string Editor { get; set; } = string.Empty;
         public string Publisher { get; set; } = string.Empty;
+        public string Characters { get; set; } = string.Empty;
 
         public static AgeRating ConvertAgeRatingToEnum(string value)
         {
