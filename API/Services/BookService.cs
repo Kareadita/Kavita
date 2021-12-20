@@ -20,7 +20,12 @@ using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
+using Image = SixLabors.ImageSharp.Image;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace API.Services
 {
@@ -541,15 +546,21 @@ namespace API.Services
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();
             var height = pageReader.GetPageHeight();
-            using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            AddBytesToBitmap(bmp, rawBytes);
-            // Removes 1px margin on left/right side after bitmap is copied out
-            for (var y = 0; y < bmp.Height; y++)
-            {
-                bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
-            }
+            //var decoder = new BmpDecoder().Decode(Configuration.Default, stream);
+            var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
+
+            //var stream = new MemoryStream();
             stream.Seek(0, SeekOrigin.Begin);
-            bmp.Save(stream, ImageFormat.Jpeg);
+            image.SaveAsPng(stream);
+            // using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            // AddBytesToBitmap(bmp, rawBytes);
+            // // Removes 1px margin on left/right side after bitmap is copied out
+            // for (var y = 0; y < bmp.Height; y++)
+            // {
+            //     bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
+            // }
+            // stream.Seek(0, SeekOrigin.Begin);
+            // bmp.Save(stream, ImageFormat.Jpeg);
             stream.Seek(0, SeekOrigin.Begin);
         }
 
