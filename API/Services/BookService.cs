@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,7 +17,10 @@ using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace API.Services
 {
@@ -445,31 +445,25 @@ namespace API.Services
            return null;
         }
 
-        private static void AddBytesToBitmap(Bitmap bmp, byte[] rawBytes)
-        {
-            var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-
-            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, bmp.PixelFormat);
-            var pNative = bmpData.Scan0;
-
-            Marshal.Copy(rawBytes, 0, pNative, rawBytes.Length);
-            bmp.UnlockBits(bmpData);
-        }
-
+        /// <summary>
+        /// Extracts a pdf into images to a target directory. Uses multi-threaded implementation since docnet is slow normally.
+        /// </summary>
+        /// <param name="fileFilePath"></param>
+        /// <param name="targetDirectory"></param>
         public void ExtractPdfImages(string fileFilePath, string targetDirectory)
         {
             _directoryService.ExistOrCreate(targetDirectory);
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();
-            using var stream = StreamManager.GetStream("BookService.GetPdfPage");
-            for (var pageNumber = 0; pageNumber < pages; pageNumber++)
+            Parallel.For(0, pages, pageNumber =>
             {
+                using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, pageNumber, stream);
                 using var fileStream = File.Create(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"));
                 stream.Seek(0, SeekOrigin.Begin);
                 stream.CopyTo(fileStream);
-            }
+            });
         }
 
         /// <summary>
@@ -536,20 +530,14 @@ namespace API.Services
 
         private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
-            // TODO: BUG: Most of this Bitmap code is only supported on Windows. Refactor.
             using var pageReader = docReader.GetPageReader(pageNumber);
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();
             var height = pageReader.GetPageHeight();
-            using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            AddBytesToBitmap(bmp, rawBytes);
-            // Removes 1px margin on left/right side after bitmap is copied out
-            for (var y = 0; y < bmp.Height; y++)
-            {
-                bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
-            }
+            var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
+
             stream.Seek(0, SeekOrigin.Begin);
-            bmp.Save(stream, ImageFormat.Jpeg);
+            image.SaveAsPng(stream);
             stream.Seek(0, SeekOrigin.Begin);
         }
 

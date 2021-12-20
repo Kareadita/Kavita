@@ -346,6 +346,7 @@ namespace API.Services
                 info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
                 info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
                 info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+                info.Characters = Parser.Parser.CleanAuthor(info.Characters);
 
                 if (!string.IsNullOrEmpty(info.Web))
                 {

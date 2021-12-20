@@ -171,6 +171,8 @@ namespace API.Tests.Parser
         [InlineData("TEST/Love Hina - Special.jpg", false)]
         [InlineData("__macosx/Love Hina/", false)]
         [InlineData("MACOSX/Love Hina/", false)]
+        [InlineData("._Love Hina/Love Hina/", true)]
+        [InlineData("@Recently-Snapshot/Love Hina/", true)]
         public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
