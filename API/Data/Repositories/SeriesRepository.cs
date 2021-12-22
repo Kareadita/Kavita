@@ -514,7 +514,7 @@ public class SeriesRepository : ISeriesRepository
         var retSeries = query.Where(s => s.AppUserId == userId
                                          && s.PagesRead > 0
                                          && s.PagesRead < s.Series.Pages)
-            .OrderByDescending(s => s.LastModified)
+            .OrderByDescending(s => s.LastModified) // TODO: This needs to be Chapter Created (Max)
             .ThenByDescending(s => s.Series.LastModified)
             .Select(s => s.Series)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)

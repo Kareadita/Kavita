@@ -468,11 +468,7 @@ namespace API.Controllers
                    _unitOfWork.UserRepository.Update(user);
                }
 
-
-               if (await _unitOfWork.CommitAsync())
-               {
-                  return Ok();
-               }
+               await _unitOfWork.CommitAsync();
             }
             catch (Exception)
             {
