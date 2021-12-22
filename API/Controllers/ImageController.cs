@@ -85,5 +85,23 @@ namespace API.Controllers
             Response.AddCacheHeader(path);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
+
+        /// <summary>
+        /// Returns image for a given bookmark page
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="pageNum">Starts at 0</param>
+        /// <returns></returns>
+        [HttpGet("bookmark")]
+        public async Task<ActionResult> GetBookmarkImage(int bookmarkId, int chapterId)
+        {
+            //var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, user.Id);
+            if (bookmark == null) return BadRequest("Bookmark does not exist");
+
+            var file = new FileInfo(Path.Join(_directoryService.BookmarkDirectory, bookmark.FileName));
+            var format = Path.GetExtension(file.FullName).Replace(".", "");
+            return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
+        }
     }
 }

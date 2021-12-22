@@ -40,6 +40,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
+    Task<BookmarkDto> GetBookmarkDtoAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);

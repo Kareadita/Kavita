@@ -20,6 +20,7 @@ namespace API.Services
         string LogDirectory { get; }
         string TempDirectory { get; }
         string ConfigDirectory { get; }
+        string BookmarkDirectory { get; }
         /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
@@ -59,6 +60,7 @@ namespace API.Services
         public string LogDirectory { get; }
         public string TempDirectory { get; }
         public string ConfigDirectory { get; }
+        public string BookmarkDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -75,6 +77,7 @@ namespace API.Services
            LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
            TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
            ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
+           BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
        }
 
        /// <summary>

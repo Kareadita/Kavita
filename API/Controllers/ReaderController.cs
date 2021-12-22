@@ -24,15 +24,17 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
+        private readonly IDirectoryService _directoryService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
-            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService, IDirectoryService directoryService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
+            _directoryService = directoryService;
         }
 
         /// <summary>
@@ -455,6 +457,16 @@ namespace API.Controllers
                 var userBookmark =
                     await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
+                // We need to get the image
+                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+                var fileInfo = new FileInfo(path);
+
+                _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
+                    $"{user.Id}", $"{bookmarkDto.SeriesId}"));
+
+
                if (userBookmark == null)
                {
                    user.Bookmarks ??= new List<AppUserBookmark>();
@@ -464,6 +476,8 @@ namespace API.Controllers
                        VolumeId = bookmarkDto.VolumeId,
                        SeriesId = bookmarkDto.SeriesId,
                        ChapterId = bookmarkDto.ChapterId,
+                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
+
                    });
                    _unitOfWork.UserRepository.Update(user);
                }

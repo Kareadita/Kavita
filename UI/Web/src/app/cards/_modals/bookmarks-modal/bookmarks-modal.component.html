@@ -9,6 +9,13 @@
     <ul class="list-unstyled">
         <li class="list-group-item" *ngIf="bookmarks.length > 0">
             There are {{bookmarks.length}} pages bookmarked over {{uniqueChapters}} files.
+            
+            <div class="row no-gutters">
+                <div *ngFor="let bookmark of bookmarks; let idx = index">
+                    <app-card-item class="col-auto" [title]="'Page ' + bookmark.page" [entity]="bookmark"
+                    [imageUrl]="imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)"></app-card-item>
+                </div>
+            </div>
         </li>
         <li class="list-group-item" *ngIf="bookmarks.length === 0">
             No bookmarks yet

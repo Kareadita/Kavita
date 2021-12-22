@@ -41,7 +41,7 @@ export class ImageService {
   }
 
   getBookmarkedImage(chapterId: number, pageNum: number) {
-    return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId + '&pageNum=' + pageNum;
+    return this.baseUrl + 'image/bookmark?chapterId=' + chapterId + '&pageNum=' + pageNum;
   }
 
   updateErroredImage(event: any) {

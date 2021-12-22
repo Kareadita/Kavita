@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -19,19 +20,24 @@ public interface IReaderService
     Task<int> CapPageToChapter(int chapterId, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
+    Task<string> BookmarkFile();
 }
 
 public class ReaderService : IReaderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
+    private readonly IDirectoryService _directoryService;
+    private readonly ICacheService _cacheService;
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IDirectoryService directoryService, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _directoryService = directoryService;
+        _cacheService = cacheService;
     }
 
     /// <summary>
@@ -297,6 +303,17 @@ public class ReaderService : IReaderService
             }
         }
         return -1;
+    }
+
+    public async Task<string> BookmarkFile()
+    {
+        var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+        if (chapter == null) return string.Empty;
+        var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+        var fileInfo = new FileInfo(path);
+
+        _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
+            $"{user.Id}", $"{bookmarkDto.SeriesId}"));
     }
 
     private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber)
