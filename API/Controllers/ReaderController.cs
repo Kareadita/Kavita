@@ -477,9 +477,10 @@ namespace API.Controllers
             catch (Exception)
             {
                await _unitOfWork.RollbackAsync();
+               return BadRequest("Could not save bookmark");
             }
 
-            return BadRequest("Could not save bookmark");
+            return Ok();
         }
 
         /// <summary>
