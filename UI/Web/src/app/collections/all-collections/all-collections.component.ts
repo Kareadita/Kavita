@@ -37,6 +37,13 @@ export class AllCollectionsComponent implements OnInit {
     this.router.navigate(['collections', item.id]);
     this.loadPage();
   }
+  loadCollectionTab(item: CollectionTag) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['collections', item.id])
+    );
+  
+    window.open(url, '_blank');
+  }
 
   loadPage() {
     this.collectionService.allTags().subscribe(tags => {

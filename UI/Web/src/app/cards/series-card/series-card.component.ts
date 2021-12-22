@@ -176,5 +176,12 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     this.clicked.emit(this.data);
     this.router.navigate(['library', this.libraryId, 'series', this.data?.id]);
   }
+  handleMiddleClick() {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['library', this.libraryId, 'series', this.data?.id])
+    );
+  
+    window.open(url, '_blank');
+  }
 
 }

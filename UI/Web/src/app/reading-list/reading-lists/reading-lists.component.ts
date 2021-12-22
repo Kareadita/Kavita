@@ -91,5 +91,12 @@ export class ReadingListsComponent implements OnInit {
   handleClick(list: ReadingList) {
     this.router.navigateByUrl('lists/' + list.id);
   }
+  handleMiddleClick(list: ReadingList) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['lists', list.id])
+    );
+  
+    window.open(url, '_blank');
+  }
 
 }

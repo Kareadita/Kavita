@@ -63,6 +63,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Output() clicked = new EventEmitter<string>();
   /**
+   * Event emitted when item is middle-clicked
+   */
+  @Output() middleclicked = new EventEmitter<string>();
+  /**
    * When the card is selected.
    */
   @Output() selection = new EventEmitter<boolean>();
@@ -172,6 +176,12 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   handleClick(event?: any) {
     this.clicked.emit(this.title);
+  }
+  @HostListener('mouseup', ['$event'])
+  handleMiddleClick(event?: any) {
+    if (event.button === 1) {
+      this.middleclicked.emit(this.title);
+    }
   }
 
   isNullOrEmpty(val: string) {

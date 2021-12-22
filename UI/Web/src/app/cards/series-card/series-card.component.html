@@ -2,5 +2,6 @@
     <app-card-item [title]="data.name" [actions]="actions" [supressLibraryLink]="suppressLibraryLink" [imageUrl]="imageUrl" 
     [entity]="data" [total]="data.pages" [read]="data.pagesRead"  (clicked)="handleClick()"
     [allowSelection]="allowSelection" (selection)="selection.emit(selected)" [selected]="selected"
+    (middleclicked)="handleMiddleClick()"
     ></app-card-item>
 </ng-container>

@@ -472,6 +472,26 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id], {queryParams: {incognitoMode}});
     }
   }
+  openChapterTab(chapter: Chapter) {
+    if (chapter.pages === 0) {
+      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+      return;
+    }
+
+    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id])
+      );
+    
+      window.open(url, '_blank');
+    } else {
+      const url = this.router.serializeUrl(
+        this.router.createUrlTree(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id])
+      );
+    
+      window.open(url, '_blank');
+    }
+  }
 
   openVolume(volume: Volume) {
     if (volume.chapters === undefined || volume.chapters?.length === 0) {
@@ -492,7 +512,25 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // Sort the chapters, then grab first if no reading progress
     this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
   }
+  openVolumeTab(volume: Volume) {
+    if (volume.chapters === undefined || volume.chapters?.length === 0) {
+      this.toastr.error('There are no chapters to this volume. Cannot read.');
+      return;
+    }
+    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes 
+    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background 
+    // to help the user make a good choice. 
 
+    // If user has progress on the volume, load them where they left off
+    if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
+      // Find the continue point chapter and load it
+      this.openChapterTab(this.readerService.getCurrentChapter([volume]));
+      return;
+    }
+
+    // Sort the chapters, then grab first if no reading progress
+    this.openChapterTab([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
+  }
   isNullOrEmpty(val: string) {
     return val === null || val === undefined || val === '';
   }
