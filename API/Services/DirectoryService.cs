@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -32,6 +32,7 @@ namespace API.Services
         void CopyFileToDirectory(string fullFilePath, string targetDirectory);
         int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger);
         bool IsDriveMounted(string path);
+        bool IsDirectoryEmpty(string path);
         long GetTotalSize(IEnumerable<string> paths);
         void ClearDirectory(string directoryPath);
         void ClearAndDeleteDirectory(string directoryPath);
@@ -259,7 +260,12 @@ namespace API.Services
            return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
        }
 
-       public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
+        public bool IsDirectoryEmpty(string path)
+        {
+            return Directory.EnumerateFileSystemEntries(path).Any();
+        }
+
+        public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
            // TODO: Use GitFiles instead
           if (searchPatternExpression != string.Empty)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -218,6 +218,13 @@ public class ScannerService : IScannerService
         if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            return;
+        }
+
+        // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
+        if (library.Folders.Any(f => !_directoryService.IsDirectoryEmpty(f.Path)))
+        {
+            _logger.LogError("Some of the root folders for library are empty. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
