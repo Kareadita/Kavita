@@ -260,6 +260,12 @@ namespace API.Services
            return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
        }
 
+
+        /// <summary>
+        /// Checks if the root path of a path is empty or not.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public bool IsDirectoryEmpty(string path)
         {
             return Directory.EnumerateFileSystemEntries(path).Any();

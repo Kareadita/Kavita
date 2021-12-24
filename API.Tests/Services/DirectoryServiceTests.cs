@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
@@ -370,6 +370,29 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
             Assert.True(ds.IsDriveMounted("c:/manga/file"));
+        }
+        #endregion
+
+        #region IsDirectoryEmpty
+        [Fact]
+        public void IsDirectoryEmpty_DirectoryIsEmpty()
+        {
+            const string testDirectory = "c:/manga/";
+            var fileSystem = new MockFileSystem();
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            Assert.False(ds.IsDirectoryEmpty("c:/manga/"));
+        }
+
+        [Fact]
+        public void IsDirectoryEmpty_DirectoryIsNotEmpty()
+        {
+            const string testDirectory = "c:/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}data-0.txt", new MockFileData("abc"));
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            Assert.False(ds.IsDirectoryEmpty("c:/manga/"));
         }
         #endregion
 
