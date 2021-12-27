@@ -55,6 +55,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'Preferences', fragment: ''},
     {title: 'Bookmarks', fragment: 'bookmarks'},
+    {title: 'Password', fragment: 'password'},
+    {title: '3rd Party Clients', fragment: 'clients'},
   ];
   active = this.tabs[0];
   opdsEnabled: boolean = false;
