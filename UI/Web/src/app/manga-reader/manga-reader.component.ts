@@ -356,7 +356,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onDestroy.complete();
     this.goToPageEvent.complete();
     this.showBookmarkEffectEvent.complete();
-    this.exitFullscreen();
+    this.readerService.exitFullscreen();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -1096,50 +1096,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleFullscreen() {
-    this.checkFullscreenMode();
+    this.isFullscreen = this.readerService.checkFullscreenMode();
     if (this.isFullscreen) {
-      this.exitFullscreen();
-    } else {
-      this.enterFullscreen(this.reader.nativeElement);
-    }
-  }
-
-  enterFullscreen(el: Element) {
-    //const el = this.reader.nativeElement;
-    if (!document.fullscreenElement) { 
-      if (el.requestFullscreen) {
-        el.requestFullscreen().then(() => {
-          this.isFullscreen = true;
-        });
-      }
-      //  else if (el.mozRequestFullScreen) {
-      //   el.mozRequestFullScreen();
-      // } else if (el.webkitRequestFullscreen) {
-      //   el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-      // } else if (el.msRequestFullscreen) {
-      //   el.msRequestFullscreen();
-      // }
-    }
-  }
-
-  exitFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen().then(() => {
+      this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
       });
+    } else {
+      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+        this.isFullscreen = true;
+      });
     }
-    //  else if (document.msExitFullscreen) {
-    //   document.msExitFullscreen();
-    // } else if (document.mozCancelFullScreen) {
-    //   document.mozCancelFullScreen();
-    // } else if (document.webkitExitFullscreen) {
-    //   document.webkitExitFullscreen();
-    // }
   }
 
-  checkFullscreenMode() {
-    this.isFullscreen = document.fullscreenElement != null;
-  }
 
   toggleReaderMode() {
     switch(this.readerMode) {
