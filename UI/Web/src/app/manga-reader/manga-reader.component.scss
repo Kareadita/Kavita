@@ -49,14 +49,6 @@ canvas {
     white-space: nowrap;
 }
 
-.filter-dark {
-    filter: brightness(0.65);
-}
-
-.filter-sepia {
-    filter: sepia(80%) hue-rotate(349deg) saturate(200%) brightness(0.65);
-}
-
 .bottom-menu {
     padding: 20px 20px;
 }
@@ -64,6 +56,7 @@ canvas {
 
 .overlay {
   background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
   color: white;
 }
 
@@ -233,10 +226,21 @@ canvas {
     justify-content: center;
 
     i {
-        color: colors.$primary-color;
-        font-size: 38px;
+        color: white;
+        font-size: 42px;
     }
   }
+
+.highlight {
+  background-color: rgba(65, 225, 100, 0.5) !important;
+  animation: fadein .5s both;
+  backdrop-filter: blur(10px);
+}
+.highlight-2 {
+  background-color: rgba(65, 105, 225, 0.5) !important;
+  animation: fadein .5s both;
+  backdrop-filter: blur(10px);
+}
 
   
 .bookmark-effect {

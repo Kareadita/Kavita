@@ -24,7 +24,7 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} " 
+        <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
@@ -38,17 +38,17 @@
             (loadPrevChapter)="loadPrevChapter()"
             [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
         </div>
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}}" (click)="handlePageChange($event, 'right')">
-                <div *ngIf="showClickOverlay">
+        <ng-container *ngIf="true || readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+                <div *ngIf="true || showClickOverlay">
                     <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
-                     aria-label="Next Page"></i>
+                     title="Next Page" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}}" (click)="handlePageChange($event, 'left')">
-                <div *ngIf="showClickOverlay">
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+                <div *ngIf="true || showClickOverlay">
                     <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
-                     aria-label="Previous Page"></i>
+                     title="Previous Page" aria-hidden="true"></i>
                 </div>
             </div>
         </ng-container>
