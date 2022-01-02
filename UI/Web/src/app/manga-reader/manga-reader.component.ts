@@ -1100,10 +1100,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isFullscreen) {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
+        this.firstPageRendered = false;
+        this.render();
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
+        this.firstPageRendered = false;
+        this.render();
       });
     }
   }
