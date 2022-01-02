@@ -623,6 +623,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    *
    * @returns If the current model reflects no split of fit split
+   * @remarks Fit to Screen falls under no split
    */
   isNoSplit() {
     const splitValue = parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10);
@@ -631,7 +632,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateSplitPage() {
     const needsSplitting = this.isCoverImage();
-    if (!needsSplitting || this.isNoSplit()) { // TODO: I think I need to check if FitToScreen as well
+    if (!needsSplitting || this.isNoSplit()) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
     }
@@ -664,17 +665,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
       }
     }
-
-    // TODO: I need a condition for changing from fit to screen to a split:
-    // this.currentImageSplitPart
-    // this.firstPageRendered = false;
-    // if (this.ctx && this.canvas) {
-    //   let [w, h] = this.getWindowDimensions();
-    //   console.log('width: ', w);
-    //   console.log('height: ', h);
-    //   this.canvas.nativeElement.width = w;
-    //   this.canvas.nativeElement.height = h;
-    // }
   }
 
   handlePageChange(event: any, direction: string) {
@@ -851,10 +841,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const needsSplitting = this.isCoverImage();
       this.updateSplitPage();
 
-      console.log('Needs Splitting: ', needsSplitting);
-      console.log('First Page Rendered: ', this.firstPageRendered);
-
-
       if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
         this.canvas.nativeElement.width = this.canvasImage.width / 2;
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
@@ -863,12 +849,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       } else {
         if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
-          this.updateScalingForFirstPageRender(); // BUG: This can cause issues if firstPageRendered is Split Page
+          this.updateScalingForFirstPageRender();
         }
 
         // Fit Split on a page that needs splitting
         if (this.shouldRenderAsFitSplit()) {
-          console.log('Rendering Fit Split')
           const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
@@ -887,21 +872,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
           // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
-          console.log('Window width: ', windowWidth);
-          console.log('New Width: ', newWidth);
-          console.log('Image width: ', this.canvasImage.width);
           if (windowWidth > newWidth) {
-            console.log('Using raw draw');
-            //this.ctx.drawImage(this.canvasImage, 0, 0);
-            this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-            //this.ctx.drawImage(this.canvasImage, 0, 0, windowWidth, newHeight);
+            //console.log('Using raw draw');
+            this.setCanvasSize();
+            this.ctx.drawImage(this.canvasImage, 0, 0);
           } else {
-            console.log('Using scaled draw');
+            //console.log('Using scaled draw');
             this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
             this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
           }
         } else {
-          console.log('Normal Render')
+          //console.log('Normal Render')
           this.ctx.drawImage(this.canvasImage, 0, 0);
         }
       }
@@ -932,10 +913,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Try to reset one time based on who's dimension (width/height) is smaller
       if (widthRatio < heightRatio) {
         newScale = FITTING_OPTION.WIDTH;
-        console.log('New Scale: Width');
       } else if (widthRatio > heightRatio) {
         newScale = FITTING_OPTION.HEIGHT;
-        console.log('New Scale: Height');
       }
 
       this.firstPageRendered = true;
