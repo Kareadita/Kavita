@@ -631,7 +631,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateSplitPage() {
     const needsSplitting = this.isCoverImage();
-    if (!needsSplitting || this.isNoSplit()) {
+    if (!needsSplitting || this.isNoSplit()) { // TODO: I think I need to check if FitToScreen as well
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
     }
@@ -664,6 +664,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           break;
       }
     }
+
+    // TODO: I need a condition for changing from fit to screen to a split:
+    // this.currentImageSplitPart
     // this.firstPageRendered = false;
     // if (this.ctx && this.canvas) {
     //   let [w, h] = this.getWindowDimensions();
@@ -832,9 +835,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (needsScaling) {
         this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
         this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
-      } else if (this.isCoverImage()) {
-        //this.canvas.nativeElement.width = this.canvasImage.width / 2;
-        //this.canvas.nativeElement.height = this.canvasImage.height;
       } else {
         this.canvas.nativeElement.width = this.canvasImage.width;
         this.canvas.nativeElement.height = this.canvasImage.height;
