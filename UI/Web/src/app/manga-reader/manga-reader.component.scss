@@ -6,8 +6,6 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
-$secondary-color: #CCC;
-
 
 @media(min-width: 600px) {
     .overlay .left .i {
@@ -17,7 +15,6 @@ $secondary-color: #CCC;
         right: 20px;
     }
 } 
-
 
 .btn-icon {
     color: white;
@@ -34,6 +31,10 @@ canvas {
         align-items: center;
     }
 }
+
+
+
+
 
 .loading {
     position: absolute;
@@ -226,13 +227,15 @@ canvas {
       width: 100%;
   }
 
-  .highlight {
-      background-color: rgba(65, 225, 100, 0.5) !important;
-      animation: fadein .5s both;
-  }
-  .highlight-2 {
-    background-color: rgba(65, 105, 225, 0.5) !important;
-    animation: fadein .5s both;
+  .pagination-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+        color: colors.$primary-color;
+        font-size: 38px;
+    }
   }
 
   

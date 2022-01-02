@@ -39,8 +39,18 @@
             [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}}" (click)="handlePageChange($event, 'right')">
+                <div *ngIf="showClickOverlay">
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
+                     aria-label="Next Page"></i>
+                </div>
+            </div>
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}}" (click)="handlePageChange($event, 'left')">
+                <div *ngIf="showClickOverlay">
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
+                     aria-label="Previous Page"></i>
+                </div>
+            </div>
         </ng-container>
     </div>
     
