@@ -5,22 +5,16 @@
     </button>
 </div>
 <div class="modal-body">
-    
-    <ul class="list-unstyled">
-        <li class="list-group-item" *ngIf="bookmarks.length > 0">
-            There are {{bookmarks.length}} pages bookmarked over {{uniqueChapters}} files.
-            
-            <div class="row no-gutters">
-                <div *ngFor="let bookmark of bookmarks; let idx = index">
-                    <app-card-item class="col-auto" [title]="'Page ' + (bookmark.page + 1)" [entity]="bookmark" [total]="1" [read]="1"
-                    [imageUrl]="imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)"></app-card-item>
-                </div>
-            </div>
-        </li>
-        <li class="list-group-item" *ngIf="bookmarks.length === 0">
-            No bookmarks yet
-        </li>
-    </ul>
+    <p *ngIf="bookmarks.length > 0; else noBookmarks">
+        There are {{bookmarks.length}} pages bookmarked over {{uniqueChapters}} files.
+    </p>
+    <ng-template #noBookmarks>No bookmarks yet</ng-template>
+
+    <div class="row no-gutters">
+        <div *ngFor="let bookmark of bookmarks; let idx = index">
+            <app-bookmark [bookmark]="bookmark" (bookmarkRemoved)="removeBookmark(bookmark, idx)" class="col-auto"></app-bookmark>
+        </div>
+    </div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="clearBookmarks()" [disabled]="(isDownloading || isClearing) || bookmarks.length === 0">
