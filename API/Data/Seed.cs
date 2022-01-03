@@ -8,6 +8,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,6 +53,8 @@ namespace API.Data
                 new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
                 new () {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
+                new () {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
+                new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
             };
 
             foreach (var defaultSetting in defaultSettings)

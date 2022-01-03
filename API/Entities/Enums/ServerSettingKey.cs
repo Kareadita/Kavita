@@ -58,7 +58,18 @@ namespace API.Entities.Enums
         /// Represents this installation of Kavita. Is tied to Stat reporting but has no information about user or files.
         /// </summary>
         [Description("InstallId")]
-        InstallId = 10
+        InstallId = 10,
+        /// <summary>
+        /// Represents the version the software is running.
+        /// </summary>
+        /// <remarks>This will be updated on Startup to the latest release. Provides ability to detect if certain migrations need to be run.</remarks>
+        [Description("InstallVersion")]
+        InstallVersion = 11,
+        /// <summary>
+        /// Location of where bookmarks are stored
+        /// </summary>
+        [Description("BookmarkDirectory")]
+        BookmarkDirectory = 12,
 
     }
 }

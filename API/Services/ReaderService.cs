@@ -40,6 +40,11 @@ public class ReaderService : IReaderService
         _cacheService = cacheService;
     }
 
+    public static string FormatBookmarkPage(string baseDirectory, int userId, int seriesId, int chapterId)
+    {
+        return Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}");
+    }
+
     /// <summary>
     /// Marks all Chapters as Read by creating or updating UserProgress rows. Does not commit.
     /// </summary>

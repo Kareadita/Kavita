@@ -39,7 +39,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
-    Task<IEnumerable<AppUserBookmark>> GetAllBookmarks();
+    Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
     Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
@@ -115,7 +115,7 @@ public class UserRepository : IUserRepository
         return await query.SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarks()
+    public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()
     {
         return await _context.AppUserBookmark.ToListAsync();
     }
