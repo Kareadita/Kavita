@@ -47,6 +47,7 @@ public interface IUserRepository
     Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
+    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
 }
 
 public class UserRepository : IUserRepository
@@ -183,6 +184,18 @@ public class UserRepository : IUserRepository
             .Include(u => u.ReadingLists)
             .ThenInclude(l => l.Items)
             .SingleOrDefaultAsync(x => x.UserName == username);
+    }
+
+    /// <summary>
+    /// Returns all Bookmarks for a given set of Ids
+    /// </summary>
+    /// <param name="bookmarkIds"></param>
+    /// <returns></returns>
+    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds)
+    {
+        return await _context.AppUserBookmark
+            .Where(b => bookmarkIds.Contains(b.Id))
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

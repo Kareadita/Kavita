@@ -169,6 +169,9 @@ namespace API.Services.Tasks
             _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
         }
 
+        /// <summary>
+        /// Removes all files in the BookmarkDirectory that don't currently have bookmarks in the Database
+        /// </summary>
         public async Task CleanupBookmarks()
         {
             // Search all files in bookmarks/

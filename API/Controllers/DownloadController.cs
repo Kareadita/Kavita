@@ -136,10 +136,10 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
         {
             // We know that all bookmarks will be for one single seriesId
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
-            var totalFilePaths = new List<string>();
 
-            var tempFolder = $"download_{series.Id}_bookmarks";
+            var tempFolder = $"download_{user.Id}_{series.Id}_bookmarks";
             var fullExtractPath = Path.Join(_directoryService.TempDirectory, tempFolder);
             if (_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(fullExtractPath).Exists)
             {
@@ -148,43 +148,12 @@ namespace API.Controllers
             }
             _directoryService.ExistOrCreate(fullExtractPath);
 
-            var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
+            var files = (await _unitOfWork.UserRepository.GetAllBookmarksByIds(downloadBookmarkDto.Bookmarks
+                .Select(b => b.Id)
+                .ToList()))
+                .Select(b => _directoryService.FileSystem.Path.Join(_directoryService.BookmarkDirectory, b.FileName));
 
-            // TODO: Rewrite this logic so bookmark download just zips up the files in bookmarks/ directory
-            foreach (var chapterId in uniqueChapterIds)
-            {
-                var chapterExtractPath = Path.Join(fullExtractPath, $"{series.Id}_bookmark_{chapterId}");
-                var chapterPages = downloadBookmarkDto.Bookmarks.Where(b => b.ChapterId == chapterId)
-                    .Select(b => b.Page).ToList();
-                var mangaFiles = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-                switch (series.Format)
-                {
-                    case MangaFormat.Image:
-                        _directoryService.ExistOrCreate(chapterExtractPath);
-                        _directoryService.CopyFilesToDirectory(mangaFiles.Select(f => f.FilePath), chapterExtractPath, $"{chapterId}_");
-                        break;
-                    case MangaFormat.Archive:
-                    case MangaFormat.Pdf:
-                        _cacheService.ExtractChapterFiles(chapterExtractPath, mangaFiles.ToList());
-                        var originalFiles = _directoryService.GetFilesWithExtension(chapterExtractPath,
-                            Parser.Parser.ImageFileExtensions);
-                        _directoryService.CopyFilesToDirectory(originalFiles, chapterExtractPath, $"{chapterId}_");
-                        _directoryService.DeleteFiles(originalFiles);
-                        break;
-                    case MangaFormat.Epub:
-                        return BadRequest("Series is not in a valid format.");
-                    default:
-                        return BadRequest("Series is not in a valid format. Please rescan series and try again.");
-                }
-
-                var files = _directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
-                // Filter out images that aren't in bookmarks
-                Array.Sort(files, _numericComparer);
-                totalFilePaths.AddRange(files.Where((_, i) => chapterPages.Contains(i)));
-            }
-
-
-            var (fileBytes, _) = await _archiveService.CreateZipForDownload(totalFilePaths,
+            var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
                 tempFolder);
             _directoryService.ClearAndDeleteDirectory(fullExtractPath);
             return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
