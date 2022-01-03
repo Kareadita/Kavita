@@ -150,6 +150,7 @@ namespace API.Controllers
 
             var uniqueChapterIds = downloadBookmarkDto.Bookmarks.Select(b => b.ChapterId).Distinct().ToList();
 
+            // TODO: Rewrite this logic so bookmark download just zips up the files in bookmarks/ directory
             foreach (var chapterId in uniqueChapterIds)
             {
                 var chapterExtractPath = Path.Join(fullExtractPath, $"{series.Id}_bookmark_{chapterId}");

@@ -10,6 +10,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -25,16 +26,20 @@ namespace API.Controllers
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
         private readonly IDirectoryService _directoryService;
+        private readonly ICleanupService _cleanupService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
-            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService, IDirectoryService directoryService)
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
+            IReaderService readerService, IDirectoryService directoryService,
+            ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
             _directoryService = directoryService;
+            _cleanupService = cleanupService;
         }
 
         /// <summary>
@@ -400,6 +405,8 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    // TODO: Kick off job to clear files
+                    await _cleanupService.CleanupBookmarks();
                     return Ok();
                 }
             }
@@ -464,7 +471,7 @@ namespace API.Controllers
                 var fileInfo = new FileInfo(path);
 
                 _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
-                    $"{user.Id}", $"{bookmarkDto.SeriesId}"));
+                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
 
 
                if (userBookmark == null)

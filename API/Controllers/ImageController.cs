@@ -89,14 +89,16 @@ namespace API.Controllers
         /// <summary>
         /// Returns image for a given bookmark page
         /// </summary>
+        /// <remarks>This request is served unauthenticated, but user must be passed via api key to validate</remarks>
         /// <param name="chapterId"></param>
         /// <param name="pageNum">Starts at 0</param>
+        /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
         /// <returns></returns>
         [HttpGet("bookmark")]
-        public async Task<ActionResult> GetBookmarkImage(int bookmarkId, int chapterId)
+        public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
         {
-            //var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, user.Id);
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
             if (bookmark == null) return BadRequest("Bookmark does not exist");
 
             var file = new FileInfo(Path.Join(_directoryService.BookmarkDirectory, bookmark.FileName));

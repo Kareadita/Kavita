@@ -12,7 +12,7 @@
             
             <div class="row no-gutters">
                 <div *ngFor="let bookmark of bookmarks; let idx = index">
-                    <app-card-item class="col-auto" [title]="'Page ' + bookmark.page" [entity]="bookmark"
+                    <app-card-item class="col-auto" [title]="'Page ' + (bookmark.page + 1)" [entity]="bookmark" [total]="1" [read]="1"
                     [imageUrl]="imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)"></app-card-item>
                 </div>
             </div>

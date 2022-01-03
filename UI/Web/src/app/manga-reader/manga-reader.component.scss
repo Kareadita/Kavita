@@ -56,7 +56,7 @@ canvas {
 
 .overlay {
   background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px); // BUG: This doesn't work on Firefox
   color: white;
 }
 

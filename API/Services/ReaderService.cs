@@ -20,7 +20,7 @@ public interface IReaderService
     Task<int> CapPageToChapter(int chapterId, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
-    Task<string> BookmarkFile();
+    //Task<string> BookmarkFile();
 }
 
 public class ReaderService : IReaderService
@@ -305,16 +305,16 @@ public class ReaderService : IReaderService
         return -1;
     }
 
-    public async Task<string> BookmarkFile()
-    {
-        var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-        if (chapter == null) return string.Empty;
-        var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
-        var fileInfo = new FileInfo(path);
-
-        _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
-            $"{user.Id}", $"{bookmarkDto.SeriesId}"));
-    }
+    // public async Task<string> BookmarkFile()
+    // {
+    //     var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+    //     if (chapter == null) return string.Empty;
+    //     var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+    //     var fileInfo = new FileInfo(path);
+    //
+    //     return _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
+    //         $"{user.Id}", $"{bookmarkDto.SeriesId}"));
+    // }
 
     private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber)
     {

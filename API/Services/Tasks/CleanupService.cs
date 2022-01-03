@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -19,6 +20,7 @@ namespace API.Services.Tasks
         Task DeleteChapterCoverImages();
         Task DeleteTagCoverImages();
         Task CleanupBackups();
+        Task CleanupBookmarks();
     }
     /// <summary>
     /// Cleans up after operations on reoccurring basis
@@ -63,6 +65,9 @@ namespace API.Services.Tasks
             await DeleteChapterCoverImages();
             await SendProgress(0.7F);
             await DeleteTagCoverImages();
+            await SendProgress(0.8F);
+            _logger.LogInformation("Cleaning old bookmarks");
+            await CleanupBookmarks();
             await SendProgress(1F);
             _logger.LogInformation("Cleanup finished");
         }
@@ -162,6 +167,30 @@ namespace API.Services.Tasks
                 _directoryService.DeleteFiles(expiredBackups.Select(f => f.FullName));
             }
             _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
+        }
+
+        public async Task CleanupBookmarks()
+        {
+            // Search all files in bookmarks/
+            // except bookmark files and delete those
+            var allBookmarkFiles = _directoryService.GetFiles(_directoryService.BookmarkDirectory, searchOption: SearchOption.AllDirectories);
+            var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarks())
+                .Select(b => _directoryService.FileSystem.Path.Join(_directoryService.BookmarkDirectory,
+                    b.FileName));
+
+            var filesToDelete = allBookmarkFiles.Except(bookmarks);
+
+            _directoryService.DeleteFiles(filesToDelete);
+
+            // Clear all empty directories
+            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(_directoryService.BookmarkDirectory))
+            {
+                if (_directoryService.FileSystem.Directory.GetFiles(directory).Length == 0 &&
+                    _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
+                {
+                    _directoryService.FileSystem.Directory.Delete(directory, false);
+                }
+            }
         }
     }
 }
