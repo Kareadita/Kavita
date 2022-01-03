@@ -193,4 +193,48 @@ export class ReaderService {
     }
     return params;
   }
+
+  enterFullscreen(el: Element, callback?: VoidFunction) {
+    if (!document.fullscreenElement) { 
+      if (el.requestFullscreen) {
+        el.requestFullscreen().then(() => {
+          if (callback) {
+            callback();
+          }
+        });
+      }
+      //  else if (el.mozRequestFullScreen) {
+      //   el.mozRequestFullScreen();
+      // } else if (el.webkitRequestFullscreen) {
+      //   el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+      // } else if (el.msRequestFullscreen) {
+      //   el.msRequestFullscreen();
+      // }
+    }
+  }
+
+  exitFullscreen(callback?: VoidFunction) {
+    if (document.exitFullscreen && this.checkFullscreenMode()) {
+      document.exitFullscreen().then(() => {
+        if (callback) {
+          callback();
+        }
+      });
+    }
+    //  else if (document.msExitFullscreen) {
+    //   document.msExitFullscreen();
+    // } else if (document.mozCancelFullScreen) {
+    //   document.mozCancelFullScreen();
+    // } else if (document.webkitExitFullscreen) {
+    //   document.webkitExitFullscreen();
+    // }
+  }
+
+  /**
+   * 
+   * @returns If document is in fullscreen mode
+   */
+  checkFullscreenMode() {
+    return document.fullscreenElement != null;
+  }
 }

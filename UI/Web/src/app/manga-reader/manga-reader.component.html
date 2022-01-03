@@ -1,4 +1,4 @@
-<div class="reader">
+<div class="reader" #reader>
     <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
         <div style="display: flex; margin-top: 5px;">
             <button class="btn btn-icon" style="height: 100%" title="Back" (click)="closeReader()">
@@ -24,7 +24,7 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{this.colorMode}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} " 
+        <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
@@ -39,8 +39,18 @@
             [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"></div>
-            <div class="{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')"></div>
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+                <div *ngIf="showClickOverlay">
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
+                     title="Next Page" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+                <div *ngIf="showClickOverlay">
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
+                     title="Previous Page" aria-hidden="true"></i>
+                </div>
+            </div>
         </ng-container>
     </div>
     
@@ -78,9 +88,9 @@
                 </button>
             </div>
             <div class="col">
-                <button class="btn btn-icon {{this.colorMode}}" [disabled]="readerMode === READER_MODE.WEBTOON" title="Color Options: {{colorOptionName}}" (click)="toggleColorMode();resetMenuCloseTimer();">
-                    <i class="fa fa-palette" aria-hidden="true"></i>
-                    <span class="sr-only"></span>
+                <button class="btn btn-icon" title="{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
+                    <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}}" aria-hidden="true"></i>
+                    <span class="sr-only">{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}</span>
                 </button>
             </div>
             <div class="col">

@@ -15,8 +15,3 @@ export enum PAGING_DIRECTION {
     BACKWARDS = -1,
 }
   
-export enum COLOR_FILTER {
-    NONE = '',
-    SEPIA = 'filter-sepia',
-    DARK = 'filter-dark'
-}
