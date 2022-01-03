@@ -7,7 +7,7 @@ namespace API.DTOs.Filtering;
 /// </summary>
 public class ReadStatus
 {
-    public bool NotRead { get; set; } = false;
-    public bool InProgress { get; set; } = false;
-    public bool Read { get; set; } = false;
+    public bool NotRead { get; set; } = true;
+    public bool InProgress { get; set; } = true;
+    public bool Read { get; set; } = true;
 }
