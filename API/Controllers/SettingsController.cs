@@ -169,7 +169,7 @@ namespace API.Controllers
 
 
             _logger.LogInformation("Server Settings updated");
-            _taskScheduler.ScheduleTasks();
+            await _taskScheduler.ScheduleTasks();
             return Ok(updateSettingsDto);
         }
 

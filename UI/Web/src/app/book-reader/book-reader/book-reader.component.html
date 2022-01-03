@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}}">
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}}" #reader>
     <div class="fixed-top" #stickyTop>
         <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -56,6 +56,17 @@
                         <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
                         <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
+                    </div>
+                    <div class="controls">
+                        <label id="fullscreen">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
+                        <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
+                        <span class="sr-only" id="fullscreen-help">
+                            <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
+                        </span>
+                        <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
+                            <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
+                            <span *ngIf="darkMode">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
+                        </button>
                     </div>
                     <div class="row no-gutters justify-content-between">
                         <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>

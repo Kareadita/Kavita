@@ -6,8 +6,6 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
-$secondary-color: #CCC;
-
 
 @media(min-width: 600px) {
     .overlay .left .i {
@@ -17,7 +15,6 @@ $secondary-color: #CCC;
         right: 20px;
     }
 } 
-
 
 .btn-icon {
     color: white;
@@ -35,6 +32,10 @@ canvas {
     }
 }
 
+
+
+
+
 .loading {
     position: absolute;
     left: 48%;
@@ -48,14 +49,6 @@ canvas {
     white-space: nowrap;
 }
 
-.filter-dark {
-    filter: brightness(0.65);
-}
-
-.filter-sepia {
-    filter: sepia(80%) hue-rotate(349deg) saturate(200%) brightness(0.65);
-}
-
 .bottom-menu {
     padding: 20px 20px;
 }
@@ -63,6 +56,7 @@ canvas {
 
 .overlay {
   background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
   color: white;
 }
 
@@ -226,14 +220,27 @@ canvas {
       width: 100%;
   }
 
-  .highlight {
-      background-color: rgba(65, 225, 100, 0.5) !important;
-      animation: fadein .5s both;
+  .pagination-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+        color: white;
+        font-size: 42px;
+    }
   }
-  .highlight-2 {
-    background-color: rgba(65, 105, 225, 0.5) !important;
-    animation: fadein .5s both;
-  }
+
+.highlight {
+  background-color: rgba(65, 225, 100, 0.5) !important;
+  animation: fadein .5s both;
+  backdrop-filter: blur(10px);
+}
+.highlight-2 {
+  background-color: rgba(65, 105, 225, 0.5) !important;
+  animation: fadein .5s both;
+  backdrop-filter: blur(10px);
+}
 
   
 .bookmark-effect {

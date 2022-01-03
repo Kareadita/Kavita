@@ -111,6 +111,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingHtml', {static: false}) readingHtml!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('reader', {static: true}) reader!: ElementRef;
 
   /**
    * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
@@ -184,6 +185,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Hack: Override background color for reader and restore it onDestroy
    */
   originalBodyColor: string | undefined;
+
+  /**
+   * If the web browser is in fullscreen mode
+   */
+  isFullscreen: boolean = false;
 
   darkModeStyles = `
     *:not(input), *:not(select), *:not(code), *:not(:link), *:not(.ngx-toastr) {
@@ -364,6 +370,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
       this.clickToPaginateVisualOverlayTimeout2 = undefined;
     }
+
+    this.readerService.exitFullscreen();
 
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -1012,6 +1020,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+  }
+
+  toggleFullscreen() {
+    this.isFullscreen = this.readerService.checkFullscreenMode();
+    if (this.isFullscreen) {
+      this.readerService.exitFullscreen(() => {
+        this.isFullscreen = false;
+      });
+    } else {
+      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+        this.isFullscreen = true;
+      });
+    }
   }
 
 }

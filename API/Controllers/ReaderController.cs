@@ -468,18 +468,15 @@ namespace API.Controllers
                    _unitOfWork.UserRepository.Update(user);
                }
 
-
-               if (await _unitOfWork.CommitAsync())
-               {
-                  return Ok();
-               }
+               await _unitOfWork.CommitAsync();
             }
             catch (Exception)
             {
                await _unitOfWork.RollbackAsync();
+               return BadRequest("Could not save bookmark");
             }
 
-            return BadRequest("Could not save bookmark");
+            return Ok();
         }
 
         /// <summary>
