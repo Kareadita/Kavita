@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -101,7 +102,9 @@ namespace API.Controllers
             var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
             if (bookmark == null) return BadRequest("Bookmark does not exist");
 
-            var file = new FileInfo(Path.Join(_directoryService.BookmarkDirectory, bookmark.FileName));
+            var bookmarkDirectory =
+                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
             var format = Path.GetExtension(file.FullName).Replace(".", "");
             return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
         }

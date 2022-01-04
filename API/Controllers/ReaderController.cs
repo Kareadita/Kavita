@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
@@ -470,7 +471,9 @@ namespace API.Controllers
                 var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
                 var fileInfo = new FileInfo(path);
 
-                _directoryService.CopyFileToDirectory(path, Path.Join(_directoryService.BookmarkDirectory,
+                var bookmarkDirectory =
+                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
                     $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
 
 

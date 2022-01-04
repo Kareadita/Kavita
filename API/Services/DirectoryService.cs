@@ -20,6 +20,9 @@ namespace API.Services
         string LogDirectory { get; }
         string TempDirectory { get; }
         string ConfigDirectory { get; }
+        /// <summary>
+        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettings.BackupDirectory"/> for actual path.
+        /// </summary>
         string BookmarkDirectory { get; }
         /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.

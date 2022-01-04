@@ -176,9 +176,11 @@ namespace API.Services.Tasks
         {
             // Search all files in bookmarks/
             // except bookmark files and delete those
-            var allBookmarkFiles = _directoryService.GetFiles(_directoryService.BookmarkDirectory, searchOption: SearchOption.AllDirectories);
+            var bookmarkDirectory =
+                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories);
             var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-                .Select(b => _directoryService.FileSystem.Path.Join(_directoryService.BookmarkDirectory,
+                .Select(b => _directoryService.FileSystem.Path.Join(bookmarkDirectory,
                     b.FileName));
 
             var filesToDelete = allBookmarkFiles.Except(bookmarks);
@@ -186,7 +188,7 @@ namespace API.Services.Tasks
             _directoryService.DeleteFiles(filesToDelete);
 
             // Clear all empty directories
-            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(_directoryService.BookmarkDirectory))
+            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory))
             {
                 if (_directoryService.FileSystem.Directory.GetFiles(directory).Length == 0 &&
                     _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)

@@ -48,6 +48,7 @@ namespace API.Controllers
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            // TODO: Is this needed as it gets updated in the DB on startup
             settingsDto.Port = Configuration.Port;
             settingsDto.LoggingLevel = Configuration.LogLevel;
             return Ok(settingsDto);
