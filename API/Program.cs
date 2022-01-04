@@ -83,7 +83,7 @@ namespace API
 
                 // Apply Bookmark Migrations
                 //var unitOfWork = services.GetRequiredService<IUnitOfWork>();
-                //await MigrateBookmarks.Migrate(directoryService, unitOfWork, services.GetRequiredService<ILogger<Program>>(), services);
+                MigrateBookmarks.Migrate(directoryService, context, services.GetRequiredService<ILogger<Program>>());
 
 
                 // Apply all migrations on startup

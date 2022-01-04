@@ -16,6 +16,11 @@ namespace API.Data
 {
     public static class Seed
     {
+        /// <summary>
+        /// Generated on Startup. Seed.SeedSettings must run before
+        /// </summary>
+        public static IList<ServerSetting> DefaultSettings;
+
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
             var roles = typeof(PolicyConstants)
@@ -40,7 +45,7 @@ namespace API.Data
         {
             await context.Database.EnsureCreatedAsync();
 
-            IList<ServerSetting> defaultSettings = new List<ServerSetting>()
+            DefaultSettings = new List<ServerSetting>()
             {
                 new () {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
@@ -57,7 +62,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
             };
 
-            foreach (var defaultSetting in defaultSettings)
+            foreach (var defaultSetting in DefaultSettings)
             {
                 var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
                 if (existing == null)

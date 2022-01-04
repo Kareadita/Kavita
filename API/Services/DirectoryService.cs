@@ -274,7 +274,7 @@ namespace API.Services
         /// <returns></returns>
         public bool IsDirectoryEmpty(string path)
         {
-            return !FileSystem.Directory.EnumerateFileSystemEntries(path).Any();
+            return FileSystem.Directory.Exists(path) && !FileSystem.Directory.EnumerateFileSystemEntries(path).Any();
         }
 
         public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")

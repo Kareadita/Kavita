@@ -94,6 +94,7 @@
         </div>
     
         <div class="float-right">
+            <button type="button" class="btn btn-secondary mr-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
             <button type="submit" class="btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
         </div>

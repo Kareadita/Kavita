@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,46 +19,48 @@ namespace API.Data;
 /// </summary>
 public static class MigrateBookmarks
 {
+    private static Version _versionBookmarksChanged = new Version(0, 4, 9, 27);
     /// <summary>
     /// This will migrate existing bookmarks to bookmark folder based
     /// </summary>
     /// <remarks>Bookmark directory is configurable. This will always use the default bookmark directory.</remarks>
     /// <param name="directoryService"></param>
     /// <returns></returns>
-    public static async Task Migrate(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger logger, IServiceProvider serviceProvider)
+    public static void Migrate(IDirectoryService directoryService, DbContext context, ILogger logger)
     {
         // NOTE: This migration can be run after startup technically, which will let us use all our services. I can just kick off a task immediately.
         //var settingsRepository = serviceProvider.GetRequiredService<ISettingsRepository>();
-        var existingVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
-        var bookmarkDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        var existingVersion = GetSetting(context, ServerSettingKey.InstallVersion);
+        var bookmarkDirectory = GetSetting(context, ServerSettingKey.BookmarkDirectory);
         if (string.IsNullOrEmpty(bookmarkDirectory))
         {
             bookmarkDirectory = directoryService.BookmarkDirectory;
         }
 
-        if (string.IsNullOrEmpty(existingVersion) || Version.Parse(existingVersion) > new Version(0, 4, 9, 26))
+        if (string.IsNullOrEmpty(existingVersion) || Version.Parse(existingVersion) >= _versionBookmarksChanged
+                                                  || directoryService.IsDirectoryEmpty(bookmarkDirectory))
         {
             logger.LogInformation("Bookmark migration is needed");
-            var allBookmarks = (await unitOfWork.UserRepository.GetAllBookmarksAsync()).ToList();
-
-
-            var uniqueChapterIds = allBookmarks.Select(b => b.ChapterId).Distinct().ToList();
-            foreach (var chapterId in uniqueChapterIds)
-            {
-                var chapterPages = allBookmarks.Where(b => b.ChapterId == chapterId)
-                    .Select(b => b.Page).ToList();
-                var mangaFiles = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-            }
-
-
-            foreach (var bookmark in allBookmarks)
-            {
-                // TODO: Investigate a way to keep this logic consistent between code
-                var path = string.Empty;
-                // directoryService.CopyFileToDirectory(path, directoryService.FileSystem.Path.Join(bookmarkDirectory,
-                //     ReaderService.FormatBookmarkPage(bookmarkDirectory, bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId)));
-
-            }
+            // var allBookmarks = (await unitOfWork.UserRepository.GetAllBookmarksAsync()).ToList();
+            //
+            //
+            // var uniqueChapterIds = allBookmarks.Select(b => b.ChapterId).Distinct().ToList();
+            // foreach (var chapterId in uniqueChapterIds)
+            // {
+            //     var chapterPages = allBookmarks.Where(b => b.ChapterId == chapterId)
+            //         .Select(b => b.Page).ToList();
+            //     var mangaFiles = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
+            // }
+            //
+            //
+            // foreach (var bookmark in allBookmarks)
+            // {
+            //     // TODO: Investigate a way to keep this logic consistent between code
+            //     var path = string.Empty;
+            //     // directoryService.CopyFileToDirectory(path, directoryService.FileSystem.Path.Join(bookmarkDirectory,
+            //     //     ReaderService.FormatBookmarkPage(bookmarkDirectory, bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId)));
+            //
+            // }
 
         }
         else
@@ -67,6 +70,15 @@ public static class MigrateBookmarks
 
 
 
+    }
+
+
+
+    private static string GetSetting(DbContext context, ServerSettingKey key)
+    {
+        var val = (int) key;
+        Console.WriteLine($"Select Value from ServerSetting Where Key = {val}");
+        return SqlHelper.RawSqlQuery(context, $"Select Value from ServerSetting Where Key = {val}" , x => x[0].ToString()).FirstOrDefault();
     }
 
     // private void GetFiles(IList<AppUserBookmark> bookmarks, IDirectoryService directoryService)

@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Services;
+using AutoMapper;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -24,15 +25,17 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly IAccountService _accountService;
         private readonly IDirectoryService _directoryService;
+        private readonly IMapper _mapper;
 
         public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-            IAccountService accountService, IDirectoryService directoryService)
+            IAccountService accountService, IDirectoryService directoryService, IMapper mapper)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
             _accountService = accountService;
             _directoryService = directoryService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -52,6 +55,20 @@ namespace API.Controllers
             settingsDto.Port = Configuration.Port;
             settingsDto.LoggingLevel = Configuration.LogLevel;
             return Ok(settingsDto);
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("reset")]
+        public async Task<ActionResult<ServerSettingDto>> ResetSettings()
+        {
+            _logger.LogInformation("{UserName} is resetting Server Settings", User.GetUsername());
+
+
+            // We do not allow CacheDirectory changes, so we will ignore.
+            // var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
+            // currentSettings = Seed.DefaultSettings;
+
+            return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -75,7 +92,14 @@ namespace API.Controllers
             var updateAuthentication = false;
             var updateBookmarks = false;
             var originalBookmarkDirectory = _directoryService.BookmarkDirectory;
-            var bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
+
+            var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
+            if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
+                !updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks/"))
+            {
+                bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
+            }
+
             if (string.IsNullOrEmpty(updateSettingsDto.BookmarksDirectory))
             {
                 bookmarkDirectory = _directoryService.BookmarkDirectory;
@@ -137,7 +161,8 @@ namespace API.Controllers
                     }
 
                     originalBookmarkDirectory = setting.Value;
-                    setting.Value = bookmarkDirectory;
+                    // Normalize the path deliminators. Just to look nice in DB, no functionality
+                    setting.Value = _directoryService.FileSystem.Path.GetFullPath(bookmarkDirectory);
                     _unitOfWork.SettingsRepository.Update(setting);
                     updateBookmarks = true;
 
@@ -188,6 +213,7 @@ namespace API.Controllers
 
                 if (updateBookmarks)
                 {
+                    _directoryService.ExistOrCreate(bookmarkDirectory);
                     _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
                     _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
                 }

@@ -82,6 +82,16 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
+  resetToDefaults() {
+    this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+      this.serverSettings = settings;
+      this.resetForm();
+      this.toastr.success('Server settings updated');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
   openDirectoryChooser(existingDirectory: string, formControl: string) {
     const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
     modalRef.componentInstance.startingFolder = existingDirectory || '';
