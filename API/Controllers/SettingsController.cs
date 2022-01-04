@@ -76,6 +76,10 @@ namespace API.Controllers
             var updateBookmarks = false;
             var originalBookmarkDirectory = _directoryService.BookmarkDirectory;
             var bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
+            if (string.IsNullOrEmpty(updateSettingsDto.BookmarksDirectory))
+            {
+                bookmarkDirectory = _directoryService.BookmarkDirectory;
+            }
 
             foreach (var setting in currentSettings)
             {
@@ -127,19 +131,10 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
                 {
                     // Validate new directory can be used
-                    try
+                    if (!await _directoryService.CheckWriteAccess(bookmarkDirectory))
                     {
-                        _directoryService.ExistOrCreate(bookmarkDirectory);
-                        await _directoryService.FileSystem.File.WriteAllTextAsync(
-                            _directoryService.FileSystem.Path.Join(bookmarkDirectory, "test.txt"),
-                            string.Empty);
-                    }
-                    catch (Exception ex)
-                    {
-                        _directoryService.ClearAndDeleteDirectory(bookmarkDirectory);
                         return BadRequest("Bookmark Directory does not have correct permissions for Kavita to use");
                     }
-                    _directoryService.ClearAndDeleteDirectory(bookmarkDirectory);
 
                     originalBookmarkDirectory = setting.Value;
                     setting.Value = bookmarkDirectory;

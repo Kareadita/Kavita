@@ -379,9 +379,10 @@ namespace API.Tests.Services
         {
             const string testDirectory = "c:/manga/";
             var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-            Assert.False(ds.IsDirectoryEmpty("c:/manga/"));
+            Assert.True(ds.IsDirectoryEmpty("c:/manga/"));
         }
 
         [Fact]
@@ -732,6 +733,25 @@ namespace API.Tests.Services
             Assert.False(fileSystem.FileExists($"{testDirectory}subdir/data-3.webp"));
             Assert.True(fileSystem.Directory.Exists($"{testDirectory}subdir/"));
         }
+
+        #endregion
+
+        #region CheckWriteAccess
+
+        [Fact]
+        public async Task CheckWriteAccess_ShouldHaveAccess()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var hasAccess = await ds.CheckWriteAccess(ds.FileSystem.Path.Join(testDirectory, "bookmarks"));
+            Assert.True(hasAccess);
+
+            Assert.False(ds.FileSystem.Directory.Exists(ds.FileSystem.Path.Join(testDirectory, "bookmarks")));
+            Assert.False(ds.FileSystem.File.Exists(ds.FileSystem.Path.Join(testDirectory, "bookmarks", "test.txt")));
+        }
+
 
         #endregion
     }

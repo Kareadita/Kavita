@@ -222,7 +222,7 @@ public class ScannerService : IScannerService
         }
 
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
-        if (library.Folders.Any(f => !_directoryService.IsDirectoryEmpty(f.Path)))
+        if (library.Folders.Any(f => _directoryService.IsDirectoryEmpty(f.Path)))
         {
             _logger.LogError("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +

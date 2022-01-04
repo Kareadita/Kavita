@@ -54,7 +54,7 @@ namespace API.Services
         void DeleteFiles(IEnumerable<string> files);
         void RemoveNonImages(string directoryName);
         void Flatten(string directoryName);
-
+        Task<bool> CheckWriteAccess(string directoryName);
     }
     public class DirectoryService : IDirectoryService
     {
@@ -274,7 +274,7 @@ namespace API.Services
         /// <returns></returns>
         public bool IsDirectoryEmpty(string path)
         {
-            return Directory.EnumerateFileSystemEntries(path).Any();
+            return !FileSystem.Directory.EnumerateFileSystemEntries(path).Any();
         }
 
         public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
@@ -686,6 +686,30 @@ namespace API.Services
 
             var index = 0;
             FlattenDirectory(directory, directory, ref index);
+        }
+
+        /// <summary>
+        /// Checks whether a directory has write permissions
+        /// </summary>
+        /// <param name="directoryName">Fully qualified path</param>
+        /// <returns></returns>
+        public async Task<bool> CheckWriteAccess(string directoryName)
+        {
+            try
+            {
+                ExistOrCreate(directoryName);
+                await FileSystem.File.WriteAllTextAsync(
+                    FileSystem.Path.Join(directoryName, "test.txt"),
+                    string.Empty);
+            }
+            catch (Exception ex)
+            {
+                ClearAndDeleteDirectory(directoryName);
+                return false;
+            }
+
+            ClearAndDeleteDirectory(directoryName);
+            return true;
         }
 
 

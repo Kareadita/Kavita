@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.Settings
+﻿using API.Services;
+
+namespace API.DTOs.Settings
 {
     public class ServerSettingDto
     {
@@ -33,6 +35,7 @@
         /// <summary>
         /// Where Bookmarks are stored.
         /// </summary>
+        /// <remarks>If null or empty string, will default back to default install setting aka <see cref="DirectoryService.BookmarkDirectory"/></remarks>
         public string BookmarksDirectory { get; set; }
     }
 }
