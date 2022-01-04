@@ -84,6 +84,8 @@ namespace API.Services.Tasks.Scanner
         {
             ParserInfo info = null;
 
+            // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
+
             if (Parser.Parser.IsEpub(path))
             {
                 info = _readingItemService.Parse(path, rootPath, type);
@@ -114,8 +116,6 @@ namespace API.Services.Tasks.Scanner
             info.ComicInfo = GetComicInfo(path);
             if (info.ComicInfo != null)
             {
-                var sw = Stopwatch.StartNew();
-
                 if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
                 {
                     info.Volumes = info.ComicInfo.Volume;

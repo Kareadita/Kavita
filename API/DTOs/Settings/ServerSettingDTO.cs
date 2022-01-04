@@ -30,5 +30,9 @@
         /// Base Url for the kavita. Requires restart to take effect.
         /// </summary>
         public string BaseUrl { get; set; }
+        /// <summary>
+        /// Where Bookmarks are stored.
+        /// </summary>
+        public string BookmarksDirectory { get; set; }
     }
 }

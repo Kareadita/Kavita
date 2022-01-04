@@ -82,8 +82,8 @@ namespace API
                 }
 
                 // Apply Bookmark Migrations
-                var unitOfWork = services.GetRequiredService<IUnitOfWork>();
-                await MigrateBookmarks.Migrate(directoryService, unitOfWork, services.GetRequiredService<ILogger<Program>>());
+                //var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+                //await MigrateBookmarks.Migrate(directoryService, unitOfWork, services.GetRequiredService<ILogger<Program>>(), services);
 
 
                 // Apply all migrations on startup

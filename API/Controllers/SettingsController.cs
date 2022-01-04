@@ -23,13 +23,16 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IAccountService _accountService;
+        private readonly IDirectoryService _directoryService;
 
-        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler, IAccountService accountService)
+        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
+            IAccountService accountService, IDirectoryService directoryService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
             _accountService = accountService;
+            _directoryService = directoryService;
         }
 
         [AllowAnonymous]
@@ -69,6 +72,9 @@ namespace API.Controllers
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
             var updateAuthentication = false;
+            var updateBookmarks = false;
+            var originalBookmarkDirectory = _directoryService.BookmarkDirectory;
+            var bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
 
             foreach (var setting in currentSettings)
             {
@@ -117,6 +123,30 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
+                {
+                    // Validate new directory can be used
+                    try
+                    {
+                        _directoryService.ExistOrCreate(bookmarkDirectory);
+                        await _directoryService.FileSystem.File.WriteAllTextAsync(
+                            _directoryService.FileSystem.Path.Join(bookmarkDirectory, "test.txt"),
+                            string.Empty);
+                    }
+                    catch (Exception ex)
+                    {
+                        _directoryService.ClearAndDeleteDirectory(bookmarkDirectory);
+                        return BadRequest("Bookmark Directory does not have correct permissions for Kavita to use");
+                    }
+                    _directoryService.ClearAndDeleteDirectory(bookmarkDirectory);
+
+                    originalBookmarkDirectory = setting.Value;
+                    setting.Value = bookmarkDirectory;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                    updateBookmarks = true;
+
+                }
+
                 if (setting.Key == ServerSettingKey.EnableAuthentication && updateSettingsDto.EnableAuthentication + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.EnableAuthentication + string.Empty;
@@ -158,6 +188,12 @@ namespace API.Controllers
                     }
 
                     _logger.LogInformation("Server authentication changed. Updated all non-admins to default password");
+                }
+
+                if (updateBookmarks)
+                {
+                    _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
+                    _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
                 }
             }
             catch (Exception ex)

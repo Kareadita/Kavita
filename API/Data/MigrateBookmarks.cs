@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace API.Data;
@@ -22,8 +24,10 @@ public static class MigrateBookmarks
     /// <remarks>Bookmark directory is configurable. This will always use the default bookmark directory.</remarks>
     /// <param name="directoryService"></param>
     /// <returns></returns>
-    public static async Task Migrate(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger logger)
+    public static async Task Migrate(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger logger, IServiceProvider serviceProvider)
     {
+        // NOTE: This migration can be run after startup technically, which will let us use all our services. I can just kick off a task immediately.
+        //var settingsRepository = serviceProvider.GetRequiredService<ISettingsRepository>();
         var existingVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value;
         var bookmarkDirectory = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         if (string.IsNullOrEmpty(bookmarkDirectory))
