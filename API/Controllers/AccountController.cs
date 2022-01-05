@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -77,6 +78,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
