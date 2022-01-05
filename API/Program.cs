@@ -36,7 +36,6 @@ namespace API
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
 
 
-            // TODO: Figure out a solution for this migration and logger.
             var directoryService = new DirectoryService(null, new FileSystem());
             MigrateConfigFiles.Migrate(isDocker, directoryService);
 
@@ -58,7 +57,7 @@ namespace API
             try
             {
                 var context = services.GetRequiredService<DataContext>();
-                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
+
 
                 if (isDocker && new FileInfo("data/appsettings.json").Exists)
                 {
@@ -81,28 +80,27 @@ namespace API
                     requiresCoverImageMigration = false;
                 }
 
-
-                // Apply all migrations on startup
-                // If we have pending migrations, make a backup first
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogInformation("Performing backup as migrations are needed");
-                    // var backupService = services.GetRequiredService<BackupService>();
-                    // await backupService.BackupDatabase();
-                }
-
-                await context.Database.MigrateAsync();
-
                 if (requiresCoverImageMigration)
                 {
                     await MigrateCoverImages.UpdateDatabaseWithImages(context, directoryService);
                 }
 
-                await Seed.SeedRoles(roleManager);
-                await Seed.SeedSettings(context, directoryService);
-                await Seed.SeedUserApiKeys(context);
+                // // Apply all migrations on startup
+                // // If we have pending migrations, make a backup first
+                // var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                // if (pendingMigrations.Any())
+                // {
+                //     var logger = services.GetRequiredService<ILogger<Program>>();
+                //     logger.LogInformation("Performing backup as migrations are needed");
+                //     // var backupService = services.GetRequiredService<BackupService>();
+                //     // await backupService.BackupDatabase();
+                // }
+                //
+                // await context.Database.MigrateAsync();
+                //
+                // await Seed.SeedRoles(roleManager);
+                // await Seed.SeedSettings(context, directoryService);
+                // await Seed.SeedUserApiKeys(context);
             }
             catch (Exception ex)
             {
