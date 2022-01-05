@@ -142,21 +142,21 @@ namespace API
             {
                 Task.Run(async () =>
                 {
-                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
-                        serviceProvider.GetRequiredService<ILogger<Program>>(), cacheService);
-
                     // Apply all migrations on startup
                     // If we have pending migrations, make a backup first
+                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var context = serviceProvider.GetRequiredService<DataContext>();
                     var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
                     if (pendingMigrations.Any())
                     {
-                        var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                         logger.LogInformation("Performing backup as migrations are needed");
                         await backupService.BackupDatabase();
                     }
 
                     await context.Database.MigrateAsync();
+
+                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
+                        logger, cacheService);
 
                     var roleManager = serviceProvider.GetRequiredService<RoleManager<AppRole>>();
 
