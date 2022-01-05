@@ -40,7 +40,7 @@ public class ReaderService : IReaderService
         _cacheService = cacheService;
     }
 
-    public static string FormatBookmarkPage(string baseDirectory, int userId, int seriesId, int chapterId)
+    public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
         return Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}");
     }

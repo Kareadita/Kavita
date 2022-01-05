@@ -406,8 +406,14 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
-                    // TODO: Kick off job to clear files
-                    await _cleanupService.CleanupBookmarks();
+                    try
+                    {
+                        await _cleanupService.CleanupBookmarks();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue cleaning up old bookmarks");
+                    }
                     return Ok();
                 }
             }

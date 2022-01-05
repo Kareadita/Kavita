@@ -81,10 +81,6 @@ namespace API
                     requiresCoverImageMigration = false;
                 }
 
-                // Apply Bookmark Migrations
-                //var unitOfWork = services.GetRequiredService<IUnitOfWork>();
-                MigrateBookmarks.Migrate(directoryService, context, services.GetRequiredService<ILogger<Program>>());
-
 
                 // Apply all migrations on startup
                 // If we have pending migrations, make a backup first
