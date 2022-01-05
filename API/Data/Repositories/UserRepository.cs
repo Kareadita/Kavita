@@ -32,8 +32,8 @@ public interface IUserRepository
     Task<IEnumerable<MemberDto>>  GetMembersAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
-    Task<bool> IsUserAdmin(AppUser user);
-    Task<AppUserRating> GetUserRating(int seriesId, int userId);
+    Task<bool> IsUserAdminAsync(AppUser user);
+    Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserPreferences> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
@@ -208,12 +208,12 @@ public class UserRepository : IUserRepository
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.PlebRole);
     }
 
-    public async Task<bool> IsUserAdmin(AppUser user)
+    public async Task<bool> IsUserAdminAsync(AppUser user)
     {
         return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
     }
 
-    public async Task<AppUserRating> GetUserRating(int seriesId, int userId)
+    public async Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
