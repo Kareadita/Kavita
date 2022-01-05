@@ -6,10 +6,12 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
 using API.Services.HostedServices;
+using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
@@ -19,8 +21,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -130,12 +134,45 @@ namespace API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
             IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider, ICacheService cacheService,
-            IDirectoryService directoryService, IUnitOfWork unitOfWork)
+            IDirectoryService directoryService, IUnitOfWork unitOfWork, IBackupService backupService)
         {
 
             // Apply Migrations
-            Task.Run(async () => await MigrateBookmarks.Migrate(directoryService, unitOfWork,
-                serviceProvider.GetRequiredService<ILogger<Program>>(), cacheService)).GetAwaiter().GetResult();
+            try
+            {
+                Task.Run(async () =>
+                {
+                    // Apply all migrations on startup
+                    // If we have pending migrations, make a backup first
+                    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                    var context = serviceProvider.GetRequiredService<DataContext>();
+                    var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        logger.LogInformation("Performing backup as migrations are needed");
+                        await backupService.BackupDatabase();
+                    }
+
+                    await context.Database.MigrateAsync();
+
+                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
+                        logger, cacheService);
+
+                    var roleManager = serviceProvider.GetRequiredService<RoleManager<AppRole>>();
+
+                    await Seed.SeedRoles(roleManager);
+                    await Seed.SeedSettings(context, directoryService);
+                    await Seed.SeedUserApiKeys(context);
+
+                }).GetAwaiter()
+                    .GetResult();
+            }
+            catch (Exception ex)
+            {
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+                logger.LogCritical(ex, "An error occurred during migration");
+            }
+
 
 
             app.UseMiddleware<ExceptionMiddleware>();
