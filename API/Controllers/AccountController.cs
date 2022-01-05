@@ -13,7 +13,6 @@ using API.Interfaces.Services;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -79,7 +78,6 @@ namespace API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
-        [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
         {
@@ -88,6 +86,17 @@ namespace API.Controllers
                 if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
                 {
                     return BadRequest("Username is taken.");
+                }
+
+                // If we are registering an admin account, ensure there are no existing admins or user registering is an admin
+                if (registerDto.IsAdmin)
+                {
+                    var firstTimeFlow = !(await _userManager.GetUsersInRoleAsync("Admin")).Any();
+                    if (!firstTimeFlow && !await _unitOfWork.UserRepository.IsUserAdmin(
+                            await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername())))
+                    {
+                        return BadRequest("You are not permitted to create an admin account");
+                    }
                 }
 
                 var user = _mapper.Map<AppUser>(registerDto);
@@ -104,6 +113,7 @@ namespace API.Controllers
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
                 if (!result.Succeeded) return BadRequest(result.Errors);
+
 
                 var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
