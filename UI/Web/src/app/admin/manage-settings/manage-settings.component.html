@@ -8,6 +8,20 @@
             <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
         </div>
 
+        <div class="form-group">
+            <label for="settings-bookmarksdir">Bookmarks Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="bookmarksDirectoryTooltip" role="button" tabindex="0"></i>
+            <ng-template #bookmarksDirectoryTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed, other files within directory will be deleted.</ng-template>
+            <span class="sr-only" id="settings-bookmarksdir-help"><ng-container [ngTemplateOutlet]="bookmarksDirectoryTooltip"></ng-container></span>
+            <div class="input-group">
+                <input readonly id="settings-bookmarksdir" aria-describedby="settings-bookmarksdir-help" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir">
+                <div class="input-group-append">
+                    <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(settingsForm.get('bookmarksDirectory')?.value, 'bookmarksDirectory')">
+                        Change
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- <div class="form-group">
             <label for="settings-baseurl">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
             <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
@@ -15,20 +29,22 @@
             <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text">
         </div> -->
 
-        <div class="form-group">
-            <label for="settings-port">Port</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
-            <ng-template #portTooltip>Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
-            <span class="sr-only" id="settings-port-help">Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
-            <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-        </div>
-
-        <div class="form-group">
-            <label for="logging-level-port">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
-            <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
-            <span class="sr-only" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>
-            <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="loggingLevel">
-                <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
-            </select>
+        <div class="row no-gutters">
+            <div class="form-group col-md-6 col-sm-12 pr-2">
+                <label for="settings-port">Port</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
+                <ng-template #portTooltip>Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
+                <span class="sr-only" id="settings-port-help">Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
+                <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+            </div>
+    
+            <div class="form-group col-md-6 col-sm-12">
+                <label for="logging-level-port">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
+                <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
+                <span class="sr-only" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>
+                <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-control" aria-describedby="settings-tasks-scan-help" formControlName="loggingLevel">
+                    <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group">
@@ -78,6 +94,7 @@
         </div>
     
         <div class="float-right">
+            <button type="button" class="btn btn-secondary mr-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()">Reset</button>
             <button type="submit" class="btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
         </div>

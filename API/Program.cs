@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -79,6 +80,7 @@ namespace API
                 {
                     requiresCoverImageMigration = false;
                 }
+
 
                 // Apply all migrations on startup
                 // If we have pending migrations, make a backup first

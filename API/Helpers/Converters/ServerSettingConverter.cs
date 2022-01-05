@@ -42,6 +42,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.BaseUrl:
                         destination.BaseUrl = row.Value;
                         break;
+                    case ServerSettingKey.BookmarkDirectory:
+                        destination.BookmarksDirectory = row.Value;
+                        break;
                 }
             }
 

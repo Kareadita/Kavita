@@ -4,6 +4,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using API.Data;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -24,6 +26,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API
 {
@@ -126,8 +129,15 @@ namespace API
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IBackgroundJobClient backgroundJobs, IWebHostEnvironment env,
-            IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider)
+            IHostApplicationLifetime applicationLifetime, IServiceProvider serviceProvider, ICacheService cacheService,
+            IDirectoryService directoryService, IUnitOfWork unitOfWork)
         {
+
+            // Apply Migrations
+            Task.Run(async () => await MigrateBookmarks.Migrate(directoryService, unitOfWork,
+                serviceProvider.GetRequiredService<ILogger<Program>>(), cacheService)).GetAwaiter().GetResult();
+
+
             app.UseMiddleware<ExceptionMiddleware>();
 
             if (env.IsDevelopment())

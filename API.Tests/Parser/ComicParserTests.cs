@@ -78,6 +78,7 @@ namespace API.Tests.Parser
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
         [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
         [InlineData("Tintin - T22 Vol 714 pour Sydney", "Tintin")]
+        [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));

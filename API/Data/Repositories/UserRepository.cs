@@ -39,12 +39,15 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
+    Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
+    Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
+    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
 }
 
 public class UserRepository : IUserRepository
@@ -112,10 +115,22 @@ public class UserRepository : IUserRepository
         return await query.SingleOrDefaultAsync();
     }
 
+    public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()
+    {
+        return await _context.AppUserBookmark.ToListAsync();
+    }
+
     public async Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId)
     {
         return await _context.AppUserBookmark
             .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId)
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId)
+    {
+        return await _context.AppUserBookmark
+            .Where(b => b.Id == bookmarkId)
             .SingleOrDefaultAsync();
     }
 
@@ -169,6 +184,18 @@ public class UserRepository : IUserRepository
             .Include(u => u.ReadingLists)
             .ThenInclude(l => l.Items)
             .SingleOrDefaultAsync(x => x.UserName == username);
+    }
+
+    /// <summary>
+    /// Returns all Bookmarks for a given set of Ids
+    /// </summary>
+    /// <param name="bookmarkIds"></param>
+    /// <returns></returns>
+    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds)
+    {
+        return await _context.AppUserBookmark
+            .Where(b => bookmarkIds.Contains(b.Id))
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

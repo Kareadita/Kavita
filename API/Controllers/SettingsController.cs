@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Services;
+using AutoMapper;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -23,13 +24,18 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IAccountService _accountService;
+        private readonly IDirectoryService _directoryService;
+        private readonly IMapper _mapper;
 
-        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler, IAccountService accountService)
+        public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
+            IAccountService accountService, IDirectoryService directoryService, IMapper mapper)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
             _accountService = accountService;
+            _directoryService = directoryService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -45,9 +51,24 @@ namespace API.Controllers
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            // TODO: Is this needed as it gets updated in the DB on startup
             settingsDto.Port = Configuration.Port;
             settingsDto.LoggingLevel = Configuration.LogLevel;
             return Ok(settingsDto);
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("reset")]
+        public async Task<ActionResult<ServerSettingDto>> ResetSettings()
+        {
+            _logger.LogInformation("{UserName} is resetting Server Settings", User.GetUsername());
+
+
+            // We do not allow CacheDirectory changes, so we will ignore.
+            // var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
+            // currentSettings = Seed.DefaultSettings;
+
+            return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -69,6 +90,20 @@ namespace API.Controllers
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
             var updateAuthentication = false;
+            var updateBookmarks = false;
+            var originalBookmarkDirectory = _directoryService.BookmarkDirectory;
+
+            var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
+            if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
+                !updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks/"))
+            {
+                bookmarkDirectory = _directoryService.FileSystem.Path.Join(updateSettingsDto.BookmarksDirectory, "bookmarks");
+            }
+
+            if (string.IsNullOrEmpty(updateSettingsDto.BookmarksDirectory))
+            {
+                bookmarkDirectory = _directoryService.BookmarkDirectory;
+            }
 
             foreach (var setting in currentSettings)
             {
@@ -117,6 +152,22 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
+                {
+                    // Validate new directory can be used
+                    if (!await _directoryService.CheckWriteAccess(bookmarkDirectory))
+                    {
+                        return BadRequest("Bookmark Directory does not have correct permissions for Kavita to use");
+                    }
+
+                    originalBookmarkDirectory = setting.Value;
+                    // Normalize the path deliminators. Just to look nice in DB, no functionality
+                    setting.Value = _directoryService.FileSystem.Path.GetFullPath(bookmarkDirectory);
+                    _unitOfWork.SettingsRepository.Update(setting);
+                    updateBookmarks = true;
+
+                }
+
                 if (setting.Key == ServerSettingKey.EnableAuthentication && updateSettingsDto.EnableAuthentication + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.EnableAuthentication + string.Empty;
@@ -158,6 +209,13 @@ namespace API.Controllers
                     }
 
                     _logger.LogInformation("Server authentication changed. Updated all non-admins to default password");
+                }
+
+                if (updateBookmarks)
+                {
+                    _directoryService.ExistOrCreate(bookmarkDirectory);
+                    _directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
+                    _directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
                 }
             }
             catch (Exception ex)

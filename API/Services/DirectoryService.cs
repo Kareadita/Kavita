@@ -21,6 +21,10 @@ namespace API.Services
         string TempDirectory { get; }
         string ConfigDirectory { get; }
         /// <summary>
+        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettings.BackupDirectory"/> for actual path.
+        /// </summary>
+        string BookmarkDirectory { get; }
+        /// <summary>
         /// Lists out top-level folders for a given directory. Filters out System and Hidden folders.
         /// </summary>
         /// <param name="rootPath">Absolute path of directory to scan.</param>
@@ -50,7 +54,7 @@ namespace API.Services
         void DeleteFiles(IEnumerable<string> files);
         void RemoveNonImages(string directoryName);
         void Flatten(string directoryName);
-
+        Task<bool> CheckWriteAccess(string directoryName);
     }
     public class DirectoryService : IDirectoryService
     {
@@ -60,6 +64,7 @@ namespace API.Services
         public string LogDirectory { get; }
         public string TempDirectory { get; }
         public string ConfigDirectory { get; }
+        public string BookmarkDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -76,6 +81,7 @@ namespace API.Services
            LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
            TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
            ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
+           BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
        }
 
        /// <summary>
@@ -268,7 +274,7 @@ namespace API.Services
         /// <returns></returns>
         public bool IsDirectoryEmpty(string path)
         {
-            return Directory.EnumerateFileSystemEntries(path).Any();
+            return FileSystem.Directory.Exists(path) && !FileSystem.Directory.EnumerateFileSystemEntries(path).Any();
         }
 
         public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
@@ -680,6 +686,30 @@ namespace API.Services
 
             var index = 0;
             FlattenDirectory(directory, directory, ref index);
+        }
+
+        /// <summary>
+        /// Checks whether a directory has write permissions
+        /// </summary>
+        /// <param name="directoryName">Fully qualified path</param>
+        /// <returns></returns>
+        public async Task<bool> CheckWriteAccess(string directoryName)
+        {
+            try
+            {
+                ExistOrCreate(directoryName);
+                await FileSystem.File.WriteAllTextAsync(
+                    FileSystem.Path.Join(directoryName, "test.txt"),
+                    string.Empty);
+            }
+            catch (Exception ex)
+            {
+                ClearAndDeleteDirectory(directoryName);
+                return false;
+            }
+
+            ClearAndDeleteDirectory(directoryName);
+            return true;
         }
 
 

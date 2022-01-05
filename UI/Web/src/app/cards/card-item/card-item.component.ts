@@ -8,6 +8,7 @@ import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
@@ -49,7 +50,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input() entity!: Series | Volume | Chapter | CollectionTag;
+  @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark;
   /**
    * If the entity is selected or not. 
    */

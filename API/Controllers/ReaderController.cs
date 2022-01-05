@@ -8,8 +8,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -24,15 +26,21 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
+        private readonly IDirectoryService _directoryService;
+        private readonly ICleanupService _cleanupService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
-            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
+            IReaderService readerService, IDirectoryService directoryService,
+            ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
+            _directoryService = directoryService;
+            _cleanupService = cleanupService;
         }
 
         /// <summary>
@@ -398,6 +406,14 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    try
+                    {
+                        await _cleanupService.CleanupBookmarks();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue cleaning up old bookmarks");
+                    }
                     return Ok();
                 }
             }
@@ -455,6 +471,18 @@ namespace API.Controllers
                 var userBookmark =
                     await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
+                // We need to get the image
+                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+                var fileInfo = new FileInfo(path);
+
+                var bookmarkDirectory =
+                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
+                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
+
+
                if (userBookmark == null)
                {
                    user.Bookmarks ??= new List<AppUserBookmark>();
@@ -464,6 +492,8 @@ namespace API.Controllers
                        VolumeId = bookmarkDto.VolumeId,
                        SeriesId = bookmarkDto.SeriesId,
                        ChapterId = bookmarkDto.ChapterId,
+                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
+
                    });
                    _unitOfWork.UserRepository.Update(user);
                }

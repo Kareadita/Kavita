@@ -8,4 +8,5 @@ export interface ServerSettings {
     enableOpds: boolean;
     enableAuthentication: boolean;
     baseUrl: string;
+    bookmarksDirectory: string;
 }
