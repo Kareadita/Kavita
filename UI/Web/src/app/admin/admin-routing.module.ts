@@ -4,7 +4,7 @@ import { AdminGuard } from '../_guards/admin.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
 
 const routes: Routes = [
-  {path: '**', component: DashboardComponent, pathMatch: 'full'},
+  {path: '**', component: DashboardComponent, pathMatch: 'full', canActivate: [AdminGuard]},
   {
     runGuardsAndResolvers: 'always',
     canActivate: [AdminGuard],
