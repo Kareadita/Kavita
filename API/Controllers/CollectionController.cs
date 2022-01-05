@@ -32,7 +32,7 @@ namespace API.Controllers
         public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             if (isAdmin)
             {
                 return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
