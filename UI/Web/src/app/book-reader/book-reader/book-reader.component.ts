@@ -300,6 +300,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
 
+        console.log('Scroll');
+
         // Highlight the current chapter we are on
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
@@ -868,14 +870,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateReaderStyles() {
     if (this.readingHtml != undefined && this.readingHtml.nativeElement) {
-      for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
-        const elem = this.readingHtml.nativeElement.children.item(i);
-        if (elem?.tagName != 'STYLE') {
-          Object.entries(this.pageStyles).forEach(item => {
-            this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
-          });
+      // for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
+      //   const elem = this.readingHtml.nativeElement.children.item(i);
+      //   if (elem?.tagName != 'STYLE') {
+      //     Object.entries(this.pageStyles).forEach(item => {
+      //       if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') return;
+      //       this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
+      //     });
+      //   }
+      // }
+      console.log('pageStyles: ', this.pageStyles);
+      console.log('readingHtml: ', this.readingHtml.nativeElement);
+      Object.entries(this.pageStyles).forEach(item => {
+        if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+          // Remove the style or skip
+          this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
+          return;
         }
-      }
+        this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
+      });
     }
   }
 
@@ -1027,10 +1040,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isFullscreen) {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
+        //this.renderer.removeStyle(this.readingHtml, 'overflow');
+        this.renderer.removeStyle(this.reader.nativeElement, 'background-color');
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
+        if (!this.darkMode) {
+          // For some reason, in fullscreen mode the browser sets background color for us, so we need to make the background color white 
+          this.renderer.setStyle(this.reader.nativeElement, 'background-color', 'white', RendererStyleFlags2.Important);
+        }
       });
     }
   }
