@@ -175,12 +175,7 @@ namespace API.Services
                 stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
             }
 
-            foreach (Match match in Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
-            {
-                if (!match.Success) continue;
-                var importFile = match.Groups["Filename"].Value;
-                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
-            }
+            EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
 
             // Check if there are any background images and rewrite those urls
             EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
@@ -205,6 +200,16 @@ namespace API.Services
                 styleRule.Text = $"{CssScopeClass} " + styleRule.Text;
             }
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+
+        private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
+        {
+            foreach (Match match in Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
         }
 
         private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
