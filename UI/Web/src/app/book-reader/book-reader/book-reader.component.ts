@@ -1041,15 +1041,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
         //this.renderer.removeStyle(this.readingHtml, 'overflow');
-        this.renderer.removeStyle(this.reader.nativeElement, 'background-color');
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
-        if (!this.darkMode) {
-          // For some reason, in fullscreen mode the browser sets background color for us, so we need to make the background color white 
-          this.renderer.setStyle(this.reader.nativeElement, 'background-color', 'white', RendererStyleFlags2.Important);
-        }
       });
     }
   }
