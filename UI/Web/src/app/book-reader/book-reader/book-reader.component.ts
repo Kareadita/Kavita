@@ -719,6 +719,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.setupPage(part, scrollTop);
           return;
         }
+
+        // Apply scaling class to all images to ensure they scale down to max width to not blow out the reader
+        Array.from(imgs).forEach(img => this.renderer.addClass(img, 'scale-width'));
+
         Promise.all(Array.from(imgs)
         .filter(img => !img.complete)
         .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))

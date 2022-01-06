@@ -178,6 +178,10 @@ $primary-color: #0062cc;
     padding-inline-start: 0px
 }
 
+::ng-deep .scale-width {
+    max-width: 100%;
+}
+
 
 // Click to Paginate styles
 .icon-primary-color {
