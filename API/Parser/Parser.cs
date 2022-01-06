@@ -28,7 +28,8 @@ namespace API.Parser
         /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
         /// </summary>
         /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(src:\s?)?url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(?<End>.{1}\))",
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
+                                                                 + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
             MatchOptions, RegexTimeout);
         /// <summary>
         /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import

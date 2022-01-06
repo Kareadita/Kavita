@@ -1,3 +1,4 @@
+using System.Linq;
 using API.Entities.Enums;
 using Xunit;
 using static API.Parser.Parser;
@@ -58,20 +59,28 @@ namespace API.Tests.Parser
             Assert.Equal(expected, CleanTitle(input, isComic));
         }
 
+        [Theory]
+        [InlineData("src: url(fonts/AvenirNext-UltraLight.ttf)", true)]
+        [InlineData("src: url(ideal-sans-serif.woff)", true)]
+        [InlineData("src: local(\"Helvetica Neue Bold\")", true)]
+        [InlineData("src: url(\"/fonts/OpenSans-Regular-webfont.woff2\")", true)]
+        [InlineData("src: local(\"/fonts/OpenSans-Regular-webfont.woff2\")", true)]
+        [InlineData("src: url(data:application/x-font-woff", false)]
+        public void FontCssRewriteMatches(string input, bool expectedMatch)
+        {
+            Assert.Equal(expectedMatch, FontSrcUrlRegex.Matches(input).Count > 0);
+        }
 
-        // [Theory]
-        // //[InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "@font-face{font-family:\"PaytoneOne\";src:url(\"PaytoneOne.ttf\")}")]
-        // [InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "..\\/Fonts\\/PaytoneOne.ttf")]
-        // //[InlineData("@font-face{font-family:'PaytoneOne';src:url('..\\/Fonts\\/PaytoneOne.ttf')}", "@font-face{font-family:'PaytoneOne';src:url('PaytoneOne.ttf')}")]
-        // //[InlineData("@font-face{\r\nfont-family:'PaytoneOne';\r\nsrc:url('..\\/Fonts\\/PaytoneOne.ttf')\r\n}", "@font-face{font-family:'PaytoneOne';src:url('PaytoneOne.ttf')}")]
-        // public void ReplaceStyleUrlTest(string input, string expected)
-        // {
-        //     var replacementStr = "PaytoneOne.ttf";
-        //     // Use Match to validate since replace is weird
-        //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
-        //     var match = FontSrcUrlRegex.Match(input);
-        //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
-        // }
+        [Theory]
+        [InlineData("src: url(fonts/AvenirNext-UltraLight.ttf)", new [] {"src: url(", "fonts/AvenirNext-UltraLight.ttf", ")"})]
+        [InlineData("src: url(ideal-sans-serif.woff)", new [] {"src: url(", "ideal-sans-serif.woff", ")"})]
+        [InlineData("src: local(\"Helvetica Neue Bold\")", new [] {"src: local(\"", "Helvetica Neue Bold", "\")"})]
+        [InlineData("src: url(\"/fonts/OpenSans-Regular-webfont.woff2\")", new [] {"src: url(\"", "/fonts/OpenSans-Regular-webfont.woff2", "\")"})]
+        [InlineData("src: local(\"/fonts/OpenSans-Regular-webfont.woff2\")", new [] {"src: local(\"", "/fonts/OpenSans-Regular-webfont.woff2", "\")"})]
+        public void FontCssCorrectlySeparates(string input, string[] expected)
+        {
+            Assert.Equal(expected, FontSrcUrlRegex.Match(input).Groups.Values.Select(g => g.Value).Where((s, i) => i > 0).ToArray());
+        }
 
 
         [Theory]

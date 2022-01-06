@@ -168,8 +168,14 @@ namespace API.Services
             }
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
-            var importMatches = Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml);
-            foreach (Match match in importMatches)
+            foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
+
+            foreach (Match match in Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
             {
                 if (!match.Success) continue;
                 var importFile = match.Groups["Filename"].Value;
