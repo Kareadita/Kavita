@@ -26,6 +26,7 @@ canvas {
 
 .reader {
     background-color: black;
+    overflow: auto;
 
     img {
         align-items: center;
@@ -52,6 +53,8 @@ canvas {
 .bottom-menu {
     padding: 20px 20px;
 }
+
+
 
 
 .overlay {
