@@ -170,6 +170,8 @@ namespace API.Tests.Parser
         [InlineData("cover.jpg", true)]
         [InlineData("cover.png", true)]
         [InlineData("ch1/cover.png", true)]
+        [InlineData("ch1/backcover.png", false)]
+        [InlineData("backcover.png", false)]
         public void IsCoverImageTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, IsCoverImage(inputPath));
