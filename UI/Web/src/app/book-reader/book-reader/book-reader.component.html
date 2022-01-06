@@ -94,7 +94,7 @@
                         </ul>
                     </div>
                     <ng-template #nestedChildren>
-                        <ul *ngFor="let chapterGroup of chapters" style="padding-inline-start: 0px">
+                        <ul *ngFor="let chapterGroup of chapters" class="chapter-title">
                             <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
                                 {{chapterGroup.title}}
                             </li>
