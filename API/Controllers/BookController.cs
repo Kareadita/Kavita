@@ -217,141 +217,34 @@ namespace API.Controllers
             var bookPages = await book.GetReadingOrderAsync();
             foreach (var contentFileRef in bookPages)
             {
-                if (page == counter)
+                if (page != counter)
                 {
-                    var content = await contentFileRef.ReadContentAsync();
-                    if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
-
-                    // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
-                    content = BookService.EscapeTags(content);
-
-                    doc.LoadHtml(content);
-                    var body = doc.DocumentNode.SelectSingleNode("//body");
-
-                    if (body == null)
-                    {
-                        if (doc.ParseErrors.Any())
-                        {
-                            LogBookErrors(book, contentFileRef, doc);
-                            return BadRequest("The file is malformed! Cannot read.");
-                        }
-                        _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
-                        doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
-                        body = doc.DocumentNode.SelectSingleNode("/html/body");
-                    }
-
-                    var inlineStyles = doc.DocumentNode.SelectNodes("//style");
-                    if (inlineStyles != null)
-                    {
-                        foreach (var inlineStyle in inlineStyles)
-                        {
-                            var styleContent = await _bookService.ScopeStyles(inlineStyle.InnerHtml, apiBase, "", book);
-                            body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
-                        }
-                    }
-
-                    var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
-                    if (styleNodes != null)
-                    {
-                        foreach (var styleLinks in styleNodes)
-                        {
-                            var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
-                            // Some epubs are malformed the key in content.opf might be: content/resources/filelist_0_0.xml but the actual html links to resources/filelist_0_0.xml
-                            // In this case, we will do a search for the key that ends with
-                            if (!book.Content.Css.ContainsKey(key))
-                            {
-                                var correctedKey = book.Content.Css.Keys.SingleOrDefault(s => s.EndsWith(key));
-                                if (correctedKey == null)
-                                {
-                                    _logger.LogError("Epub is Malformed, key: {Key} is not matching OPF file", key);
-                                    continue;
-                                }
-
-                                key = correctedKey;
-                            }
-
-                            var styleContent = await _bookService.ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase, book.Content.Css[key].FileName, book);
-                            if (styleContent != null)
-                            {
-                                body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
-                            }
-                        }
-                    }
-
-                    var anchors = doc.DocumentNode.SelectNodes("//a");
-                    if (anchors != null)
-                    {
-                        foreach (var anchor in anchors)
-                        {
-                            BookService.UpdateLinks(anchor, mappings, page);
-                        }
-                    }
-
-                    var images = doc.DocumentNode.SelectNodes("//img");
-                    if (images != null)
-                    {
-                        foreach (var image in images)
-                        {
-                            if (image.Name != "img") continue;
-
-                            // Need to do for xlink:href
-                            if (image.Attributes["src"] != null)
-                            {
-                                var imageFile = image.Attributes["src"].Value;
-                                if (!book.Content.Images.ContainsKey(imageFile))
-                                {
-                                    var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
-                                    if (correctedKey != null)
-                                    {
-                                        imageFile = correctedKey;
-                                    }
-                                }
-                                image.Attributes.Remove("src");
-                                image.Attributes.Add("src", $"{apiBase}" + imageFile);
-                            }
-                        }
-                    }
-
-                    images = doc.DocumentNode.SelectNodes("//image");
-                    if (images != null)
-                    {
-                        foreach (var image in images)
-                        {
-                            if (image.Name != "image") continue;
-
-                            if (image.Attributes["xlink:href"] != null)
-                            {
-                                var imageFile = image.Attributes["xlink:href"].Value;
-                                if (!book.Content.Images.ContainsKey(imageFile))
-                                {
-                                    var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
-                                    if (correctedKey != null)
-                                    {
-                                        imageFile = correctedKey;
-                                    }
-                                }
-                                image.Attributes.Remove("xlink:href");
-                                image.Attributes.Add("xlink:href", $"{apiBase}" + imageFile);
-                            }
-                        }
-                    }
-
-                    // Check if any classes on the html node (some r2l books do this) and move them to body tag for scoping
-                    var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
-                    if (htmlNode != null && htmlNode.Attributes.Contains("class"))
-                    {
-                        var bodyClasses = body.Attributes.Contains("class") ? body.Attributes["class"].Value : string.Empty;
-                        var classes = htmlNode.Attributes["class"].Value + " " + bodyClasses;
-                        body.Attributes.Add("class", $"{classes}");
-                        // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
-                        return Ok($"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>");
-                    }
-
-
-                    return Ok(body.InnerHtml);
+                    counter++;
+                    continue;
                 }
 
-                counter++;
+                var content = await contentFileRef.ReadContentAsync();
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return Ok(content);
+
+                // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                content = BookService.EscapeTags(content);
+
+                doc.LoadHtml(content);
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    if (doc.ParseErrors.Any())
+                    {
+                        LogBookErrors(book, contentFileRef, doc);
+                        return BadRequest("The file is malformed! Cannot read.");
+                    }
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("/html/body");
+                }
+
+                return Ok(await _bookService.ScopePage(doc, book, apiBase, body, mappings, page));
             }
 
             return BadRequest("Could not find the appropriate html for that page");
