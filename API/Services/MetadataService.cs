@@ -28,7 +28,7 @@ public interface IMetadataService
     /// <param name="forceUpdate"></param>
     Task RefreshMetadata(int libraryId, bool forceUpdate = false);
     /// <summary>
-    /// Performs a forced refresh of metatdata just for a series and it's nested entities
+    /// Performs a forced refresh of metadata just for a series and it's nested entities
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
