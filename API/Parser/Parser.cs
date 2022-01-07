@@ -28,7 +28,8 @@ namespace API.Parser
         /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
         /// </summary>
         /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(src:\s?)?url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(?<End>.{1}\))",
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
+                                                                 + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
             MatchOptions, RegexTimeout);
         /// <summary>
         /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
@@ -54,7 +55,7 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
             MatchOptions, RegexTimeout);
-        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])",
+        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)((?<!back)cover|folder)(?![\w\d])",
             MatchOptions, RegexTimeout);
 
         private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9\+]",
@@ -1088,11 +1089,12 @@ namespace API.Parser
         /// <summary>
         /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image
         /// </summary>
-        /// <param name="name"></param>
+        /// <remarks>If the path has "backcover" in it, it will be ignored</remarks>
+        /// <param name="filename">Filename with extension</param>
         /// <returns></returns>
-        public static bool IsCoverImage(string name)
+        public static bool IsCoverImage(string filename)
         {
-            return IsImage(name, true) && (CoverImageRegex.IsMatch(name));
+            return IsImage(filename, true) && CoverImageRegex.IsMatch(filename);
         }
 
         public static bool HasBlacklistedFolderInPath(string path)

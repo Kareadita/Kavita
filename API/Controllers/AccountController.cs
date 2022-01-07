@@ -12,7 +12,6 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

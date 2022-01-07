@@ -28,9 +28,9 @@ namespace API.Data.Metadata
         /// This is the link to where the data was scraped from
         /// </summary>
         public string Web { get; set; } = string.Empty;
-        public int Day { get; set; }
-        public int Month { get; set; }
-        public int Year { get; set; }
+        public int Day { get; set; } = 0;
+        public int Month { get; set; } = 0;
+        public int Year { get; set; } = 0;
 
 
         /// <summary>
