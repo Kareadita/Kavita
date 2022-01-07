@@ -10,6 +10,7 @@ using API.Extensions;
 using API.Services;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 
@@ -21,10 +22,11 @@ namespace API.Controllers
         private readonly IBookService _bookService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICacheService _cacheService;
-        private static readonly string BookApiUrl = "book-resources?file=";
+        private const string BookApiUrl = "book-resources?file=";
 
 
-        public BookController(ILogger<BookController> logger, IBookService bookService, IUnitOfWork unitOfWork, ICacheService cacheService)
+        public BookController(ILogger<BookController> logger, IBookService bookService,
+            IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             _logger = logger;
             _bookService = bookService;
@@ -212,7 +214,8 @@ namespace API.Controllers
 
             var counter = 0;
             var doc = new HtmlDocument {OptionFixNestedTags = true};
-            var baseUrl = Request.Scheme + "://" + Request.Host + Request.PathBase + "/api/";
+
+            var baseUrl = "//" + Request.Host + Request.PathBase + "/api/";
             var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
             var bookPages = await book.GetReadingOrderAsync();
             foreach (var contentFileRef in bookPages)
