@@ -301,8 +301,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
 
-        console.log('Scroll');
-
         // Highlight the current chapter we are on
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
@@ -745,9 +743,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (part !== undefined && part !== '') {
       this.scrollTo(part);
     } else if (scrollTop !== undefined && scrollTop !== 0) {
-      this.scrollService.scrollTo(scrollTop);
+      this.scrollService.scrollTo(scrollTop, this.reader.nativeElement);
     } else {
-      this.scrollService.scrollTo(0);
+      this.scrollService.scrollTo(0, this.reader.nativeElement);
     }
   }
 
@@ -971,7 +969,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET);
+    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
   }
 
   toggleClickToPaginate() {
