@@ -79,7 +79,7 @@ namespace API.Tests.Parser
         [InlineData("src: local(\"/fonts/OpenSans-Regular-webfont.woff2\")", new [] {"src: local(\"", "/fonts/OpenSans-Regular-webfont.woff2", "\")"})]
         public void FontCssCorrectlySeparates(string input, string[] expected)
         {
-            Assert.Equal(expected, FontSrcUrlRegex.Match(input).Groups.Values.Select(g => g.Value).Where((s, i) => i > 0).ToArray());
+            Assert.Equal(expected, FontSrcUrlRegex.Match(input).Groups.Values.Select(g => g.Value).Where((_, i) => i > 0).ToArray());
         }
 
 

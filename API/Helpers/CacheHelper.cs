@@ -43,7 +43,7 @@ public class CacheHelper : ICacheHelper
         if (isCoverLocked && fileExists) return false;
         if (forceUpdate) return true;
         if (firstFile == null) return true;
-        return (_fileService.HasFileBeenModifiedSince(coverPath, chapterCreated)) || !fileExists;
+        return (_fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)) || !fileExists;
     }
 
     /// <summary>

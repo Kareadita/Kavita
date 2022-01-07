@@ -70,6 +70,8 @@ public class MetadataService : IMetadataService
 
         if (firstFile == null) return false;
 
+        //if (_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
+
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
 
@@ -352,20 +354,33 @@ public class MetadataService : IMetadataService
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
         {
-            var volumeUpdated = false;
+            var volumeIndex = 0;
+            var firstVolumeUpdated = false;
             foreach (var volume in series.Volumes)
             {
-                var chapterUpdated = false;
+                var firstChapterUpdated = false; // This only needs to be FirstChapter updated
+                var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
-                    UpdateChapterMetadata(chapter, allPeople, allTags, forceUpdate || chapterUpdated);
+                    var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
+                    UpdateChapterMetadata(chapter, allPeople, allTags, forceUpdate || firstChapterUpdated);
+                    if (index == 0 && chapterUpdated)
+                    {
+                        firstChapterUpdated = true;
+                    }
+
+                    index++;
                 }
 
-                volumeUpdated = UpdateVolumeCoverImage(volume, chapterUpdated || forceUpdate);
+                var volumeUpdated = UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate);
+                if (volumeIndex == 0 && volumeUpdated)
+                {
+                    firstVolumeUpdated = true;
+                }
+                volumeIndex++;
             }
 
-            UpdateSeriesCoverImage(series, volumeUpdated || forceUpdate);
+            UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate);
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, forceUpdate);
         }
         catch (Exception ex)

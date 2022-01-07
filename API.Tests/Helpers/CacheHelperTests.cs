@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using API.Entities;
 using API.Helpers;
 using API.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -72,6 +75,35 @@ public class CacheHelperTests
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
             false, false));
     }
+
+    [Fact]
+    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_2()
+    {
+        // Represents first run
+        var file = new MangaFile()
+        {
+            FilePath = TestCoverArchive,
+            LastModified = DateTime.Now
+        };
+        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now,
+            false, false));
+    }
+
+    // [Fact]
+    // public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_Robbie()
+    // {
+    //     // Represents first run
+    //     var file = new MangaFile()
+    //     {
+    //         FilePath = "YOUR REAL Path here",
+    //         LastModified = DateTime.Now
+    //     };
+    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+    //     var fileService = new FileService(ds.FileSystem);
+    //     var cacheHelper = new CacheHelper(fileService);
+    //     Assert.False(cacheHelper.ShouldUpdateCoverImage("the existing cover image, full path", file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+    //         false, false));
+    // }
 
     [Fact]
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked()
