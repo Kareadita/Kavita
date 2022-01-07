@@ -641,7 +641,7 @@ public class ScannerService : IScannerService
             existingFile.Format = info.Format;
             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
-            existingFile.UpdateLastModified();
+            //existingFile.UpdateLastModified(); // We skip updating DB here so that metadata refresh can do it
         }
         else
         {
