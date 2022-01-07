@@ -203,13 +203,6 @@ export class ReaderService {
           }
         });
       }
-      //  else if (el.mozRequestFullScreen) {
-      //   el.mozRequestFullScreen();
-      // } else if (el.webkitRequestFullscreen) {
-      //   el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-      // } else if (el.msRequestFullscreen) {
-      //   el.msRequestFullscreen();
-      // }
     }
   }
 
@@ -221,13 +214,6 @@ export class ReaderService {
         }
       });
     }
-    //  else if (document.msExitFullscreen) {
-    //   document.msExitFullscreen();
-    // } else if (document.mozCancelFullScreen) {
-    //   document.mozCancelFullScreen();
-    // } else if (document.webkitExitFullscreen) {
-    //   document.webkitExitFullscreen();
-    // }
   }
 
   /**
