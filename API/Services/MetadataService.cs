@@ -70,26 +70,23 @@ public class MetadataService : IMetadataService
 
         if (firstFile == null) return false;
 
-        //if (_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
-
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
 
         return true;
     }
 
-    private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, bool forceUpdate)
+    private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, bool forceUpdate)
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-        UpdateChapterFromComicInfo(chapter, allPeople, allTags, firstFile);
+        UpdateChapterFromComicInfo(chapter, allPeople, allTags, allGenres, firstFile);
         firstFile.UpdateLastModified();
     }
 
-    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, MangaFile firstFile)
+    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, MangaFile firstFile)
     {
-        // TODO: Think about letting the higher level loop have access for series to avoid duplicate IO operations
         var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
         if (comicInfo == null) return;
 
@@ -198,6 +195,14 @@ public class MetadataService : IMetadataService
             PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
                 person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
         }
+
+        if (!string.IsNullOrEmpty(comicInfo.Genre))
+        {
+            var genres = comicInfo.Genre.Split(",");
+            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
+            GenreHelper.UpdateGenre(allGenres, genres, false,
+                genre => chapter.Genres.Add(genre));
+        }
     }
 
 
@@ -255,17 +260,44 @@ public class MetadataService : IMetadataService
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
     }
 
-    private void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
+    private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
     {
         var isBook = series.Library.Type == LibraryType.Book;
         var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
         var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
-        if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(firstChapter, forceUpdate, firstFile)) return;
+        if (firstFile == null) return;
         if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
 
-        foreach (var chapter in series.Volumes.SelectMany(volume => volume.Chapters))
+        var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
+
+        // Update Metadata based on Chapter metadata
+        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
+
+        if (series.Metadata.ReleaseYear < 1000)
+        {
+            // Not a valid year, default to 0
+            series.Metadata.ReleaseYear = 0;
+        }
+
+        // Set the AgeRating as highest in all the comicInfos
+        series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
+
+
+        if (!string.IsNullOrEmpty(firstChapter.Summary))
+        {
+            series.Metadata.Summary = firstChapter.Summary;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.Language))
+        {
+            series.Metadata.Language = firstChapter.Language;
+        }
+
+
+        // Handle People
+        foreach (var chapter in chapters)
         {
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
                 person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
@@ -299,49 +331,14 @@ public class MetadataService : IMetadataService
 
             TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
                 TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
+
+            GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
+                GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
         }
 
-        var comicInfos = series.Volumes
-            .SelectMany(volume => volume.Chapters)
-            .OrderBy(c => double.Parse(c.Number), new ChapterSortComparer())
-            .SelectMany(c => c.Files)
-            .Select(file => _readingItemService.GetComicInfo(file.FilePath, file.Format))
-            .Where(ci => ci != null)
-            .ToList();
-
-        var comicInfo = comicInfos.FirstOrDefault();
-        if (!string.IsNullOrEmpty(comicInfo?.Summary))
-        {
-            series.Metadata.Summary = comicInfo.Summary;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo?.LanguageISO))
-        {
-            series.Metadata.Language = comicInfo.LanguageISO;
-        }
-
-        // Set the AgeRating as highest in all the comicInfos
-        series.Metadata.AgeRating = comicInfos.Max(i => ComicInfo.ConvertAgeRatingToEnum(comicInfo?.AgeRating));
-        series.Metadata.ReleaseYear = series.Volumes
-            .SelectMany(volume => volume.Chapters).Min(c => c.ReleaseDate.Year);
-
-        if (series.Metadata.ReleaseYear < 1000)
-        {
-            // Not a valid year, default to 0
-            series.Metadata.ReleaseYear = 0;
-        }
-
-        var genres = comicInfos.SelectMany(i => i?.Genre.Split(",")).Distinct().ToList();
-        var tags = comicInfos.SelectMany(i => i?.Tags.Split(",")).Distinct().ToList();
-        var people = series.Volumes.SelectMany(volume => volume.Chapters).SelectMany(c => c.People).ToList();
-
-
+        var people = chapters.SelectMany(c => c.People).ToList();
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
             people, person => series.Metadata.People.Remove(person));
-
-        GenreHelper.UpdateGenre(allGenres, genres, false, genre => GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
-        GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList(),
-            genre => series.Metadata.Genres.Remove(genre));
     }
 
     /// <summary>
@@ -363,7 +360,8 @@ public class MetadataService : IMetadataService
                 foreach (var chapter in volume.Chapters)
                 {
                     var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
-                    UpdateChapterMetadata(chapter, allPeople, allTags, forceUpdate || firstChapterUpdated);
+                    // If cover was update, either the file has changed or first scan and we should force a metadata update
+                    UpdateChapterMetadata(chapter, allPeople, allTags, allGenres, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
                     {
                         firstChapterUpdated = true;
