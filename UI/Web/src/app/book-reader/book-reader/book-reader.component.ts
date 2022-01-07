@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
-import {Location} from '@angular/common';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import {DOCUMENT, Location} from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -243,7 +243,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService) {
+    private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
+    @Inject(DOCUMENT) private document: Document) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -281,7 +282,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           });
         }
 
-        const bodyNode = document.querySelector('body');
+        const bodyNode = this.document.querySelector('body');
         if (bodyNode !== undefined && bodyNode !== null) {
           this.originalBodyColor = bodyNode.style.background;
         }
@@ -296,7 +297,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   ngAfterViewInit() {
     // check scroll offset and if offset is after any of the "id" markers, save progress
-    fromEvent(window, 'scroll')
+    fromEvent(this.readingSectionElemRef.nativeElement, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
 
@@ -305,7 +306,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         // Highlight the current chapter we are on
         if (Object.keys(this.pageAnchors).length !== 0) {
           // get the height of the document so we can capture markers that are halfway on the document viewport
-          const verticalOffset = this.scrollService.scrollPosition + (document.body.offsetHeight / 2);
+          const verticalOffset = this.scrollService.scrollPosition + (this.document.body.offsetHeight / 2);
         
           const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
           if (alreadyReached.length > 0) {
@@ -352,7 +353,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    const bodyNode = document.querySelector('body');
+    const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
       if (this.user.preferences.siteDarkMode) {
@@ -361,7 +362,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.navService.showNavBar();
 
-    const head = document.querySelector('head');
+    const head = this.document.querySelector('head');
     this.renderer.removeChild(head, this.darkModeStyleElem);
 
     if (this.clickToPaginateVisualOverlayTimeout !== undefined) {
@@ -583,8 +584,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   resetSettings() {
     const windowWidth = window.innerWidth
-      || document.documentElement.clientWidth
-      || document.body.clientWidth;
+      || this.document.documentElement.clientWidth
+      || this.document.body.clientWidth;
 
     let margin = '15%';
     if (windowWidth <= 700) {
@@ -633,7 +634,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   moveFocus() {
-    const elems = document.getElementsByClassName('reading-section');
+    const elems = this.document.getElementsByClassName('reading-section');
     if (elems.length > 0) {
       (elems[0] as HTMLDivElement).focus();
     }
@@ -681,10 +682,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getPageMarkers(ids: Array<string>) {
     try {
-      return document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
+      return this.document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
     } catch (Exception) {
       // Fallback to anchors instead. Some books have ids that are not valid for querySelectors, so anchors should be used instead
-      return document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
+      return this.document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
     }
   }
 
@@ -920,7 +921,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setOverrideStyles() {
-    const bodyNode = document.querySelector('body');
+    const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
       if (this.user.preferences.siteDarkMode) {
         bodyNode.classList.remove('bg-dark');
@@ -929,7 +930,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       bodyNode.style.background = this.getDarkModeBackgroundColor();
     }
     this.backgroundColor = this.getDarkModeBackgroundColor();
-    const head = document.querySelector('head');
+    const head = this.document.querySelector('head');
     if (this.darkMode) {
       this.renderer.appendChild(head, this.darkModeStyleElem)
     } else {
@@ -965,7 +966,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Part selector is a XPATH
       element = this.getElementFromXPath(partSelector);
     } else {
-      element = document.querySelector('*[id="' + partSelector + '"]');
+      element = this.document.querySelector('*[id="' + partSelector + '"]');
     }
 
     if (element === null) return;
@@ -1001,7 +1002,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getElementFromXPath(path: string) {
-    const node = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    const node = this.document.evaluate(path, this.document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
     if (node?.nodeType === Node.ELEMENT_NODE) {
       return node as Element;
     }
@@ -1011,7 +1012,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getXPathTo(element: any): string {
     if (element === null) return '';
     if (element.id !== '') { return 'id("' + element.id + '")'; }
-    if (element === document.body) { return element.tagName; }
+    if (element === this.document.body) { return element.tagName; }
           
   
     let ix = 0;
@@ -1047,7 +1048,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderer.removeStyle(this.reader.nativeElement, 'background');
       });
     } else {
-      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+      this.readerService.enterFullscreen(this.readingSectionElemRef.nativeElement, () => {
         this.isFullscreen = true;
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
         if (!this.darkMode) {
@@ -1056,5 +1057,4 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }
   }
-
 }
