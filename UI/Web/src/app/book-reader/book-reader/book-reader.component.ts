@@ -297,7 +297,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   ngAfterViewInit() {
     // check scroll offset and if offset is after any of the "id" markers, save progress
-    fromEvent(this.readingSectionElemRef.nativeElement, 'scroll')
+    fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
         if (this.isLoading) return;
 
@@ -1048,7 +1048,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderer.removeStyle(this.reader.nativeElement, 'background');
       });
     } else {
-      this.readerService.enterFullscreen(this.readingSectionElemRef.nativeElement, () => {
+      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
         if (!this.darkMode) {
