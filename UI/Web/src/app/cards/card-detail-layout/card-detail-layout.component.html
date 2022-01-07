@@ -38,11 +38,13 @@
     </div>
 
     <ng-template #filterSection>
+        <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
         <div class="filter-section mx-auto pb-3">
             <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
-                        <label for="format">Format</label>
+                        <label for="format">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="sr-only" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -70,7 +72,8 @@
     
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.collectionDisabled">
                     <div class="form-group">
-                        <label for="collections">Collections</label>
+                        <label for="collections">Collections</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="sr-only" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
