@@ -309,6 +309,19 @@
                     </app-typeahead>
                 </div>
 
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.publicationStatusDisabled">
+                    <label for="publication-status">Publication Status</label>
+                    <app-typeahead (selectedData)="updatePublicationStatus($event)" [settings]="publicationStatusSettings" [reset]="resetTypeaheads">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+            </div>
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="form-group">
@@ -326,16 +339,13 @@
                             </select>
                         </div>
                     </form>
-                </div>
-    
-                
-                
-            </div>
-            <div class="row justify-content-center no-gutters">
-                <div class="col-md-3 mr-3">
+                </div>  
+                <div class="col-md-2 mr-3"></div>
+                <div class="col-md-2 mr-3"></div>
+                <div class="col-md-2 mr-3 mt-4">
                     <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2 mr-3 mt-4">
                     <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
                 </div>
             </div>

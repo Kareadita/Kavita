@@ -107,6 +107,19 @@ public class MetadataService : IMetadataService
             chapter.Language = comicInfo.LanguageISO;
         }
 
+        if (comicInfo.Count > 0)
+        {
+            chapter.TotalCount = comicInfo.Count;
+        }
+
+        if (int.Parse(comicInfo.Number) > 0)
+        {
+            chapter.Count = int.Parse(comicInfo.Number);
+        }
+
+
+
+
         if (comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
@@ -294,6 +307,13 @@ public class MetadataService : IMetadataService
         // Set the AgeRating as highest in all the comicInfos
         series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
+
+        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
+        series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.Completed;
+        }
 
         if (!string.IsNullOrEmpty(firstChapter.Summary))
         {

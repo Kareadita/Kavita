@@ -89,6 +89,10 @@ namespace API.DTOs.Filtering
         /// Languages (ISO 639-1 code) to filter by. Empty list will return everything back
         /// </summary>
         public IList<string> Languages { get; init; } = new List<string>();
+        /// <summary>
+        /// Publication statuses to filter by. Empty list will return everything back
+        /// </summary>
+        public IList<PublicationStatus> PublicationStatus { get; init; } = new List<PublicationStatus>();
 
     }
 }

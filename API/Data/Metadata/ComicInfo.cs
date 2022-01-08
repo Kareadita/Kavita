@@ -8,13 +8,17 @@ namespace API.Data.Metadata
     /// <summary>
     /// A representation of a ComicInfo.xml file
     /// </summary>
-    /// <remarks>See reference of the loose spec here: https://github.com/Kussie/ComicInfoStandard/blob/main/ComicInfo.xsd</remarks>
+    /// <remarks>See reference of the loose spec here: https://anansi-project.github.io/docs/comicinfo/documentation</remarks>
     public class ComicInfo
     {
         public string Summary { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Series { get; set; } = string.Empty;
         public string Number { get; set; } = string.Empty;
+        /// <summary>
+        /// The total number of items in the series.
+        /// </summary>
+        public int Count { get; set; } = 0;
         public string Volume { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;

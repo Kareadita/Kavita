@@ -53,7 +53,8 @@ public class OpdsController : BaseApiController
         CollectionTags = new List<int>(),
         CoverArtist = new List<int>(),
         ReadStatus = new ReadStatus(),
-        SortOptions = null
+        SortOptions = null,
+        PublicationStatus = new List<PublicationStatus>()
     };
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 

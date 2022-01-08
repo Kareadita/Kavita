@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220108200822_CountMetadata")]
+    partial class CountMetadata
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
@@ -341,9 +343,6 @@ namespace API.Data.Migrations
                     b.Property<string>("TitleName")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("TotalCount")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("VolumeId")
                         .HasColumnType("INTEGER");
 
@@ -505,9 +504,6 @@ namespace API.Data.Migrations
 
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("PublicationStatus")
-                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ReleaseYear")
                         .HasColumnType("INTEGER");

@@ -94,6 +94,27 @@ public class MetadataController : BaseApiController
     }
 
     /// <summary>
+    /// Fetches all publication status' from the instance
+    /// </summary>
+    /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
+    /// <returns></returns>
+    [HttpGet("publication-status")]
+    public async Task<ActionResult<IList<AgeRatingDto>>> GetAllPublicationStatus(string? libraryIds)
+    {
+        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        if (ids != null && ids.Count > 0)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+        }
+
+        return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()
+        {
+            Title = t.ToDescription(),
+            Value = t
+        }));
+    }
+
+    /// <summary>
     /// Fetches all age ratings from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>

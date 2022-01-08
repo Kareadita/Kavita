@@ -70,6 +70,14 @@ namespace API.DTOs
         /// Language for the Chapter/Issue
         /// </summary>
         public string Language { get; set; }
+        /// <summary>
+        /// Number in the TotalCount of issues
+        /// </summary>
+        public int Count { get; set; }
+        /// <summary>
+        /// Total number of issues for the series
+        /// </summary>
+        public int TotalCount { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();
