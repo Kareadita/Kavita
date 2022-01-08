@@ -600,6 +600,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
 
         if (metadataDto != null)
