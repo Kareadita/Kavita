@@ -97,6 +97,16 @@ public class MetadataService : IMetadataService
             chapter.TitleName = comicInfo.Title.Trim();
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Summary))
+        {
+            chapter.Summary = comicInfo.Summary;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.LanguageISO))
+        {
+            chapter.Language = comicInfo.LanguageISO;
+        }
+
         if (comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
@@ -227,7 +237,7 @@ public class MetadataService : IMetadataService
     }
 
     /// <summary>
-    /// Updates metadata for Series
+    /// Updates cover image for Series
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>

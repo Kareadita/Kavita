@@ -124,6 +124,8 @@ namespace API.Tests.Parser
         [InlineData("Conquistador_Tome_2", "2")]
         [InlineData("Max_l_explorateur-_Tome_0", "0")]
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
+        [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
+        [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -167,6 +169,8 @@ namespace API.Tests.Parser
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
         [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
+        [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
+        [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
