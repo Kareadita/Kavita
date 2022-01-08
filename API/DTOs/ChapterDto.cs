@@ -62,6 +62,14 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
+        /// <summary>
+        /// Summary for the Chapter/Issue
+        /// </summary>
+        public string Summary { get; set; }
+        /// <summary>
+        /// Language for the Chapter/Issue
+        /// </summary>
+        public string Language { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();

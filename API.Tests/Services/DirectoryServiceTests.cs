@@ -53,6 +53,39 @@ namespace API.Tests.Services
         }
 
         [Fact]
+        public void TraverseTreeParallelForEach_LongDirectory_ShouldBe1()
+        {
+            var fileSystem = new MockFileSystem();
+            // Create a super long path
+            var testDirectory = "/manga/";
+            for (var i = 0; i < 200; i++)
+            {
+                testDirectory = fileSystem.FileSystem.Path.Join(testDirectory, "supercalifragilisticexpialidocious");
+            }
+
+
+            fileSystem.AddFile(fileSystem.FileSystem.Path.Join(testDirectory, "file_{29}.jpg"), new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = new List<string>();
+            try
+            {
+                var fileCount = ds.TraverseTreeParallelForEach("/manga/", s => files.Add(s),
+                    API.Parser.Parser.ImageFileExtensions, _logger);
+                Assert.Equal(1, fileCount);
+            }
+            catch (Exception ex)
+            {
+                Assert.False(true);
+            }
+
+
+            Assert.Equal(1, files.Count);
+        }
+
+
+
+        [Fact]
         public void TraverseTreeParallelForEach_DontCountExcludedDirectories_ShouldBe28()
         {
             var testDirectory = "/manga/";

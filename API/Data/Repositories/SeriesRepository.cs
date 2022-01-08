@@ -156,6 +156,11 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -186,7 +191,12 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
-            .ThenInclude(cm => cm.Tags)
+            .ThenInclude(c => c.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Tags)
