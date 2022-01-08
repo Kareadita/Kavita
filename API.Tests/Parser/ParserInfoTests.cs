@@ -20,7 +20,7 @@ namespace API.Tests.Parser
                 Title = "darker than black",
                 Volumes = "0"
             };
-            
+
             var p2 = new ParserInfo()
             {
                 Chapters = "1",
@@ -32,7 +32,7 @@ namespace API.Tests.Parser
                 Title = "Darker Than Black",
                 Volumes = "0"
             };
-            
+
             var expected = new ParserInfo()
             {
                 Chapters = "1",
@@ -45,11 +45,11 @@ namespace API.Tests.Parser
                 Volumes = "0"
             };
             p1.Merge(p2);
-            
+
             AssertSame(expected, p1);
 
         }
-        
+
         [Fact]
         public void MergeFromTest2()
         {
@@ -64,7 +64,7 @@ namespace API.Tests.Parser
                 Title = "darker than black",
                 Volumes = "0"
             };
-            
+
             var p2 = new ParserInfo()
             {
                 Chapters = "0",
@@ -76,7 +76,7 @@ namespace API.Tests.Parser
                 Title = "Darker Than Black",
                 Volumes = "1"
             };
-            
+
             var expected = new ParserInfo()
             {
                 Chapters = "1",
@@ -93,9 +93,9 @@ namespace API.Tests.Parser
             AssertSame(expected, p1);
 
         }
-        
 
-        private void AssertSame(ParserInfo expected, ParserInfo actual)
+
+        private static void AssertSame(ParserInfo expected, ParserInfo actual)
         {
             Assert.Equal(expected.Chapters, actual.Chapters);
             Assert.Equal(expected.Volumes, actual.Volumes);

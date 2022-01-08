@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using API.Entities;
 using API.Helpers;
 using API.Services;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Helpers;

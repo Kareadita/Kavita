@@ -16,19 +16,7 @@ namespace API.Tests.Services
 
     public class DirectoryServiceTests
     {
-        private readonly DirectoryService _directoryService;
         private readonly ILogger<DirectoryService> _logger = Substitute.For<ILogger<DirectoryService>>();
-
-        public DirectoryServiceTests()
-        {
-            var filesystem = new MockFileSystem()
-            {
-
-            };
-
-            _directoryService = new DirectoryService(_logger, filesystem);
-        }
-
 
         #region TraverseTreeParallelForEach
         [Fact]

@@ -16,6 +16,7 @@ using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
@@ -30,9 +31,35 @@ namespace API.Tests.Services
     public class ScannerServiceTests
     {
         [Fact]
-        public void AddOrUpdateFileForChapter()
+        public void FindSeriesNotOnDisk_Should_Remove1()
         {
-            // TODO: This can be tested, it has _filesystem mocked
+            var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
+
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
+            //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
+
+            var existingSeries = new List<Series>
+            {
+                new Series()
+                {
+                    Name = "Darker Than Black",
+                    LocalizedName = "Darker Than Black",
+                    OriginalName = "Darker Than Black",
+                    Volumes = new List<Volume>()
+                    {
+                        new Volume()
+                        {
+                            Number = 1,
+                            Name = "1"
+                        }
+                    },
+                    NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                    Metadata = new SeriesMetadata(),
+                    Format = MangaFormat.Epub
+                }
+            };
+
+            Assert.Equal(1, ScannerService.FindSeriesNotOnDisk(existingSeries, infos).Count());
         }
 
         [Fact]
@@ -40,9 +67,9 @@ namespace API.Tests.Services
         {
             var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
 
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
 
             var existingSeries = new List<Series>
             {
@@ -114,48 +141,6 @@ namespace API.Tests.Services
         //     Assert.Equal(missingSeries.Count, removeCount);
         // }
 
-        private void AddToParsedInfo(IDictionary<ParsedSeries, List<ParserInfo>> collectedSeries, ParserInfo info)
-        {
-            var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == API.Parser.Parser.Normalize(info.Series));
-            existingKey ??= new ParsedSeries()
-            {
-                Format = info.Format,
-                Name = info.Series,
-                NormalizedName = API.Parser.Parser.Normalize(info.Series)
-            };
-            if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
-            {
-                ((ConcurrentDictionary<ParsedSeries, List<ParserInfo>>) collectedSeries).AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
-                {
-                    oldValue ??= new List<ParserInfo>();
-                    if (!oldValue.Contains(info))
-                    {
-                        oldValue.Add(info);
-                    }
 
-                    return oldValue;
-                });
-            }
-            else
-            {
-                if (!collectedSeries.ContainsKey(existingKey))
-                {
-                    collectedSeries.Add(existingKey, new List<ParserInfo>() {info});
-                }
-                else
-                {
-                    var list = collectedSeries[existingKey];
-                    if (!list.Contains(info))
-                    {
-                        list.Add(info);
-                    }
-
-                    collectedSeries[existingKey] = list;
-                }
-
-            }
-
-        }
     }
 }
