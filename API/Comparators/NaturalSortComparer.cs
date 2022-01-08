@@ -23,7 +23,7 @@ namespace API.Comparators
             _isAscending = inAscendingOrder;
         }
 
-        int IComparer<string>.Compare(string x, string y)
+        int IComparer<string>.Compare(string? x, string? y)
         {
             if (x == y) return 0;
 

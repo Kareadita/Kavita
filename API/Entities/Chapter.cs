@@ -56,12 +56,24 @@ namespace API.Entities
         /// Date which chapter was released
         /// </summary>
         public DateTime ReleaseDate { get; set; }
+        /// <summary>
+        /// Summary for the Chapter/Issue
+        /// </summary>
+        public string Summary { get; set; }
+        /// <summary>
+        /// Language for the Chapter/Issue
+        /// </summary>
+        public string Language { get; set; }
 
 
         /// <summary>
         /// All people attached at a Chapter level. Usually Comics will have different people per issue.
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
+        /// <summary>
+        /// Genres for the Chapter
+        /// </summary>
+        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
 

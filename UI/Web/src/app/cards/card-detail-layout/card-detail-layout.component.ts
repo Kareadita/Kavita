@@ -84,7 +84,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   libraries: Array<FilterItem<Library>> = [];
   genres: Array<FilterItem<Genre>> = [];
   persons: Array<FilterItem<Person>> = [];
-  collectionTags: Array<FilterItem<CollectionTag>> = [];
+  //collectionTags: Array<FilterItem<CollectionTag>> = [];
 
   readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
@@ -329,9 +329,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       return options.filter(m => m.title.toLowerCase() === f);
     }
     if (this.filterSettings.presetCollectionId > 0) {
-      this.collectionSettings.savedData = this.collectionTags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
-      this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.value.id);
-      this.resetTypeaheads.next(true);
+      this.collectionSettings.fetchFn('').subscribe(tags => {
+        this.collectionSettings.savedData = tags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
+        this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.value.id);
+        this.resetTypeaheads.next(true);
+      });
     }
   }
 

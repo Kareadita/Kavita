@@ -23,6 +23,7 @@ namespace API.Entities
         /// <summary>
         /// Last time underlying file was modified
         /// </summary>
+        /// <remarks>This gets updated anytime the file is scanned</remarks>
         public DateTime LastModified { get; set; }
 
 
@@ -32,11 +33,10 @@ namespace API.Entities
 
 
         /// <summary>
-        /// Updates the Last Modified time of the underlying file
+        /// Updates the Last Modified time of the underlying file to the LastWriteTime
         /// </summary>
         public void UpdateLastModified()
         {
-            // Should this be DateTime.Now ?
             LastModified = File.GetLastWriteTime(FilePath);
         }
     }
