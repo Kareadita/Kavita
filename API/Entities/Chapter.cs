@@ -46,7 +46,6 @@ namespace API.Entities
         /// </summary>
         public AgeRating AgeRating { get; set; }
 
-
         /// <summary>
         /// Chapter title
         /// </summary>

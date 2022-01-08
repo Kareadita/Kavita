@@ -467,44 +467,10 @@ public class ScannerService : IScannerService
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
     {
-        var foundSeries = parsedSeries.Select(s => s.Key.Name).ToList();
-        return existingSeries.Where(es => !es.NameInList(foundSeries) && !SeriesHasMatchingParserInfoFormat(es, parsedSeries));
+        return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
     }
 
-    /// <summary>
-    /// Checks each parser info to see if there is a name match and if so, checks if the format matches the Series object.
-    /// This accounts for if the Series has an Unknown type and if so, considers it matching.
-    /// </summary>
-    /// <param name="series"></param>
-    /// <param name="parsedSeries"></param>
-    /// <returns></returns>
-    private static bool SeriesHasMatchingParserInfoFormat(Series series,
-        Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
-    {
-        var format = MangaFormat.Unknown;
-        foreach (var pSeries in parsedSeries.Keys)
-        {
-            var name = pSeries.Name;
-            var normalizedName = Parser.Parser.Normalize(name);
 
-            if (normalizedName == series.NormalizedName ||
-                normalizedName == Parser.Parser.Normalize(series.Name) ||
-                name == series.Name || name == series.LocalizedName ||
-                name == series.OriginalName ||
-                normalizedName == Parser.Parser.Normalize(series.OriginalName))
-            {
-                format = pSeries.Format;
-                break;
-            }
-        }
-
-        if (series.Format == MangaFormat.Unknown && format != MangaFormat.Unknown)
-        {
-            return true;
-        }
-
-        return format == series.Format;
-    }
 
     private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
     {
