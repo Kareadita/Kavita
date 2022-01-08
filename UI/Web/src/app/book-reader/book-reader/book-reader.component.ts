@@ -812,7 +812,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum - 1);
     }
 
-    if (this.pageNum >= this.maxPages - 1) {
+    if (this.pageNum === this.maxPages - 1) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
     }
