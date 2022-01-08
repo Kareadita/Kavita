@@ -72,6 +72,7 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
+    Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -425,7 +426,7 @@ public class SeriesRepository : ISeriesRepository
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
         out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
-        out bool hasLanguageFilter)
+        out bool hasLanguageFilter, out bool hasPublicationFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -454,6 +455,7 @@ public class SeriesRepository : ISeriesRepository
         hasAgeRating = filter.AgeRating.Count > 0;
         hasTagsFilter = filter.Tags.Count > 0;
         hasLanguageFilter = filter.Languages.Count > 0;
+        hasPublicationFilter = filter.PublicationStatus.Count > 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -541,7 +543,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -555,6 +557,7 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
+                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             )
             .AsNoTracking();
 
@@ -768,5 +771,19 @@ public class SeriesRepository : ISeriesRepository
                 Title = CultureInfo.GetCultureInfo(s).DisplayName,
                 IsoCode = s
             }).ToList();
+    }
+
+    public async Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.PublicationStatus)
+            .Distinct()
+            .Select(s => new PublicationStatusDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
+            .ToListAsync();
     }
 }

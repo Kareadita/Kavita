@@ -212,7 +212,8 @@ export class SeriesService {
       sortOptions: null,
       ageRating: [],
       tags: [],
-      languages: []
+      languages: [],
+      publicationStatus: [],
     };
 
     if (filter === undefined) return data;

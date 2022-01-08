@@ -11,6 +11,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { Language } from 'src/app/_models/metadata/language';
+import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
 import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
@@ -39,6 +40,7 @@ export class FilterSettings {
   ageRatingDisabled = false;
   tagsDisabled = false;
   languageDisabled = false;
+  publicationStatusDisabled = false;
 }
 
 @Component({
@@ -70,6 +72,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   genreSettings: TypeaheadSettings<FilterItem<Genre>> = new TypeaheadSettings();
   collectionSettings: TypeaheadSettings<FilterItem<CollectionTag>> = new TypeaheadSettings();
   ageRatingSettings: TypeaheadSettings<FilterItem<AgeRatingDto>> = new TypeaheadSettings();
+  publicationStatusSettings: TypeaheadSettings<FilterItem<PublicationStatusDto>> = new TypeaheadSettings();
   tagsSettings: TypeaheadSettings<FilterItem<Tag>> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<FilterItem<Language>> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
@@ -84,7 +87,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   libraries: Array<FilterItem<Library>> = [];
   genres: Array<FilterItem<Genre>> = [];
   persons: Array<FilterItem<Person>> = [];
-  //collectionTags: Array<FilterItem<CollectionTag>> = [];
+
 
   readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
@@ -171,6 +174,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.setupCollectionTagTypeahead();
     this.setupPersonTypeahead();
     this.setupAgeRatingSettings();
+    this.setupPublicationStatusSettings();
     this.setupTagSettings();
     this.setupLanguageSettings();
   }
@@ -256,6 +260,29 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       }));
     };
     this.ageRatingSettings.compareFn = (options: FilterItem<AgeRatingDto>[], filter: string) => {
+      const f = filter.toLowerCase();
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+    }
+  }
+
+  setupPublicationStatusSettings() {
+    this.publicationStatusSettings.minCharacters = 0;
+    this.publicationStatusSettings.multiple = true;
+    this.publicationStatusSettings.id = 'publication-status';
+    this.publicationStatusSettings.unique = true;
+    this.publicationStatusSettings.addIfNonExisting = false;
+    this.publicationStatusSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllPublicationStatus(this.filter.libraries).pipe(map(statuses => {
+        return statuses.map(status => {
+          return {
+            title: status.title,
+            value: status,
+            selected: false,
+          }
+        })
+      }));
+    };
+    this.publicationStatusSettings.compareFn = (options: FilterItem<PublicationStatusDto>[], filter: string) => {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
     }
@@ -475,9 +502,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       case PersonRole.Colorist:
         this.filter.colorist = persons.map(p => p.value.id);
         break;
-      // case PersonRole.Artist:
-      //   this.filter.artist = persons.map(p => p.value.id);
-      //   break;
       case PersonRole.Editor:
         this.filter.editor = persons.map(p => p.value.id);
         break;
@@ -514,12 +538,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.filter.ageRating = ratingDtos.map(item => item.value.value) || [];
   }
 
+  updatePublicationStatus(dtos: FilterItem<PublicationStatusDto>[]) {
+    this.filter.publicationStatus = dtos.map(item => item.value.value) || [];
+  }
+
   updateLanguageRating(languages: FilterItem<Language>[]) {
     this.filter.languages = languages.map(item => item.value.isoCode) || [];
   }
 
   updateReadStatus(status: string) {
-    console.log('readstatus: ', this.filter.readStatus);
     if (status === 'read') {
       this.filter.readStatus.read = !this.filter.readStatus.read;
     } else if (status === 'inProgress') {

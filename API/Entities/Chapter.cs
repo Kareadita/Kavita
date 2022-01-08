@@ -63,6 +63,14 @@ namespace API.Entities
         /// Language for the Chapter/Issue
         /// </summary>
         public string Language { get; set; }
+        /// <summary>
+        /// Total number of issues in the series
+        /// </summary>
+        public int TotalCount { get; set; } = 0;
+        /// <summary>
+        /// Number in the Total Count
+        /// </summary>
+        public int Count { get; set; } = 0;
 
 
         /// <summary>

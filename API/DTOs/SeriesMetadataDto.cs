@@ -43,6 +43,18 @@ namespace API.DTOs
         /// Language of the content (ISO 639-1 code)
         /// </summary>
         public string Language { get; set; } = string.Empty;
+        /// <summary>
+        /// Number in the TotalCount of issues
+        /// </summary>
+        public int Count { get; set; }
+        /// <summary>
+        /// Total number of issues for the series
+        /// </summary>
+        public int TotalCount { get; set; }
+        /// <summary>
+        /// Publication status of the Series
+        /// </summary>
+        public PublicationStatus PublicationStatus { get; set; }
 
         public int SeriesId { get; set; }
     }
