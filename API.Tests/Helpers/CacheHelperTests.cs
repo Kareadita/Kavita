@@ -89,22 +89,6 @@ public class CacheHelperTests
             false, false));
     }
 
-    // [Fact]
-    // public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_Robbie()
-    // {
-    //     // Represents first run
-    //     var file = new MangaFile()
-    //     {
-    //         FilePath = "YOUR REAL Path here",
-    //         LastModified = DateTime.Now
-    //     };
-    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-    //     var fileService = new FileService(ds.FileSystem);
-    //     var cacheHelper = new CacheHelper(fileService);
-    //     Assert.False(cacheHelper.ShouldUpdateCoverImage("the existing cover image, full path", file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
-    //         false, false));
-    // }
-
     [Fact]
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked()
     {
