@@ -64,7 +64,7 @@ namespace API.Tests.Services
             }
 
 
-            fileSystem.AddFile(fileSystem.FileSystem.Path.Join(testDirectory, "file_{29}.jpg"), new MockFileData(""));
+            fileSystem.AddFile(fileSystem.FileSystem.Path.Join(testDirectory, "file_29.jpg"), new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
