@@ -148,7 +148,8 @@ public class ScannerService : IScannerService
 
         try
         {
-            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres);
+            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
         }
         catch (Exception ex)
@@ -346,7 +347,7 @@ public class ScannerService : IScannerService
             var librarySeries = cleanedSeries.ToList();
             Parallel.ForEach(librarySeries, (series) =>
             {
-                UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres);
+                UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
             });
 
             try
@@ -424,7 +425,7 @@ public class ScannerService : IScannerService
         foreach(var series in newSeries)
         {
             _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres);
+            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
             _unitOfWork.SeriesRepository.Attach(series);
             try
             {
@@ -453,7 +454,8 @@ public class ScannerService : IScannerService
             newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
     }
 
-    private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres)
+    private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
+        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, LibraryType libraryType)
     {
         try
         {
@@ -471,6 +473,8 @@ public class ScannerService : IScannerService
             }
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
+
+            UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }
         catch (Exception ex)
         {
@@ -481,6 +485,95 @@ public class ScannerService : IScannerService
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
+    }
+
+
+    private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
+    {
+        var isBook = libraryType == LibraryType.Book;
+        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
+        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+
+        var firstFile = firstChapter?.Files.FirstOrDefault();
+        if (firstFile == null) return;
+        if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
+
+        var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
+
+        // Update Metadata based on Chapter metadata
+        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
+
+        if (series.Metadata.ReleaseYear < 1000)
+        {
+            // Not a valid year, default to 0
+            series.Metadata.ReleaseYear = 0;
+        }
+
+        // Set the AgeRating as highest in all the comicInfos
+        series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
+
+
+        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
+        series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.Completed;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.Summary))
+        {
+            series.Metadata.Summary = firstChapter.Summary;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.Language))
+        {
+            series.Metadata.Language = firstChapter.Language;
+        }
+
+
+        // Handle People
+        foreach (var chapter in chapters)
+        {
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Name), PersonRole.Character,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Colorist).Select(p => p.Name), PersonRole.Colorist,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Editor).Select(p => p.Name), PersonRole.Editor,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Inker).Select(p => p.Name), PersonRole.Inker,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Letterer).Select(p => p.Name), PersonRole.Letterer,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
+                TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
+
+            GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
+                GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
+        }
+
+        var people = chapters.SelectMany(c => c.People).ToList();
+        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
+            people, person => series.Metadata.People.Remove(person));
     }
 
 

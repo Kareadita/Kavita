@@ -76,158 +76,13 @@ public class MetadataService : IMetadataService
         return true;
     }
 
-    private void UpdateChapterMetadata(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, bool forceUpdate)
+    private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-        //UpdateChapterFromComicInfo(chapter, allPeople, allTags, allGenres, firstFile);
         firstFile.UpdateLastModified();
     }
-
-    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, MangaFile firstFile)
-    {
-        var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
-        if (comicInfo == null) return;
-
-        chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
-
-        if (!string.IsNullOrEmpty(comicInfo.Title))
-        {
-            chapter.TitleName = comicInfo.Title.Trim();
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Summary))
-        {
-            chapter.Summary = comicInfo.Summary;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.LanguageISO))
-        {
-            chapter.Language = comicInfo.LanguageISO;
-        }
-
-        if (comicInfo.Count > 0)
-        {
-            chapter.TotalCount = comicInfo.Count;
-        }
-
-        if (int.Parse(comicInfo.Number) > 0)
-        {
-            chapter.Count = int.Parse(comicInfo.Number);
-        }
-
-
-
-
-        if (comicInfo.Year > 0)
-        {
-            var day = Math.Max(comicInfo.Day, 1);
-            var month = Math.Max(comicInfo.Month, 1);
-            chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Colorist))
-        {
-            var people = comicInfo.Colorist.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Characters))
-        {
-            var people = comicInfo.Characters.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Translator))
-        {
-            var people = comicInfo.Translator.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Tags))
-        {
-            var tags = comicInfo.Tags.Split(",").Select(s => s.Trim()).ToList();
-            // Remove all tags that aren't matching between chapter tags and metadata
-            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
-            TagHelper.UpdateTag(allTags, tags, false,
-                (tag, added) =>
-                {
-                    chapter.Tags.Add(tag);
-                });
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Writer))
-        {
-            var people = comicInfo.Writer.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Editor))
-        {
-            var people = comicInfo.Editor.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Inker))
-        {
-            var people = comicInfo.Inker.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Letterer))
-        {
-            var people = comicInfo.Letterer.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Penciller))
-        {
-            var people = comicInfo.Penciller.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
-        {
-            var people = comicInfo.CoverArtist.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Publisher))
-        {
-            var people = comicInfo.Publisher.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.Genre))
-        {
-            var genres = comicInfo.Genre.Split(",");
-            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
-            GenreHelper.UpdateGenre(allGenres, genres, false,
-                genre => chapter.Genres.Add(genre));
-        }
-    }
-
 
     /// <summary>
     /// Updates the cover image for a Volume
@@ -283,93 +138,6 @@ public class MetadataService : IMetadataService
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
     }
 
-    private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
-    {
-        var isBook = series.Library.Type == LibraryType.Book;
-        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
-        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
-
-        var firstFile = firstChapter?.Files.FirstOrDefault();
-        if (firstFile == null) return;
-        if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
-
-        var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
-
-        // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
-
-        if (series.Metadata.ReleaseYear < 1000)
-        {
-            // Not a valid year, default to 0
-            series.Metadata.ReleaseYear = 0;
-        }
-
-        // Set the AgeRating as highest in all the comicInfos
-        series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
-
-
-        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
-        series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
-        {
-            series.Metadata.PublicationStatus = PublicationStatus.Completed;
-        }
-
-        if (!string.IsNullOrEmpty(firstChapter.Summary))
-        {
-            series.Metadata.Summary = firstChapter.Summary;
-        }
-
-        if (!string.IsNullOrEmpty(firstChapter.Language))
-        {
-            series.Metadata.Language = firstChapter.Language;
-        }
-
-
-        // Handle People
-        foreach (var chapter in chapters)
-        {
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Name), PersonRole.Character,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Colorist).Select(p => p.Name), PersonRole.Colorist,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Editor).Select(p => p.Name), PersonRole.Editor,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Inker).Select(p => p.Name), PersonRole.Inker,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Letterer).Select(p => p.Name), PersonRole.Letterer,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
-                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
-
-            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
-                TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
-
-            GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
-                GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
-        }
-
-        var people = chapters.SelectMany(c => c.People).ToList();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
-            people, person => series.Metadata.People.Remove(person));
-    }
 
     /// <summary>
     ///
@@ -391,7 +159,7 @@ public class MetadataService : IMetadataService
                 {
                     var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
                     // If cover was update, either the file has changed or first scan and we should force a metadata update
-                    UpdateChapterMetadata(chapter, allPeople, allTags, allGenres, forceUpdate || chapterUpdated);
+                    UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
                     {
                         firstChapterUpdated = true;
@@ -409,7 +177,6 @@ public class MetadataService : IMetadataService
             }
 
             UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate);
-            UpdateSeriesMetadata(series, allPeople, allGenres, allTags, forceUpdate);
         }
         catch (Exception ex)
         {
