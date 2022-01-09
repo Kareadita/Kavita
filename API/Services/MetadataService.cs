@@ -81,7 +81,7 @@ public class MetadataService : IMetadataService
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
-        UpdateChapterFromComicInfo(chapter, allPeople, allTags, allGenres, firstFile);
+        //UpdateChapterFromComicInfo(chapter, allPeople, allTags, allGenres, firstFile);
         firstFile.UpdateLastModified();
     }
 
