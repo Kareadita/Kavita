@@ -24,7 +24,7 @@ namespace API.Tests.Services;
 
 internal class MockReadingItemService : IReadingItemService
 {
-    public ComicInfo GetComicInfo(string filePath, MangaFormat format)
+    public ComicInfo GetComicInfo(string filePath)
     {
         throw new System.NotImplementedException();
     }
