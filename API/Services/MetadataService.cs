@@ -310,7 +310,7 @@ public class MetadataService : IMetadataService
 
         series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
         series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count)
+        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
         {
             series.Metadata.PublicationStatus = PublicationStatus.Completed;
         }
