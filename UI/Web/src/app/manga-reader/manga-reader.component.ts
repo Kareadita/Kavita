@@ -417,6 +417,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.pageNum = 0;
+    this.pagingDirection = PAGING_DIRECTION.FORWARD;
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
@@ -435,7 +436,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
       if (page > this.maxPages) {
-        page = this.maxPages;
+        page = this.maxPages - 1;
       }
       this.setPageNum(page);
 
@@ -884,16 +885,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
           if (windowWidth > newWidth) {
-            //console.log('Using raw draw');
             this.setCanvasSize();
             this.ctx.drawImage(this.canvasImage, 0, 0);
           } else {
-            //console.log('Using scaled draw');
             this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
             this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
           }
         } else {
-          //console.log('Normal Render')
           this.ctx.drawImage(this.canvasImage, 0, 0);
         }
       }
@@ -958,7 +956,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-    //console.log('prefetched images: ', this.cachedImages.arr.map(item => this.readerService.imageUrlToPageNum(item.src) + (item.complete ? ' (c)' : '')));
   }
 
   loadPage() {
@@ -1034,7 +1031,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let tempPageNum = this.pageNum;
-    if (this.pageNum == this.maxPages - 1) {
+    if (this.pageNum == this.maxPages - 1 && this.pagingDirection === PAGING_DIRECTION.FORWARD) {
       tempPageNum = this.pageNum + 1;
     }
 
