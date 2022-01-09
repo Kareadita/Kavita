@@ -80,6 +80,7 @@ namespace API.Parser
         /// <summary>
         /// Merges non empty/null properties from info2 into this entity.
         /// </summary>
+        /// <remarks>This does not merge ComicInfo as they should always be the same</remarks>
         /// <param name="info2"></param>
         public void Merge(ParserInfo info2)
         {
@@ -90,7 +91,6 @@ namespace API.Parser
             Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
             Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;
             IsSpecial = IsSpecial || info2.IsSpecial;
-            // TODO: Merge ComicInfos?
         }
     }
 }
