@@ -7,7 +7,7 @@ namespace API.Services;
 
 public interface IReadingItemService
 {
-    ComicInfo GetComicInfo(string filePath, MangaFormat format);
+    ComicInfo GetComicInfo(string filePath);
     int GetNumberOfPages(string filePath, MangaFormat format);
     string GetCoverImage(string fileFilePath, string fileName, MangaFormat format);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
@@ -34,13 +34,17 @@ public class ReadingItemService : IReadingItemService
     /// Gets the ComicInfo for the file if it exists. Null otherewise.
     /// </summary>
     /// <param name="filePath">Fully qualified path of file</param>
-    /// <param name="format">Format of the file determines how we open it (epub vs comicinfo.xml)</param>
     /// <returns></returns>
-    public ComicInfo? GetComicInfo(string filePath, MangaFormat format)
+    public ComicInfo? GetComicInfo(string filePath)
     {
-        if (format is MangaFormat.Archive or MangaFormat.Epub)
+        if (Parser.Parser.IsEpub(filePath))
         {
-            return Parser.Parser.IsEpub(filePath) ? _bookService.GetComicInfo(filePath) : _archiveService.GetComicInfo(filePath);
+            return _bookService.GetComicInfo(filePath);
+        }
+
+        if (Parser.Parser.IsComicInfoExtension(filePath))
+        {
+            return _archiveService.GetComicInfo(filePath);
         }
 
         return null;
@@ -120,6 +124,13 @@ public class ReadingItemService : IReadingItemService
         }
     }
 
+    /// <summary>
+    /// Parses information out of a file. If file is a book (epub), it will use book metadata regardless of LibraryType
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="rootPath"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public ParserInfo Parse(string path, string rootPath, LibraryType type)
     {
         return Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);

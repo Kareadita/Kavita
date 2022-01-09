@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
@@ -42,11 +43,13 @@ public class ScannerService : IScannerService
     private readonly IFileService _fileService;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
+    private readonly ICacheHelper _cacheHelper;
     private readonly NaturalSortComparer _naturalSort = new ();
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
-        IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService)
+        IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService,
+        ICacheHelper cacheHelper)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -56,6 +59,7 @@ public class ScannerService : IScannerService
         _fileService = fileService;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
+        _cacheHelper = cacheHelper;
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -75,6 +79,10 @@ public class ScannerService : IScannerService
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
+
+        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
         var dirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
@@ -140,7 +148,8 @@ public class ScannerService : IScannerService
 
         try
         {
-            UpdateSeries(series, parsedSeries);
+            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
         }
         catch (Exception ex)
@@ -296,6 +305,10 @@ public class ScannerService : IScannerService
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
 
+        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+
         // Update existing series
         _logger.LogInformation("[ScannerService] Updating existing series for {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size",
             library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
@@ -334,7 +347,7 @@ public class ScannerService : IScannerService
             var librarySeries = cleanedSeries.ToList();
             Parallel.ForEach(librarySeries, (series) =>
             {
-                UpdateSeries(series, parsedSeries);
+                UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
             });
 
             try
@@ -407,11 +420,12 @@ public class ScannerService : IScannerService
             newSeries.Add(s);
         }
 
+
         var i = 0;
         foreach(var series in newSeries)
         {
             _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            UpdateSeries(series, parsedSeries);
+            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
             _unitOfWork.SeriesRepository.Attach(series);
             try
             {
@@ -440,14 +454,15 @@ public class ScannerService : IScannerService
             newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
     }
 
-    private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+    private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
+        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, LibraryType libraryType)
     {
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
-            UpdateVolumes(series, parsedInfos);
+            UpdateVolumes(series, parsedInfos, allPeople, allTags, allGenres);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
@@ -458,6 +473,8 @@ public class ScannerService : IScannerService
             }
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
+
+            UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }
         catch (Exception ex)
         {
@@ -471,8 +488,97 @@ public class ScannerService : IScannerService
     }
 
 
+    private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
+    {
+        var isBook = libraryType == LibraryType.Book;
+        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
+        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
+        var firstFile = firstChapter?.Files.FirstOrDefault();
+        if (firstFile == null) return;
+        if (Parser.Parser.IsPdf(firstFile.FilePath)) return;
+
+        var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
+
+        // Update Metadata based on Chapter metadata
+        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
+
+        if (series.Metadata.ReleaseYear < 1000)
+        {
+            // Not a valid year, default to 0
+            series.Metadata.ReleaseYear = 0;
+        }
+
+        // Set the AgeRating as highest in all the comicInfos
+        series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
+
+
+        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
+        series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
+        if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
+        {
+            series.Metadata.PublicationStatus = PublicationStatus.Completed;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.Summary))
+        {
+            series.Metadata.Summary = firstChapter.Summary;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.Language))
+        {
+            series.Metadata.Language = firstChapter.Language;
+        }
+
+
+        // Handle People
+        foreach (var chapter in chapters)
+        {
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Name), PersonRole.Character,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Colorist).Select(p => p.Name), PersonRole.Colorist,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Editor).Select(p => p.Name), PersonRole.Editor,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Inker).Select(p => p.Name), PersonRole.Inker,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Letterer).Select(p => p.Name), PersonRole.Letterer,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
+
+            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
+                TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
+
+            GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
+                GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre));
+        }
+
+        var people = chapters.SelectMany(c => c.People).ToList();
+        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
+            people, person => series.Metadata.People.Remove(person));
+    }
+
+
+
+    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres)
     {
         var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
@@ -492,6 +598,22 @@ public class ScannerService : IScannerService
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
             UpdateChapters(volume, infos);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
+
+            // Update all the metadata on the Chapters
+            foreach (var chapter in volume.Chapters)
+            {
+                var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
+                try
+                {
+                    var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
+                    UpdateChapterFromComicInfo(chapter, allPeople, allTags, allGenres, firstChapterInfo?.ComicInfo);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "There was some issue when updating chapter's metadata");
+                }
+            }
         }
 
         // Remove existing volumes that aren't in parsedInfos
@@ -593,11 +715,6 @@ public class ScannerService : IScannerService
         }
     }
 
-    private MangaFile CreateMangaFile(ParserInfo info)
-    {
-        return DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
-    }
-
     private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
     {
         chapter.Files ??= new List<MangaFile>();
@@ -607,14 +724,166 @@ public class ScannerService : IScannerService
             existingFile.Format = info.Format;
             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
-            //existingFile.UpdateLastModified(); // We skip updating DB here so that metadata refresh can do it
+            // We skip updating DB here with last modified time so that metadata refresh can do it
         }
         else
         {
-            var file = CreateMangaFile(info);
+            var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
             if (file == null) return;
 
             chapter.Files.Add(file);
+        }
+    }
+
+    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
+    {
+        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        if (firstFile == null ||
+            _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
+
+        var comicInfo = info;
+        if (info == null)
+        {
+            comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath);
+        }
+
+        if (comicInfo == null) return;
+
+        chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+
+        if (!string.IsNullOrEmpty(comicInfo.Title))
+        {
+            chapter.TitleName = comicInfo.Title.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Summary))
+        {
+            chapter.Summary = comicInfo.Summary;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.LanguageISO))
+        {
+            chapter.Language = comicInfo.LanguageISO;
+        }
+
+        if (comicInfo.Count > 0)
+        {
+            chapter.TotalCount = comicInfo.Count;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Number) && int.Parse(comicInfo.Number) > 0)
+        {
+            chapter.Count = int.Parse(comicInfo.Number);
+        }
+
+
+
+
+        if (comicInfo.Year > 0)
+        {
+            var day = Math.Max(comicInfo.Day, 1);
+            var month = Math.Max(comicInfo.Month, 1);
+            chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Colorist))
+        {
+            var people = comicInfo.Colorist.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Characters))
+        {
+            var people = comicInfo.Characters.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Translator))
+        {
+            var people = comicInfo.Translator.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Tags))
+        {
+            var tags = comicInfo.Tags.Split(",").Select(s => s.Trim()).ToList();
+            // Remove all tags that aren't matching between chapter tags and metadata
+            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
+            TagHelper.UpdateTag(allTags, tags, false,
+                (tag, added) =>
+                {
+                    chapter.Tags.Add(tag);
+                });
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Writer))
+        {
+            var people = comicInfo.Writer.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Editor))
+        {
+            var people = comicInfo.Editor.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Inker))
+        {
+            var people = comicInfo.Inker.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Letterer))
+        {
+            var people = comicInfo.Letterer.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Penciller))
+        {
+            var people = comicInfo.Penciller.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
+        {
+            var people = comicInfo.CoverArtist.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Publisher))
+        {
+            var people = comicInfo.Publisher.Split(",");
+            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
+            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
+                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Genre))
+        {
+            var genres = comicInfo.Genre.Split(",");
+            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
+            GenreHelper.UpdateGenre(allGenres, genres, false,
+                genre => chapter.Genres.Add(genre));
         }
     }
 }
