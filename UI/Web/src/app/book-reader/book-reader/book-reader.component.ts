@@ -874,17 +874,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateReaderStyles() {
     if (this.readingHtml != undefined && this.readingHtml.nativeElement) {
-      // for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
-      //   const elem = this.readingHtml.nativeElement.children.item(i);
-      //   if (elem?.tagName != 'STYLE') {
-      //     Object.entries(this.pageStyles).forEach(item => {
-      //       if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') return;
-      //       this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
-      //     });
-      //   }
-      // }
-      console.log('pageStyles: ', this.pageStyles);
-      console.log('readingHtml: ', this.readingHtml.nativeElement);
       Object.entries(this.pageStyles).forEach(item => {
         if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
           // Remove the style or skip
