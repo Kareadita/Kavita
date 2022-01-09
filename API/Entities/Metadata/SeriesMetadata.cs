@@ -32,7 +32,7 @@ namespace API.Entities.Metadata
         /// </summary>
         public int ReleaseYear { get; set; }
         /// <summary>
-        /// Language of the content (ISO 639-1 code)
+        /// Language of the content (BCP-47 code)
         /// </summary>
         public string Language { get; set; } = string.Empty;
         /// <summary>

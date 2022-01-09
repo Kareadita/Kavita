@@ -752,7 +752,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setPageNum(pageNum: number) {
     if (pageNum < 0) {
       this.pageNum = 0;
-    } else if (pageNum >= this.maxPages - 1) {
+    } else if (pageNum >= this.maxPages) {
       this.pageNum = this.maxPages - 1;
     } else {
       this.pageNum = pageNum;
@@ -812,12 +812,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum - 1);
     }
 
-    if (this.pageNum === this.maxPages - 1) {
+    if (oldPageNum + 1 === this.maxPages) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
     }
 
     if (oldPageNum === this.pageNum) { return; }
+
 
     this.loadPage();
   }
