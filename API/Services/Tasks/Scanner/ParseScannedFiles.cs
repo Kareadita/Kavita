@@ -59,20 +59,6 @@ namespace API.Services.Tasks.Scanner
             return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
         }
 
-        private ComicInfo GetComicInfo(string path)
-        {
-            if (Parser.Parser.IsEpub(path))
-            {
-                return _readingItemService.GetComicInfo(path, MangaFormat.Epub);
-            }
-
-            if (Parser.Parser.IsComicInfoExtension(path))
-            {
-                return _readingItemService.GetComicInfo(path, MangaFormat.Archive);
-            }
-            return null;
-        }
-
         /// <summary>
         /// Processes files found during a library scan.
         /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
@@ -82,22 +68,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            ParserInfo info = null;
-
             // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
 
-            if (Parser.Parser.IsEpub(path))
-            {
-                info = _readingItemService.Parse(path, rootPath, type);
-            }
-            else
-            {
-                info = _readingItemService.Parse(path, rootPath, type);
-            }
-
-            // If we couldn't match, log. But don't log if the file parses as a cover image
+            var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
             {
+                // If the file is an image and literally a cover image, skip processing.
                 if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
                 {
                     _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
@@ -105,15 +81,16 @@ namespace API.Services.Tasks.Scanner
                 return;
             }
 
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
+
+            // This catches when original library type is Manga/Comic and when parsing with non
+            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
             {
-                info = _defaultParser.Parse(path, rootPath, LibraryType.Book); // TODO: Why do I reparse?
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
                 var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }
 
-            // TODO: Think about doing this before the Fallback code to speed up
-            info.ComicInfo = GetComicInfo(path);
+            info.ComicInfo = _readingItemService.GetComicInfo(path);
             if (info.ComicInfo != null)
             {
                 if (!string.IsNullOrEmpty(info.ComicInfo.Volume))

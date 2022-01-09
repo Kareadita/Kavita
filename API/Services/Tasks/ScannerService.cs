@@ -744,9 +744,9 @@ public class ScannerService : IScannerService
         var comicInfo = info;
         if (info == null)
         {
-            comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
+            comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath);
         }
-        //var comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath, firstFile.Format);
+
         if (comicInfo == null) return;
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
