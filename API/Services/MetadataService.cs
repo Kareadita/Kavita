@@ -193,7 +193,6 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
     {
-        // TODO: Think about splitting the comicinfo stuff into a separate task
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
         _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
@@ -258,18 +257,9 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
 
-        await RemoveAbandonedMetadataKeys();
-
-
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
 
-    private async Task RemoveAbandonedMetadataKeys()
-    {
-        await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
-        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
-        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
-    }
 
     // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
     private async Task PerformScan(Library library, bool forceUpdate, Action<int, Chunk> action)
@@ -362,7 +352,6 @@ public class MetadataService : IMetadataService
             await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
-        await RemoveAbandonedMetadataKeys();
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }

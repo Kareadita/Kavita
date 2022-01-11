@@ -305,6 +305,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Where(s => s.Id == seriesId)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
@@ -320,6 +321,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
             .Where(s => seriesIds.Contains(s.Id))
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -343,7 +345,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// This returns a dictonary mapping seriesId -> list of chapters back for each series id passed
+    /// This returns a dictionary mapping seriesId -> list of chapters back for each series id passed
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>

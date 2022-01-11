@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
+using API.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner
@@ -26,6 +29,7 @@ namespace API.Services.Tasks.Scanner
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
+        private readonly IHubContext<MessageHub> _messageHub;
         private readonly DefaultParser _defaultParser;
 
         /// <summary>
@@ -36,11 +40,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="directoryService">Directory Service</param>
         /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
         public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
-            IReadingItemService readingItemService)
+            IReadingItemService readingItemService, IHubContext<MessageHub> messageHub)
         {
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
+            _messageHub = messageHub;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
             _defaultParser = new DefaultParser(_directoryService);
         }
@@ -69,7 +74,6 @@ namespace API.Services.Tasks.Scanner
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
             // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
-
             var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
             {
@@ -132,8 +136,6 @@ namespace API.Services.Tasks.Scanner
                 NormalizedName = Parser.Parser.Normalize(info.Series)
             };
 
-
-
             _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
             {
                 oldValue ??= new List<ParserInfo>();
@@ -171,30 +173,38 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
         /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
-        /// <param name="totalFiles">Total files scanned</param>
-        /// <param name="scanElapsedTime">Time it took to scan and parse files</param>
         /// <returns></returns>
-        public Dictionary<ParsedSeries, List<ParserInfo>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, out int totalFiles,
-            out long scanElapsedTime)
+        public Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders)
         {
             var sw = Stopwatch.StartNew();
-            totalFiles = 0;
-            var searchPattern = Parser.Parser.SupportedExtensions;
             foreach (var folderPath in folders)
             {
                 try
                 {
-                    totalFiles += _directoryService.TraverseTreeParallelForEach(folderPath, (f) =>
+                    async void Action(string f)
                     {
                         try
                         {
+                            // Maybe send a metiatr notification so the hanldler can be async?
+
                             ProcessFile(f, folderPath, libraryType);
+                            await _messageHub.Clients.All.SendAsync("library.scan.file", new SignalRMessage()
+                            {
+                                Name = "library.scan.file",
+                                Body = new
+                                {
+                                    LibraryId = 0,
+                                    FileName = f
+                                }
+                            });
                         }
                         catch (FileNotFoundException exception)
                         {
                             _logger.LogError(exception, "The file {Filename} could not be found", f);
                         }
-                    }, searchPattern, _logger);
+                    }
+
+                    _directoryService.TraverseTreeParallelForEach(folderPath, Action, Parser.Parser.SupportedExtensions, _logger);
                 }
                 catch (ArgumentException ex)
                 {
@@ -202,11 +212,10 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            scanElapsedTime = sw.ElapsedMilliseconds;
-            _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
-                scanElapsedTime);
+            // _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
+            //     scanElapsedTime);
 
-            return SeriesWithInfos();
+            return Task.FromResult(SeriesWithInfos());
         }
 
         /// <summary>

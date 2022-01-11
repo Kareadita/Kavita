@@ -73,10 +73,9 @@ public class ScannerService : IScannerService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
         var folderPaths = library.Folders.Select(f => f.Path).ToList();
 
-        // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (folderPaths.Any(f => !_directoryService.IsDriveMounted(f)))
+
+        if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
         {
-            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
@@ -87,8 +86,9 @@ public class ScannerService : IScannerService
         var dirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
-        var parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles, out var scanElapsedTime);
+        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs.Keys);
+
+
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
@@ -134,11 +134,11 @@ public class ScannerService : IScannerService
                     }
                 }
 
+                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, dirs.Keys);
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
-                parsedSeries = scanner.ScanLibrariesForSeries(library.Type, dirs.Keys, out var totalFiles2, out var scanElapsedTime2);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
+                parsedSeries = parsedSeries2;
                 RemoveParsedInfosNotForSeries(parsedSeries, series);
             }
         }
@@ -148,9 +148,10 @@ public class ScannerService : IScannerService
 
         try
         {
-            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
 
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
+            await RemoveAbandonedMetadataKeys();
         }
         catch (Exception ex)
         {
@@ -184,6 +185,53 @@ public class ScannerService : IScannerService
                 "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
                 totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
         }
+    }
+
+    private async Task<bool> CheckMounts(IList<string> folders)
+    {
+        // TODO: IF false, inform UI
+        // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
+        if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
+        {
+            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            await _messageHub.Clients.All.SendAsync("library.scan.error", new SignalRMessage()
+            {
+                Name = "library.scan.error",
+                Body =
+                new {
+                    Message =
+                    "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
+                    Details = ""
+                }
+            });
+            return false;
+        }
+
+        // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
+        if (folders.Any(f => _directoryService.IsDirectoryEmpty(f)))
+        {
+            // TODO: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean.
+            // That way logging and UI informing is all in one place with full context
+            _logger.LogError("Some of the root folders for the library are empty. " +
+                             "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                             "Scan will be aborted. " +
+                             "Check that your mount is connected or change the library's root folder and rescan");
+            await _messageHub.Clients.All.SendAsync("library.scan.error", new SignalRMessage()
+            {
+                Name = "library.scan.error",
+                Body =
+                    new {
+                        Message =
+                            "Some of the root folders for the library are empty.",
+                        Details = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                                  "Scan will be aborted. " +
+                                  "Check that your mount is connected or change the library's root folder and rescan"
+                    }
+            });
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -223,20 +271,8 @@ public class ScannerService : IScannerService
             return;
         }
 
-        // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
-        if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
+        if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
         {
-            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            return;
-        }
-
-        // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
-        if (library.Folders.Any(f => _directoryService.IsDirectoryEmpty(f.Path)))
-        {
-            _logger.LogError("Some of the root folders for the library are empty. " +
-                             "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                             "Scan will be aborted. " +
-                             "Check that your mount is connected or change the library's root folder and rescan");
             return;
         }
 
@@ -244,8 +280,8 @@ public class ScannerService : IScannerService
         await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
-        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
-        var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
+
+        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
 
         foreach (var folderPath in library.Folders)
         {
@@ -276,6 +312,18 @@ public class ScannerService : IScannerService
             MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
     }
 
+    private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)
+    {
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _messageHub);
+        var scanWatch = new Stopwatch();
+        var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs);
+        var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
+        var scanElapsedTime = scanWatch.ElapsedMilliseconds;
+        _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
+            scanElapsedTime);
+        return new Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
+    }
+
     /// <summary>
     /// Remove any user progress rows that no longer exist since scan library ran and deleted series/volumes/chapters
     /// </summary>
@@ -291,6 +339,7 @@ public class ScannerService : IScannerService
     /// </summary>
     private async Task CleanupDbEntities()
     {
+        await RemoveAbandonedMetadataKeys();
         await CleanupAbandonedChapters();
         var cleanedUp = await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
         _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
@@ -345,10 +394,16 @@ public class ScannerService : IScannerService
 
             // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
             var librarySeries = cleanedSeries.ToList();
-            Parallel.ForEach(librarySeries, (series) =>
+            // Parallel.ForEach(librarySeries, (series) =>
+            // {
+            //
+            //
+            // });
+
+            foreach (var series in librarySeries)
             {
-                UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
-            });
+                await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+            }
 
             try
             {
@@ -425,7 +480,7 @@ public class ScannerService : IScannerService
         foreach(var series in newSeries)
         {
             _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
             _unitOfWork.SeriesRepository.Attach(series);
             try
             {
@@ -454,7 +509,7 @@ public class ScannerService : IScannerService
             newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
     }
 
-    private void UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
+    private async Task UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
         ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, LibraryType libraryType)
     {
         try
@@ -473,6 +528,16 @@ public class ScannerService : IScannerService
             }
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
+            await _messageHub.Clients.All.SendAsync("NotificationProgressEvent", new SignalRMessage()
+            {
+                Name = "library.update.series",
+                Body = new
+                {
+                    Title = "Updating Series",
+                    SubTitle = series.Name
+                }
+            });
+
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }
@@ -485,6 +550,13 @@ public class ScannerService : IScannerService
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
+    }
+
+    private async Task RemoveAbandonedMetadataKeys()
+    {
+        await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
+        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
     }
 
 
