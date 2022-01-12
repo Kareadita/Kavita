@@ -8,7 +8,7 @@ namespace API.Services;
 public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
-    string GetCoverImage(string path, string fileName);
+    string GetCoverImage(string path, string fileName, string outputDirectory);
 
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
@@ -17,7 +17,7 @@ public interface IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
 
-    string WriteCoverThumbnail(Stream stream, string fileName);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory);
 }
 
 public class ImageService : IImageService
@@ -54,7 +54,7 @@ public class ImageService : IImageService
         }
     }
 
-    public string GetCoverImage(string path, string fileName)
+    public string GetCoverImage(string path, string fileName, string outputDirectory)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
@@ -62,7 +62,7 @@ public class ImageService : IImageService
         {
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
         catch (Exception ex)
@@ -80,12 +80,16 @@ public class ImageService : IImageService
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
-        _directoryService.ExistOrCreate(_directoryService.CoverImageDirectory);
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+        _directoryService.ExistOrCreate(outputDirectory);
+        try
+        {
+            _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        } catch (Exception ex) {/* Swallow exception */}
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }
 

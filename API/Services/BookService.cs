@@ -27,7 +27,7 @@ namespace API.Services
     public interface IBookService
     {
         int GetNumberOfPages(string filePath);
-        string GetCoverImage(string fileFilePath, string fileName);
+        string GetCoverImage(string fileFilePath, string fileName, string outputDirectory);
         Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
         /// <summary>
@@ -632,13 +632,13 @@ namespace API.Services
         /// <param name="fileFilePath"></param>
         /// <param name="fileName">Name of the new file.</param>
         /// <returns></returns>
-        public string GetCoverImage(string fileFilePath, string fileName)
+        public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             if (!IsValidFile(fileFilePath)) return string.Empty;
 
             if (Parser.Parser.IsPdf(fileFilePath))
             {
-                return GetPdfCoverImage(fileFilePath, fileName);
+                return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
             }
 
             using var epubBook = EpubReader.OpenBook(fileFilePath);
@@ -654,7 +654,7 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
 
-                return _imageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
             }
             catch (Exception ex)
             {
@@ -665,7 +665,7 @@ namespace API.Services
         }
 
 
-        private string GetPdfCoverImage(string fileFilePath, string fileName)
+        private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             try
             {
@@ -675,7 +675,7 @@ namespace API.Services
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-                return _imageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
 
             }
             catch (Exception ex)

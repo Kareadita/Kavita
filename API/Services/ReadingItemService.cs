@@ -19,6 +19,7 @@ public class ReadingItemService : IReadingItemService
     private readonly IArchiveService _archiveService;
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
     private readonly DefaultParser _defaultParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService, IDirectoryService directoryService)
@@ -26,6 +27,7 @@ public class ReadingItemService : IReadingItemService
         _archiveService = archiveService;
         _bookService = bookService;
         _imageService = imageService;
+        _directoryService = directoryService;
 
         _defaultParser = new DefaultParser(directoryService);
     }
@@ -85,12 +87,13 @@ public class ReadingItemService : IReadingItemService
         {
             return string.Empty;
         }
+
         return format switch
         {
-            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName),
-            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName),
-            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName),
-            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName),
+            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
+            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
+            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
+            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
             _ => string.Empty
         };
     }
