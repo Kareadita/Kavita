@@ -39,7 +39,7 @@ public class ScannerService : IScannerService
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
     private readonly ICacheService _cacheService;
-    private readonly IHubContext<MessageHub> _messageHub;
+    private readonly IEventHub _eventHub;
     private readonly IFileService _fileService;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
@@ -47,7 +47,7 @@ public class ScannerService : IScannerService
     private readonly NaturalSortComparer _naturalSort = new ();
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
-        IMetadataService metadataService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
+        IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService,
         ICacheHelper cacheHelper)
     {
@@ -55,7 +55,7 @@ public class ScannerService : IScannerService
         _logger = logger;
         _metadataService = metadataService;
         _cacheService = cacheService;
-        _messageHub = messageHub;
+        _eventHub = eventHub;
         _fileService = fileService;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
@@ -159,7 +159,8 @@ public class ScannerService : IScannerService
             await _unitOfWork.RollbackAsync();
         }
         // Tell UI that this series is done
-        await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(seriesId, series.Name), token);
+        await _eventHub.SendMessageAsync(SignalREvents.ScanSeries,
+            MessageFactory.ScanSeriesEvent(seriesId, series.Name), true);
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
@@ -210,24 +211,26 @@ public class ScannerService : IScannerService
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
         if (folders.Any(f => _directoryService.IsDirectoryEmpty(f)))
         {
-            // TODO: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean.
+            // TODO: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean. (We can throw a custom exception which
+            // will always propagate to the UI)
             // That way logging and UI informing is all in one place with full context
             _logger.LogError("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
-            await _messageHub.Clients.All.SendAsync("library.scan.error", new SignalRMessage()
+            await _eventHub.SendMessageAsync(SignalREvents.Error, new SignalRMessage()
             {
-                Name = "library.scan.error",
+                Name = SignalREvents.Error,
                 Body =
                     new {
-                        Message =
+                        Title =
                             "Some of the root folders for the library are empty.",
-                        Details = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                        SubTitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                                   "Scan will be aborted. " +
                                   "Check that your mount is connected or change the library's root folder and rescan"
                     }
-            });
+            }, true);
+
             return false;
         }
 
@@ -314,9 +317,9 @@ public class ScannerService : IScannerService
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)
     {
-        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _messageHub);
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = new Stopwatch();
-        var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs);
+        var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
         _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
@@ -666,6 +669,7 @@ public class ScannerService : IScannerService
                 _unitOfWork.VolumeRepository.Add(volume);
             }
 
+            // TODO: Here we can put a signalR update
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
             UpdateChapters(volume, infos);

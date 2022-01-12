@@ -1,11 +1,9 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
@@ -25,7 +23,9 @@ export enum EVENTS {
   ScanLibraryError = 'ScanLibraryError',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
   CleanupProgress = 'CleanupProgress',
-  DownloadProgress = 'DownloadProgress'
+  DownloadProgress = 'DownloadProgress',
+  NotificationProgress = 'NotificationProgress',
+  FileScanProgress = 'FileScanProgress'
 }
 
 export interface Message<T> {
@@ -116,6 +116,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.RefreshMetadataProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.NotificationProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.NotificationProgress,
         payload: resp.body
       });
     });

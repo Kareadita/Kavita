@@ -29,7 +29,7 @@ namespace API.Services.Tasks.Scanner
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
-        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IEventHub _eventHub;
         private readonly DefaultParser _defaultParser;
 
         /// <summary>
@@ -40,12 +40,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="directoryService">Directory Service</param>
         /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
         public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
-            IReadingItemService readingItemService, IHubContext<MessageHub> messageHub)
+            IReadingItemService readingItemService, IEventHub eventHub)
         {
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
-            _messageHub = messageHub;
+            _eventHub = eventHub;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
             _defaultParser = new DefaultParser(_directoryService);
         }
@@ -73,7 +73,6 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
             var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
             {
@@ -174,7 +173,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
         /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
         /// <returns></returns>
-        public Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders)
+        public Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
         {
             var sw = Stopwatch.StartNew();
             foreach (var folderPath in folders)
@@ -185,18 +184,8 @@ namespace API.Services.Tasks.Scanner
                     {
                         try
                         {
-                            // Maybe send a metiatr notification so the hanldler can be async?
-
                             ProcessFile(f, folderPath, libraryType);
-                            await _messageHub.Clients.All.SendAsync("library.scan.file", new SignalRMessage()
-                            {
-                                Name = "library.scan.file",
-                                Body = new
-                                {
-                                    LibraryId = 0,
-                                    FileName = f
-                                }
-                            });
+                            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName), true);
                         }
                         catch (FileNotFoundException exception)
                         {

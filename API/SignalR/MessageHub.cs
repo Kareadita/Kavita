@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Data;
 using API.Extensions;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.Authorization;
@@ -36,6 +37,7 @@ namespace API.SignalR
 
         public override async Task OnConnectedAsync()
         {
+
             lock (Connections)
             {
                 Connections.Add(Context.ConnectionId);

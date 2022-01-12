@@ -18,7 +18,8 @@ interface ProcessedEvent {
 
 type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
 
-const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress];
+const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, 
+  EVENTS.CleanupProgress, EVENTS.DownloadProgress];
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -56,8 +57,35 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.updateAvailable = true;
         this.updateBody = event.payload;
+      } else if (event.event.endsWith('error')) {
+        // Show an error handle
+      } else if (event.event === EVENTS.NotificationProgress) {
+        this.processNotificationProgressEvent(event, event.event)
       }
     });
+  }
+
+  processNotificationProgressEvent(event: Message<ProgressEvent>, eventType: string) {
+    const scanEvent = event.payload as ProgressEvent;
+    console.log('Notification Progress Event: ', event.event, event.payload);
+
+
+    // this.libraryService.getLibraryNames().subscribe(names => {
+    //   const data = this.progressEventsSource.getValue();
+    //   const index = data.findIndex(item => item.eventType === eventType && item.libraryId === event.payload.libraryId);
+    //   if (index >= 0) {
+    //     data.splice(index, 1);
+    //   }
+
+    //   if (scanEvent.progress !== 1) {
+    //     const libraryName = names[scanEvent.libraryId] || '';
+    //     const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName, rawBody: event.payload};
+    //     data.push(newEvent);
+    //   }
+
+      
+    //   this.progressEventsSource.next(data);
+    // });
   }
 
 

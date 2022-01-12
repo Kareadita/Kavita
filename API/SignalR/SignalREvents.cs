@@ -49,5 +49,15 @@
         /// </summary>
         public const string DownloadProgress = "DownloadProgress";
 
+        public const string NotificationProgress = "NotificationProgress";
+        /// <summary>
+        /// Event sent out when Scan Loop is parsing a file
+        /// </summary>
+        public const string FileScanProgress = "FileScanProgress";
+        /// <summary>
+        /// A generic error that can occur in background processing
+        /// </summary>
+        public const string Error = "Error";
+
     }
 }

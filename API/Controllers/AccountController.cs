@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
+using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,13 +32,14 @@ namespace API.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
+        private readonly IMediator _mediator;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper, IAccountService accountService)
+            IMapper mapper, IAccountService accountService, IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -46,6 +48,7 @@ namespace API.Controllers
             _logger = logger;
             _mapper = mapper;
             _accountService = accountService;
+            _mediator = mediator;
         }
 
         /// <summary>
@@ -219,9 +222,22 @@ namespace API.Controllers
         [HttpPost("update-rbs")]
         public async Task<ActionResult> UpdateRoles(UpdateRbsDto updateRbsDto)
         {
+
+            var successful = await _mediator.Send(new UpdateUserRole
+            {
+                Roles = updateRbsDto.Roles,
+                Username = updateRbsDto.Username
+            });
+
+            if (!successful)
+            {
+                return BadRequest("Something went wrong, unable to update user's roles");
+            }
+
             var user = await _userManager.Users
                 .Include(u => u.UserPreferences)
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == updateRbsDto.Username.ToUpper());
+
             if (updateRbsDto.Roles.Contains(PolicyConstants.AdminRole) ||
                 updateRbsDto.Roles.Contains(PolicyConstants.PlebRole))
             {

@@ -3,6 +3,7 @@ using API.Data;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using API.SignalR;
 using API.SignalR.Presence;
 using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
@@ -39,11 +40,13 @@ namespace API.Extensions
             services.AddScoped<IAccountService, AccountService>();
 
 
+
             services.AddScoped<IFileSystem, FileSystem>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICacheHelper, CacheHelper>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
+            services.AddScoped<IEventHub, EventHub>();
 
             services.AddSqLite(config, env);
             services.AddLogging(config);

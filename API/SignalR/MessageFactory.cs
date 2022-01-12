@@ -161,5 +161,34 @@ namespace API.SignalR
                 }
             };
         }
+
+
+        public static SignalRMessage FileScanProgressEvent(string filename, string libraryName)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.FileScanProgress,
+                Body = new
+                {
+                    Title = $"Scanning {libraryName}",
+                    Subtitle = filename,
+                    EventTime = DateTime.Now
+                }
+            };
+        }
+
+        // public static SignalRMessage NotificationProgressEvent()
+        // {
+        //     return new SignalRMessage()
+        //     {
+        //         Name = SignalREvents.DownloadProgress,
+        //         Body = new
+        //         {
+        //             UserName = username,
+        //             DownloadName = downloadName,
+        //             Progress = progress
+        //         }
+        //     };
+        // }
     }
 }
