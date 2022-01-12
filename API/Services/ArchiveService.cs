@@ -22,7 +22,7 @@ namespace API.Services
     {
         void ExtractArchive(string archivePath, string extractPath);
         int GetNumberOfPagesFromArchive(string archivePath);
-        string GetCoverImage(string archivePath, string fileName);
+        string GetCoverImage(string archivePath, string fileName, string outputDirectory);
         bool IsValidArchive(string archivePath);
         ComicInfo GetComicInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
@@ -186,7 +186,7 @@ namespace API.Services
         /// <param name="archivePath"></param>
         /// <param name="fileName">File name to use based on context of entity.</param>
         /// <returns></returns>
-        public string GetCoverImage(string archivePath, string fileName)
+        public string GetCoverImage(string archivePath, string fileName, string outputDirectory)
         {
             if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
             try
@@ -203,7 +203,7 @@ namespace API.Services
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
-                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName);
+                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
@@ -215,7 +215,7 @@ namespace API.Services
 
                         using var stream = entry.OpenEntryStream();
 
-                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName);
+                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -279,14 +279,15 @@ namespace API.Services
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private string CreateThumbnail(string entryName, Stream stream, string fileName)
+        private string CreateThumbnail(string entryName, Stream stream, string fileName, string outputDirectory)
         {
             try
             {
-                return _imageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
             }
             catch (Exception ex)
             {
+                // NOTE: I can just let this bubble up
                 _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
             }
 
@@ -337,28 +338,24 @@ namespace API.Services
 
         public static void CleanComicInfo(ComicInfo info)
         {
-            if (info != null)
-            {
-                info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-                info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-                info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-                info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-                info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-                info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-                info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-                info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+            if (info == null) return;
 
-                if (!string.IsNullOrEmpty(info.Web))
+            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+
+            if (!string.IsNullOrEmpty(info.Web))
+            {
+                // ComicVine stores the Issue number in Number field and does not use Volume.
+                if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
+                if (info.Volume.Equals("1"))
                 {
-                    // TODO: Validate this works through testing
-                    // ComicVine stores the Issue number in Number field and does not use Volume.
-                    if (info.Web.Contains("https://comicvine.gamespot.com/"))
-                    {
-                        if (info.Volume.Equals("1"))
-                        {
-                            info.Volume = Parser.Parser.DefaultVolume;
-                        }
-                    }
+                    info.Volume = Parser.Parser.DefaultVolume;
                 }
             }
         }
@@ -451,7 +448,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user (throw exception, let middleware inform user)
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 

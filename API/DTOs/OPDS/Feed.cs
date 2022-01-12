@@ -23,7 +23,7 @@ namespace API.DTOs.OPDS
         public string Icon { get; set; } = "/favicon.ico";
 
         [XmlElement("author")]
-        public Author Author { get; set; } = new Author()
+        public FeedAuthor Author { get; set; } = new FeedAuthor()
         {
             Name = "Kavita",
             Uri = "https://kavitareader.com"

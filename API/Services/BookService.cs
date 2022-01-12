@@ -27,7 +27,7 @@ namespace API.Services
     public interface IBookService
     {
         int GetNumberOfPages(string filePath);
-        string GetCoverImage(string fileFilePath, string fileName);
+        string GetCoverImage(string fileFilePath, string fileName, string outputDirectory);
         Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
         /// <summary>
@@ -299,7 +299,6 @@ namespace API.Services
             var classes = htmlNode.Attributes["class"].Value + " " + bodyClasses;
             body.Attributes.Add("class", $"{classes}");
             // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
-            //return Ok($"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>");
             return $"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>";
         }
 
@@ -369,7 +368,6 @@ namespace API.Services
 
                 var info =  new ComicInfo()
                 {
-                    // TODO: Summary is in html, we need to turn it into string
                     Summary = epubBook.Schema.Package.Metadata.Description,
                     Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
@@ -634,13 +632,13 @@ namespace API.Services
         /// <param name="fileFilePath"></param>
         /// <param name="fileName">Name of the new file.</param>
         /// <returns></returns>
-        public string GetCoverImage(string fileFilePath, string fileName)
+        public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             if (!IsValidFile(fileFilePath)) return string.Empty;
 
             if (Parser.Parser.IsPdf(fileFilePath))
             {
-                return GetPdfCoverImage(fileFilePath, fileName);
+                return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
             }
 
             using var epubBook = EpubReader.OpenBook(fileFilePath);
@@ -656,7 +654,7 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
 
-                return _imageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
             }
             catch (Exception ex)
             {
@@ -667,7 +665,7 @@ namespace API.Services
         }
 
 
-        private string GetPdfCoverImage(string fileFilePath, string fileName)
+        private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             try
             {
@@ -677,7 +675,7 @@ namespace API.Services
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-                return _imageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
 
             }
             catch (Exception ex)
