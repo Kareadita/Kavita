@@ -1,8 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using API.Comparators;
-using API.Entities;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
