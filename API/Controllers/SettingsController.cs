@@ -63,11 +63,6 @@ namespace API.Controllers
         {
             _logger.LogInformation("{UserName} is resetting Server Settings", User.GetUsername());
 
-
-            // We do not allow CacheDirectory changes, so we will ignore.
-            // var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
-            // currentSettings = Seed.DefaultSettings;
-
             return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
         }
 

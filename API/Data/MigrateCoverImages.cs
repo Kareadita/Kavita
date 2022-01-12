@@ -52,7 +52,7 @@ namespace API.Data
                     {
                         var stream = new MemoryStream(series.CoverImage);
                         stream.Position = 0;
-                        imageService.WriteCoverThumbnail(stream, ImageService.GetSeriesFormat(int.Parse(series.Id)));
+                        imageService.WriteCoverThumbnail(stream, ImageService.GetSeriesFormat(int.Parse(series.Id)), directoryService.CoverImageDirectory);
                     }
                     catch (Exception e)
                     {
@@ -78,7 +78,7 @@ namespace API.Data
                     {
                         var stream = new MemoryStream(chapter.CoverImage);
                         stream.Position = 0;
-                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}");
+                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetChapterFormat(int.Parse(chapter.Id), int.Parse(chapter.ParentId))}", directoryService.CoverImageDirectory);
                     }
                     catch (Exception e)
                     {
@@ -103,7 +103,7 @@ namespace API.Data
                     {
                         var stream = new MemoryStream(tag.CoverImage);
                         stream.Position = 0;
-                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}");
+                        imageService.WriteCoverThumbnail(stream, $"{ImageService.GetCollectionTagFormat(int.Parse(tag.Id))}", directoryService.CoverImageDirectory);
                     }
                     catch (Exception e)
                     {
@@ -131,6 +131,7 @@ namespace API.Data
 
             Console.WriteLine("Updating Chapter entities");
             var chapters = await context.Chapter.ToListAsync();
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var chapter in chapters)
             {
                 if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
@@ -161,6 +162,7 @@ namespace API.Data
 
             Console.WriteLine("Updating Collection Tag entities");
             var tags = await context.CollectionTag.ToListAsync();
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var tag in tags)
             {
                 if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,

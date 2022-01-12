@@ -1,8 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using API.Comparators;
-using API.Entities;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
@@ -10,16 +7,9 @@ namespace API.Services;
 
 public interface IImageService
 {
-    void ExtractImages(string fileFilePath, string targetDirectory, int fileCount);
-    string GetCoverImage(string path, string fileName);
-    string GetCoverFile(MangaFile file);
+    void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
+    string GetCoverImage(string path, string fileName, string outputDirectory);
 
-    /// <summary>
-    /// Creates a Thumbnail version of an image
-    /// </summary>
-    /// <param name="path">Path to the image file</param>
-    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    //string CreateThumbnail(string path, string fileName);
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
@@ -27,7 +17,7 @@ public interface IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
 
-    string WriteCoverThumbnail(Stream stream, string fileName);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory);
 }
 
 public class ImageService : IImageService
@@ -50,7 +40,7 @@ public class ImageService : IImageService
         _directoryService = directoryService;
     }
 
-    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
+    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount)
     {
         _directoryService.ExistOrCreate(targetDirectory);
         if (fileCount == 1)
@@ -64,37 +54,15 @@ public class ImageService : IImageService
         }
     }
 
-    /// <summary>
-    /// Finds the first image in the directory of the first file. Does not check for "cover/folder".ext files to override.
-    /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
-    public string GetCoverFile(MangaFile file)
-    {
-        var directory = Path.GetDirectoryName(file.FilePath);
-        if (string.IsNullOrEmpty(directory))
-        {
-            _logger.LogError("Could not find Directory for {File}", file.FilePath);
-            return null;
-        }
-
-        using var nc = new NaturalSortComparer();
-        var firstImage = _directoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
-            .OrderBy(Path.GetFileNameWithoutExtension, nc).FirstOrDefault();
-
-        return firstImage;
-    }
-
-    public string GetCoverImage(string path, string fileName)
+    public string GetCoverImage(string path, string fileName, string outputDirectory)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
-            //return CreateThumbnail(path,  fileName);
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
         catch (Exception ex)
@@ -105,24 +73,6 @@ public class ImageService : IImageService
         return string.Empty;
     }
 
-    /// <inheritdoc />
-    // public string CreateThumbnail(string path, string fileName)
-    // {
-    //     try
-    //     {
-    //         using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
-    //         var filename = fileName + ".png";
-    //         thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
-    //         return filename;
-    //     }
-    //     catch (Exception e)
-    //     {
-    //         _logger.LogError(e, "Error creating thumbnail from url");
-    //     }
-    //
-    //     return string.Empty;
-    // }
-
     /// <summary>
     /// Creates a thumbnail out of a memory stream and saves to <see cref="DirectoryService.CoverImageDirectory"/> with the passed
     /// fileName and .png extension.
@@ -130,12 +80,16 @@ public class ImageService : IImageService
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
-        _directoryService.ExistOrCreate(_directoryService.CoverImageDirectory);
-        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, filename));
+        _directoryService.ExistOrCreate(outputDirectory);
+        try
+        {
+            _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        } catch (Exception ex) {/* Swallow exception */}
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }
 

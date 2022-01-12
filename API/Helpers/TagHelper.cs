@@ -24,9 +24,6 @@ public static class TagHelper
             var added = false;
             var normalizedName = Parser.Parser.Normalize(name);
 
-            // var tag = DbFactory.Tag(name, isExternal);
-            // TagHelper.AddTagIfNotExists(allTags, tag);
-
             var genre = allTags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)

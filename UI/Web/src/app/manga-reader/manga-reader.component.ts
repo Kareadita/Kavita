@@ -865,34 +865,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         // Fit Split on a page that needs splitting
-        if (this.shouldRenderAsFitSplit()) {
-          const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-          const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
-          // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          this.canvas.nativeElement.width = windowWidth;
-          this.canvas.nativeElement.height = windowHeight;
-          const ratio = this.canvasImage.width / this.canvasImage.height;
-          let newWidth = windowWidth;
-          let newHeight = newWidth / ratio;
-          if (newHeight > windowHeight) {
-            newHeight = windowHeight;
-            newWidth = newHeight * ratio;
-          }
-
-          // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
-          if (windowWidth > newWidth) {
-            this.setCanvasSize();
-            this.ctx.drawImage(this.canvasImage, 0, 0);
-          } else {
-            this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-            this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-          }
-        } else {
+        if (!this.shouldRenderAsFitSplit()) {
           this.ctx.drawImage(this.canvasImage, 0, 0);
+        }
+        
+        const windowWidth = window.innerWidth
+                || document.documentElement.clientWidth
+                || document.body.clientWidth;
+        const windowHeight = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+        // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
+        this.canvas.nativeElement.width = windowWidth;
+        this.canvas.nativeElement.height = windowHeight;
+        const ratio = this.canvasImage.width / this.canvasImage.height;
+        let newWidth = windowWidth;
+        let newHeight = newWidth / ratio;
+        if (newHeight > windowHeight) {
+          newHeight = windowHeight;
+          newWidth = newHeight * ratio;
+        }
+
+        // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
+        if (windowWidth > newWidth) {
+          this.setCanvasSize();
+          this.ctx.drawImage(this.canvasImage, 0, 0);
+        } else {
+          this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+          this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
         }
       }
 
@@ -936,7 +936,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   shouldRenderAsFitSplit() {
-    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
+    // Some pages aren't cover images but might need fit split renderings
+    if (parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
+    //if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
     return true;
   }
 

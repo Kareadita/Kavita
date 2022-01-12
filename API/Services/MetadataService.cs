@@ -193,7 +193,6 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
     {
-        // TODO: Think about splitting the comicinfo stuff into a separate task
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
         _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
 
