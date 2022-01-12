@@ -157,8 +157,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
     }
-    
-    this.setupGenreTypeahead();
 
     this.libraryService.getLibrariesForMember().subscribe(libs => {
       this.libraries = libs.map(lib => {
@@ -168,20 +166,26 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
           selected: true,
         }
       });
-      this.setupLibraryTypeahead();
+      this.setupTypeaheads();
     });
 
-    this.setupCollectionTagTypeahead();
-    this.setupPersonTypeahead();
-    this.setupAgeRatingSettings();
-    this.setupPublicationStatusSettings();
-    this.setupTagSettings();
-    this.setupLanguageSettings();
+    
   }
 
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
+  }
+
+  setupTypeaheads() {
+    this.setupLibraryTypeahead();
+      this.setupCollectionTagTypeahead();
+      this.setupPersonTypeahead();
+      this.setupAgeRatingSettings();
+      this.setupPublicationStatusSettings();
+      this.setupTagSettings();
+      this.setupLanguageSettings();
+      this.setupGenreTypeahead();
   }
 
 
@@ -355,6 +359,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       const f = filter.toLowerCase();
       return options.filter(m => m.title.toLowerCase() === f);
     }
+
     if (this.filterSettings.presetCollectionId > 0) {
       this.collectionSettings.fetchFn('').subscribe(tags => {
         this.collectionSettings.savedData = tags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
@@ -362,6 +367,17 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
         this.resetTypeaheads.next(true);
       });
     }
+  }
+
+  applyPresets() {
+
+    // if (this.filterSettings.presetCollectionId > 0) {
+    //   this.collectionSettings.fetchFn('').subscribe(tags => {
+    //     this.collectionSettings.savedData = tags.filter(item => item.value.id === this.filterSettings.presetCollectionId);
+    //     this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.value.id);
+    //     this.resetTypeaheads.next(true);
+    //   });
+    // }
   }
 
   setupPersonTypeahead() {
@@ -579,6 +595,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.readProgressGroup.get('inProgress')?.setValue(true);
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
+    // Apply any presets
+    this.setupTypeaheads();
     this.resetTypeaheads.next(true);
 
     this.applyFilter.emit(this.filter);
