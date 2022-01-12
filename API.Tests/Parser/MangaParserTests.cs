@@ -279,6 +279,7 @@ namespace API.Tests.Parser
         [InlineData("Beastars - SP01", false)]
         [InlineData("Beastars SP01", false)]
         [InlineData("The League of Extraordinary Gentlemen", false)]
+        [InlineData("The League of Extra-ordinary Gentlemen", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
