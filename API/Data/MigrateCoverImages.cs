@@ -131,6 +131,7 @@ namespace API.Data
 
             Console.WriteLine("Updating Chapter entities");
             var chapters = await context.Chapter.ToListAsync();
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var chapter in chapters)
             {
                 if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
@@ -161,6 +162,7 @@ namespace API.Data
 
             Console.WriteLine("Updating Collection Tag entities");
             var tags = await context.CollectionTag.ToListAsync();
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var tag in tags)
             {
                 if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,

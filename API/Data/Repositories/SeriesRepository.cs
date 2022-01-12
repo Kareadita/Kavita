@@ -434,6 +434,10 @@ public class SeriesRepository : ISeriesRepository
         {
             userLibraries = userLibraries.Where(l => filter.Libraries.Contains(l)).ToList();
         }
+        else if (libraryId > 0)
+        {
+            userLibraries = userLibraries.Where(l => l == libraryId).ToList();
+        }
 
         allPeopleIds = new List<int>();
         allPeopleIds.AddRange(filter.Writers);
@@ -489,7 +493,7 @@ public class SeriesRepository : ISeriesRepository
                     Series = s,
                     PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
                 })
-                .ToList()
+                .AsEnumerable()
                 .Where(s => ProgressComparison(s.PagesRead, s.Series.Pages))
                 .Select(s => s.Series.Id)
                 .ToList();

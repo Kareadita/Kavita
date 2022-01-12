@@ -139,8 +139,7 @@ namespace API.Services
 
           while (FileSystem.Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
           {
-             //var folder = new DirectoryInfo(path).Name;
-             var folder = FileSystem.DirectoryInfo.FromDirectoryName(path).Name;
+              var folder = FileSystem.DirectoryInfo.FromDirectoryName(path).Name;
              paths.Add(folder);
              path = path.Substring(0, path.LastIndexOf(separator));
           }
@@ -169,7 +168,6 @@ namespace API.Services
        /// <returns></returns>
        public IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
-           // TODO: Refactor this and GetFilesWithCertainExtensions to use same implementation
            if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
 
           if (fileNameRegex != string.Empty)
@@ -279,13 +277,12 @@ namespace API.Services
 
         public string[] GetFilesWithExtension(string path, string searchPatternExpression = "")
        {
-           // TODO: Use GitFiles instead
-          if (searchPatternExpression != string.Empty)
-          {
-             return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
-          }
+           if (searchPatternExpression != string.Empty)
+           {
+               return GetFilesWithCertainExtensions(path, searchPatternExpression).ToArray();
+           }
 
-          return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
+           return !FileSystem.Directory.Exists(path) ? Array.Empty<string>() : FileSystem.Directory.GetFiles(path);
        }
 
        /// <summary>
@@ -468,11 +465,9 @@ namespace API.Services
        /// <exception cref="ArgumentException"></exception>
        public int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger)
        {
-          //Count of files traversed and timer for diagnostic output
+            //Count of files traversed and timer for diagnostic output
             var fileCount = 0;
 
-            // Determine whether to parallelize file processing on each folder based on processor count.
-            //var procCount = Environment.ProcessorCount;
 
             // Data structure to hold names of subfolders to be examined for files.
             var dirs = new Stack<string>();
@@ -505,8 +500,7 @@ namespace API.Services
                }
 
                try {
-                   // TODO: Replace this with GetFiles - It's the same code
-                  files = GetFilesWithCertainExtensions(currentDir, searchPattern)
+                   files = GetFilesWithCertainExtensions(currentDir, searchPattern)
                      .ToArray();
                }
                catch (UnauthorizedAccessException e) {
@@ -526,22 +520,7 @@ namespace API.Services
                // Otherwise, execute sequentially. Files are opened and processed
                // synchronously but this could be modified to perform async I/O.
                try {
-                  // if (files.Length < procCount) {
-                  //    foreach (var file in files) {
-                  //       action(file);
-                  //       fileCount++;
-                  //    }
-                  // }
-                  // else {
-                  //    Parallel.ForEach(files, () => 0, (file, _, localCount) =>
-                  //                                 { action(file);
-                  //                                   return ++localCount;
-                  //                                 },
-                  //                     (c) => {
-                  //                        Interlocked.Add(ref fileCount, c);
-                  //                     });
-                  // }
-                  foreach (var file in files) {
+                   foreach (var file in files) {
                      action(file);
                      fileCount++;
                   }

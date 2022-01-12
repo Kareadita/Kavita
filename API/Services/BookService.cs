@@ -299,7 +299,6 @@ namespace API.Services
             var classes = htmlNode.Attributes["class"].Value + " " + bodyClasses;
             body.Attributes.Add("class", $"{classes}");
             // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
-            //return Ok($"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>");
             return $"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>";
         }
 
@@ -369,7 +368,6 @@ namespace API.Services
 
                 var info =  new ComicInfo()
                 {
-                    // TODO: Summary is in html, we need to turn it into string
                     Summary = epubBook.Schema.Package.Metadata.Description,
                     Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),

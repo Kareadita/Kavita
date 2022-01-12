@@ -9,7 +9,7 @@ public interface IReadingItemService
 {
     ComicInfo GetComicInfo(string filePath);
     int GetNumberOfPages(string filePath, MangaFormat format);
-    string GetCoverImage(string fileFilePath, string fileName, MangaFormat format);
+    string GetCoverImage(string filePath, string fileName, MangaFormat format);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
     ParserInfo Parse(string path, string rootPath, LibraryType type);
 }

@@ -75,7 +75,6 @@ namespace API
 
                 if (isDocker && new FileInfo("data/appsettings.json").Exists)
                 {
-                    //var logger = services.GetRequiredService<ILogger<Startup>>();
                     logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
                     return;
                 }

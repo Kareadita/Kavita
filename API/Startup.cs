@@ -144,7 +144,7 @@ namespace API
                 {
                     // Apply all migrations on startup
                     // If we have pending migrations, make a backup first
-                    var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
+                    //var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var context = serviceProvider.GetRequiredService<DataContext>();
                     // var pendingMigrations = await context.Database.GetPendingMigrationsAsync();

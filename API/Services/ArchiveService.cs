@@ -337,28 +337,24 @@ namespace API.Services
 
         public static void CleanComicInfo(ComicInfo info)
         {
-            if (info != null)
-            {
-                info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-                info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-                info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-                info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-                info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-                info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-                info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-                info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+            if (info == null) return;
 
-                if (!string.IsNullOrEmpty(info.Web))
+            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+
+            if (!string.IsNullOrEmpty(info.Web))
+            {
+                // ComicVine stores the Issue number in Number field and does not use Volume.
+                if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
+                if (info.Volume.Equals("1"))
                 {
-                    // TODO: Validate this works through testing
-                    // ComicVine stores the Issue number in Number field and does not use Volume.
-                    if (info.Web.Contains("https://comicvine.gamespot.com/"))
-                    {
-                        if (info.Volume.Equals("1"))
-                        {
-                            info.Volume = Parser.Parser.DefaultVolume;
-                        }
-                    }
+                    info.Volume = Parser.Parser.DefaultVolume;
                 }
             }
         }
@@ -451,7 +447,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user (throw exception, let middleware inform user)
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 

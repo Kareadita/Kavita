@@ -90,9 +90,6 @@ namespace API.Entities
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
 
-        //public ChapterMetadata ChapterMetadata { get; set; }
-        //public int ChapterMetadataId { get; set; }
-
         public void UpdateFrom(ParserInfo info)
         {
             Files ??= new List<MangaFile>();

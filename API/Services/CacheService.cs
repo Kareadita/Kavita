@@ -171,7 +171,10 @@ namespace API.Services
             var path = GetCachePath(chapter.Id);
             var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
             using var nc = new NaturalSortComparer();
-            files = files.ToList().OrderBy(Path.GetFileNameWithoutExtension, nc).ToArray();
+            files = files
+                .AsEnumerable()
+                .OrderBy(Path.GetFileNameWithoutExtension, nc)
+                .ToArray();
 
 
             if (files.Length == 0)
