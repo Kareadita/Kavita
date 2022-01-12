@@ -68,7 +68,7 @@ namespace API.Services
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
-          @"@eaDir|\.DS_Store",
+          @"@eaDir|\.DS_Store|\.qpkg",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
