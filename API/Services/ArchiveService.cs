@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -58,7 +58,14 @@ namespace API.Services
             if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
             var ext = _directoryService.FileSystem.Path.GetExtension(archivePath);
-            if (ext == ".cbr" || ext == ".rar")
+            if (ext.ToLower() == ".cbr" || ext.ToLower() == ".rar") return ArchiveLibrary.SharpCompress;
+
+            try
+            {
+                using var a2 = ZipFile.OpenRead(archivePath);
+                return ArchiveLibrary.Default;
+            }
+            catch (Exception)
             {
                 try
                 {
@@ -68,25 +75,6 @@ namespace API.Services
                 catch (Exception)
                 {
                     return ArchiveLibrary.NotSupported;
-                }
-            } else
-            {
-                try
-                {
-                    using var a2 = ZipFile.OpenRead(archivePath);
-                    return ArchiveLibrary.Default;
-                }
-                catch (Exception)
-                {
-                    try
-                    {
-                        using var a1 = ArchiveFactory.Open(archivePath);
-                        return ArchiveLibrary.SharpCompress;
-                    }
-                    catch (Exception)
-                    {
-                        return ArchiveLibrary.NotSupported;
-                    }
                 }
             }
         }
