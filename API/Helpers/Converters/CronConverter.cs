@@ -26,16 +26,16 @@ namespace API.Helpers.Converters
             return destination;
         }
 
-        public static string ConvertFromCronNotation(string cronNotation)
-        {
-            var destination = string.Empty;
-            destination = cronNotation.ToLower() switch
-            {
-                "0 0 31 2 *" => "disabled",
-                _ => destination
-            };
-            
-            return destination;
-        }
+        // public static string ConvertFromCronNotation(string cronNotation)
+        // {
+        //     var destination = string.Empty;
+        //     destination = cronNotation.ToLower() switch
+        //     {
+        //         "0 0 31 2 *" => "disabled",
+        //         _ => destination
+        //     };
+        //
+        //     return destination;
+        // }
     }
 }

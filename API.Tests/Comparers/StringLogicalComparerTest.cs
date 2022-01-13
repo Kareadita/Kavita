@@ -8,13 +8,20 @@ namespace API.Tests.Comparers
     {
         [Theory]
         [InlineData(
-           new[] {"x1.jpg", "x10.jpg", "x3.jpg", "x4.jpg", "x11.jpg"}, 
-           new[] {"x1.jpg", "x3.jpg", "x4.jpg", "x10.jpg", "x11.jpg"}
+            new[] {"x1.jpg", "x10.jpg", "x3.jpg", "x4.jpg", "x11.jpg"},
+            new[] {"x1.jpg", "x3.jpg", "x4.jpg", "x10.jpg", "x11.jpg"}
         )]
-        public void TestLogicalComparer(string[] input, string[] expected)
+        [InlineData(
+            new[] {"a.jpg", "aaa.jpg", "1.jpg", },
+            new[] {"1.jpg", "a.jpg", "aaa.jpg"}
+        )]
+        [InlineData(
+            new[] {"a.jpg", "aaa.jpg", "1.jpg", "!cover.png"},
+            new[] {"!cover.png", "1.jpg", "a.jpg", "aaa.jpg"}
+        )]
+        public void StringComparer(string[] input, string[] expected)
         {
-            NumericComparer nc = new NumericComparer();
-            Array.Sort(input, nc);
+            Array.Sort(input, StringLogicalComparer.Compare);
 
             var i = 0;
             foreach (var s in input)

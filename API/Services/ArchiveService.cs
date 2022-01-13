@@ -196,6 +196,7 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
+                        // TODO: Move the logic that selects the cover image into a testable method
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
 
