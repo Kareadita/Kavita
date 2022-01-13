@@ -174,16 +174,17 @@ namespace API.Services.Tasks
         /// </summary>
         public async Task CleanupBookmarks()
         {
-            // Search all files in bookmarks/
-            // except bookmark files and delete those
+            // Search all files in bookmarks/ except bookmark files and delete those
             var bookmarkDirectory =
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories);
+            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories).Select(f => _directoryService.FileSystem.Path.GetFullPath(f));
             var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-                .Select(b => _directoryService.FileSystem.Path.Join(bookmarkDirectory,
-                    b.FileName));
+                .Select(b => _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
+                    b.FileName)));
 
-            var filesToDelete = allBookmarkFiles.Except(bookmarks);
+
+            var filesToDelete = allBookmarkFiles.ToList().Except(bookmarks).ToList();
+            _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count());
 
             _directoryService.DeleteFiles(filesToDelete);
 
