@@ -34,6 +34,7 @@ public class CleanupServiceTests
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
     private const string BackupDirectory = "C:/kavita/config/backups/";
+    private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
 
 
     public CleanupServiceTests()
@@ -75,6 +76,9 @@ public class CleanupServiceTests
         setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
         setting.Value = BackupDirectory;
 
+        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
+        setting.Value = BookmarkDirectory;
+
         _context.ServerSetting.Update(setting);
 
         _context.Library.Add(new Library()
@@ -94,6 +98,8 @@ public class CleanupServiceTests
     private async Task ResetDB()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
+        _context.Users.RemoveRange(_context.Users.ToList());
+        _context.AppUserBookmark.RemoveRange(_context.AppUserBookmark.ToList());
 
         await _context.SaveChangesAsync();
     }
@@ -106,6 +112,7 @@ public class CleanupServiceTests
         fileSystem.AddDirectory(CacheDirectory);
         fileSystem.AddDirectory(CoverImageDirectory);
         fileSystem.AddDirectory(BackupDirectory);
+        fileSystem.AddDirectory(BookmarkDirectory);
         fileSystem.AddDirectory("C:/data/");
 
         return fileSystem;
@@ -353,6 +360,73 @@ public class CleanupServiceTests
             ds);
         cleanupService.CleanupBackups();
         Assert.True(filesystem.File.Exists($"{BackupDirectory}randomfile.zip"));
+    }
+
+    #endregion
+
+    #region CleanupBookmarks
+
+    [Fact]
+    public async Task CleanupBookmarks_LeaveAllFiles()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{BookmarkDirectory}1/1/1/0001.jpg", new MockFileData(""));
+        filesystem.AddFile($"{BookmarkDirectory}1/1/1/0002.jpg", new MockFileData(""));
+
+        // Delete all Series to reset state
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+
+                        }
+                    }
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        _context.AppUser.Add(new AppUser()
+        {
+            Bookmarks = new List<AppUserBookmark>()
+            {
+                new AppUserBookmark()
+                {
+                    AppUserId = 1,
+                    ChapterId = 1,
+                    Page = 1,
+                    FileName = "1/1/1/0001.jpg",
+                    SeriesId = 1,
+                    VolumeId = 1
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
+            ds);
+
+        await cleanupService.CleanupBookmarks();
+
+        Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+
     }
 
     #endregion
