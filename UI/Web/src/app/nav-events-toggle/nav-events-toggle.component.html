@@ -21,5 +21,21 @@
                 <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
             </li>
         </ul>
+
+        <ul class="list-group list-group-flush dark-menu">
+            <li class="list-group-item dark-menu-item" *ngFor="let message of updateEvents">
+                <div class="spinner-border text-primary small-spinner"
+                role="status" title="Started at {{message.eventTime | date: 'short'}}" 
+                attr.aria-valuetext="{{prettyPrintProgress(message.body.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(message.body.progress)">
+                </div>
+                {{prettyPrintProgress(message.body.progress)}}%
+                {{message.title}}
+                {{message.subTitle}}
+            </li>
+            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable">Not much going on here</li>
+            <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">
+                <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
+            </li>
+        </ul>
     </ng-template>
 </ng-container>
