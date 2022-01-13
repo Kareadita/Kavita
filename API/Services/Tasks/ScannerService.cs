@@ -160,7 +160,7 @@ public class ScannerService : IScannerService
         }
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(SignalREvents.ScanSeries,
-            MessageFactory.ScanSeriesEvent(seriesId, series.Name), true);
+            MessageFactory.ScanSeriesEvent(seriesId, series.Name));
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
@@ -195,7 +195,7 @@ public class ScannerService : IScannerService
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            await _messageHub.Clients.All.SendAsync("library.scan.error", new SignalRMessage()
+            await _eventHub.SendMessageAsync("library.scan.error", new SignalRMessage()
             {
                 Name = "library.scan.error",
                 Body =
@@ -203,8 +203,11 @@ public class ScannerService : IScannerService
                     Message =
                     "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
                     Details = ""
-                }
+                },
+                Title = "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
+                SubTitle = string.Join(", ", folders.Where(f => !_directoryService.IsDriveMounted(f)))
             });
+
             return false;
         }
 
@@ -221,6 +224,10 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(SignalREvents.Error, new SignalRMessage()
             {
                 Name = SignalREvents.Error,
+                Title = "Some of the root folders for the library are empty.",
+                SubTitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                           "Scan will be aborted. " +
+                           "Check that your mount is connected or change the library's root folder and rescan",
                 Body =
                     new {
                         Title =
@@ -280,7 +287,7 @@ public class ScannerService : IScannerService
         }
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-        await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+        await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 0));
 
 
@@ -311,7 +318,7 @@ public class ScannerService : IScannerService
         await CleanupDbEntities();
 
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
-        await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+        await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
     }
 
@@ -419,8 +426,8 @@ public class ScannerService : IScannerService
                 {
                     _logger.LogDebug("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
                 }
-                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryError,
-                    MessageFactory.ScanLibraryError(library.Id));
+                await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryError,
+                    MessageFactory.ScanLibraryError(library.Id, library.Name));
                 continue;
             }
             _logger.LogInformation(
@@ -430,11 +437,11 @@ public class ScannerService : IScannerService
             // Emit any series removed
             foreach (var missing in missingSeries)
             {
-                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
+                await _eventHub.SendMessageAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
             }
 
             var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
-            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+            await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
                 MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
         }
 
@@ -493,7 +500,7 @@ public class ScannerService : IScannerService
                     newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
 
                 // Inform UI of new series added
-                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
+                await _eventHub.SendMessageAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
             }
             catch (Exception ex)
             {
@@ -502,7 +509,7 @@ public class ScannerService : IScannerService
             }
 
             var progress =  Math.Max(0F, Math.Min(1F, i * 1F / newSeries.Count));
-            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+            await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
                 MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
             i++;
         }
@@ -531,16 +538,7 @@ public class ScannerService : IScannerService
             }
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
-            await _messageHub.Clients.All.SendAsync("NotificationProgressEvent", new SignalRMessage()
-            {
-                Name = "library.update.series",
-                Body = new
-                {
-                    Title = "Updating Series",
-                    SubTitle = series.Name
-                }
-            });
-
+            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }

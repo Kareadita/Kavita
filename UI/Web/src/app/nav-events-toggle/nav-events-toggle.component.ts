@@ -6,7 +6,7 @@ import { UpdateNotificationModalComponent } from '../shared/update-notification/
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { User } from '../_models/user';
 import { LibraryService } from '../_services/library.service';
-import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, Message, MessageHubService, SignalRMessage } from '../_services/message-hub.service';
 
 interface ProcessedEvent {
   eventType: string;
@@ -42,6 +42,13 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   updateBody: any;
   private updateNotificationModalRef: NgbModalRef | null = null;
 
+  // Debug code
+  updates: any = {};
+
+  get updateEvents(): Array<SignalRMessage> {
+    return Object.values(this.updates);
+  }
+
   constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal) { }
   
   ngOnDestroy(): void {
@@ -52,22 +59,39 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+      console.log(event.event);
       if (acceptedEvents.includes(event.event)) {
         this.processProgressEvent(event, event.event);
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.updateAvailable = true;
         this.updateBody = event.payload;
       } else if (event.event.endsWith('error')) {
-        // Show an error handle
+        // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
-        this.processNotificationProgressEvent(event, event.event)
+        this.processNotificationProgressEvent(event);
       }
     });
   }
 
-  processNotificationProgressEvent(event: Message<ProgressEvent>, eventType: string) {
-    const scanEvent = event.payload as ProgressEvent;
-    console.log('Notification Progress Event: ', event.event, event.payload);
+  processNotificationProgressEvent(event: Message<SignalRMessage>) {
+    const message = event.payload as SignalRMessage;
+    console.log('Notification Progress Event: ', event.event, message);
+    console.log('Type: ', message.name);
+
+
+    if (message.eventType === 'started') {
+      this.updates[message.name] = message;
+      console.log('Started: ', message.name);
+    } else if (message.eventType === 'updated') {
+      this.updates[message.name] = message;
+      console.log('Updated: ', message.name);
+    } else if (message.eventType === 'ended') {
+      //delete this.updates[message.name];
+      console.log('Ended: ', message.name);
+    }
+
+
+
 
 
     // this.libraryService.getLibraryNames().subscribe(names => {

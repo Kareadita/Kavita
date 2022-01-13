@@ -10,7 +10,7 @@ namespace API.SignalR;
 /// </summary>
 public interface IEventHub
 {
-    Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = false);
+    Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true);
 }
 
 public class EventHub : IEventHub
@@ -26,7 +26,7 @@ public class EventHub : IEventHub
         _unitOfWork = unitOfWork;
     }
 
-    public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = false)
+    public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true)
     {
         var users = _messageHub.Clients.All;
         if (onlyAdmins)

@@ -1,5 +1,6 @@
 ﻿using System;
 using API.DTOs.Update;
+using API.Entities;
 
 namespace API.SignalR
 {
@@ -48,9 +49,11 @@ namespace API.SignalR
 
         public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
         {
+            // TODO: Remove this?
             return new SignalRMessage()
             {
                 Name = SignalREvents.ScanLibraryProgress,
+                Title = $"Scanning {libraryId}",
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -65,6 +68,7 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.RefreshMetadataProgress,
+                Title = "Refreshing Cover Images",
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -81,6 +85,7 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.RefreshMetadata,
+                Title = "Refreshing Cover Images", // This doesn't need a title, it doesn't display on the UI widget
                 Body = new
                 {
                     SeriesId = seriesId,
@@ -94,6 +99,7 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.BackupDatabaseProgress,
+                Title = "Backing up Database",
                 Body = new
                 {
                     Progress = progress
@@ -105,6 +111,7 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.CleanupProgress,
+                Title = "Cleaning up Server", // TODO: Find a better word for this
                 Body = new
                 {
                     Progress = progress
@@ -113,12 +120,12 @@ namespace API.SignalR
         }
 
 
-
         public static SignalRMessage UpdateVersionEvent(UpdateNotificationDto update)
         {
             return new SignalRMessage
             {
                 Name = SignalREvents.UpdateAvailable,
+                Title = "Update Available",
                 Body = update
             };
         }
@@ -127,7 +134,7 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateAvailable,
+                Name = SignalREvents.SeriesAddedToCollection,
                 Body = new
                 {
                     TagId = tagId,
@@ -136,11 +143,13 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryError(int libraryId)
+        public static SignalRMessage ScanLibraryError(int libraryId, string libraryName)
         {
             return new SignalRMessage
             {
                 Name = SignalREvents.ScanLibraryError,
+                Title = "Error",
+                SubTitle = $"Error Scanning {libraryName}",
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -153,6 +162,8 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.DownloadProgress,
+                Title = $"Downloading {downloadName}",
+                SubTitle = $"{username} is downloading",
                 Body = new
                 {
                     UserName = username,
@@ -163,11 +174,14 @@ namespace API.SignalR
         }
 
 
-        public static SignalRMessage FileScanProgressEvent(string filename, string libraryName)
+        public static SignalRMessage FileScanProgressEvent(string filename, string libraryName, string eventType)
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.FileScanProgress,
+                Title = $"Scanning {libraryName}",
+                SubTitle = filename,
+                EventType = eventType,
                 Body = new
                 {
                     Title = $"Scanning {libraryName}",
@@ -177,18 +191,20 @@ namespace API.SignalR
             };
         }
 
-        // public static SignalRMessage NotificationProgressEvent()
-        // {
-        //     return new SignalRMessage()
-        //     {
-        //         Name = SignalREvents.DownloadProgress,
-        //         Body = new
-        //         {
-        //             UserName = username,
-        //             DownloadName = downloadName,
-        //             Progress = progress
-        //         }
-        //     };
-        // }
+        public static SignalRMessage DbUpdateProgressEvent(Series series, string eventType)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.ScanSeries,
+                Title = "Updating Series",
+                SubTitle = series.Name,
+                EventType = eventType,
+                Body = new
+                {
+                    Title = "Updating Series",
+                    SubTitle = series.Name
+                }
+            };
+        }
     }
 }

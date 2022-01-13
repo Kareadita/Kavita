@@ -33,6 +33,15 @@ export interface Message<T> {
   payload: T;
 }
 
+export interface SignalRMessage {
+  body: any;
+  name: string;
+  title: string;
+  subTitle: string; 
+  eventType: 'single' | 'started' | 'updated' | 'ended';
+  eventTime: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -75,108 +84,109 @@ export class MessageHubService {
       this.onlineUsersSource.next(usernames);
     });
 
-
-    this.hubConnection.on(EVENTS.ScanSeries, resp => {
-      this.messagesSource.next({
-        event: EVENTS.ScanSeries,
-        payload: resp.body
-      });
-      this.scanSeries.emit(resp.body);
-    });
-
-    this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.ScanLibraryProgress,
-        payload: resp.body
-      });
-      this.scanLibrary.emit(resp.body);
-    });
-
-    this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.BackupDatabaseProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.CleanupProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.CleanupProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.DownloadProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.DownloadProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.RefreshMetadataProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.NotificationProgress, resp => {
+    this.hubConnection.on(EVENTS.NotificationProgress, (resp: SignalRMessage) => {
       this.messagesSource.next({
         event: EVENTS.NotificationProgress,
-        payload: resp.body
+        payload: resp
       });
     });
 
-    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
-      this.messagesSource.next({
-        event: EVENTS.SeriesAddedToCollection,
-        payload: resp.body
-      });
-    });
 
-    this.hubConnection.on(EVENTS.ScanLibraryError, resp => {
-      this.messagesSource.next({
-        event: EVENTS.ScanLibraryError,
-        payload: resp.body
-      });
-      if (this.isAdmin) {
-        this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
-      }
-    });
+    // this.hubConnection.on(EVENTS.ScanSeries, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.ScanSeries,
+    //     payload: resp.body
+    //   });
+    //   this.scanSeries.emit(resp.body);
+    // });
 
-    this.hubConnection.on(EVENTS.SeriesAdded, resp => {
-      this.messagesSource.next({
-        event: EVENTS.SeriesAdded,
-        payload: resp.body
-      });
-      this.seriesAdded.emit(resp.body);
-      // Don't show the toast when user has reader open
-      if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
-        this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
-      }
-    });
+    // this.hubConnection.on(EVENTS.ScanLibraryProgress, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.ScanLibraryProgress,
+    //     payload: resp.body
+    //   });
+    //   this.scanLibrary.emit(resp.body);
+    // });
 
-    this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
-      this.messagesSource.next({
-        event: EVENTS.SeriesRemoved,
-        payload: resp.body
-      });
-    });
+    // this.hubConnection.on(EVENTS.BackupDatabaseProgress, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.BackupDatabaseProgress,
+    //     payload: resp.body
+    //   });
+    // });
 
-    this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
-      this.messagesSource.next({
-        event: EVENTS.RefreshMetadata,
-        payload: resp.body
-      });
-      this.refreshMetadata.emit(resp.body);
-    });
+    // this.hubConnection.on(EVENTS.CleanupProgress, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.CleanupProgress,
+    //     payload: resp.body
+    //   });
+    // });
 
-    this.hubConnection.on(EVENTS.UpdateAvailable, resp => {
-      this.messagesSource.next({
-        event: EVENTS.UpdateAvailable,
-        payload: resp.body
-      });
-    });
+    // this.hubConnection.on(EVENTS.DownloadProgress, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.DownloadProgress,
+    //     payload: resp.body
+    //   });
+    // });
+
+    // this.hubConnection.on(EVENTS.RefreshMetadataProgress, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.RefreshMetadataProgress,
+    //     payload: resp.body
+    //   });
+    // });
+
+
+    // this.hubConnection.on(EVENTS.SeriesAddedToCollection, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.SeriesAddedToCollection,
+    //     payload: resp.body
+    //   });
+    // });
+
+    // this.hubConnection.on(EVENTS.ScanLibraryError, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.ScanLibraryError,
+    //     payload: resp.body
+    //   });
+    //   if (this.isAdmin) {
+    //     this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
+    //   }
+    // });
+
+    // this.hubConnection.on(EVENTS.SeriesAdded, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.SeriesAdded,
+    //     payload: resp.body
+    //   });
+    //   this.seriesAdded.emit(resp.body);
+    //   // Don't show the toast when user has reader open
+    //   if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
+    //     this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
+    //   }
+    // });
+
+    // this.hubConnection.on(EVENTS.SeriesRemoved, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.SeriesRemoved,
+    //     payload: resp.body
+    //   });
+    // });
+
+    // this.hubConnection.on(EVENTS.RefreshMetadata, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.RefreshMetadata,
+    //     payload: resp.body
+    //   });
+    //   this.refreshMetadata.emit(resp.body);
+    // });
+
+    // this.hubConnection.on(EVENTS.UpdateAvailable, (resp: SignalRMessage) => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.UpdateAvailable,
+    //     payload: resp.body
+    //   });
+    // });
   }
 
   stopHubConnection() {

@@ -173,9 +173,9 @@ namespace API.Services.Tasks.Scanner
         /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
         /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
         /// <returns></returns>
-        public Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
+        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
         {
-            var sw = Stopwatch.StartNew();
+            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
             foreach (var folderPath in folders)
             {
                 try
@@ -185,7 +185,7 @@ namespace API.Services.Tasks.Scanner
                         try
                         {
                             ProcessFile(f, folderPath, libraryType);
-                            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName), true);
+                            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
                         }
                         catch (FileNotFoundException exception)
                         {
@@ -201,10 +201,9 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            // _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
-            //     scanElapsedTime);
+            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
 
-            return Task.FromResult(SeriesWithInfos());
+            return SeriesWithInfos();
         }
 
         /// <summary>

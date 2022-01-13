@@ -59,8 +59,7 @@ namespace API.Benchmark
                 Title = "A Town Where You Live",
                 Volumes = "1"
             };
-            _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new [] {libraryPath},
-                out _, out _);
+            _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new [] {libraryPath}, "Manga");
             _parseScannedFiles.MergeName(p1);
         }
     }
