@@ -94,6 +94,7 @@ public class ChapterRepository : IChapterRepository
                 ChapterTitle = data.TitleName
             })
             .AsNoTracking()
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
 
         return chapterInfo;

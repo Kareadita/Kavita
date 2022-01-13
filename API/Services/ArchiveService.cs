@@ -57,12 +57,8 @@ namespace API.Services
         {
             if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
-            try
-            {
-                using var a2 = ZipFile.OpenRead(archivePath);
-                return ArchiveLibrary.Default;
-            }
-            catch (Exception)
+            var ext = _directoryService.FileSystem.Path.GetExtension(archivePath);
+            if (ext == ".cbr" || ext == ".rar")
             {
                 try
                 {
@@ -72,6 +68,25 @@ namespace API.Services
                 catch (Exception)
                 {
                     return ArchiveLibrary.NotSupported;
+                }
+            } else
+            {
+                try
+                {
+                    using var a2 = ZipFile.OpenRead(archivePath);
+                    return ArchiveLibrary.Default;
+                }
+                catch (Exception)
+                {
+                    try
+                    {
+                        using var a1 = ArchiveFactory.Open(archivePath);
+                        return ArchiveLibrary.SharpCompress;
+                    }
+                    catch (Exception)
+                    {
+                        return ArchiveLibrary.NotSupported;
+                    }
                 }
             }
         }
