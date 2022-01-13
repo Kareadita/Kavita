@@ -502,6 +502,11 @@ namespace API.Parser
                 MatchOptions, RegexTimeout
         );
 
+        private static readonly Regex EmptySpaceRegex = new Regex(
+                @"(?!=.+)(\s{2,})(?!=.+)",
+                MatchOptions, RegexTimeout
+        );
+
         public static MangaFormat ParseFormat(string filePath)
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
@@ -840,6 +845,8 @@ namespace API.Parser
             {
                 title = title.Substring(1);
             }
+
+            title = EmptySpaceRegex.Replace(title, " ");
 
             return title.Trim();
         }

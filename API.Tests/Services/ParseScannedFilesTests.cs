@@ -264,7 +264,7 @@ public class ParseScannedFilesTests
     }
 
     [Fact]
-    public void MergeName_ShouldNotMerge_MismatchedFormat()
+    public void MergeName_ShouldMerge_MismatchedFormatSameName()
     {
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory("C:/Data/");
@@ -279,8 +279,8 @@ public class ParseScannedFilesTests
 
         psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, out _, out _);
 
-        Assert.NotEqual("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
-        Assert.NotEqual("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
+        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
+        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
     }
 
     #endregion
