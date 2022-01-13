@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
@@ -151,7 +150,7 @@ namespace API.Services.Tasks.Scanner
         /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
+        /// <returns>Series Name to group this info into</returns>
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
@@ -179,7 +178,6 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = Parser.Parser.SupportedExtensions;
             foreach (var folderPath in folders)
             {
                 try
@@ -194,7 +192,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             _logger.LogError(exception, "The file {Filename} could not be found", f);
                         }
-                    }, searchPattern, _logger);
+                    }, Parser.Parser.SupportedExtensions, _logger);
                 }
                 catch (ArgumentException ex)
                 {
