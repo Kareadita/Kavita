@@ -178,6 +178,7 @@ public class VolumeRepository : IVolumeRepository
             .OrderBy(volume => volume.Number)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
+            .AsSplitQuery()
             .ToListAsync();
 
         await AddVolumeModifiers(userId, volumes);

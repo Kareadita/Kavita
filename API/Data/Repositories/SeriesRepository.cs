@@ -305,6 +305,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Where(s => s.Id == seriesId)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
@@ -320,6 +321,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
             .Where(s => seriesIds.Contains(s.Id))
+            .AsSplitQuery()
             .ToListAsync();
     }
 
