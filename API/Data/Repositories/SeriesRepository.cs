@@ -305,6 +305,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Where(s => s.Id == seriesId)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
@@ -320,6 +321,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
             .Where(s => seriesIds.Contains(s.Id))
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -617,6 +619,7 @@ public class SeriesRepository : ISeriesRepository
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -640,6 +643,7 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s.LibraryId)
             .ThenBy(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
