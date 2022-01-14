@@ -5,6 +5,8 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
@@ -107,23 +109,312 @@ public class ReaderServiceTests
 
     [Theory]
     [InlineData("/manga/", 1, 1, 1, "/manga/1/1/1")]
+    [InlineData("C:/manga/", 1, 1, 10001, "C:/manga/1/1/10001")]
     public void FormatBookmarkFolderPathTest(string baseDir, int userId, int seriesId, int chapterId, string expected)
     {
-        // const string testDirectory = "/manga/";
-        // var fileSystem = new MockFileSystem();
-        // for (var i = 0; i < 10; i++)
-        // {
-        //     fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
-        // }
-        //
-        // fileSystem.AddDirectory(CacheDirectory);
-        //
-        // var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        // var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        // var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
-
         Assert.Equal(expected, ReaderService.FormatBookmarkFolderPath(baseDir, userId, seriesId, chapterId));
     }
 
     #endregion
+
+    #region CapPageToChapter
+
+    [Fact]
+    public async Task CapPageToChapterTest()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        Assert.Equal(0, await readerService.CapPageToChapter(1, -1));
+        Assert.Equal(1, await readerService.CapPageToChapter(1, 10));
+    }
+
+    #endregion
+
+    #region SaveReadingProgress
+
+    [Fact]
+    public async Task SaveReadingProgress_ShouldCreateNewEntity()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var successful = await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = 1,
+            PageNum = 1,
+            SeriesId = 1,
+            VolumeId = 1,
+            BookScrollId = null
+        }, 1);
+
+        Assert.True(successful);
+        Assert.NotNull(await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
+    }
+
+    [Fact]
+    public async Task SaveReadingProgress_ShouldUpdateExisting()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var successful = await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = 1,
+            PageNum = 1,
+            SeriesId = 1,
+            VolumeId = 1,
+            BookScrollId = null
+        }, 1);
+
+        Assert.True(successful);
+        Assert.NotNull(await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
+
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = 1,
+            PageNum = 1,
+            SeriesId = 1,
+            VolumeId = 1,
+            BookScrollId = "/h1/"
+        }, 1));
+
+        Assert.Equal("/h1/", (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).BookScrollId);
+
+    }
+
+
+    #endregion
+
+    #region MarkChaptersAsRead
+
+    [Fact]
+    public async Task MarkChaptersAsReadTest()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        },
+                        new Chapter()
+                        {
+                            Pages = 2
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumes(1);
+        readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _context.SaveChangesAsync();
+
+        Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+    }
+    #endregion
+
+    #region MarkChapterAsUnread
+
+    [Fact]
+    public async Task MarkChapterAsUnreadTest()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        },
+                        new Chapter()
+                        {
+                            Pages = 2
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
+        readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+
+        await _context.SaveChangesAsync();
+        Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
+
+        readerService.MarkChaptersAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _context.SaveChangesAsync();
+
+        var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
+        Assert.Equal(0, progresses.Max(p => p.PagesRead));
+        Assert.Equal(2, progresses.Count);
+    }
+
+    #endregion
+
+    // #region GetNumberOfPages
+    //
+    // [Fact]
+    // public void GetNumberOfPages_EPUB()
+    // {
+    // const string testDirectory = "/manga/";
+    // var fileSystem = new MockFileSystem();
+    //
+    // var actualFile = Path.Join(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB"), "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub")
+    // fileSystem.File.WriteAllBytes("${testDirectory}test.epub", File.ReadAllBytes(actualFile));
+    //
+    // fileSystem.AddDirectory(CacheDirectory);
+    //
+    // var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+    // var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+    // var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+    //
+    //
+    // }
+    //
+    //
+    // #endregion
+
 }

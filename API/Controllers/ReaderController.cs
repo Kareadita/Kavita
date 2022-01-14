@@ -139,15 +139,7 @@ namespace API.Controllers
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
-                foreach (var chapter in volume.Chapters)
-                {
-                    var userProgress = ReaderService.GetUserProgressForChapter(user, chapter);
-
-                    if (userProgress == null) continue;
-                    userProgress.PagesRead = 0;
-                    userProgress.SeriesId = markReadDto.SeriesId;
-                    userProgress.VolumeId = volume.Id;
-                }
+                _readerService.MarkChaptersAsUnread(user, markReadDto.SeriesId, volume.Chapters);
             }
 
             _unitOfWork.UserRepository.Update(user);

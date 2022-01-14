@@ -87,29 +87,18 @@ public class ReaderService : IReaderService
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
 
-            if (userProgress == null)
-            {
-                user.Progresses.Add(new AppUserProgress
-                {
-                    PagesRead = 0,
-                    VolumeId = chapter.VolumeId,
-                    SeriesId = seriesId,
-                    ChapterId = chapter.Id
-                });
-            }
-            else
-            {
-                userProgress.PagesRead = 0;
-                userProgress.SeriesId = seriesId;
-                userProgress.VolumeId = chapter.VolumeId;
-            }
+            if (userProgress == null) continue;
+
+            userProgress.PagesRead = 0;
+            userProgress.SeriesId = seriesId;
+            userProgress.VolumeId = chapter.VolumeId;
         }
     }
 
     /// <summary>
     /// Gets the User Progress for a given Chapter. This will handle any duplicates that might have occured in past versions and will delete them. Does not commit.
     /// </summary>
-    /// <param name="user"></param>
+    /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
     public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
