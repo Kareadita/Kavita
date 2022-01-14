@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using API.Comparators;
+﻿using System.Linq;
 using API.Extensions;
 using Xunit;
 
-namespace API.Tests.Comparers
+namespace API.Tests.Extensions;
+
+public class EnumerableExtensionsTests
 {
-    public class NaturalSortComparerTest
-    {
-        [Theory]
+    [Theory]
         [InlineData(
             new[] {"x1.jpg", "x10.jpg", "x3.jpg", "x4.jpg", "x11.jpg"},
             new[] {"x1.jpg", "x3.jpg", "x4.jpg", "x10.jpg", "x11.jpg"}
@@ -41,7 +37,7 @@ namespace API.Tests.Comparers
         )]
         [InlineData(
             new[] {"3and4.cbz", "The World God Only Knows - Oneshot.cbz", "5.cbz", "1and2.cbz"},
-            new[] {"The World God Only Knows - Oneshot.cbz", "1and2.cbz", "3and4.cbz", "5.cbz"}
+            new[] {"1and2.cbz", "3and4.cbz", "5.cbz", "The World God Only Knows - Oneshot.cbz"}
         )]
         [InlineData(
             new[] {"Solo Leveling - c000 (v01) - p000 [Cover] [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p001 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p002 [dig] [Yen Press] [LuCaZ].jpg", "Solo Leveling - c000 (v01) - p003 [dig] [Yen Press] [LuCaZ].jpg"},
@@ -56,8 +52,8 @@ namespace API.Tests.Comparers
             new[] {"!001", "001", "002"}
         )]
         [InlineData(
-            new[] {"001", "", null},
-            new[] {"", "001", null}
+            new[] {"001", ""},
+            new[] {"", "001"}
         )]
         [InlineData(
             new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.020/001.jpg"},
@@ -67,10 +63,8 @@ namespace API.Tests.Comparers
             new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"},
             new[] {@"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\001.jpg", @"F:\/Anime_Series_Pelis/MANGA/Mangahere (EN)\Kirara Fantasia\_Ch.001\002.jpg"}
         )]
-        public void TestNaturalSortComparer(string[] input, string[] expected)
+        public void TestNaturalSort(string[] input, string[] expected)
         {
-            Array.Sort(input, new NaturalSortComparer());
-            //Assert.Equal(expected, input);
             Assert.Equal(expected, input.OrderByNatural(x => x).ToArray());
         }
 
@@ -100,6 +94,10 @@ namespace API.Tests.Comparers
             new[] {"001.jpg", "10.jpg",}
         )]
         [InlineData(
+            new[] {"001", "002", "!001"},
+            new[] {"!001", "001", "002"}
+        )]
+        [InlineData(
             new[] {"10/001.jpg", "10.jpg",},
             new[] {"10.jpg", "10/001.jpg",}
         )]
@@ -111,9 +109,9 @@ namespace API.Tests.Comparers
             new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg"},
             new[] {"Honzuki no Gekokujou_ Part 2/_Ch.019/001.jpg", "Honzuki no Gekokujou_ Part 2/_Ch.019/002.jpg"}
         )]
-        public void TestNaturalSortComparerLinq(string[] input, string[] expected)
+        public void TestNaturalSortLinq(string[] input, string[] expected)
         {
-            var output = input.OrderBy(c => c, new NaturalSortComparer());
+            var output = input.OrderByNatural(x => x);
 
             var i = 0;
             foreach (var s in output)
@@ -122,5 +120,4 @@ namespace API.Tests.Comparers
                 i++;
             }
         }
-    }
 }

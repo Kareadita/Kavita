@@ -17,6 +17,8 @@ namespace API.Comparators
 
         private bool _disposed;
 
+        private static readonly Regex Regex = new Regex(@"\d+", RegexOptions.Compiled);
+
 
         public NaturalSortComparer(bool inAscendingOrder = true)
         {
@@ -63,6 +65,7 @@ namespace API.Comparators
             }
             else
             {
+                // If same length, can we do a first character sort then result to 0?
                 returnVal = 0;
             }
 
