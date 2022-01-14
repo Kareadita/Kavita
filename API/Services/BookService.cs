@@ -250,11 +250,23 @@ namespace API.Services
                         var imageFile = image.Attributes["src"].Value;
                         if (!book.Content.Images.ContainsKey(imageFile))
                         {
+                            // TODO: Refactor the Key code to a method to allow the hacks to be tested
                             var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
                             if (correctedKey != null)
                             {
                                 imageFile = correctedKey;
+                            } else if (imageFile.StartsWith(".."))
+                            {
+                                // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
+                                correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
+                                if (correctedKey != null)
+                                {
+                                    imageFile = correctedKey;
+                                }
                             }
+
+
+
                         }
 
                         image.Attributes.Remove("src");

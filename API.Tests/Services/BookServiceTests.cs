@@ -52,5 +52,16 @@ namespace API.Tests.Services
             Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
         }
 
+
+        #region BookEscaping
+
+        [Fact]
+        public void EscapeCSSImportReferencesTest()
+        {
+
+        }
+
+        #endregion
+
     }
 }
