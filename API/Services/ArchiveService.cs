@@ -57,8 +57,8 @@ namespace API.Services
         {
             if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
-            var ext = _directoryService.FileSystem.Path.GetExtension(archivePath);
-            if (ext.ToUpper().Equals(".CBR") || ext.ToUpper().Equals(".RAR")) return ArchiveLibrary.SharpCompress;
+            var ext = _directoryService.FileSystem.Path.GetExtension(archivePath).ToUpper();
+            if (ext.Equals(".CBR") || ext.Equals(".RAR")) return ArchiveLibrary.SharpCompress;
 
             try
             {
