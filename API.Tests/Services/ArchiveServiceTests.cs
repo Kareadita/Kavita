@@ -138,7 +138,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "folder.jpg")]
         public void FindFolderEntry(string[] files, string expected)
         {
-            var foundFile = _archiveService.FindFolderEntry(files);
+            var foundFile = ArchiveService.FindFolderEntry(files);
             Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
         }
 

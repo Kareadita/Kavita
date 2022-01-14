@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -231,7 +232,7 @@ public class ReaderService : IReaderService
         if (currentVolume.Number == 0)
         {
             // Handle specials by sorting on their Filename aka Range
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 
@@ -282,7 +283,7 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()).Reverse(), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 

@@ -52,6 +52,14 @@ public class EnumerableExtensionsTests
             new[] {"!001", "001", "002"}
         )]
         [InlineData(
+            new[] {"001.jpg", "002.jpg", "!001.jpg"},
+            new[] {"!001.jpg", "001.jpg", "002.jpg"}
+        )]
+        [InlineData(
+            new[] {"001", "002", "!002"},
+            new[] {"!002", "001", "002"}
+        )]
+        [InlineData(
             new[] {"001", ""},
             new[] {"", "001"}
         )]

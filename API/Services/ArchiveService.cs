@@ -122,12 +122,12 @@ namespace API.Services
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public string FindFolderEntry(IEnumerable<string> entryFullNames)
+        public static string FindFolderEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames
-                .FirstOrDefault(x => !Path.EndsInDirectorySeparator(x) && !Parser.Parser.HasBlacklistedFolderInPath(x)
-                       && Parser.Parser.IsCoverImage(x)
-                       && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .FirstOrDefault(Parser.Parser.IsCoverImage);
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -141,28 +141,28 @@ namespace API.Services
         {
             // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
             // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
-            var fullNames = entryFullNames.Where(x =>!Parser.Parser.HasBlacklistedFolderInPath(x)
-                                                     && Parser.Parser.IsImage(x)
-                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith))
-                                                    .ToList();
+            var fullNames = entryFullNames
+                .OrderByNatural(c => c)
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .ToList();
+
             if (fullNames.Count == 0) return null;
-            using var nc = new NaturalSortComparer();
             var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
-                .OrderBy(f => f.GetFullPathWithoutExtension(), nc)
+                .OrderByNatural(f => f.GetFullPathWithoutExtension())
                 .FirstOrDefault();
 
             if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
 
             // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
             // Get first folder, then sort within that
-            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, nc).FirstOrDefault();
+            var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName).FirstOrDefault();
             if (!string.IsNullOrEmpty(firstDirectoryFile))
             {
                 var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
                 if (!string.IsNullOrEmpty(firstDirectory))
                 {
                     var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
-                        .OrderBy(Path.GetFileNameWithoutExtension, nc)
+                        .OrderByNatural(Path.GetFileNameWithoutExtension)
                         .FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
@@ -170,7 +170,7 @@ namespace API.Services
             }
 
             var result = fullNames
-                .OrderBy(Path.GetFileNameWithoutExtension, nc)
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;

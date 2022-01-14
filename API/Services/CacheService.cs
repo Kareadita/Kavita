@@ -170,12 +170,10 @@ namespace API.Services
             // Calculate what chapter the page belongs to
             var path = GetCachePath(chapter.Id);
             var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
-            using var nc = new NaturalSortComparer();
             files = files
                 .AsEnumerable()
-                .OrderBy(Path.GetFileNameWithoutExtension, nc)
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .ToArray();
-
 
             if (files.Length == 0)
             {
