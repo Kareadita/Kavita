@@ -51,7 +51,7 @@ namespace API.Tests.Comparers
             new[] {"Marvel2In1-7", "Marvel2In1-7-01", "Marvel2In1-7-02"}
         )]
         [InlineData(
-            new[] {"!001", "001", "002"},
+            new[] {"001", "002", "!001"},
             new[] {"!001", "001", "002"}
         )]
         [InlineData(

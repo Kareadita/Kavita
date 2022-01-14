@@ -268,5 +268,24 @@ namespace API.Tests.Services
 
             Assert.NotStrictEqual(expected, actual);
         }
+
+        #region FindCoverImageFilename
+
+        [Theory]
+        [InlineData(new string[] {}, "", null)]
+        [InlineData(new [] {"001.jpg", "002.jpg"}, "Test.zip", "001.jpg")]
+        [InlineData(new [] {"001.jpg", "!002.jpg"}, "Test.zip", "!002.jpg")]
+        [InlineData(new [] {"001.jpg", "!001.jpg"}, "Test.zip", "!001.jpg")]
+        [InlineData(new [] {"001.jpg", "cover.jpg"}, "Test.zip", "cover.jpg")]
+        [InlineData(new [] {"001.jpg", "Chapter 20/cover.jpg", "Chapter 21/0001.jpg"}, "Test.zip", "Chapter 20/cover.jpg")]
+        [InlineData(new [] {"._/001.jpg", "._/cover.jpg", "010.jpg"}, "Test.zip", "010.jpg")]
+        [InlineData(new [] {"001.txt", "002.txt", "a.jpg"}, "Test.zip", "a.jpg")]
+        public void FindCoverImageFilename(string[] filenames, string archiveName, string expected)
+        {
+            Assert.Equal(expected, _archiveService.FindCoverImageFilename(archiveName, filenames));
+        }
+
+
+        #endregion
     }
 }

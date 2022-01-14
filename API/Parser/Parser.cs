@@ -989,5 +989,16 @@ namespace API.Parser
             if (string.IsNullOrEmpty(author)) return string.Empty;
             return author.Trim();
         }
+
+        /// <summary>
+        /// Normalizes the slashes in a path to be <see cref="Path.AltDirectorySeparatorChar"/>
+        /// </summary>
+        /// <example>/manga/1\1 -> /manga/1/1</example>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string NormalizePath(string path)
+        {
+            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
     }
 }

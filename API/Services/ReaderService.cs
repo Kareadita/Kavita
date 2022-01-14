@@ -41,7 +41,7 @@ public class ReaderService : IReaderService
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
-        return Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}");
+        return Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
     }
 
     /// <summary>

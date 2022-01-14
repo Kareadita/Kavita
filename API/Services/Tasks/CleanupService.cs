@@ -177,9 +177,9 @@ namespace API.Services.Tasks
             // Search all files in bookmarks/ except bookmark files and delete those
             var bookmarkDirectory =
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories).Select(f => _directoryService.FileSystem.Path.GetFullPath(f));
+            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories).Select(Parser.Parser.NormalizePath);
             var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-                .Select(b => _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
+                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
                     b.FileName)));
 
 

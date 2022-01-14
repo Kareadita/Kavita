@@ -28,6 +28,7 @@ namespace API.Services
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
         Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+        string FindCoverImageFilename(string archivePath, IList<string> entryNames);
     }
 
     /// <summary>
@@ -136,17 +137,18 @@ namespace API.Services
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public static string FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
+        public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
             // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
             // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
             var fullNames = entryFullNames.Where(x =>!Parser.Parser.HasBlacklistedFolderInPath(x)
                                                      && Parser.Parser.IsImage(x)
-                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)).ToList();
+                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith))
+                                                    .ToList();
             if (fullNames.Count == 0) return null;
             using var nc = new NaturalSortComparer();
             var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
-                .OrderBy(f => f.GetFullPathWithoutExtension(), nc) // BUG: This shouldn't take into account extension
+                .OrderBy(f => f.GetFullPathWithoutExtension(), nc)
                 .FirstOrDefault();
 
             if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
@@ -198,9 +200,9 @@ namespace API.Services
                     {
                         // TODO: Move the logic that selects the cover image into a testable method
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
+                        var entryNames = archive.Entries.Select(e => e.FullName).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
                         using var stream = entry.Open();
 
@@ -211,7 +213,7 @@ namespace API.Services
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
                         using var stream = entry.OpenEntryStream();
@@ -232,6 +234,18 @@ namespace API.Services
             }
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Given a list of image paths (assume within an archive), find the filename that corresponds to the cover
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <param name="entryNames"></param>
+        /// <returns></returns>
+        public string FindCoverImageFilename(string archivePath, IList<string> entryNames)
+        {
+            var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+            return entryName;
         }
 
         /// <summary>
