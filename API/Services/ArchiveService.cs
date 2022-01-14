@@ -198,15 +198,14 @@ namespace API.Services
                 {
                     case ArchiveLibrary.Default:
                     {
-                        // TODO: Move the logic that selects the cover image into a testable method
                         using var archive = ZipFile.OpenRead(archivePath);
                         var entryNames = archive.Entries.Select(e => e.FullName).ToList();
 
                         var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
-                        using var stream = entry.Open();
 
-                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName, outputDirectory);
+                        using var stream = entry.Open();
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
@@ -217,8 +216,7 @@ namespace API.Services
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
                         using var stream = entry.OpenEntryStream();
-
-                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName, outputDirectory);
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -294,20 +292,6 @@ namespace API.Services
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private string CreateThumbnail(string entryName, Stream stream, string fileName, string outputDirectory)
-        {
-            try
-            {
-                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
-            }
-            catch (Exception ex)
-            {
-                // NOTE: I can just let this bubble up
-                _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
-            }
-
-            return string.Empty;
-        }
 
         /// <summary>
         /// Test if the archive path exists and an archive

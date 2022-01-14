@@ -9,8 +9,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
@@ -44,7 +46,9 @@ public class ReaderServiceTests
         _context = new DataContext(contextOptions);
         Task.Run(SeedDb).GetAwaiter().GetResult();
 
-        _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
+        var mapper = config.CreateMapper();
+        _unitOfWork = new UnitOfWork(_context, mapper, null);
     }
 
     #region Setup
@@ -390,6 +394,396 @@ public class ReaderServiceTests
         var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
+    }
+
+    #endregion
+
+    #region GetNextChapterIdAsync
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldGetNextVolume()
+    {
+        // V1 -> V2
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("2", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("21", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldNotMoveFromVolumeToSpecial()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("A.cbz", true, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("B.cbz", true, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+        Assert.Equal(-1, nextChapter);
+    }
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldMoveFromSpecialToSpecial()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("A.cbz", true, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("B.cbz", true, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        Assert.NotEqual(-1, nextChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("B.cbz", actualChapter.Range);
+    }
+
+    #endregion
+
+    #region GetPrevChapterIdAsync
+
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume()
+    {
+        // V1 -> V2
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.Equal("1", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.Equal("2", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldMoveFromVolumeToSpecial()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("A.cbz", true, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("B.cbz", true, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        Assert.NotEqual(-1, prevChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.Equal("B.cbz", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToSpecial()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("A.cbz", true, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("B.cbz", true, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
+        Assert.NotEqual(-1, prevChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.Equal("A.cbz", actualChapter.Range);
     }
 
     #endregion

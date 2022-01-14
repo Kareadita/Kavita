@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -101,9 +102,14 @@ public class ReaderService : IReaderService
     /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
         AppUserProgress userProgress = null;
+
+        if (user.Progresses == null)
+        {
+            throw new KavitaException("Progresses must exist on user");
+        }
         try
         {
             userProgress =

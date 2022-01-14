@@ -45,7 +45,7 @@ public class VolumeListExtensionsTests
             }),
         };
 
-        Assert.Equal(volumes[1].Number, volumes.FirstWithChapters(true).Number);
+        Assert.Equal(volumes[0].Number, volumes.FirstWithChapters(true).Number);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class VolumeListExtensionsTests
             }),
         };
 
-        Assert.Equal(volumes[1].Number, volumes.FirstWithChapters(false).Number);
+        Assert.Equal(volumes[0].Number, volumes.FirstWithChapters(false).Number);
     }
 
     #endregion
@@ -109,7 +109,7 @@ public class VolumeListExtensionsTests
             }),
         };
 
-        Assert.Equal(volumes[1].Number, volumes.GetCoverImage(MangaFormat.Epub).Number);
+        Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Epub).Name);
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class VolumeListExtensionsTests
             }),
         };
 
-        Assert.Equal(volumes[1].Number, volumes.GetCoverImage(MangaFormat.Pdf).Number);
+        Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Pdf).Name);
     }
 
     [Fact]
@@ -149,7 +149,27 @@ public class VolumeListExtensionsTests
             }),
         };
 
-        Assert.Equal(volumes[1].Number, volumes.GetCoverImage(MangaFormat.Image).Number);
+        Assert.Equal(volumes[0].Name, volumes.GetCoverImage(MangaFormat.Image).Name);
+    }
+
+    [Fact]
+    public void GetCoverImage_ImageFormat_NoSpecials()
+    {
+        var volumes = new List<Volume>()
+        {
+            EntityFactory.CreateVolume("2", new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("3", false),
+                EntityFactory.CreateChapter("4", false),
+            }),
+            EntityFactory.CreateVolume("1", new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("1", false),
+                EntityFactory.CreateChapter("0", true),
+            }),
+        };
+
+        Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Image).Name);
     }
 
 
