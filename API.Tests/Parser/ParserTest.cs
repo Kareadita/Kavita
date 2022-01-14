@@ -152,7 +152,7 @@ namespace API.Tests.Parser
         [InlineData("test.jpeg", true)]
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
-        [InlineData("!test.jpg", false)]
+        [InlineData("!test.jpg", true)]
         [InlineData("test.webp", true)]
         public void IsImageTest(string filename, bool expected)
         {
