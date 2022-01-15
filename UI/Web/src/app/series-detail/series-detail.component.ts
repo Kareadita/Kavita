@@ -253,6 +253,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
         break;
+      case(Action.AddToCollection):
+        this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
+        break;
       default:
         break;
     }
