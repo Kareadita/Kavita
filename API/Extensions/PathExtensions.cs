@@ -8,6 +8,7 @@ public static class PathExtensions
     {
         if (string.IsNullOrEmpty(filepath)) return filepath;
         var extension = Path.GetExtension(filepath);
+        if (string.IsNullOrEmpty(extension)) return filepath;
         return Path.GetFullPath(filepath.Replace(extension, string.Empty));
     }
 }

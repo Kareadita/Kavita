@@ -28,6 +28,7 @@ namespace API.Services
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
         Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+        string FindCoverImageFilename(string archivePath, IList<string> entryNames);
     }
 
     /// <summary>
@@ -124,55 +125,27 @@ namespace API.Services
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public string FindFolderEntry(IEnumerable<string> entryFullNames)
+        public static string FindFolderEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames
-                .FirstOrDefault(x => !Path.EndsInDirectorySeparator(x) && !Parser.Parser.HasBlacklistedFolderInPath(x)
-                       && Parser.Parser.IsCoverImage(x)
-                       && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .FirstOrDefault(Parser.Parser.IsCoverImage);
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
         /// <summary>
-        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="NaturalSortComparer"/> for ordering files
+        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="OrderByNatural"/> for ordering files
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public static string FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
+        public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
-            // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
-            // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
-            var fullNames = entryFullNames.Where(x =>!Parser.Parser.HasBlacklistedFolderInPath(x)
-                                                     && Parser.Parser.IsImage(x)
-                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)).ToList();
-            if (fullNames.Count == 0) return null;
-            using var nc = new NaturalSortComparer();
-            var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
-                .OrderBy(f => f.GetFullPathWithoutExtension(), nc) // BUG: This shouldn't take into account extension
-                .FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
-
-            // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
-            // Get first folder, then sort within that
-            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, nc).FirstOrDefault();
-            if (!string.IsNullOrEmpty(firstDirectoryFile))
-            {
-                var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
-                if (!string.IsNullOrEmpty(firstDirectory))
-                {
-                    var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
-                        .OrderBy(Path.GetFileNameWithoutExtension, nc)
-                        .FirstOrDefault();
-
-                    if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
-                }
-            }
-
-            var result = fullNames
-                .OrderBy(Path.GetFileNameWithoutExtension, nc)
-                .FirstOrDefault();
+            var result = entryFullNames
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .FirstOrDefault(path => Parser.Parser.IsImage(path));
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -200,25 +173,24 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
+                        var entryNames = archive.Entries.Select(e => e.FullName).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
-                        using var stream = entry.Open();
 
-                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName, outputDirectory);
+                        using var stream = entry.Open();
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
                         using var stream = entry.OpenEntryStream();
-
-                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName, outputDirectory);
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -234,6 +206,18 @@ namespace API.Services
             }
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Given a list of image paths (assume within an archive), find the filename that corresponds to the cover
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <param name="entryNames"></param>
+        /// <returns></returns>
+        public string FindCoverImageFilename(string archivePath, IList<string> entryNames)
+        {
+            var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+            return entryName;
         }
 
         /// <summary>
@@ -282,20 +266,6 @@ namespace API.Services
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private string CreateThumbnail(string entryName, Stream stream, string fileName, string outputDirectory)
-        {
-            try
-            {
-                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
-            }
-            catch (Exception ex)
-            {
-                // NOTE: I can just let this bubble up
-                _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
-            }
-
-            return string.Empty;
-        }
 
         /// <summary>
         /// Test if the archive path exists and an archive

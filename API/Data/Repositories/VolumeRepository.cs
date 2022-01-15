@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -195,10 +196,9 @@ public class VolumeRepository : IVolumeRepository
 
     private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
     {
-        var sorter = new NaturalSortComparer();
         foreach (var v in volumes.Where(vDto => vDto.Number == 0))
         {
-            v.Chapters = v.Chapters.OrderBy(x => x.Range, sorter).ToList();
+            v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }
     }
 

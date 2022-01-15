@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -28,6 +29,7 @@ namespace API.Tests.Helpers
             return new Volume()
             {
                 Name = volumeNumber,
+                Number = int.Parse(volumeNumber),
                 Pages = 0,
                 Chapters = chapters ?? new List<Chapter>()
             };

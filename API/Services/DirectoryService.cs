@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -698,8 +699,7 @@ namespace API.Services
             {
                 var fileIndex = 1;
 
-                using var nc = new NaturalSortComparer();
-                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, nc))
+                foreach (var file in directory.EnumerateFiles().OrderByNatural(file => file.FullName))
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
@@ -713,8 +713,7 @@ namespace API.Services
                 directoryIndex++;
             }
 
-            var sort = new NaturalSortComparer();
-            foreach (var subDirectory in directory.EnumerateDirectories().OrderBy(d => d.FullName, sort))
+            foreach (var subDirectory in directory.EnumerateDirectories().OrderByNatural(d => d.FullName))
             {
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }

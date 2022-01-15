@@ -916,10 +916,9 @@ namespace API.Parser
             return BookFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
-        public static bool IsImage(string filePath, bool suppressExtraChecks = false)
+        public static bool IsImage(string filePath)
         {
-            if (filePath.StartsWith(".") || (!suppressExtraChecks && filePath.StartsWith("!"))) return false;
-            return ImageRegex.IsMatch(Path.GetExtension(filePath));
+            return !filePath.StartsWith(".") && ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsXml(string filePath)
@@ -959,7 +958,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool IsCoverImage(string filename)
         {
-            return IsImage(filename, true) && CoverImageRegex.IsMatch(filename);
+            return IsImage(filename) && CoverImageRegex.IsMatch(filename);
         }
 
         public static bool HasBlacklistedFolderInPath(string path)
@@ -988,6 +987,17 @@ namespace API.Parser
         {
             if (string.IsNullOrEmpty(author)) return string.Empty;
             return author.Trim();
+        }
+
+        /// <summary>
+        /// Normalizes the slashes in a path to be <see cref="Path.AltDirectorySeparatorChar"/>
+        /// </summary>
+        /// <example>/manga/1\1 -> /manga/1/1</example>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string NormalizePath(string path)
+        {
+            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
     }
 }

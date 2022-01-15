@@ -44,7 +44,6 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly ICacheHelper _cacheHelper;
-    private readonly NaturalSortComparer _naturalSort = new ();
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IHubContext<MessageHub> messageHub,
@@ -709,7 +708,7 @@ public class ScannerService : IScannerService
                 // Ensure we remove any files that no longer exist AND order
                 existingChapter.Files = existingChapter.Files
                     .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
-                    .OrderBy(f => f.FilePath, _naturalSort).ToList();
+                    .OrderByNatural(f => f.FilePath).ToList();
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }
         }

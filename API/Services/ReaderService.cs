@@ -8,6 +8,8 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -41,7 +43,7 @@ public class ReaderService : IReaderService
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
-        return Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}");
+        return Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
     }
 
     /// <summary>
@@ -87,34 +89,28 @@ public class ReaderService : IReaderService
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
 
-            if (userProgress == null)
-            {
-                user.Progresses.Add(new AppUserProgress
-                {
-                    PagesRead = 0,
-                    VolumeId = chapter.VolumeId,
-                    SeriesId = seriesId,
-                    ChapterId = chapter.Id
-                });
-            }
-            else
-            {
-                userProgress.PagesRead = 0;
-                userProgress.SeriesId = seriesId;
-                userProgress.VolumeId = chapter.VolumeId;
-            }
+            if (userProgress == null) continue;
+
+            userProgress.PagesRead = 0;
+            userProgress.SeriesId = seriesId;
+            userProgress.VolumeId = chapter.VolumeId;
         }
     }
 
     /// <summary>
     /// Gets the User Progress for a given Chapter. This will handle any duplicates that might have occured in past versions and will delete them. Does not commit.
     /// </summary>
-    /// <param name="user"></param>
+    /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
         AppUserProgress userProgress = null;
+
+        if (user.Progresses == null)
+        {
+            throw new KavitaException("Progresses must exist on user");
+        }
         try
         {
             userProgress =
@@ -236,7 +232,7 @@ public class ReaderService : IReaderService
         if (currentVolume.Number == 0)
         {
             // Handle specials by sorting on their Filename aka Range
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 
@@ -287,7 +283,7 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()).Reverse(), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 
