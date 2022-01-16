@@ -452,6 +452,7 @@ public class SeriesRepository : ISeriesRepository
         allPeopleIds.AddRange(filter.Publisher);
         allPeopleIds.AddRange(filter.CoverArtist);
         allPeopleIds.AddRange(filter.Translators);
+        //allPeopleIds.AddRange(filter.Artist);
 
         hasPeopleFilter = allPeopleIds.Count > 0;
         hasGenresFilter = filter.Genres.Count > 0;

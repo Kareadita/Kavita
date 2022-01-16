@@ -8,7 +8,7 @@ import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
-import { KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
 import { Pagination } from 'src/app/_models/pagination';
@@ -82,7 +82,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
     private modalService: NgbModal, private titleService: Title, private accountService: AccountService,
-    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService) {
+    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
+    private utilityService: UtilityService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -98,7 +99,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.filterSettings.presetCollectionId = tagId;
+      [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+      this.filterSettings.presets.collectionTags = [tagId];
       
       this.updateTag(tagId);
   }

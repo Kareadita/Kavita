@@ -12,7 +12,7 @@ export interface SeriesMetadata {
     tags: Array<Tag>;
     collectionTags: Array<CollectionTag>;
     writers: Array<Person>;
-    artists: Array<Person>;
+    coverArtists: Array<Person>;
     publishers: Array<Person>;
     characters: Array<Person>;
     pencillers: Array<Person>;

@@ -61,10 +61,10 @@
                         <label for="libraries">Libraries</label>
                         <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -117,13 +117,13 @@
                 <!-- The People row -->
                 <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
-                        <label for="cover-artist">(Cover) Artists</label>
+                        <label for="cover-artist">Cover Artists</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -134,10 +134,10 @@
                         <label for="writers">Writers</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -148,10 +148,10 @@
                         <label for="publisher">Publisher</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -162,10 +162,10 @@
                         <label for="penciller">Penciller</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -176,10 +176,10 @@
                         <label for="letterer">Letterer</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -190,10 +190,10 @@
                         <label for="inker">Inker</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -204,10 +204,10 @@
                         <label for="editor">Editor</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -218,10 +218,10 @@
                         <label for="colorist">Colorist</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -232,10 +232,10 @@
                         <label for="character">Character</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -246,10 +246,10 @@
                         <label for="translators">Translators</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -328,9 +328,9 @@
                         <div class="form-group">
                             <label for="sort-options">Sort By</label>
                             <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
-                                <i class="fa fa-arrow-down" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                                <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
                                 <ng-template #descSort>
-                                    <i class="fa fa-arrow-up" title="Descending"></i>
+                                    <i class="fa fa-arrow-down" title="Descending"></i>
                                 </ng-template>
                             </button>
                             <select id="sort-options" class="form-control" formControlName="sortField" style="height: 38px;">

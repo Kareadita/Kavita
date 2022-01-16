@@ -9,6 +9,7 @@ import { Person } from '../../_models/person';
 export class PersonBadgeComponent implements OnInit {
 
   @Input() person!: Person;
+  
 
   constructor() { }
 
