@@ -322,15 +322,15 @@ namespace API.Services
             info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
             info.Characters = Parser.Parser.CleanAuthor(info.Characters);
 
-            if (!string.IsNullOrEmpty(info.Web))
-            {
-                // ComicVine stores the Issue number in Number field and does not use Volume.
-                if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
-                if (info.Volume.Equals("1"))
-                {
-                    info.Volume = Parser.Parser.DefaultVolume;
-                }
-            }
+            // if (!string.IsNullOrEmpty(info.Web))
+            // {
+            //     // ComicVine stores the Issue number in Number field and does not use Volume.
+            //     if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
+            //     if (info.Volume.Equals("1"))
+            //     {
+            //         info.Volume = Parser.Parser.DefaultVolume;
+            //     }
+            // }
         }
 
         /// <summary>
