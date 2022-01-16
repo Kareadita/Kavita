@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -45,17 +46,23 @@ namespace API.Services.Tasks.Scanner
         }
 
         /// <summary>
-        /// Gets the list of parserInfos given a Series. If the series does not exist within, return empty list.
+        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
         /// </summary>
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
-            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
+            var allKeys = parsedSeries.Keys.Where(ps =>
+                SeriesHelper.FindSeries(series, ps));
 
-            return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
+            var infos = new List<ParserInfo>();
+            foreach (var key in allKeys)
+            {
+                infos.AddRange(parsedSeries[key]);
+            }
+
+            return infos;
         }
 
         /// <summary>
