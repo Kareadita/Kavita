@@ -102,6 +102,41 @@ public class SeriesHelperTests
             NormalizedName = API.Parser.Parser.Normalize("SomethingRandom")
         }));
     }
+
+    [Fact]
+    public void FindSeries_ShouldFind_UsingLocalizedName()
+    {
+        var series = DbFactory.Series("Darker than Black");
+        series.LocalizedName = "Something Random";
+        series.Format = MangaFormat.Image;
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Image,
+            Name = "Something Random",
+            NormalizedName = API.Parser.Parser.Normalize("Something Random")
+        }));
+
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Image,
+            Name = "Something Random".ToLower(),
+            NormalizedName = API.Parser.Parser.Normalize("Something Random")
+        }));
+
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Image,
+            Name = "Something Random".ToUpper(),
+            NormalizedName = API.Parser.Parser.Normalize("Something Random")
+        }));
+
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Image,
+            Name = "SomethingRandom".ToUpper(),
+            NormalizedName = API.Parser.Parser.Normalize("SomethingRandom")
+        }));
+    }
     #endregion
 
     [Fact]
