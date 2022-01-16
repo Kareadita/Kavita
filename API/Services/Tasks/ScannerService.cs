@@ -145,6 +145,7 @@ public class ScannerService : IScannerService
         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
         if (parsedSeries.Count == 0) return;
 
+        // Merge any series together that might have different ParsedSeries but belong to another group of ParsedSeries
         try
         {
             UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
@@ -167,7 +168,7 @@ public class ScannerService : IScannerService
     {
         var keys = parsedSeries.Keys;
         foreach (var key in keys.Where(key =>
-                     !series.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || series.Format != key.Format))
+                      series.Format != key.Format || !SeriesHelper.FindSeries(series, key)))
         {
             parsedSeries.Remove(key);
         }
@@ -460,6 +461,7 @@ public class ScannerService : IScannerService
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
+            // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
             UpdateVolumes(series, parsedInfos, allPeople, allTags, allGenres);
             series.Pages = series.Volumes.Sum(v => v.Pages);
