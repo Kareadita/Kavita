@@ -1,6 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
@@ -78,7 +78,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   publicationStatusSettings: TypeaheadSettings<FilterItem<PublicationStatusDto>> = new TypeaheadSettings();
   tagsSettings: TypeaheadSettings<FilterItem<Tag>> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<FilterItem<Language>> = new TypeaheadSettings();
-  peopleSettings: {[PersonRole: string]: TypeaheadSettings<FilterItem<Person>>} = {};
+  peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
   /**
@@ -427,211 +427,69 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  // updateFromPreset(personSettings: TypeaheadSettings<FilterItem<Person>>, peopleFilterField: Array<any>, presetField: Array<any>) {
-  //   if (this.filterSettings.presets?.writers && this.filterSettings.presets?.writers.length > 0) {
-  //     const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-  //     fetch('').pipe(map(people => {
-  //       personSettings.savedData = people.filter(item => this.filterSettings.presets?.writers.includes(item.value.id));
-  //       peopleFilterField = personSettings.savedData.map(item => item.value.id);
-  //       this.resetTypeaheads.next(true);
-  //     })).subscribe(() => {
-  //       this.peopleSettings[PersonRole.Writer] = personSettings;
-  //     });
-  //   } else {
-  //     this.peopleSettings[PersonRole.Writer] = personSettings;
-  //   }
-  // }
-
-  // TODO: It might be better to do a ForkJoin on all the preset calls so I have complete control and can update the external filter in one call
-  setupPersonTypeahead() {
-    this.peopleSettings = {};
-
-    var personSettings = this.createBlankPersonSettings('writers', PersonRole.Writer);
-    if (this.filterSettings.presets?.writers && this.filterSettings.presets?.writers.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.writers.includes(item.value.id));
-        this.filter.writers = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Writer] = setting;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Writer);
+  updateFromPreset(id: string, peopleFilterField: Array<any>, presetField: Array<any> | undefined, role: PersonRole) {
+    const personSettings = this.createBlankPersonSettings(id, role)
+    if (presetField && presetField.length > 0) {
+      //const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
+      const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
+      return fetch('').pipe(map(people => {
+        personSettings.savedData = people.filter(item => presetField.includes(item.id));
+        peopleFilterField = personSettings.savedData.map(item => item.id);
         this.resetTypeaheads.next(true);
-      });
+        this.peopleSettings[role] = personSettings;
+        //this.updatePersonFilters(personSettings.savedData as FilterItem<Person>[], role);
+        this.updatePersonFilters(personSettings.savedData as Person[], role);
+        return true;
+      }));
     } else {
-      this.peopleSettings[PersonRole.Writer] = personSettings;
-    }
-    
-
-    personSettings = this.createBlankPersonSettings('character', PersonRole.Character);
-    if (this.filterSettings.presets?.character && this.filterSettings.presets?.character.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.character.includes(item.value.id));
-        this.filter.character = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Character] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Character);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Character] = personSettings;
-    }
-    
-
-    personSettings = this.createBlankPersonSettings('colorist', PersonRole.Colorist);
-    if (this.filterSettings.presets?.colorist && this.filterSettings.presets?.colorist.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.colorist.includes(item.value.id));
-        this.filter.colorist = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Colorist] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Colorist);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Colorist] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('cover-artist', PersonRole.CoverArtist);
-    if (this.filterSettings.presets?.coverArtist && this.filterSettings.presets?.coverArtist.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.coverArtist.includes(item.value.id));
-        this.filter.coverArtist = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.CoverArtist] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.CoverArtist);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.CoverArtist] = personSettings;
-    }
-
-
-    personSettings = this.createBlankPersonSettings('editor', PersonRole.Editor);
-    if (this.filterSettings.presets?.editor && this.filterSettings.presets?.editor.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.editor.includes(item.value.id));
-        this.filter.editor = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Editor] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Editor);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Editor] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('inker', PersonRole.Inker);
-    if (this.filterSettings.presets?.inker && this.filterSettings.presets?.inker.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.inker.includes(item.value.id));
-        this.filter.inker = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Inker] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Inker);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Inker] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('letterer', PersonRole.Letterer);
-    if (this.filterSettings.presets?.letterer && this.filterSettings.presets?.letterer.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.letterer.includes(item.value.id));
-        this.filter.letterer = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Letterer] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Letterer);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Letterer] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('penciller', PersonRole.Penciller);
-    if (this.filterSettings.presets?.penciller && this.filterSettings.presets?.penciller.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.penciller.includes(item.value.id));
-        this.filter.penciller = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Penciller] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Penciller);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Penciller] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('publisher', PersonRole.Publisher);
-    if (this.filterSettings.presets?.publisher && this.filterSettings.presets?.publisher.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.publisher.includes(item.value.id));
-        this.filter.publisher = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Publisher] = personSettings;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Publisher);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Publisher] = personSettings;
-    }
-
-    personSettings = this.createBlankPersonSettings('translators', PersonRole.Translator);
-    if (this.filterSettings.presets?.translators && this.filterSettings.presets?.translators.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<FilterItem<Person>[]>);
-      const setting = Object.assign({}, personSettings);
-      fetch('').pipe(map(people => {
-        setting.savedData = people.filter(item => this.filterSettings.presets?.translators.includes(item.value.id));
-        this.filter.translators = setting.savedData.map(item => item.value.id);
-      })).subscribe(() => {
-        this.peopleSettings[PersonRole.Translator] = setting;
-        this.updatePersonFilters(setting.savedData as FilterItem<Person>[], PersonRole.Translator);
-        this.resetTypeaheads.next(true);
-      });
-    } else {
-      this.peopleSettings[PersonRole.Translator] = personSettings;
+      this.peopleSettings[role] = personSettings;
+      return of(true);
     }
   }
 
-  fetchPeople(role: PersonRole, filter: string): Observable<FilterItem<Person>[]> {
+  setupPersonTypeahead() {
+    this.peopleSettings = {};
+
+    forkJoin([
+      this.updateFromPreset('writers', this.filter.writers, this.filterSettings.presets?.writers, PersonRole.Writer),
+      this.updateFromPreset('character', this.filter.character, this.filterSettings.presets?.character, PersonRole.Character),  
+      this.updateFromPreset('colorist', this.filter.colorist, this.filterSettings.presets?.colorist, PersonRole.Colorist),
+      this.updateFromPreset('cover-artist', this.filter.coverArtist, this.filterSettings.presets?.coverArtist, PersonRole.CoverArtist),
+      this.updateFromPreset('editor', this.filter.editor, this.filterSettings.presets?.editor, PersonRole.Editor),
+      this.updateFromPreset('inker', this.filter.inker, this.filterSettings.presets?.inker, PersonRole.Inker),
+      this.updateFromPreset('letterer', this.filter.letterer, this.filterSettings.presets?.letterer, PersonRole.Letterer),
+      this.updateFromPreset('penciller', this.filter.penciller, this.filterSettings.presets?.penciller, PersonRole.Penciller),
+      this.updateFromPreset('publisher', this.filter.publisher, this.filterSettings.presets?.publisher, PersonRole.Publisher),
+      this.updateFromPreset('translators', this.filter.translators, this.filterSettings.presets?.translators, PersonRole.Translator)
+    ]).subscribe(results => {
+      this.resetTypeaheads.next(true);
+      this.apply();
+    });
+  }
+
+  fetchPeople(role: PersonRole, filter: string) { //: Observable<FilterItem<Person>[]>
     return this.metadataService.getAllPeople(this.filter.libraries).pipe(map(people => {
-      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter)).map((p: Person) => {
-        return {
-          title: p.name,
-          value: p,
-          selected: false,
-        }
-      });
+      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
+      // .map((p: Person) => {
+      //   return {
+      //     title: p.name,
+      //     value: p,
+      //     selected: false,
+      //   }
+      // });
     }));
   }
 
   createBlankPersonSettings(id: string, role: PersonRole) {
-    var personSettings = new TypeaheadSettings<FilterItem<Person>>();
+    var personSettings = new TypeaheadSettings<Person>();
     personSettings.minCharacters = 0;
     personSettings.multiple = true;
     personSettings.unique = true;
     personSettings.addIfNonExisting = false;
     personSettings.id = id;
-    personSettings.compareFn = (options: FilterItem<Person>[], filter: string) => {
+    personSettings.compareFn = (options: Person[], filter: string) => {
       const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => m.name.toLowerCase() === f);
     }
     personSettings.fetchFn = (filter: string) => {
       return this.fetchPeople(role, filter);
@@ -676,37 +534,72 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.filter.tags = tags.map(item => item.value.id) || [];
   }
 
-  updatePersonFilters(persons: FilterItem<Person>[], role: PersonRole) {
+  // updatePersonFilters(persons: FilterItem<Person>[], role: PersonRole) {
+  //   switch (role) {
+  //     case PersonRole.CoverArtist:
+  //       this.filter.coverArtist = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Character:
+  //       this.filter.character = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Colorist:
+  //       this.filter.colorist = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Editor:
+  //       this.filter.editor = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Inker:
+  //       this.filter.inker = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Letterer:
+  //       this.filter.letterer = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Penciller:
+  //       this.filter.penciller = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Publisher:
+  //       this.filter.publisher = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Writer:
+  //       this.filter.writers = persons.map(p => p.value.id);
+  //       break;
+  //     case PersonRole.Translator:
+  //       this.filter.translators = persons.map(p => p.value.id);
+
+  //   }
+  // }
+
+  updatePersonFilters(persons: Person[], role: PersonRole) {
     switch (role) {
       case PersonRole.CoverArtist:
-        this.filter.coverArtist = persons.map(p => p.value.id);
+        this.filter.coverArtist = persons.map(p => p.id);
         break;
       case PersonRole.Character:
-        this.filter.character = persons.map(p => p.value.id);
+        this.filter.character = persons.map(p => p.id);
         break;
       case PersonRole.Colorist:
-        this.filter.colorist = persons.map(p => p.value.id);
+        this.filter.colorist = persons.map(p => p.id);
         break;
       case PersonRole.Editor:
-        this.filter.editor = persons.map(p => p.value.id);
+        this.filter.editor = persons.map(p => p.id);
         break;
       case PersonRole.Inker:
-        this.filter.inker = persons.map(p => p.value.id);
+        this.filter.inker = persons.map(p => p.id);
         break;
       case PersonRole.Letterer:
-        this.filter.letterer = persons.map(p => p.value.id);
+        this.filter.letterer = persons.map(p => p.id);
         break;
       case PersonRole.Penciller:
-        this.filter.penciller = persons.map(p => p.value.id);
+        this.filter.penciller = persons.map(p => p.id);
         break;
       case PersonRole.Publisher:
-        this.filter.publisher = persons.map(p => p.value.id);
+        this.filter.publisher = persons.map(p => p.id);
         break;
       case PersonRole.Writer:
-        this.filter.writers = persons.map(p => p.value.id);
+        this.filter.writers = persons.map(p => p.id);
         break;
       case PersonRole.Translator:
-        this.filter.translators = persons.map(p => p.value.id);
+        this.filter.translators = persons.map(p => p.id);
 
     }
   }
