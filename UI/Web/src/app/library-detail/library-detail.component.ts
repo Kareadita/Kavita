@@ -140,6 +140,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: SeriesFilter) {
     this.filter = data;
+    console.log('filter: ', this.filter);
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
@@ -155,9 +156,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
     this.loadingSeries = true;
 
-    // The filter is out of sync with the presets from typeaheads
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
-      this.filter = this.seriesService.createSeriesFilter(); // NOTE: FILTER CREATION
+      this.filter = this.seriesService.createSeriesFilter();
       this.filter.libraries.push(this.libraryId);
     }
 

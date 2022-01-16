@@ -61,10 +61,10 @@
                         <label for="libraries">Libraries</label>
                         <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
