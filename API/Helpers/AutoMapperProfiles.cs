@@ -63,7 +63,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.Writers,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
-                .ForMember(dest => dest.Artists,
+                .ForMember(dest => dest.CoverArtists,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
                 .ForMember(dest => dest.Characters,

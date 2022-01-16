@@ -22,7 +22,7 @@ namespace API.DTOs
         /// </summary>
         public ICollection<TagDto> Tags { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Artists { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
