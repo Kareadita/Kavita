@@ -144,6 +144,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"__MACOSX/cover.jpg", "vol1/page 01.jpg"}, "vol1/page 01.jpg")]
         [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg")]
         [InlineData(new [] {"001.jpg", "001 - chapter 1/001.jpg"}, "001.jpg")]
+        [InlineData(new [] {"chapter 1/001.jpg", "chapter 2/002.jpg", "somefile.jpg"}, "somefile.jpg")]
         public void FindFirstEntry(string[] files, string expected)
         {
             var foundFile = ArchiveService.FirstFileEntry(files, string.Empty);

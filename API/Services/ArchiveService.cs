@@ -142,10 +142,39 @@ namespace API.Services
         /// <returns>Entry name of match, null if no match</returns>
         public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
-            var result = entryFullNames
+            // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
+            // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
+            var fullNames = entryFullNames
                 .OrderByNatural(c => c.GetFullPathWithoutExtension())
-                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
-                .FirstOrDefault(path => Parser.Parser.IsImage(path));
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)) && Parser.Parser.IsImage(path))
+                .ToList();
+            if (fullNames.Count == 0) return null;
+
+            var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
+                .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
+
+            // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
+            // Get first folder, then sort within that
+            var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstDirectoryFile))
+            {
+                var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
+                if (!string.IsNullOrEmpty(firstDirectory))
+                {
+                    var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
+                        .OrderByNatural(Path.GetFileNameWithoutExtension)
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
+                }
+            }
+
+            var result = fullNames
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
