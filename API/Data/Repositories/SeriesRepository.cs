@@ -48,7 +48,7 @@ public interface ISeriesRepository
     Task<bool> DeleteSeriesAsync(int seriesId);
     Task<Series> GetSeriesByIdAsync(int seriesId);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
-    Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
+    Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
     /// <summary>
     /// Used to add Progress/Rating information to series list.
@@ -325,7 +325,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
+    public async Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds)
     {
         var volumes = await _context.Volume
             .Where(v => seriesIds.Contains(v.SeriesId))
@@ -516,6 +516,9 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
+        //var allSeriesWithProgress = await _context.AppUserProgresses.Select(p => p.SeriesId).ToListAsync();
+        //var allChapters = await GetChapterIdsForSeriesAsync(allSeriesWithProgress);
+
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
                 new
@@ -524,17 +527,21 @@ public class SeriesRepository : ISeriesRepository
                     PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
                         .Sum(s1 => s1.PagesRead),
                     progress.AppUserId,
-                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
-                        .Max(p => p.LastModified)
+                    LastReadingProgress = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
+                        .Max(p => p.LastModified),
+                    // This is only taking into account chapters that have progress on them, not all chapters in said series
+                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created)
+                    //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
                 });
+        // I think I need another Join statement. The problem is the chapters are still limited to progress
 
 
 
         var retSeries = query.Where(s => s.AppUserId == userId
                                          && s.PagesRead > 0
                                          && s.PagesRead < s.Series.Pages)
-            .OrderByDescending(s => s.LastModified) // TODO: This needs to be Chapter Created (Max)
-            .ThenByDescending(s => s.Series.LastModified)
+            .OrderByDescending(s => s.LastReadingProgress)
+            .ThenByDescending(s => s.LastChapterCreated)
             .Select(s => s.Series)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
