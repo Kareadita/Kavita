@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}}" style="overflow: auto;" #reader>
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}" #reader>
     <div class="fixed-top" #stickyTop>
         <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -116,10 +116,8 @@
         <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" 
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
-        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
-        </div>
-        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate">
-        </div>
+        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
+        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         
         <div *ngIf="page !== undefined && scrollbarNeeded">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>

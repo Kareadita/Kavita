@@ -159,6 +159,10 @@ $primary-color: #0062cc;
     //overflow: auto;  // This will break progress reporting
 }
 
+.reader-container {
+    outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
+}
+
 .book-content {
     position: relative;
 }
