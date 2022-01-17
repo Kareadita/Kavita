@@ -76,7 +76,7 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm('Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
       if (callback) {
         callback(library);
       }
