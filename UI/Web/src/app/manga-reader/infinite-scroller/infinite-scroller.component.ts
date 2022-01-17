@@ -63,6 +63,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   
   /**
    * Stores and emits all the src urls
@@ -182,6 +183,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             this.renderer.removeClass(image, 'bookmark-effect');
           }, 1000);
         }
+      });
+    }
+
+    if (this.fullscreenToggled) {
+      this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
+        this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
+        this.setPageNum(this.pageNum, true);
       });
     }
   }

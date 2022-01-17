@@ -131,6 +131,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
    */
    showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
+   /**
+   * An event emiter when fullscreen mode is toggled. Used soley by the webtoon reader.
+   */
+   fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   /**
    * If the menu is open/visible.
    */
@@ -1080,12 +1084,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
         this.firstPageRendered = false;
+        this.fullscreenEvent.next(false);
         this.render();
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.firstPageRendered = false;
+        this.fullscreenEvent.next(true);
         this.render();
       });
     }
