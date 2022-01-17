@@ -873,6 +873,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!this.shouldRenderAsFitSplit()) {
         this.setCanvasSize();
         this.ctx.drawImage(this.canvasImage, 0, 0);
+        this.isLoading = false;
         return;
       }
       
