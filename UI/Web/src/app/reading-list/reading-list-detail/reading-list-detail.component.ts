@@ -157,7 +157,11 @@ export class ReadingListDetailComponent implements OnInit {
 
   removeRead() {
     this.isLoading = true;
-    this.readingListService.removeRead(this.readingList.id).subscribe(() => {
+    this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
+      if (resp === 'Nothing to remove') {
+        this.toastr.info(resp);
+        return;
+      }
       this.getListItems();
     });
   }
