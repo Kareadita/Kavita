@@ -227,6 +227,8 @@ public class ScannerService : IScannerService
         if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
@@ -237,6 +239,8 @@ public class ScannerService : IScannerService
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
+            await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
+                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
