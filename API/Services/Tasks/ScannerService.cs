@@ -226,14 +226,14 @@ public class ScannerService : IScannerService
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (library.Folders.Any(f => !_directoryService.IsDriveMounted(f.Path)))
         {
-            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
         if (library.Folders.Any(f => _directoryService.IsDirectoryEmpty(f.Path)))
         {
-            _logger.LogError("Some of the root folders for the library are empty. " +
+            _logger.LogCritical("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");

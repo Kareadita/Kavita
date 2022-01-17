@@ -153,7 +153,7 @@ namespace API.Controllers
             var files = (await _unitOfWork.UserRepository.GetAllBookmarksByIds(downloadBookmarkDto.Bookmarks
                 .Select(b => b.Id)
                 .ToList()))
-                .Select(b => _directoryService.FileSystem.Path.Join(bookmarkDirectory, b.FileName));
+                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, b.FileName)));
 
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
                 tempFolder);
