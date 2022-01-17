@@ -235,6 +235,13 @@ namespace API.Services
         }
 
         // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns></returns>
+        /// <exception cref="KavitaException"></exception>
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
