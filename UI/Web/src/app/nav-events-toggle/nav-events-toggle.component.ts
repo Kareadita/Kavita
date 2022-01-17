@@ -103,7 +103,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   prettyPrintEvent(eventType: string, event: any) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
+      case (EVENTS.RefreshMetadataProgress): return 'Refreshing Covers for ';
       case (EVENTS.CleanupProgress): return 'Clearing Cache';
       case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
       case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;
