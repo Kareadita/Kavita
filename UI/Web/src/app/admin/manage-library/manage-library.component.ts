@@ -39,14 +39,16 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     // when a progress event comes in, show it on the UI next to library
     this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
       if (event.event !== EVENTS.ScanLibraryProgress) return;
+
+      console.log('scan event: ', event.payload);
       
       const scanEvent = event.payload as ProgressEvent;
-      this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 100};
+      this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 1};
       if (scanEvent.progress === 0) {
         this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;
       }
       
-      if (this.scanInProgress[scanEvent.libraryId].progress === false && scanEvent.progress === 100) {
+      if (this.scanInProgress[scanEvent.libraryId].progress === false && scanEvent.progress === 1) {
         this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
           const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
           const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);

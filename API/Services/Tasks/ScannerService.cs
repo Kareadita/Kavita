@@ -275,9 +275,9 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
         await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 
     /// <summary>
