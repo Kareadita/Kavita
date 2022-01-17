@@ -170,16 +170,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    let params = ''
-    window.location.href.split('?')[1].split('&').forEach(part => {
-      if (part.startsWith('page=')) {
-        params += 'page=' + this.pagination.currentPage;
-      } else {
-        params += part;
-      }
-    });
-    
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + params);
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + 'page=' + this.pagination.currentPage);
     this.loadPage();
   }
 
