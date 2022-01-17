@@ -748,11 +748,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollService.scrollTo(0, this.reader.nativeElement);
     }
 
-    // On fullscreen we need to click the document before arrow keys will scroll down.
-    if (this.isFullscreen) {
-      this.renderer.setAttribute(this.reader.nativeElement, 'tabIndex', '0');
-      this.reader.nativeElement.focus();
-    }
+    // we need to click the document before arrow keys will scroll down.
+    this.reader.nativeElement.focus();
   }
 
   setPageNum(pageNum: number) {
