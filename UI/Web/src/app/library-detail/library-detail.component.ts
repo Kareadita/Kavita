@@ -93,7 +93,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
     this.filterSettings.presets.libraries = [this.libraryId];
     
-    this.loadPage();
+    //this.loadPage();
   }
 
   ngOnInit(): void {
@@ -140,7 +140,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: SeriesFilter) {
     this.filter = data;
-    console.log('filter: ', this.filter);
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
@@ -171,7 +170,16 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    let params = ''
+    window.location.href.split('?')[1].split('&').forEach(part => {
+      if (part.startsWith('page=')) {
+        params += 'page=' + this.pagination.currentPage;
+      } else {
+        params += part;
+      }
+    });
+    
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + params);
     this.loadPage();
   }
 
