@@ -152,7 +152,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit(): void {
-    fromEvent(window, 'scroll')
+    const reader = document.querySelector('.reader') || window;
+    fromEvent(reader, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy)) 
     .subscribe((event) => this.handleScrollEvent(event));
 
