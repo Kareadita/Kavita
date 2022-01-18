@@ -20,20 +20,24 @@ public enum AgeRating
     G = 4,
     [Description("Everyone 10+")]
     Everyone10Plus = 5,
+    [Description("PG")]
+    PG = 6,
     [Description("Kids to Adults")]
-    KidsToAdults = 6,
+    KidsToAdults = 7,
     [Description("Teen")]
-    Teen = 7,
+    Teen = 8,
     [Description("MA 15+")]
-    Mature15Plus = 8,
+    Mature15Plus = 9,
     [Description("Mature 17+")]
-    Mature17Plus = 9,
+    Mature17Plus = 10,
     [Description("M")]
-    Mature = 10,
+    Mature = 11,
+    [Description("R18+")]
+    R18Plus = 12,
     [Description("Adults Only 18+")]
-    AdultsOnly = 11,
+    AdultsOnly = 13,
     [Description("X18+")]
-    X18Plus = 12
+    X18Plus = 14
 
 
 }
