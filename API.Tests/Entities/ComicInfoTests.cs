@@ -22,6 +22,8 @@ public class ComicInfoTests
     [InlineData("X18+", AgeRating.X18Plus)]
     [InlineData("Kids to Adults", AgeRating.KidsToAdults)]
     [InlineData("NotValid", AgeRating.Unknown)]
+    [InlineData("PG", AgeRating.PG)]
+    [InlineData("R18+", AgeRating.R18Plus)]
     public void ConvertAgeRatingToEnum_ShouldConvertCorrectly(string input, AgeRating expected)
     {
         Assert.Equal(expected, ComicInfo.ConvertAgeRatingToEnum(input));
@@ -30,7 +32,7 @@ public class ComicInfoTests
     [Fact]
     public void ConvertAgeRatingToEnum_ShouldCompareCaseInsensitive()
     {
-        Assert.Equal(AgeRating.Mature, ComicInfo.ConvertAgeRatingToEnum("mature"));
+        Assert.Equal(AgeRating.RatingPending, ComicInfo.ConvertAgeRatingToEnum("rating pending"));
     }
     #endregion
 }
