@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
-using API.Interfaces.Services;
+using API.Helpers;
 using API.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -23,34 +23,46 @@ namespace API.Services.Tasks.Scanner
     public class ParseScannedFiles
     {
         private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
-        private readonly IBookService _bookService;
         private readonly ILogger _logger;
+        private readonly IDirectoryService _directoryService;
+        private readonly IReadingItemService _readingItemService;
+        private readonly DefaultParser _defaultParser;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
         /// Each instance is separate from other threads, allowing for no cross over.
         /// </summary>
-        /// <param name="bookService"></param>
-        /// <param name="logger"></param>
-        public ParseScannedFiles(IBookService bookService, ILogger logger)
+        /// <param name="logger">Logger of the parent class that invokes this</param>
+        /// <param name="directoryService">Directory Service</param>
+        /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
+        public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
+            IReadingItemService readingItemService)
         {
-            _bookService = bookService;
             _logger = logger;
+            _directoryService = directoryService;
+            _readingItemService = readingItemService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            _defaultParser = new DefaultParser(_directoryService);
         }
 
         /// <summary>
-        /// Gets the list of parserInfos given a Series. If the series does not exist within, return empty list.
+        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
         /// </summary>
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
-            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
+            var allKeys = parsedSeries.Keys.Where(ps =>
+                SeriesHelper.FindSeries(series, ps));
 
-            return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
+            var infos = new List<ParserInfo>();
+            foreach (var key in allKeys)
+            {
+                infos.AddRange(parsedSeries[key]);
+            }
+
+            return infos;
         }
 
         /// <summary>
@@ -62,20 +74,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            ParserInfo info;
+            // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
 
-            if (Parser.Parser.IsEpub(path))
-            {
-                info = _bookService.ParseInfo(path);
-            }
-            else
-            {
-                info = Parser.Parser.Parse(path, rootPath, type);
-            }
-
-            // If we couldn't match, log. But don't log if the file parses as a cover image
+            var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
             {
+                // If the file is an image and literally a cover image, skip processing.
                 if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
                 {
                     _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
@@ -83,15 +87,35 @@ namespace API.Services.Tasks.Scanner
                 return;
             }
 
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
+
+            // This catches when original library type is Manga/Comic and when parsing with non
+            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
             {
-                info = Parser.Parser.Parse(path, rootPath, type);
-                var info2 = _bookService.ParseInfo(path);
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
+                var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
+            }
+
+            info.ComicInfo = _readingItemService.GetComicInfo(path);
+            if (info.ComicInfo != null)
+            {
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                {
+                    info.Volumes = info.ComicInfo.Volume;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
             }
 
             TrackSeries(info);
         }
+
 
         /// <summary>
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
@@ -133,7 +157,7 @@ namespace API.Services.Tasks.Scanner
         /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
+        /// <returns>Series Name to group this info into</returns>
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
@@ -161,12 +185,11 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = GetLibrarySearchPattern();
             foreach (var folderPath in folders)
             {
                 try
                 {
-                    totalFiles += DirectoryService.TraverseTreeParallelForEach(folderPath, (f) =>
+                    totalFiles += _directoryService.TraverseTreeParallelForEach(folderPath, (f) =>
                     {
                         try
                         {
@@ -176,7 +199,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             _logger.LogError(exception, "The file {Filename} could not be found", f);
                         }
-                    }, searchPattern, _logger);
+                    }, Parser.Parser.SupportedExtensions, _logger);
                 }
                 catch (ArgumentException ex)
                 {
@@ -189,11 +212,6 @@ namespace API.Services.Tasks.Scanner
                 scanElapsedTime);
 
             return SeriesWithInfos();
-        }
-
-        private static string GetLibrarySearchPattern()
-        {
-            return Parser.Parser.SupportedExtensions;
         }
 
         /// <summary>

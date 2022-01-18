@@ -1,13 +1,13 @@
-@import '../../../theme/colors';
+@use '../../../theme/colors';
 
-$triangle-size: 40px;
+$triangle-size: 30px;
 $image-height: 230px;
 $image-width: 160px;
 
 .error-banner {
     width: 160px;
     height: 18px;
-    background-color: $error-color;
+    background-color: colors.$error-color;
     font-size: 12px;
     color: white;
     text-transform: uppercase;
@@ -38,6 +38,9 @@ $image-width: 160px;
     margin-bottom: 0px;
 }
 
+.selected-highlight {
+    outline: 2px solid colors.$primary-color;
+}
 
 
 .img-top {
@@ -49,7 +52,7 @@ $image-width: 160px;
     height: 5px;
 
     .progress {
-        color: $primary-color;
+        color: colors.$primary-color;
         background-color: transparent;
     }
 }
@@ -70,7 +73,7 @@ $image-width: 160px;
     height: 0;
     border-style: solid;
     border-width: 0 $triangle-size $triangle-size 0;
-    border-color: transparent $primary-color transparent transparent;
+    border-color: transparent colors.$primary-color transparent transparent;
 }
 
 

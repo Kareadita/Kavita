@@ -1,10 +1,10 @@
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-<app-card-detail-layout header="{{libraryName}}" 
+<app-card-detail-layout [header]="libraryName" 
     [isLoading]="loadingSeries"
     [items]="series"
     [actions]="actions"
     [pagination]="pagination"
-    [filters]="filters"
+    [filterSettings]="filterSettings"
     (applyFilter)="updateFilter($event)"
     (pageChange)="onPageChange($event)"
     >

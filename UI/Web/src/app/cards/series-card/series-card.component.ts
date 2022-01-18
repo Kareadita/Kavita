@@ -109,6 +109,9 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, (series) => {/* No Operation */ });
         break;
+      case(Action.AddToCollection):
+        this.actionService.addMultipleSeriesToCollectionTag([series], () => {/* No Operation */ });
+        break;
       default:
         break;
     }
@@ -132,35 +135,26 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  refreshMetdata(series: Series) {
-    this.seriesService.refreshMetadata(series).subscribe((res: any) => {
-      this.toastr.success('Refresh started for ' + series.name);
-    });
+  async refreshMetdata(series: Series) {
+    this.actionService.refreshMetdata(series);
   }
 
-  scanLibrary(series: Series) {
+  async scanLibrary(series: Series) {
     this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
+      this.toastr.success('Scan queued for ' + series.name);
     });
   }
 
   async deleteSeries(series: Series) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
-      return;
-    }
-
-    this.seriesService.delete(series.id).subscribe((res: boolean) => {
-      if (res) {
-        this.toastr.success('Series deleted');
+    this.actionService.deleteSeries(series, (result: boolean) => {
+      if (result) {
         this.reload.emit(true);
       }
     });
   }
 
   markAsUnread(series: Series) {
-    this.seriesService.markUnread(series.id).subscribe(res => {
-      this.toastr.success(series.name + ' is now unread');
-      series.pagesRead = 0;
+    this.actionService.markSeriesAsUnread(series, () => {
       if (this.data) {
         this.data.pagesRead = 0;
       }
@@ -170,9 +164,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   markAsRead(series: Series) {
-    this.seriesService.markRead(series.id).subscribe(res => {
-      this.toastr.success(series.name + ' is now read');
-      series.pagesRead = series.pages;
+    this.actionService.markSeriesAsRead(series, () => {
       if (this.data) {
         this.data.pagesRead = series.pages;
       }

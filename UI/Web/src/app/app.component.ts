@@ -6,7 +6,7 @@ import { LibraryService } from './_services/library.service';
 import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +17,11 @@ export class AppComponent implements OnInit {
 
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
-    private router: Router, private ngbModal: NgbModal) {
+    private router: Router, private ngbModal: NgbModal, private ratingConfig: NgbRatingConfig) {
+
+    // Setup default rating config
+    ratingConfig.max = 5;
+    ratingConfig.resettable = true;
     
     // Close any open modals when a route change occurs
     router.events

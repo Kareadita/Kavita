@@ -1,38 +1,70 @@
 import { MangaFormat } from "./manga-format";
 
-export interface FilterItem {
+export interface FilterItem<T> {
     title: string;
-    value: any;
+    value: T;
     selected: boolean;
 }
 
 export interface SeriesFilter {
-    mangaFormat: MangaFormat | null;
+    formats: Array<MangaFormat>;
+    libraries: Array<number>,
+    readStatus: ReadStatus;
+    genres: Array<number>;
+    writers: Array<number>;
+    penciller: Array<number>;
+    inker: Array<number>;
+    colorist: Array<number>;
+    letterer: Array<number>;
+    coverArtist: Array<number>;
+    editor: Array<number>;
+    publisher: Array<number>;
+    character: Array<number>;
+    translators: Array<number>;
+    collectionTags: Array<number>;
+    rating: number;
+    ageRating: Array<number>;
+    sortOptions: SortOptions | null;
+    tags: Array<number>;
+    languages: Array<string>;
+    publicationStatus: Array<number>;
+}
+
+export interface SortOptions {
+  sortField: SortField;
+  isAscending: boolean;
+}
+
+export enum SortField {
+  SortName = 1,
+  Created = 2,
+  LastModified = 3
+}
+
+export interface ReadStatus {
+  notRead: boolean,
+  inProgress: boolean,
+  read: boolean,
 }
 
 export const mangaFormatFilters = [
     {
-      title: 'Format: All',
-      value: null,
-      selected: false
-    },
-    {
-      title: 'Format: Images',
+      title: 'Images',
       value: MangaFormat.IMAGE,
       selected: false
     },
     {
-      title: 'Format: EPUB',
+      title: 'EPUB',
       value: MangaFormat.EPUB,
       selected: false
     },
     {
-      title: 'Format: PDF',
+      title: 'PDF',
       value: MangaFormat.PDF,
       selected: false
     },
     {
-      title: 'Format: ARCHIVE',
+      title: 'ARCHIVE',
       value: MangaFormat.ARCHIVE,
       selected: false
     }

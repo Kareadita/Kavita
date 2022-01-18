@@ -1,7 +1,10 @@
-using System;
 using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
 using API.Entities.Enums;
 using API.Parser;
+using API.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,10 +13,14 @@ namespace API.Tests.Parser
     public class ComicParserTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
+        private readonly DefaultParser _defaultParser;
 
         public ComicParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
+            _defaultParser =
+                new DefaultParser(new DirectoryService(Substitute.For<ILogger<DirectoryService>>(),
+                    new MockFileSystem()));
         }
 
         [Theory]
@@ -61,8 +68,17 @@ namespace API.Tests.Parser
         [InlineData("Demon 012 (Sep 1973) c2c", "Demon")]
         [InlineData("Dragon Age - Until We Sleep 01 (of 03)", "Dragon Age - Until We Sleep")]
         [InlineData("Green Lantern v2 017 - The Spy-Eye that doomed Green Lantern v2", "Green Lantern")]
-        [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire  - Adam Strange")]
-        [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis  - Rags Morales Sketches")]
+        [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire - Adam Strange")]
+        [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis - Rags Morales Sketches")]
+        [InlineData("Daredevil - t6 - 10 - (2019)", "Daredevil")]
+        [InlineData("Batgirl T2000 #57", "Batgirl")]
+        [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
+        [InlineData("Conquistador_-Tome_2", "Conquistador")]
+        [InlineData("Max_l_explorateur-_Tome_0", "Max l explorateur")]
+        [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
+        [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
+        [InlineData("Tintin - T22 Vol 714 pour Sydney", "Tintin")]
+        [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -101,6 +117,15 @@ namespace API.Tests.Parser
         [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
+        // Tome Tests
+        [InlineData("Daredevil - t6 - 10 - (2019)", "6")]
+        [InlineData("Batgirl T2000 #57", "2000")]
+        [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
+        [InlineData("Conquistador_Tome_2", "2")]
+        [InlineData("Max_l_explorateur-_Tome_0", "0")]
+        [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
+        [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
+        [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -144,6 +169,8 @@ namespace API.Tests.Parser
         [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "366")]
         [InlineData("Daredevil - v6 - 10 - (2019)", "10")]
         [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
+        [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
+        [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
@@ -155,76 +182,13 @@ namespace API.Tests.Parser
         [InlineData("Zombie Tramp vs. Vampblade TPB (2016) (Digital) (TheArchivist-Empire)", true)]
         [InlineData("Baldwin the Brave & Other Tales Special SP1.cbr", true)]
         [InlineData("Mouse Guard Specials - Spring 1153 - Fraggle Rock FCBD 2010", true)]
+        [InlineData("Boule et Bill - THS -Bill à disparu", true)]
+        [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
+        [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
+        [InlineData("laughs", false)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
         }
-
-        [Fact]
-        public void ParseInfoTest()
-        {
-            const string rootPath = @"E:/Comics/";
-            var expected = new Dictionary<string, ParserInfo>();
-            var filepath = @"E:/Comics/Teen Titans/Teen Titans v1 Annual 01 (1967) SP01.cbr";
-             expected.Add(filepath, new ParserInfo
-             {
-                 Series = "Teen Titans", Volumes = "0",
-                 Chapters = "0", Filename = "Teen Titans v1 Annual 01 (1967) SP01.cbr", Format = MangaFormat.Archive,
-                 FullFilePath = filepath
-             });
-
-             // Fallback test with bad naming
-             filepath = @"E:\Comics\Comics\Babe\Babe Vol.1 #1-4\Babe 01.cbr";
-             expected.Add(filepath, new ParserInfo
-             {
-                 Series = "Babe", Volumes = "0", Edition = "",
-                 Chapters = "1", Filename = "Babe 01.cbr", Format = MangaFormat.Archive,
-                 FullFilePath = filepath, IsSpecial = false
-             });
-
-             filepath = @"E:\Comics\Comics\Publisher\Batman the Detective (2021)\Batman the Detective - v6 - 11 - (2021).cbr";
-             expected.Add(filepath, new ParserInfo
-             {
-                 Series = "Batman the Detective", Volumes = "6", Edition = "",
-                 Chapters = "11", Filename = "Batman the Detective - v6 - 11 - (2021).cbr", Format = MangaFormat.Archive,
-                 FullFilePath = filepath, IsSpecial = false
-             });
-
-             filepath = @"E:\Comics\Comics\Batman - The Man Who Laughs #1 (2005)\Batman - The Man Who Laughs #1 (2005).cbr";
-             expected.Add(filepath, new ParserInfo
-             {
-                 Series = "Batman - The Man Who Laughs", Volumes = "0", Edition = "",
-                 Chapters = "1", Filename = "Batman - The Man Who Laughs #1 (2005).cbr", Format = MangaFormat.Archive,
-                 FullFilePath = filepath, IsSpecial = false
-             });
-
-            foreach (var file in expected.Keys)
-            {
-                var expectedInfo = expected[file];
-                var actual = API.Parser.Parser.Parse(file, rootPath, LibraryType.Comic);
-                if (expectedInfo == null)
-                {
-                    Assert.Null(actual);
-                    return;
-                }
-                Assert.NotNull(actual);
-                _testOutputHelper.WriteLine($"Validating {file}");
-                Assert.Equal(expectedInfo.Format, actual.Format);
-                _testOutputHelper.WriteLine("Format ✓");
-                Assert.Equal(expectedInfo.Series, actual.Series);
-                _testOutputHelper.WriteLine("Series ✓");
-                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
-                _testOutputHelper.WriteLine("Chapters ✓");
-                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
-                _testOutputHelper.WriteLine("Volumes ✓");
-                Assert.Equal(expectedInfo.Edition, actual.Edition);
-                _testOutputHelper.WriteLine("Edition ✓");
-                Assert.Equal(expectedInfo.Filename, actual.Filename);
-                _testOutputHelper.WriteLine("Filename ✓");
-                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
-                _testOutputHelper.WriteLine("FullFilePath ✓");
-            }
-        }
-
     }
 }

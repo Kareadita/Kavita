@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using API.Interfaces.Services;
+using System.IO.Abstractions;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -14,7 +14,8 @@ namespace API.Tests.Services
 
         public BookServiceTests()
         {
-            _bookService = new BookService(_logger);
+            var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+            _bookService = new BookService(_logger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService));
         }
 
         [Theory]
@@ -26,6 +27,41 @@ namespace API.Tests.Services
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
             Assert.Equal(expectedPages, _bookService.GetNumberOfPages(Path.Join(testDirectory, filePath)));
         }
+
+        [Fact]
+        public void ShouldHaveComicInfo()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
+            var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
+            const string summaryInfo = "Book Description";
+
+            var comicInfo = _bookService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal(summaryInfo, comicInfo.Summary);
+            Assert.Equal("genre1, genre2", comicInfo.Genre);
+        }
+
+        [Fact]
+        public void ShouldHaveComicInfo_WithAuthors()
+        {
+            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB");
+            var archive = Path.Join(testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub");
+
+            var comicInfo = _bookService.GetComicInfo(archive);
+            Assert.NotNull(comicInfo);
+            Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
+        }
+
+
+        #region BookEscaping
+
+        [Fact]
+        public void EscapeCSSImportReferencesTest()
+        {
+
+        }
+
+        #endregion
 
     }
 }

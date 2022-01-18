@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<package xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.idpf.org/2007/opf" version="2.0" unique-identifier="id">
+  <metadata>
+    <dc:rights>Public domain in the USA.</dc:rights>
+    <dc:identifier opf:scheme="URI" id="id">http://www.gutenberg.org/64999</dc:identifier>
+    <dc:creator opf:file-as="Starbuck, Roger">Roger Starbuck</dc:creator>
+    <dc:title>The Golden Harpoon / Lost Among the Floes</dc:title>
+    <dc:language xsi:type="dcterms:RFC4646">en</dc:language>
+    <dc:date opf:event="publication">2021-04-05</dc:date>
+    <dc:date opf:event="conversion">2021-04-05T23:00:07.039989+00:00</dc:date>
+    <dc:source>https://www.gutenberg.org/files/64999/64999-h/64999-h.htm</dc:source>
+    <dc:description>Book Description</dc:description>
+    <dc:subject>Genre1, Genre2</dc:subject>
+    <dc:creator id="creator">Junya Inoue</dc:creator>
+    <meta refines="#creator" property="file-as">Inoue, Junya</meta>
+    <meta refines="#creator" property="role" scheme="marc:relators">aut</meta>
+    <meta name="cover" content="item1"/>
+  </metadata>
+  <manifest>
+    <!--Image: 1000 x 1572 size=145584 -->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@images@cover.jpg" id="item1" media-type="image/jpeg"/>
+    <item href="pgepub.css" id="item2" media-type="text/css"/>
+    <item href="0.css" id="item3" media-type="text/css"/>
+    <item href="1.css" id="item4" media-type="text/css"/>
+    <!--Chunk: size=3477 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-0.htm.html" id="cover" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=3242 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-1.htm.html" id="item5" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=27802 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-2.htm.html" id="item6" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=13387 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-3.htm.html" id="item7" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=25774 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-4.htm.html" id="item8" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=17053 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-5.htm.html" id="item9" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=19590 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-6.htm.html" id="item10" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=16645 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-7.htm.html" id="item11" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=19768 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-8.htm.html" id="item12" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=30397 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-9.htm.html" id="item13" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=41064 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-10.htm.html" id="item14" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=35745 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-11.htm.html" id="item15" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=3277 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-12.htm.html" id="item16" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=5983 Split on div.chapter-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-13.htm.html" id="item17" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=22066-->
+    <item href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-14.htm.html" id="item18" media-type="application/xhtml+xml"/>
+    <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
+    <item href="wrap0000.html" id="coverpage-wrapper" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="coverpage-wrapper" linear="yes"/>
+    <itemref idref="cover" linear="yes"/>
+    <itemref idref="item5" linear="yes"/>
+    <itemref idref="item6" linear="yes"/>
+    <itemref idref="item7" linear="yes"/>
+    <itemref idref="item8" linear="yes"/>
+    <itemref idref="item9" linear="yes"/>
+    <itemref idref="item10" linear="yes"/>
+    <itemref idref="item11" linear="yes"/>
+    <itemref idref="item12" linear="yes"/>
+    <itemref idref="item13" linear="yes"/>
+    <itemref idref="item14" linear="yes"/>
+    <itemref idref="item15" linear="yes"/>
+    <itemref idref="item16" linear="yes"/>
+    <itemref idref="item17" linear="yes"/>
+    <itemref idref="item18" linear="yes"/>
+  </spine>
+  <guide>
+    <reference type="toc" title="CONTENTS" href="@public@vhost@g@gutenberg@html@files@64999@64999-h@64999-h-1.htm.html#pgepubid00001"/>
+    <reference type="cover" title="Cover" href="wrap0000.html"/>
+  </guide>
+</package>

@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using API.Data;
+using API.Entities.Enums;
 using API.Extensions;
-using API.Interfaces;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,11 +14,13 @@ namespace API.Controllers
     public class ImageController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDirectoryService _directoryService;
 
         /// <inheritdoc />
-        public ImageController(IUnitOfWork unitOfWork)
+        public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService)
         {
             _unitOfWork = unitOfWork;
+            _directoryService = directoryService;
         }
 
         /// <summary>
@@ -28,12 +31,12 @@ namespace API.Controllers
         [HttpGet("chapter-cover")]
         public async Task<ActionResult> GetChapterCoverImage(int chapterId)
         {
-            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
         /// <summary>
@@ -44,12 +47,12 @@ namespace API.Controllers
         [HttpGet("volume-cover")]
         public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
         {
-            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
         /// <summary>
@@ -60,12 +63,12 @@ namespace API.Controllers
         [HttpGet("series-cover")]
         public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
         {
-            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
         /// <summary>
@@ -76,12 +79,34 @@ namespace API.Controllers
         [HttpGet("collection-cover")]
         public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
         {
-            var path = Path.Join(DirectoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No cover image");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
             Response.AddCacheHeader(path);
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
+        }
+
+        /// <summary>
+        /// Returns image for a given bookmark page
+        /// </summary>
+        /// <remarks>This request is served unauthenticated, but user must be passed via api key to validate</remarks>
+        /// <param name="chapterId"></param>
+        /// <param name="pageNum">Starts at 0</param>
+        /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
+        /// <returns></returns>
+        [HttpGet("bookmark")]
+        public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
+            if (bookmark == null) return BadRequest("Bookmark does not exist");
+
+            var bookmarkDirectory =
+                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
+            var format = Path.GetExtension(file.FullName).Replace(".", "");
+            return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
         }
     }
 }

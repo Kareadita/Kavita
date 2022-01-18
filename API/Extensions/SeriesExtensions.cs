@@ -9,7 +9,7 @@ namespace API.Extensions
     public static class SeriesExtensions
     {
         /// <summary>
-        /// Checks against all the name variables of the Series if it matches anything in the list.
+        /// Checks against all the name variables of the Series if it matches anything in the list. This does not check against format.
         /// </summary>
         /// <param name="series"></param>
         /// <param name="list"></param>

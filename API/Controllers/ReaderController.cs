@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
+using API.Services;
+using API.Services.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -24,15 +26,21 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
+        private readonly IDirectoryService _directoryService;
+        private readonly ICleanupService _cleanupService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
-            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
+            IReaderService readerService, IDirectoryService directoryService,
+            ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
+            _directoryService = directoryService;
+            _cleanupService = cleanupService;
         }
 
         /// <summary>
@@ -50,7 +58,7 @@ namespace API.Controllers
 
             try
             {
-                var (path, _) = await _cacheService.GetCachedPagePath(chapter, page);
+                var path = _cacheService.GetCachedPagePath(chapter, page);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
@@ -75,6 +83,7 @@ namespace API.Controllers
             if (chapter == null) return BadRequest("Could not find Chapter");
 
             var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
+            if (dto == null) return BadRequest("Please perform a scan on this series or library and try again");
             var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
 
             return Ok(new ChapterInfoDto()
@@ -89,6 +98,7 @@ namespace API.Controllers
                 LibraryId = dto.LibraryId,
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
+                ChapterTitle = dto.ChapterTitle ?? string.Empty
             });
         }
 
@@ -129,15 +139,7 @@ namespace API.Controllers
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
-                foreach (var chapter in volume.Chapters)
-                {
-                    var userProgress = ReaderService.GetUserProgressForChapter(user, chapter);
-
-                    if (userProgress == null) continue;
-                    userProgress.PagesRead = 0;
-                    userProgress.SeriesId = markReadDto.SeriesId;
-                    userProgress.VolumeId = volume.Id;
-                }
+                _readerService.MarkChaptersAsUnread(user, markReadDto.SeriesId, volume.Chapters);
             }
 
             _unitOfWork.UserRepository.Update(user);
@@ -396,6 +398,14 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    try
+                    {
+                        await _cleanupService.CleanupBookmarks();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue cleaning up old bookmarks");
+                    }
                     return Ok();
                 }
             }
@@ -453,6 +463,18 @@ namespace API.Controllers
                 var userBookmark =
                     await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
+                // We need to get the image
+                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+                var fileInfo = new FileInfo(path);
+
+                var bookmarkDirectory =
+                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
+                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
+
+
                if (userBookmark == null)
                {
                    user.Bookmarks ??= new List<AppUserBookmark>();
@@ -462,22 +484,21 @@ namespace API.Controllers
                        VolumeId = bookmarkDto.VolumeId,
                        SeriesId = bookmarkDto.SeriesId,
                        ChapterId = bookmarkDto.ChapterId,
+                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
+
                    });
                    _unitOfWork.UserRepository.Update(user);
                }
 
-
-               if (await _unitOfWork.CommitAsync())
-               {
-                  return Ok();
-               }
+               await _unitOfWork.CommitAsync();
             }
             catch (Exception)
             {
                await _unitOfWork.RollbackAsync();
+               return BadRequest("Could not save bookmark");
             }
 
-            return BadRequest("Could not save bookmark");
+            return Ok();
         }
 
         /// <summary>

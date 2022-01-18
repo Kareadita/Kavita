@@ -3,12 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Errors;
-using API.Interfaces.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
 {
+    public interface IAccountService
+    {
+        Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
+    }
+
     public class AccountService : IAccountService
     {
         private readonly UserManager<AppUser> _userManager;

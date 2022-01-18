@@ -36,6 +36,7 @@
                 <i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>
                 Back
             </button>
+
             <button type="button" class="btn btn-primary float-right" [disabled]="routeStack.peek() === undefined" (click)="shareFolder('', $event)">Share</button>
         </div>
     </ul>
@@ -50,6 +51,6 @@
     </ul>
 </div>
 <div class="modal-footer">
-    <a class="btn btn-info" href="https://wiki.kavitareader.com/en/guides/adding-a-library" target="_blank">Help</a>
+    <a class="btn btn-info" *ngIf="helpUrl.length > 0" href="{{helpUrl}}" target="_blank">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
 </div>

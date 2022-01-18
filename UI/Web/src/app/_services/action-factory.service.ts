@@ -79,7 +79,7 @@ export class ActionFactoryService {
 
         this.seriesActions.push({
           action: Action.RefreshMetadata,
-          title: 'Refresh Metadata',
+          title: 'Refresh Covers',
           callback: this.dummyCallback,
           requiresAdmin: true
         });
@@ -114,7 +114,7 @@ export class ActionFactoryService {
 
         this.libraryActions.push({
           action: Action.RefreshMetadata,
-          title: 'Refresh Metadata',
+          title: 'Refresh Covers',
           callback: this.dummyCallback,
           requiresAdmin: true
         });

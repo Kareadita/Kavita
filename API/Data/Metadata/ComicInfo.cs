@@ -1,51 +1,121 @@
-﻿namespace API.Data.Metadata
+﻿using System;
+using System.Linq;
+using API.Entities.Enums;
+using Kavita.Common.Extensions;
+
+namespace API.Data.Metadata
 {
     /// <summary>
     /// A representation of a ComicInfo.xml file
     /// </summary>
-    /// <remarks>See reference of the loose spec here: https://github.com/Kussie/ComicInfoStandard/blob/main/ComicInfo.xsd</remarks>
+    /// <remarks>See reference of the loose spec here: https://anansi-project.github.io/docs/comicinfo/documentation</remarks>
     public class ComicInfo
     {
-        public string Summary { get; set; }
-        public string Title { get; set; }
-        public string Series { get; set; }
-        public string Number { get; set; }
-        public string Volume { get; set; }
-        public string Notes { get; set; }
-        public string Genre { get; set; }
+        public string Summary { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Series { get; set; } = string.Empty;
+        public string Number { get; set; } = string.Empty;
+        /// <summary>
+        /// The total number of items in the series.
+        /// </summary>
+        public int Count { get; set; } = 0;
+        public string Volume { get; set; } = string.Empty;
+        public string Notes { get; set; } = string.Empty;
+        public string Genre { get; set; } = string.Empty;
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
-        public string LanguageISO { get; set; }
-        public string Web { get; set; }
-        public int Month { get; set; }
-        public int Year { get; set; }
         /// <summary>
-        /// Rating based on the content. Think PG-13, R for movies
+        /// ISO 639-1 Code to represent the language of the content
         /// </summary>
-        public string AgeRating { get; set; }
+        public string LanguageISO { get; set; } = string.Empty;
+        /// <summary>
+        /// This is the link to where the data was scraped from
+        /// </summary>
+        public string Web { get; set; } = string.Empty;
+        public int Day { get; set; } = 0;
+        public int Month { get; set; } = 0;
+        public int Year { get; set; } = 0;
+
+
+        /// <summary>
+        /// Rating based on the content. Think PG-13, R for movies. See <see cref="AgeRating"/> for valid types
+        /// </summary>
+        public string AgeRating { get; set; } = string.Empty;
         /// <summary>
         /// User's rating of the content
         /// </summary>
         public float UserRating { get; set; }
 
-        public string AlternateSeries { get; set; }
-        public string StoryArc { get; set; }
-        public string SeriesGroup { get; set; }
-        public string AlternativeSeries { get; set; }
-        public string AlternativeNumber { get; set; }
+        public string AlternateSeries { get; set; } = string.Empty;
+        public string StoryArc { get; set; } = string.Empty;
+        public string SeriesGroup { get; set; } = string.Empty;
+        public string AlternativeSeries { get; set; } = string.Empty;
+        public string AlternativeNumber { get; set; } = string.Empty;
 
+        /// <summary>
+        /// This is Epub only: calibre:title_sort
+        /// Represents the sort order for the title
+        /// </summary>
+        public string TitleSort { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The translator, can be comma separated. This is part of ComicInfo.xml draft v2.1
+        /// </summary>
+        /// See https://github.com/anansi-project/comicinfo/issues/2 for information about this tag
+        public string Translator { get; set; } = string.Empty;
+        /// <summary>
+        /// Misc tags. This is part of ComicInfo.xml draft v2.1
+        /// </summary>
+        /// See https://github.com/anansi-project/comicinfo/issues/1 for information about this tag
+        public string Tags { get; set; } = string.Empty;
 
         /// <summary>
         /// This is the Author. For Books, we map creator tag in OPF to this field. Comma separated if multiple.
         /// </summary>
-        public string Writer { get; set; } // TODO: Validate if we should make this a list of writers
-        public string Penciller { get; set; }
-        public string Inker { get; set; }
-        public string Colorist { get; set; }
-        public string Letterer { get; set; }
-        public string CoverArtist { get; set; }
-        public string Editor { get; set; }
-        public string Publisher { get; set; }
+        public string Writer { get; set; } = string.Empty;
+        public string Penciller { get; set; } = string.Empty;
+        public string Inker { get; set; } = string.Empty;
+        public string Colorist { get; set; } = string.Empty;
+        public string Letterer { get; set; } = string.Empty;
+        public string CoverArtist { get; set; } = string.Empty;
+        public string Editor { get; set; } = string.Empty;
+        public string Publisher { get; set; } = string.Empty;
+        public string Characters { get; set; } = string.Empty;
+
+        public static AgeRating ConvertAgeRatingToEnum(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return Entities.Enums.AgeRating.Unknown;
+            return Enum.GetValues<AgeRating>()
+                .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
+        }
+
+        public static void CleanComicInfo(ComicInfo info)
+        {
+            if (info == null) return;
+
+            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+            info.Translator = Parser.Parser.CleanAuthor(info.Translator);
+            info.CoverArtist = Parser.Parser.CleanAuthor(info.CoverArtist);
+
+
+            // if (!string.IsNullOrEmpty(info.Web))
+            // {
+            //     // ComicVine stores the Issue number in Number field and does not use Volume.
+            //     if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
+            //     if (info.Volume.Equals("1"))
+            //     {
+            //         info.Volume = Parser.Parser.DefaultVolume;
+            //     }
+            // }
+        }
+
 
     }
 }

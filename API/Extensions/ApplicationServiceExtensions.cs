@@ -1,7 +1,6 @@
-﻿using API.Data;
+﻿using System.IO.Abstractions;
+using API.Data;
 using API.Helpers;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR.Presence;
@@ -36,7 +35,13 @@ namespace API.Extensions
             services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
             services.AddScoped<IDownloadService, DownloadService>();
             services.AddScoped<IReaderService, ReaderService>();
+            services.AddScoped<IReadingItemService, ReadingItemService>();
             services.AddScoped<IAccountService, AccountService>();
+
+
+            services.AddScoped<IFileSystem, FileSystem>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ICacheHelper, CacheHelper>();
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
 
@@ -51,6 +56,7 @@ namespace API.Extensions
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                options.EnableDetailedErrors();
                 options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.LogLevel.Equals("Debug"));
             });
         }

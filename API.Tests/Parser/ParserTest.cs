@@ -1,3 +1,5 @@
+using System.Linq;
+using API.Entities.Enums;
 using Xunit;
 using static API.Parser.Parser;
 
@@ -5,6 +7,14 @@ namespace API.Tests.Parser
 {
     public class ParserTests
     {
+        [Theory]
+        [InlineData("Joe Shmo, Green Blue", "Joe Shmo, Green Blue")]
+        [InlineData("Shmo, Joe",  "Shmo, Joe")]
+        [InlineData("  Joe Shmo  ",  "Joe Shmo")]
+        public void CleanAuthorTest(string input, string expected)
+        {
+            Assert.Equal(expected, CleanAuthor(input));
+        }
 
         [Theory]
         [InlineData("Beastars - SP01", true)]
@@ -40,6 +50,8 @@ namespace API.Tests.Parser
         [InlineData("Hello_I_am_here   ",  false, "Hello I am here")]
         [InlineData("[ReleaseGroup] The Title", false, "The Title")]
         [InlineData("[ReleaseGroup]_The_Title", false, "The Title")]
+        [InlineData("-The Title", false, "The Title")]
+        [InlineData("- The Title", false, "The Title")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
         public void CleanTitleTest(string input, bool isComic, string expected)
@@ -47,20 +59,28 @@ namespace API.Tests.Parser
             Assert.Equal(expected, CleanTitle(input, isComic));
         }
 
+        [Theory]
+        [InlineData("src: url(fonts/AvenirNext-UltraLight.ttf)", true)]
+        [InlineData("src: url(ideal-sans-serif.woff)", true)]
+        [InlineData("src: local(\"Helvetica Neue Bold\")", true)]
+        [InlineData("src: url(\"/fonts/OpenSans-Regular-webfont.woff2\")", true)]
+        [InlineData("src: local(\"/fonts/OpenSans-Regular-webfont.woff2\")", true)]
+        [InlineData("src: url(data:application/x-font-woff", false)]
+        public void FontCssRewriteMatches(string input, bool expectedMatch)
+        {
+            Assert.Equal(expectedMatch, FontSrcUrlRegex.Matches(input).Count > 0);
+        }
 
-        // [Theory]
-        // //[InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "@font-face{font-family:\"PaytoneOne\";src:url(\"PaytoneOne.ttf\")}")]
-        // [InlineData("@font-face{font-family:\"PaytoneOne\";src:url(\"..\\/Fonts\\/PaytoneOne.ttf\")}", "..\\/Fonts\\/PaytoneOne.ttf")]
-        // //[InlineData("@font-face{font-family:'PaytoneOne';src:url('..\\/Fonts\\/PaytoneOne.ttf')}", "@font-face{font-family:'PaytoneOne';src:url('PaytoneOne.ttf')}")]
-        // //[InlineData("@font-face{\r\nfont-family:'PaytoneOne';\r\nsrc:url('..\\/Fonts\\/PaytoneOne.ttf')\r\n}", "@font-face{font-family:'PaytoneOne';src:url('PaytoneOne.ttf')}")]
-        // public void ReplaceStyleUrlTest(string input, string expected)
-        // {
-        //     var replacementStr = "PaytoneOne.ttf";
-        //     // Use Match to validate since replace is weird
-        //     //Assert.Equal(expected, FontSrcUrlRegex.Replace(input, "$1" + replacementStr + "$2" + "$3"));
-        //     var match = FontSrcUrlRegex.Match(input);
-        //     Assert.Equal(!string.IsNullOrEmpty(expected), FontSrcUrlRegex.Match(input).Success);
-        // }
+        [Theory]
+        [InlineData("src: url(fonts/AvenirNext-UltraLight.ttf)", new [] {"src: url(", "fonts/AvenirNext-UltraLight.ttf", ")"})]
+        [InlineData("src: url(ideal-sans-serif.woff)", new [] {"src: url(", "ideal-sans-serif.woff", ")"})]
+        [InlineData("src: local(\"Helvetica Neue Bold\")", new [] {"src: local(\"", "Helvetica Neue Bold", "\")"})]
+        [InlineData("src: url(\"/fonts/OpenSans-Regular-webfont.woff2\")", new [] {"src: url(\"", "/fonts/OpenSans-Regular-webfont.woff2", "\")"})]
+        [InlineData("src: local(\"/fonts/OpenSans-Regular-webfont.woff2\")", new [] {"src: local(\"", "/fonts/OpenSans-Regular-webfont.woff2", "\")"})]
+        public void FontCssCorrectlySeparates(string input, string[] expected)
+        {
+            Assert.Equal(expected, FontSrcUrlRegex.Match(input).Groups.Values.Select(g => g.Value).Where((_, i) => i > 0).ToArray());
+        }
 
 
         [Theory]
@@ -132,28 +152,14 @@ namespace API.Tests.Parser
         [InlineData("test.jpeg", true)]
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
-        [InlineData("!test.jpg", false)]
+        [InlineData("!test.jpg", true)]
         [InlineData("test.webp", true)]
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));
         }
 
-        [Theory]
-        [InlineData("C:/", "C:/Love Hina/Love Hina - Special.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Love Hina/Specials/Ani-Hina Art Collection.cbz", "Love Hina")]
-        [InlineData("C:/", "C:/Mujaki no Rakuen Something/Mujaki no Rakuen Vol12 ch76.cbz", "Mujaki no Rakuen")]
-        public void FallbackTest(string rootDir, string inputPath, string expectedSeries)
-        {
-            var actual = Parse(inputPath, rootDir);
-            if (actual == null)
-            {
-                Assert.NotNull(actual);
-                return;
-            }
 
-            Assert.Equal(expectedSeries, actual.Series);
-        }
 
         [Theory]
         [InlineData("Love Hina - Special.jpg", false)]
@@ -164,6 +170,8 @@ namespace API.Tests.Parser
         [InlineData("cover.jpg", true)]
         [InlineData("cover.png", true)]
         [InlineData("ch1/cover.png", true)]
+        [InlineData("ch1/backcover.png", false)]
+        [InlineData("backcover.png", false)]
         public void IsCoverImageTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, IsCoverImage(inputPath));
@@ -174,9 +182,23 @@ namespace API.Tests.Parser
         [InlineData("TEST/Love Hina - Special.jpg", false)]
         [InlineData("__macosx/Love Hina/", false)]
         [InlineData("MACOSX/Love Hina/", false)]
+        [InlineData("._Love Hina/Love Hina/", true)]
+        [InlineData("@Recently-Snapshot/Love Hina/", true)]
         public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
+        }
+
+        [Theory]
+        [InlineData("/manga/1/1/1", "/manga/1/1/1")]
+        [InlineData("/manga/1/1/1.jpg", "/manga/1/1/1.jpg")]
+        [InlineData(@"/manga/1/1\1.jpg", @"/manga/1/1/1.jpg")]
+        [InlineData("/manga/1/1//1", "/manga/1/1//1")]
+        [InlineData("/manga/1\\1\\1", "/manga/1/1/1")]
+        [InlineData("C:/manga/1\\1\\1.jpg", "C:/manga/1/1/1.jpg")]
+        public void NormalizePathTest(string inputPath, string expected)
+        {
+            Assert.Equal(expected, NormalizePath(inputPath));
         }
     }
 }

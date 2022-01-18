@@ -1,4 +1,4 @@
-@import "../../theme/colors";
+@use "../../theme/colors";
 
 input {
     width: 15px;
@@ -35,16 +35,19 @@ input {
         line-height: inherit !important;
         box-shadow: none !important;
     }
+    input:empty {
+        padding-top: 6px !important;
+    }
 }
 
 ::ng-deep .bg-dark .typeahead-input {
     color: #efefef;
-    background-color: $dark-bg-color;
+    background-color: colors.$dark-bg-color;
 }
 
 // Causes bleedover
 ::ng-deep .bg-dark .dropdown .list-group-item.active {
-    background-color: $dark-hover-color;
+    background-color: colors.$dark-hover-color;
 }
 
 .dropdown {
@@ -62,7 +65,7 @@ input {
     overflow-x: hidden;
 
     .list-group-item {
-        padding: 5px 5px;
+        padding: 5px 10px;
     }
 
 

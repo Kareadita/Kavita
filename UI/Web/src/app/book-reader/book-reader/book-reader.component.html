@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}}">
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
         <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -57,6 +57,17 @@
                         <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
                     </div>
+                    <div class="controls">
+                        <label id="fullscreen">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
+                        <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
+                        <span class="sr-only" id="fullscreen-help">
+                            <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
+                        </span>
+                        <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
+                            <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
+                            <span *ngIf="darkMode">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
+                        </button>
+                    </div>
                     <div class="row no-gutters justify-content-between">
                         <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
                     </div>
@@ -83,7 +94,7 @@
                         </ul>
                     </div>
                     <ng-template #nestedChildren>
-                        <ul *ngFor="let chapterGroup of chapters" style="padding-inline-start: 0px">
+                        <ul *ngFor="let chapterGroup of chapters" class="chapter-title">
                             <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
                                 {{chapterGroup.title}}
                             </li>
@@ -99,13 +110,14 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" [innerHtml]="page" *ngIf="page !== undefined"></div>
+    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" 
+        [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
 
-        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate">
-        </div>
-        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate">
-        </div>
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" 
+            [innerHtml]="page" *ngIf="page !== undefined"></div>
+
+        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
+        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         
         <div *ngIf="page !== undefined && scrollbarNeeded">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>

@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using API.Data.Metadata;
 using API.Entities.Enums;
-using API.Interfaces.Services;
 using API.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -21,21 +17,54 @@ using ExCSS;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace API.Services
 {
+    public interface IBookService
+    {
+        int GetNumberOfPages(string filePath);
+        string GetCoverImage(string fileFilePath, string fileName, string outputDirectory);
+        Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
+
+        /// <summary>
+        /// Scopes styles to .reading-section and replaces img src to the passed apiBase
+        /// </summary>
+        /// <param name="stylesheetHtml"></param>
+        /// <param name="apiBase"></param>
+        /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
+        /// <param name="book">Book Reference, needed for if you expect Import statements</param>
+        /// <returns></returns>
+        Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
+        ComicInfo GetComicInfo(string filePath);
+        ParserInfo ParseInfo(string filePath);
+        /// <summary>
+        /// Extracts a PDF file's pages as images to an target directory
+        /// </summary>
+        /// <param name="fileFilePath"></param>
+        /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
+        void ExtractPdfImages(string fileFilePath, string targetDirectory);
+
+        Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
+    }
+
     public class BookService : IBookService
     {
         private readonly ILogger<BookService> _logger;
+        private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
 
-        public BookService(ILogger<BookService> logger)
+        public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
-
+            _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -141,13 +170,10 @@ namespace API.Services
             }
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
-            var importMatches = Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml);
-            foreach (Match match in importMatches)
-            {
-                if (!match.Success) continue;
-                var importFile = match.Groups["Filename"].Value;
-                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
-            }
+
+            EscapeCSSImportReferences(ref stylesheetHtml, apiBase, prepend);
+
+            EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
 
             // Check if there are any background images and rewrite those urls
             EscapeCssImageReferences(ref stylesheetHtml, apiBase, book);
@@ -174,6 +200,26 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
+        private static void EscapeCSSImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
+        {
+            foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
+        }
+
+        private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
+        {
+            foreach (Match match in Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
+            {
+                if (!match.Success) continue;
+                var importFile = match.Groups["Filename"].Value;
+                stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + prepend + importFile);
+            }
+        }
+
         private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
         {
             var matches = Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
@@ -186,6 +232,139 @@ namespace API.Services
                 if (!book.Content.AllFiles.ContainsKey(key)) continue;
 
                 stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + key);
+            }
+        }
+
+        private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
+        {
+            var images = doc.DocumentNode.SelectNodes("//img");
+            if (images != null)
+            {
+                foreach (var image in images)
+                {
+                    if (image.Name != "img") continue;
+
+                    // Need to do for xlink:href
+                    if (image.Attributes["src"] != null)
+                    {
+                        var imageFile = image.Attributes["src"].Value;
+                        if (!book.Content.Images.ContainsKey(imageFile))
+                        {
+                            // TODO: Refactor the Key code to a method to allow the hacks to be tested
+                            var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                            if (correctedKey != null)
+                            {
+                                imageFile = correctedKey;
+                            } else if (imageFile.StartsWith(".."))
+                            {
+                                // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
+                                correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
+                                if (correctedKey != null)
+                                {
+                                    imageFile = correctedKey;
+                                }
+                            }
+
+
+
+                        }
+
+                        image.Attributes.Remove("src");
+                        image.Attributes.Add("src", $"{apiBase}" + imageFile);
+                    }
+                }
+            }
+
+            images = doc.DocumentNode.SelectNodes("//image");
+            if (images != null)
+            {
+                foreach (var image in images)
+                {
+                    if (image.Name != "image") continue;
+
+                    if (image.Attributes["xlink:href"] != null)
+                    {
+                        var imageFile = image.Attributes["xlink:href"].Value;
+                        if (!book.Content.Images.ContainsKey(imageFile))
+                        {
+                            var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                            if (correctedKey != null)
+                            {
+                                imageFile = correctedKey;
+                            }
+                        }
+
+                        image.Attributes.Remove("xlink:href");
+                        image.Attributes.Add("xlink:href", $"{apiBase}" + imageFile);
+                    }
+                }
+            }
+        }
+
+        private static string PrepareFinalHtml(HtmlDocument doc, HtmlNode body)
+        {
+            // Check if any classes on the html node (some r2l books do this) and move them to body tag for scoping
+            var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
+            if (htmlNode == null || !htmlNode.Attributes.Contains("class")) return body.InnerHtml;
+
+            var bodyClasses = body.Attributes.Contains("class") ? body.Attributes["class"].Value : string.Empty;
+            var classes = htmlNode.Attributes["class"].Value + " " + bodyClasses;
+            body.Attributes.Add("class", $"{classes}");
+            // I actually need the body tag itself for the classes, so i will create a div and put the body stuff there.
+            return $"<div class=\"{body.Attributes["class"].Value}\">{body.InnerHtml}</div>";
+        }
+
+        private static void RewriteAnchors(int page, HtmlDocument doc, Dictionary<string, int> mappings)
+        {
+            var anchors = doc.DocumentNode.SelectNodes("//a");
+            if (anchors != null)
+            {
+                foreach (var anchor in anchors)
+                {
+                    BookService.UpdateLinks(anchor, mappings, page);
+                }
+            }
+        }
+
+        private async Task InlineStyles(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body)
+        {
+            var inlineStyles = doc.DocumentNode.SelectNodes("//style");
+            if (inlineStyles != null)
+            {
+                foreach (var inlineStyle in inlineStyles)
+                {
+                    var styleContent = await ScopeStyles(inlineStyle.InnerHtml, apiBase, "", book);
+                    body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                }
+            }
+
+            var styleNodes = doc.DocumentNode.SelectNodes("/html/head/link");
+            if (styleNodes != null)
+            {
+                foreach (var styleLinks in styleNodes)
+                {
+                    var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
+                    // Some epubs are malformed the key in content.opf might be: content/resources/filelist_0_0.xml but the actual html links to resources/filelist_0_0.xml
+                    // In this case, we will do a search for the key that ends with
+                    if (!book.Content.Css.ContainsKey(key))
+                    {
+                        var correctedKey = book.Content.Css.Keys.SingleOrDefault(s => s.EndsWith(key));
+                        if (correctedKey == null)
+                        {
+                            _logger.LogError("Epub is Malformed, key: {Key} is not matching OPF file", key);
+                            continue;
+                        }
+
+                        key = correctedKey;
+                    }
+
+                    var styleContent = await ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase,
+                        book.Content.Css[key].FileName, book);
+                    if (styleContent != null)
+                    {
+                        body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                    }
+                }
             }
         }
 
@@ -202,10 +381,13 @@ namespace API.Services
                 var info =  new ComicInfo()
                 {
                     Summary = epubBook.Schema.Package.Metadata.Description,
-                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators),
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                    Title = epubBook.Title,
+                    Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
+
                 };
                 // Parse tags not exposed via Library
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -214,6 +396,9 @@ namespace API.Services
                     {
                         case "calibre:rating":
                             info.UserRating = float.Parse(metadataItem.Content);
+                            break;
+                        case "calibre:title_sort":
+                            info.TitleSort = metadataItem.Content;
                             break;
                     }
                 }
@@ -305,8 +490,6 @@ namespace API.Services
            {
                 using var epubBook = EpubReader.OpenBook(filePath);
 
-                // If the epub has the following tags, we can group the books as Volumes
-                // <meta content="5.0" name="calibre:series_index"/>
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
                 // If all three are present, we can take that over dc:title and format as:
@@ -323,6 +506,7 @@ namespace API.Services
                     var series = string.Empty;
                     var specialName = string.Empty;
                     var groupPosition = string.Empty;
+                    var titleSort = string.Empty;
 
 
                     foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -338,6 +522,7 @@ namespace API.Services
                                 break;
                             case "calibre:title_sort":
                                 specialName = metadataItem.Content;
+                                titleSort = metadataItem.Content;
                                 break;
                         }
 
@@ -363,18 +548,26 @@ namespace API.Services
                         {
                             specialName = epubBook.Title;
                         }
-                        return new ParserInfo()
+                        var info = new ParserInfo()
                         {
                             Chapters = Parser.Parser.DefaultChapter,
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
-                            Title = specialName.Trim(),
+                            Title = specialName?.Trim(),
                             FullFilePath = filePath,
                             IsSpecial = false,
                             Series = series.Trim(),
                             Volumes = seriesIndex
                         };
+
+                        // Don't set titleSort if the book belongs to a group
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex))
+                        {
+                            info.SeriesSort = titleSort;
+                        }
+
+                        return info;
                     }
                 }
                 catch (Exception)
@@ -392,7 +585,7 @@ namespace API.Services
                     FullFilePath = filePath,
                     IsSpecial = false,
                     Series = epubBook.Title.Trim(),
-                    Volumes = Parser.Parser.DefaultVolume
+                    Volumes = Parser.Parser.DefaultVolume,
                 };
            }
            catch (Exception ex)
@@ -403,31 +596,46 @@ namespace API.Services
            return null;
         }
 
-        private static void AddBytesToBitmap(Bitmap bmp, byte[] rawBytes)
-        {
-            var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-
-            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, bmp.PixelFormat);
-            var pNative = bmpData.Scan0;
-
-            Marshal.Copy(rawBytes, 0, pNative, rawBytes.Length);
-            bmp.UnlockBits(bmpData);
-        }
-
+        /// <summary>
+        /// Extracts a pdf into images to a target directory. Uses multi-threaded implementation since docnet is slow normally.
+        /// </summary>
+        /// <param name="fileFilePath"></param>
+        /// <param name="targetDirectory"></param>
         public void ExtractPdfImages(string fileFilePath, string targetDirectory)
         {
-            DirectoryService.ExistOrCreate(targetDirectory);
+            _directoryService.ExistOrCreate(targetDirectory);
 
             using var docReader = DocLib.Instance.GetDocReader(fileFilePath, new PageDimensions(1080, 1920));
             var pages = docReader.GetPageCount();
-            using var stream = StreamManager.GetStream("BookService.GetPdfPage");
-            for (var pageNumber = 0; pageNumber < pages; pageNumber++)
+            Parallel.For(0, pages, pageNumber =>
             {
+                using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, pageNumber, stream);
                 using var fileStream = File.Create(Path.Combine(targetDirectory, "Page-" + pageNumber + ".png"));
                 stream.Seek(0, SeekOrigin.Begin);
                 stream.CopyTo(fileStream);
-            }
+            });
+        }
+
+        /// <summary>
+        /// Responsible to scope all the css, links, tags, etc to prepare a self contained html file for the page
+        /// </summary>
+        /// <param name="doc">Html Doc that will be appended to</param>
+        /// <param name="book">Underlying epub</param>
+        /// <param name="apiBase">API Url for file loading to pass through</param>
+        /// <param name="body">Body element from the epub</param>
+        /// <param name="mappings">Epub mappings</param>
+        /// <param name="page">Page number we are loading</param>
+        /// <returns></returns>
+        public async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
+        {
+            await InlineStyles(doc, book, apiBase, body);
+
+            RewriteAnchors(page, doc, mappings);
+
+            ScopeImages(doc, book, apiBase);
+
+            return PrepareFinalHtml(doc, body);
         }
 
         /// <summary>
@@ -436,13 +644,13 @@ namespace API.Services
         /// <param name="fileFilePath"></param>
         /// <param name="fileName">Name of the new file.</param>
         /// <returns></returns>
-        public string GetCoverImage(string fileFilePath, string fileName)
+        public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             if (!IsValidFile(fileFilePath)) return string.Empty;
 
             if (Parser.Parser.IsPdf(fileFilePath))
             {
-                return GetPdfCoverImage(fileFilePath, fileName);
+                return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
             }
 
             using var epubBook = EpubReader.OpenBook(fileFilePath);
@@ -458,7 +666,7 @@ namespace API.Services
                 if (coverImageContent == null) return string.Empty;
                 using var stream = coverImageContent.GetContentStream();
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
             }
             catch (Exception ex)
             {
@@ -469,7 +677,7 @@ namespace API.Services
         }
 
 
-        private string GetPdfCoverImage(string fileFilePath, string fileName)
+        private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {
             try
             {
@@ -479,7 +687,7 @@ namespace API.Services
                 using var stream = StreamManager.GetStream("BookService.GetPdfPage");
                 GetPdfPage(docReader, 0, stream);
 
-                return ImageService.WriteCoverThumbnail(stream, fileName);
+                return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
 
             }
             catch (Exception ex)
@@ -498,15 +706,10 @@ namespace API.Services
             var rawBytes = pageReader.GetImage(new NaiveTransparencyRemover());
             var width = pageReader.GetPageWidth();
             var height = pageReader.GetPageHeight();
-            using var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            AddBytesToBitmap(bmp, rawBytes);
-            // Removes 1px margin on left/right side after bitmap is copied out
-            for (var y = 0; y < bmp.Height; y++)
-            {
-                bmp.SetPixel(bmp.Width - 1, y, bmp.GetPixel(bmp.Width - 2, y));
-            }
+            var image = Image.LoadPixelData<Bgra32>(rawBytes, width, height);
+
             stream.Seek(0, SeekOrigin.Begin);
-            bmp.Save(stream, ImageFormat.Jpeg);
+            image.SaveAsPng(stream);
             stream.Seek(0, SeekOrigin.Begin);
         }
 

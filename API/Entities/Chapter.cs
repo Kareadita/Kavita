@@ -41,6 +41,50 @@ namespace API.Entities
         /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
         /// </summary>
         public string Title { get; set; }
+        /// <summary>
+        /// Age Rating for the issue/chapter
+        /// </summary>
+        public AgeRating AgeRating { get; set; }
+
+        /// <summary>
+        /// Chapter title
+        /// </summary>
+        /// <remarks>This should not be confused with Title which is used for special filenames.</remarks>
+        public string TitleName { get; set; } = string.Empty;
+        /// <summary>
+        /// Date which chapter was released
+        /// </summary>
+        public DateTime ReleaseDate { get; set; }
+        /// <summary>
+        /// Summary for the Chapter/Issue
+        /// </summary>
+        public string Summary { get; set; }
+        /// <summary>
+        /// Language for the Chapter/Issue
+        /// </summary>
+        public string Language { get; set; }
+        /// <summary>
+        /// Total number of issues in the series
+        /// </summary>
+        public int TotalCount { get; set; } = 0;
+        /// <summary>
+        /// Number in the Total Count
+        /// </summary>
+        public int Count { get; set; } = 0;
+
+
+        /// <summary>
+        /// All people attached at a Chapter level. Usually Comics will have different people per issue.
+        /// </summary>
+        public ICollection<Person> People { get; set; } = new List<Person>();
+        /// <summary>
+        /// Genres for the Chapter
+        /// </summary>
+        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
+        public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+
+
 
         // Relationships
         public Volume Volume { get; set; }

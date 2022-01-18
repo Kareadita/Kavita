@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgbCollapseModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { RegisterMemberComponent } from '../register-member/register-member.component';
@@ -16,6 +16,8 @@ import { UpdateNotificationModalComponent } from './update-notification/update-n
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SentenceCasePipe } from './sentence-case.pipe';
+import { PersonBadgeComponent } from './person-badge/person-badge.component';
+import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
 
 @NgModule({
   declarations: [
@@ -31,12 +33,15 @@ import { SentenceCasePipe } from './sentence-case.pipe';
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
     SentenceCasePipe,
+    PersonBadgeComponent,
+    BadgeExpanderComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
     NgbCollapseModule,
+    NgbTooltipModule, // RegisterMemberComponent
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
@@ -52,6 +57,8 @@ import { SentenceCasePipe } from './sentence-case.pipe';
     SeriesFormatComponent,
     TagBadgeComponent,
     CircularLoaderComponent,
+    PersonBadgeComponent,
+    BadgeExpanderComponent
   ],
 })
 export class SharedModule { }

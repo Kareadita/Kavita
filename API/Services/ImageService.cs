@@ -1,21 +1,32 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using API.Comparators;
-using API.Entities;
-using API.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using NetVips;
 
-namespace API.Services
-{
+namespace API.Services;
 
-  public class ImageService : IImageService
-  {
+public interface IImageService
+{
+    void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
+    string GetCoverImage(string path, string fileName, string outputDirectory);
+
+    /// <summary>
+    /// Creates a Thumbnail version of a base64 image
+    /// </summary>
+    /// <param name="encodedImage">base64 encoded image</param>
+    /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
+    string CreateThumbnailFromBase64(string encodedImage, string fileName);
+
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory);
+}
+
+public class ImageService : IImageService
+{
     private readonly ILogger<ImageService> _logger;
+    private readonly IDirectoryService _directoryService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
-    public const string SeriesCoverImageRegex = @"seres\d+";
-    public const string CollectionTagCoverImageRegex = @"tag\d+";
+    public const string SeriesCoverImageRegex = @"series_\d+";
+    public const string CollectionTagCoverImageRegex = @"tag_\d+";
 
 
     /// <summary>
@@ -23,60 +34,40 @@ namespace API.Services
     /// </summary>
     private const int ThumbnailWidth = 320;
 
-    public ImageService(ILogger<ImageService> logger)
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
-      _logger = logger;
+        _logger = logger;
+        _directoryService = directoryService;
     }
 
-    /// <summary>
-    /// Finds the first image in the directory of the first file. Does not check for "cover/folder".ext files to override.
-    /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
-    public string GetCoverFile(MangaFile file)
+    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount)
     {
-      var directory = Path.GetDirectoryName(file.FilePath);
-      if (string.IsNullOrEmpty(directory))
-      {
-        _logger.LogError("Could not find Directory for {File}", file.FilePath);
-        return null;
-      }
-
-      var firstImage = DirectoryService.GetFilesWithExtension(directory, Parser.Parser.ImageFileExtensions)
-        .OrderBy(f => f, new NaturalSortComparer()).FirstOrDefault();
-
-      return firstImage;
+        _directoryService.ExistOrCreate(targetDirectory);
+        if (fileCount == 1)
+        {
+            _directoryService.CopyFileToDirectory(fileFilePath, targetDirectory);
+        }
+        else
+        {
+            _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
+                Parser.Parser.ImageFileExtensions);
+        }
     }
 
-    public string GetCoverImage(string path, string fileName)
+    public string GetCoverImage(string path, string fileName, string outputDirectory)
     {
-      if (string.IsNullOrEmpty(path)) return string.Empty;
+        if (string.IsNullOrEmpty(path)) return string.Empty;
 
-      try
-      {
-          return CreateThumbnail(path,  fileName);
-      }
-      catch (Exception ex)
-      {
-        _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
-      }
-
-      return string.Empty;
-    }
-
-    /// <inheritdoc />
-    public string CreateThumbnail(string path, string fileName)
-    {
         try
         {
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, filename));
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError(e, "Error creating thumbnail from url");
+            _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {ImageFile}. Defaulting to no cover image", path);
         }
 
         return string.Empty;
@@ -89,11 +80,16 @@ namespace API.Services
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public static string WriteCoverThumbnail(Stream stream, string fileName)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + ".png";
-        thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+        _directoryService.ExistOrCreate(outputDirectory);
+        try
+        {
+            _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        } catch (Exception ex) {/* Swallow exception */}
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }
 
@@ -105,7 +101,7 @@ namespace API.Services
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
             var filename = fileName + ".png";
-            thumbnail.WriteToFile(Path.Join(DirectoryService.CoverImageDirectory, fileName + ".png"));
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
             return filename;
         }
         catch (Exception e)
@@ -146,5 +142,4 @@ namespace API.Services
     {
         return $"tag{tagId}";
     }
-  }
 }

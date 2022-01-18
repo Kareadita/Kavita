@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.DTOs.Metadata;
+using API.Entities;
 
 namespace API.DTOs
 {
@@ -50,5 +52,41 @@ namespace API.DTOs
         /// When chapter was created
         /// </summary>
         public DateTime Created { get; init; }
+        /// <summary>
+        /// When the chapter was released.
+        /// </summary>
+        /// <remarks>Metadata field</remarks>
+        public DateTime ReleaseDate { get; init; }
+        /// <summary>
+        /// Title of the Chapter/Issue
+        /// </summary>
+        /// <remarks>Metadata field</remarks>
+        public string TitleName { get; set; }
+        /// <summary>
+        /// Summary for the Chapter/Issue
+        /// </summary>
+        public string Summary { get; set; }
+        /// <summary>
+        /// Language for the Chapter/Issue
+        /// </summary>
+        public string Language { get; set; }
+        /// <summary>
+        /// Number in the TotalCount of issues
+        /// </summary>
+        public int Count { get; set; }
+        /// <summary>
+        /// Total number of issues for the series
+        /// </summary>
+        public int TotalCount { get; set; }
+        public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Colorist { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Letterer { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> CoverArtist { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
+        public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     }
 }

@@ -1,7 +1,5 @@
 <form [formGroup]="typeaheadForm">
     <ng-container *ngIf="settings.multiple" >
-
-
       <div class="typeahead-input" (click)="onInputFocus($event)">
         <div>
           <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
@@ -13,6 +11,7 @@
           <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoadingOptions">
             <span class="sr-only">Loading...</span>
           </div>
+          <!-- TODO: Add a clear all button -->
         </div>
       </div>
       <div class="dropdown" *ngIf="hasFocus">

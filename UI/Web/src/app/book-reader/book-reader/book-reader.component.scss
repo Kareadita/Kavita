@@ -154,18 +154,40 @@ $primary-color: #0062cc;
 }
 
 .reading-section {
-    height: 100vh;
+    max-height: 100vh;
     width: 100%;
+    //overflow: auto;  // This will break progress reporting
+}
+
+.reader-container {
+    outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
+    overflow: auto;
 }
 
 .book-content {
     position: relative;
 }
 
+// A bunch of resets so books render correctly
+::ng-deep .book-content {
+    & a, & :link {
+        color: blue;
+    }
+}
+
 .drawer-body {
     padding-bottom: 20px;
 }
 
+.chapter-title {
+    padding-inline-start: 0px
+}
+
+::ng-deep .scale-width {
+    max-width: 100%;
+    object-fit: contain;
+    object-position: top center;
+}
 
 
 // Click to Paginate styles

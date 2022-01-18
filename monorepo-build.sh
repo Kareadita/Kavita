@@ -77,15 +77,15 @@ fi
 
 #Build for x64
 Build "linux-x64"
-Package "net5.0" "linux-x64"
+Package "net6.0" "linux-x64"
 cd "$dir"
 
 #Build for arm
 Build "linux-arm"
-Package "net5.0" "linux-arm"
+Package "net6.0" "linux-arm"
 cd "$dir"
 
 #Build for arm64
 Build "linux-arm64"
-Package "net5.0" "linux-arm64"
+Package "net6.0" "linux-arm64"
 cd "$dir"

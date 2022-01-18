@@ -1,5 +1,8 @@
 ﻿namespace API.SignalR
 {
+    /// <summary>
+    /// Payload for SignalR messages to Frontend
+    /// </summary>
     public class SignalRMessage
     {
         public object Body { get; set; }

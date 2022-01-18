@@ -4,12 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data;
 using API.DTOs;
 using API.DTOs.Account;
 using API.Entities;
 using API.Extensions;
-using API.Interfaces;
-using API.Interfaces.Services;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
@@ -92,7 +91,7 @@ namespace API.Controllers
                 if (registerDto.IsAdmin)
                 {
                     var firstTimeFlow = !(await _userManager.GetUsersInRoleAsync("Admin")).Any();
-                    if (!firstTimeFlow && !await _unitOfWork.UserRepository.IsUserAdmin(
+                    if (!firstTimeFlow && !await _unitOfWork.UserRepository.IsUserAdminAsync(
                             await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername())))
                     {
                         return BadRequest("You are not permitted to create an admin account");
@@ -167,7 +166,7 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             if (!settings.EnableAuthentication && !isAdmin)
             {

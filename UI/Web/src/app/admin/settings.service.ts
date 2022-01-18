@@ -21,6 +21,10 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings', model);
   }
 
+  resetServerSettings() {
+    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset', {});
+  }
+
   getTaskFrequencies() {
     return this.http.get<string[]>(this.baseUrl + 'settings/task-frequencies');
   }

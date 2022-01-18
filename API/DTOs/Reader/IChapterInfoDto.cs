@@ -13,6 +13,7 @@ namespace API.DTOs.Reader
         public int LibraryId { get; set; }
         public int Pages { get; set; }
         public bool IsSpecial { get; set; }
+        public string ChapterTitle { get; set; }
 
     }
 }

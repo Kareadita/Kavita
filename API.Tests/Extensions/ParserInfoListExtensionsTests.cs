@@ -1,15 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Parser;
+using API.Services;
 using API.Tests.Helpers;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Extensions
 {
     public class ParserInfoListExtensions
     {
+        private readonly DefaultParser _defaultParser;
+        public ParserInfoListExtensions()
+        {
+            _defaultParser =
+                new DefaultParser(new DirectoryService(Substitute.For<ILogger<DirectoryService>>(),
+                    new MockFileSystem()));
+        }
+
         [Theory]
         [InlineData(new[] {"1", "1", "3-5", "5", "8", "0", "0"}, new[] {"1", "3-5", "5", "8", "0"})]
         public void DistinctVolumesTest(string[] volumeNumbers, string[] expectedNumbers)
@@ -17,7 +29,7 @@ namespace API.Tests.Extensions
             var infos = volumeNumbers.Select(n => new ParserInfo() {Volumes = n}).ToList();
             Assert.Equal(expectedNumbers, infos.DistinctVolumes());
         }
-        
+
         [Theory]
         [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
         [InlineData(new[] {@"Cynthia The Mission - c000-006 (v06-07) [Desudesu&Brolen].zip"}, new[] {@"E:\Manga\Cynthia the Mission\Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip"}, true)]
@@ -27,7 +39,7 @@ namespace API.Tests.Extensions
             var infos = new List<ParserInfo>();
             foreach (var filename in inputInfos)
             {
-                infos.Add(API.Parser.Parser.Parse(
+                infos.Add(_defaultParser.Parse(
                     filename,
                     string.Empty));
             }

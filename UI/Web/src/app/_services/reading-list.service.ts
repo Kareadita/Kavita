@@ -75,7 +75,7 @@ export class ReadingListService {
   }
 
   removeRead(readingListId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, { responseType: 'text' as 'json' });
+    return this.httpClient.post<string>(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, {}, { responseType: 'text' as 'json' });
   }
 
   actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {

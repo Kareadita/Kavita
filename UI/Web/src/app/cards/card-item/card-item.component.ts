@@ -8,6 +8,7 @@ import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
@@ -49,7 +50,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input() entity!: Series | Volume | Chapter | CollectionTag;
+  @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark;
   /**
    * If the entity is selected or not. 
    */
@@ -79,12 +80,18 @@ export class CardItemComponent implements OnInit, OnDestroy {
    * Format of the entity (only applies to Series)
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
+  chapterTitle: string = '';
   
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
   isShiftDown: boolean = false;
+
+  get tooltipTitle() {
+    if (this.chapterTitle === '' || this.chapterTitle === null) return this.title;
+    return this.chapterTitle;
+  }
   
 
   get MangaFormat(): typeof MangaFormat {
@@ -111,6 +118,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
       });
     }
     this.format = (this.entity as Series).format;
+
+    if (this.utilityService.isChapter(this.entity)) {
+      this.chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+    } else if (this.utilityService.isVolume(this.entity)) {
+      const vol = this.utilityService.asVolume(this.entity);
+      if (vol.chapters !== undefined && vol.chapters.length > 0) {
+        this.chapterTitle = vol.chapters[0].titleName;
+      }
+    }
   }
 
   ngOnDestroy() {

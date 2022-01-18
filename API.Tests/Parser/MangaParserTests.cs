@@ -167,6 +167,9 @@ namespace API.Tests.Parser
         [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
         [InlineData("[Renzokusei]_Kimi_wa_Midara_na_Boku_no_Joou_Ch5_Final_Chapter", "Kimi wa Midara na Boku no Joou")]
         [InlineData("Battle Royale, v01 (2000) [TokyoPop] [Manga-Sketchbook]", "Battle Royale")]
+        [InlineData("Kaiju No. 8 036 (2021) (Digital)", "Kaiju No. 8")]
+        [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
+        [InlineData("Love Hina - Volume 01 [Scans].pdf", "Love Hina")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -240,6 +243,8 @@ namespace API.Tests.Parser
         [InlineData("Deku_&_Bakugo_-_Rising_v1_c1.1.cbz", "1.1")]
         [InlineData("Chapter 63 - The Promise Made for 520 Cenz.cbr", "63")]
         [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
+        [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
+        [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
@@ -255,6 +260,7 @@ namespace API.Tests.Parser
         [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
         [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
+        [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
         public void ParseEditionTest(string input, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseEdition(input));
@@ -272,6 +278,8 @@ namespace API.Tests.Parser
         [InlineData("Yuki Merry - 4-Komga Anthology", false)]
         [InlineData("Beastars - SP01", false)]
         [InlineData("Beastars SP01", false)]
+        [InlineData("The League of Extraordinary Gentlemen", false)]
+        [InlineData("The League of Extra-ordinary Gentlemen", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
@@ -294,194 +302,6 @@ namespace API.Tests.Parser
         }
 
 
-        [Theory]
-        [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
-        [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
-        [InlineData("/manga/Monster #8/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster #8~0~1")]
-        public void ParseFromFallbackFoldersTest(string inputFile, string expectedParseInfo)
-        {
-          const string rootDirectory = "/manga/";
-          var tokens = expectedParseInfo.Split("~");
-          var actual = new ParserInfo {Chapters = "0", Volumes = "0"};
-          API.Parser.Parser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
-          Assert.Equal(tokens[0], actual.Series);
-          Assert.Equal(tokens[1], actual.Volumes);
-          Assert.Equal(tokens[2], actual.Chapters);
 
-        }
-
-        [Fact]
-        public void ParseInfoTest()
-        {
-            const string rootPath = @"E:/Manga/";
-            var expected = new Dictionary<string, ParserInfo>();
-            var filepath = @"E:/Manga/Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz";
-             expected.Add(filepath, new ParserInfo
-             {
-                 Series = "Mujaki no Rakuen", Volumes = "12",
-                 Chapters = "76", Filename = "Mujaki no Rakuen Vol12 ch76.cbz", Format = MangaFormat.Archive,
-                 FullFilePath = filepath
-             });
-
-             filepath = @"E:/Manga/Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen/Vol 1.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Shimoneta to Iu Gainen ga Sonzai Shinai Taikutsu na Sekai Man-hen", Volumes = "1",
-                Chapters = "0", Filename = "Vol 1.cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Beelzebub\Beelzebub_01_[Noodles].zip";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Beelzebub", Volumes = "0",
-                Chapters = "1", Filename = "Beelzebub_01_[Noodles].zip", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Ichinensei ni Nacchattara\Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Ichinensei ni Nacchattara", Volumes = "1",
-                Chapters = "1", Filename = "Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Tenjo Tenge (Color)\Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Tenjo Tenge", Volumes = "1", Edition = "Full Contact Edition",
-                Chapters = "0", Filename = "Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)\Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Akame ga KILL! ZERO", Volumes = "1", Edition = "",
-                Chapters = "0", Filename = "Akame ga KILL! ZERO v01 (2016) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Dorohedoro\Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Dorohedoro", Volumes = "1", Edition = "",
-                Chapters = "0", Filename = "Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\APOSIMZ\APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "APOSIMZ", Volumes = "0", Edition = "",
-                Chapters = "40", Filename = "APOSIMZ 040 (2020) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Corpse Party Musume\Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Kedouin Makoto - Corpse Party Musume", Volumes = "0", Edition = "",
-                Chapters = "9", Filename = "Kedouin Makoto - Corpse Party Musume, Chapter 09.cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Goblin Slayer\Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Goblin Slayer - Brand New Day", Volumes = "0", Edition = "",
-                Chapters = "6.5", Filename = "Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire).cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath
-            });
-
-            filepath = @"E:\Manga\Summer Time Rendering\Specials\Record 014 (between chapter 083 and ch084) SP11.cbr";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Summer Time Rendering", Volumes = "0", Edition = "",
-                Chapters = "0", Filename = "Record 014 (between chapter 083 and ch084) SP11.cbr", Format = MangaFormat.Archive,
-                FullFilePath = filepath, IsSpecial = true
-            });
-
-            filepath = @"E:\Manga\Seraph of the End\Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-              Series = "Seraph of the End - Vampire Reign", Volumes = "0", Edition = "",
-              Chapters = "93", Filename = "Seraph of the End - Vampire Reign 093 (2020) (Digital) (LuCaZ).cbz", Format = MangaFormat.Archive,
-              FullFilePath = filepath, IsSpecial = false
-            });
-
-            filepath = @"E:\Manga\Kono Subarashii Sekai ni Bakuen wo!\Vol. 00 Ch. 000.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-              Series = "Kono Subarashii Sekai ni Bakuen wo!", Volumes = "0", Edition = "",
-              Chapters = "0", Filename = "Vol. 00 Ch. 000.cbz", Format = MangaFormat.Archive,
-              FullFilePath = filepath, IsSpecial = false
-            });
-
-            filepath = @"E:\Manga\Toukyou Akazukin\Vol. 01 Ch. 001.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-              Series = "Toukyou Akazukin", Volumes = "1", Edition = "",
-              Chapters = "1", Filename = "Vol. 01 Ch. 001.cbz", Format = MangaFormat.Archive,
-              FullFilePath = filepath, IsSpecial = false
-            });
-
-            filepath = @"E:\Manga\Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub";
-            expected.Add(filepath, new ParserInfo
-            {
-              Series = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows", Volumes = "2.5", Edition = "",
-              Chapters = "0", Filename = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", Format = MangaFormat.Epub,
-              FullFilePath = filepath, IsSpecial = false
-            });
-
-            // If an image is cover exclusively, ignore it
-            filepath = @"E:\Manga\Seraph of the End\cover.png";
-            expected.Add(filepath, null);
-
-            filepath = @"E:\Manga\The Beginning After the End\Chapter 001.cbz";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "The Beginning After the End", Volumes = "0", Edition = "",
-                Chapters = "1", Filename = "Chapter 001.cbz", Format = MangaFormat.Archive,
-                FullFilePath = filepath, IsSpecial = false
-            });
-
-            filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
-            expected.Add(filepath, new ParserInfo
-            {
-                Series = "Monster #8", Volumes = "0", Edition = "",
-                Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Archive,
-                FullFilePath = filepath, IsSpecial = false
-            });
-
-
-            foreach (var file in expected.Keys)
-            {
-                var expectedInfo = expected[file];
-                var actual = API.Parser.Parser.Parse(file, rootPath);
-                if (expectedInfo == null)
-                {
-                    Assert.Null(actual);
-                    return;
-                }
-                Assert.NotNull(actual);
-                _testOutputHelper.WriteLine($"Validating {file}");
-                Assert.Equal(expectedInfo.Format, actual.Format);
-                _testOutputHelper.WriteLine("Format ✓");
-                Assert.Equal(expectedInfo.Series, actual.Series);
-                _testOutputHelper.WriteLine("Series ✓");
-                Assert.Equal(expectedInfo.Chapters, actual.Chapters);
-                _testOutputHelper.WriteLine("Chapters ✓");
-                Assert.Equal(expectedInfo.Volumes, actual.Volumes);
-                _testOutputHelper.WriteLine("Volumes ✓");
-                Assert.Equal(expectedInfo.Edition, actual.Edition);
-                _testOutputHelper.WriteLine("Edition ✓");
-                Assert.Equal(expectedInfo.Filename, actual.Filename);
-                _testOutputHelper.WriteLine("Filename ✓");
-                Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
-                _testOutputHelper.WriteLine("FullFilePath ✓");
-            }
-        }
     }
 }

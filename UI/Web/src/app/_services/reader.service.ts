@@ -193,4 +193,34 @@ export class ReaderService {
     }
     return params;
   }
+
+  enterFullscreen(el: Element, callback?: VoidFunction) {
+    if (!document.fullscreenElement) { 
+      if (el.requestFullscreen) {
+        el.requestFullscreen().then(() => {
+          if (callback) {
+            callback();
+          }
+        });
+      }
+    }
+  }
+
+  exitFullscreen(callback?: VoidFunction) {
+    if (document.exitFullscreen && this.checkFullscreenMode()) {
+      document.exitFullscreen().then(() => {
+        if (callback) {
+          callback();
+        }
+      });
+    }
+  }
+
+  /**
+   * 
+   * @returns If document is in fullscreen mode
+   */
+  checkFullscreenMode() {
+    return document.fullscreenElement != null;
+  }
 }

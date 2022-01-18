@@ -4,13 +4,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterItem, mangaFormatFilters, SeriesFilter } from '../_models/series-filter';
+import { SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
@@ -30,11 +30,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   loadingSeries = false;
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
-  filters: Array<FilterItem> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    mangaFormat: null
-  };
+  filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
+  filterSettings: FilterSettings = new FilterSettings();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -75,12 +73,14 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
+    private utilityService: UtilityService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
       return;
     }
+
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
@@ -89,7 +89,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    this.loadPage();
+    
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+    this.filterSettings.presets.libraries = [this.libraryId];
+    
+    //this.loadPage();
   }
 
   ngOnInit(): void {
@@ -134,8 +138,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+  updateFilter(data: SeriesFilter) {
+    this.filter = data;
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
@@ -151,7 +155,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
     this.loadingSeries = true;
 
-    this.seriesService.getSeriesForLibrary(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
+    if (this.filter == undefined) {
+      this.filter = this.seriesService.createSeriesFilter();
+      this.filter.libraries.push(this.libraryId);
+    }
+
+    this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;
@@ -160,7 +170,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + 'page=' + this.pagination.currentPage);
     this.loadPage();
   }
 

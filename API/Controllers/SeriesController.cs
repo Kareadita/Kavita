@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Metadata;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Interfaces;
+using API.Services;
 using API.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -80,6 +83,8 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
@@ -89,6 +94,8 @@ namespace API.Controllers
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId));
             }
             return Ok(result);
         }
@@ -151,7 +158,7 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-            var userRating = await _unitOfWork.UserRepository.GetUserRating(updateSeriesRatingDto.SeriesId, user.Id) ??
+            var userRating = await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
                              new AppUserRating();
 
             userRating.Rating = updateSeriesRatingDto.UserRating;
@@ -187,7 +194,7 @@ namespace API.Controllers
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
             series.SortName = updateSeries.SortName?.Trim();
-            series.Summary = updateSeries.Summary?.Trim();
+            series.Metadata.Summary = updateSeries.Summary?.Trim();
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset
@@ -219,6 +226,23 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var series =
                 await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
+
+            // Apply progress/rating information (I can't work out how to do this in initial query)
+            if (series == null) return BadRequest("Could not get series");
+
+            await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+            Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+            return Ok(series);
+        }
+
+        [HttpPost("all")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
             // Apply progress/rating information (I can't work out how to do this in initial query)
             if (series == null) return BadRequest("Could not get series");
@@ -294,6 +318,7 @@ namespace API.Controllers
                 else
                 {
                     series.Metadata.CollectionTags ??= new List<CollectionTag>();
+                    // TODO: Move this merging logic into a reusable code as it can be used for any Tag
                     var newTags = new List<CollectionTag>();
 
                     // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
@@ -313,7 +338,7 @@ namespace API.Controllers
                         var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
                         if (existingTag != null)
                         {
-                            if (!series.Metadata.CollectionTags.Any(t => t.Title == tag.Title))
+                            if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
                             {
                                 newTags.Add(existingTag);
                             }
@@ -392,6 +417,12 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
         }
 
+        [HttpGet("age-rating")]
+        public ActionResult<string> GetAgeRating(int ageRating)
+        {
+            var val = (AgeRating) ageRating;
 
+            return Ok(val.ToDescription());
+        }
     }
 }

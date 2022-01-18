@@ -160,6 +160,9 @@ export class CardDetailsModalComponent implements OnInit {
       case(Action.MarkAsUnread):
         this.markChapterAsUnread(chapter);
         break;
+        case(Action.AddToReadingList):
+        this.actionService.addChapterToReadingList(chapter, this.seriesId);
+        break;
       default:
         break;
     }

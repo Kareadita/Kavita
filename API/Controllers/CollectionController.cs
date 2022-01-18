@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.DTOs;
 using API.DTOs.CollectionTags;
-using API.Entities;
+using API.Entities.Metadata;
 using API.Extensions;
-using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,7 +32,7 @@ namespace API.Controllers
         public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             if (isAdmin)
             {
                 return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();

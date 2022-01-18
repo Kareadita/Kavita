@@ -9,6 +9,8 @@ import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { AllSeriesComponent } from './all-series/all-series.component';
+import { AdminGuard } from './_guards/admin.guard';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -16,18 +18,22 @@ const routes: Routes = [
   {path: '', component: UserLoginComponent},
   {
     path: 'admin',
+    canActivate: [AdminGuard],
     loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: 'collections',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./collections/collections.module').then(m => m.CollectionsModule)
   },
   {
     path: 'preferences',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./user-settings/user-settings.module').then(m => m.UserSettingsModule)
   },
   {
     path: 'lists',
+    canActivate: [AuthGuard],
     loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
   },
   {
@@ -55,6 +61,8 @@ const routes: Routes = [
       {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
       {path: 'on-deck', component: OnDeckComponent},
+      {path: 'all-series', component: AllSeriesComponent},
+
     ]
   },
   {path: 'login', component: UserLoginComponent},

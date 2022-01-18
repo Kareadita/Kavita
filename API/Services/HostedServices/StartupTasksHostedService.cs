@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using API.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -21,7 +20,7 @@ namespace API.Services.HostedServices
             using var scope = _provider.CreateScope();
 
             var taskScheduler = scope.ServiceProvider.GetRequiredService<ITaskScheduler>();
-            taskScheduler.ScheduleTasks();
+            await taskScheduler.ScheduleTasks();
             taskScheduler.ScheduleUpdaterTasks();
 
             try

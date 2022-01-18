@@ -10,7 +10,6 @@ using API.Archive;
 using API.Comparators;
 using API.Data.Metadata;
 using API.Extensions;
-using API.Interfaces.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -19,6 +18,19 @@ using SharpCompress.Common;
 
 namespace API.Services
 {
+    public interface IArchiveService
+    {
+        void ExtractArchive(string archivePath, string extractPath);
+        int GetNumberOfPagesFromArchive(string archivePath);
+        string GetCoverImage(string archivePath, string fileName, string outputDirectory);
+        bool IsValidArchive(string archivePath);
+        ComicInfo GetComicInfo(string archivePath);
+        ArchiveLibrary CanOpen(string archivePath);
+        bool ArchiveNeedsFlattening(ZipArchive archive);
+        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+        string FindCoverImageFilename(string archivePath, IList<string> entryNames);
+    }
+
     /// <summary>
     /// Responsible for manipulating Archive files. Used by <see cref="CacheService"/> and <see cref="ScannerService"/>
     /// </summary>
@@ -27,12 +39,14 @@ namespace API.Services
     {
         private readonly ILogger<ArchiveService> _logger;
         private readonly IDirectoryService _directoryService;
+        private readonly IImageService _imageService;
         private const string ComicInfoFilename = "comicinfo";
 
-        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService)
+        public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
         {
             _logger = logger;
             _directoryService = directoryService;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -42,7 +56,10 @@ namespace API.Services
         /// <returns></returns>
         public virtual ArchiveLibrary CanOpen(string archivePath)
         {
-            if (!(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
+            if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
+
+            var ext = _directoryService.FileSystem.Path.GetExtension(archivePath).ToUpper();
+            if (ext.Equals(".CBR") || ext.Equals(".RAR")) return ArchiveLibrary.SharpCompress;
 
             try
             {
@@ -108,46 +125,47 @@ namespace API.Services
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public string FindFolderEntry(IEnumerable<string> entryFullNames)
+        public static string FindFolderEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames
-                .FirstOrDefault(x => !Path.EndsInDirectorySeparator(x) && !Parser.Parser.HasBlacklistedFolderInPath(x)
-                       && Parser.Parser.IsCoverImage(x)
-                       && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith));
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .FirstOrDefault(Parser.Parser.IsCoverImage);
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
 
         /// <summary>
-        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="NaturalSortComparer"/> for ordering files
+        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="OrderByNatural"/> for ordering files
         /// </summary>
         /// <param name="entryFullNames"></param>
         /// <returns>Entry name of match, null if no match</returns>
-        public static string FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
+        public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
             // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
             // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
-            var fullNames = entryFullNames.Where(x =>!Parser.Parser.HasBlacklistedFolderInPath(x)
-                                                     && Parser.Parser.IsImage(x)
-                                                     && !x.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)).ToList();
+            var fullNames = entryFullNames
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)) && Parser.Parser.IsImage(path))
+                .ToList();
             if (fullNames.Count == 0) return null;
 
             var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
-                .OrderBy(Path.GetFullPath, new NaturalSortComparer())
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
                 .FirstOrDefault();
 
             if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
 
             // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
             // Get first folder, then sort within that
-            var firstDirectoryFile = fullNames.OrderBy(Path.GetDirectoryName, new NaturalSortComparer()).FirstOrDefault();
+            var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName).FirstOrDefault();
             if (!string.IsNullOrEmpty(firstDirectoryFile))
             {
                 var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
                 if (!string.IsNullOrEmpty(firstDirectory))
                 {
                     var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
-                        .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                        .OrderByNatural(Path.GetFileNameWithoutExtension)
                         .FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
@@ -155,7 +173,7 @@ namespace API.Services
             }
 
             var result = fullNames
-                .OrderBy(Path.GetFileName, new NaturalSortComparer())
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;
@@ -173,7 +191,7 @@ namespace API.Services
         /// <param name="archivePath"></param>
         /// <param name="fileName">File name to use based on context of entity.</param>
         /// <returns></returns>
-        public string GetCoverImage(string archivePath, string fileName)
+        public string GetCoverImage(string archivePath, string fileName, string outputDirectory)
         {
             if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
             try
@@ -184,25 +202,24 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entryNames = archive.Entries.Select(e => e.FullName).ToArray();
+                        var entryNames = archive.Entries.Select(e => e.FullName).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
-                        using var stream = entry.Open();
 
-                        return CreateThumbnail(archivePath + " - " + entry.FullName, stream, fileName);
+                        using var stream = entry.Open();
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         using var archive = ArchiveFactory.Open(archivePath);
                         var entryNames = archive.Entries.Where(archiveEntry => !archiveEntry.IsDirectory).Select(e => e.Key).ToList();
 
-                        var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+                        var entryName = FindCoverImageFilename(archivePath, entryNames);
                         var entry = archive.Entries.Single(e => e.Key == entryName);
 
                         using var stream = entry.OpenEntryStream();
-
-                        return CreateThumbnail(archivePath + " - " + entry.Key, stream, fileName);
+                        return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -221,6 +238,18 @@ namespace API.Services
         }
 
         /// <summary>
+        /// Given a list of image paths (assume within an archive), find the filename that corresponds to the cover
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <param name="entryNames"></param>
+        /// <returns></returns>
+        public string FindCoverImageFilename(string archivePath, IList<string> entryNames)
+        {
+            var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
+            return entryName;
+        }
+
+        /// <summary>
         /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
         /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
         /// </summary>
@@ -235,18 +264,25 @@ namespace API.Services
         }
 
         // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns></returns>
+        /// <exception cref="KavitaException"></exception>
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
-            var tempLocation = Path.Join(DirectoryService.TempDirectory, $"{tempFolder}_{dateString}");
-            DirectoryService.ExistOrCreate(tempLocation);
+            var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+            _directoryService.ExistOrCreate(tempLocation);
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
             }
 
-            var zipPath = Path.Join(DirectoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
+            var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
             try
             {
                 ZipFile.CreateFromDirectory(tempLocation, zipPath);
@@ -260,25 +296,12 @@ namespace API.Services
 
             var fileBytes = await _directoryService.ReadFileAsync(zipPath);
 
-            DirectoryService.ClearAndDeleteDirectory(tempLocation);
+            _directoryService.ClearAndDeleteDirectory(tempLocation); // NOTE: For sending back just zip, just schedule this to be called after the file is returned or let next temp storage cleanup take care of it
             (new FileInfo(zipPath)).Delete();
 
             return Tuple.Create(fileBytes, zipPath);
         }
 
-        private string CreateThumbnail(string entryName, Stream stream, string fileName)
-        {
-            try
-            {
-                return ImageService.WriteCoverThumbnail(stream, fileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[GetCoverImage] There was an error and prevented thumbnail generation on {EntryName}. Defaulting to no cover image", entryName);
-            }
-
-            return string.Empty;
-        }
 
         /// <summary>
         /// Test if the archive path exists and an archive
@@ -322,7 +345,12 @@ namespace API.Services
             return null;
         }
 
-        public ComicInfo GetComicInfo(string archivePath)
+        /// <summary>
+        /// This can be null if nothing is found or any errors occur during access
+        /// </summary>
+        /// <param name="archivePath"></param>
+        /// <returns></returns>
+        public ComicInfo? GetComicInfo(string archivePath)
         {
             if (!IsValidArchive(archivePath)) return null;
 
@@ -336,7 +364,7 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entry = archive.Entries.SingleOrDefault(x =>
+                        var entry = archive.Entries.FirstOrDefault(x =>
                             !Parser.Parser.HasBlacklistedFolderInPath(x.FullName)
                             && Path.GetFileNameWithoutExtension(x.Name)?.ToLower() == ComicInfoFilename
                             && !Path.GetFileNameWithoutExtension(x.Name)
@@ -346,7 +374,9 @@ namespace API.Services
                         {
                             using var stream = entry.Open();
                             var serializer = new XmlSerializer(typeof(ComicInfo));
-                            return (ComicInfo) serializer.Deserialize(stream);
+                            var info = (ComicInfo) serializer.Deserialize(stream);
+                            ComicInfo.CleanComicInfo(info);
+                            return info;
                         }
 
                         break;
@@ -354,7 +384,7 @@ namespace API.Services
                     case ArchiveLibrary.SharpCompress:
                     {
                         using var archive = ArchiveFactory.Open(archivePath);
-                        return FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
+                        var info = FindComicInfoXml(archive.Entries.Where(entry => !entry.IsDirectory
                                                                                && !Parser.Parser
                                                                                    .HasBlacklistedFolderInPath(
                                                                                        Path.GetDirectoryName(
@@ -365,6 +395,9 @@ namespace API.Services
                                                                                        .Parser
                                                                                        .MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
+                        ComicInfo.CleanComicInfo(info);
+
+                        return info;
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetComicInfo] This archive cannot be read: {ArchivePath}", archivePath);
@@ -385,9 +418,9 @@ namespace API.Services
         }
 
 
-        private static void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
+        private void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
         {
-            DirectoryService.ExistOrCreate(extractPath);
+            _directoryService.ExistOrCreate(extractPath);
             foreach (var entry in entries)
             {
                 entry.WriteToDirectory(extractPath, new ExtractionOptions()
@@ -400,7 +433,7 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // NOTE: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user
+            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user (throw exception, let middleware inform user)
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
@@ -408,7 +441,7 @@ namespace API.Services
             if (!needsFlattening) return;
 
             _logger.LogDebug("Extracted archive is nested in root folder, flattening...");
-            new DirectoryInfo(extractPath).Flatten();
+            _directoryService.Flatten(extractPath);
         }
 
         /// <summary>
@@ -447,10 +480,10 @@ namespace API.Services
                         break;
                     }
                     case ArchiveLibrary.NotSupported:
-                        _logger.LogWarning("[ExtractArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] This archive cannot be read: {ArchivePath}", archivePath);
                         return;
                     default:
-                        _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+                        _logger.LogWarning("[ExtractArchive] There was an exception when reading archive stream: {ArchivePath}", archivePath);
                         return;
                 }
 

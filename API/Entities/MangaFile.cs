@@ -23,24 +23,17 @@ namespace API.Entities
         /// <summary>
         /// Last time underlying file was modified
         /// </summary>
+        /// <remarks>This gets updated anytime the file is scanned</remarks>
         public DateTime LastModified { get; set; }
+
 
         // Relationship Mapping
         public Chapter Chapter { get; set; }
         public int ChapterId { get; set; }
 
-        // Methods
-        /// <summary>
-        /// If the File on disk's last modified time is after what is stored in MangaFile
-        /// </summary>
-        /// <returns></returns>
-        public bool HasFileBeenModified()
-        {
-            return File.GetLastWriteTime(FilePath) > LastModified;
-        }
 
         /// <summary>
-        /// Updates the Last Modified time of the underlying file
+        /// Updates the Last Modified time of the underlying file to the LastWriteTime
         /// </summary>
         public void UpdateLastModified()
         {

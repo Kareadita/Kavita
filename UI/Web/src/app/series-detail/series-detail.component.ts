@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
@@ -15,6 +15,7 @@ import { DownloadService } from '../shared/_services/download.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
@@ -62,7 +63,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   activeTabId = 2;
   hasNonSpecialVolumeChapters = true;
 
-  seriesSummary: string = '';
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -147,7 +147,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
-              private ratingConfig: NgbRatingConfig, private router: Router,
+              private router: Router, public bulkSelectionService: BulkSelectionService,
               private modalService: NgbModal, public readerService: ReaderService,
               public utilityService: UtilityService, private toastr: ToastrService,
               private accountService: AccountService, public imageService: ImageService,
@@ -155,8 +155,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService, 
-              public bulkSelectionService: BulkSelectionService) {
-    ratingConfig.max = 5;
+              ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -188,16 +187,21 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.toastr.info('This series no longer exists');
           this.router.navigateByUrl('/libraries');
         }
+      } else if (event.event === EVENTS.RefreshMetadata) {
+        const seriesRemovedEvent = event.payload as RefreshMetadataEvent;
+        if (seriesRemovedEvent.seriesId === this.series.id) {
+          this.seriesService.getMetadata(this.series.id).pipe(take(1)).subscribe(metadata => {
+            this.seriesMetadata = metadata;
+            this.createHTML();
+          })
+        }
       }
     });
 
     const seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
-      this.libraryType = type;
-      this.loadSeries(seriesId);
-    });
+    this.loadSeries(seriesId);
   }
 
   ngOnDestroy() {
@@ -248,6 +252,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
+        break;
+      case(Action.AddToCollection):
+        this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
         break;
       default:
         break;
@@ -302,17 +309,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
   async deleteSeries(series: Series) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+    this.actionService.deleteSeries(series, (result: boolean) => {
       this.actionInProgress = false;
-      return;
-    }
-
-    this.seriesService.delete(series.id).subscribe((res: boolean) => {
-      if (res) {
-        this.toastr.success('Series deleted');
+      if (result) {
         this.router.navigate(['library', this.libraryId]);
       }
-      this.actionInProgress = false;
     });
   }
 
@@ -334,11 +335,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
-      this.seriesMetadata = metadata;
-    });
-    this.seriesService.getSeries(seriesId).subscribe(series => {
-      this.series = series;
+
+    forkJoin([
+      this.libraryService.getLibraryType(this.libraryId),
+      this.seriesService.getMetadata(seriesId),
+      this.seriesService.getSeries(seriesId)
+    ]).subscribe(results => {
+      this.libraryType = results[0];
+      this.seriesMetadata = results[1];
+      this.series = results[2];
+
       this.createHTML();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
@@ -387,7 +393,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   createHTML() {
-    this.seriesSummary = (this.series.summary === null ? '' : this.series.summary).replace(/\n/g, '<br>');
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 
@@ -571,5 +576,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.downloadInProgress = false;
         })).subscribe(() => {/* No Operation */});;
     });
+  }
+
+  formatChapterTitle(chapter: Chapter) {
+    return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
+  }
+
+  formatVolumeTitle(volume: Volume) {
+    return 'Volume ' + volume.name;
   }
 }

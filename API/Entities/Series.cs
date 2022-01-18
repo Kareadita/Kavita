@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Metadata;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
@@ -30,10 +31,6 @@ namespace API.Entities
         /// Original Name on disk. Not exposed to UI.
         /// </summary>
         public string OriginalName { get; set; }
-        /// <summary>
-        /// Summary information related to the Series
-        /// </summary>
-        public string Summary { get; set; } // NOTE: Migrate into SeriesMetdata (with Metadata update)
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         /// <summary>
@@ -56,6 +53,8 @@ namespace API.Entities
         public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
         public SeriesMetadata Metadata { get; set; }
+        public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
+        public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();
 
         // Relationships
         public List<Volume> Volumes { get; set; }

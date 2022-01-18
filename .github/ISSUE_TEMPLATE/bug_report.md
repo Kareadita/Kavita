@@ -9,7 +9,7 @@ assignees: ''
 
 **If this is a feature request, request [here](https://feats.kavitareader.com/) instead. Feature requests will be deleted from Github.**
 
-
+Please put as much information as possible to help me understand your issue. OS, browser, version are very important!
 
 **Describe the bug**
 A clear and concise description of what the bug is.

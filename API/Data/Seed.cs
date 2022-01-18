@@ -8,6 +8,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,11 @@ namespace API.Data
 {
     public static class Seed
     {
+        /// <summary>
+        /// Generated on Startup. Seed.SeedSettings must run before
+        /// </summary>
+        public static IList<ServerSetting> DefaultSettings;
+
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
             var roles = typeof(PolicyConstants)
@@ -35,16 +41,16 @@ namespace API.Data
             }
         }
 
-        public static async Task SeedSettings(DataContext context)
+        public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)
         {
             await context.Database.EnsureCreatedAsync();
 
-            IList<ServerSetting> defaultSettings = new List<ServerSetting>()
+            DefaultSettings = new List<ServerSetting>()
             {
-                new () {Key = ServerSettingKey.CacheDirectory, Value = DirectoryService.CacheDirectory},
+                new () {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
                 new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
-                new () {Key = ServerSettingKey.TaskBackup, Value = "weekly"},
+                new () {Key = ServerSettingKey.TaskBackup, Value = "daily"},
                 new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)},
                 new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
                 new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
@@ -52,9 +58,11 @@ namespace API.Data
                 new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
                 new () {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
+                new () {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
+                new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
             };
 
-            foreach (var defaultSetting in defaultSettings)
+            foreach (var defaultSetting in DefaultSettings)
             {
                 var existing = context.ServerSetting.FirstOrDefault(s => s.Key == defaultSetting.Key);
                 if (existing == null)
@@ -71,7 +79,7 @@ namespace API.Data
             context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
                 Configuration.LogLevel + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
-                DirectoryService.CacheDirectory + string.Empty;
+                directoryService.CacheDirectory + string.Empty;
             context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
                 DirectoryService.BackupDirectory + string.Empty;
 

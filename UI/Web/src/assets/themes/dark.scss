@@ -16,6 +16,10 @@
     }
   }
 
+  hr {
+    background-color: colors.$dark-form-border;
+  }
+
   a.btn {
     color: white;
   }

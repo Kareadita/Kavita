@@ -14,6 +14,20 @@ $dark-form-border: rgba(239, 239, 239, 0.125);
 $dark-form-readonly: #434648;
 $dark-item-accent-bg: #292d32;
 
+
+//=========================
+//     Ratings
+//=========================
+$rating-filled: $primary-color;
+$rating-empty: #b0c4de;
+
+//=========================
+//    Drawers
+//=========================
+// :root {
+//   --drawer-background-color: #FFF;
+// }
+
 $theme-colors: (
   "primary": $primary-color,
   "danger": $error-color 

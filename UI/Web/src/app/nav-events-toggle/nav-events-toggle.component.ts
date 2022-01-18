@@ -1,6 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { User } from '../_models/user';
 import { LibraryService } from '../_services/library.service';
@@ -15,6 +17,8 @@ interface ProcessedEvent {
 }
 
 type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
+
+const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress];
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -33,7 +37,11 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
   progressEvents$ = this.progressEventsSource.asObservable();
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService) { }
+  updateAvailable: boolean = false;
+  updateBody: any;
+  private updateNotificationModalRef: NgbModalRef | null = null;
+
+  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal) { }
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -43,8 +51,11 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (event.event === EVENTS.ScanLibraryProgress || event.event === EVENTS.RefreshMetadataProgress || event.event === EVENTS.BackupDatabaseProgress  || event.event === EVENTS.CleanupProgress) {
+      if (acceptedEvents.includes(event.event)) {
         this.processProgressEvent(event, event.event);
+      } else if (event.event === EVENTS.UpdateAvailable) {
+        this.updateAvailable = true;
+        this.updateBody = event.payload;
       }
     });
   }
@@ -64,7 +75,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
       if (scanEvent.progress !== 1) {
         const libraryName = names[scanEvent.libraryId] || '';
-        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName};
+        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName, rawBody: event.payload};
         data.push(newEvent);
       }
 
@@ -73,16 +84,29 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     });
   }
 
+  handleUpdateAvailableClick() {
+    if (this.updateNotificationModalRef != null) { return; }
+    this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
+    this.updateNotificationModalRef.componentInstance.updateData = this.updateBody;
+    this.updateNotificationModalRef.closed.subscribe(() => {
+      this.updateNotificationModalRef = null;
+    });
+    this.updateNotificationModalRef.dismissed.subscribe(() => {
+      this.updateNotificationModalRef = null;
+    });
+  }
+
   prettyPrintProgress(progress: number) {
     return Math.trunc(progress * 100);
   }
 
-  prettyPrintEvent(eventType: string) {
+  prettyPrintEvent(eventType: string, event: any) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
+      case (EVENTS.RefreshMetadataProgress): return 'Refreshing Covers for ';
       case (EVENTS.CleanupProgress): return 'Clearing Cache';
       case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
+      case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;
       default: return eventType;
     }
   }

@@ -3,13 +3,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
-using API.Interfaces;
-using API.Interfaces.Services;
+using API.Entities.Metadata;
+using API.Helpers;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks;
@@ -27,55 +28,38 @@ using Xunit;
 
 namespace API.Tests.Services
 {
-    public class ScannerServiceTests : IDisposable
+    public class ScannerServiceTests
     {
-        private readonly ScannerService _scannerService;
-        private readonly ILogger<ScannerService> _logger = Substitute.For<ILogger<ScannerService>>();
-        private readonly IArchiveService _archiveService = Substitute.For<IArchiveService>();
-        private readonly IBookService _bookService = Substitute.For<IBookService>();
-        private readonly IImageService _imageService = Substitute.For<IImageService>();
-        private readonly ILogger<MetadataService> _metadataLogger = Substitute.For<ILogger<MetadataService>>();
-        private readonly ICacheService _cacheService = Substitute.For<ICacheService>();
-        private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
-
-        private readonly DbConnection _connection;
-        private readonly DataContext _context;
-
-
-        public ScannerServiceTests()
+        [Fact]
+        public void FindSeriesNotOnDisk_Should_Remove1()
         {
-            var contextOptions = new DbContextOptionsBuilder()
-                .UseSqlite(CreateInMemoryDatabase())
-                .Options;
-            _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
+            var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
 
-            _context = new DataContext(contextOptions);
-            Task.Run(SeedDb).GetAwaiter().GetResult();
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
+            //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
 
-            IUnitOfWork unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
-
-
-            IMetadataService metadataService = Substitute.For<MetadataService>(unitOfWork, _metadataLogger, _archiveService, _bookService, _imageService, _messageHub);
-            _scannerService = new ScannerService(unitOfWork, _logger, _archiveService, metadataService, _bookService, _cacheService, _messageHub);
-        }
-
-        private async Task<bool> SeedDb()
-        {
-            await _context.Database.MigrateAsync();
-            await Seed.SeedSettings(_context);
-
-            _context.Library.Add(new Library()
+            var existingSeries = new List<Series>
             {
-                Name = "Manga",
-                Folders = new List<FolderPath>()
+                new Series()
                 {
-                    new FolderPath()
+                    Name = "Darker Than Black",
+                    LocalizedName = "Darker Than Black",
+                    OriginalName = "Darker Than Black",
+                    Volumes = new List<Volume>()
                     {
-                        Path = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Manga")
-                    }
+                        new Volume()
+                        {
+                            Number = 1,
+                            Name = "1"
+                        }
+                    },
+                    NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                    Metadata = new SeriesMetadata(),
+                    Format = MangaFormat.Epub
                 }
-            });
-            return await _context.SaveChangesAsync() > 0;
+            };
+
+            Assert.Equal(1, ScannerService.FindSeriesNotOnDisk(existingSeries, infos).Count());
         }
 
         [Fact]
@@ -83,9 +67,9 @@ namespace API.Tests.Services
         {
             var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
 
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
-            AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
+            ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "10", Format = MangaFormat.Archive});
 
             var existingSeries = new List<Series>
             {
@@ -138,78 +122,25 @@ namespace API.Tests.Services
         //     Assert.Equal(expected, actualName);
         // }
 
-        [Fact]
-        public void RemoveMissingSeries_Should_RemoveSeries()
-        {
-            var existingSeries = new List<Series>()
-            {
-                EntityFactory.CreateSeries("Darker than Black Vol 1"),
-                EntityFactory.CreateSeries("Darker than Black"),
-                EntityFactory.CreateSeries("Beastars"),
-            };
-            var missingSeries = new List<Series>()
-            {
-                EntityFactory.CreateSeries("Darker than Black Vol 1"),
-            };
-            existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
+        // [Fact]
+        // public void RemoveMissingSeries_Should_RemoveSeries()
+        // {
+        //     var existingSeries = new List<Series>()
+        //     {
+        //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
+        //         EntityFactory.CreateSeries("Darker than Black"),
+        //         EntityFactory.CreateSeries("Beastars"),
+        //     };
+        //     var missingSeries = new List<Series>()
+        //     {
+        //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
+        //     };
+        //     existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
+        //
+        //     Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
+        //     Assert.Equal(missingSeries.Count, removeCount);
+        // }
 
-            Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
-            Assert.Equal(missingSeries.Count, removeCount);
-        }
 
-        private void AddToParsedInfo(IDictionary<ParsedSeries, List<ParserInfo>> collectedSeries, ParserInfo info)
-        {
-            var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == API.Parser.Parser.Normalize(info.Series));
-            existingKey ??= new ParsedSeries()
-            {
-                Format = info.Format,
-                Name = info.Series,
-                NormalizedName = API.Parser.Parser.Normalize(info.Series)
-            };
-            if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
-            {
-                ((ConcurrentDictionary<ParsedSeries, List<ParserInfo>>) collectedSeries).AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
-                {
-                    oldValue ??= new List<ParserInfo>();
-                    if (!oldValue.Contains(info))
-                    {
-                        oldValue.Add(info);
-                    }
-
-                    return oldValue;
-                });
-            }
-            else
-            {
-                if (!collectedSeries.ContainsKey(existingKey))
-                {
-                    collectedSeries.Add(existingKey, new List<ParserInfo>() {info});
-                }
-                else
-                {
-                    var list = collectedSeries[existingKey];
-                    if (!list.Contains(info))
-                    {
-                        list.Add(info);
-                    }
-
-                    collectedSeries[existingKey] = list;
-                }
-
-            }
-
-        }
-
-        private static DbConnection CreateInMemoryDatabase()
-        {
-            var connection = new SqliteConnection("Filename=:memory:");
-
-            connection.Open();
-
-            return connection;
-        }
-
-        public void Dispose() => _connection.Dispose();
     }
 }

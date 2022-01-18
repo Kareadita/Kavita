@@ -1,4 +1,6 @@
 import { MangaFile } from './manga-file';
+import { Person } from './person';
+import { Tag } from './tag';
 
 export interface Chapter {
     id: number;
@@ -16,4 +18,19 @@ export interface Chapter {
     isSpecial: boolean;
     title: string;
     created: string;
+
+    titleName: string;
+    /**
+     * This is only Year and Month, Day is not supported from underlying sources
+     */
+    releaseDate: string;
+    writers: Array<Person>;
+    penciller: Array<Person>;
+    inker: Array<Person>;
+    colorist: Array<Person>;
+    letterer: Array<Person>;
+    coverArtist: Array<Person>;
+    editor: Array<Person>;
+    publisher: Array<Person>;
+    tags: Array<Tag>;
 }

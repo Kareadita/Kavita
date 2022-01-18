@@ -1,6 +1,11 @@
-﻿using API.Entities;
+﻿using System.Linq;
+using API.Entities;
+using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Parser;
+using API.Services.Tasks.Scanner;
+using API.Tests.Helpers;
 using Xunit;
 
 namespace API.Tests.Extensions
@@ -30,6 +35,38 @@ namespace API.Tests.Extensions
 
             Assert.Equal(expected, series.NameInList(list));
         }
+
+        [Theory]
+        [InlineData(new [] {"Darker than Black", "Darker Than Black", "Darker than Black"}, new [] {"Darker than Black"}, MangaFormat.Archive, true)]
+        [InlineData(new [] {"Darker than Black", "Darker Than Black", "Darker than Black"}, new [] {"Darker_than_Black"}, MangaFormat.Archive, true)]
+        [InlineData(new [] {"Darker than Black", "Darker Than Black", "Darker than Black"}, new [] {"Darker then Black!"}, MangaFormat.Archive, false)]
+        [InlineData(new [] {"Salem's Lot", "Salem's Lot", "Salem's Lot"}, new [] {"Salem's Lot"}, MangaFormat.Archive, true)]
+        [InlineData(new [] {"Salem's Lot", "Salem's Lot", "Salem's Lot"}, new [] {"salems lot"}, MangaFormat.Archive, true)]
+        [InlineData(new [] {"Salem's Lot", "Salem's Lot", "Salem's Lot"}, new [] {"salem's lot"}, MangaFormat.Archive, true)]
+        // Different normalizations pass as we check normalization against an on-the-fly calculation so we don't delete series just because we change how normalization works
+        [InlineData(new [] {"Salem's Lot", "Salem's Lot", "Salem's Lot", "salems lot"}, new [] {"salem's lot"}, MangaFormat.Archive, true)]
+        [InlineData(new [] {"Rent-a-Girlfriend", "Rent-a-Girlfriend", "Kanojo, Okarishimasu", "rentagirlfriend"}, new [] {"Kanojo, Okarishimasu"}, MangaFormat.Archive, true)]
+        public void NameInListParserInfoTest(string[] seriesInput, string[] list, MangaFormat format, bool expected)
+        {
+            var series = new Series()
+            {
+                Name = seriesInput[0],
+                LocalizedName = seriesInput[1],
+                OriginalName = seriesInput[2],
+                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Parser.Parser.Normalize(seriesInput[0]),
+                Metadata = new SeriesMetadata(),
+            };
+
+            var parserInfos = list.Select(s => new ParsedSeries()
+            {
+                Name = s,
+                NormalizedName = API.Parser.Parser.Normalize(s),
+            }).ToList();
+
+            // This doesn't do any checks against format
+            Assert.Equal(expected, series.NameInList(parserInfos));
+        }
+
 
         [Theory]
         [InlineData(new [] {"Darker than Black", "Darker Than Black", "Darker than Black"}, "Darker than Black", true)]

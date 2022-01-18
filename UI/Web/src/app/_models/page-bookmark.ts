@@ -4,4 +4,5 @@ export interface PageBookmark {
     seriesId: number;
     volumeId: number;
     chapterId: number;
+    fileName: string;
 }

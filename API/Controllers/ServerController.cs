@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
-using API.Interfaces.Services;
+using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -27,10 +27,11 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly IVersionUpdaterService _versionUpdaterService;
         private readonly IStatsService _statsService;
+        private readonly ICleanupService _cleanupService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
             IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
-            IVersionUpdaterService versionUpdaterService, IStatsService statsService)
+            IVersionUpdaterService versionUpdaterService, IStatsService statsService, ICleanupService cleanupService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
@@ -40,6 +41,7 @@ namespace API.Controllers
             _cacheService = cacheService;
             _versionUpdaterService = versionUpdaterService;
             _statsService = statsService;
+            _cleanupService = cleanupService;
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace API.Controllers
         public ActionResult ClearCache()
         {
             _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
-            _cacheService.Cleanup();
+            _cleanupService.CleanupCacheDirectory();
 
             return Ok();
         }
@@ -94,7 +96,7 @@ namespace API.Controllers
         [HttpGet("logs")]
         public async Task<ActionResult> GetLogs()
         {
-            var files = _backupService.LogFiles(_config.GetMaxRollingFiles(), _config.GetLoggingFileName());
+            var files = _backupService.GetLogFiles(_config.GetMaxRollingFiles(), _config.GetLoggingFileName());
             try
             {
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files, "logs");

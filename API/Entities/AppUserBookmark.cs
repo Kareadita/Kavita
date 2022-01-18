@@ -13,6 +13,11 @@ namespace API.Entities
         public int SeriesId { get; set; }
         public int ChapterId { get; set; }
 
+        /// <summary>
+        /// Filename in the Bookmark Directory
+        /// </summary>
+        public string FileName { get; set; } = string.Empty;
+
 
         // Relationships
         [JsonIgnore]

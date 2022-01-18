@@ -3,11 +3,11 @@ import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { UpdateFilterEvent } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterItem, SeriesFilter, mangaFormatFilters } from '../_models/series-filter';
+import { SeriesFilter} from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { SeriesService } from '../_services/series.service';
@@ -23,10 +23,8 @@ export class OnDeckComponent implements OnInit {
   series: Series[] = [];
   pagination!: Pagination;
   libraryId!: number;
-  filters: Array<FilterItem> = mangaFormatFilters;
-  filter: SeriesFilter = {
-    mangaFormat: null
-  };
+  filter: SeriesFilter | undefined = undefined;
+  filterSettings: FilterSettings = new FilterSettings();
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {
@@ -35,6 +33,8 @@ export class OnDeckComponent implements OnInit {
     if (this.pagination === undefined || this.pagination === null) {
       this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
+    this.filterSettings.readProgressDisabled = true;
+    this.filterSettings.sortDisabled = true;
     this.loadPage();
   }
 
@@ -63,8 +63,8 @@ export class OnDeckComponent implements OnInit {
     this.loadPage();
   }
 
-  updateFilter(data: UpdateFilterEvent) {
-    this.filter.mangaFormat = data.filterItem.value;
+  updateFilter(data: SeriesFilter) {
+    this.filter = data;
     if (this.pagination !== undefined && this.pagination !== null) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);

@@ -3,8 +3,8 @@
 [isLoading]="isLoading"
 [items]="series"
 [pagination]="pagination"
-[filters]="filters"
-(applyFilter)="updateFilter($event)"
+[filterSettings]="filterSettings"
+(applyFilter)="applyFilter($event)"
 (pageChange)="onPageChange($event)"
 >
     <ng-template #cardItem let-item let-position="idx">

@@ -28,7 +28,8 @@ namespace API.Parser
         /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
         /// </summary>
         /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
-        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(src:\s?)?url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(?<End>.{1}\))",
+        public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
+                                                                 + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
             MatchOptions, RegexTimeout);
         /// <summary>
         /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
@@ -48,11 +49,13 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
             MatchOptions, RegexTimeout);
+        private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
+            MatchOptions, RegexTimeout);
         private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
             MatchOptions, RegexTimeout);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
             MatchOptions, RegexTimeout);
-        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(cover|folder)(?![\w\d])",
+        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)((?<!back)cover|folder)(?![\w\d])",
             MatchOptions, RegexTimeout);
 
         private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9\+]",
@@ -164,7 +167,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+) (?:\(\d{4}\)) ",
+                @"(?<Series>.*)\s+(?<Chapter>\d+)\s+(?:\(\d{4}\))\s",
                 MatchOptions, RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
@@ -207,7 +210,6 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
                 MatchOptions, RegexTimeout),
-
             // Baketeriya ch01-05.zip
             new Regex(
                 @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
@@ -236,9 +238,13 @@ namespace API.Parser
 
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
+            // Tintin - T22 Vol 714 pour Sydney
+            new Regex(
+                @"(?<Series>.+?)\s?(\b|_|-)\s?((vol|tome|t)\.?)(?<Volume>\d+(-\d+)?)",
+                MatchOptions, RegexTimeout),
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.?)( |_)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.+?)(\b|_)((vol|tome|t)\.?)(\s|_)(?<Volume>\d+(-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -256,9 +262,9 @@ namespace API.Parser
             new Regex(
             @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
                 MatchOptions, RegexTimeout),
-            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             new Regex(
-                @"^(?<Series>.+?)(?: |_)v\d+",
+                @"^(?<Series>.+?)(?: |_|-)(v|t)\d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
@@ -306,11 +312,11 @@ namespace API.Parser
         {
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)v(?<Volume>\d+)",
+                @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)vol\.?\s?(?<Volume>\d+)",
+                @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -407,7 +413,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)(?<!Vol)\.?\s(?<Chapter>\d+(?:.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
@@ -470,7 +476,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra( Chapter)?|Art Collection|Side( |_)Stories|Bonus)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra(?:(\sChapter)?[^\S])|Art Collection|Side( |_)Stories|Bonus)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -478,7 +484,15 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Extra( Chapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side( |_)Stories|Bonus)",
+                @"(?<Special>Specials?|OneShot|One\-Shot|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                MatchOptions, RegexTimeout),
+        };
+
+        private static readonly Regex[] EuropeanComicRegex =
+        {
+            // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+            new Regex(
+                @"(?<Special>Bd(\s|_|-)Fr)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -488,147 +502,10 @@ namespace API.Parser
                 MatchOptions, RegexTimeout
         );
 
-
-        /// <summary>
-        /// Parses information out of a file path. Will fallback to using directory name if Series couldn't be parsed
-        /// from filename.
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="rootPath">Root folder</param>
-        /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
-        /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-        public static ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(filePath);
-            ParserInfo ret;
-
-            if (IsEpub(filePath))
-            {
-                ret = new ParserInfo()
-                {
-                    Chapters = ParseChapter(fileName) ?? ParseComicChapter(fileName),
-                    Series = ParseSeries(fileName) ?? ParseComicSeries(fileName),
-                    Volumes = ParseVolume(fileName) ?? ParseComicVolume(fileName),
-                    Filename = Path.GetFileName(filePath),
-                    Format = ParseFormat(filePath),
-                    FullFilePath = filePath
-                };
-            }
-            else
-            {
-                ret = new ParserInfo()
-                {
-                    Chapters = type == LibraryType.Manga ? ParseChapter(fileName) : ParseComicChapter(fileName),
-                    Series = type == LibraryType.Manga ? ParseSeries(fileName) : ParseComicSeries(fileName),
-                    Volumes = type == LibraryType.Manga ? ParseVolume(fileName) : ParseComicVolume(fileName),
-                    Filename = Path.GetFileName(filePath),
-                    Format = ParseFormat(filePath),
-                    Title = Path.GetFileNameWithoutExtension(fileName),
-                    FullFilePath = filePath
-                };
-            }
-
-            if (IsImage(filePath) && IsCoverImage(filePath)) return null;
-
-            if (IsImage(filePath))
-            {
-              // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
-              ret.Volumes = DefaultVolume;
-              ret.Chapters = DefaultChapter;
-              ret.Series = string.Empty;
-            }
-
-            if (ret.Series == string.Empty || IsImage(filePath))
-            {
-                // Try to parse information out of each folder all the way to rootPath
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            var edition = ParseEdition(fileName);
-            if (!string.IsNullOrEmpty(edition))
-            {
-                ret.Series = CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
-                ret.Edition = edition;
-            }
-
-            var isSpecial = type == LibraryType.Comic ? ParseComicSpecial(fileName) : ParseMangaSpecial(fileName);
-            // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
-            // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-            if (ret.Chapters == DefaultChapter && ret.Volumes == DefaultVolume && !string.IsNullOrEmpty(isSpecial))
-            {
-                ret.IsSpecial = true;
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
-            if (HasSpecialMarker(fileName))
-            {
-                ret.IsSpecial = true;
-                ret.Chapters = DefaultChapter;
-                ret.Volumes = DefaultVolume;
-
-                ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
-            }
-
-            if (string.IsNullOrEmpty(ret.Series))
-            {
-                ret.Series = CleanTitle(fileName, type is LibraryType.Comic);
-            }
-
-            // Pdfs may have .pdf in the series name, remove that
-            if (IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
-            {
-                ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
-            }
-
-            return ret.Series == string.Empty ? null : ret;
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="rootPath"></param>
-        /// <param name="type"></param>
-        /// <param name="ret">Expects a non-null ParserInfo which this method will populate</param>
-        public static void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
-        {
-          var fallbackFolders = DirectoryService.GetFoldersTillRoot(rootPath, filePath).ToList();
-            for (var i = 0; i < fallbackFolders.Count; i++)
-            {
-                var folder = fallbackFolders[i];
-                if (!string.IsNullOrEmpty(ParseMangaSpecial(folder))) continue;
-
-                var parsedVolume = type is LibraryType.Manga ? ParseVolume(folder) : ParseComicVolume(folder);
-                var parsedChapter = type is LibraryType.Manga ? ParseChapter(folder) : ParseComicChapter(folder);
-
-                if (!parsedVolume.Equals(DefaultVolume) || !parsedChapter.Equals(DefaultChapter))
-                {
-                  if ((ret.Volumes.Equals(DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !parsedVolume.Equals(DefaultVolume))
-                  {
-                    ret.Volumes = parsedVolume;
-                  }
-                  if ((ret.Chapters.Equals(DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !parsedChapter.Equals(DefaultChapter))
-                  {
-                    ret.Chapters = parsedChapter;
-                  }
-                }
-
-                var series = ParseSeries(folder);
-
-                if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
-                {
-                    ret.Series = CleanTitle(folder, type is LibraryType.Comic);
-                    break;
-                }
-
-                if (!string.IsNullOrEmpty(series))
-                {
-                    ret.Series = series;
-                    break;
-                }
-            }
-        }
+        private static readonly Regex EmptySpaceRegex = new Regex(
+                @"(?!=.+)(\s{2,})(?!=.+)",
+                MatchOptions, RegexTimeout
+        );
 
         public static MangaFormat ParseFormat(string filePath)
         {
@@ -862,7 +739,6 @@ namespace API.Parser
                 }
             }
 
-            // TODO: Since we have loops like this, think about using a method
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(title);
@@ -881,6 +757,23 @@ namespace API.Parser
         private static string RemoveMangaSpecialTags(string title)
         {
             foreach (var regex in MangaSpecialRegex)
+            {
+                var matches = regex.Matches(title);
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
+                    {
+                        title = title.Replace(match.Value, string.Empty).Trim();
+                    }
+                }
+            }
+
+            return title;
+        }
+
+        private static string RemoveEuropeanTags(string title)
+        {
+            foreach (var regex in EuropeanComicRegex)
             {
                 var matches = regex.Matches(title);
                 foreach (Match match in matches)
@@ -931,12 +824,29 @@ namespace API.Parser
 
             title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
 
+            if (isComic)
+            {
+                title = RemoveComicSpecialTags(title);
+                title = RemoveEuropeanTags(title);
+            }
+            else
+            {
+                title = RemoveMangaSpecialTags(title);
+            }
+
 
             title = title.Replace("_", " ").Trim();
             if (title.EndsWith("-") || title.EndsWith(","))
             {
                 title = title.Substring(0, title.Length - 1);
             }
+
+            if (title.StartsWith("-") || title.StartsWith(","))
+            {
+                title = title.Substring(1);
+            }
+
+            title = EmptySpaceRegex.Replace(title, " ");
 
             return title.Trim();
         }
@@ -997,15 +907,18 @@ namespace API.Parser
         {
             return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
         }
+        public static bool IsComicInfoExtension(string filePath)
+        {
+            return ComicInfoArchiveRegex.IsMatch(Path.GetExtension(filePath));
+        }
         public static bool IsBook(string filePath)
         {
             return BookFileRegex.IsMatch(Path.GetExtension(filePath));
         }
 
-        public static bool IsImage(string filePath, bool suppressExtraChecks = false)
+        public static bool IsImage(string filePath)
         {
-            if (filePath.StartsWith(".") || (!suppressExtraChecks && filePath.StartsWith("!"))) return false;
-            return ImageRegex.IsMatch(Path.GetExtension(filePath));
+            return !filePath.StartsWith(".") && ImageRegex.IsMatch(Path.GetExtension(filePath));
         }
 
         public static bool IsXml(string filePath)
@@ -1040,16 +953,17 @@ namespace API.Parser
         /// <summary>
         /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image
         /// </summary>
-        /// <param name="name"></param>
+        /// <remarks>If the path has "backcover" in it, it will be ignored</remarks>
+        /// <param name="filename">Filename with extension</param>
         /// <returns></returns>
-        public static bool IsCoverImage(string name)
+        public static bool IsCoverImage(string filename)
         {
-            return IsImage(name, true) && (CoverImageRegex.IsMatch(name));
+            return IsImage(filename) && CoverImageRegex.IsMatch(filename);
         }
 
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("._");
         }
 
 
@@ -1061,6 +975,29 @@ namespace API.Parser
         public static bool IsPdf(string filePath)
         {
            return Path.GetExtension(filePath).ToLower() == ".pdf";
+        }
+
+        /// <summary>
+        /// Cleans an author's name
+        /// </summary>
+        /// <remarks>If the author is Last, First, this will not reverse</remarks>
+        /// <param name="author"></param>
+        /// <returns></returns>
+        public static string CleanAuthor(string author)
+        {
+            if (string.IsNullOrEmpty(author)) return string.Empty;
+            return author.Trim();
+        }
+
+        /// <summary>
+        /// Normalizes the slashes in a path to be <see cref="Path.AltDirectorySeparatorChar"/>
+        /// </summary>
+        /// <example>/manga/1\1 -> /manga/1/1</example>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string NormalizePath(string path)
+        {
+            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
     }
 }

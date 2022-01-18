@@ -23,6 +23,7 @@ export type VolumeActionCallback = (volume: Volume) => void;
 export type ChapterActionCallback = (chapter: Chapter) => void;
 export type ReadingListActionCallback = (readingList: ReadingList) => void;
 export type VoidActionCallback = () => void;
+export type BooleanActionCallback = (result: boolean) => void;
 
 /**
  * Responsible for executing actions
@@ -57,7 +58,7 @@ export class ActionService implements OnDestroy {
       return;
     }
     this.libraryService.scan(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -75,12 +76,15 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm('Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(library);
+      }
       return;
     }
 
     this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + library.name);
+      this.toastr.success('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -124,7 +128,7 @@ export class ActionService implements OnDestroy {
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Scan started for ' + series.name);
+      this.toastr.success('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
       }
@@ -137,7 +141,10 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
-    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm('Refresh covers will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+      if (callback) {
+        callback(series);
+      }
       return;
     }
 
@@ -480,6 +487,22 @@ export class ActionService implements OnDestroy {
 
       if (callback) {
         callback();
+      }
+    });
+  }
+
+  async deleteSeries(series: Series, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
+
+    this.seriesService.delete(series.id).subscribe((res: boolean) => {
+      if (callback) {
+        this.toastr.success('Series deleted');
+        callback(res);
       }
     });
   }
