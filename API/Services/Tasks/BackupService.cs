@@ -62,6 +62,8 @@ public class BackupService : IBackupService
         {
             _backupFiles.Add(file);
         }
+
+
     }
 
     public IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName)
@@ -114,6 +116,10 @@ public class BackupService : IBackupService
 
         await CopyCoverImagesToBackupDirectory(tempDirectory);
 
+        await SendProgress(0.5F);
+
+        await CopyBookmarksToBackupDirectory(tempDirectory);
+
         await SendProgress(0.75F);
 
         try
@@ -154,7 +160,30 @@ public class BackupService : IBackupService
             // Swallow exception. This can be a duplicate cover being copied as chapter and volumes can share same file.
         }
 
-        if (!_directoryService.GetFiles(outputTempDir).Any())
+        if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())
+        {
+            _directoryService.ClearAndDeleteDirectory(outputTempDir);
+        }
+    }
+
+    private async Task CopyBookmarksToBackupDirectory(string tempDirectory)
+    {
+        var bookmarkDirectory =
+            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+
+        var outputTempDir = Path.Join(tempDirectory, "bookmarks");
+        _directoryService.ExistOrCreate(outputTempDir);
+
+        try
+        {
+            _directoryService.CopyDirectoryToDirectory(bookmarkDirectory, outputTempDir);
+        }
+        catch (IOException)
+        {
+            // Swallow exception.
+        }
+
+        if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())
         {
             _directoryService.ClearAndDeleteDirectory(outputTempDir);
         }

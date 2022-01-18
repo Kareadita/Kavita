@@ -142,10 +142,39 @@ namespace API.Services
         /// <returns>Entry name of match, null if no match</returns>
         public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {
-            var result = entryFullNames
+            // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
+            // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
+            var fullNames = entryFullNames
                 .OrderByNatural(c => c.GetFullPathWithoutExtension())
-                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
-                .FirstOrDefault(path => Parser.Parser.IsImage(path));
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)) && Parser.Parser.IsImage(path))
+                .ToList();
+            if (fullNames.Count == 0) return null;
+
+            var nonNestedFile = fullNames.Where(entry => (Path.GetDirectoryName(entry) ?? string.Empty).Equals(archiveName))
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
+                .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(nonNestedFile)) return nonNestedFile;
+
+            // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
+            // Get first folder, then sort within that
+            var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName).FirstOrDefault();
+            if (!string.IsNullOrEmpty(firstDirectoryFile))
+            {
+                var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
+                if (!string.IsNullOrEmpty(firstDirectory))
+                {
+                    var firstDirectoryResult = fullNames.Where(f => firstDirectory.Equals(Path.GetDirectoryName(f)))
+                        .OrderByNatural(Path.GetFileNameWithoutExtension)
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(firstDirectoryResult)) return firstDirectoryResult;
+                }
+            }
+
+            var result = fullNames
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .FirstOrDefault();
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -235,6 +264,13 @@ namespace API.Services
         }
 
         // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="files"></param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns></returns>
+        /// <exception cref="KavitaException"></exception>
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
@@ -309,30 +345,6 @@ namespace API.Services
             return null;
         }
 
-        public static void CleanComicInfo(ComicInfo info)
-        {
-            if (info == null) return;
-
-            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
-
-            // if (!string.IsNullOrEmpty(info.Web))
-            // {
-            //     // ComicVine stores the Issue number in Number field and does not use Volume.
-            //     if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
-            //     if (info.Volume.Equals("1"))
-            //     {
-            //         info.Volume = Parser.Parser.DefaultVolume;
-            //     }
-            // }
-        }
-
         /// <summary>
         /// This can be null if nothing is found or any errors occur during access
         /// </summary>
@@ -363,7 +375,7 @@ namespace API.Services
                             using var stream = entry.Open();
                             var serializer = new XmlSerializer(typeof(ComicInfo));
                             var info = (ComicInfo) serializer.Deserialize(stream);
-                            CleanComicInfo(info);
+                            ComicInfo.CleanComicInfo(info);
                             return info;
                         }
 
@@ -383,7 +395,7 @@ namespace API.Services
                                                                                        .Parser
                                                                                        .MacOsMetadataFileStartsWith)
                                                                                && Parser.Parser.IsXml(entry.Key)));
-                        CleanComicInfo(info);
+                        ComicInfo.CleanComicInfo(info);
 
                         return info;
                     }

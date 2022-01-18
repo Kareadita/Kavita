@@ -83,6 +83,8 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
@@ -92,6 +94,8 @@ namespace API.Controllers
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId));
             }
             return Ok(result);
         }

@@ -161,6 +161,7 @@ $primary-color: #0062cc;
 
 .reader-container {
     outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
+    overflow: auto;
 }
 
 .book-content {

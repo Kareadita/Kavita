@@ -139,15 +139,6 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
-            var tempFolder = $"download_{user.Id}_{series.Id}_bookmarks";
-            var fullExtractPath = Path.Join(_directoryService.TempDirectory, tempFolder);
-            if (_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(fullExtractPath).Exists)
-            {
-                return BadRequest(
-                    "Server is currently processing this exact download. Please try again in a few minutes.");
-            }
-            _directoryService.ExistOrCreate(fullExtractPath);
-
             var bookmarkDirectory =
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
             var files = (await _unitOfWork.UserRepository.GetAllBookmarksByIds(downloadBookmarkDto.Bookmarks
@@ -156,8 +147,7 @@ namespace API.Controllers
                 .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, b.FileName)));
 
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
-                tempFolder);
-            _directoryService.ClearAndDeleteDirectory(fullExtractPath);
+                $"download_{user.Id}_{series.Id}_bookmarks");
             return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
         }
 

@@ -748,11 +748,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollService.scrollTo(0, this.reader.nativeElement);
     }
 
-    // On fullscreen we need to click the document before arrow keys will scroll down.
-    if (this.isFullscreen) {
-      this.renderer.setAttribute(this.reader.nativeElement, 'tabIndex', '0');
-      this.reader.nativeElement.focus();
-    }
+    // we need to click the document before arrow keys will scroll down.
+    this.reader.nativeElement.focus();
   }
 
   setPageNum(pageNum: number) {
@@ -888,6 +885,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
       });
+
+      for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
+        const elem = this.readingHtml.nativeElement.children.item(i);
+        if (elem?.tagName === 'STYLE') continue;
+          Object.entries(this.pageStyles).forEach(item => {
+            if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+              // Remove the style or skip
+              this.renderer.removeStyle(elem, item[0]);
+              return;
+            }
+            this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
+          });
+        
+      }
     }
   }
 

@@ -151,7 +151,6 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       this.collectionTag = matchingTags[0];
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
-      this.loadPage();
     });
   }
 
