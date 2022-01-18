@@ -62,7 +62,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all tags</param>
     /// <returns></returns>
     [HttpGet("tags")]
-    public async Task<ActionResult<IList<PersonDto>>> GetAllTags(string? libraryIds)
+    public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
