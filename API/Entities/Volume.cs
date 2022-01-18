@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
