@@ -494,6 +494,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault(); 
     } else if (event.key === KEY_CODES.G) {
       this.goToPage();
+    } else if (event.key === KEY_CODES.F) {
+      this.toggleFullscreen()
     }
   }
 
