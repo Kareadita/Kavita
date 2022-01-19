@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { AccountService } from 'src/app/_services/account.service';
+import { Clipboard } from '@angular/cdk/clipboard';
 
 @Component({
   selector: 'app-api-key',
@@ -21,7 +22,7 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
   
 
-  constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService) { }
+  constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
@@ -43,8 +44,10 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  async copy() {
-    await navigator.clipboard.writeText(this.key);
+  async copy(input: any) {
+    input.select();
+    this.clipboard.copy(input.value);
+    input.setSelectionRange(0, 0);
   }
 
   async refresh() {
