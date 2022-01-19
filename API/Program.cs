@@ -62,7 +62,33 @@ namespace API
                 if (pendingMigrations.Any())
                 {
                     logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
-                    directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), directoryService.TempDirectory);
+                    string currentVersion = null;
+                    try
+                    {
+                        currentVersion =
+                            (await context.ServerSetting.SingleOrDefaultAsync(s =>
+                                s.Key == ServerSettingKey.InstallVersion))?.Value;
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+
+                    if (string.IsNullOrEmpty(currentVersion))
+                    {
+                        currentVersion = "vUnknown";
+                    }
+
+                    var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
+                        "migration", currentVersion);
+                    directoryService.ExistOrCreate(migrationDirectory);
+
+                    if (!directoryService.FileSystem.File.Exists(
+                            directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
+                    {
+                        directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
+                        logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
+                    }
                 }
 
                 await context.Database.MigrateAsync();
@@ -82,7 +108,8 @@ namespace API
             catch (Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogCritical(ex, "An error occurred during migration");
+                logger.LogCritical(ex, "A migration failed during startup. Please check config/temp/ for a backup and try again");
+                return;
             }
 
             await host.RunAsync();
