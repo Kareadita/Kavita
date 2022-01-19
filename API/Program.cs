@@ -62,25 +62,7 @@ namespace API
                 if (pendingMigrations.Any())
                 {
                     logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
-                    string currentVersion = null;
-                    try
-                    {
-                        currentVersion =
-                            (await context.ServerSetting.SingleOrDefaultAsync(s =>
-                                s.Key == ServerSettingKey.InstallVersion))?.Value;
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-
-                    if (string.IsNullOrEmpty(currentVersion))
-                    {
-                        currentVersion = "vUnknown";
-                    }
-
-                    var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
-                        "migration", currentVersion);
+                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
                     directoryService.ExistOrCreate(migrationDirectory);
 
                     if (!directoryService.FileSystem.File.Exists(
@@ -108,11 +90,40 @@ namespace API
             catch (Exception ex)
             {
                 var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogCritical(ex, "A migration failed during startup. Please check config/temp/ for a backup and try again");
+                var context = services.GetRequiredService<DataContext>();
+                var migrationDirectory = await GetMigrationDirectory(context, directoryService);
+
+                logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
+                directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db"), directoryService.ConfigDirectory);
+
                 return;
             }
 
             await host.RunAsync();
+        }
+
+        private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
+        {
+            string currentVersion = null;
+            try
+            {
+                currentVersion =
+                    (await context.ServerSetting.SingleOrDefaultAsync(s =>
+                        s.Key == ServerSettingKey.InstallVersion))?.Value;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            if (string.IsNullOrEmpty(currentVersion))
+            {
+                currentVersion = "vUnknown";
+            }
+
+            var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
+                "migration", currentVersion);
+            return migrationDirectory;
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
