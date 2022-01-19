@@ -19,6 +19,7 @@ export enum KEY_CODES {
   ENTER = 'Enter',
   G = 'g',
   B = 'b',
+  F = 'f',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete',
   SHIFT = 'Shift'

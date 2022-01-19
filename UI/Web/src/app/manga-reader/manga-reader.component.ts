@@ -400,6 +400,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goToPage(parseInt(goToPageNum.trim(), 10));
     } else if (event.key === KEY_CODES.B) {
       this.bookmarkPage();
+    } else if (event.key === KEY_CODES.F) {
+      this.toggleFullscreen()
     }
   }
 
