@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Constants;
 using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
@@ -13,6 +14,7 @@ using API.Services;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -27,11 +29,12 @@ namespace API.Controllers
         private readonly ICacheService _cacheService;
         private readonly IDownloadService _downloadService;
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly UserManager<AppUser> _userManager;
         private readonly NumericComparer _numericComparer;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            ICacheService cacheService, IDownloadService downloadService, IHubContext<MessageHub> messageHub)
+            ICacheService cacheService, IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
@@ -39,6 +42,7 @@ namespace API.Controllers
             _cacheService = cacheService;
             _downloadService = downloadService;
             _messageHub = messageHub;
+            _userManager = userManager;
             _numericComparer = new NumericComparer();
         }
 
@@ -66,6 +70,13 @@ namespace API.Controllers
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
+            // TODO: MOve this into a claim annotation like was done on stats
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var roles = await _userManager.GetRolesAsync(user);
+            if (!roles.Contains(PolicyConstants.DownloadRole))
+            {
+                return BadRequest("You do not have permission");
+            }
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
             var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
