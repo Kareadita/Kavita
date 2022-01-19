@@ -44,10 +44,10 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  async copy(input: any) {
-    input.select();
-    this.clipboard.copy(input.value);
-    input.setSelectionRange(0, 0);
+  async copy() {
+    this.inputElem.nativeElement.select();
+    this.clipboard.copy(this.inputElem.nativeElement.value);
+    this.inputElem.nativeElement.setSelectionRange(0, 0);
   }
 
   async refresh() {
