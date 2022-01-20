@@ -83,6 +83,10 @@ export class ErrorInterceptor implements HttpInterceptor {
     } else {
       console.error('error:', error);
       if (error.statusText === 'Bad Request') {
+        if (error.error instanceof Blob) {
+          this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);         
+          return; 
+        }
         this.toastr.error(error.error, error.status);
       } else {
         this.toastr.error(error.statusText === 'OK' ? error.error : error.statusText, error.status);
@@ -101,7 +105,13 @@ export class ErrorInterceptor implements HttpInterceptor {
         console.log('500 error: ', error);
       }
       this.toastr.error(err.message);
-    } else {
+    } else if (error.hasOwnProperty('message') && error.message.trim() !== '') {
+      if (error.message != 'User is not authenticated') {
+        console.log('500 error: ', error);
+      }
+      this.toastr.error(error.message);
+    }
+     else {
       this.toastr.error('There was an unknown critical error.');
       console.error('500 error:', error);
     }

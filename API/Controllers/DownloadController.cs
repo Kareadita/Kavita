@@ -26,24 +26,20 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly ICacheService _cacheService;
         private readonly IDownloadService _downloadService;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly UserManager<AppUser> _userManager;
-        private readonly NumericComparer _numericComparer;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            ICacheService cacheService, IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager)
+            IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
-            _cacheService = cacheService;
             _downloadService = downloadService;
             _messageHub = messageHub;
             _userManager = userManager;
-            _numericComparer = new NumericComparer();
         }
 
         [HttpGet("volume-size")]
