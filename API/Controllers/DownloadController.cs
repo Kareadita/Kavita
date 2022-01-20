@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
+using API.Constants;
 using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
@@ -13,33 +14,32 @@ using API.Services;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
-    [Authorize(Policy = "RequireDownloadRole")]
+    [Authorize(Policy="RequireDownloadRole")]
     public class DownloadController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IArchiveService _archiveService;
         private readonly IDirectoryService _directoryService;
-        private readonly ICacheService _cacheService;
         private readonly IDownloadService _downloadService;
         private readonly IHubContext<MessageHub> _messageHub;
-        private readonly NumericComparer _numericComparer;
+        private readonly UserManager<AppUser> _userManager;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            ICacheService cacheService, IDownloadService downloadService, IHubContext<MessageHub> messageHub)
+            IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
-            _cacheService = cacheService;
             _downloadService = downloadService;
             _messageHub = messageHub;
-            _numericComparer = new NumericComparer();
+            _userManager = userManager;
         }
 
         [HttpGet("volume-size")]
@@ -63,9 +63,12 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+        [Authorize(Policy="RequireDownloadRole")]
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)
         {
+            if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
+
             var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
             var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
@@ -79,6 +82,13 @@ namespace API.Controllers
             }
         }
 
+        private async Task<bool> HasDownloadPermission()
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
+        }
+
         private async Task<ActionResult> GetFirstFileDownload(IEnumerable<MangaFile> files)
         {
             var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
@@ -88,6 +98,7 @@ namespace API.Controllers
         [HttpGet("chapter")]
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
+            if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
@@ -120,6 +131,7 @@ namespace API.Controllers
         [HttpGet("series")]
         public async Task<ActionResult> DownloadSeries(int seriesId)
         {
+            if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
             var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             try
@@ -135,6 +147,8 @@ namespace API.Controllers
         [HttpPost("bookmarks")]
         public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
         {
+            if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
+
             // We know that all bookmarks will be for one single seriesId
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
