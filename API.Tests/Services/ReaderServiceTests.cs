@@ -788,27 +788,227 @@ public class ReaderServiceTests
 
     #endregion
 
-    // #region GetNumberOfPages
-    //
-    // [Fact]
-    // public void GetNumberOfPages_EPUB()
-    // {
-    // const string testDirectory = "/manga/";
-    // var fileSystem = new MockFileSystem();
-    //
-    // var actualFile = Path.Join(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService/EPUB"), "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub")
-    // fileSystem.File.WriteAllBytes("${testDirectory}test.epub", File.ReadAllBytes(actualFile));
-    //
-    // fileSystem.AddDirectory(CacheDirectory);
-    //
-    // var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-    // var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-    // var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
-    //
-    //
-    // }
-    //
-    //
-    // #endregion
+    #region GetContinuePoint
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        // Save progress on first volume chapters and 1st of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("22", nextChapter.Range);
+
+
+    }
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstSpecial()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        // Save progress on first volume chapters and 1st of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("31", nextChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        // Save progress on first volume chapters and 1st of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1", nextChapter.Range);
+    }
+
+    #endregion
+
+
 
 }

@@ -22,6 +22,7 @@ public interface IReaderService
     Task<int> CapPageToChapter(int chapterId, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
+    Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
 }
 
 public class ReaderService : IReaderService
@@ -303,6 +304,39 @@ public class ReaderService : IReaderService
             }
         }
         return -1;
+    }
+
+    public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
+    {
+        // Loop through all chapters that are not in volume 0
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+
+        var nonSpecialChapters = volumes
+            .Where(v => v.Number != 0)
+            .SelectMany(v => v.Chapters)
+            .OrderBy(c => float.Parse(c.Number))
+            .ToList();
+
+        var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+
+
+        // Check if there are any specials
+        if (currentlyReadingChapter == null)
+        {
+            var volume = volumes.SingleOrDefault(v => v.Number == 0);
+            if (volume == null) return nonSpecialChapters.First();
+
+            foreach (var chapter in volume.Chapters.OrderBy(c => float.Parse(c.Number)))
+            {
+                if (chapter.PagesRead < chapter.Pages)
+                {
+                    currentlyReadingChapter = chapter;
+                    break;
+                }
+            }
+        }
+
+        return currentlyReadingChapter ?? nonSpecialChapters.First();
     }
 
 

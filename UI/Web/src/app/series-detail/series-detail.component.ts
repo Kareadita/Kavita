@@ -354,14 +354,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-      
-      
+
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
-
+        
         this.setContinuePoint();
+
         const vol0 = this.volumes.filter(v => v.number === 0);
         this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
         if (this.hasSpecials) {
@@ -398,7 +398,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   setContinuePoint() {
     this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
-    this.currentlyReadingChapter = this.readerService.getCurrentChapter(this.volumes);
+    this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
   markAsRead(vol: Volume) {
@@ -488,7 +488,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
       // Find the continue point chapter and load it
-      this.openChapter(this.readerService.getCurrentChapter([volume]));
+      this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.openChapter(chapter));
       return;
     }
 

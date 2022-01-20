@@ -357,6 +357,19 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Continue point is the chapter which you should start reading again from. If there is no progress on a series, then the first chapter will be returned (non-special unless only specials).
+        /// Otherwise, loop through the chapters and volumes in order to find the next chapter which has progress.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("continue-point")]
+        public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+
+            return Ok(await _readerService.GetContinuePoint(seriesId, userId));
+        }
+
+        /// <summary>
         /// Returns a list of bookmarked pages for a given Chapter
         /// </summary>
         /// <param name="chapterId"></param>
