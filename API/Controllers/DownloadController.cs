@@ -86,7 +86,7 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var roles = await _userManager.GetRolesAsync(user);
-            return roles.Contains(PolicyConstants.DownloadRole);
+            return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
         }
 
         private async Task<ActionResult> GetFirstFileDownload(IEnumerable<MangaFile> files)
