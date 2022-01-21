@@ -384,6 +384,7 @@ namespace API.Services
                     Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
+                    Day = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Day : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
                     Title = epubBook.Title,
                     Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
