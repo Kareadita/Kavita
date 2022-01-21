@@ -7,7 +7,7 @@ public enum PublicationStatus
     /// <summary>
     /// Default Status. Publication is currently in progress
     /// </summary>
-    [Description("On Going")]
+    [Description("Ongoing")]
     OnGoing = 0,
     /// <summary>
     /// Series is on temp or indefinite Hiatus
