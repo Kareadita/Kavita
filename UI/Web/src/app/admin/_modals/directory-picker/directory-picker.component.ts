@@ -77,6 +77,7 @@ export class DirectoryPickerComponent implements OnInit {
 
   loadChildren(path: string) {
     this.libraryService.listDirectories(path).subscribe(folders => {
+      this.filterQuery = '';
       this.folders = folders;
     }, err => {
       // If there was an error, pop off last directory added to stack
