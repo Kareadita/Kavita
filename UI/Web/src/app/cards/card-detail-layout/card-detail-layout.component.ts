@@ -58,6 +58,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
   /**
+   * Should filtering be shown on the page
+   */
+  @Input() filteringDisabled: boolean = false;
+  /**
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
