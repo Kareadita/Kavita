@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using API.DTOs.Account;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,8 @@ namespace API.Services;
 public interface ITokenService
 {
     Task<string> CreateToken(AppUser user);
+    Task<TokenRequestDto> ValidateRefreshToken(TokenRequestDto request);
+    Task<string> CreateRefreshToken(AppUser user);
 }
 
 public class TokenService : ITokenService
@@ -48,12 +51,42 @@ public class TokenService : ITokenService
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.Now.AddDays(7),
-            SigningCredentials = creds
+            SigningCredentials = creds,
+            Issuer = "Kavita"
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    public async Task<string> CreateRefreshToken(AppUser user)
+    {
+        await _userManager.RemoveAuthenticationTokenAsync(user, "Kavita", "RefreshToken");
+        var refreshToken = await _userManager.GenerateUserTokenAsync(user, "", "RefreshToken");
+        await _userManager.SetAuthenticationTokenAsync(user, "Kavita", "RefreshToken", refreshToken);
+        return refreshToken;
+    }
+
+    public async Task<TokenRequestDto> ValidateRefreshToken(TokenRequestDto request)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenContent = tokenHandler.ReadJwtToken(request.Token);
+        var username = tokenContent.Claims.FirstOrDefault(q => q.Type == ClaimTypes.Name)?.Value;
+        var user = await _userManager.FindByNameAsync(username);
+        var isValid = await _userManager.VerifyUserTokenAsync(user, "", "RefreshToken", request.RefreshToken);
+        if (isValid)
+        {
+            return new TokenRequestDto()
+            {
+                Token = await CreateToken(user),
+                RefreshToken = await CreateRefreshToken(user)
+            };
+        }
+
+        await _userManager.UpdateSecurityStampAsync(user);
+
+        return null;
     }
 }

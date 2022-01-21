@@ -22,6 +22,11 @@ export class AccountService implements OnDestroy {
   private currentUserSource = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserSource.asObservable();
 
+  /**
+   * SetTimeout handler for keeping track of refresh token call
+   */
+  private refreshTokenTimeout: ReturnType<typeof setTimeout> | undefined;
+
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
@@ -50,6 +55,7 @@ export class AccountService implements OnDestroy {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.startRefreshTokenTimer();
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),
@@ -75,6 +81,7 @@ export class AccountService implements OnDestroy {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
+    this.stopRefreshTokenTimer();
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
     this.messageHub.stopHubConnection();
@@ -135,8 +142,38 @@ export class AccountService implements OnDestroy {
       }
       return key;
     }));
-
-    
   }
+
+  private refreshToken() {
+    return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token', {}).pipe(map(user => {
+      if (this.currentUser) {
+        this.currentUser.token = user.token;
+        this.currentUser.refreshToken = user.refreshToken;
+      }
+      
+      this.currentUserSource.next(this.currentUser);
+      this.startRefreshTokenTimer();
+      return user;
+    }));
+  }
+
+  private startRefreshTokenTimer() {
+    if (this.currentUser == null) return;
+
+    const jwtToken = JSON.parse(atob(this.currentUser.token.split('.')[1]));
+    // set a timeout to refresh the token a minute before it expires
+    const expires = new Date(jwtToken.exp * 1000);
+    console.log('JWT Expires ', expires);
+    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(), timeout);
+  }
+
+  private stopRefreshTokenTimer() {
+    if (this.refreshTokenTimeout !== undefined) {
+      clearTimeout(this.refreshTokenTimeout);
+    }
+  }
+
+
 
 }

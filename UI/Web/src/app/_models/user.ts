@@ -4,6 +4,7 @@ import { Preferences } from './preferences/preferences';
 export interface User {
     username: string;
     token: string;
+    refreshToken: string;
     roles: string[];
     preferences: Preferences;
     apiKey: string;
