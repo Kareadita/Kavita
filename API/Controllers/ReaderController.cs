@@ -370,6 +370,19 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Marks every chapter that is sorted below the passed number as Read
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("mark-chapter-less-than-as-read")]
+        public async Task<ActionResult<bool>> MarkChaptersLessThanAsRead(float chapterNumber)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+
+            return Ok(false);
+            //return Ok(await _readerService.GetContinuePoint(seriesId, userId));
+        }
+
+        /// <summary>
         /// Returns a list of bookmarked pages for a given Chapter
         /// </summary>
         /// <param name="chapterId"></param>
