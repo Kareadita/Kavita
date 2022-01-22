@@ -143,10 +143,6 @@ export class MessageHubService {
         payload: resp.body
       });
       this.seriesAdded.emit(resp.body);
-      // Don't show the toast when user has reader open
-      if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
-        this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
-      }
     });
 
     this.hubConnection.on(EVENTS.SeriesRemoved, resp => {

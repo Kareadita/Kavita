@@ -148,7 +148,7 @@ namespace API.Controllers
         }
 
         [HttpGet("chapter")]
-        public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
+        public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
         {
             return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
