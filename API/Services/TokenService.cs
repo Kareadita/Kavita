@@ -51,8 +51,7 @@ public class TokenService : ITokenService
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.Now.AddDays(7),
-            SigningCredentials = creds,
-            Issuer = "Kavita"
+            SigningCredentials = creds
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -63,9 +62,9 @@ public class TokenService : ITokenService
 
     public async Task<string> CreateRefreshToken(AppUser user)
     {
-        await _userManager.RemoveAuthenticationTokenAsync(user, "Kavita", "RefreshToken");
-        var refreshToken = await _userManager.GenerateUserTokenAsync(user, "", "RefreshToken");
-        await _userManager.SetAuthenticationTokenAsync(user, "Kavita", "RefreshToken", refreshToken);
+        await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken");
+        var refreshToken = await _userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken");
+        await _userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", refreshToken);
         return refreshToken;
     }
 
@@ -73,9 +72,9 @@ public class TokenService : ITokenService
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenContent = tokenHandler.ReadJwtToken(request.Token);
-        var username = tokenContent.Claims.FirstOrDefault(q => q.Type == ClaimTypes.Name)?.Value;
+        var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
         var user = await _userManager.FindByNameAsync(username);
-        var isValid = await _userManager.VerifyUserTokenAsync(user, "", "RefreshToken", request.RefreshToken);
+        var isValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", request.RefreshToken);
         if (isValid)
         {
             return new TokenRequestDto()

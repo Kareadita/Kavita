@@ -28,6 +28,7 @@ namespace API.Extensions
                     opt.Password.RequireNonAlphanumeric = false;
                     opt.Password.RequiredLength = 6;
                 })
+                .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider)
                 .AddRoles<AppRole>()
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddSignInManager<SignInManager<AppUser>>()
@@ -43,6 +44,7 @@ namespace API.Extensions
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                        ValidIssuer = "Kavita"
                     };
 
                     options.Events = new JwtBearerEvents()
