@@ -40,7 +40,6 @@ export class AppComponent implements OnInit {
 
   setCurrentUser() {
     const user = this.accountService.getUserFromLocalStorage();
-
     this.accountService.setCurrentUser(user);
 
     if (user) {
