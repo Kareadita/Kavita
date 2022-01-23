@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SelectionModel } from 'src/app/typeahead/typeahead.component';
@@ -7,13 +7,15 @@ import { Member } from 'src/app/_models/member';
 import { LibraryService } from 'src/app/_services/library.service';
 
 @Component({
-  selector: 'app-library-access-modal',
-  templateUrl: './library-access-modal.component.html',
-  styleUrls: ['./library-access-modal.component.scss']
+  selector: 'app-library-selector',
+  templateUrl: './library-selector.component.html',
+  styleUrls: ['./library-selector.component.scss']
 })
-export class LibraryAccessModalComponent implements OnInit {
+export class LibrarySelectorComponent implements OnInit {
 
   @Input() member: Member | undefined;
+  @Output() selected: EventEmitter<Array<Library>> = new EventEmitter<Array<Library>>();
+
   allLibraries: Library[] = [];
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
@@ -24,7 +26,7 @@ export class LibraryAccessModalComponent implements OnInit {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService, private fb: FormBuilder) { }
+  constructor(private libraryService: LibraryService, private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libs => {
@@ -33,20 +35,6 @@ export class LibraryAccessModalComponent implements OnInit {
     });
   }
 
-  close() {
-    this.modal.dismiss();
-  }
-
-  save() {
-    if (this.member?.username === undefined) {
-      return;
-    }
-
-    const selectedLibraries = this.selections.selected();
-    this.libraryService.updateLibrariesForMember(this.member?.username, selectedLibraries).subscribe(() => {
-      this.modal.close(true);
-    });
-  }
 
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.allLibraries);
@@ -58,16 +46,14 @@ export class LibraryAccessModalComponent implements OnInit {
         this.selections.toggle(lib, true, (a, b) => a.name === b.name);
       });
       this.selectAll = this.selections.selected().length === this.allLibraries.length;
+      this.selected.emit(this.selections.selected());
     }
-  }
-
-  reset() {
-    this.setupSelections();
   }
 
   toggleAll() {
     this.selectAll = !this.selectAll;
     this.allLibraries.forEach(s => this.selections.toggle(s, this.selectAll));
+    this.selected.emit(this.selections.selected());
   }
 
   handleSelection(item: Library) {
@@ -78,6 +64,8 @@ export class LibraryAccessModalComponent implements OnInit {
     } else if (numberOfSelected == this.selectedLibraries.length) {
       this.selectAll = true;
     }
+
+    this.selected.emit(this.selections.selected());
   }
 
 }

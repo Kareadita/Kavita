@@ -1,10 +1,49 @@
 
 
 <div class="container-fluid">
-    <div class="row mb-2">
+    <!-- <div class="row mb-2">
         <div class="col-8"><h3>Users</h3></div>
         <div class="col-4"><button class="btn btn-primary float-right" (click)="createMember()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add User</span></button></div>
-    </div>
+    </div> -->
+
+    <ng-container>
+        <div class="row mb-2">
+            <div class="col-8"><h3>Pending Invites</h3></div>
+            <div class="col-4"><button class="btn btn-primary float-right" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
+        </div>
+        <ul class="list-group">
+            <li  class="list-group-item">
+                <div>
+                    <h4>
+                        <span id="member-name--{{0}}">{{'robbie' | titlecase}} </span>
+                        <div class="float-right">
+                            <button class="btn btn-danger mr-2">Cancel</button>
+                            <button class="btn btn-secondary mr-2">Resend</button>
+                        </div>
+                    </h4>
+
+                    <div>Invited: 1/27/2021 11:03 am
+                        <!-- <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                        <ng-template #activeDate>
+                            {{member.lastActive | date: 'short'}}
+                        </ng-template> -->
+                    </div>
+                </div>
+            </li>
+            <li *ngIf="loadingMembers" class="list-group-item">
+                <div class="spinner-border text-secondary" role="status">
+                    <span class="invisible">Loading...</span>
+                </div>
+            </li>
+            <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
+                There are no other users.
+            </li>
+        </ul>
+    </ng-container>
+
+
+
+    <h3 class="mt-3">Active Users</h3>
     <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
         <li *ngFor="let member of members; let idx = index;" class="list-group-item">
             <div>

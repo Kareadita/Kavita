@@ -16,6 +16,9 @@ import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.c
 import { ManageSystemComponent } from './manage-system/manage-system.component';
 import { ChangelogComponent } from './changelog/changelog.component';
 import { PipeModule } from '../pipe/pipe.module';
+import { InviteUserComponent } from './invite-user/invite-user.component';
+import { RoleSelectorComponent } from './role-selector/role-selector.component';
+import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 
 
 
@@ -33,6 +36,9 @@ import { PipeModule } from '../pipe/pipe.module';
     EditRbsModalComponent,
     ManageSystemComponent,
     ChangelogComponent,
+    InviteUserComponent,
+    RoleSelectorComponent,
+    LibrarySelectorComponent,
   ],
   imports: [
     CommonModule,

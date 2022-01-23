@@ -12,6 +12,7 @@ import { ConfirmService } from 'src/app/shared/confirm.service';
 import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { Subject } from 'rxjs';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
+import { InviteUserComponent } from '../invite-user/invite-user.component';
 
 @Component({
   selector: 'app-manage-users',
@@ -89,6 +90,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.loadMembers();
     });
   }
+  
 
   async deleteUser(member: Member) {
     if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
@@ -106,7 +108,17 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       if (updatedMember !== undefined) {
         member = updatedMember;
       }
-    })
+    });
+  }
+
+  inviteUser() {
+    const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
+    modalRef.closed.subscribe(() => {
+      // if (updatedMember !== undefined) {
+      //   member = updatedMember;
+      // }
+      // TODO: Refresh pending invites from server
+    });
   }
 
   updatePassword(member: Member) {
