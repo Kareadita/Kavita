@@ -43,6 +43,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
+  storyChapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
   hasDownloadingRole = false;
@@ -61,7 +62,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = 2;
-  hasNonSpecialVolumeChapters = true;
+  hasNonSpecialVolumeChapters = false;
+  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -357,13 +359,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+        this.storyChapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
         
         this.setContinuePoint();
 
         const vol0 = this.volumes.filter(v => v.number === 0);
-        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
+        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0;
         if (this.hasSpecials) {
           this.specials = vol0.map(v => v.chapters || [])
           .flat()
@@ -375,14 +378,30 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           });
         }
 
-        if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
-          this.activeTabId = 1;
-          this.hasNonSpecialVolumeChapters = false;
+        // This shows Chapters/Issues tab
+        // If this has chapters that are not specials
+        if (this.chapters.filter(c => !c.isSpecial).length > 0) {
+          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
+            this.activeTabId = 4;
+          }
+          this.hasNonSpecialNonVolumeChapters = true;
+        }
+
+        // This shows Volumes tab
+        if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
+          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
+            this.activeTabId = 3;
+          }
+          this.hasNonSpecialVolumeChapters = true;
         }
 
         // If an update occured and we were on specials, re-activate Volumes/Chapters 
-        if (!this.hasSpecials && this.activeTabId != 2) {
-          this.activeTabId = 2;
+        if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != 2) {
+          this.activeTabId = 3;
+        }
+
+        if (this.hasSpecials) {
+          this.activeTabId = 1;
         }
 
         this.isLoading = false;
