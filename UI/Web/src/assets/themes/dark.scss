@@ -9,7 +9,7 @@
       color: $dark-text-color;
   }
 
-  a, .btn-link {
+  a:not(.dark-exempt), .btn-link {
     color: $dark-hover-color;
     > i {
       color: $dark-hover-color !important;
