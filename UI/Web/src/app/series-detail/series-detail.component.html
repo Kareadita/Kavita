@@ -92,7 +92,7 @@
                     </div>
                 </ng-template>
             </li>
-            <li [ngbNavItem]="3" *ngIf="libraryType !== LibraryType.Comic && hasNonSpecialVolumeChapters">
+            <li [ngbNavItem]="3" *ngIf="hasNonSpecialVolumeChapters">
                 <a ngbNavLink>Volumes</a>
                 <ng-template ngbNavContent>
                     <div class="row no-gutters">
