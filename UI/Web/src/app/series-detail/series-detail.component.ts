@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
@@ -43,6 +43,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
+  storyChapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
   hasDownloadingRole = false;
@@ -61,7 +62,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = 2;
-  hasNonSpecialVolumeChapters = true;
+  hasNonSpecialVolumeChapters = false;
+  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -223,6 +225,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  onNavChange(event: NgbNavChangeEvent) {
+    this.bulkSelectionService.deselectAll();
+  }
+
   handleSeriesActionCallback(action: Action, series: Series) {
     this.actionInProgress = true;
     switch(action) {
@@ -336,14 +342,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
 
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+
     forkJoin([
       this.libraryService.getLibraryType(this.libraryId),
-      this.seriesService.getMetadata(seriesId),
       this.seriesService.getSeries(seriesId)
     ]).subscribe(results => {
       this.libraryType = results[0];
-      this.seriesMetadata = results[1];
-      this.series = results[2];
+      this.series = results[1];
 
       this.createHTML();
 
@@ -357,17 +363,19 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
-        this.volumes = volumes.sort(this.utilityService.sortVolumes);
+        this.volumes = volumes; // volumes are already be sorted in the backend
+        const vol0 = this.volumes.filter(v => v.number === 0);
+        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
+        
         
         this.setContinuePoint();
 
-        const vol0 = this.volumes.filter(v => v.number === 0);
-        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
+        
+        const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
+        this.hasSpecials = specials.length > 0
         if (this.hasSpecials) {
-          this.specials = vol0.map(v => v.chapters || [])
-          .flat()
-          .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
+          this.specials = specials
           .map(c => {
             c.title = this.utilityService.cleanSpecialTitle(c.title);
             c.range = this.utilityService.cleanSpecialTitle(c.range);
@@ -375,14 +383,30 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           });
         }
 
-        if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
-          this.activeTabId = 1;
-          this.hasNonSpecialVolumeChapters = false;
+        // This shows Chapters/Issues tab
+        // If this has chapters that are not specials
+        if (this.chapters.filter(c => !c.isSpecial).length > 0) {
+          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
+            this.activeTabId = 4;
+          }
+          this.hasNonSpecialNonVolumeChapters = true;
+        }
+
+        // This shows Volumes tab
+        if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
+          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
+            this.activeTabId = 3;
+          }
+          this.hasNonSpecialVolumeChapters = true;
         }
 
         // If an update occured and we were on specials, re-activate Volumes/Chapters 
-        if (!this.hasSpecials && this.activeTabId != 2) {
-          this.activeTabId = 2;
+        if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != 2) {
+          this.activeTabId = 3;
+        }
+
+        if (this.hasSpecials) {
+          this.activeTabId = 1;
         }
 
         this.isLoading = false;
@@ -397,7 +421,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   setContinuePoint() {
-    this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
+    this.readerService.hasSeriesProgress(this.series.id).subscribe(hasProgress => this.hasReadingProgress = hasProgress);
     this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
