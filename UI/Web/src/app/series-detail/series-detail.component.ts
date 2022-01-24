@@ -359,18 +359,18 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.storyChapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+        const vol0 = this.volumes.filter(v => v.number === 0);
+        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
         this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
         this.volumes = volumes.sort(this.utilityService.sortVolumes);
         
         this.setContinuePoint();
 
-        const vol0 = this.volumes.filter(v => v.number === 0);
-        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0;
+        
+        const specials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
+        this.hasSpecials = specials.length > 0
         if (this.hasSpecials) {
-          this.specials = vol0.map(v => v.chapters || [])
-          .flat()
-          .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
+          this.specials = specials
           .map(c => {
             c.title = this.utilityService.cleanSpecialTitle(c.title);
             c.range = this.utilityService.cleanSpecialTitle(c.range);
