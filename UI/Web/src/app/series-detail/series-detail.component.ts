@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
@@ -223,6 +223,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
     }
+  }
+
+  onNavChange(event: NgbNavChangeEvent) {
+    this.bulkSelectionService.deselectAll();
   }
 
   handleSeriesActionCallback(action: Action, series: Series) {
