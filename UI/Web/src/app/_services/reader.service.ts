@@ -103,6 +103,10 @@ export class ReaderService {
     return this.httpClient.get<number>(this.baseUrl + 'reader/prev-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
+  hasSeriesProgress(seriesId: number) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'reader/has-progress?seriesId=' + seriesId);
+  }
+
   getCurrentChapter(seriesId: number) {
     return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
   }

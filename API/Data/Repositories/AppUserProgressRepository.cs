@@ -12,6 +12,7 @@ public interface IAppUserProgressRepository
     Task<int> CleanupAbandonedChapters();
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId);
+    Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId);
 }
 
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -74,6 +75,12 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Where(s => seriesIds.Contains(s.Id) && s.Library.Type == libraryType)
             .AsNoTracking()
             .AnyAsync();
+    }
+
+    public async Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId)
+    {
+        return await _context.AppUserProgresses
+            .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
     }
 
     public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)

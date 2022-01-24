@@ -365,8 +365,19 @@ namespace API.Controllers
         public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-
             return Ok(await _readerService.GetContinuePoint(seriesId, userId));
+        }
+
+        /// <summary>
+        /// Returns if the user has reading progress on the Series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        [HttpGet("has-progress")]
+        public async Task<ActionResult<ChapterDto>> HasProgress(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId));
         }
 
         /// <summary>

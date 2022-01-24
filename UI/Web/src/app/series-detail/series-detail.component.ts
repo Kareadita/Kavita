@@ -342,14 +342,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
 
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+
     forkJoin([
       this.libraryService.getLibraryType(this.libraryId),
-      this.seriesService.getMetadata(seriesId),
       this.seriesService.getSeries(seriesId)
     ]).subscribe(results => {
       this.libraryType = results[0];
-      this.seriesMetadata = results[1];
-      this.series = results[2];
+      this.series = results[1];
 
       this.createHTML();
 
@@ -363,15 +363,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
+        this.volumes = volumes; // volumes are already be sorted in the backend
         const vol0 = this.volumes.filter(v => v.number === 0);
         this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
         this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
-        this.volumes = volumes.sort(this.utilityService.sortVolumes);
+        
         
         this.setContinuePoint();
 
         
-        const specials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
+        const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
         this.hasSpecials = specials.length > 0
         if (this.hasSpecials) {
           this.specials = specials
@@ -420,7 +421,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   setContinuePoint() {
-    this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
+    this.readerService.hasSeriesProgress(this.series.id).subscribe(hasProgress => this.hasReadingProgress = hasProgress);
     this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
