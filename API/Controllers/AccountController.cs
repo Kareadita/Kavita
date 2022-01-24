@@ -12,6 +12,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -284,6 +285,50 @@ namespace API.Controllers
             await _unitOfWork.RollbackAsync();
             return BadRequest("Something went wrong, unable to reset key");
 
+        }
+
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("invite")]
+        public async Task<ActionResult> InviteUser(InviteUserDto dto)
+        {
+            var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
+
+            // Check if said email already exists within the system
+            //if (_userManager.UserValidators.) // TODO:
+            // Check if there is an existing invite
+            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+            if (invitedUser != null)
+            {
+                if (await _userManager.IsEmailConfirmedAsync(invitedUser))
+                    return BadRequest($"User is already registered as {invitedUser.UserName}");
+                return BadRequest("User is already invited under this email and has yet to accepted invite.");
+            }
+
+            // Create a new user
+            var user = new AppUser()
+            {
+                Email = dto.Email,
+                ApiKey = HashUtil.ApiKey(),
+                UserPreferences = new AppUserPreferences()
+            };
+            var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
+            if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            if (!string.IsNullOrEmpty(token))
+            {
+                // TODO: Send email (KavitaEmail post call)
+            }
+
+
+
+
+
+
+
+            return BadRequest("Not Implemented");
         }
     }
 }

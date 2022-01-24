@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -8,6 +9,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,6 +50,7 @@ public interface IUserRepository
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
+    Task<AppUser> GetUserByEmailAsync(string email);
 }
 
 public class UserRepository : IUserRepository
@@ -198,6 +201,11 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    public async Task<AppUser> GetUserByEmailAsync(string email)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.Equals(email));
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -304,5 +312,15 @@ public class UserRepository : IUserRepository
             })
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<bool> ValidateUserExists(string username)
+    {
+        if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == username.ToUpper()))
+        {
+            throw new ValidationException("Username is taken.");
+        }
+
+        return true;
     }
 }
