@@ -9,7 +9,6 @@ using API.DTOs.Reader;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Kavita.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

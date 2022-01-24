@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Constants;
 using API.Data;
 using API.DTOs.Downloads;

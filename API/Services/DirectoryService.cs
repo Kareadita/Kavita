@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -7,7 +6,6 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 

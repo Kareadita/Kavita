@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
-using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.SignalR;

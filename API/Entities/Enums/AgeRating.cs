@@ -21,6 +21,7 @@ public enum AgeRating
     [Description("Everyone 10+")]
     Everyone10Plus = 5,
     [Description("PG")]
+    // ReSharper disable once InconsistentNaming
     PG = 6,
     [Description("Kids to Adults")]
     KidsToAdults = 7,
