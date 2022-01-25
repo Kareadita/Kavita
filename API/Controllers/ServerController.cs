@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.DTOs.Update;
@@ -28,10 +29,11 @@ namespace API.Controllers
         private readonly IVersionUpdaterService _versionUpdaterService;
         private readonly IStatsService _statsService;
         private readonly ICleanupService _cleanupService;
+        private readonly IEmailService _emailService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
             IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
-            IVersionUpdaterService versionUpdaterService, IStatsService statsService, ICleanupService cleanupService)
+            IVersionUpdaterService versionUpdaterService, IStatsService statsService, ICleanupService cleanupService, IEmailService emailService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
@@ -42,6 +44,7 @@ namespace API.Controllers
             _versionUpdaterService = versionUpdaterService;
             _statsService = statsService;
             _cleanupService = cleanupService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -118,6 +121,16 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
         {
             return Ok(await _versionUpdaterService.GetAllReleases());
+        }
+
+        /// <summary>
+        /// Is this server accessible to the outside net
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("accessible")]
+        public async Task<ActionResult<bool>> IsServerAccessible()
+        {
+            return await _emailService.CheckIfAccessible(Request.Host.ToString());
         }
     }
 }

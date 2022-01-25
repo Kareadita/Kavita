@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Account;
+using API.DTOs.Email;
 using API.Entities;
 using API.Extensions;
 using API.Services;
@@ -32,13 +35,14 @@ namespace API.Controllers
         private readonly ILogger<AccountController> _logger;
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
+        private readonly IEmailService _emailService;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper, IAccountService accountService)
+            IMapper mapper, IAccountService accountService, IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -47,6 +51,7 @@ namespace API.Controllers
             _logger = logger;
             _mapper = mapper;
             _accountService = accountService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -309,6 +314,7 @@ namespace API.Controllers
             // Create a new user
             var user = new AppUser()
             {
+                UserName = dto.Email,
                 Email = dto.Email,
                 ApiKey = HashUtil.ApiKey(),
                 UserPreferences = new AppUserPreferences()
@@ -317,19 +323,50 @@ namespace API.Controllers
             if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
             if (!string.IsNullOrEmpty(token))
             {
                 // TODO: Send email (KavitaEmail post call)
-
+                await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                {
+                    EmailAddress = dto.Email,
+                    InvitingUser = adminUser.UserName,
+                    ServerConfirmationLink = ""
+                });
             }
 
-
-
-
-
-
-
-            return BadRequest("Not Implemented");
+            return Ok("Email link");
         }
+
+        // public string FullyQualifiedApplicationPath
+        // {
+        //     get
+        //     {
+        //         //Return variable declaration
+        //         var appPath = string.Empty;
+        //
+        //         //Getting the current context of HTTP request
+        //         var context = HttpContext.Current;
+        //
+        //         //Checking the current context content
+        //         if (context != null)
+        //         {
+        //             //Formatting the fully qualified website url/name
+        //             appPath = string.Format("{0}://{1}{2}{3}",
+        //                 context.Request.Url.Scheme,
+        //                 context.Request.Url.Host,
+        //                 context.Request.Url.Port == 80
+        //                     ? string.Empty
+        //                     : ":" + context.Request.Url.Port,
+        //                 context.Request.ApplicationPath);
+        //         }
+        //
+        //         if (!appPath.EndsWith("/"))
+        //             appPath += "/";
+        //
+        //         return appPath;
+        //     }
+        // }
+
     }
 }

@@ -91,19 +91,6 @@ export class AccountService implements OnDestroy {
     this.messageHub.stopHubConnection();
   }
 
-  // setCurrentUser() {
-  //   // TODO: Refactor this to setCurentUser in accoutnService
-  //   const user = this.getUserFromLocalStorage();
-
-
-  //   if (user) {
-  //     this.navService.setDarkMode(user.preferences.siteDarkMode);
-  //     this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
-  //     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-  //   } else {
-  //     this.navService.setDarkMode(true);
-  //   }
-  // }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {
     if (!model.hasOwnProperty('isAdmin')) {
@@ -116,6 +103,10 @@ export class AccountService implements OnDestroy {
       }),
       takeUntil(this.onDestroy)
     );
+  }
+
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
+    return this.httpClient.post(this.baseUrl + 'account/invite', model, {responseType: 'json' as 'text'});
   }
 
   getDecodedToken(token: string) {
