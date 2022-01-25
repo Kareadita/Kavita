@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Entities;
 using API.Errors;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -13,6 +14,7 @@ namespace API.Services
     {
         Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
         Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
+        Task<IEnumerable<ApiException>> ValidateUsername(string username);
     }
 
     public class AccountService : IAccountService
@@ -59,6 +61,18 @@ namespace API.Services
                 {
                     return validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description));
                 }
+            }
+
+            return Array.Empty<ApiException>();
+        }
+        public async Task<IEnumerable<ApiException>> ValidateUsername(string username)
+        {
+            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == username.ToUpper()))
+            {
+                return new List<ApiException>()
+                {
+                    new ApiException(400, "Username is already taken")
+                };
             }
 
             return Array.Empty<ApiException>();

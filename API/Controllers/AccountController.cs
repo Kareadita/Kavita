@@ -90,9 +90,10 @@ namespace API.Controllers
         {
             try
             {
-                if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == registerDto.Username.ToUpper()))
+                var usernameValidation = await _accountService.ValidateUsername(registerDto.Username);
+                if (usernameValidation.Any())
                 {
-                    return BadRequest("Username is taken.");
+                    return BadRequest(usernameValidation);
                 }
 
                 // If we are registering an admin account, ensure there are no existing admins or user registering is an admin
@@ -348,18 +349,14 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
 
-            // Validate Password and Username before anything
+            // Validate Password and Username
             var validationErrors = new List<ApiException>();
-            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == dto.Username.ToUpper()))
-            {
-                validationErrors.Add(new ApiException(400, "Username is taken"));
-            }
-
+            validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
             validationErrors.AddRange(await _accountService.ValidatePassword(user, dto.Password));
 
             if (validationErrors.Any())
             {
-                // TODO: Figure out how to throw validation errors to UI
+                // TODO: Figure out how to throw validation errors to UI properly
                 return BadRequest(validationErrors);
             }
 
@@ -386,8 +383,8 @@ namespace API.Controllers
             {
                 return BadRequest(errors);
             }
+            await _unitOfWork.CommitAsync();
 
-            // Save everything
 
             user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
                 AppUserIncludes.UserPreferences);
