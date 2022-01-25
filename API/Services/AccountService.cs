@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
@@ -11,6 +12,7 @@ namespace API.Services
     public interface IAccountService
     {
         Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
+        Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
     }
 
     public class AccountService : IAccountService
@@ -27,14 +29,8 @@ namespace API.Services
 
         public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
         {
-            foreach (var validator in _userManager.PasswordValidators)
-            {
-                var validationResult = await validator.ValidateAsync(_userManager, user, newPassword);
-                if (!validationResult.Succeeded)
-                {
-                    return validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description));
-                }
-            }
+            var passwordValidationIssues = (await ValidatePassword(user, newPassword)).ToList();
+            if (passwordValidationIssues.Any()) return passwordValidationIssues;
 
             var result = await _userManager.RemovePasswordAsync(user);
             if (!result.Succeeded)
@@ -52,6 +48,20 @@ namespace API.Services
             }
 
             return new List<ApiException>();
+        }
+
+        public async Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password)
+        {
+            foreach (var validator in _userManager.PasswordValidators)
+            {
+                var validationResult = await validator.ValidateAsync(_userManager, user, password);
+                if (!validationResult.Succeeded)
+                {
+                    return validationResult.Errors.Select(e => new ApiException(400, e.Code, e.Description));
+                }
+            }
+
+            return Array.Empty<ApiException>();
         }
     }
 }

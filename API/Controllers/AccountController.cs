@@ -12,6 +12,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
+using API.Errors;
 using API.Extensions;
 using API.Services;
 using AutoMapper;
@@ -346,15 +347,45 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> ConfirmEmail(ConfirmEmailDto dto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+
+            // Validate Password and Username before anything
+            var validationErrors = new List<ApiException>();
+            if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == dto.Username.ToUpper()))
+            {
+                validationErrors.Add(new ApiException(400, "Username is taken"));
+            }
+
+            validationErrors.AddRange(await _accountService.ValidatePassword(user, dto.Password));
+
+            if (validationErrors.Any())
+            {
+                // TODO: Figure out how to throw validation errors to UI
+                return BadRequest(validationErrors);
+            }
+
+
             var result =  await _userManager.ConfirmEmailAsync(user, dto.Token);
             if (!result.Succeeded)
             {
                 // TODO: Throw exceptions
-                return BadRequest("Some error");
+                _logger.LogCritical("Email validation failed");
+                if (result.Errors.Any())
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        _logger.LogCritical("Email validation error: {Message}", error.Description);
+                    }
+                }
+
+                return BadRequest("Email validation failed");
             }
 
             user.UserName = dto.Username;
-            // TODO: Call change password
+            var errors = await _accountService.ChangeUserPassword(user, dto.Password);
+            if (errors.Any())
+            {
+                return BadRequest(errors);
+            }
 
             // Save everything
 
