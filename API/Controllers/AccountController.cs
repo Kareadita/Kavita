@@ -176,6 +176,8 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
+            // TODO: Need to check if email has been confirmed or not
+
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             if (!settings.EnableAuthentication && !isAdmin)
@@ -328,20 +330,18 @@ namespace API.Controllers
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-            if (!string.IsNullOrEmpty(token))
-            {
-                var emailLink = Request.Scheme + "://" + Request.Host + Request.PathBase + "/confirm-email?token=" +
-                                token;
-                await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-                {
-                    EmailAddress = dto.Email,
-                    InvitingUser = adminUser.UserName,
-                    ServerConfirmationLink = emailLink
-                });
-                return Ok(emailLink);
-            }
+            if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
 
-            return BadRequest("There was an issue sending email");
+
+            var emailLink = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/registration/confirm-email?token={token}&email={dto.Email}";
+
+            await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+            {
+                EmailAddress = dto.Email,
+                InvitingUser = adminUser.UserName,
+                ServerConfirmationLink = emailLink
+            });
+            return Ok(emailLink);
         }
 
         [HttpPost("confirm-email")]

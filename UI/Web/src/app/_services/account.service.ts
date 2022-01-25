@@ -49,7 +49,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  login(model: any): Observable<any> {
+  login(model: {username: string, password: string}): Observable<any> {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;
@@ -107,6 +107,10 @@ export class AccountService implements OnDestroy {
 
   inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
     return this.httpClient.post(this.baseUrl + 'account/invite', model, {responseType: 'json' as 'text'});
+  }
+
+  confirmEmail(model: {email: string, username: string, password: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
   }
 
   getDecodedToken(token: string) {

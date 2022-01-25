@@ -1,0 +1,86 @@
+@use "../../../theme/colors";
+
+.login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -61px; // To offset the navbar
+    height: calc(100vh);
+    min-height: 289px;
+    position: relative;
+    width: 100vw;
+    max-width: 100vw;
+
+
+    &::before {
+        content: "";
+        background-image: url('../../../assets/images/login-bg.jpg');
+        background-size: cover;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        width: 100%;
+    }
+
+    .logo-container {
+        .logo {
+            display:inline-block;
+            height: 50px;
+        }
+    }
+
+    .row {
+        margin-top: 10vh;
+    }
+
+    .card {
+        background-color: colors.$primary-color;
+        color: #fff;
+        cursor: pointer;
+        min-width: 300px;
+
+        &:focus {
+            border: 2px solid white;
+
+        }
+
+
+        .card-title {
+            font-family: 'Spartan', sans-serif;
+            font-weight: bold;
+            display: inline-block;
+            vertical-align: middle;
+            width: 280px;
+        }
+
+        .card-text {
+            font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+        }
+
+        .alt {
+            background-color: #424c72;
+            border-color: #444f75;
+        }
+
+        .alt:hover {
+            background-color: #3b4466;
+        }
+
+        .alt:focus {
+            background-color: #343c59;
+            box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%);
+        }
+    }
+}
+
+.invalid-feedback {
+    display: inline-block;
+    color: #343c59;
+}
+
+input {
+    background-color: #fff !important;
+    color: black;
+}
