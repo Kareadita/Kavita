@@ -22,6 +22,36 @@
                 </div>
             </div>
         </div>
+
+        <ng-container *ngIf="!accessible && checkedAccessibility">
+            <div class="row no-gutters">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group" style="width:100%">
+                        <label for="username">Username</label>
+                        <input class="form-control" type="email" id="username" formControlName="username" required>
+                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
+                            <div *ngIf="username?.errors?.required">
+                                This field is required
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group" style="width:100%">
+                        <label for="password">Password</label>
+                        <!-- TODO: A show password button-->
+                        <input class="form-control" type="email" id="password" formControlName="password" required>
+                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
+                            <div *ngIf="password?.errors?.required">
+                                This field is required
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </ng-container>
     
         <div class="row no-gutters">
             <div class="col-md-6">
@@ -39,7 +69,7 @@
     <button type="button" class="btn btn-secondary" (click)="close()">
         Cancel
     </button>
-    <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid">
+    <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid || !accessible">
         <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>{{isSending ? 'Inviting...' : 'Invite'}}</span>
     </button>

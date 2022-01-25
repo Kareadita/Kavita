@@ -21,19 +21,25 @@ export class InviteUserComponent implements OnInit {
   /**
    * If a user would be able to load this server up externally
    */
-  accessible: boolean = false;
+  accessible: boolean = true;
+  checkedAccessibility: boolean = false;
 
   public get email() { return this.inviteForm.get('email'); }
+  public get username() { return this.inviteForm.get('username'); }
+  public get password() { return this.inviteForm.get('password'); }
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
 
-    this.serverService.isServerAccessible().subscribe(async (accessbile) => {
-      this.accessible = accessbile;
-      if (!this.accessible) {
-        await this.confirmService.alert('This server is not accessible. You cannot invite via Email. Please use the password button or correct the issue.');
+    this.serverService.isServerAccessible().subscribe(async (accessibile) => {
+      if (!accessibile) {
+        await this.confirmService.alert('This server is not accessible. You cannot invite via Email. Please correct the issue or use username/password fields.');
+        this.accessible = accessibile;
+        this.checkedAccessibility = true;
+        this.inviteForm.addControl('username', new FormControl('', [Validators.required]));
+        this.inviteForm.addControl('password', new FormControl('', [Validators.required]));
       }
     });
   }
