@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Email;
@@ -300,8 +301,6 @@ namespace API.Controllers
             var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
-            // Check if said email already exists within the system
-            //if (_userManager.UserValidators.) // TODO:
             // Check if there is an existing invite
             var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
             if (invitedUser != null)
@@ -319,54 +318,60 @@ namespace API.Controllers
                 ApiKey = HashUtil.ApiKey(),
                 UserPreferences = new AppUserPreferences()
             };
+
             var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
             if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
+
+            // TODO: Assign Roles
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
             if (!string.IsNullOrEmpty(token))
             {
-                // TODO: Send email (KavitaEmail post call)
+                var emailLink = Request.Scheme + "://" + Request.Host + Request.PathBase + "/confirm-email?token=" +
+                                token;
                 await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                 {
                     EmailAddress = dto.Email,
                     InvitingUser = adminUser.UserName,
-                    ServerConfirmationLink = ""
+                    ServerConfirmationLink = emailLink
                 });
+                return Ok(emailLink);
             }
 
-            return Ok("Email link");
+            return BadRequest("There was an issue sending email");
         }
 
-        // public string FullyQualifiedApplicationPath
-        // {
-        //     get
-        //     {
-        //         //Return variable declaration
-        //         var appPath = string.Empty;
-        //
-        //         //Getting the current context of HTTP request
-        //         var context = HttpContext.Current;
-        //
-        //         //Checking the current context content
-        //         if (context != null)
-        //         {
-        //             //Formatting the fully qualified website url/name
-        //             appPath = string.Format("{0}://{1}{2}{3}",
-        //                 context.Request.Url.Scheme,
-        //                 context.Request.Url.Host,
-        //                 context.Request.Url.Port == 80
-        //                     ? string.Empty
-        //                     : ":" + context.Request.Url.Port,
-        //                 context.Request.ApplicationPath);
-        //         }
-        //
-        //         if (!appPath.EndsWith("/"))
-        //             appPath += "/";
-        //
-        //         return appPath;
-        //     }
-        // }
+        [HttpPost("confirm-email")]
+        public async Task<ActionResult<UserDto>> ConfirmEmail(ConfirmEmailDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+            var result =  await _userManager.ConfirmEmailAsync(user, dto.Token);
+            if (!result.Succeeded)
+            {
+                // TODO: Throw exceptions
+                return BadRequest("Some error");
+            }
+
+            user.UserName = dto.Username;
+            // TODO: Call change password
+
+            // Save everything
+
+            user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+                AppUserIncludes.UserPreferences);
+
+            // Perform Login code
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
+                ApiKey = user.ApiKey,
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            };
+        }
+
 
     }
 }

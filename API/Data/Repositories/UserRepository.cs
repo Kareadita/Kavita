@@ -21,7 +21,8 @@ public enum AppUserIncludes
     Progress = 2,
     Bookmarks = 4,
     ReadingLists = 8,
-    Ratings = 16
+    Ratings = 16,
+    UserPreferences = 32
 }
 
 public interface IUserRepository
@@ -157,6 +158,13 @@ public class UserRepository : IUserRepository
         {
             query = query.Include(u => u.Ratings);
         }
+
+        if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
+        {
+            query = query.Include(u => u.UserPreferences);
+        }
+
+
 
         return query;
     }
