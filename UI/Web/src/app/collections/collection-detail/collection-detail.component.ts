@@ -13,7 +13,7 @@ import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
@@ -175,9 +175,9 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateFilter(data: SeriesFilter) {
-    this.filter = data;
-    if (this.seriesPagination !== undefined && this.seriesPagination !== null) {
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+    if (this.seriesPagination !== undefined && this.seriesPagination !== null && !data.isFirst) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);
     } else {
