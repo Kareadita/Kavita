@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
-import { RegisterMemberComponent } from '../register-member/register-member.component';
 import { ReadMoreComponent } from './read-more/read-more.component';
 import { RouterModule } from '@angular/router';
 import { DrawerComponent } from './drawer/drawer.component';
@@ -21,7 +20,6 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
 
 @NgModule({
   declarations: [
-    RegisterMemberComponent,
     ConfirmDialogComponent,
     SafeHtmlPipe,
     ReadMoreComponent,
@@ -45,7 +43,6 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
-    RegisterMemberComponent,
     SafeHtmlPipe,
     SentenceCasePipe,
     ReadMoreComponent,

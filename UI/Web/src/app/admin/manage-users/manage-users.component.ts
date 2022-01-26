@@ -24,9 +24,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   members: Member[] = [];
   pendingInvites: Member[] = [];
   loggedInUsername = '';
-
-  // Create User functionality
-  createMemberToggle = false;
   loadingMembers = false;
 
   private onDestroy = new Subject<void>();
@@ -92,15 +89,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   canEditMember(member: Member): boolean {
     return this.loggedInUsername !== member.username;
-  }
-
-  createMember() {
-    this.createMemberToggle = true;
-  }
-
-  onMemberCreated(createdUser: User | null) {
-    this.createMemberToggle = false;
-    this.loadMembers();
   }
 
   openEditLibraryAccess(member: Member) {

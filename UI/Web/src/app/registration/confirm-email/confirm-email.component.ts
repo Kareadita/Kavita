@@ -40,7 +40,6 @@ export class ConfirmEmailComponent implements OnInit {
       return;
     }
     this.token = token;
-    console.log(this.token);
     this.registerForm.get('email')?.setValue(email || '');
   }
 
@@ -53,7 +52,6 @@ export class ConfirmEmailComponent implements OnInit {
     this.accountService.confirmEmail(model).subscribe((user) => {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
-      //TODO: Log the user in automatically this.accountService.login()
     }, err => {
       this.errors = err;
     });

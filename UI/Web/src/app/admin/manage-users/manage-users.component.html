@@ -34,7 +34,7 @@
 
 
     <h3 class="mt-3">Active Users</h3>
-    <ul class="list-group" *ngIf="!createMemberToggle; else createUser">
+    <ul class="list-group">
         <li *ngFor="let member of members; let idx = index;" class="list-group-item">
             <div>
                 <h4>
@@ -78,7 +78,4 @@
             There are no other users.
         </li>
     </ul>
-    <ng-template #createUser>
-        <app-register-member (created)="onMemberCreated($event)"></app-register-member>
-    </ng-template>
 </div>

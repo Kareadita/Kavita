@@ -38,7 +38,6 @@ export class RegisterComponent implements OnInit {
     this.accountService.register(model).subscribe((user) => {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
-      //TODO: Log the user in automatically this.accountService.login()
     }, err => {
       // TODO: Handle errors
     });
