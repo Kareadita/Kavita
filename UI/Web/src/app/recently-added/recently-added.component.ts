@@ -9,7 +9,7 @@ import { KEY_CODES } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { MessageHubService } from '../_services/message-hub.service';
@@ -23,6 +23,7 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './recently-added.component.html',
   styleUrls: ['./recently-added.component.scss']
 })
+
 export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = true;
@@ -81,9 +82,10 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  applyFilter(data: SeriesFilter) {
-    this.filter = data;
-    if (this.pagination !== undefined && this.pagination !== null) {
+  applyFilter(event: FilterEvent) {
+    this.filter = event.filter;
+    const page = this.getPage();
+    if (page === undefined || page === null || !event.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {

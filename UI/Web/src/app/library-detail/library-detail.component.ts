@@ -10,7 +10,7 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
@@ -138,10 +138,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: SeriesFilter) {
-    this.filter = data;
+  updateFilter(event: FilterEvent) {
+    this.filter = event.filter;
     const page = this.getPage();
-    if (page === undefined || page === null) {
+    if (page === undefined || page === null || !event.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {
