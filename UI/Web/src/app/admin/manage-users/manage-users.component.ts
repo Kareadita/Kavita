@@ -22,6 +22,7 @@ import { InviteUserComponent } from '../invite-user/invite-user.component';
 export class ManageUsersComponent implements OnInit, OnDestroy {
 
   members: Member[] = [];
+  pendingInvites: Member[] = [];
   loggedInUsername = '';
 
   // Create User functionality
@@ -44,6 +45,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMembers();
+
+    this.loadPendingInvites();
   }
 
   ngOnDestroy() {
@@ -67,6 +70,23 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         return 0;
       })
       this.loadingMembers = false;
+    });
+  }
+
+  loadPendingInvites() {
+    this.memberService.getPendingInvites().subscribe(members => {
+      this.pendingInvites = members;
+      // Show logged in user at the top of the list
+      this.pendingInvites.sort((a: Member, b: Member) => {
+        if (a.username === this.loggedInUsername) return 1;
+        if (b.username === this.loggedInUsername) return 1;
+
+        const nameA = a.username.toUpperCase();
+        const nameB = b.username.toUpperCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
+      })
     });
   }
 

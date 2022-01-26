@@ -8,6 +8,11 @@
     <p>
         Invite a user to your server. Enter their email in and we will send them an email to create an account.
     </p>
+
+    <p *ngIf="!checkedAccessibility">
+        <span class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" aria-hidden="true"></span>
+        &nbsp;Checking accessibility of server...
+    </p>
     
 
     <form [formGroup]="inviteForm">
@@ -23,34 +28,9 @@
             </div>
         </div>
 
-        <ng-container *ngIf="!accessible && checkedAccessibility">
-            <div class="row no-gutters">
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group" style="width:100%">
-                        <label for="username">Username</label>
-                        <input class="form-control" type="email" id="username" formControlName="username" required>
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
-                            <div *ngIf="username?.errors?.required">
-                                This field is required
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-sm-12">
-                    <div class="form-group" style="width:100%">
-                        <label for="password">Password</label>
-                        <!-- TODO: A show password button-->
-                        <input class="form-control" type="email" id="password" formControlName="password" required>
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
-                            <div *ngIf="password?.errors?.required">
-                                This field is required
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
+        <ng-container *ngIf="emailLink !== '' && checkedAccessibility && !accessible">
+            <p>Use this link to finish setting up the user account due to your server not being accessible outside your local network.</p>
+            <a href="{{emailLink}}" target="_blank">{{emailLink}}</a>
         </ng-container>
     
         <div class="row no-gutters">
@@ -69,7 +49,7 @@
     <button type="button" class="btn btn-secondary" (click)="close()">
         Cancel
     </button>
-    <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid || !accessible">
+    <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid || !checkedAccessibility">
         <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>{{isSending ? 'Inviting...' : 'Invite'}}</span>
     </button>

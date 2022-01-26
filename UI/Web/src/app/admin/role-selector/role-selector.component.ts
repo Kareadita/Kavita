@@ -50,4 +50,8 @@ export class RoleSelectorComponent implements OnInit {
     }
   }
 
+  handleModelUpdate() {
+    this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
+  }
+
 }

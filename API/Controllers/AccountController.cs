@@ -16,11 +16,13 @@ using API.Errors;
 using API.Extensions;
 using API.Services;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -38,13 +40,14 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly IAccountService _accountService;
         private readonly IEmailService _emailService;
+        private readonly IHostEnvironment _environment;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper, IAccountService accountService, IEmailService emailService)
+            IMapper mapper, IAccountService accountService, IEmailService emailService, IHostEnvironment environment)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -54,6 +57,7 @@ namespace API.Controllers
             _mapper = mapper;
             _accountService = accountService;
             _emailService = emailService;
+            _environment = environment;
         }
 
         /// <summary>
@@ -385,7 +389,7 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("invite")]
-        public async Task<ActionResult> InviteUser(InviteUserDto dto)
+        public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
         {
             var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
@@ -412,7 +416,12 @@ namespace API.Controllers
             if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
 
             // Assign Roles
-            foreach (var role in dto.Roles)
+            var roles = dto.Roles;
+            if (!dto.Roles.Contains(PolicyConstants.AdminRole))
+            {
+                roles.Add(PolicyConstants.PlebRole);
+            }
+            foreach (var role in roles)
             {
                 if (!role.Equals(PolicyConstants.AdminRole) || !role.Equals(PolicyConstants.PlebRole) || !role.Equals(PolicyConstants.DownloadRole)) continue;
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
@@ -423,14 +432,18 @@ namespace API.Controllers
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
 
-
-            var emailLink = $"{Request.Scheme}://{Request.Host}{Request.PathBase}/registration/confirm-email?token={token}&email={dto.Email}";
-            await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+            var emailLink = $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-email?token={token}&email={dto.Email}";
+            if (dto.SendEmail)
             {
-                EmailAddress = dto.Email,
-                InvitingUser = adminUser.UserName,
-                ServerConfirmationLink = emailLink
-            });
+                await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                {
+                    EmailAddress = dto.Email,
+                    InvitingUser = adminUser.UserName,
+                    ServerConfirmationLink = emailLink
+                });
+            }
+
 
             return Ok(emailLink);
         }

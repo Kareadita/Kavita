@@ -1,6 +1,6 @@
 <h4>Libraries</h4>
 <div class="list-group" *ngIf="!isLoading">
-    <div class="form-check">
+    <div class="form-check" *ngIf="allLibraries.length > 0">
         <input id="selectall" type="checkbox" class="form-check-input" 
             [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
         <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>

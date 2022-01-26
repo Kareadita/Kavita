@@ -12,10 +12,10 @@
             <div class="col-4"><button class="btn btn-primary float-right" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
         </div>
         <ul class="list-group">
-            <li  class="list-group-item">
+            <li  class="list-group-item" *ngFor="let invite of pendingInvites; let idx = index;">
                 <div>
                     <h4>
-                        <span id="member-name--{{0}}">{{'robbie' | titlecase}} </span>
+                        <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
                         <div class="float-right">
                             <button class="btn btn-danger mr-2">Cancel</button>
                             <button class="btn btn-secondary mr-2">Resend</button>

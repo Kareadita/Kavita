@@ -31,7 +31,8 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     public void Delete(AppUser user);
-    Task<IEnumerable<MemberDto>>  GetMembersAsync();
+    Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
+    Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser user);
@@ -295,9 +296,10 @@ public class UserRepository : IUserRepository
     }
 
 
-    public async Task<IEnumerable<MemberDto>> GetMembersAsync()
+    public async Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync()
     {
         return await _context.Users
+            .Where(u => u.EmailConfirmed)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
@@ -306,6 +308,35 @@ public class UserRepository : IUserRepository
             {
                 Id = u.Id,
                 Username = u.UserName,
+                Email = u.Email,
+                Created = u.Created,
+                LastActive = u.LastActive,
+                Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                Libraries =  u.Libraries.Select(l => new LibraryDto
+                {
+                    Name = l.Name,
+                    Type = l.Type,
+                    LastScanned = l.LastScanned,
+                    Folders = l.Folders.Select(x => x.Path).ToList()
+                }).ToList()
+            })
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
+    {
+        return await _context.Users
+            .Where(u => !u.EmailConfirmed)
+            .Include(x => x.Libraries)
+            .Include(r => r.UserRoles)
+            .ThenInclude(r => r.Role)
+            .OrderBy(u => u.UserName)
+            .Select(u => new MemberDto
+            {
+                Id = u.Id,
+                Username = u.UserName,
+                Email = u.Email,
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
