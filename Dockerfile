@@ -20,7 +20,7 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 libgdiplus \
+  && apt-get install -y libicu-dev libssl1.1 libgdiplus curl\
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh
@@ -28,6 +28,8 @@ COPY entrypoint.sh /entrypoint.sh
 EXPOSE 5000
 
 WORKDIR /kavita
+
+HEALTHCHECK --interval=300s --timeout=15s --start-period=30s --retries=3 CMD curl --fail http://localhost:5000 || exit 1
 
 ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]
