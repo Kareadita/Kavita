@@ -58,8 +58,9 @@ export class InviteUserComponent implements OnInit {
     }).subscribe(email => {
       console.log('email', email);
       this.isSending = false;
+      this.modal.close(true);
     });
-    this.modal.close(true);
+    
   }
 
   updateRoleSelection(roles: Array<string>) {

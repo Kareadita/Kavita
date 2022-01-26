@@ -92,11 +92,12 @@ export class AccountService implements OnDestroy {
   }
 
 
-  register(model: {username: string, password: string, isAdmin?: boolean}) {
-    if (!model.hasOwnProperty('isAdmin')) {
-      model.isAdmin = false;
-    }
-
+  /**
+   * Registers the first admin on the account. Only used for that. All other registrations must occur through invite
+   * @param model 
+   * @returns 
+   */
+  register(model: {username: string, password: string, email: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
         return user;

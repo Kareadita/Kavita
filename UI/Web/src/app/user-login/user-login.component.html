@@ -1,13 +1,13 @@
 <div class="mx-auto login">
     
     <ng-container *ngIf="isLoaded"> 
-        <div class="display: inline-block" *ngIf="firstTimeFlow">
+        <!-- <div class="display: inline-block" *ngIf="firstTimeFlow">
             <h3 class="card-title text-center">Create an Admin Account</h3>
             <div class="card p-3">
                 <p>Please create an admin account for yourself to start your reading journey.</p>
                 <app-register-member (created)="onAdminCreated($event)" [firstTimeFlow]="firstTimeFlow"></app-register-member>
             </div>
-        </div>
+        </div> -->
     
         <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
             <div class="row row-cols-4 row-cols-md-4 row-cols-sm-2 row-cols-xs-2">

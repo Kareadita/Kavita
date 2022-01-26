@@ -62,6 +62,12 @@ export class UserLoginComponent implements OnInit {
       } else {
         this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
           this.firstTimeFlow = !adminExists;
+
+          if (this.firstTimeFlow) {
+            this.router.navigateByUrl('registration/register');
+            return;
+          }
+
           this.setupAuthenticatedLoginFlow();
           this.isLoaded = true;
         });
@@ -95,7 +101,7 @@ export class UserLoginComponent implements OnInit {
   }
 
   login() {
-    this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
+    this.model = this.loginForm.getRawValue(); // {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
@@ -109,9 +115,12 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl('/library');
       }
     }, err => {
+      if (err.error === 'You must confirm your email first') {
+      }
       this.toastr.error(err.error);
     });
 
+    // TODO: Move this into account service so it always happens
     this.accountService.currentUser$
       .pipe(first(x => (x !== null && x !== undefined && typeof x !== 'undefined')))
       .subscribe(currentUser => {
