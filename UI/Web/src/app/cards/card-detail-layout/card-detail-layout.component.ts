@@ -14,7 +14,7 @@ import { Language } from 'src/app/_models/metadata/language';
 import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
 import { Tag } from 'src/app/_models/tag';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
@@ -69,8 +69,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Input() filterSettings!: FilterSettings;
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
-  @Output() applyFilter: EventEmitter<SeriesFilter> = new EventEmitter();
-  @Output() applyFirstFilter: EventEmitter<SeriesFilter> = new EventEmitter();
+  @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
   
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
 
@@ -572,11 +571,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   apply(isFirst) {
-    if (isFirst === true) {
-      this.applyFirstFilter.emit(this.filter);
-    } else {
-      this.applyFilter.emit(this.filter);
-    }
+    this.applyFilter.emit({filter: this.filter, isFirst: isFirst});
     this.updateApplied++;
   }
 

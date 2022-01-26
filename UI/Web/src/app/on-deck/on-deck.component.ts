@@ -7,7 +7,7 @@ import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.c
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter} from '../_models/series-filter';
+import { FilterEvent, SeriesFilter} from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { SeriesService } from '../_services/series.service';
@@ -63,10 +63,10 @@ export class OnDeckComponent implements OnInit {
     this.loadPage();
   }
 
-  updateFilter(data: SeriesFilter, isFirst) {
-    this.filter = data;
+  updateFilter(event: FilterEvent) {
+    this.filter = event.filter;
     const page = this.getPage();
-    if (page === undefined || page === null || isFirst !== true) {
+    if (page === undefined || page === null || event.isFirst !== true) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {
