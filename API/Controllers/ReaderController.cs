@@ -186,6 +186,8 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
+
+
             var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
             _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
 
@@ -370,16 +372,30 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Marks every chapter that is sorted below the passed number as Read
+        /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.
         /// </summary>
+        /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
         /// <returns></returns>
-        [HttpGet("mark-chapter-less-than-as-read")]
-        public async Task<ActionResult<bool>> MarkChaptersLessThanAsRead(float chapterNumber)
+        [HttpPost("mark-chapter-until-as-read")]
+        public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
         {
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
 
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+            foreach (var volume in volumes.OrderBy(v => v.Number))
+            {
+                var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber);
+                _readerService.MarkChaptersAsRead(user, volume.SeriesId, chapters);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (!_unitOfWork.HasChanges()) return Ok(true);
+            if (await _unitOfWork.CommitAsync()) return Ok(true);
+
+            await _unitOfWork.RollbackAsync();
             return Ok(false);
-            //return Ok(await _readerService.GetContinuePoint(seriesId, userId));
         }
 
         /// <summary>

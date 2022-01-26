@@ -134,6 +134,19 @@ namespace API.Tests.Parser
         }
 
         [Theory]
+        [InlineData("12-14", 14)]
+        [InlineData("24", 24)]
+        [InlineData("18-04", 18)]
+        [InlineData("18-04.5", 18)]
+        [InlineData("40", 40)]
+        [InlineData("40a-040b", 0)]
+        [InlineData("40.1_a", 0)]
+        public void MaximumNumberFromRangeTest(string input, float expected)
+        {
+            Assert.Equal(expected, MaximumNumberFromRange(input));
+        }
+
+        [Theory]
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
         [InlineData("Darker Than_Black", "darkerthanblack")]
