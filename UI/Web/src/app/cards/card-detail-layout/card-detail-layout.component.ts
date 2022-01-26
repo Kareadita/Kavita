@@ -571,6 +571,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   apply(isFirst) {
+    isFirst = isFirst ? isFirst : false;
     this.applyFilter.emit({filter: this.filter, isFirst: isFirst});
     this.updateApplied++;
   }

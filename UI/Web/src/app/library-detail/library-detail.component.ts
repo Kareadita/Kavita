@@ -141,7 +141,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   updateFilter(event: FilterEvent) {
     this.filter = event.filter;
     const page = this.getPage();
-    if (page === undefined || page === null || event.isFirst !== true) {
+    if (page === undefined || page === null || !event.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {
