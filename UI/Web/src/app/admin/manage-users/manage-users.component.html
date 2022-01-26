@@ -25,8 +25,8 @@
                     <span class="invisible">Loading...</span>
                 </div>
             </li>
-            <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
-                There are no other users.
+            <li class="list-group-item" *ngIf="pendingInvites.length === 0 && !loadingMembers">
+                There are no invited Users
             </li>
         </ul>
     </ng-container>

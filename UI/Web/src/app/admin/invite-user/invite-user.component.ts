@@ -64,8 +64,8 @@ export class InviteUserComponent implements OnInit {
       roles: this.selectedRoles,
       sendEmail: this.accessible
     }).subscribe(email => {
-      console.log('email', email);
       this.emailLink = email;
+      console.log('Email: ', email);
       this.isSending = false;
       if (this.accessible) {
         this.modal.close(true);

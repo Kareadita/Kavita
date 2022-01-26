@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Web;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
@@ -412,40 +413,74 @@ namespace API.Controllers
                 UserPreferences = new AppUserPreferences()
             };
 
-            var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
-            if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
-
-            // Assign Roles
-            var roles = dto.Roles;
-            if (!dto.Roles.Contains(PolicyConstants.AdminRole))
+            try
             {
-                roles.Add(PolicyConstants.PlebRole);
-            }
-            foreach (var role in roles)
-            {
-                if (!role.Equals(PolicyConstants.AdminRole) || !role.Equals(PolicyConstants.PlebRole) || !role.Equals(PolicyConstants.DownloadRole)) continue;
-                var roleResult = await _userManager.AddToRoleAsync(user, role);
-                if (!roleResult.Succeeded) return BadRequest(result.Errors); // TODO: Combine all these return BadRequest into one big thing
-            }
+                var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
+                if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
 
-
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
-
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var emailLink = $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-email?token={token}&email={dto.Email}";
-            if (dto.SendEmail)
-            {
-                await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                // Assign Roles
+                var roles = dto.Roles;
+                var hasAdminRole = dto.Roles.Contains(PolicyConstants.AdminRole);
+                if (!hasAdminRole)
                 {
-                    EmailAddress = dto.Email,
-                    InvitingUser = adminUser.UserName,
-                    ServerConfirmationLink = emailLink
-                });
+                    roles.Add(PolicyConstants.PlebRole);
+                }
+
+                foreach (var role in roles)
+                {
+                    if (!PolicyConstants.ValidRoles.Contains(role)) continue;
+                    var roleResult = await _userManager.AddToRoleAsync(user, role);
+                    if (!roleResult.Succeeded)
+                        return
+                            BadRequest(result.Errors); // TODO: Combine all these return BadRequest into one big thing
+                }
+
+                // Grant access to libraries
+                List<Library> libraries;
+                if (hasAdminRole)
+                {
+                    _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+                        user.UserName);
+                    libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+                }
+                else
+                {
+                    libraries = (await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.Libraries)).ToList();
+                }
+
+                foreach (var lib in libraries)
+                {
+                    lib.AppUsers ??= new List<AppUser>();
+                    lib.AppUsers.Add(user);
+                }
+
+                await _unitOfWork.CommitAsync();
+
+
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+
+                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+                var emailLink =
+                    $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(dto.Email)}";
+                if (dto.SendEmail)
+                {
+                    await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                    {
+                        EmailAddress = dto.Email,
+                        InvitingUser = adminUser.UserName,
+                        ServerConfirmationLink = emailLink
+                    });
+                }
+                return Ok(emailLink);
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.CommitAsync();
             }
 
-
-            return Ok(emailLink);
+            return BadRequest("There was an error setting up your account. Please check the logs");
         }
 
         [HttpPost("confirm-email")]
@@ -465,7 +500,7 @@ namespace API.Controllers
             }
 
 
-            if (!await ConfirmEmailToken(dto.Token, user)) return null;
+            if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
 
             user.UserName = dto.Username;
             var errors = await _accountService.ChangeUserPassword(user, dto.Password);
@@ -476,7 +511,7 @@ namespace API.Controllers
             await _unitOfWork.CommitAsync();
 
 
-            user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+            user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
                 AppUserIncludes.UserPreferences);
 
             // Perform Login code

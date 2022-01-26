@@ -40,6 +40,7 @@ export class ConfirmEmailComponent implements OnInit {
       return;
     }
     this.token = token;
+    console.log(this.token);
     this.registerForm.get('email')?.setValue(email || '');
   }
 

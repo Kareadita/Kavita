@@ -107,7 +107,7 @@ export class AccountService implements OnDestroy {
   }
 
   inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, sendEmail: boolean}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/invite', model); //, {responseType: 'json' as 'text'}
+    return this.httpClient.post<string>(this.baseUrl + 'account/invite', model, {responseType: 'text' as 'json'});
   }
 
   confirmEmail(model: {email: string, username: string, password: string, token: string}) {

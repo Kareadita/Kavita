@@ -35,7 +35,7 @@ public class EmailService : IEmailService
 
         try
         {
-            var response = await (ApiUrl + "/api/confirm")
+            var response = await (ApiUrl + "/api/email/confirm")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")

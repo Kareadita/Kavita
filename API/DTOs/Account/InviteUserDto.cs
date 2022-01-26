@@ -15,7 +15,7 @@ public class InviteUserDto
     /// <summary>
     /// A list of libraries to grant access to
     /// </summary>
-    public ICollection<int> Libraries { get; init; }
+    public IList<int> Libraries { get; init; }
 
     public bool SendEmail { get; init; } = true;
 }

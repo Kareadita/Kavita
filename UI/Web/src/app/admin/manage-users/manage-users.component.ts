@@ -116,6 +116,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
       this.memberService.deleteMember(member.username).subscribe(() => {
         this.loadMembers();
+        this.loadPendingInvites();
         this.toastr.success(member.username + ' has been deleted.');
       });
     }
@@ -133,11 +134,10 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   inviteUser() {
     const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
-    modalRef.closed.subscribe(() => {
-      // if (updatedMember !== undefined) {
-      //   member = updatedMember;
-      // }
-      // TODO: Refresh pending invites from server
+    modalRef.closed.subscribe((successful: boolean) => {
+      if (successful) {
+        this.loadPendingInvites();
+      }
     });
   }
 
