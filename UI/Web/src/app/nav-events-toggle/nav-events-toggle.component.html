@@ -1,4 +1,4 @@
-<ng-container>
+<ng-container *ngIf="isAdmin">
     
     <button type="button" class="btn btn-icon {{(progressEventsSource.getValue().length > 0 || updateAvailable) ? 'colored' : ''}}" 
         [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">

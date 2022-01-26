@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -21,6 +21,11 @@ export class AccountService implements OnDestroy {
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User>(1);
   currentUser$ = this.currentUserSource.asObservable();
+
+  /**
+   * SetTimeout handler for keeping track of refresh token call
+   */
+  private refreshTokenTimeout: ReturnType<typeof setTimeout> | undefined;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -69,16 +74,36 @@ export class AccountService implements OnDestroy {
 
     this.currentUserSource.next(user);
     this.currentUser = user;
+    if (this.currentUser !== undefined) {
+      this.startRefreshTokenTimer();
+    } else {
+      this.stopRefreshTokenTimer();
+    }
   }
 
   logout() {
     localStorage.removeItem(this.userKey);
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
+    this.stopRefreshTokenTimer();
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
     this.messageHub.stopHubConnection();
   }
+
+  // setCurrentUser() {
+  //   // TODO: Refactor this to setCurentUser in accoutnService
+  //   const user = this.getUserFromLocalStorage();
+
+
+  //   if (user) {
+  //     this.navService.setDarkMode(user.preferences.siteDarkMode);
+  //     this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
+  //     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
+  //   } else {
+  //     this.navService.setDarkMode(true);
+  //   }
+  // }
 
   register(model: {username: string, password: string, isAdmin?: boolean}) {
     if (!model.hasOwnProperty('isAdmin')) {
@@ -135,8 +160,45 @@ export class AccountService implements OnDestroy {
       }
       return key;
     }));
-
-    
   }
+
+  private refreshToken() {
+    if (this.currentUser === null || this.currentUser === undefined) return of();
+
+    return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token', {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
+      if (this.currentUser) {
+        this.currentUser.token = user.token;
+        this.currentUser.refreshToken = user.refreshToken;
+      }
+      
+      this.currentUserSource.next(this.currentUser);
+      this.startRefreshTokenTimer();
+      return user;
+    }));
+  }
+
+  private startRefreshTokenTimer() {
+    if (this.currentUser === null || this.currentUser === undefined) return;
+
+    if (this.refreshTokenTimeout !== undefined) {
+      this.stopRefreshTokenTimer();
+    }
+
+    const jwtToken = JSON.parse(atob(this.currentUser.token.split('.')[1]));
+    // set a timeout to refresh the token a minute before it expires
+    const expires = new Date(jwtToken.exp * 1000);
+    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {
+      console.log('Token Refreshed');
+    }), timeout);
+  }
+
+  private stopRefreshTokenTimer() {
+    if (this.refreshTokenTimeout !== undefined) {
+      clearTimeout(this.refreshTokenTimeout);
+    }
+  }
+
+
 
 }

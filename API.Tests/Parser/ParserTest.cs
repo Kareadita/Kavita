@@ -152,6 +152,7 @@ namespace API.Tests.Parser
         [InlineData("Darker Than_Black", "darkerthanblack")]
         [InlineData("Citrus", "citrus")]
         [InlineData("Citrus+", "citrus+")]
+        [InlineData("카비타", "카비타")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {

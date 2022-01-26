@@ -484,7 +484,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                @"(?<Special>Specials?|OneShot|One\-Shot|\d.+?(\W|_|-)Annual|Annual(\W|_|-)\d.+?|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
                 MatchOptions, RegexTimeout),
         };
 
@@ -965,7 +965,8 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return NormalizeRegex.Replace(name, string.Empty).ToLower();
+            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
+            return string.IsNullOrEmpty(normalized) ? name : normalized;
         }
 
 

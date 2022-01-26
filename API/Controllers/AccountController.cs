@@ -139,6 +139,7 @@ namespace API.Controllers
                 {
                     Username = user.UserName,
                     Token = await _tokenService.CreateToken(user),
+                    RefreshToken = await _tokenService.CreateRefreshToken(user),
                     ApiKey = user.ApiKey,
                     Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
                 };
@@ -192,9 +193,22 @@ namespace API.Controllers
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+        {
+            var token = await _tokenService.ValidateRefreshToken(tokenRequestDto);
+            if (token == null)
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            return Ok(token);
         }
 
         /// <summary>
