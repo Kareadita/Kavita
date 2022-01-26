@@ -5,7 +5,8 @@
     [pagination]="pagination"
     [filterSettings]="filterSettings"
     (pageChange)="onPageChange($event)"
-    (applyFilter)="updateFilter($event)"
+    (applyFirstFilter)="updateFilter($event, true)"
+    (applyFilter)="updateFilter($event, false)"
     >
     <ng-template #cardItem let-item let-position="idx">
         <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>

@@ -70,6 +70,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
   @Output() applyFilter: EventEmitter<SeriesFilter> = new EventEmitter();
+  @Output() applyFirstFilter: EventEmitter<SeriesFilter> = new EventEmitter();
   
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
 
@@ -187,7 +188,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
       }
-      this.apply();
+      const isFirst = true;
+      this.apply(isFirst);
     });
   }
 
@@ -569,8 +571,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.setupTypeaheads();
   }
 
-  apply() {
-    this.applyFilter.emit(this.filter);
+  apply(isFirst) {
+    if (isFirst === true) {
+      this.applyFirstFilter.emit(this.filter);
+    } else {
+      this.applyFilter.emit(this.filter);
+    }
     this.updateApplied++;
   }
 

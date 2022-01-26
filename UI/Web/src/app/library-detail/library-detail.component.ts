@@ -138,10 +138,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: SeriesFilter) {
+  updateFilter(data: SeriesFilter, isFirst) {
     this.filter = data;
     const page = this.getPage();
-    if (page === undefined || page === null) {
+    if (page === undefined || page === null || isFirst !== true) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {

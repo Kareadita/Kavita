@@ -4,7 +4,8 @@
 [items]="series"
 [pagination]="pagination"
 [filterSettings]="filterSettings"
-(applyFilter)="applyFilter($event)"
+(applyFirstFilter)="applyFilter($event, true)"
+(applyFilter)="applyFilter($event, false)"
 (pageChange)="onPageChange($event)"
 >
     <ng-template #cardItem let-item let-position="idx">

@@ -5,7 +5,8 @@
     [actions]="actions"
     [pagination]="pagination"
     [filterSettings]="filterSettings"
-    (applyFilter)="updateFilter($event)"
+    (applyFirstFilter)="updateFilter($event, true)"
+    (applyFilter)="updateFilter($event, false)"
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
