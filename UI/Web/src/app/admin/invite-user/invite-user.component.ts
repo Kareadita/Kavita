@@ -30,8 +30,6 @@ export class InviteUserComponent implements OnInit {
   emailLinkUrl: SafeUrl | undefined;
 
   public get email() { return this.inviteForm.get('email'); }
-  public get username() { return this.inviteForm.get('username'); }
-  public get password() { return this.inviteForm.get('password'); }
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, 
     private confirmService: ConfirmService) { }
@@ -43,8 +41,6 @@ export class InviteUserComponent implements OnInit {
       if (!accessibile) {
         await this.confirmService.alert('This server is not accessible outside the network. You cannot invite via Email. You wil be given a link to finish registration with instead.');
         this.accessible = accessibile;
-        // this.inviteForm.addControl('username', new FormControl('', [Validators.required]));
-        // this.inviteForm.addControl('password', new FormControl('', [Validators.required]));
       }
       this.checkedAccessibility = true;
     });

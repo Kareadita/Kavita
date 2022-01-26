@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Entities;
 using API.Errors;
 using Microsoft.AspNetCore.Identity;
@@ -15,18 +16,21 @@ namespace API.Services
         Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword);
         Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
         Task<IEnumerable<ApiException>> ValidateUsername(string username);
+        Task<IEnumerable<ApiException>> ValidateEmail(string email);
     }
 
     public class AccountService : IAccountService
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<AccountService> _logger;
+        private readonly IUnitOfWork _unitOfWork;
         public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
 
-        public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger)
+        public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)
@@ -76,6 +80,17 @@ namespace API.Services
             }
 
             return Array.Empty<ApiException>();
+        }
+
+        public async Task<IEnumerable<ApiException>> ValidateEmail(string email)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+            if (user == null) return Array.Empty<ApiException>();
+
+            return new List<ApiException>()
+            {
+                new ApiException(400, "Email is already registered")
+            };
         }
     }
 }

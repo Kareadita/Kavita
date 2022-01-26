@@ -18,6 +18,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Flurl.Util;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -387,6 +388,96 @@ namespace API.Controllers
 
         }
 
+        /// <summary>
+        /// Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("update")]
+        public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
+        {
+            var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized("You do not have permission");
+
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId);
+            if (user == null) return BadRequest("User does not exist");
+
+            // Check if username is changing
+            if (!user.UserName.Equals(dto.Username))
+            {
+                // Validate username change
+                var errors = await _accountService.ValidateUsername(dto.Username);
+                if (errors.Any()) return BadRequest("Username already taken");
+                user.UserName = dto.Username;
+                _unitOfWork.UserRepository.Update(user);
+            }
+
+            if (!user.Email.Equals(dto.Email))
+            {
+                // Validate username change
+                var errors = await _accountService.ValidateEmail(dto.Email);
+                if (errors.Any()) return BadRequest("Email already registered");
+                // TODO: This needs to be handled differently, like save it in a temp variable in DB until email is validated
+                //user.Email = dto.Email;
+                //_unitOfWork.UserRepository.Update(user);
+            }
+
+            // Update roles
+            var existingRoles = await _userManager.GetRolesAsync(user);
+            var hasAdminRole = dto.Roles.Contains(PolicyConstants.AdminRole);
+            if (!hasAdminRole)
+            {
+                dto.Roles.Add(PolicyConstants.PlebRole);
+            }
+            if (existingRoles.Except(dto.Roles).Any()) // BUG: This doesn't work, we want a check to make sure there is some delta before we do this code
+            {
+                var roles = dto.Roles;
+
+                var roleResult = await _userManager.RemoveFromRolesAsync(user, existingRoles);
+                if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
+                roleResult = await _userManager.AddToRolesAsync(user, roles);
+                if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
+            }
+
+
+            var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+            List<Library> libraries;
+            if (hasAdminRole)
+            {
+                _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
+                    user.UserName);
+                libraries = allLibraries;
+            }
+            else
+            {
+                // Remove user from all libraries
+
+                foreach (var lib in allLibraries)
+                {
+                    lib.AppUsers ??= new List<AppUser>();
+                    lib.AppUsers.Remove(user);
+                }
+
+                libraries = (await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.Libraries)).ToList();
+            }
+
+            foreach (var lib in libraries)
+            {
+                lib.AppUsers ??= new List<AppUser>();
+                lib.AppUsers.Add(user);
+            }
+
+            if (!_unitOfWork.HasChanges()) return Ok();
+            if (await _unitOfWork.CommitAsync())
+            {
+                return Ok();
+            }
+
+            await _unitOfWork.RollbackAsync();
+            return BadRequest("There was an exception when updating the user");
+        }
+
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("invite")]
@@ -396,9 +487,10 @@ namespace API.Controllers
             _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
             // Check if there is an existing invite
-            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (invitedUser != null)
+            var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
+            if (emailValidationErrors.Any())
             {
+                var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
                 if (await _userManager.IsEmailConfirmedAsync(invitedUser))
                     return BadRequest($"User is already registered as {invitedUser.UserName}");
                 return BadRequest("User is already invited under this email and has yet to accepted invite.");
@@ -432,7 +524,7 @@ namespace API.Controllers
                     var roleResult = await _userManager.AddToRoleAsync(user, role);
                     if (!roleResult.Succeeded)
                         return
-                            BadRequest(result.Errors); // TODO: Combine all these return BadRequest into one big thing
+                            BadRequest(roleResult.Errors); // TODO: Combine all these return BadRequest into one big thing
                 }
 
                 // Grant access to libraries

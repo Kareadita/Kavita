@@ -13,6 +13,7 @@ import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.
 import { Subject } from 'rxjs';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { InviteUserComponent } from '../invite-user/invite-user.component';
+import { EditUserComponent } from '../edit-user/edit-user.component';
 
 @Component({
   selector: 'app-manage-users',
@@ -91,8 +92,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     return this.loggedInUsername !== member.username;
   }
 
-  openEditLibraryAccess(member: Member) {
-    const modalRef = this.modalService.open(LibraryAccessModalComponent);
+  openEditUser(member: Member) {
+    const modalRef = this.modalService.open(EditUserComponent, {size: 'lg'});
     modalRef.componentInstance.member = member;
     modalRef.closed.subscribe(() => {
       this.loadMembers();

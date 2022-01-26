@@ -122,6 +122,10 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password}, {responseType: 'json' as 'text'});
   }
 
+  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
+    return this.httpClient.post(this.baseUrl + 'account/update', model);
+  }
+
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
       if (this.currentUser !== undefined || this.currentUser != null) {

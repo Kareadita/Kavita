@@ -19,6 +19,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { InviteUserComponent } from './invite-user/invite-user.component';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
+import { EditUserComponent } from './edit-user/edit-user.component';
 
 
 
@@ -39,6 +40,7 @@ import { LibrarySelectorComponent } from './library-selector/library-selector.co
     InviteUserComponent,
     RoleSelectorComponent,
     LibrarySelectorComponent,
+    EditUserComponent,
   ],
   imports: [
     CommonModule,
