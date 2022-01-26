@@ -926,6 +926,25 @@ namespace API.Parser
             return XmlRegex.IsMatch(Path.GetExtension(filePath));
         }
 
+
+        public static float MaximumNumberFromRange(string range)
+        {
+            try
+            {
+                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+                {
+                    return (float) 0.0;
+                }
+
+                var tokens = range.Replace("_", string.Empty).Split("-");
+                return tokens.Max(float.Parse);
+            }
+            catch
+            {
+                return (float) 0.0;
+            }
+        }
+
         public static float MinimumNumberFromRange(string range)
         {
             try
