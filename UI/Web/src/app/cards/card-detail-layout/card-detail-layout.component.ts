@@ -99,6 +99,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   updateApplied: number = 0;
 
+
   private onDestory: Subject<void> = new Subject();
 
   get PersonRole(): typeof PersonRole {
@@ -187,8 +188,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
       }
-      const isFirst = true;
-      this.apply(isFirst);
+      this.apply();
     });
   }
 
@@ -570,9 +570,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.setupTypeaheads();
   }
 
-  apply(isFirst) {
-    isFirst = isFirst ? isFirst : false;
-    this.applyFilter.emit({filter: this.filter, isFirst: isFirst});
+  apply() {
+    this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
   }
 
