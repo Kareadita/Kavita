@@ -946,7 +946,8 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return NormalizeRegex.Replace(name, string.Empty).ToLower();
+            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
+            return string.IsNullOrEmpty(normalized) ? name : normalized;
         }
 
 
