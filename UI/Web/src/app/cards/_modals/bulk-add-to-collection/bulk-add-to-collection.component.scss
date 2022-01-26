@@ -5,3 +5,16 @@
 .clickable:hover, .clickable:focus {
     background-color: lightgreen;
 }
+
+#add-to-collection {
+    overflow: auto;
+    .modal-body {
+    height: calc(100vh - 206px);
+    min-height: 150px;
+        .list-group {
+            overflow: auto;
+            height: calc(100vh - 325px);
+            min-height: 32px;
+        }
+    }
+}
