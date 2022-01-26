@@ -1,11 +1,6 @@
 
 
 <div class="container-fluid">
-    <!-- <div class="row mb-2">
-        <div class="col-8"><h3>Users</h3></div>
-        <div class="col-4"><button class="btn btn-primary float-right" (click)="createMember()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add User</span></button></div>
-    </div> -->
-
     <ng-container>
         <div class="row mb-2">
             <div class="col-8"><h3>Pending Invites</h3></div>
@@ -17,17 +12,12 @@
                     <h4>
                         <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
                         <div class="float-right">
-                            <button class="btn btn-danger mr-2">Cancel</button>
+                            <button class="btn btn-danger mr-2" (click)="deleteUser(invite)">Cancel</button>
                             <button class="btn btn-secondary mr-2">Resend</button>
                         </div>
                     </h4>
 
-                    <div>Invited: 1/27/2021 11:03 am
-                        <!-- <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
-                        <ng-template #activeDate>
-                            {{member.lastActive | date: 'short'}}
-                        </ng-template> -->
-                    </div>
+                    <div>Invited: {{invite.created | date: 'short'}}</div>
                 </div>
             </li>
             <li *ngIf="loadingMembers" class="list-group-item">
@@ -48,7 +38,12 @@
         <li *ngFor="let member of members; let idx = index;" class="list-group-item">
             <div>
                 <h4>
-                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i><span id="member-name--{{idx}}">{{member.username | titlecase}} </span><span *ngIf="member.username === loggedInUsername">(You)</span>
+                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
+                    <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
+                    <span *ngIf="member.username === loggedInUsername">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <span class="sr-only">(You)</span>
+                    </span>
                     <div class="float-right" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
                         <button class="btn btn-secondary mr-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
