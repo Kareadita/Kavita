@@ -430,7 +430,7 @@ namespace API.Controllers
             {
                 dto.Roles.Add(PolicyConstants.PlebRole);
             }
-            if (existingRoles.Except(dto.Roles).Any()) // BUG: This doesn't work, we want a check to make sure there is some delta before we do this code
+            if (existingRoles.Except(dto.Roles).Any())
             {
                 var roles = dto.Roles;
 

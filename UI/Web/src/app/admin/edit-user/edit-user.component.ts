@@ -33,6 +33,8 @@ export class EditUserComponent implements OnInit {
   ngOnInit(): void {
     this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required, Validators.email]));
     this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required]));
+
+    this.userForm.get('email')?.disable();
   }
 
   updateRoleSelection(roles: Array<string>) {
