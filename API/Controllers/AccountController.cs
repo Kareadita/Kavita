@@ -418,9 +418,7 @@ namespace API.Controllers
                 // Validate username change
                 var errors = await _accountService.ValidateEmail(dto.Email);
                 if (errors.Any()) return BadRequest("Email already registered");
-                // TODO: This needs to be handled differently, like save it in a temp variable in DB until email is validated
-                //user.Email = dto.Email;
-                //_unitOfWork.UserRepository.Update(user);
+                // NOTE: This needs to be handled differently, like save it in a temp variable in DB until email is validated. For now, I wont allow it
             }
 
             // Update roles
@@ -452,7 +450,6 @@ namespace API.Controllers
             else
             {
                 // Remove user from all libraries
-
                 foreach (var lib in allLibraries)
                 {
                     lib.AppUsers ??= new List<AppUser>();

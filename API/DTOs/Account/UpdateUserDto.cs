@@ -6,6 +6,9 @@ public record UpdateUserDto
 {
     public int UserId { get; set; }
     public string Username { get; set; }
+    /// <summary>
+    /// This field will not result in any change to the User model. Changing email is not supported.
+    /// </summary>
     public string Email { get; set; }
     /// <summary>
     /// List of Roles to assign to user. If admin not present, Pleb will be applied.
