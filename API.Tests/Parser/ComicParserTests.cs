@@ -184,6 +184,10 @@ namespace API.Tests.Parser
         [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
         [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
         [InlineData("laughs", false)]
+        [InlineData("Annual Days of Summer", false)]
+        [InlineData("Adventure Time 2013 Annual #001 (2013)", true)]
+        [InlineData("Adventure Time 2013_Annual_#001 (2013)", true)]
+        [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));

@@ -317,6 +317,8 @@ public class ReaderService : IReaderService
             .OrderBy(c => float.Parse(c.Number))
             .ToList();
 
+
+
         var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
 
 
@@ -330,8 +332,7 @@ public class ReaderService : IReaderService
             {
                 if (chapter.PagesRead < chapter.Pages)
                 {
-                    currentlyReadingChapter = chapter;
-                    break;
+                    return chapter;
                 }
             }
         }

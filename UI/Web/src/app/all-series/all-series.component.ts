@@ -10,7 +10,7 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { ActionItem, Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { MessageHubService } from '../_services/message-hub.service';
@@ -105,9 +105,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: SeriesFilter) {
-    this.filter = data;
-    if (this.pagination !== undefined && this.pagination !== null) {
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+    if (this.pagination !== undefined && this.pagination !== null && !data.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {

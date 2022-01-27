@@ -69,3 +69,9 @@ export const mangaFormatFilters = [
       selected: false
     }
 ];
+
+export interface FilterEvent {
+  filter: SeriesFilter;
+  isFirst: boolean;
+}
+
