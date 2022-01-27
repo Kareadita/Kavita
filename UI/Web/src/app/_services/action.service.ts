@@ -375,7 +375,7 @@ export class ActionService implements OnDestroy {
    */
   addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: VoidActionCallback) {
     if (this.collectionModalRef != null) { return; }
-      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md' });
+      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
       this.collectionModalRef.componentInstance.title = 'New Collection';
 
