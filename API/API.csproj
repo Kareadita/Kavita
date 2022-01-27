@@ -59,7 +59,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Include="NetVips" Version="2.1.0" />
-    <PackageReference Include="NetVips.Native" Version="8.12.1" />
+    <PackageReference Include="NetVips.Native" Version="8.12.2" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.2" />
     <PackageReference Include="SharpCompress" Version="0.30.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
