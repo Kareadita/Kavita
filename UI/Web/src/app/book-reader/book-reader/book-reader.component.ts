@@ -663,9 +663,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       page = 0;
     }
 
+    // BUG: Last page is not counting as read
     if (!(page === 0 || page === this.maxPages - 1)) {
       page -= 1;
     }
+
+    // // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
+    // let tempPageNum = this.pageNum;
+    // if (this.pageNum == this.maxPages - 1) {
+    //   tempPageNum = this.pageNum + 1;
+    // }
 
     this.pageNum = page;
     this.loadPage();
