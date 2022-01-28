@@ -235,6 +235,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  get IsNextChapter(): boolean {
+    return this.pageNum + 1 >= this.maxPages;
+  }
+  get IsPrevChapter(): boolean {
+    return this.pageNum === 0;
+  }
+
   get drawerBackgroundColor() {
     return this.darkMode ? '#010409': '#fff';
   }
@@ -344,10 +351,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.lastSeenScrollPartPath = path;
         }
 
-        if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
-          this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+        if (this.lastSeenScrollPartPath !== '') {
+          this.saveProgress();
         }
     });
+  }
+
+  saveProgress() {
+    let tempPageNum = this.pageNum;
+    if (this.pageNum == this.maxPages - 1) {
+      tempPageNum = this.pageNum + 1;
+    }
+
+    if (!this.incognitoMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
+
   }
 
   ngOnDestroy(): void {
@@ -450,9 +469,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
         if (this.pageNum >= this.maxPages) {
           this.pageNum = this.maxPages - 1;
-          if (!this.incognitoMode) {
-            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-          }
+          this.saveProgress();
         }
   
         this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -711,9 +728,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    if (!this.incognitoMode) {
-      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-    }
+    this.saveProgress();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
@@ -764,8 +779,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setPageNum(pageNum: number) {
     if (pageNum < 0) {
       this.pageNum = 0;
-    } else if (pageNum >= this.maxPages) {
-      this.pageNum = this.maxPages - 1;
+    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
+      this.pageNum = this.maxPages; // 
     } else {
       this.pageNum = pageNum;
     }
@@ -794,6 +809,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   prevPage() {
     const oldPageNum = this.pageNum;
+    
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum - 1);
     } else {
@@ -816,18 +832,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-
     const oldPageNum = this.pageNum;
+    if (oldPageNum + 1 === this.maxPages) {
+      // Move to next volume/chapter automatically
+      this.loadNextChapter();
+      return;
+    }
+
+
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum + 1);
     } else {
       this.setPageNum(this.pageNum - 1);
     }
 
-    if (oldPageNum + 1 === this.maxPages) {
-      // Move to next volume/chapter automatically
-      this.loadNextChapter();
-    }
+    
 
     if (oldPageNum === this.pageNum) { return; }
 
@@ -1051,7 +1070,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.saveProgress();
   }
 
   toggleFullscreen() {
