@@ -191,14 +191,6 @@ namespace API.Controllers
                     "You are missing an email on your account. Please wait while we migrate your account.");
             }
 
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            if (!settings.EnableAuthentication && !isAdmin)
-            {
-                _logger.LogDebug("User {UserName} is logging in with authentication disabled", loginDto.Username);
-                loginDto.Password = AccountService.DefaultPassword;
-            }
-
             var result = await _signInManager
                 .CheckPasswordSignInAsync(user, loginDto.Password, false);
 

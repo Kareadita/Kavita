@@ -1,38 +1,24 @@
-<div class="mx-auto login">
-    
-    <ng-container *ngIf="isLoaded"> 
-        <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
-            <div class="row row-cols-4 row-cols-md-4 row-cols-sm-2 row-cols-xs-2">
-            <ng-container *ngFor="let member of memberNames">
-                <div class="col align-self-center card p-3 m-3" style="max-width: 12rem;">
-                    <span tabindex="0" (click)="select(member)" a11y-click="13,32">
-                        <div class="logo-container">
-                            <h3 class="card-title text-center">{{member | sentenceCase}}</h3>
-                        </div>
-                    </span>
-    
-                    <div class="card-text" #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed[member]" (keyup.enter)="$event.stopPropagation()">
-                        <div class="form-group" [ngStyle]="authDisabled ? {display: 'none'} : {}">
-                            <label for="username--{{member}}">Username</label>
-                            <input class="form-control" formControlName="username" id="username--{{member}}" type="text" [readonly]="authDisabled">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="password--{{member}}">Password</label>
-                            <input class="form-control" formControlName="password" id="password--{{member}}" type="password" autofocus>
-                            <div *ngIf="authDisabled" class="invalid-feedback">
-                                Authentication is disabled. Only type password if this is an admin account.
-                            </div>
-                        </div>
-                        
-                        <div class="float-right">
-                            <button class="btn btn-primary alt" type="submit--{{member}}">Login</button>
-                        </div>
+<app-splash-container>
+    <ng-container title><h2>Login</h2></ng-container>
+    <ng-container body>
+        <ng-container *ngIf="isLoaded"> 
+            <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
+                <div class="card-text">
+                    <div class="form-group" style="width:100%">
+                        <label for="username">Username</label>
+                        <input class="form-control" formControlName="username" id="username" type="text">
+                    </div>
+                    
+                    <div class="form-group" style="width:100%">
+                        <label for="password">Password</label>
+                        <input class="form-control" formControlName="password" id="password" type="password" autofocus>
+                    </div>
+                    
+                    <div class="float-right">
+                        <button class="btn btn-secondary alt" type="submit">Login</button>
                     </div>
                 </div>
-            </ng-container>
-            </div>
-        </form>
+            </form>
+        </ng-container>
     </ng-container>
-
-</div>
+</app-splash-container>

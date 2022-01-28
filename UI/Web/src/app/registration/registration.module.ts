@@ -24,6 +24,9 @@ import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confir
     RegistrationRoutingModule,
     NgbTooltipModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    SplashContainerComponent
   ]
 })
 export class RegistrationModule { }

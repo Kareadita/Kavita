@@ -194,7 +194,7 @@
                 <app-series-bookmarks></app-series-bookmarks>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'password'">
-                <ng-container *ngIf="isAuthenticationEnabled || isAdmin; else authDisabled">
+                <ng-container *ngIf="isAdmin">
                     <p>Change your Password</p>
                     <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
                         <div *ngFor="let error of resetPasswordErrors">{{error}}</div>
@@ -227,9 +227,6 @@
                         </div>
                     </form>
                 </ng-container>
-                <ng-template #authDisabled>
-                    <p class="text-warning">Authentication is disabled on this server. A password is not required to authenticate.</p>
-                </ng-template>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'clients'">
                 <p>All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.</p>

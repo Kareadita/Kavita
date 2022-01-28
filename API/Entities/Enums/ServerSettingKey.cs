@@ -47,6 +47,7 @@ namespace API.Entities.Enums
         /// <summary>
         /// Is Authentication needed for non-admin accounts
         /// </summary>
+        /// <remarks>Deprecated. This is no longer used v0.5.1+. Assume Authentication is always in effect</remarks>
         [Description("EnableAuthentication")]
         EnableAuthentication = 8,
         /// <summary>
