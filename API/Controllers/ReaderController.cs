@@ -392,12 +392,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
-            var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
-            foreach (var volume in volumes.OrderBy(v => v.Number))
-            {
-                var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber);
-                _readerService.MarkChaptersAsRead(user, volume.SeriesId, chapters);
-            }
+            await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
 
             _unitOfWork.UserRepository.Update(user);
 
