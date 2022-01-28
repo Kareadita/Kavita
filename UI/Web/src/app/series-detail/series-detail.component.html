@@ -63,7 +63,7 @@
     <div>
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav-tabs nav-pills" [destroyOnHide]="false" (navChange)="onNavChange($event)">
-            <li [ngbNavItem]="1" *ngIf="hasSpecials">
+            <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row no-gutters">
@@ -75,7 +75,7 @@
                 </div>
               </ng-template>
             </li>
-            <li [ngbNavItem]="2" *ngIf="libraryType !== LibraryType.Book && (hasNonSpecialVolumeChapters || hasNonSpecialNonVolumeChapters)">
+            <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (hasNonSpecialVolumeChapters || hasNonSpecialNonVolumeChapters)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
                     <div class="row no-gutters">
@@ -92,7 +92,7 @@
                     </div>
                 </ng-template>
             </li>
-            <li [ngbNavItem]="3" *ngIf="hasNonSpecialVolumeChapters">
+            <li [ngbNavItem]="TabID.Volumes" *ngIf="hasNonSpecialVolumeChapters">
                 <a ngbNavLink>Volumes</a>
                 <ng-template ngbNavContent>
                     <div class="row no-gutters">
@@ -104,7 +104,7 @@
                     </div>
                 </ng-template>
               </li>
-            <li [ngbNavItem]="4" *ngIf="hasNonSpecialNonVolumeChapters">
+            <li [ngbNavItem]="TabID.Chapters" *ngIf="hasNonSpecialNonVolumeChapters">
               <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
               <ng-template ngbNavContent>
                   <div class="row no-gutters">

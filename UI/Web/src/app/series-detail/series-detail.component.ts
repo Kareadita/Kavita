@@ -33,6 +33,13 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
 
+enum TabID {
+  Specials = 1,
+  Storyline = 2,
+  Volumes = 3,
+  Chapters = 4
+}
+
 @Component({
   selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
@@ -61,7 +68,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
-  activeTabId = 2;
+  activeTabId = TabID.Storyline;
   hasNonSpecialVolumeChapters = false;
   hasNonSpecialNonVolumeChapters = false;
 
@@ -146,6 +153,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   get TagBadgeCursor(): typeof TagBadgeCursor {
     return TagBadgeCursor;
+  }
+
+  get TabID(): typeof TabID {
+    return TabID;
   }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
@@ -383,37 +394,43 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           });
         }
 
-        // This shows Chapters/Issues tab
-        // If this has chapters that are not specials
-        if (this.chapters.filter(c => !c.isSpecial).length > 0) {
-          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
-            this.activeTabId = 4;
-          }
-          this.hasNonSpecialNonVolumeChapters = true;
-        }
-
-        // This shows Volumes tab
-        if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
-          if (this.utilityService.formatChapterName(this.libraryType) == 'Book') {
-            this.activeTabId = 3;
-          }
-          this.hasNonSpecialVolumeChapters = true;
-        }
-
-        // If an update occured and we were on specials, re-activate Volumes/Chapters 
-        if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != 2) {
-          this.activeTabId = 3;
-        }
-
-        if (this.hasSpecials) {
-          this.activeTabId = 1;
-        }
+        this.updateSelectedTab();
 
         this.isLoading = false;
       });
     }, err => {
       this.router.navigateByUrl('/libraries');
     });
+  }
+
+  /**
+   * This will update the selected tab
+   * 
+   * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
+   */
+  updateSelectedTab() {
+    // This shows Chapters/Issues tab
+
+    // If this has chapters that are not specials
+    if (this.chapters.filter(c => !c.isSpecial).length > 0) {
+      this.hasNonSpecialNonVolumeChapters = true;
+    }
+
+    // This shows Volumes tab
+    if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
+      this.hasNonSpecialVolumeChapters = true;
+    }
+
+    // If an update occured and we were on specials, re-activate Volumes/Chapters 
+    if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != TabID.Storyline) {
+      this.activeTabId = TabID.Storyline;
+    }
+
+    if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
+      this.activeTabId = TabID.Storyline;
+    } else {
+      this.activeTabId = TabID.Specials;
+    }
   }
 
   createHTML() {

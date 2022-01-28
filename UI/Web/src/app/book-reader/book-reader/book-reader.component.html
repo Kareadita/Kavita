@@ -129,18 +129,28 @@
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" 
                 [disabled]="IsPrevDisabled" 
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum === 0 : pageNum + 1 >= maxPages - 1) ? 'fa-angle-double-left' : 'fa-angle-left'}}" aria-hidden="true"></i>
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}}" aria-hidden="true"></i>
                 <span class="phone-hidden">&nbsp;{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}}</span>
             </button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Go Back</span></button>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Settings</span></button>
-            <div class="book-title col-2 phone-hidden">{{bookTitle}}  <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span></div>
+            <div class="book-title col-2 phone-hidden">
+                <ng-container *ngIf="isLoading; else showTitle">
+                    <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
+                        <span class="sr-only">Loading book...</span>
+                    </div>
+                </ng-container>
+                <ng-template #showTitle>
+                    {{bookTitle}}
+                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span>
+                </ng-template>
+            </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" 
                 [disabled]="IsNextDisabled" 
                 (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
                 <span class="phone-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}}&nbsp;</span>
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? pageNum + 1 > maxPages - 1 : pageNum === 0) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
             </button>
         </div>
     </ng-template>
