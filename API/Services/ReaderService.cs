@@ -318,8 +318,6 @@ public class ReaderService : IReaderService
             .OrderBy(c => float.Parse(c.Number))
             .ToList();
 
-
-
         var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
 
 
@@ -368,7 +366,7 @@ public class ReaderService : IReaderService
         {
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && chapterNumber > 0.0);
+                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && Parser.Parser.MaximumNumberFromRange(c.Range) > 0.0);
             MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }
