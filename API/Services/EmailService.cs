@@ -20,7 +20,7 @@ public interface IEmailService
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
-    private const string ApiUrl = "http://localhost:5003";
+    private const string ApiUrl = "https://email.kavitareader.com";
 
     public EmailService(ILogger<EmailService> logger)
     {
