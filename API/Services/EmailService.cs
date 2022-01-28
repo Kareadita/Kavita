@@ -14,6 +14,7 @@ public interface IEmailService
 {
     Task SendConfirmationEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
+    Task SendMigrationEmail(EmailMigrationDto data);
 }
 
 public class EmailService : IEmailService
@@ -31,45 +32,29 @@ public class EmailService : IEmailService
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
     {
-        var responseContent = string.Empty;
 
-        try
+        var success = await SendEmailWithPost(ApiUrl + "/api/email/confirm", data);
+        if (!success)
         {
-            var response = await (ApiUrl + "/api/email/confirm")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
-                .PostJsonAsync(data);
-
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                _logger.LogError("There was a critical error sending Confirmation email. {Content}", response);
-            }
-        }
-        catch (HttpRequestException e)
-        {
-            var info = new
-            {
-                dataSent = data,
-                response = responseContent
-            };
-
-            _logger.LogError(e, "There was a critical error sending Confirmation email. {Content}", info);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "There was a critical error sending Confirmation email");
+            _logger.LogError("There was a critical error sending Confirmation email");
         }
     }
 
     public async Task<bool> CheckIfAccessible(string host)
     {
+        return await SendEmailWithGet(ApiUrl + "/api/email/reachable?host=" + host);
+    }
+
+    public async Task SendMigrationEmail(EmailMigrationDto data)
+    {
+        await SendEmailWithPost(ApiUrl + "/api/email/email-migration", data);
+    }
+
+    private static async Task<bool> SendEmailWithGet(string url)
+    {
         try
         {
-            var response = await (ApiUrl + "/api/email/reachable?host=" + host)
+            var response = await (url)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
@@ -88,5 +73,31 @@ public class EmailService : IEmailService
             return false;
         }
         return false;
+    }
+
+
+    private static async Task<bool> SendEmailWithPost(string url, object data)
+    {
+        try
+        {
+            var response = await (url)
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(30))
+                .PostJsonAsync(data);
+
+            if (response.StatusCode != StatusCodes.Status200OK)
+            {
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+        return true;
     }
 }

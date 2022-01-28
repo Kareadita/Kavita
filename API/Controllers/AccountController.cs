@@ -263,7 +263,14 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
-            // TODO: Need to check if email has been confirmed or not
+            // Check if the user has an email, if not, inform them so they can migrate
+            var validPassword = await _signInManager.UserManager.CheckPasswordAsync(user, loginDto.Password);
+            if (string.IsNullOrEmpty(user.Email) && !user.EmailConfirmed && validPassword)
+            {
+                _logger.LogCritical("User {UserName} does not have an email. Providing a one time migration", user.UserName);
+                return Unauthorized(
+                    "You are missing an email on your account. Please wait while we migrate your account.");
+            }
 
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -552,6 +559,7 @@ namespace API.Controllers
                 var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
                 var emailLink =
                     $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(dto.Email)}";
+                _logger.LogInformation("[Invite User]: Email Link: {Link}", emailLink);
                 if (dto.SendEmail)
                 {
                     await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
@@ -613,6 +621,92 @@ namespace API.Controllers
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [AllowAnonymous]
+        [HttpPost("confirm-migration-email")]
+        public async Task<ActionResult<UserDto>> ConfirmMigrationEmail(ConfirmMigrationEmailDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+            if (user == null) return Unauthorized("This email is not on system");
+
+            if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
+
+            await _unitOfWork.CommitAsync();
+
+            user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
+                AppUserIncludes.UserPreferences);
+
+            // Perform Login code
+            return new UserDto
+            {
+                Username = user.UserName,
+                Email = user.Email,
+                Token = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
+                ApiKey = user.ApiKey,
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            };
+        }
+
+        /// <summary>
+        /// This is similar to invite. Essentially we authenticate the user's password then go through invite email flow
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("migrate-email")]
+        public async Task<ActionResult<string>> MigrateEmail(MigrateUserEmailDto dto)
+        {
+            // Check if there is an existing invite
+            var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
+            if (emailValidationErrors.Any())
+            {
+                var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+                if (await _userManager.IsEmailConfirmedAsync(invitedUser))
+                    return BadRequest($"User is already registered as {invitedUser.UserName}");
+                return BadRequest("User is already invited under this email and has yet to accepted invite.");
+            }
+
+
+            var user = await _userManager.Users
+                .Include(u => u.UserPreferences)
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == dto.Username.ToUpper());
+            if (user == null) return Unauthorized("Invalid username");
+
+            var validPassword = await _signInManager.UserManager.CheckPasswordAsync(user, dto.Password);
+            if (!validPassword) return Unauthorized("Your credentials are not correct");
+
+            try
+            {
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+                user.Email = dto.Email;
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.CommitAsync();
+
+                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+                var emailLink =
+                    $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-migration-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(dto.Email)}";
+                _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
+                if (dto.SendEmail)
+                {
+                    await _emailService.SendMigrationEmail(new EmailMigrationDto()
+                    {
+                        EmailAddress = dto.Email,
+                        Username = user.UserName,
+                        ServerConfirmationLink = emailLink
+                    });
+                }
+                return Ok(emailLink);
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.CommitAsync();
+            }
+
+            return BadRequest("There was an error setting up your account. Please check the logs");
         }
 
         private async Task<bool> ConfirmEmailToken(string token, AppUser user)

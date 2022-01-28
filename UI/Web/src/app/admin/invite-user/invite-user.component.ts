@@ -27,7 +27,6 @@ export class InviteUserComponent implements OnInit {
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
   emailLink: string = '';
-  emailLinkUrl: SafeUrl | undefined;
 
   public get email() { return this.inviteForm.get('email'); }
 
@@ -61,7 +60,6 @@ export class InviteUserComponent implements OnInit {
       sendEmail: this.accessible
     }).subscribe(email => {
       this.emailLink = email;
-      console.log('Email: ', email);
       this.isSending = false;
       if (this.accessible) {
         this.modal.close(true);

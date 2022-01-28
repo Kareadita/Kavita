@@ -128,6 +128,7 @@ namespace API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("accessible")]
+        [AllowAnonymous]
         public async Task<ActionResult<bool>> IsServerAccessible()
         {
             return await _emailService.CheckIfAccessible(Request.Host.ToString());

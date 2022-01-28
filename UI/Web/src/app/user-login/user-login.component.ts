@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { first, take } from 'rxjs/operators';
 import { SettingsService } from '../admin/settings.service';
+import { AddEmailToAccountMigrationModalComponent } from '../registration/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
@@ -35,7 +37,7 @@ export class UserLoginComponent implements OnInit {
   isLoaded: boolean = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, 
-    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService) { }
+    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.navService.showNavBar();
@@ -101,7 +103,7 @@ export class UserLoginComponent implements OnInit {
   }
 
   login() {
-    this.model = this.loginForm.getRawValue(); // {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
+    this.model = this.loginForm.getRawValue();
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
@@ -115,9 +117,16 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl('/library');
       }
     }, err => {
-      if (err.error === 'You must confirm your email first') {
+      if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
+        // TODO: Implement this flow
+        const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
+        modalRef.componentInstance.username = this.model.username; 
+        modalRef.closed.pipe(take(1)).subscribe(() => {
+          
+        });
+      } else {
+        this.toastr.error(err.error);
       }
-      this.toastr.error(err.error);
     });
 
     // TODO: Move this into account service so it always happens

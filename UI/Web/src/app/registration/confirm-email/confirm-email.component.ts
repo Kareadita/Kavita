@@ -33,7 +33,7 @@ export class ConfirmEmailComponent implements OnInit {
 
     const token = this.route.snapshot.queryParamMap.get('token');
     const email = this.route.snapshot.queryParamMap.get('email');
-    if (token == undefined || token === '') {
+    if (token == undefined || token === '' || token === null) {
       // This is not a valid url, redirect to login
       this.toastr.error('Invalid confirmation email');
       this.router.navigateByUrl('login');
