@@ -1007,6 +1007,137 @@ public class ReaderServiceTests
         Assert.Equal("1", nextChapter.Range);
     }
 
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        // Save progress on first volume chapters and 1st of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1", nextChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var fileSystem = new MockFileSystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        // Save progress on first volume chapters and 1st of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("Some Special Title", nextChapter.Range);
+    }
+
     #endregion
 
 

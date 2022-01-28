@@ -23,6 +23,7 @@ public interface IReaderService
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
+    Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
 }
 
 public class ReaderService : IReaderService
@@ -322,22 +323,19 @@ public class ReaderService : IReaderService
         var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
 
 
-        // Check if there are any specials
-        if (currentlyReadingChapter == null)
-        {
-            var volume = volumes.SingleOrDefault(v => v.Number == 0);
-            if (volume == null) return nonSpecialChapters.First();
+        if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
-            foreach (var chapter in volume.Chapters.OrderBy(c => float.Parse(c.Number)))
-            {
-                if (chapter.PagesRead < chapter.Pages)
-                {
-                    return chapter;
-                }
-            }
+        // Check if there are any specials
+        var volume = volumes.SingleOrDefault(v => v.Number == 0);
+        if (volume == null) return nonSpecialChapters.First();
+
+        var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList();
+        foreach (var chapter in chapters.Where(chapter => chapter.PagesRead < chapter.Pages))
+        {
+            return chapter;
         }
 
-        return currentlyReadingChapter ?? nonSpecialChapters.First();
+        return chapters.First();
     }
 
 
@@ -355,6 +353,24 @@ public class ReaderService : IReaderService
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read or Volumes with a single 0 chapter.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="chapterNumber"></param>
+    public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
+    {
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        foreach (var volume in volumes.OrderBy(v => v.Number))
+        {
+            var chapters = volume.Chapters
+                .OrderBy(c => float.Parse(c.Number))
+                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && chapterNumber > 0.0);
+            MarkChaptersAsRead(user, volume.SeriesId, chapters);
+        }
     }
 
 
