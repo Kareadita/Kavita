@@ -5,7 +5,6 @@ import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { LibraryAccessModalComponent } from '../_modals/library-access-modal/library-access-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -14,6 +13,7 @@ import { Subject } from 'rxjs';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { InviteUserComponent } from '../invite-user/invite-user.component';
 import { EditUserComponent } from '../edit-user/edit-user.component';
+import { ServerService } from 'src/app/_services/server.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -34,7 +34,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
               private modalService: NgbModal,
               private toastr: ToastrService,
               private confirmService: ConfirmService,
-              public messageHub: MessageHubService) {
+              public messageHub: MessageHubService,
+              private serverService: ServerService) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
       this.loggedInUsername = user.username;
     });
@@ -128,6 +129,22 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.loadPendingInvites();
       }
     });
+  }
+
+  resendEmail(member: Member) {
+
+    this.serverService.isServerAccessible().subscribe(canAccess => {
+      this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
+        if (canAccess) {
+          this.toastr.info('Email sent to ' + member.username);
+          return;
+        }
+        await this.confirmService.alert(
+          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank">' + email + '</a>');
+
+      });
+    });
+    
   }
 
   updatePassword(member: Member) {

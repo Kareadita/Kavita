@@ -13,7 +13,7 @@
                         <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
                         <div class="float-right">
                             <button class="btn btn-danger mr-2" (click)="deleteUser(invite)">Cancel</button>
-                            <button class="btn btn-secondary mr-2">Resend</button>
+                            <button class="btn btn-secondary mr-2" (click)="resendEmail(invite)">Resend</button>
                         </div>
                     </h4>
 

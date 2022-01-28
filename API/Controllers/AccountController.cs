@@ -167,87 +167,6 @@ namespace API.Controllers
             return BadRequest("Something went wrong when registering user");
         }
 
-        /// <summary>
-        /// Register a new user on the server
-        /// </summary>
-        /// <param name="registerDto"></param>
-        /// <returns></returns>
-        // [HttpPost("register")]
-        // public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
-        // {
-        //     try
-        //     {
-        //         var usernameValidation = await _accountService.ValidateUsername(registerDto.Username);
-        //         if (usernameValidation.Any())
-        //         {
-        //             return BadRequest(usernameValidation);
-        //         }
-        //
-        //         // If we are registering an admin account, ensure there are no existing admins or user registering is an admin
-        //         if (registerDto.IsAdmin)
-        //         {
-        //             var firstTimeFlow = !(await _userManager.GetUsersInRoleAsync("Admin")).Any();
-        //             if (!firstTimeFlow && !await _unitOfWork.UserRepository.IsUserAdminAsync(
-        //                     await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername())))
-        //             {
-        //                 return BadRequest("You are not permitted to create an admin account");
-        //             }
-        //         }
-        //
-        //         var user = _mapper.Map<AppUser>(registerDto);
-        //         user.UserPreferences ??= new AppUserPreferences();
-        //         user.ApiKey = HashUtil.ApiKey();
-        //
-        //         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        //         if (!settings.EnableAuthentication && !registerDto.IsAdmin)
-        //         {
-        //             _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password", registerDto.Username);
-        //             registerDto.Password = AccountService.DefaultPassword;
-        //         }
-        //
-        //         var result = await _userManager.CreateAsync(user, registerDto.Password);
-        //
-        //         if (!result.Succeeded) return BadRequest(result.Errors);
-        //
-        //
-        //         var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
-        //         var roleResult = await _userManager.AddToRoleAsync(user, role);
-        //
-        //         if (!roleResult.Succeeded) return BadRequest(result.Errors);
-        //
-        //         // When we register an admin, we need to grant them access to all Libraries.
-        //         if (registerDto.IsAdmin)
-        //         {
-        //             _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
-        //                 user.UserName);
-        //             var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-        //             foreach (var lib in libraries)
-        //             {
-        //                 lib.AppUsers ??= new List<AppUser>();
-        //                 lib.AppUsers.Add(user);
-        //             }
-        //
-        //             if (libraries.Any() && !await _unitOfWork.CommitAsync())
-        //                 _logger.LogError("There was an issue granting library access. Please do this manually");
-        //         }
-        //
-        //         return new UserDto
-        //         {
-        //             Username = user.UserName,
-        //             Token = await _tokenService.CreateToken(user),
-        //             RefreshToken = await _tokenService.CreateRefreshToken(user),
-        //             ApiKey = user.ApiKey,
-        //             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-        //         };
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "Something went wrong when registering user");
-        //         await _unitOfWork.RollbackAsync();
-        //     }
-        //
-        //     return BadRequest("Something went wrong when registering user");
-        // }
 
         /// <summary>
         /// Perform a login. Will send JWT Token of the logged in user back.
@@ -647,6 +566,33 @@ namespace API.Controllers
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [HttpPost("resend-confirmation-email")]
+        public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            if (user == null) return BadRequest("User does not exist");
+
+            if (string.IsNullOrEmpty(user.Email))
+                return BadRequest(
+                    "This user needs to migrate. Have them log out and login to trigger a migration flow");
+            if (user.EmailConfirmed) return BadRequest("User already confirmed");
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+            var emailLink =
+                $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-migration-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(user.Email)}";
+            _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
+            await _emailService.SendMigrationEmail(new EmailMigrationDto()
+            {
+                EmailAddress = user.Email,
+                Username = user.UserName,
+                ServerConfirmationLink = emailLink
+            });
+
+
+            return Ok(emailLink);
         }
 
         /// <summary>

@@ -66,7 +66,7 @@
         <div class="nav-item">
           <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
         </div>
-        <div class="nav-item">
+        <div class="nav-item pr-2">
           <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt" style="padding: 5px">
             <i class="fa fa-cogs" aria-hidden="true" style="color: white"></i>
             <span class="sr-only">Server Settings</span>
