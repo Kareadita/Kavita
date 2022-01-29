@@ -11,15 +11,10 @@
     </ng-template>
 </app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added" (sectionClick)="handleSectionClick($event)">
+<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added">
     <ng-template #carouselItem let-item let-position="idx">
-        <!-- <app-series-card [data]="item" (dataChanged)="loadRecentlyAddedChapters()"></app-series-card> -->
-        <div style="width: 200px; height: 400px; overflow: scroll;" class="pr-2">
-            <div>Created:{{item.created | date: 'short'}}</div>
-            <div>{{item.seriesName}}</div>
-            <div>Title: {{item.title}}</div>
-        </div>
-        <!-- <app-card-item [entity]="item"></app-card-item> -->
+        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
+        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
     </ng-template>
 </app-carousel-reel>
 

@@ -17,5 +17,18 @@ public class RecentlyAddedItemDto
     /// </summary>
     public string Title { get; set; }
     public DateTime Created { get; set; }
+    /// <summary>
+    /// Chapter Id if this is a chapter. Not guaranteed to be set.
+    /// </summary>
+    public int ChapterId { get; set; } = 0;
+    /// <summary>
+    /// Volume Id if this is a chapter. Not guaranteed to be set.
+    /// </summary>
+    public int VolumeId { get; set; } = 0;
+    /// <summary>
+    /// This is used only on the UI. It is just index of being added.
+    /// </summary>
+    public int Id { get; set; }
+    public MangaFormat Format { get; set; }
 
 }

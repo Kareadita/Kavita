@@ -7,4 +7,7 @@ export interface RecentlyAddedItem {
     title: string;
     libraryId: number;
     libraryType: LibraryType;
+    volumeId: number;
+    chapterId: number; 
+    id: number; // This is UI only
 }

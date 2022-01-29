@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { AccountService } from './account.service';
 import { NavService } from './nav.service';
 
@@ -39,6 +40,13 @@ export class ImageService implements OnDestroy {
   ngOnDestroy(): void {
       this.onDestroy.next();
       this.onDestroy.complete();
+  }
+
+  getRecentlyAddedItem(item: RecentlyAddedItem) {
+    if (item.chapterId === 0) {
+      return this.getVolumeCoverImage(item.volumeId);
+    }
+    return this.getChapterCoverImage(item.chapterId);
   }
 
   getVolumeCoverImage(volumeId: number) {

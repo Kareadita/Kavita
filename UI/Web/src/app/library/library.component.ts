@@ -5,12 +5,10 @@ import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
-import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
 import { User } from '../_models/user';
-import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
@@ -32,7 +30,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
   recentlyAdded: Series[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
-  continueReading: InProgressChapter[] = [];
 
   private readonly onDestroy = new Subject<void>();
 
@@ -108,9 +105,13 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   loadRecentlyAddedChapters() {
-    this.seriesService.getRecentlyAddedChapters(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAddedChapters = updatedSeries.result;
+    this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAddedChapters = updatedSeries;
     });
+  }
+
+  handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
+    this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
   }
 
   handleSectionClick(sectionTitle: string) {

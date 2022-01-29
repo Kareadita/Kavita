@@ -73,7 +73,7 @@ public interface ISeriesRepository
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
-    Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId, UserParams userParams, FilterDto filterDto);
+    Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -804,7 +804,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId, UserParams userParams, FilterDto filterDto)
+    public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId)
     {
         var libraries = await _context.AppUser
             .Where(u => u.Id == userId)
@@ -816,36 +816,17 @@ public class SeriesRepository : ISeriesRepository
 
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId) && s.LastModified >= withinLastWeek)
-            // .Join(_context.Volume.Where(v => v.Created >= withinLastWeek), s => s.Id, v => v.SeriesId, (s, v) => new
-            // {
-            //     s.LibraryId,
-            //     LibraryType = s.Library.Type,
-            //     SeriesId = s.Id,
-            //     SeriesName = s.Name,
-            //     Volume = v
-            // })
-            // .Join(_context.Chapter.Where(c => c.Created >= withinLastWeek), obj => obj.Volume.Id, c => c.VolumeId, (obj, c) => new RecentlyAddedItemDto()
-            // {
-            //     LibraryId = obj.LibraryId,
-            //     LibraryType = obj.LibraryType,
-            //     SeriesId = obj.SeriesId,
-            //     SeriesName = obj.SeriesName,
-            //     Created = c.Created,
-            //     //Title =
-            //     //Volume =
-            // })
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .Select(s => new
             {
-                LibraryId = s.LibraryId,
+                s.LibraryId,
                 LibraryType = s.Library.Type,
-                Created = s.Created,
+                s.Created,
                 SeriesId = s.Id,
                 SeriesName = s.Name,
                 Series = s,
                 Chapters = s.Volumes.SelectMany(v => v.Chapters)
-
             })
             .Take(50)
             .AsNoTracking()
@@ -856,6 +837,7 @@ public class SeriesRepository : ISeriesRepository
         var items = new List<RecentlyAddedItemDto>();
         foreach (var series in ret)
         {
+            if (items.Count >= 50) return items;
             var chaptersThatMeetCutoff = series.Chapters.Where(c => c.Created >= withinLastWeek)
                 .OrderByDescending(c => c.Created);
             var chapterMap = chaptersThatMeetCutoff.GroupBy(c => c.VolumeId)
@@ -892,8 +874,6 @@ public class SeriesRepository : ISeriesRepository
                             : $"{chapterTitle} {chapters.FirstOrDefault()?.Range}";
                     }
 
-
-
                     items.Add(new RecentlyAddedItemDto()
                     {
                         LibraryId = series.LibraryId,
@@ -902,7 +882,11 @@ public class SeriesRepository : ISeriesRepository
                         SeriesName = series.SeriesName,
                         Created = chapters.Max(c => c.Created),
                         Title = title,
+                        ChapterId = firstChapter.Id,
+                        Id = items.Count,
+                        Format = series.Series.Format
                     });
+                    if (items.Count >= 50) return items;
                     continue;
                 }
 
@@ -935,46 +919,35 @@ public class SeriesRepository : ISeriesRepository
                             LibraryType = series.LibraryType,
                             SeriesId = series.SeriesId,
                             SeriesName = series.SeriesName,
-                            Created = volumeChapters.Max(c => c.Created),
+                            Created = chap.Created,
                             Title = title,
+                            ChapterId = chap.Id,
+                            Id = items.Count,
+                            Format = series.Series.Format
                         });
+                        if (items.Count >= 50) return items;
                     }
                     continue;
                 }
 
                 // Create a volume ReadingListItemDto
+                var theVolume = series.Series.Volumes.First(v => v.Id == volumeId);
                 items.Add(new RecentlyAddedItemDto()
                 {
                     LibraryId = series.LibraryId,
+                    LibraryType = series.LibraryType,
                     SeriesId = series.SeriesId,
                     SeriesName = series.SeriesName,
                     Created = chapters.Max(c => c.Created),
-                    Title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number,
+                    Title = "Volume " + theVolume.Number,
+                    VolumeId = theVolume.Id,
+                    Id = items.Count,
+                    Format = series.Series.Format
                 });
-
+                if (items.Count >= 50) return items;
             }
         }
 
         return items;
-        // var ret = await _context.Chapter
-        //     .Where(s => s.LastModified >= withinLastWeek)
-        //     .Include(s => s.Volume)
-        //     .ThenInclude(v => v.Series)
-        //     .Select(s => new RecentlyAddedItemDto()
-        //     {
-        //         LibraryId = s.Volume.Series.LibraryId,
-        //         LibraryType = s.Volume.Series.Library.Type,
-        //         Created = s.Created,
-        //         SeriesId = s.Volume.Series.Id,
-        //         SeriesName = s.Volume.Series.Name
-        //     })
-        //     .Take(50)
-        //     .AsNoTracking()
-        //     .AsSplitQuery()
-        //     .OrderByDescending(item => item.Created)
-        //     .ToListAsync();
-        // Ideas: I can pull all the chapters and if multiple belong to a Volume, then combine them in memory
-
-        //return ret;
     }
 }
