@@ -5,10 +5,10 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
-import { InProgressChapter } from '../_models/in-progress-chapter';
 import { PaginatedResult } from '../_models/pagination';
+import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
-import { ReadStatus, SeriesFilter } from '../_models/series-filter';
+import { SeriesFilter } from '../_models/series-filter';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
@@ -119,6 +119,15 @@ export class SeriesService {
     return this.httpClient.post<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map(response => {
         return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
+      })
+    );
+  }
+
+  getRecentlyAddedChapters() {
+    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {}).pipe(
+      map(items => {
+        items.forEach((item, i) => item.id = i);
+        return items;
       })
     );
   }

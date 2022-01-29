@@ -9,6 +9,7 @@ import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
@@ -32,6 +33,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() title = '';
   /**
+   * Shows below the title. Defaults to not visible
+   */
+  @Input() subtitle = '';
+  /**
    * Any actions to perform on the card
    */
   @Input() actions: ActionItem<any>[] = [];
@@ -50,7 +55,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark;
+  @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem;
   /**
    * If the entity is selected or not. 
    */
@@ -59,6 +64,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
    * If the entity should show selection code
    */
   @Input() allowSelection: boolean = false;
+  /**
+   * This will supress the cannot read archive warning when total pages is 0
+   */
+   @Input() supressArchiveWarning: boolean = false;
   /**
    * Event emitted when item is clicked
    */
@@ -72,10 +81,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   libraryName: string | undefined = undefined; 
   libraryId: number | undefined = undefined; 
-  /**
-   * This will supress the cannot read archive warning when total pages is 0
-   */
-  supressArchiveWarning: boolean = false;
   /**
    * Format of the entity (only applies to Series)
    */
