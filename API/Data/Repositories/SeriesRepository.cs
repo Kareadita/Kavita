@@ -867,46 +867,90 @@ public class SeriesRepository : ISeriesRepository
                 if (chapters.Count == 1)
                 {
                     // Create a chapter ReadingListItemDto
-                    var maxDate = chapters.Max(c => c.Created);
+                    var chapterTitle = "Chapter";
+                    switch (series.LibraryType)
+                    {
+                        case LibraryType.Book:
+                            chapterTitle = "";
+                            break;
+                        case LibraryType.Comic:
+                            chapterTitle = "Issue";
+                            break;
+                    }
+
+                    // If chapter is 0, then it means it's really a volume, so show it that way
+                    var firstChapter = chapters.First();
+                    string title;
+                    if (firstChapter.Number.Equals(Parser.Parser.DefaultChapter))
+                    {
+                        title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+                    }
+                    else
+                    {
+                        title = chapters.First().IsSpecial
+                            ? chapters.FirstOrDefault()?.Range
+                            : $"{chapterTitle} {chapters.FirstOrDefault()?.Range}";
+                    }
+
+
+
                     items.Add(new RecentlyAddedItemDto()
                     {
                         LibraryId = series.LibraryId,
+                        LibraryType = series.LibraryType,
                         SeriesId = series.SeriesId,
                         SeriesName = series.SeriesName,
-                        Created = maxDate,
-                        Title = "Chapter " + chapters.FirstOrDefault()?.Range,
+                        Created = chapters.Max(c => c.Created),
+                        Title = title,
                     });
                     continue;
                 }
 
 
+                // Multiple chapters, so let's show as a volume
                 var volumeNumber = series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
                 if (volumeNumber == 0)
                 {
-                    // Create a chapter ReadingListItemDto
-                    var maxDate = chapters.Max(c => c.Created);
-                    items.Add(new RecentlyAddedItemDto()
+                    var volumeChapters = chapters.Where(c => c.Created >= withinLastWeek).ToList();
+                    foreach (var chap in volumeChapters)
                     {
-                        LibraryId = series.LibraryId,
-                        SeriesId = series.SeriesId,
-                        SeriesName = series.SeriesName,
-                        Created = maxDate,
-                        Title = "Chapter " + chapters.FirstOrDefault()?.Range,
-                    });
+                        // Create a chapter ReadingListItemDto
+                        var chapterTitle = "Chapter";
+                        switch (series.LibraryType)
+                        {
+                            case LibraryType.Book:
+                                chapterTitle = "";
+                                break;
+                            case LibraryType.Comic:
+                                chapterTitle = "Issue";
+                                break;
+                        }
+
+                        var title = volumeChapters.First().IsSpecial
+                            ? volumeChapters.FirstOrDefault()?.Range
+                            : $"{chapterTitle} {volumeChapters.FirstOrDefault()?.Range}";
+                        items.Add(new RecentlyAddedItemDto()
+                        {
+                            LibraryId = series.LibraryId,
+                            LibraryType = series.LibraryType,
+                            SeriesId = series.SeriesId,
+                            SeriesName = series.SeriesName,
+                            Created = volumeChapters.Max(c => c.Created),
+                            Title = title,
+                        });
+                    }
+                    continue;
                 }
-                else
+
+                // Create a volume ReadingListItemDto
+                items.Add(new RecentlyAddedItemDto()
                 {
-                    // Create a volume ReadingListItemDto
-                    var maxDate = chapters.Max(c => c.Created);
-                    items.Add(new RecentlyAddedItemDto()
-                    {
-                        LibraryId = series.LibraryId,
-                        SeriesId = series.SeriesId,
-                        SeriesName = series.SeriesName,
-                        Created = maxDate,
-                        Title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number,
-                    });
-                }
+                    LibraryId = series.LibraryId,
+                    SeriesId = series.SeriesId,
+                    SeriesName = series.SeriesName,
+                    Created = chapters.Max(c => c.Created),
+                    Title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number,
+                });
 
             }
         }
