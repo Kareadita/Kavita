@@ -7,8 +7,10 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { InProgressChapter } from '../_models/in-progress-chapter';
 import { Library } from '../_models/library';
+import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
 import { User } from '../_models/user';
+import { Volume } from '../_models/volume';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
@@ -28,6 +30,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isAdmin = false;
 
   recentlyAdded: Series[] = [];
+  recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
   continueReading: InProgressChapter[] = [];
 
@@ -76,6 +79,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   reloadSeries() {
     this.loadRecentlyAdded();
     this.loadOnDeck();
+    this.loadRecentlyAddedChapters();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -100,6 +104,12 @@ export class LibraryComponent implements OnInit, OnDestroy {
   loadRecentlyAdded() {
     this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyAdded = updatedSeries.result;
+    });
+  }
+
+  loadRecentlyAddedChapters() {
+    this.seriesService.getRecentlyAddedChapters(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAddedChapters = updatedSeries.result;
     });
   }
 
