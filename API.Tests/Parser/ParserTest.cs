@@ -1,5 +1,4 @@
 using System.Linq;
-using API.Entities.Enums;
 using Xunit;
 using static API.Parser.Parser;
 

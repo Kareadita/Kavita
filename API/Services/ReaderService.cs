@@ -30,17 +30,13 @@ public class ReaderService : IReaderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
-    private readonly IDirectoryService _directoryService;
-    private readonly ICacheService _cacheService;
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IDirectoryService directoryService, ICacheService cacheService)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _directoryService = directoryService;
-        _cacheService = cacheService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)

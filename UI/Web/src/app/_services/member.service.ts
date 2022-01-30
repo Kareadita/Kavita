@@ -39,4 +39,8 @@ export class MemberService {
   updateMemberRoles(username: string, roles: string[]) {
     return this.httpClient.post(this.baseUrl + 'account/update-rbs', {username, roles});
   }
+
+  getPendingInvites() {
+    return this.httpClient.get<Array<Member>>(this.baseUrl + 'users/pending');
+  }
 }

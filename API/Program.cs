@@ -8,7 +8,6 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
-using API.Services.Tasks;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;

@@ -569,7 +569,7 @@ public class ScannerService : IScannerService
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
                 person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
 
-            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
+            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, _) =>
                 TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
 
             GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
@@ -821,7 +821,7 @@ public class ScannerService : IScannerService
             // Remove all tags that aren't matching between chapter tags and metadata
             TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
             TagHelper.UpdateTag(allTags, tags, false,
-                (tag, added) =>
+                (tag, _) =>
                 {
                     chapter.Tags.Add(tag);
                 });

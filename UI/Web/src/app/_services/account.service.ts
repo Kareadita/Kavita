@@ -49,7 +49,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  login(model: any): Observable<any> {
+  login(model: {username: string, password: string}): Observable<any> {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;
@@ -91,25 +91,13 @@ export class AccountService implements OnDestroy {
     this.messageHub.stopHubConnection();
   }
 
-  // setCurrentUser() {
-  //   // TODO: Refactor this to setCurentUser in accoutnService
-  //   const user = this.getUserFromLocalStorage();
 
-
-  //   if (user) {
-  //     this.navService.setDarkMode(user.preferences.siteDarkMode);
-  //     this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
-  //     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-  //   } else {
-  //     this.navService.setDarkMode(true);
-  //   }
-  // }
-
-  register(model: {username: string, password: string, isAdmin?: boolean}) {
-    if (!model.hasOwnProperty('isAdmin')) {
-      model.isAdmin = false;
-    }
-
+  /**
+   * Registers the first admin on the account. Only used for that. All other registrations must occur through invite
+   * @param model 
+   * @returns 
+   */
+  register(model: {username: string, password: string, email: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
         return user;
@@ -118,12 +106,36 @@ export class AccountService implements OnDestroy {
     );
   }
 
+  migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
+    return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, {responseType: 'text' as 'json'});
+  }
+
+  confirmMigrationEmail(model: {email: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-migration-email', model);
+  }
+
+  resendConfirmationEmail(userId: number) {
+    return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
+  }
+
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, sendEmail: boolean}) {
+    return this.httpClient.post<string>(this.baseUrl + 'account/invite', model, {responseType: 'text' as 'json'});
+  }
+
+  confirmEmail(model: {email: string, username: string, password: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
+  }
+
   getDecodedToken(token: string) {
     return JSON.parse(atob(token.split('.')[1]));
   }
 
   resetPassword(username: string, password: string) {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password}, {responseType: 'json' as 'text'});
+  }
+
+  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
+    return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
   updatePreferences(userPreferences: Preferences) {

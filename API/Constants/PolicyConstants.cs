@@ -1,4 +1,7 @@
-﻿namespace API.Constants
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+
+namespace API.Constants
 {
     /// <summary>
     /// Role-based Security
@@ -17,5 +20,10 @@
         /// Used to give a user ability to download files from the server
         /// </summary>
         public const string DownloadRole = "Download";
+
+        public static readonly ImmutableArray<string> ValidRoles = new ImmutableArray<string>()
+        {
+            AdminRole, PlebRole, DownloadRole
+        };
     }
 }

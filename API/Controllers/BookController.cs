@@ -10,7 +10,6 @@ using API.Extensions;
 using API.Services;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
 

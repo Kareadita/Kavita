@@ -4,6 +4,8 @@ import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
 
+// TODO: Remove this component, edit-user will take over
+
 @Component({
   selector: 'app-edit-rbs-modal',
   templateUrl: './edit-rbs-modal.component.html',

@@ -65,7 +65,11 @@ const routes: Routes = [
 
     ]
   },
-  {path: 'login', component: UserLoginComponent},
+  {
+    path: 'registration',
+    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
+  },
+  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: 'no-connection', component: NotConnectedComponent},
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];

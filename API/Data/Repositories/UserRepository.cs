@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -20,7 +21,8 @@ public enum AppUserIncludes
     Progress = 2,
     Bookmarks = 4,
     ReadingLists = 8,
-    Ratings = 16
+    Ratings = 16,
+    UserPreferences = 32
 }
 
 public interface IUserRepository
@@ -29,7 +31,8 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     public void Delete(AppUser user);
-    Task<IEnumerable<MemberDto>>  GetMembersAsync();
+    Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
+    Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser user);
@@ -48,6 +51,7 @@ public interface IUserRepository
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
+    Task<AppUser> GetUserByEmailAsync(string email);
 }
 
 public class UserRepository : IUserRepository
@@ -156,6 +160,13 @@ public class UserRepository : IUserRepository
             query = query.Include(u => u.Ratings);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
+        {
+            query = query.Include(u => u.UserPreferences);
+        }
+
+
+
         return query;
     }
 
@@ -196,6 +207,11 @@ public class UserRepository : IUserRepository
         return await _context.AppUserBookmark
             .Where(b => bookmarkIds.Contains(b.Id))
             .ToListAsync();
+    }
+
+    public async Task<AppUser> GetUserByEmailAsync(string email)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.Equals(email));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
@@ -280,9 +296,10 @@ public class UserRepository : IUserRepository
     }
 
 
-    public async Task<IEnumerable<MemberDto>> GetMembersAsync()
+    public async Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync()
     {
         return await _context.Users
+            .Where(u => u.EmailConfirmed)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
@@ -291,6 +308,7 @@ public class UserRepository : IUserRepository
             {
                 Id = u.Id,
                 Username = u.UserName,
+                Email = u.Email,
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
@@ -304,5 +322,43 @@ public class UserRepository : IUserRepository
             })
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
+    {
+        return await _context.Users
+            .Where(u => !u.EmailConfirmed)
+            .Include(x => x.Libraries)
+            .Include(r => r.UserRoles)
+            .ThenInclude(r => r.Role)
+            .OrderBy(u => u.UserName)
+            .Select(u => new MemberDto
+            {
+                Id = u.Id,
+                Username = u.UserName,
+                Email = u.Email,
+                Created = u.Created,
+                LastActive = u.LastActive,
+                Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                Libraries =  u.Libraries.Select(l => new LibraryDto
+                {
+                    Name = l.Name,
+                    Type = l.Type,
+                    LastScanned = l.LastScanned,
+                    Folders = l.Folders.Select(x => x.Path).ToList()
+                }).ToList()
+            })
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<bool> ValidateUserExists(string username)
+    {
+        if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == username.ToUpper()))
+        {
+            throw new ValidationException("Username is taken.");
+        }
+
+        return true;
     }
 }
