@@ -40,10 +40,6 @@ namespace API.Entities
         /// </summary>
         public DateTime LastModified { get; set; }
         /// <summary>
-        /// Updated whenever volumes are added to a Series.
-        /// </summary>
-        //public DateTime LastAdded { get; set; }
-        /// <summary>
         /// Absolute path to the (managed) image file
         /// </summary>
         /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>

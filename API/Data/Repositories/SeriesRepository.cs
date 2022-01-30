@@ -887,9 +887,9 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
         var libraryIds = libraries.Select(l => l.LibraryId).ToList();
 
-        var withinLastWeek = DateTime.Now - TimeSpan.FromDays(1);
+        var dateCutoff = DateTime.Now - TimeSpan.FromDays(12);
         var ret = await _context.Chapter
-            .Where(c => c.Created >= withinLastWeek)
+            .Where(c => c.Created >= dateCutoff)
             .AsNoTracking()
             .Include(c => c.Volume)
             .ThenInclude(v => v.Series)
@@ -912,7 +912,7 @@ public class SeriesRepository : ISeriesRepository
                 VolumeNumber = c.Volume.Number,
                 ChapterTitle = c.Title
             })
-            .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
+            .Where(c => c.Created >= dateCutoff && libraryIds.Contains(c.LibraryId))
             .ToListAsync();
 
 
@@ -958,13 +958,6 @@ public class SeriesRepository : ISeriesRepository
             items.Add(dto);
         }
 
-        var multipleChapters = items.Where(i => !i.Title.StartsWith("Volume"))
-            .GroupBy(i => i.VolumeId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-        foreach (var VARIABLE in multipleChapters)
-        {
-
-        }
 
         return items;
 

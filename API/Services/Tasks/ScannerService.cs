@@ -670,7 +670,7 @@ public class ScannerService : IScannerService
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                volume.Chapters.Add(DbFactory.Chapter(info)); // TODO: Update Series LastAdded
+                volume.Chapters.Add(DbFactory.Chapter(info));
             }
             else
             {
