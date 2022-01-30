@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace API.Constants
 {
@@ -20,7 +21,7 @@ namespace API.Constants
         /// </summary>
         public const string DownloadRole = "Download";
 
-        public static readonly IList<string> ValidRoles = new List<string>()
+        public static readonly ImmutableArray<string> ValidRoles = new ImmutableArray<string>()
         {
             AdminRole, PlebRole, DownloadRole
         };
