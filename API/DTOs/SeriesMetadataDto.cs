@@ -22,7 +22,7 @@ namespace API.DTOs
         /// </summary>
         public ICollection<TagDto> Tags { get; set; }
         public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Artists { get; set; } = new List<PersonDto>();
+        public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
@@ -40,9 +40,21 @@ namespace API.DTOs
         /// </summary>
         public int ReleaseYear { get; set; }
         /// <summary>
-        /// Language of the content (ISO 639-1 code)
+        /// Language of the content (BCP-47 code)
         /// </summary>
         public string Language { get; set; } = string.Empty;
+        /// <summary>
+        /// Number in the TotalCount of issues
+        /// </summary>
+        public int Count { get; set; }
+        /// <summary>
+        /// Total number of issues for the series
+        /// </summary>
+        public int TotalCount { get; set; }
+        /// <summary>
+        /// Publication status of the Series
+        /// </summary>
+        public PublicationStatus PublicationStatus { get; set; }
 
         public int SeriesId { get; set; }
     }

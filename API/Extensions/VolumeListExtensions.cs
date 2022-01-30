@@ -12,7 +12,8 @@ namespace API.Extensions
         {
             return inBookSeries
                 ? volumes.FirstOrDefault(v => v.Chapters.Any())
-                : volumes.OrderBy(v => v.Number, new ChapterSortComparer()).FirstOrDefault(v => v.Chapters.Any());
+                : volumes.OrderBy(v => v.Number, new ChapterSortComparer())
+                    .FirstOrDefault(v => v.Chapters.Any());
         }
 
         /// <summary>

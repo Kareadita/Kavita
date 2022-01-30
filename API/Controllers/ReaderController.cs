@@ -8,8 +8,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -24,15 +26,21 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
+        private readonly IDirectoryService _directoryService;
+        private readonly ICleanupService _cleanupService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
-            IUnitOfWork unitOfWork, ILogger<ReaderController> logger, IReaderService readerService)
+            IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
+            IReaderService readerService, IDirectoryService directoryService,
+            ICleanupService cleanupService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
+            _directoryService = directoryService;
+            _cleanupService = cleanupService;
         }
 
         /// <summary>
@@ -131,15 +139,7 @@ namespace API.Controllers
             user.Progresses ??= new List<AppUserProgress>();
             foreach (var volume in volumes)
             {
-                foreach (var chapter in volume.Chapters)
-                {
-                    var userProgress = ReaderService.GetUserProgressForChapter(user, chapter);
-
-                    if (userProgress == null) continue;
-                    userProgress.PagesRead = 0;
-                    userProgress.SeriesId = markReadDto.SeriesId;
-                    userProgress.VolumeId = volume.Id;
-                }
+                _readerService.MarkChaptersAsUnread(user, markReadDto.SeriesId, volume.Chapters);
             }
 
             _unitOfWork.UserRepository.Update(user);
@@ -357,6 +357,54 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Continue point is the chapter which you should start reading again from. If there is no progress on a series, then the first chapter will be returned (non-special unless only specials).
+        /// Otherwise, loop through the chapters and volumes in order to find the next chapter which has progress.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("continue-point")]
+        public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+
+            return Ok(await _readerService.GetContinuePoint(seriesId, userId));
+        }
+
+        /// <summary>
+        /// Returns if the user has reading progress on the Series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        [HttpGet("has-progress")]
+        public async Task<ActionResult<ChapterDto>> HasProgress(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId));
+        }
+
+        /// <summary>
+        /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.
+        /// </summary>
+        /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
+        /// <returns></returns>
+        [HttpPost("mark-chapter-until-as-read")]
+        public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (!_unitOfWork.HasChanges()) return Ok(true);
+            if (await _unitOfWork.CommitAsync()) return Ok(true);
+
+            await _unitOfWork.RollbackAsync();
+            return Ok(false);
+        }
+
+
+        /// <summary>
         /// Returns a list of bookmarked pages for a given Chapter
         /// </summary>
         /// <param name="chapterId"></param>
@@ -398,6 +446,14 @@ namespace API.Controllers
 
                 if (await _unitOfWork.CommitAsync())
                 {
+                    try
+                    {
+                        await _cleanupService.CleanupBookmarks();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an issue cleaning up old bookmarks");
+                    }
                     return Ok();
                 }
             }
@@ -455,6 +511,18 @@ namespace API.Controllers
                 var userBookmark =
                     await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
 
+                // We need to get the image
+                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
+                var fileInfo = new FileInfo(path);
+
+                var bookmarkDirectory =
+                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
+                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
+
+
                if (userBookmark == null)
                {
                    user.Bookmarks ??= new List<AppUserBookmark>();
@@ -464,6 +532,8 @@ namespace API.Controllers
                        VolumeId = bookmarkDto.VolumeId,
                        SeriesId = bookmarkDto.SeriesId,
                        ChapterId = bookmarkDto.ChapterId,
+                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
+
                    });
                    _unitOfWork.UserRepository.Update(user);
                }

@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Router } from '@angular/router';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { UtilityService } from '../shared/_services/utility.service';
 import { MangaFormat } from '../_models/manga-format';
@@ -32,12 +33,12 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return TagBadgeCursor;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService) { }
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router) { }
   
   ngOnChanges(changes: SimpleChanges): void {
     this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
                                   this.seriesMetadata.editors.length > 0 || 
-                                  this.seriesMetadata.artists.length > 0 || 
+                                  this.seriesMetadata.coverArtists.length > 0 || 
                                   this.seriesMetadata.inkers.length > 0 ||
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
@@ -58,5 +59,11 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  goTo(queryParamName: string, filter: any) {
+    let params: any = {};
+    params[queryParamName] = filter;
+    params['page'] = 1;
+    this.router.navigate(['library', this.series.libraryId], {queryParams: params});
+  }
 
 }

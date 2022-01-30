@@ -16,19 +16,7 @@ namespace API.Tests.Services
 
     public class DirectoryServiceTests
     {
-        private readonly DirectoryService _directoryService;
         private readonly ILogger<DirectoryService> _logger = Substitute.For<ILogger<DirectoryService>>();
-
-        public DirectoryServiceTests()
-        {
-            var filesystem = new MockFileSystem()
-            {
-
-            };
-
-            _directoryService = new DirectoryService(_logger, filesystem);
-        }
-
 
         #region TraverseTreeParallelForEach
         [Fact]
@@ -53,6 +41,39 @@ namespace API.Tests.Services
         }
 
         [Fact]
+        public void TraverseTreeParallelForEach_LongDirectory_ShouldBe1()
+        {
+            var fileSystem = new MockFileSystem();
+            // Create a super long path
+            var testDirectory = "/manga/";
+            for (var i = 0; i < 200; i++)
+            {
+                testDirectory = fileSystem.FileSystem.Path.Join(testDirectory, "supercalifragilisticexpialidocious");
+            }
+
+
+            fileSystem.AddFile(fileSystem.FileSystem.Path.Join(testDirectory, "file_29.jpg"), new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var files = new List<string>();
+            try
+            {
+                var fileCount = ds.TraverseTreeParallelForEach("/manga/", s => files.Add(s),
+                    API.Parser.Parser.ImageFileExtensions, _logger);
+                Assert.Equal(1, fileCount);
+            }
+            catch (Exception ex)
+            {
+                Assert.False(true);
+            }
+
+
+            Assert.Equal(1, files.Count);
+        }
+
+
+
+        [Fact]
         public void TraverseTreeParallelForEach_DontCountExcludedDirectories_ShouldBe28()
         {
             var testDirectory = "/manga/";
@@ -64,6 +85,7 @@ namespace API.Tests.Services
 
             fileSystem.AddFile($"{Path.Join(testDirectory, "@eaDir")}file_{29}.jpg", new MockFileData(""));
             fileSystem.AddFile($"{Path.Join(testDirectory, ".DS_Store")}file_{30}.jpg", new MockFileData(""));
+            fileSystem.AddFile($"{Path.Join(testDirectory, ".qpkg")}file_{30}.jpg", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
@@ -379,9 +401,10 @@ namespace API.Tests.Services
         {
             const string testDirectory = "c:/manga/";
             var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
 
-            Assert.False(ds.IsDirectoryEmpty("c:/manga/"));
+            Assert.True(ds.IsDirectoryEmpty("c:/manga/"));
         }
 
         [Fact]
@@ -733,6 +756,38 @@ namespace API.Tests.Services
             Assert.True(fileSystem.Directory.Exists($"{testDirectory}subdir/"));
         }
 
+        #endregion
+
+        #region CheckWriteAccess
+
+        [Fact]
+        public async Task CheckWriteAccess_ShouldHaveAccess()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            var hasAccess = await ds.CheckWriteAccess(ds.FileSystem.Path.Join(testDirectory, "bookmarks"));
+            Assert.True(hasAccess);
+
+            Assert.False(ds.FileSystem.Directory.Exists(ds.FileSystem.Path.Join(testDirectory, "bookmarks")));
+            Assert.False(ds.FileSystem.File.Exists(ds.FileSystem.Path.Join(testDirectory, "bookmarks", "test.txt")));
+        }
+
+
+        #endregion
+
+        #region GetHumanReadableBytes
+
+        [Theory]
+        [InlineData(1200, "1.17 KB")]
+        [InlineData(1, "1 B")]
+        [InlineData(10000000, "9.54 MB")]
+        [InlineData(10000000000, "9.31 GB")]
+        public void GetHumanReadableBytesTest(long bytes, string expected)
+        {
+            Assert.Equal(expected, DirectoryService.GetHumanReadableBytes(bytes));
+        }
         #endregion
     }
 }

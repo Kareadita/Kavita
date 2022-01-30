@@ -1,4 +1,4 @@
-<div class="reader" #reader>
+<div class="reader" #reader [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}">
     <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
         <div style="display: flex; margin-top: 5px;">
             <button class="btn btn-icon" style="height: 100%" title="Back" (click)="closeReader()">
@@ -36,7 +36,8 @@
             [urlProvider]="getPageUrl" 
             (loadNextChapter)="loadNextChapter()" 
             (loadPrevChapter)="loadPrevChapter()"
-            [bookmarkPage]="showBookmarkEffectEvent"></app-infinite-scroller>
+            [bookmarkPage]="showBookmarkEffectEvent"
+            [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
         </div>
         <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
             <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">

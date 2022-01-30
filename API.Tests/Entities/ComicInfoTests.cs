@@ -11,17 +11,19 @@ public class ComicInfoTests
     [Theory]
     [InlineData("G", AgeRating.G)]
     [InlineData("Everyone", AgeRating.Everyone)]
-    [InlineData("Mature", AgeRating.Mature)]
     [InlineData("Teen", AgeRating.Teen)]
     [InlineData("Adults Only 18+", AgeRating.AdultsOnly)]
     [InlineData("Early Childhood", AgeRating.EarlyChildhood)]
     [InlineData("Everyone 10+", AgeRating.Everyone10Plus)]
-    [InlineData("Mature 15+", AgeRating.Mature15Plus)]
+    [InlineData("M", AgeRating.Mature)]
+    [InlineData("MA 15+", AgeRating.Mature15Plus)]
     [InlineData("Mature 17+", AgeRating.Mature17Plus)]
     [InlineData("Rating Pending", AgeRating.RatingPending)]
-    [InlineData("X 18+", AgeRating.X18Plus)]
+    [InlineData("X18+", AgeRating.X18Plus)]
     [InlineData("Kids to Adults", AgeRating.KidsToAdults)]
     [InlineData("NotValid", AgeRating.Unknown)]
+    [InlineData("PG", AgeRating.PG)]
+    [InlineData("R18+", AgeRating.R18Plus)]
     public void ConvertAgeRatingToEnum_ShouldConvertCorrectly(string input, AgeRating expected)
     {
         Assert.Equal(expected, ComicInfo.ConvertAgeRatingToEnum(input));
@@ -30,7 +32,7 @@ public class ComicInfoTests
     [Fact]
     public void ConvertAgeRatingToEnum_ShouldCompareCaseInsensitive()
     {
-        Assert.Equal(AgeRating.Mature, ComicInfo.ConvertAgeRatingToEnum("mature"));
+        Assert.Equal(AgeRating.RatingPending, ComicInfo.ConvertAgeRatingToEnum("rating pending"));
     }
     #endregion
 }

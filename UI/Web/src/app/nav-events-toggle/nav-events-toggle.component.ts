@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { User } from '../_models/user';
+import { AccountService } from '../_services/account.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 
@@ -28,6 +29,7 @@ const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgre
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   @Input() user!: User;
+  isAdmin: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -41,7 +43,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   updateBody: any;
   private updateNotificationModalRef: NgbModalRef | null = null;
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal) { }
+  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -56,6 +58,13 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       } else if (event.event === EVENTS.UpdateAvailable) {
         this.updateAvailable = true;
         this.updateBody = event.payload;
+      }
+    });
+    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+      if (user) {
+        this.isAdmin = this.accountService.hasAdminRole(user);
+      } else {
+        this.isAdmin = false;
       }
     });
   }
@@ -103,7 +112,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   prettyPrintEvent(eventType: string, event: any) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
+      case (EVENTS.RefreshMetadataProgress): return 'Refreshing Covers for ';
       case (EVENTS.CleanupProgress): return 'Clearing Cache';
       case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
       case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;

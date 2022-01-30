@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
@@ -33,6 +33,13 @@ import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
 
 
+enum TabID {
+  Specials = 1,
+  Storyline = 2,
+  Volumes = 3,
+  Chapters = 4
+}
+
 @Component({
   selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
@@ -43,6 +50,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
+  storyChapters: Chapter[] = [];
   libraryId = 0;
   isAdmin = false;
   hasDownloadingRole = false;
@@ -60,8 +68,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
-  activeTabId = 2;
-  hasNonSpecialVolumeChapters = true;
+  activeTabId = TabID.Storyline;
+  hasNonSpecialVolumeChapters = false;
+  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -146,6 +155,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     return TagBadgeCursor;
   }
 
+  get TabID(): typeof TabID {
+    return TabID;
+  }
+
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
               private modalService: NgbModal, public readerService: ReaderService,
@@ -223,6 +236,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  onNavChange(event: NgbNavChangeEvent) {
+    this.bulkSelectionService.deselectAll();
+  }
+
   handleSeriesActionCallback(action: Action, series: Series) {
     this.actionInProgress = true;
     switch(action) {
@@ -252,6 +269,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
+        break;
+      case(Action.AddToCollection):
+        this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
         break;
       default:
         break;
@@ -333,14 +353,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   loadSeries(seriesId: number) {
     this.coverImageOffset = 0;
 
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+
     forkJoin([
       this.libraryService.getLibraryType(this.libraryId),
-      this.seriesService.getMetadata(seriesId),
       this.seriesService.getSeries(seriesId)
     ]).subscribe(results => {
       this.libraryType = results[0];
-      this.seriesMetadata = results[1];
-      this.series = results[2];
+      this.series = results[1];
 
       this.createHTML();
 
@@ -351,20 +371,22 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
-      
-      
+
 
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.chapters = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
-        this.volumes = volumes.sort(this.utilityService.sortVolumes);
-
-        this.setContinuePoint();
+        this.volumes = volumes; // volumes are already be sorted in the backend
         const vol0 = this.volumes.filter(v => v.number === 0);
-        this.hasSpecials = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => c.isSpecial || isNaN(parseInt(c.range, 10))).length > 0 ;
+        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
+        
+        
+        this.setContinuePoint();
+
+        
+        const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
+        this.hasSpecials = specials.length > 0
         if (this.hasSpecials) {
-          this.specials = vol0.map(v => v.chapters || [])
-          .flat()
-          .filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)))
+          this.specials = specials
           .map(c => {
             c.title = this.utilityService.cleanSpecialTitle(c.title);
             c.range = this.utilityService.cleanSpecialTitle(c.range);
@@ -372,15 +394,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           });
         }
 
-        if (this.volumes.filter(v => v.number !== 0).length === 0 && this.chapters.filter(c => !c.isSpecial).length === 0 && this.specials.length > 0) {
-          this.activeTabId = 1;
-          this.hasNonSpecialVolumeChapters = false;
-        }
-
-        // If an update occured and we were on specials, re-activate Volumes/Chapters 
-        if (!this.hasSpecials && this.activeTabId != 2) {
-          this.activeTabId = 2;
-        }
+        this.updateSelectedTab();
 
         this.isLoading = false;
       });
@@ -389,13 +403,43 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * This will update the selected tab
+   * 
+   * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
+   */
+  updateSelectedTab() {
+    // This shows Chapters/Issues tab
+
+    // If this has chapters that are not specials
+    if (this.chapters.filter(c => !c.isSpecial).length > 0) {
+      this.hasNonSpecialNonVolumeChapters = true;
+    }
+
+    // This shows Volumes tab
+    if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
+      this.hasNonSpecialVolumeChapters = true;
+    }
+
+    // If an update occured and we were on specials, re-activate Volumes/Chapters 
+    if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != TabID.Storyline) {
+      this.activeTabId = TabID.Storyline;
+    }
+
+    if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
+      this.activeTabId = TabID.Storyline;
+    } else {
+      this.activeTabId = TabID.Specials;
+    }
+  }
+
   createHTML() {
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
   }
 
   setContinuePoint() {
-    this.hasReadingProgress = this.volumes.filter(v => v.pagesRead > 0).length > 0 || this.chapters.filter(c => c.pagesRead > 0).length > 0;
-    this.currentlyReadingChapter = this.readerService.getCurrentChapter(this.volumes);
+    this.readerService.hasSeriesProgress(this.series.id).subscribe(hasProgress => this.hasReadingProgress = hasProgress);
+    this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
   markAsRead(vol: Volume) {
@@ -485,7 +529,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
       // Find the continue point chapter and load it
-      this.openChapter(this.readerService.getCurrentChapter([volume]));
+      this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.openChapter(chapter));
       return;
     }
 

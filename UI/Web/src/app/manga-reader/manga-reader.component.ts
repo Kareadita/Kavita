@@ -131,6 +131,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
    */
    showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
+   /**
+   * An event emiter when fullscreen mode is toggled. Used soley by the webtoon reader.
+   */
+   fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   /**
    * If the menu is open/visible.
    */
@@ -396,6 +400,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goToPage(parseInt(goToPageNum.trim(), 10));
     } else if (event.key === KEY_CODES.B) {
       this.bookmarkPage();
+    } else if (event.key === KEY_CODES.F) {
+      this.toggleFullscreen()
     }
   }
 
@@ -417,6 +423,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.pageNum = 0;
+    this.pagingDirection = PAGING_DIRECTION.FORWARD;
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
@@ -435,7 +442,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
       if (page > this.maxPages) {
-        page = this.maxPages;
+        page = this.maxPages - 1;
       }
       this.setPageNum(page);
 
@@ -844,66 +851,67 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderPage() {
-    if (this.ctx && this.canvas) {
-      this.canvasImage.onload = null;
+    if (!this.ctx || !this.canvas) { return; }
 
-      this.setCanvasSize();
+    this.canvasImage.onload = null;
 
-      const needsSplitting = this.isCoverImage();
-      this.updateSplitPage();
+    this.setCanvasSize();
 
-      if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
-        this.canvas.nativeElement.width = this.canvasImage.width / 2;
-        this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
-      } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
-        this.canvas.nativeElement.width = this.canvasImage.width / 2;
-        this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+    const needsSplitting = this.isCoverImage();
+    this.updateSplitPage();
+
+    if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
+      this.canvas.nativeElement.width = this.canvasImage.width / 2;
+      this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+    } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
+      this.canvas.nativeElement.width = this.canvasImage.width / 2;
+      this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+    } else {
+      if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
+        this.updateScalingForFirstPageRender();
+      }
+
+      // Fit Split on a page that needs splitting
+      if (!this.shouldRenderAsFitSplit()) {
+        this.setCanvasSize();
+        this.ctx.drawImage(this.canvasImage, 0, 0);
+        this.isLoading = false;
+        return;
+      }
+      
+      const windowWidth = window.innerWidth
+              || document.documentElement.clientWidth
+              || document.body.clientWidth;
+      const windowHeight = window.innerHeight
+              || document.documentElement.clientHeight
+              || document.body.clientHeight;
+      // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
+      this.canvas.nativeElement.width = windowWidth;
+      this.canvas.nativeElement.height = windowHeight;
+      const ratio = this.canvasImage.width / this.canvasImage.height;
+      let newWidth = windowWidth;
+      let newHeight = newWidth / ratio;
+      if (newHeight > windowHeight) {
+        newHeight = windowHeight;
+        newWidth = newHeight * ratio;
+      }
+
+      // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
+      if (windowWidth > newWidth) {
+        this.setCanvasSize();
+        this.ctx.drawImage(this.canvasImage, 0, 0);
       } else {
-        if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
-          this.updateScalingForFirstPageRender();
-        }
-
-        // Fit Split on a page that needs splitting
-        if (this.shouldRenderAsFitSplit()) {
-          const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-          const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
-          // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-          this.canvas.nativeElement.width = windowWidth;
-          this.canvas.nativeElement.height = windowHeight;
-          const ratio = this.canvasImage.width / this.canvasImage.height;
-          let newWidth = windowWidth;
-          let newHeight = newWidth / ratio;
-          if (newHeight > windowHeight) {
-            newHeight = windowHeight;
-            newWidth = newHeight * ratio;
-          }
-
-          // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
-          if (windowWidth > newWidth) {
-            //console.log('Using raw draw');
-            this.setCanvasSize();
-            this.ctx.drawImage(this.canvasImage, 0, 0);
-          } else {
-            //console.log('Using scaled draw');
-            this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-            this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-          }
-        } else {
-          //console.log('Normal Render')
-          this.ctx.drawImage(this.canvasImage, 0, 0);
-        }
+        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+        this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
       }
-
-      // Reset scroll on non HEIGHT Fits
-      if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-        window.scrollTo(0, 0);
-      }
-
     }
+
+    // Reset scroll on non HEIGHT Fits
+    if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+      window.scrollTo(0, 0);
+    }
+
+
     this.isLoading = false;
   }
 
@@ -938,7 +946,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   shouldRenderAsFitSplit() {
-    if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
+    // Some pages aren't cover images but might need fit split renderings
+    if (parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
+    //if (!this.isCoverImage() || parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) !== PageSplitOption.FitSplit) return false;
     return true;
   }
 
@@ -958,7 +968,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-    //console.log('prefetched images: ', this.cachedImages.arr.map(item => this.readerService.imageUrlToPageNum(item.src) + (item.complete ? ' (c)' : '')));
   }
 
   loadPage() {
@@ -1034,7 +1043,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
     let tempPageNum = this.pageNum;
-    if (this.pageNum == this.maxPages - 1) {
+    if (this.pageNum == this.maxPages - 1 && this.pagingDirection === PAGING_DIRECTION.FORWARD) {
       tempPageNum = this.pageNum + 1;
     }
 
@@ -1081,12 +1090,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
         this.firstPageRendered = false;
+        this.fullscreenEvent.next(false);
         this.render();
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.firstPageRendered = false;
+        this.fullscreenEvent.next(true);
         this.render();
       });
     }

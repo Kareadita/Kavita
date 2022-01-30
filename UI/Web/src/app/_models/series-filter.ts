@@ -27,6 +27,7 @@ export interface SeriesFilter {
     sortOptions: SortOptions | null;
     tags: Array<number>;
     languages: Array<string>;
+    publicationStatus: Array<number>;
 }
 
 export interface SortOptions {
@@ -68,3 +69,9 @@ export const mangaFormatFilters = [
       selected: false
     }
 ];
+
+export interface FilterEvent {
+  filter: SeriesFilter;
+  isFirst: boolean;
+}
+

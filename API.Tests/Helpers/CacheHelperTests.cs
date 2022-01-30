@@ -5,6 +5,8 @@ using System.IO.Abstractions.TestingHelpers;
 using API.Entities;
 using API.Helpers;
 using API.Services;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -70,6 +72,19 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
+            false, false));
+    }
+
+    [Fact]
+    public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_2()
+    {
+        // Represents first run
+        var file = new MangaFile()
+        {
+            FilePath = TestCoverArchive,
+            LastModified = DateTime.Now
+        };
+        Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now,
             false, false));
     }
 
@@ -274,4 +289,5 @@ public class CacheHelperTests
         };
         Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
     }
+
 }

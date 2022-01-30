@@ -48,7 +48,7 @@ public interface ISeriesRepository
     Task<bool> DeleteSeriesAsync(int seriesId);
     Task<Series> GetSeriesByIdAsync(int seriesId);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
-    Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds);
+    Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
     /// <summary>
     /// Used to add Progress/Rating information to series list.
@@ -72,6 +72,8 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
+    Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
+    Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -156,6 +158,11 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -186,7 +193,12 @@ public class SeriesRepository : ISeriesRepository
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
-            .ThenInclude(cm => cm.Tags)
+            .ThenInclude(c => c.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Tags)
@@ -294,6 +306,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Where(s => s.Id == seriesId)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
@@ -309,10 +322,11 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
             .Where(s => seriesIds.Contains(s.Id))
+            .AsSplitQuery()
             .ToListAsync();
     }
 
-    public async Task<int[]> GetChapterIdsForSeriesAsync(int[] seriesIds)
+    public async Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds)
     {
         var volumes = await _context.Volume
             .Where(v => seriesIds.Contains(v.SeriesId))
@@ -415,13 +429,17 @@ public class SeriesRepository : ISeriesRepository
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
         out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
-        out bool hasLanguageFilter)
+        out bool hasLanguageFilter, out bool hasPublicationFilter)
     {
         var formats = filter.GetSqlFilter();
 
         if (filter.Libraries.Count > 0)
         {
             userLibraries = userLibraries.Where(l => filter.Libraries.Contains(l)).ToList();
+        }
+        else if (libraryId > 0)
+        {
+            userLibraries = userLibraries.Where(l => l == libraryId).ToList();
         }
 
         allPeopleIds = new List<int>();
@@ -435,6 +453,7 @@ public class SeriesRepository : ISeriesRepository
         allPeopleIds.AddRange(filter.Publisher);
         allPeopleIds.AddRange(filter.CoverArtist);
         allPeopleIds.AddRange(filter.Translators);
+        //allPeopleIds.AddRange(filter.Artist);
 
         hasPeopleFilter = allPeopleIds.Count > 0;
         hasGenresFilter = filter.Genres.Count > 0;
@@ -444,6 +463,7 @@ public class SeriesRepository : ISeriesRepository
         hasAgeRating = filter.AgeRating.Count > 0;
         hasTagsFilter = filter.Tags.Count > 0;
         hasLanguageFilter = filter.Languages.Count > 0;
+        hasPublicationFilter = filter.PublicationStatus.Count > 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -477,7 +497,7 @@ public class SeriesRepository : ISeriesRepository
                     Series = s,
                     PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
                 })
-                .ToList()
+                .AsEnumerable()
                 .Where(s => ProgressComparison(s.PagesRead, s.Series.Pages))
                 .Select(s => s.Series.Id)
                 .ToList();
@@ -497,6 +517,9 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
+        //var allSeriesWithProgress = await _context.AppUserProgresses.Select(p => p.SeriesId).ToListAsync();
+        //var allChapters = await GetChapterIdsForSeriesAsync(allSeriesWithProgress);
+
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
                 new
@@ -505,17 +528,21 @@ public class SeriesRepository : ISeriesRepository
                     PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
                         .Sum(s1 => s1.PagesRead),
                     progress.AppUserId,
-                    LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
-                        .Max(p => p.LastModified)
+                    LastReadingProgress = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
+                        .Max(p => p.LastModified),
+                    // This is only taking into account chapters that have progress on them, not all chapters in said series
+                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created)
+                    //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
                 });
+        // I think I need another Join statement. The problem is the chapters are still limited to progress
 
 
 
         var retSeries = query.Where(s => s.AppUserId == userId
                                          && s.PagesRead > 0
                                          && s.PagesRead < s.Series.Pages)
-            .OrderByDescending(s => s.LastModified) // TODO: This needs to be Chapter Created (Max)
-            .ThenByDescending(s => s.Series.LastModified)
+            .OrderByDescending(s => s.LastReadingProgress)
+            .ThenByDescending(s => s.LastChapterCreated)
             .Select(s => s.Series)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -531,7 +558,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -545,6 +572,7 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
+                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             )
             .AsNoTracking();
 
@@ -590,6 +618,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
 
         if (metadataDto != null)
@@ -599,6 +628,7 @@ public class SeriesRepository : ISeriesRepository
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .ToListAsync();
         }
 
@@ -622,6 +652,7 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s.LibraryId)
             .ThenBy(s => s.SortName)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .AsNoTracking();
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
@@ -757,5 +788,166 @@ public class SeriesRepository : ISeriesRepository
                 Title = CultureInfo.GetCultureInfo(s).DisplayName,
                 IsoCode = s
             }).ToList();
+    }
+
+    public async Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.PublicationStatus)
+            .Distinct()
+            .Select(s => new PublicationStatusDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId)
+    {
+        var libraries = await _context.AppUser
+            .Where(u => u.Id == userId)
+            .SelectMany(u => u.Libraries.Select(l => new {LibraryId = l.Id, LibraryType = l.Type}))
+            .ToListAsync();
+        var libraryIds = libraries.Select(l => l.LibraryId).ToList();
+
+        var withinLastWeek = DateTime.Now - TimeSpan.FromDays(12);
+
+        var ret = await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId) && s.LastModified >= withinLastWeek)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .Select(s => new
+            {
+                s.LibraryId,
+                LibraryType = s.Library.Type,
+                s.Created,
+                SeriesId = s.Id,
+                SeriesName = s.Name,
+                Series = s,
+                Chapters = s.Volumes.SelectMany(v => v.Chapters)
+            })
+            .Take(50)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .OrderByDescending(item => item.Created)
+            .ToListAsync();
+
+        var items = new List<RecentlyAddedItemDto>();
+        foreach (var series in ret)
+        {
+            if (items.Count >= 50) return items;
+            var chaptersThatMeetCutoff = series.Chapters.Where(c => c.Created >= withinLastWeek)
+                .OrderByDescending(c => c.Created);
+            var chapterMap = chaptersThatMeetCutoff.GroupBy(c => c.VolumeId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var (volumeId, chapters) in chapterMap)
+            {
+                // If a single chapter
+                if (chapters.Count == 1)
+                {
+                    // Create a chapter ReadingListItemDto
+                    var chapterTitle = "Chapter";
+                    switch (series.LibraryType)
+                    {
+                        case LibraryType.Book:
+                            chapterTitle = "";
+                            break;
+                        case LibraryType.Comic:
+                            chapterTitle = "Issue";
+                            break;
+                    }
+
+                    // If chapter is 0, then it means it's really a volume, so show it that way
+                    var firstChapter = chapters.First();
+                    string title;
+                    if (firstChapter.Number.Equals(Parser.Parser.DefaultChapter))
+                    {
+                        title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+                    }
+                    else
+                    {
+                        title = chapters.First().IsSpecial
+                            ? chapters.FirstOrDefault()?.Range
+                            : $"{chapterTitle} {chapters.FirstOrDefault()?.Range}";
+                    }
+
+                    items.Add(new RecentlyAddedItemDto()
+                    {
+                        LibraryId = series.LibraryId,
+                        LibraryType = series.LibraryType,
+                        SeriesId = series.SeriesId,
+                        SeriesName = series.SeriesName,
+                        Created = chapters.Max(c => c.Created),
+                        Title = title,
+                        ChapterId = firstChapter.Id,
+                        Id = items.Count,
+                        Format = series.Series.Format
+                    });
+                    if (items.Count >= 50) return items;
+                    continue;
+                }
+
+
+                // Multiple chapters, so let's show as a volume
+                var volumeNumber = series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+                if (volumeNumber == 0)
+                {
+                    var volumeChapters = chapters.Where(c => c.Created >= withinLastWeek).ToList();
+                    foreach (var chap in volumeChapters)
+                    {
+                        // Create a chapter ReadingListItemDto
+                        var chapterTitle = "Chapter";
+                        switch (series.LibraryType)
+                        {
+                            case LibraryType.Book:
+                                chapterTitle = "";
+                                break;
+                            case LibraryType.Comic:
+                                chapterTitle = "Issue";
+                                break;
+                        }
+
+                        var title = volumeChapters.First().IsSpecial
+                            ? volumeChapters.FirstOrDefault()?.Range
+                            : $"{chapterTitle} {volumeChapters.FirstOrDefault()?.Range}";
+                        items.Add(new RecentlyAddedItemDto()
+                        {
+                            LibraryId = series.LibraryId,
+                            LibraryType = series.LibraryType,
+                            SeriesId = series.SeriesId,
+                            SeriesName = series.SeriesName,
+                            Created = chap.Created,
+                            Title = title,
+                            ChapterId = chap.Id,
+                            Id = items.Count,
+                            Format = series.Series.Format
+                        });
+                        if (items.Count >= 50) return items;
+                    }
+                    continue;
+                }
+
+                // Create a volume ReadingListItemDto
+                var theVolume = series.Series.Volumes.First(v => v.Id == volumeId);
+                items.Add(new RecentlyAddedItemDto()
+                {
+                    LibraryId = series.LibraryId,
+                    LibraryType = series.LibraryType,
+                    SeriesId = series.SeriesId,
+                    SeriesName = series.SeriesName,
+                    Created = chapters.Max(c => c.Created),
+                    Title = "Volume " + theVolume.Number,
+                    VolumeId = theVolume.Id,
+                    Id = items.Count,
+                    Format = series.Series.Format
+                });
+                if (items.Count >= 50) return items;
+            }
+        }
+
+        return items;
     }
 }

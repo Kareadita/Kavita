@@ -53,7 +53,8 @@ public class OpdsController : BaseApiController
         CollectionTags = new List<int>(),
         CoverArtist = new List<int>(),
         ReadStatus = new ReadStatus(),
-        SortOptions = null
+        SortOptions = null,
+        PublicationStatus = new List<PublicationStatus>()
     };
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
@@ -184,7 +185,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IList<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList()
             : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
@@ -220,7 +221,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable <CollectionTagDto> tags;
         if (isAdmin)

@@ -508,6 +508,7 @@ UI/Web/dist/
 /API/config/cache/
 /API/config/temp/
 /API/config/stats/
+/API/config/bookmarks/
 /API/config/kavita.db
 /API/config/kavita.db-shm
 /API/config/kavita.db-wal
@@ -521,3 +522,4 @@ API/config/pre-metadata/
 API/config/post-metadata/
 API.Tests/TestResults/
 UI/Web/.vscode/settings.json
+/API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*

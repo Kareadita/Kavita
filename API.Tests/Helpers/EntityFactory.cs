@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -28,12 +29,13 @@ namespace API.Tests.Helpers
             return new Volume()
             {
                 Name = volumeNumber,
+                Number = int.Parse(volumeNumber),
                 Pages = 0,
                 Chapters = chapters ?? new List<Chapter>()
             };
         }
 
-        public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null)
+        public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0)
         {
             return new Chapter()
             {
@@ -41,7 +43,7 @@ namespace API.Tests.Helpers
                 Range = range,
                 Number = API.Parser.Parser.MinimumNumberFromRange(range) + string.Empty,
                 Files = files ?? new List<MangaFile>(),
-                Pages = 0,
+                Pages = pageCount,
 
             };
         }

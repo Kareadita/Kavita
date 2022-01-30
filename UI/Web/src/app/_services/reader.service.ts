@@ -103,33 +103,12 @@ export class ReaderService {
     return this.httpClient.get<number>(this.baseUrl + 'reader/prev-chapter?seriesId=' + seriesId + '&volumeId=' + volumeId + '&currentChapterId=' + currentChapterId);
   }
 
-  getCurrentChapter(volumes: Array<Volume>): Chapter {
-    let currentlyReadingChapter: Chapter | undefined = undefined;
-    const chapters = volumes.filter(v => v.number !== 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
+  hasSeriesProgress(seriesId: number) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'reader/has-progress?seriesId=' + seriesId);
+  }
 
-    for (const c of chapters) {
-      if (c.pagesRead < c.pages) {
-        currentlyReadingChapter = c;
-        break;
-      }
-    }
-
-    if (currentlyReadingChapter === undefined) {
-      // Check if there are specials we can load:
-      const specials = volumes.filter(v => v.number === 0).map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
-      for (const c of specials) {
-        if (c.pagesRead < c.pages) {
-          currentlyReadingChapter = c;
-          break;
-        }
-      }
-      if (currentlyReadingChapter === undefined) {
-        // Default to first chapter
-        currentlyReadingChapter = chapters[0];
-      }
-    }
-
-    return currentlyReadingChapter;
+  getCurrentChapter(seriesId: number) {
+    return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
   }
 
   /**
@@ -203,13 +182,6 @@ export class ReaderService {
           }
         });
       }
-      //  else if (el.mozRequestFullScreen) {
-      //   el.mozRequestFullScreen();
-      // } else if (el.webkitRequestFullscreen) {
-      //   el.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-      // } else if (el.msRequestFullscreen) {
-      //   el.msRequestFullscreen();
-      // }
     }
   }
 
@@ -221,13 +193,6 @@ export class ReaderService {
         }
       });
     }
-    //  else if (document.msExitFullscreen) {
-    //   document.msExitFullscreen();
-    // } else if (document.mozCancelFullScreen) {
-    //   document.mozCancelFullScreen();
-    // } else if (document.webkitExitFullscreen) {
-    //   document.webkitExitFullscreen();
-    // }
   }
 
   /**

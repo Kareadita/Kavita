@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
@@ -118,7 +119,7 @@ namespace API.Data
                 FilePath = filePath,
                 Format = format,
                 Pages = pages,
-                LastModified = DateTime.Now //File.GetLastWriteTime(filePath)
+                LastModified = File.GetLastWriteTime(filePath) // NOTE: Changed this from DateTime.Now
             };
         }
 

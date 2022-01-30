@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +13,8 @@ export class ScrollService {
       || document.body.scrollTop || 0);
   }
 
-  scrollTo(top: number) {
-    window.scroll({
+  scrollTo(top: number, el: Element | Window = window) {
+    el.scroll({
       top: top,
       behavior: 'smooth' 
     });

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -84,6 +85,28 @@ namespace API.Controllers
 
             Response.AddCacheHeader(path);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
+        }
+
+        /// <summary>
+        /// Returns image for a given bookmark page
+        /// </summary>
+        /// <remarks>This request is served unauthenticated, but user must be passed via api key to validate</remarks>
+        /// <param name="chapterId"></param>
+        /// <param name="pageNum">Starts at 0</param>
+        /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
+        /// <returns></returns>
+        [HttpGet("bookmark")]
+        public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
+            if (bookmark == null) return BadRequest("Bookmark does not exist");
+
+            var bookmarkDirectory =
+                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
+            var format = Path.GetExtension(file.FullName).Replace(".", "");
+            return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
         }
     }
 }

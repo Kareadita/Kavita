@@ -90,7 +90,6 @@ namespace API.Parser
             Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
             Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;
             IsSpecial = IsSpecial || info2.IsSpecial;
-            // TODO: Merge ComicInfos?
         }
     }
 }

@@ -134,6 +134,9 @@ namespace API.Data.Migrations
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Page")
                         .HasColumnType("INTEGER");
 
@@ -181,9 +184,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("BookReaderTapToPaginate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FullscreenMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -299,6 +299,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
@@ -308,11 +311,11 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("GenreId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsSpecial")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Language")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
@@ -329,18 +332,22 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TitleName")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("TotalCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("VolumeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
 
                     b.HasIndex("VolumeId");
 
@@ -493,8 +500,14 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("PublicationStatus")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ReleaseYear")
                         .HasColumnType("INTEGER");
@@ -744,6 +757,21 @@ namespace API.Data.Migrations
                     b.HasIndex("LibrariesId");
 
                     b.ToTable("AppUserLibrary");
+                });
+
+            modelBuilder.Entity("ChapterGenre", b =>
+                {
+                    b.Property<int>("ChaptersId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GenresId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ChaptersId", "GenresId");
+
+                    b.HasIndex("GenresId");
+
+                    b.ToTable("ChapterGenre");
                 });
 
             modelBuilder.Entity("ChapterPerson", b =>
@@ -997,10 +1025,6 @@ namespace API.Data.Migrations
 
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
-                    b.HasOne("API.Entities.Genre", null)
-                        .WithMany("Chapters")
-                        .HasForeignKey("GenreId");
-
                     b.HasOne("API.Entities.Volume", "Volume")
                         .WithMany("Chapters")
                         .HasForeignKey("VolumeId")
@@ -1122,6 +1146,21 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Library", null)
                         .WithMany()
                         .HasForeignKey("LibrariesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("ChapterGenre", b =>
+                {
+                    b.HasOne("API.Entities.Chapter", null)
+                        .WithMany()
+                        .HasForeignKey("ChaptersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1275,11 +1314,6 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
                     b.Navigation("Files");
-                });
-
-            modelBuilder.Entity("API.Entities.Genre", b =>
-                {
-                    b.Navigation("Chapters");
                 });
 
             modelBuilder.Entity("API.Entities.Library", b =>

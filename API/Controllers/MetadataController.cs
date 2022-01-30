@@ -62,7 +62,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all tags</param>
     /// <returns></returns>
     [HttpGet("tags")]
-    public async Task<ActionResult<IList<PersonDto>>> GetAllTags(string? libraryIds)
+    public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
@@ -87,6 +87,27 @@ public class MetadataController : BaseApiController
         }
 
         return Ok(Enum.GetValues<AgeRating>().Select(t => new AgeRatingDto()
+        {
+            Title = t.ToDescription(),
+            Value = t
+        }));
+    }
+
+    /// <summary>
+    /// Fetches all publication status' from the instance
+    /// </summary>
+    /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
+    /// <returns></returns>
+    [HttpGet("publication-status")]
+    public async Task<ActionResult<IList<AgeRatingDto>>> GetAllPublicationStatus(string? libraryIds)
+    {
+        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        if (ids != null && ids.Count > 0)
+        {
+            return Ok(await _unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+        }
+
+        return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()
         {
             Title = t.ToDescription(),
             Value = t

@@ -8,13 +8,17 @@ namespace API.Data.Metadata
     /// <summary>
     /// A representation of a ComicInfo.xml file
     /// </summary>
-    /// <remarks>See reference of the loose spec here: https://github.com/Kussie/ComicInfoStandard/blob/main/ComicInfo.xsd</remarks>
+    /// <remarks>See reference of the loose spec here: https://anansi-project.github.io/docs/comicinfo/documentation</remarks>
     public class ComicInfo
     {
         public string Summary { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Series { get; set; } = string.Empty;
         public string Number { get; set; } = string.Empty;
+        /// <summary>
+        /// The total number of items in the series.
+        /// </summary>
+        public int Count { get; set; } = 0;
         public string Volume { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
@@ -28,9 +32,9 @@ namespace API.Data.Metadata
         /// This is the link to where the data was scraped from
         /// </summary>
         public string Web { get; set; } = string.Empty;
-        public int Day { get; set; }
-        public int Month { get; set; }
-        public int Year { get; set; }
+        public int Day { get; set; } = 0;
+        public int Month { get; set; } = 0;
+        public int Year { get; set; } = 0;
 
 
         /// <summary>
@@ -84,6 +88,23 @@ namespace API.Data.Metadata
             return Enum.GetValues<AgeRating>()
                 .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
         }
+
+        public static void CleanComicInfo(ComicInfo info)
+        {
+            if (info == null) return;
+
+            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+            info.Translator = Parser.Parser.CleanAuthor(info.Translator);
+            info.CoverArtist = Parser.Parser.CleanAuthor(info.CoverArtist);
+        }
+
 
     }
 }

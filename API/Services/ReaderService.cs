@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -7,6 +8,8 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -19,19 +22,30 @@ public interface IReaderService
     Task<int> CapPageToChapter(int chapterId, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
+    Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
+    Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
 }
 
 public class ReaderService : IReaderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
+    private readonly IDirectoryService _directoryService;
+    private readonly ICacheService _cacheService;
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IDirectoryService directoryService, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _directoryService = directoryService;
+        _cacheService = cacheService;
+    }
+
+    public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
+    {
+        return Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
     }
 
     /// <summary>
@@ -77,34 +91,28 @@ public class ReaderService : IReaderService
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
 
-            if (userProgress == null)
-            {
-                user.Progresses.Add(new AppUserProgress
-                {
-                    PagesRead = 0,
-                    VolumeId = chapter.VolumeId,
-                    SeriesId = seriesId,
-                    ChapterId = chapter.Id
-                });
-            }
-            else
-            {
-                userProgress.PagesRead = 0;
-                userProgress.SeriesId = seriesId;
-                userProgress.VolumeId = chapter.VolumeId;
-            }
+            if (userProgress == null) continue;
+
+            userProgress.PagesRead = 0;
+            userProgress.SeriesId = seriesId;
+            userProgress.VolumeId = chapter.VolumeId;
         }
     }
 
     /// <summary>
     /// Gets the User Progress for a given Chapter. This will handle any duplicates that might have occured in past versions and will delete them. Does not commit.
     /// </summary>
-    /// <param name="user"></param>
+    /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    public static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
         AppUserProgress userProgress = null;
+
+        if (user.Progresses == null)
+        {
+            throw new KavitaException("Progresses must exist on user");
+        }
         try
         {
             userProgress =
@@ -226,7 +234,7 @@ public class ReaderService : IReaderService
         if (currentVolume.Number == 0)
         {
             // Handle specials by sorting on their Filename aka Range
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 
@@ -277,7 +285,7 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => x.Range, new NaturalSortComparer()).Reverse(), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number);
             if (chapterId > 0) return chapterId;
         }
 
@@ -299,6 +307,36 @@ public class ReaderService : IReaderService
         return -1;
     }
 
+    public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
+    {
+        // Loop through all chapters that are not in volume 0
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+
+        var nonSpecialChapters = volumes
+            .Where(v => v.Number != 0)
+            .SelectMany(v => v.Chapters)
+            .OrderBy(c => float.Parse(c.Number))
+            .ToList();
+
+        var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+
+
+        if (currentlyReadingChapter != null) return currentlyReadingChapter;
+
+        // Check if there are any specials
+        var volume = volumes.SingleOrDefault(v => v.Number == 0);
+        if (volume == null) return nonSpecialChapters.First();
+
+        var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList();
+        foreach (var chapter in chapters.Where(chapter => chapter.PagesRead < chapter.Pages))
+        {
+            return chapter;
+        }
+
+        return chapters.First();
+    }
+
+
     private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber)
     {
         var next = false;
@@ -313,6 +351,24 @@ public class ReaderService : IReaderService
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read or Volumes with a single 0 chapter.
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="chapterNumber"></param>
+    public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
+    {
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        foreach (var volume in volumes.OrderBy(v => v.Number))
+        {
+            var chapters = volume.Chapters
+                .OrderBy(c => float.Parse(c.Number))
+                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && Parser.Parser.MaximumNumberFromRange(c.Range) > 0.0);
+            MarkChaptersAsRead(user, volume.SeriesId, chapters);
+        }
     }
 
 

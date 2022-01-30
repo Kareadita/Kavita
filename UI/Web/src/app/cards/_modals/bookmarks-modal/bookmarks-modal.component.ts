@@ -51,6 +51,10 @@ export class BookmarksModalComponent implements OnInit {
     this.modal.close();
   }
 
+  removeBookmark(bookmark: PageBookmark, index: number) {
+    this.bookmarks.splice(index, 1);
+  }
+
   downloadBookmarks() {
     this.isDownloading = true;
     this.downloadService.downloadBookmarks(this.bookmarks).pipe(

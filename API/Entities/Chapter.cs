@@ -46,7 +46,6 @@ namespace API.Entities
         /// </summary>
         public AgeRating AgeRating { get; set; }
 
-
         /// <summary>
         /// Chapter title
         /// </summary>
@@ -56,12 +55,32 @@ namespace API.Entities
         /// Date which chapter was released
         /// </summary>
         public DateTime ReleaseDate { get; set; }
+        /// <summary>
+        /// Summary for the Chapter/Issue
+        /// </summary>
+        public string Summary { get; set; }
+        /// <summary>
+        /// Language for the Chapter/Issue
+        /// </summary>
+        public string Language { get; set; }
+        /// <summary>
+        /// Total number of issues in the series
+        /// </summary>
+        public int TotalCount { get; set; } = 0;
+        /// <summary>
+        /// Number in the Total Count
+        /// </summary>
+        public int Count { get; set; } = 0;
 
 
         /// <summary>
         /// All people attached at a Chapter level. Usually Comics will have different people per issue.
         /// </summary>
         public ICollection<Person> People { get; set; } = new List<Person>();
+        /// <summary>
+        /// Genres for the Chapter
+        /// </summary>
+        public ICollection<Genre> Genres { get; set; } = new List<Genre>();
         public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
 
@@ -70,9 +89,6 @@ namespace API.Entities
         // Relationships
         public Volume Volume { get; set; }
         public int VolumeId { get; set; }
-
-        //public ChapterMetadata ChapterMetadata { get; set; }
-        //public int ChapterMetadataId { get; set; }
 
         public void UpdateFrom(ParserInfo info)
         {

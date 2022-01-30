@@ -14,7 +14,6 @@ namespace API.Entities.Metadata
 
         public string Summary { get; set; }
 
-
         public ICollection<CollectionTag> CollectionTags { get; set; }
 
         public ICollection<Genre> Genres { get; set; } = new List<Genre>();
@@ -33,9 +32,14 @@ namespace API.Entities.Metadata
         /// </summary>
         public int ReleaseYear { get; set; }
         /// <summary>
-        /// Language of the content (ISO 639-1 code)
+        /// Language of the content (BCP-47 code)
         /// </summary>
         public string Language { get; set; } = string.Empty;
+        /// <summary>
+        /// Total number of issues in the series
+        /// </summary>
+        public int Count { get; set; } = 0;
+        public PublicationStatus PublicationStatus { get; set; }
 
         // Relationship
         public Series Series { get; set; }

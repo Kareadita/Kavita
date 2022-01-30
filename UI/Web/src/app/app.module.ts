@@ -35,6 +35,7 @@ import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.
 import { PersonRolePipe } from './person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
+import { PublicationStatusPipe } from './publication-status.pipe';
 
 
 @NgModule({
@@ -52,6 +53,7 @@ import { AllSeriesComponent } from './all-series/all-series.component';
     DashboardComponent,
     NavEventsToggleComponent,
     PersonRolePipe,
+    PublicationStatusPipe,
     SeriesMetadataDetailComponent,
     AllSeriesComponent,
   ],

@@ -2,6 +2,10 @@
 
 namespace API.Entities.Enums;
 
+/// <summary>
+/// Represents Age Rating for content.
+/// </summary>
+/// <remarks>Based on ComicInfo.xml v2.1 https://github.com/anansi-project/comicinfo/blob/main/drafts/v2.1/ComicInfo.xsd</remarks>
 public enum AgeRating
 {
     [Description("Unknown")]
@@ -16,20 +20,24 @@ public enum AgeRating
     G = 4,
     [Description("Everyone 10+")]
     Everyone10Plus = 5,
+    [Description("PG")]
+    PG = 6,
     [Description("Kids to Adults")]
-    KidsToAdults = 6,
+    KidsToAdults = 7,
     [Description("Teen")]
-    Teen = 7,
-    [Description("Mature 15+")]
-    Mature15Plus = 8,
+    Teen = 8,
+    [Description("MA 15+")]
+    Mature15Plus = 9,
     [Description("Mature 17+")]
-    Mature17Plus = 9,
-    [Description("Mature")]
-    Mature = 10,
+    Mature17Plus = 10,
+    [Description("M")]
+    Mature = 11,
+    [Description("R18+")]
+    R18Plus = 12,
     [Description("Adults Only 18+")]
-    AdultsOnly = 11,
-    [Description("X 18+")]
-    X18Plus = 12
+    AdultsOnly = 13,
+    [Description("X18+")]
+    X18Plus = 14
 
 
 }

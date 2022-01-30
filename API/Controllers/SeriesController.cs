@@ -83,6 +83,8 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+
             var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
             var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
 
@@ -92,6 +94,8 @@ namespace API.Controllers
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId));
             }
             return Ok(result);
         }
@@ -144,7 +148,7 @@ namespace API.Controllers
         }
 
         [HttpGet("chapter")]
-        public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
+        public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
         {
             return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
@@ -154,7 +158,7 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-            var userRating = await _unitOfWork.UserRepository.GetUserRating(updateSeriesRatingDto.SeriesId, user.Id) ??
+            var userRating = await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
                              new AppUserRating();
 
             userRating.Rating = updateSeriesRatingDto.UserRating;
@@ -231,6 +235,13 @@ namespace API.Controllers
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
             return Ok(series);
+        }
+
+        [HttpPost("recently-added-chapters")]
+        public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAddedChapters(userId));
         }
 
         [HttpPost("all")]

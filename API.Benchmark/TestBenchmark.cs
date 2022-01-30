@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using API.Comparators;
 using API.DTOs;
+using API.Extensions;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 
@@ -16,9 +17,6 @@ namespace API.Benchmark
     [RankColumn]
     public class TestBenchmark
     {
-        private readonly NaturalSortComparer _naturalSortComparer = new ();
-
-
         private static IEnumerable<VolumeDto> GenerateVolumes(int max)
         {
             var random = new Random();
@@ -50,11 +48,11 @@ namespace API.Benchmark
             return list;
         }
 
-        private void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
+        private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
         {
             foreach (var v in volumes.Where(vDto => vDto.Number == 0))
             {
-                v.Chapters = v.Chapters.OrderBy(x => x.Range, _naturalSortComparer).ToList();
+                v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
             }
         }
 

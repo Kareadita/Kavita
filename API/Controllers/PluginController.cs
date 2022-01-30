@@ -32,6 +32,7 @@ namespace API.Controllers
             // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
             // Should log into access table so we can tell the user
             var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            if (userId <= 0) return Unauthorized();
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
             _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user.UserName, userId);
             return new UserDto

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { LibraryService } from '../../../_services/library.service';
@@ -17,6 +17,12 @@ export interface DirectoryPickerResult {
 })
 export class DirectoryPickerComponent implements OnInit {
 
+  @Input() startingFolder: string = '';
+  /**
+   * Url to give more information about selecting directories. Passing nothing will suppress. 
+   */
+  @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/adding-a-library';
+
   currentRoot = '';
   folders: string[] = [];
   routeStack: Stack<string> = new Stack<string>();
@@ -27,7 +33,22 @@ export class DirectoryPickerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadChildren(this.currentRoot);
+    if (this.startingFolder && this.startingFolder.length > 0) {
+      let folders = this.startingFolder.split('/');
+      let folders2 = this.startingFolder.split('\\');
+      if (folders.length === 1 && folders2.length > 1) {
+        folders = folders2;
+      }
+      if (!folders[0].endsWith('/')) {
+        folders[0] = folders[0] + '/';
+      }
+      folders.forEach(folder => this.routeStack.push(folder));
+
+      const fullPath = this.routeStack.items.join('/');
+      this.loadChildren(fullPath);
+    } else {
+      this.loadChildren(this.currentRoot);
+    }
   }
 
   filterFolder = (folder: string) => {
@@ -38,7 +59,7 @@ export class DirectoryPickerComponent implements OnInit {
     this.currentRoot = folderName;
     this.routeStack.push(folderName);
     const fullPath = this.routeStack.items.join('/');
-    this.loadChildren(fullPath);
+    this.loadChildren(fullPath); 
   }
 
   goBack() {
@@ -56,6 +77,7 @@ export class DirectoryPickerComponent implements OnInit {
 
   loadChildren(path: string) {
     this.libraryService.listDirectories(path).subscribe(folders => {
+      this.filterQuery = '';
       this.folders = folders;
     }, err => {
       // If there was an error, pop off last directory added to stack
@@ -86,7 +108,7 @@ export class DirectoryPickerComponent implements OnInit {
     if (lastPath && lastPath != path) {
       let replaced = path.replace(lastPath, '');
       if (replaced.startsWith('/') || replaced.startsWith('\\')) {
-        replaced = replaced.substr(1, replaced.length);
+        replaced = replaced.substring(1, replaced.length);
       }
       return replaced;
     }
@@ -95,14 +117,11 @@ export class DirectoryPickerComponent implements OnInit {
   }
 
   navigateTo(index: number) {
-    const numberOfPops = this.routeStack.items.length - index;
-    if (this.routeStack.items.length - numberOfPops > this.routeStack.items.length) {
-      this.routeStack.items = [];
-    }
-    for (let i = 0; i < numberOfPops; i++) {
+    while(this.routeStack.items.length - 1 > index) {
       this.routeStack.pop();
     }
-
-    this.loadChildren(this.routeStack.peek() || '');
+    
+    const fullPath = this.routeStack.items.join('/');
+    this.loadChildren(fullPath);
   }
 }

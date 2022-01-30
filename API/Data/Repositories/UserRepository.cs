@@ -32,19 +32,22 @@ public interface IUserRepository
     Task<IEnumerable<MemberDto>>  GetMembersAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
-    Task<bool> IsUserAdmin(AppUser user);
-    Task<AppUserRating> GetUserRating(int seriesId, int userId);
+    Task<bool> IsUserAdminAsync(AppUser user);
+    Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserPreferences> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
+    Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
+    Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
     Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
+    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
 }
 
 public class UserRepository : IUserRepository
@@ -112,10 +115,22 @@ public class UserRepository : IUserRepository
         return await query.SingleOrDefaultAsync();
     }
 
+    public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()
+    {
+        return await _context.AppUserBookmark.ToListAsync();
+    }
+
     public async Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId)
     {
         return await _context.AppUserBookmark
             .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId)
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId)
+    {
+        return await _context.AppUserBookmark
+            .Where(b => b.Id == bookmarkId)
             .SingleOrDefaultAsync();
     }
 
@@ -171,6 +186,18 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync(x => x.UserName == username);
     }
 
+    /// <summary>
+    /// Returns all Bookmarks for a given set of Ids
+    /// </summary>
+    /// <param name="bookmarkIds"></param>
+    /// <returns></returns>
+    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds)
+    {
+        return await _context.AppUserBookmark
+            .Where(b => bookmarkIds.Contains(b.Id))
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -181,12 +208,12 @@ public class UserRepository : IUserRepository
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.PlebRole);
     }
 
-    public async Task<bool> IsUserAdmin(AppUser user)
+    public async Task<bool> IsUserAdminAsync(AppUser user)
     {
         return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
     }
 
-    public async Task<AppUserRating> GetUserRating(int seriesId, int userId)
+    public async Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();

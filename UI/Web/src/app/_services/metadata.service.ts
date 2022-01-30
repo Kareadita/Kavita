@@ -8,6 +8,7 @@ import { Genre } from '../_models/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 import { Language } from '../_models/metadata/language';
+import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
 import { Person } from '../_models/person';
 import { Tag } from '../_models/tag';
 
@@ -42,6 +43,14 @@ export class MetadataService {
       method += '?libraryIds=' + libraries.join(',');
     }
     return this.httpClient.get<Array<AgeRatingDto>>(this.baseUrl + method);;
+  }
+
+  getAllPublicationStatus(libraries?: Array<number>) {
+    let method = 'metadata/publication-status'
+    if (libraries != undefined && libraries.length > 0) {
+      method += '?libraryIds=' + libraries.join(',');
+    }
+    return this.httpClient.get<Array<PublicationStatusDto>>(this.baseUrl + method);;
   }
 
   getAllTags(libraries?: Array<number>) {

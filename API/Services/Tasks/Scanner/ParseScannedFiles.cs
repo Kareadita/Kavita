@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Parser;
 using Microsoft.Extensions.Logging;
 
@@ -46,31 +46,23 @@ namespace API.Services.Tasks.Scanner
         }
 
         /// <summary>
-        /// Gets the list of parserInfos given a Series. If the series does not exist within, return empty list.
+        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
         /// </summary>
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
-            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
+            var allKeys = parsedSeries.Keys.Where(ps =>
+                SeriesHelper.FindSeries(series, ps));
 
-            return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
-        }
-
-        private ComicInfo GetComicInfo(string path)
-        {
-            if (Parser.Parser.IsEpub(path))
+            var infos = new List<ParserInfo>();
+            foreach (var key in allKeys)
             {
-                return _readingItemService.GetComicInfo(path, MangaFormat.Epub);
+                infos.AddRange(parsedSeries[key]);
             }
 
-            if (Parser.Parser.IsComicInfoExtension(path))
-            {
-                return _readingItemService.GetComicInfo(path, MangaFormat.Archive);
-            }
-            return null;
+            return infos;
         }
 
         /// <summary>
@@ -82,20 +74,12 @@ namespace API.Services.Tasks.Scanner
         /// <param name="type">Library type to determine parsing to perform</param>
         private void ProcessFile(string path, string rootPath, LibraryType type)
         {
-            ParserInfo info = null;
+            // TODO: Emit event with what is being processed. It can look like Kavita isn't doing anything during file scan
 
-            if (Parser.Parser.IsEpub(path))
-            {
-                info = _readingItemService.Parse(path, rootPath, type);
-            }
-            else
-            {
-                info = _readingItemService.Parse(path, rootPath, type);
-            }
-
-            // If we couldn't match, log. But don't log if the file parses as a cover image
+            var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
             {
+                // If the file is an image and literally a cover image, skip processing.
                 if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
                 {
                     _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
@@ -103,19 +87,18 @@ namespace API.Services.Tasks.Scanner
                 return;
             }
 
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume)
+
+            // This catches when original library type is Manga/Comic and when parsing with non
+            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
             {
-                info = _defaultParser.Parse(path, rootPath, LibraryType.Book); // TODO: Why do I reparse?
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
                 var info2 = _readingItemService.Parse(path, rootPath, type);
                 info.Merge(info2);
             }
 
-            // TODO: Think about doing this before the Fallback code to speed up
-            info.ComicInfo = GetComicInfo(path);
+            info.ComicInfo = _readingItemService.GetComicInfo(path);
             if (info.ComicInfo != null)
             {
-                var sw = Stopwatch.StartNew();
-
                 if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
                 {
                     info.Volumes = info.ComicInfo.Volume;
@@ -174,7 +157,7 @@ namespace API.Services.Tasks.Scanner
         /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
+        /// <returns>Series Name to group this info into</returns>
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
@@ -202,7 +185,6 @@ namespace API.Services.Tasks.Scanner
         {
             var sw = Stopwatch.StartNew();
             totalFiles = 0;
-            var searchPattern = Parser.Parser.SupportedExtensions;
             foreach (var folderPath in folders)
             {
                 try
@@ -217,7 +199,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             _logger.LogError(exception, "The file {Filename} could not be found", f);
                         }
-                    }, searchPattern, _logger);
+                    }, Parser.Parser.SupportedExtensions, _logger);
                 }
                 catch (ArgumentException ex)
                 {

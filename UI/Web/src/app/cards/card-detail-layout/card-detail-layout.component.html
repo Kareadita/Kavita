@@ -9,12 +9,13 @@
                 <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
-        
-        <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+
+        <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
+    
     <div class="phone-hidden">
         <div #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
             <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
@@ -38,11 +39,13 @@
     </div>
 
     <ng-template #filterSection>
+        <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
         <div class="filter-section mx-auto pb-3">
             <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
-                        <label for="format">Format</label>
+                        <label for="format">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="sr-only" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -59,10 +62,10 @@
                         <label for="libraries">Libraries</label>
                         <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -70,7 +73,8 @@
     
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.collectionDisabled">
                     <div class="form-group">
-                        <label for="collections">Collections</label>
+                        <label for="collections">Collections</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="sr-only" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -114,13 +118,13 @@
                 <!-- The People row -->
                 <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
-                        <label for="cover-artist">(Cover) Artists</label>
+                        <label for="cover-artist">Cover Artists</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -131,10 +135,10 @@
                         <label for="writers">Writers</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -145,10 +149,10 @@
                         <label for="publisher">Publisher</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -159,10 +163,10 @@
                         <label for="penciller">Penciller</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -173,10 +177,10 @@
                         <label for="letterer">Letterer</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -187,10 +191,10 @@
                         <label for="inker">Inker</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -201,10 +205,10 @@
                         <label for="editor">Editor</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -215,10 +219,10 @@
                         <label for="colorist">Colorist</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -229,10 +233,10 @@
                         <label for="character">Character</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -243,10 +247,10 @@
                         <label for="translators">Translators</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                             <ng-template #optionItem let-item let-position="idx">
-                                {{item.title}}
+                                {{item.name}}
                             </ng-template>
                         </app-typeahead>
                     </div>
@@ -306,14 +310,28 @@
                     </app-typeahead>
                 </div>
 
+                <div class="col-md-2 mr-3" *ngIf="!filterSettings.publicationStatusDisabled">
+                    <label for="publication-status">Publication Status</label>
+                    <app-typeahead (selectedData)="updatePublicationStatus($event)" [settings]="publicationStatusSettings" [reset]="resetTypeaheads">
+                        <ng-template #badgeItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                        <ng-template #optionItem let-item let-position="idx">
+                            {{item.title}}
+                        </ng-template>
+                    </app-typeahead>
+                </div>
+                <div class="col-md-2 mr-3"></div>
+            </div>
+            <div class="row justify-content-center no-gutters">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="form-group">
                             <label for="sort-options">Sort By</label>
                             <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
-                                <i class="fa fa-arrow-down" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                                <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
                                 <ng-template #descSort>
-                                    <i class="fa fa-arrow-up" title="Descending"></i>
+                                    <i class="fa fa-arrow-down" title="Descending"></i>
                                 </ng-template>
                             </button>
                             <select id="sort-options" class="form-control" formControlName="sortField" style="height: 38px;">
@@ -323,16 +341,14 @@
                             </select>
                         </div>
                     </form>
-                </div>
-    
-                
-                
-            </div>
-            <div class="row justify-content-center no-gutters">
-                <div class="col-md-3 mr-3">
+                </div>  
+                <div class="col-md-2 mr-3" *ngIf="filterSettings.sortDisabled"></div>
+                <div class="col-md-2 mr-3"></div>
+                <div class="col-md-2 mr-3"></div>
+                <div class="col-md-2 mr-3 mt-4">
                     <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2 mr-3 mt-4">
                     <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
                 </div>
             </div>

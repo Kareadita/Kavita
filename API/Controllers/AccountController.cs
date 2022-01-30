@@ -87,6 +87,17 @@ namespace API.Controllers
                     return BadRequest("Username is taken.");
                 }
 
+                // If we are registering an admin account, ensure there are no existing admins or user registering is an admin
+                if (registerDto.IsAdmin)
+                {
+                    var firstTimeFlow = !(await _userManager.GetUsersInRoleAsync("Admin")).Any();
+                    if (!firstTimeFlow && !await _unitOfWork.UserRepository.IsUserAdminAsync(
+                            await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername())))
+                    {
+                        return BadRequest("You are not permitted to create an admin account");
+                    }
+                }
+
                 var user = _mapper.Map<AppUser>(registerDto);
                 user.UserPreferences ??= new AppUserPreferences();
                 user.ApiKey = HashUtil.ApiKey();
@@ -101,6 +112,7 @@ namespace API.Controllers
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
 
                 if (!result.Succeeded) return BadRequest(result.Errors);
+
 
                 var role = registerDto.IsAdmin ? PolicyConstants.AdminRole : PolicyConstants.PlebRole;
                 var roleResult = await _userManager.AddToRoleAsync(user, role);
@@ -127,6 +139,7 @@ namespace API.Controllers
                 {
                     Username = user.UserName,
                     Token = await _tokenService.CreateToken(user),
+                    RefreshToken = await _tokenService.CreateRefreshToken(user),
                     ApiKey = user.ApiKey,
                     Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
                 };
@@ -154,7 +167,7 @@ namespace API.Controllers
 
             if (user == null) return Unauthorized("Invalid username");
 
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdmin(user);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             if (!settings.EnableAuthentication && !isAdmin)
             {
@@ -180,9 +193,22 @@ namespace API.Controllers
             {
                 Username = user.UserName,
                 Token = await _tokenService.CreateToken(user),
+                RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
             };
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+        {
+            var token = await _tokenService.ValidateRefreshToken(tokenRequestDto);
+            if (token == null)
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            return Ok(token);
         }
 
         /// <summary>
