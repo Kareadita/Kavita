@@ -152,9 +152,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         Assert.Equal(0, await readerService.CapPageToChapter(1, -1));
         Assert.Equal(1, await readerService.CapPageToChapter(1, 10));
@@ -199,9 +198,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var successful = await readerService.SaveReadingProgress(new ProgressDto()
         {
@@ -251,9 +249,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var successful = await readerService.SaveReadingProgress(new ProgressDto()
         {
@@ -324,9 +321,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumes(1);
         readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
@@ -378,8 +374,7 @@ public class ReaderServiceTests
 
         var fileSystem = new MockFileSystem();
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
         readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
@@ -440,9 +435,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
@@ -489,9 +483,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
@@ -534,9 +527,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
@@ -578,9 +570,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
@@ -634,9 +625,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
@@ -683,9 +673,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
@@ -728,9 +717,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
@@ -774,9 +762,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
         var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
@@ -829,9 +816,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -904,9 +890,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -972,9 +957,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -1037,9 +1021,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -1103,9 +1086,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
         await readerService.SaveReadingProgress(new ProgressDto()
@@ -1173,9 +1155,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         await readerService.MarkChaptersUntilAsRead(user, 1, 5);
@@ -1221,9 +1202,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         await readerService.MarkChaptersUntilAsRead(user, 1, 2.5f);
@@ -1270,9 +1250,8 @@ public class ReaderServiceTests
 
 
         var fileSystem = new MockFileSystem();
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var cs = new CacheService(_logger, _unitOfWork, ds, new MockReadingItemServiceForCacheService(ds));
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), ds, cs);
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         await readerService.MarkChaptersUntilAsRead(user, 1, 2);
