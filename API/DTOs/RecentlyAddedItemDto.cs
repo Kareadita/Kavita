@@ -30,5 +30,9 @@ public class RecentlyAddedItemDto
     /// </summary>
     public int Id { get; set; }
     public MangaFormat Format { get; set; }
+    /// <summary>
+    /// Number of items that are updated. This provides a sort of grouping when multiple chapters are added per Volume/Series
+    /// </summary>
+    public int Count { get; set; }
 
 }
