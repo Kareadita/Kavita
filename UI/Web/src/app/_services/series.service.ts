@@ -124,12 +124,10 @@ export class SeriesService {
   }
 
   getRecentlyAddedChapters() {
-    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {}).pipe(
-      map(items => {
-        items.forEach((item, i) => item.id = i);
-        return items;
-      })
-    );
+    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {});
+  }
+  getRecentlyAddedChaptersAlt() {
+    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters-alt', {});
   }
 
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
@@ -144,9 +142,6 @@ export class SeriesService {
     }));
   }
 
-  // getContinueReading(libraryId: number = 0) {
-  //   return this.httpClient.get<InProgressChapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
-  // }
 
   refreshMetadata(series: Series) {
     return this.httpClient.post(this.baseUrl + 'series/refresh-metadata', {libraryId: series.libraryId, seriesId: series.id});

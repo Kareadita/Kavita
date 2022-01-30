@@ -965,6 +965,7 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
+            // TODO: This can eat upto 100MB on a file scan. Look into optimizing
             var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
             return string.IsNullOrEmpty(normalized) ? name : normalized;
         }

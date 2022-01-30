@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Migrations;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
@@ -20,6 +21,21 @@ using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+internal class RecentlyAddedSeries
+{
+    public int LibraryId { get; set; }
+    public LibraryType LibraryType { get; set; }
+    public DateTime Created { get; set; }
+    public int SeriesId { get; set; }
+    public string SeriesName { get; set; }
+    public Series Series { get; set; }
+    public IList<Chapter> Chapters { get; set; } // I don't know if I need this
+    public Chapter Chapter { get; set; } // for Alt implementation
+    public MangaFormat Format { get; set; }
+    public int ChapterId { get; set; } // for Alt implementation
+    public int VolumeId { get; set; } // for Alt implementation
+}
 
 public interface ISeriesRepository
 {
@@ -74,6 +90,7 @@ public interface ISeriesRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId);
+    Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChaptersAlternate(int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -804,6 +821,235 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
+    private static RecentlyAddedItemDto CreateItem(RecentlyAddedSeries item, Chapter chapter, DateTime createdDate, string title, int count)
+    {
+        return new RecentlyAddedItemDto()
+        {
+            LibraryId = item.LibraryId,
+            LibraryType = item.LibraryType,
+            SeriesId = item.SeriesId,
+            SeriesName = item.SeriesName,
+            Created = createdDate,
+            Title = title,
+            ChapterId = chapter.Id,
+            Id = count,
+            Format = item.Format
+        };
+    }
+
+    private static RecentlyAddedItemDto CreateItemForVolume(RecentlyAddedSeries item, Volume volume, DateTime createdDate, string title, int count)
+    {
+        return new RecentlyAddedItemDto()
+        {
+            LibraryId = item.LibraryId,
+            LibraryType = item.LibraryType,
+            SeriesId = item.SeriesId,
+            SeriesName = item.SeriesName,
+            Created = createdDate,
+            Title = title,
+            VolumeId = volume.Id,
+            Id = count,
+            Format = item.Format
+        };
+    }
+
+    private static string RecentlyAddedItemTitle(RecentlyAddedSeries item)
+    {
+        var chapterTitle = "Chapter";
+        switch (item.LibraryType)
+        {
+            case LibraryType.Book:
+                chapterTitle = "";
+                break;
+            case LibraryType.Comic:
+                chapterTitle = "Issue";
+                break;
+        }
+
+        return chapterTitle;
+    }
+
+    /// <summary>
+    /// This version will show a count on the series
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChaptersAlternate(int userId)
+    {
+        var libraries = await _context.AppUser
+            .Where(u => u.Id == userId)
+            .SelectMany(u => u.Libraries.Select(l => new {LibraryId = l.Id, LibraryType = l.Type}))
+            .ToListAsync();
+        var libraryIds = libraries.Select(l => l.LibraryId).ToList();
+
+        var withinLastWeek = DateTime.Now - TimeSpan.FromDays(1);
+        var ret = await _context.Chapter
+            .Where(c => c.Created >= withinLastWeek)
+            .AsNoTracking()
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ThenInclude(s => s.Library)
+            .OrderByDescending(c => c.Created)
+            .Select(c => new RecentlyAddedSeries()
+            {
+                LibraryId = c.Volume.Series.LibraryId,
+                LibraryType = c.Volume.Series.Library.Type,
+                Created = c.Created,
+                SeriesId = c.Volume.Series.Id,
+                SeriesName = c.Volume.Series.Name,
+                Series = c.Volume.Series,
+                VolumeId = c.VolumeId,
+                ChapterId = c.Id,
+                Format = c.Volume.Series.Format,
+                Chapter = c // TODO: Optimize this query to limit the pressure on memory
+            })
+            .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
+            .ToListAsync();
+
+
+        var items = new List<RecentlyAddedItemDto>();
+        foreach (var item in ret)
+        {
+            //if (GroupRecentlyAddedAlt(items, ret, item, withinLastWeek, out var recentlyAddedItemDtos)) return recentlyAddedItemDtos;
+            var dto = new RecentlyAddedItemDto()
+            {
+                LibraryId = item.LibraryId,
+                LibraryType = item.LibraryType,
+                SeriesId = item.SeriesId,
+                SeriesName = item.SeriesName,
+                Created = item.Created,
+                Id = items.Count,
+                Format = item.Format
+            };
+
+            // Add title and Volume/Chapter Id
+            var chapterTitle = RecentlyAddedItemTitle(item);
+            string title;
+            if (item.Chapter.Number.Equals(Parser.Parser.DefaultChapter))
+            {
+                if (item.Chapter.Volume.Name.Equals(Parser.Parser.DefaultChapter))
+                {
+                    title = item.Chapter.Title;
+                }
+                else
+                {
+                    title = "Volume " + item.Chapter.Volume.Number;
+                }
+
+                dto.VolumeId = item.VolumeId;
+            }
+            else
+            {
+                title = item.Chapter.IsSpecial
+                    ? item.Chapter.Range
+                    : $"{chapterTitle} {item.Chapter.Range}";
+                dto.ChapterId = item.ChapterId;
+            }
+
+            dto.Title = title;
+            items.Add(dto);
+        }
+
+        return items;
+
+    }
+
+    // private static bool GroupRecentlyAddedAlt(List<RecentlyAddedItemDto> items, List<RecentlyAddedSeries> ret, RecentlyAddedSeries recentlyAddedSeries,
+    //     DateTime withinLastWeek, out IList<RecentlyAddedItemDto> recentlyAddedItemDtos)
+    // {
+    //     if (items.Count >= 50)
+    //     {
+    //         recentlyAddedItemDtos = items;
+    //         return true;
+    //     }
+    //
+    //     var chapterMap = ret.Select(r => r.Chapter).GroupBy(c => c.VolumeId).Take(50)
+    //         .ToDictionary(g => g.Key, g => g.ToList());
+    //
+    //     foreach (var (volumeId, chapters) in chapterMap)
+    //     {
+    //         // If a single chapter
+    //         if (chapters.Count == 1)
+    //         {
+    //             // Create a chapter ReadingListItemDto
+    //             var chapterTitle = RecentlyAddedItemTitle(recentlyAddedSeries);
+    //
+    //             // If chapter is 0, then it means it's really a volume, so show it that way
+    //             var firstChapter = chapters.First();
+    //             string title;
+    //             if (firstChapter.Number.Equals(Parser.Parser.DefaultChapter))
+    //             {
+    //                 //var firstVolume = recentlyAddedSeries.Series.Volumes.First(v => v.Id == volumeId);
+    //                 var firstVolume = firstChapter.Volume;
+    //                 if (firstVolume.Number + "" == Parser.Parser.DefaultVolume)
+    //                 {
+    //                     title = firstVolume.Chapters.First().Title;
+    //                 }
+    //                 else
+    //                 {
+    //                     title = "Volume " + firstVolume.Number;
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 title = firstChapter.IsSpecial
+    //                     ? firstChapter.Range
+    //                     : $"{chapterTitle} {firstChapter.Range}";
+    //             }
+    //
+    //             items.Add(CreateItem(recentlyAddedSeries, firstChapter, firstChapter.Created, title, items.Count));
+    //             if (items.Count >= 50)
+    //             {
+    //                 recentlyAddedItemDtos = items;
+    //                 return true;
+    //             }
+    //
+    //             continue;
+    //         }
+    //
+    //
+    //         // Multiple chapters, so let's show as a volume
+    //         //var volumeNumber = recentlyAddedSeries.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+    //         var volumeNumber = recentlyAddedSeries.Chapter.Volume.Number;
+    //         if (volumeNumber == 0)
+    //         {
+    //             var volumeChapters = chapters.Where(c => c.Created >= withinLastWeek).ToList();
+    //             foreach (var chap in volumeChapters)
+    //             {
+    //                 // Create a chapter ReadingListItemDto
+    //                 var chapterTitle = RecentlyAddedItemTitle(recentlyAddedSeries);
+    //
+    //                 var title = chap.IsSpecial
+    //                     ? chap.Range
+    //                     : $"{chapterTitle} {chap.Range}";
+    //
+    //                 items.Add(CreateItem(recentlyAddedSeries, chap, chap.Created, title, items.Count));
+    //                 if (items.Count >= 50)
+    //                 {
+    //                     recentlyAddedItemDtos = items;
+    //                     return true;
+    //                 }
+    //             }
+    //
+    //             continue;
+    //         }
+    //
+    //         // Create a volume ReadingListItemDto
+    //         //var theVolume = recentlyAddedSeries.Series.Volumes.First(v => v.Id == volumeId);
+    //         // BUG: This is not working, we need the group volume Id
+    //         var theVolume = recentlyAddedSeries.Chapter.Volume;
+    //         items.Add(CreateItemForVolume(recentlyAddedSeries, theVolume, theVolume.Created, "Volume " + theVolume.Number,
+    //             items.Count));
+    //         if (items.Count >= 50)
+    //         {
+    //             recentlyAddedItemDtos = items;
+    //             return true;
+    //         }
+    //     }
+    //
+    //     return false;
+    // }
+
     public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId)
     {
         var libraries = await _context.AppUser
@@ -814,33 +1060,32 @@ public class SeriesRepository : ISeriesRepository
 
         var withinLastWeek = DateTime.Now - TimeSpan.FromDays(12);
 
+        // NOTE: I Need a migration. LastModified is not reliable. We need LastAdded. LastModified gets updated if you change the title.
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId) && s.LastModified >= withinLastWeek)
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .Select(s => new
+            .Include(s => s.Volumes.Where(v => v.Created >= withinLastWeek).OrderByDescending(item => item.Created))
+            .ThenInclude(v => v.Chapters.Where(c => c.Created >= withinLastWeek).OrderByDescending(item => item.Created))
+            .Select(s => new RecentlyAddedSeries()
             {
-                s.LibraryId,
+                LibraryId = s.LibraryId,
                 LibraryType = s.Library.Type,
-                s.Created,
+                Created = s.Created,
                 SeriesId = s.Id,
                 SeriesName = s.Name,
                 Series = s,
-                Chapters = s.Volumes.SelectMany(v => v.Chapters)
+                Format = s.Format,
+                Chapters = s.Volumes.SelectMany(v => v.Chapters).OrderByDescending(item => item.Created).ToList() // I don't think I need this
             })
-            .Take(50)
             .AsNoTracking()
             .AsSplitQuery()
             .OrderByDescending(item => item.Created)
             .ToListAsync();
 
         var items = new List<RecentlyAddedItemDto>();
-        foreach (var series in ret)
+        foreach (var recentlyAddedSeries in ret)
         {
             if (items.Count >= 50) return items;
-            var chaptersThatMeetCutoff = series.Chapters.Where(c => c.Created >= withinLastWeek)
-                .OrderByDescending(c => c.Created);
-            var chapterMap = chaptersThatMeetCutoff.GroupBy(c => c.VolumeId)
+            var chapterMap = recentlyAddedSeries.Chapters.GroupBy(c => c.VolumeId)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
             foreach (var (volumeId, chapters) in chapterMap)
@@ -849,23 +1094,23 @@ public class SeriesRepository : ISeriesRepository
                 if (chapters.Count == 1)
                 {
                     // Create a chapter ReadingListItemDto
-                    var chapterTitle = "Chapter";
-                    switch (series.LibraryType)
-                    {
-                        case LibraryType.Book:
-                            chapterTitle = "";
-                            break;
-                        case LibraryType.Comic:
-                            chapterTitle = "Issue";
-                            break;
-                    }
+                    var chapterTitle = RecentlyAddedItemTitle(recentlyAddedSeries);
 
                     // If chapter is 0, then it means it's really a volume, so show it that way
                     var firstChapter = chapters.First();
                     string title;
                     if (firstChapter.Number.Equals(Parser.Parser.DefaultChapter))
                     {
-                        title = "Volume " + series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+                        var firstVolume = recentlyAddedSeries.Series.Volumes.First(v => v.Id == volumeId);
+                        if (firstVolume.Number + "" == Parser.Parser.DefaultVolume)
+                        {
+                            title = firstVolume.Chapters.First().Title;
+                        }
+                        else
+                        {
+                            title = "Volume " + firstVolume.Number;
+                        }
+
                     }
                     else
                     {
@@ -874,76 +1119,35 @@ public class SeriesRepository : ISeriesRepository
                             : $"{chapterTitle} {chapters.FirstOrDefault()?.Range}";
                     }
 
-                    items.Add(new RecentlyAddedItemDto()
-                    {
-                        LibraryId = series.LibraryId,
-                        LibraryType = series.LibraryType,
-                        SeriesId = series.SeriesId,
-                        SeriesName = series.SeriesName,
-                        Created = chapters.Max(c => c.Created),
-                        Title = title,
-                        ChapterId = firstChapter.Id,
-                        Id = items.Count,
-                        Format = series.Series.Format
-                    });
+                    items.Add(CreateItem(recentlyAddedSeries, firstChapter, firstChapter.Created, title, items.Count));
                     if (items.Count >= 50) return items;
                     continue;
                 }
 
 
                 // Multiple chapters, so let's show as a volume
-                var volumeNumber = series.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
+                var volumeNumber = recentlyAddedSeries.Series.Volumes.FirstOrDefault(v => v.Id == volumeId)?.Number;
                 if (volumeNumber == 0)
                 {
                     var volumeChapters = chapters.Where(c => c.Created >= withinLastWeek).ToList();
                     foreach (var chap in volumeChapters)
                     {
                         // Create a chapter ReadingListItemDto
-                        var chapterTitle = "Chapter";
-                        switch (series.LibraryType)
-                        {
-                            case LibraryType.Book:
-                                chapterTitle = "";
-                                break;
-                            case LibraryType.Comic:
-                                chapterTitle = "Issue";
-                                break;
-                        }
+                        var chapterTitle = RecentlyAddedItemTitle(recentlyAddedSeries);
 
                         var title = volumeChapters.First().IsSpecial
                             ? volumeChapters.FirstOrDefault()?.Range
                             : $"{chapterTitle} {volumeChapters.FirstOrDefault()?.Range}";
-                        items.Add(new RecentlyAddedItemDto()
-                        {
-                            LibraryId = series.LibraryId,
-                            LibraryType = series.LibraryType,
-                            SeriesId = series.SeriesId,
-                            SeriesName = series.SeriesName,
-                            Created = chap.Created,
-                            Title = title,
-                            ChapterId = chap.Id,
-                            Id = items.Count,
-                            Format = series.Series.Format
-                        });
+
+                        items.Add(CreateItem(recentlyAddedSeries, chap, chap.Created, title, items.Count));
                         if (items.Count >= 50) return items;
                     }
                     continue;
                 }
 
                 // Create a volume ReadingListItemDto
-                var theVolume = series.Series.Volumes.First(v => v.Id == volumeId);
-                items.Add(new RecentlyAddedItemDto()
-                {
-                    LibraryId = series.LibraryId,
-                    LibraryType = series.LibraryType,
-                    SeriesId = series.SeriesId,
-                    SeriesName = series.SeriesName,
-                    Created = chapters.Max(c => c.Created),
-                    Title = "Volume " + theVolume.Number,
-                    VolumeId = theVolume.Id,
-                    Id = items.Count,
-                    Format = series.Series.Format
-                });
+                var theVolume = recentlyAddedSeries.Series.Volumes.First(v => v.Id == volumeId);
+                items.Add(CreateItemForVolume(recentlyAddedSeries, theVolume, theVolume.Created, "Volume " + theVolume.Number, items.Count));
                 if (items.Count >= 50) return items;
             }
         }

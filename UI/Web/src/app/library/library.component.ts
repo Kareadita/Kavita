@@ -29,6 +29,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   recentlyAdded: Series[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
+  recentlyAddedChaptersAlt: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
 
   private readonly onDestroy = new Subject<void>();
@@ -45,10 +46,14 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAdded.unshift(series);
           });
+          this.loadRecentlyAddedChapters();
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
           this.recentlyAdded = this.recentlyAdded.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
+          
+          this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+          this.recentlyAddedChaptersAlt = this.recentlyAddedChaptersAlt.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         }
       });
   }
@@ -107,6 +112,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
   loadRecentlyAddedChapters() {
     this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyAddedChapters = updatedSeries;
+    });
+
+    this.seriesService.getRecentlyAddedChaptersAlt().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAddedChaptersAlt = updatedSeries;
     });
   }
 
