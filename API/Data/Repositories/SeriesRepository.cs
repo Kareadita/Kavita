@@ -912,7 +912,7 @@ public class SeriesRepository : ISeriesRepository
 
                         var title = volumeChapters.First().IsSpecial
                             ? volumeChapters.FirstOrDefault()?.Range
-                            : $"{chapterTitle} {volumeChapters.FirstOrDefault()?.Range}";
+                            : $"{chapterTitle} {chap.Number}";
                         items.Add(new RecentlyAddedItemDto()
                         {
                             LibraryId = series.LibraryId,
