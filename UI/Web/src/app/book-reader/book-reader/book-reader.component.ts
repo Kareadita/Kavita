@@ -43,6 +43,15 @@ const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
 
+/**
+ * Styles that should be applied on the top level book-content tag
+ */
+const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
+/**
+ * Styles that should be applied on every element within book-content tag
+ */
+const elementLevelStyles = ['line-height', 'font-family'];
+
 @Component({
   selector: 'app-book-reader',
   templateUrl: './book-reader.component.html',
@@ -680,16 +689,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       page = 0;
     }
 
-    // BUG: Last page is not counting as read
     if (!(page === 0 || page === this.maxPages - 1)) {
       page -= 1;
     }
-
-    // // Due to the fact that we start at image 0, but page 1, we need the last page to have progress as page + 1 to be completed
-    // let tempPageNum = this.pageNum;
-    // if (this.pageNum == this.maxPages - 1) {
-    //   tempPageNum = this.pageNum + 1;
-    // }
 
     this.pageNum = page;
     this.loadPage();
@@ -903,31 +905,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateReaderStyles();
   }
 
+  /**
+   * Applies styles onto the html of the book page
+   */
   updateReaderStyles() {
-    if (this.readingHtml != undefined && this.readingHtml.nativeElement) {
-      Object.entries(this.pageStyles).forEach(item => {
-        if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
-          // Remove the style or skip
-          this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
-          return;
-        }
-        this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
-      });
+    if (this.readingHtml === undefined || !this.readingHtml.nativeElement)  return;
 
-      for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
-        const elem = this.readingHtml.nativeElement.children.item(i);
-        if (elem?.tagName === 'STYLE') continue;
-          Object.entries(this.pageStyles).forEach(item => {
-            if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
-              // Remove the style or skip
-              this.renderer.removeStyle(elem, item[0]);
-              return;
-            }
-            this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
-          });
-        
+    // Line Height must be placed on each element in the page
+    
+    // Apply page level overrides
+    Object.entries(this.pageStyles).forEach(item => {
+      if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+        // Remove the style or skip
+        this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
+        return;
       }
+      if (pageLevelStyles.includes(item[0])) {
+        this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
+      }
+    });
+
+    const individualElementStyles = Object.entries(this.pageStyles).filter(item => elementLevelStyles.includes(item[0]));
+    for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
+      const elem = this.readingHtml.nativeElement.children.item(i);
+      if (elem?.tagName === 'STYLE') continue;
+      individualElementStyles.forEach(item => {
+          if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+            // Remove the style or skip
+            this.renderer.removeStyle(elem, item[0]);
+            return;
+          }
+          this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
+        });
+      
     }
+
   }
 
 
