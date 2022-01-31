@@ -1,11 +1,1 @@
 ﻿blank_issues_enabled: false
-contact_links:
-    - name: Application issue
-      url: https://github.com/Kareadita/Kavita/issues/new/choose
-      about: Issues within the app
-    - name: Feature Requests
-      url: https://feats.kavitareader.com/
-      about: Want something improved or a new feature
-    - name: Wiki
-      url: https://wiki.kavitareader.com/en
-      about: Guides, troubleshooting, and answers to common questions
