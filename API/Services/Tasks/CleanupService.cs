@@ -189,14 +189,16 @@ namespace API.Services.Tasks
             _directoryService.DeleteFiles(filesToDelete);
 
             // Clear all empty directories
-            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory))
+            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, "", SearchOption.AllDirectories))
             {
-                if (_directoryService.FileSystem.Directory.GetFiles(directory).Length == 0 &&
+                if (_directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
                     _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
                 {
                     _directoryService.FileSystem.Directory.Delete(directory, false);
                 }
             }
+
+
         }
     }
 }
