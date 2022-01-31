@@ -184,7 +184,9 @@ namespace API.Services.Tasks
 
 
             var filesToDelete = allBookmarkFiles.ToList().Except(bookmarks).ToList();
-            _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count());
+            _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count);
+
+            if (filesToDelete.Count == 0) return;
 
             _directoryService.DeleteFiles(filesToDelete);
 
