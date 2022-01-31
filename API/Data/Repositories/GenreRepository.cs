@@ -67,6 +67,7 @@ public class GenreRepository : IGenreRepository
             .Where(s => libraryIds.Contains(s.LibraryId))
             .SelectMany(s => s.Metadata.Genres)
             .Distinct()
+            .OrderBy(p => p.Title)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
