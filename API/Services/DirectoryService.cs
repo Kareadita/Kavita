@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -6,7 +7,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using API.Entities.Enums;
+using API.Comparators;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -681,7 +682,7 @@ namespace API.Services
                     FileSystem.Path.Join(directoryName, "test.txt"),
                     string.Empty);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 ClearAndDeleteDirectory(directoryName);
                 return false;

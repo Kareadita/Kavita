@@ -23,17 +23,15 @@ namespace API.Controllers
         private readonly ILogger<SettingsController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITaskScheduler _taskScheduler;
-        private readonly IAccountService _accountService;
         private readonly IDirectoryService _directoryService;
         private readonly IMapper _mapper;
 
         public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-            IAccountService accountService, IDirectoryService directoryService, IMapper mapper)
+            IDirectoryService directoryService, IMapper mapper)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
-            _accountService = accountService;
             _directoryService = directoryService;
             _mapper = mapper;
         }
@@ -84,7 +82,6 @@ namespace API.Controllers
 
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
-            var updateAuthentication = false;
             var updateBookmarks = false;
             var originalBookmarkDirectory = _directoryService.BookmarkDirectory;
 
@@ -163,13 +160,6 @@ namespace API.Controllers
 
                 }
 
-                if (setting.Key == ServerSettingKey.EnableAuthentication && updateSettingsDto.EnableAuthentication + string.Empty != setting.Value)
-                {
-                    setting.Value = updateSettingsDto.EnableAuthentication + string.Empty;
-                    _unitOfWork.SettingsRepository.Update(setting);
-                    updateAuthentication = true;
-                }
-
                 if (setting.Key == ServerSettingKey.AllowStatCollection && updateSettingsDto.AllowStatCollection + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.AllowStatCollection + string.Empty;
@@ -190,21 +180,6 @@ namespace API.Controllers
             try
             {
                 await _unitOfWork.CommitAsync();
-
-                if (updateAuthentication)
-                {
-                    var users = await _unitOfWork.UserRepository.GetNonAdminUsersAsync();
-                    foreach (var user in users)
-                    {
-                        var errors = await _accountService.ChangeUserPassword(user, AccountService.DefaultPassword);
-                        if (!errors.Any()) continue;
-
-                        await _unitOfWork.RollbackAsync();
-                        return BadRequest(errors);
-                    }
-
-                    _logger.LogInformation("Server authentication changed. Updated all non-admins to default password");
-                }
 
                 if (updateBookmarks)
                 {
@@ -252,13 +227,6 @@ namespace API.Controllers
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             return Ok(settingsDto.EnableOpds);
-        }
-
-        [HttpGet("authentication-enabled")]
-        public async Task<ActionResult<bool>> GetAuthenticationEnabled()
-        {
-            var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            return Ok(settingsDto.EnableAuthentication);
         }
     }
 }

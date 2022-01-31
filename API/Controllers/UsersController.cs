@@ -47,21 +47,6 @@ namespace API.Controllers
         }
 
 
-
-        [AllowAnonymous]
-        [HttpGet("names")]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUserNames()
-        {
-            // This is only for disabled auth flow - being removed
-            var setting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            if (setting.EnableAuthentication)
-            {
-                return Unauthorized("This API cannot be used given your server's configuration");
-            }
-            var members = await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync();
-            return Ok(members.Select(m => m.Username));
-        }
-
         [HttpGet("has-reading-progress")]
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
         {
@@ -104,6 +89,5 @@ namespace API.Controllers
 
             return BadRequest("There was an issue saving preferences.");
         }
-
     }
 }

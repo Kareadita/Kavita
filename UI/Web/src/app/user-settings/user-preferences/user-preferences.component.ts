@@ -28,7 +28,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
   isAdmin: boolean = false;
-  isAuthenticationEnabled: boolean = true;
 
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
@@ -77,9 +76,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
-    });
-    this.settingsService.getAuthenticationEnabled().subscribe(res => {
-      this.isAuthenticationEnabled = res;
     });
   }
 
