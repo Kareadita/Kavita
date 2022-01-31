@@ -89,6 +89,5 @@ namespace API.Controllers
 
             return BadRequest("There was an issue saving preferences.");
         }
-
     }
 }

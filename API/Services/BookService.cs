@@ -171,7 +171,7 @@ namespace API.Services
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
 
-            EscapeCSSImportReferences(ref stylesheetHtml, apiBase, prepend);
+            EscapeCssImportReferences(ref stylesheetHtml, apiBase, prepend);
 
             EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
 
@@ -200,7 +200,7 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
-        private static void EscapeCSSImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
+        private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
         {
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {

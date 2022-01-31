@@ -423,7 +423,7 @@ namespace API.Controllers
             try
             {
                 var result = await _userManager.CreateAsync(user, AccountService.DefaultPassword);
-                if (!result.Succeeded) return BadRequest(result.Errors); // TODO: Rollback creation?
+                if (!result.Succeeded) return BadRequest(result.Errors);
 
                 // Assign Roles
                 var roles = dto.Roles;
@@ -503,7 +503,6 @@ namespace API.Controllers
 
             if (validationErrors.Any())
             {
-                // TODO: Figure out how to throw validation errors to UI properly
                 return BadRequest(validationErrors);
             }
 
@@ -640,6 +639,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "There was an issue during email migration. Contact support");
                 _unitOfWork.UserRepository.Delete(user);
                 await _unitOfWork.CommitAsync();
             }
@@ -652,7 +652,6 @@ namespace API.Controllers
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (!result.Succeeded)
             {
-                // TODO: Throw exceptions
                 _logger.LogCritical("Email validation failed");
                 if (result.Errors.Any())
                 {

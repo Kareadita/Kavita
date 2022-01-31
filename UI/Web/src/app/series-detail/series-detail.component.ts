@@ -426,7 +426,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.activeTabId = TabID.Storyline;
     }
 
-    if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
+    if (this.libraryType == LibraryType.Book && !this.hasSpecials){
+      this.activeTabId = TabID.Volumes;
+    } else if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
       this.activeTabId = TabID.Storyline;
     } else {
       this.activeTabId = TabID.Specials;

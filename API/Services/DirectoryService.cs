@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -6,6 +7,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +22,7 @@ namespace API.Services
         string TempDirectory { get; }
         string ConfigDirectory { get; }
         /// <summary>
-        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettings.BackupDirectory"/> for actual path.
+        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
         /// </summary>
         string BookmarkDirectory { get; }
         /// <summary>

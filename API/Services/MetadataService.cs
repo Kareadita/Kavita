@@ -67,7 +67,7 @@ public class MetadataService : IMetadataService
 
         if (firstFile == null) return false;
 
-        _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
+        _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
 
         return true;
@@ -141,7 +141,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
+    private void ProcessSeriesMetadataUpdate(Series series, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -217,17 +217,12 @@ public class MetadataService : IMetadataService
                 });
             _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
-            var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-            var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-
-
             var seriesIndex = 0;
             foreach (var series in nonLibrarySeries)
             {
                 try
                 {
-                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
+                    ProcessSeriesMetadataUpdate(series, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -267,12 +262,11 @@ public class MetadataService : IMetadataService
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
     }
 
-    // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
+    // TODO: Write out a single piece of code that can iterate over a collection/chunk and perform custom actions
     private async Task PerformScan(Library library, bool forceUpdate, Action<int, Chunk> action)
     {
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
-        var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
@@ -280,7 +274,6 @@ public class MetadataService : IMetadataService
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
             if (chunkInfo.TotalChunks == 0) continue;
-            totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
 
             action(chunk, chunkInfo);
@@ -343,11 +336,7 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
 
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-
-        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
+        ProcessSeriesMetadataUpdate(series, forceUpdate);
 
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));

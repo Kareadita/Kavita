@@ -68,7 +68,7 @@ public class EmailService : IEmailService
                 return true;
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false;
         }
@@ -94,7 +94,7 @@ public class EmailService : IEmailService
                 return false;
             }
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false;
         }

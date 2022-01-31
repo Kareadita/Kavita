@@ -22,7 +22,7 @@ export class UserLoginComponent implements OnInit {
   model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required]) 
+      password: new FormControl('', [Validators.required])
   });
 
   memberNames: Array<string> = [];
@@ -36,7 +36,7 @@ export class UserLoginComponent implements OnInit {
    */
   isLoaded: boolean = false;
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, 
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
     private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
@@ -57,7 +57,7 @@ export class UserLoginComponent implements OnInit {
 
       this.setupAuthenticatedLoginFlow();
       this.isLoaded = true;
-    }); 
+    });
   }
 
   setupAuthenticatedLoginFlow() {
@@ -95,9 +95,9 @@ export class UserLoginComponent implements OnInit {
     }, err => {
       if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
         const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
-        modalRef.componentInstance.username = this.model.username; 
+        modalRef.componentInstance.username = this.model.username;
         modalRef.closed.pipe(take(1)).subscribe(() => {
-          
+
         });
       } else {
         this.toastr.error(err.error);
