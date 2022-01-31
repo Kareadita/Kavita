@@ -174,6 +174,7 @@ public class ReaderService : IReaderService
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
+            if (!_unitOfWork.HasChanges()) return true;
             if (await _unitOfWork.CommitAsync())
             {
                 return true;
