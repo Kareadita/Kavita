@@ -325,12 +325,8 @@ public class ReaderService : IReaderService
         if (volume == null) return nonSpecialChapters.First();
 
         var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList();
-        foreach (var chapter in chapters.Where(chapter => chapter.PagesRead < chapter.Pages))
-        {
-            return chapter;
-        }
 
-        return chapters.First();
+        return chapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages) ?? chapters.First();
     }
 
 

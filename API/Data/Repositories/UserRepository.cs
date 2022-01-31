@@ -211,7 +211,7 @@ public class UserRepository : IUserRepository
 
     public async Task<AppUser> GetUserByEmailAsync(string email)
     {
-        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.Equals(email));
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.ToLower().Equals(email.ToLower()));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

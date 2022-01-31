@@ -183,7 +183,7 @@ namespace API.Services.Tasks
                     b.FileName)));
 
 
-            var filesToDelete = allBookmarkFiles.ToList().Except(bookmarks).ToList();
+            var filesToDelete = allBookmarkFiles.AsEnumerable().Except(bookmarks).ToList();
             _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count);
 
             if (filesToDelete.Count == 0) return;

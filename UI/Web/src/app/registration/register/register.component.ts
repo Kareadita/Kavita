@@ -38,8 +38,6 @@ export class RegisterComponent implements OnInit {
     this.accountService.register(model).subscribe((user) => {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
-    }, err => {
-      // TODO: Handle errors
     });
   }
 

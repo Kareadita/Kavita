@@ -15,12 +15,14 @@ public interface IEmailService
     Task SendConfirmationEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
     Task SendMigrationEmail(EmailMigrationDto data);
+    Task SendPasswordResetEmail(PasswordResetEmailDto data);
 }
 
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
-    private const string ApiUrl = "https://email.kavitareader.com";
+    //private const string ApiUrl = "https://email.kavitareader.com";
+    private const string ApiUrl = "http://localhost:5003";
 
     public EmailService(ILogger<EmailService> logger)
     {
@@ -48,6 +50,11 @@ public class EmailService : IEmailService
     public async Task SendMigrationEmail(EmailMigrationDto data)
     {
         await SendEmailWithPost(ApiUrl + "/api/email/email-migration", data);
+    }
+
+    public async Task SendPasswordResetEmail(PasswordResetEmailDto data)
+    {
+        await SendEmailWithPost(ApiUrl + "/api/email/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url)

@@ -394,6 +394,7 @@ namespace API.Controllers
         }
 
 
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("invite")]
         public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
@@ -439,7 +440,7 @@ namespace API.Controllers
                     var roleResult = await _userManager.AddToRoleAsync(user, role);
                     if (!roleResult.Succeeded)
                         return
-                            BadRequest(roleResult.Errors); // TODO: Combine all these return BadRequest into one big thing
+                            BadRequest(roleResult.Errors);
                 }
 
                 // Grant access to libraries
@@ -482,7 +483,7 @@ namespace API.Controllers
                 }
                 return Ok(emailLink);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _unitOfWork.UserRepository.Delete(user);
                 await _unitOfWork.CommitAsync();
@@ -534,6 +535,63 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("confirm-password-reset")]
+        public async Task<ActionResult<string>> ConfirmForgotPassword(ConfirmPasswordResetDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+            if (user == null)
+            {
+                return BadRequest("Invalid Details");
+            }
+
+            var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", dto.Token);
+            if (result)
+            {
+                var errors = await _accountService.ChangeUserPassword(user, dto.Password);
+                if (errors.Any())
+                {
+                    return BadRequest(errors);
+                }
+            }
+
+            return Ok();
+
+        }
+
+
+        /// <summary>
+        /// Will send user a link to update their password to their email or prompt them if not accessible
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogError("There are no users with email: {Email} but user is requesting password reset", email);
+                return Ok("An email will be sent to the email if it exists in our database");
+            }
+
+            var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
+            _logger.LogInformation("[Forgot Password]: Email Link: {Link}", emailLink);
+            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+            if (await _emailService.CheckIfAccessible(host))
+            {
+                await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
+                {
+                    EmailAddress = user.Email,
+                    ServerConfirmationLink = emailLink
+                });
+                return Ok("Email sent");
+            }
+
+            return Ok("Your server is not accessible. The Link to reset your password is in the logs.");
+        }
+
+        [AllowAnonymous]
         [HttpPost("confirm-migration-email")]
         public async Task<ActionResult<UserDto>> ConfirmMigrationEmail(ConfirmMigrationEmailDto dto)
         {
@@ -570,10 +628,7 @@ namespace API.Controllers
                     "This user needs to migrate. Have them log out and login to trigger a migration flow");
             if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var emailLink =
-                $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-migration-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(user.Email)}";
+            var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
             _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
             await _emailService.SendMigrationEmail(new EmailMigrationDto()
             {
@@ -584,6 +639,14 @@ namespace API.Controllers
 
 
             return Ok(emailLink);
+        }
+
+        private string GenerateEmailLink(string token, string routePart, string email)
+        {
+            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+            var emailLink =
+                $"{Request.Scheme}://{host}{Request.PathBase}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+            return emailLink;
         }
 
         /// <summary>
@@ -622,9 +685,7 @@ namespace API.Controllers
                 _unitOfWork.UserRepository.Update(user);
                 await _unitOfWork.CommitAsync();
 
-                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-                var emailLink =
-                    $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-migration-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(dto.Email)}";
+                var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
                 _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
                 if (dto.SendEmail)
                 {
