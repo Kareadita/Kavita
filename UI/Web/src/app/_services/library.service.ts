@@ -34,6 +34,21 @@ export class LibraryService {
     }));
   }
 
+  getLibraryName(libraryId: number) {
+    if (this.libraryNames != undefined && this.libraryNames.hasOwnProperty(libraryId)) {
+      return of(this.libraryNames[libraryId]);
+    }
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(l => {
+      this.libraryNames = {};
+      l.forEach(lib => {
+        if (this.libraryNames !== undefined) {
+          this.libraryNames[lib.id] = lib.name;
+        }        
+      });
+      return this.libraryNames[libraryId];
+    }));
+  }
+
   listDirectories(rootPath: string) {
     let query = '';
     if (rootPath !== undefined && rootPath.length > 0) {

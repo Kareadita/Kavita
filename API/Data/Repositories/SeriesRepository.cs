@@ -778,6 +778,7 @@ public class SeriesRepository : ISeriesRepository
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Select(s => s.Metadata.Language)
+            .AsNoTracking()
             .Distinct()
             .ToListAsync();
 
@@ -787,7 +788,9 @@ public class SeriesRepository : ISeriesRepository
             {
                 Title = CultureInfo.GetCultureInfo(s).DisplayName,
                 IsoCode = s
-            }).ToList();
+            })
+            .OrderBy(s => s.Title)
+            .ToList();
     }
 
     public async Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
@@ -801,6 +804,7 @@ public class SeriesRepository : ISeriesRepository
                 Value = s,
                 Title = s.ToDescription()
             })
+            .OrderBy(s => s.Title)
             .ToListAsync();
     }
 

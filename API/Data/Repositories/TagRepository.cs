@@ -67,6 +67,8 @@ public class TagRepository : ITagRepository
             .Where(s => libraryIds.Contains(s.LibraryId))
             .SelectMany(s => s.Metadata.Tags)
             .Distinct()
+            .OrderBy(t => t.Title)
+            .AsNoTracking()
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -80,6 +82,7 @@ public class TagRepository : ITagRepository
     {
         return await _context.Tag
             .AsNoTracking()
+            .OrderBy(t => t.Title)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

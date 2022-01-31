@@ -412,6 +412,78 @@ public class CleanupServiceTests
                     FileName = "1/1/1/0001.jpg",
                     SeriesId = 1,
                     VolumeId = 1
+                },
+                new AppUserBookmark()
+                {
+                    AppUserId = 1,
+                    ChapterId = 1,
+                    Page = 2,
+                    FileName = "1/1/1/0002.jpg",
+                    SeriesId = 1,
+                    VolumeId = 1
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
+            ds);
+
+        await cleanupService.CleanupBookmarks();
+
+        Assert.Equal(2, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+
+    }
+
+    [Fact]
+    public async Task CleanupBookmarks_LeavesOneFiles()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{BookmarkDirectory}1/1/1/0001.jpg", new MockFileData(""));
+        filesystem.AddFile($"{BookmarkDirectory}1/1/2/0002.jpg", new MockFileData(""));
+
+        // Delete all Series to reset state
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+
+                        }
+                    }
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        _context.AppUser.Add(new AppUser()
+        {
+            Bookmarks = new List<AppUserBookmark>()
+            {
+                new AppUserBookmark()
+                {
+                    AppUserId = 1,
+                    ChapterId = 1,
+                    Page = 1,
+                    FileName = "1/1/1/0001.jpg",
+                    SeriesId = 1,
+                    VolumeId = 1
                 }
             }
         });
@@ -426,7 +498,7 @@ public class CleanupServiceTests
         await cleanupService.CleanupBookmarks();
 
         Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
-
+        Assert.Equal(1, ds.FileSystem.Directory.GetDirectories($"{BookmarkDirectory}1/1/").Length);
     }
 
     #endregion
