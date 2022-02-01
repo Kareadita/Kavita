@@ -73,7 +73,7 @@ namespace API.Controllers
             _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
             var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
 
-            if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
+            if (resetPasswordDto.UserName != User.GetUsername() && !(User.IsInRole(PolicyConstants.AdminRole) || User.IsInRole(PolicyConstants.ChangePasswordRole)))
                 return Unauthorized("You are not permitted to this operation.");
 
             var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
@@ -245,45 +245,6 @@ namespace API.Controllers
                     f => (string) f.GetValue(null)).Values.ToList();
         }
 
-        /// <summary>
-        /// Sets the given roles to the user.
-        /// </summary>
-        /// <param name="updateRbsDto"></param>
-        /// <returns></returns>
-        [HttpPost("update-rbs")]
-        public async Task<ActionResult> UpdateRoles(UpdateRbsDto updateRbsDto)
-        {
-            var user = await _userManager.Users
-                .Include(u => u.UserPreferences)
-                .SingleOrDefaultAsync(x => x.NormalizedUserName == updateRbsDto.Username.ToUpper());
-            if (updateRbsDto.Roles.Contains(PolicyConstants.AdminRole) ||
-                updateRbsDto.Roles.Contains(PolicyConstants.PlebRole))
-            {
-                return BadRequest("Invalid Roles");
-            }
-
-            var existingRoles = (await _userManager.GetRolesAsync(user))
-                .Where(s => s != PolicyConstants.AdminRole && s != PolicyConstants.PlebRole)
-                .ToList();
-
-            // Find what needs to be added and what needs to be removed
-            var rolesToRemove = existingRoles.Except(updateRbsDto.Roles);
-            var result = await _userManager.AddToRolesAsync(user, updateRbsDto.Roles);
-
-            if (!result.Succeeded)
-            {
-                await _unitOfWork.RollbackAsync();
-                return BadRequest("Something went wrong, unable to update user's roles");
-            }
-            if ((await _userManager.RemoveFromRolesAsync(user, rolesToRemove)).Succeeded)
-            {
-                return Ok();
-            }
-
-            await _unitOfWork.RollbackAsync();
-            return BadRequest("Something went wrong, unable to update user's roles");
-
-        }
 
         /// <summary>
         /// Resets the API Key assigned with a user

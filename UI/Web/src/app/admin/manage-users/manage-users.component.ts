@@ -8,7 +8,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { EditRbsModalComponent } from '../_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { Subject } from 'rxjs';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { InviteUserComponent } from '../invite-user/invite-user.component';
@@ -110,16 +109,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         this.toastr.success(member.username + ' has been deleted.');
       });
     }
-  }
-
-  openEditRole(member: Member) {
-    const modalRef = this.modalService.open(EditRbsModalComponent);
-    modalRef.componentInstance.member = member;
-    modalRef.closed.subscribe((updatedMember: Member) => {
-      if (updatedMember !== undefined) {
-        member = updatedMember;
-      }
-    });
   }
 
   inviteUser() {

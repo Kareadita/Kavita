@@ -194,7 +194,7 @@
                 <app-series-bookmarks></app-series-bookmarks>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'password'">
-                <ng-container *ngIf="isAdmin">
+                <ng-container *ngIf="(isAdmin || hasChangePasswordRole); else noPermission">
                     <p>Change your Password</p>
                     <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
                         <div *ngFor="let error of resetPasswordErrors">{{error}}</div>
@@ -227,6 +227,9 @@
                         </div>
                     </form>
                 </ng-container>
+                <ng-template #noPermission>
+                    <p>You do not have permission to change your password. Reach out to the admin of the server.</p>
+                </ng-template>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'clients'">
                 <p>All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.</p>

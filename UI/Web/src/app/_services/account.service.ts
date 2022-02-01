@@ -41,6 +41,10 @@ export class AccountService implements OnDestroy {
     return user && user.roles.includes('Admin');
   }
 
+  hasChangePasswordRole(user: User) {
+    return user && user.roles.includes('Change Password');
+  }
+
   hasDownloadRole(user: User) {
     return user && user.roles.includes('Download');
   }

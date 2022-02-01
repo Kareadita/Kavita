@@ -62,10 +62,6 @@
                     <ng-template #showRoles>
                         <app-tag-badge *ngFor="let role of getRoles(member)">{{role}}</app-tag-badge>
                     </ng-template>
-                    <button class="btn btn-icon" attr.aria-labelledby="member-name--{{idx}}" title="{{hasAdminRole(member) ? 'Admins have all feature permissions' : 'Edit Role'}}" (click)="openEditRole(member)" [disabled]="hasAdminRole(member)">
-                        <i class="fa fa-pen" aria-hidden="true"></i>
-                        <span class="sr-only">Edit Role</span>
-                    </button>
                 </div>
             </div>
         </li>
