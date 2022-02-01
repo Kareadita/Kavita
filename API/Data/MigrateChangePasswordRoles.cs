@@ -2,14 +2,12 @@
 using API.Constants;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 
 namespace API.Data;
 
-public class MigrateChangePasswordRoles
+public static class MigrateChangePasswordRoles
 {
-    public static async Task Migrate(IUnitOfWork unitOfWork,
-        ILogger<Program> logger, UserManager<AppUser> userManager)
+    public static async Task Migrate(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
     {
         foreach (var user in await unitOfWork.UserRepository.GetAllUsers())
         {

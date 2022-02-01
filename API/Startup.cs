@@ -150,8 +150,7 @@ namespace API
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
-                    await MigrateChangePasswordRoles.Migrate(unitOfWork,
-                        logger, userManager);
+                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
 
                     var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
                     try
