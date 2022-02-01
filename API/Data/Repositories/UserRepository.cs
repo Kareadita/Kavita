@@ -52,6 +52,7 @@ public interface IUserRepository
     Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser> GetUserByEmailAsync(string email);
+    Task<IEnumerable<AppUser>> GetAllUsers();
 }
 
 public class UserRepository : IUserRepository
@@ -212,6 +213,11 @@ public class UserRepository : IUserRepository
     public async Task<AppUser> GetUserByEmailAsync(string email)
     {
         return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.ToLower().Equals(email.ToLower()));
+    }
+
+    public async Task<IEnumerable<AppUser>> GetAllUsers()
+    {
+        return await _context.AppUser.ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

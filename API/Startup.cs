@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -140,26 +142,16 @@ namespace API
                 Task.Run(async () =>
                 {
                     // Apply all migrations on startup
-                    // If we have pending migrations, make a backup first
-                    //var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var context = serviceProvider.GetRequiredService<DataContext>();
-                    // var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                    // if (pendingMigrations.Any())
-                    // {
-                    //     logger.LogInformation("Performing backup as migrations are needed");
-                    //     await backupService.BackupDatabase();
-                    // }
-                    //
-                    // await context.Database.MigrateAsync();
-                    // var roleManager = serviceProvider.GetRequiredService<RoleManager<AppRole>>();
-                    //
-                    // await Seed.SeedRoles(roleManager);
-                    // await Seed.SeedSettings(context, directoryService);
-                    // await Seed.SeedUserApiKeys(context);
+                    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
+
+                    await MigrateChangePasswordRoles.Migrate(unitOfWork,
+                        logger, userManager);
 
                     var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
                     try

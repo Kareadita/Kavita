@@ -12,7 +12,6 @@ import { DirectoryPickerComponent } from './_modals/directory-picker/directory-p
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
-import { EditRbsModalComponent } from './_modals/edit-rbs-modal/edit-rbs-modal.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
 import { ChangelogComponent } from './changelog/changelog.component';
 import { PipeModule } from '../pipe/pipe.module';
@@ -34,7 +33,6 @@ import { EditUserComponent } from './edit-user/edit-user.component';
     DirectoryPickerComponent,
     ResetPasswordModalComponent,
     ManageSettingsComponent,
-    EditRbsModalComponent,
     ManageSystemComponent,
     ChangelogComponent,
     InviteUserComponent,
