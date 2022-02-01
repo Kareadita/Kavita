@@ -1,5 +1,7 @@
 @use "../../../theme/colors";
 
+
+
 .login {
     display: flex;
     align-items: center;
@@ -72,6 +74,15 @@
             box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%);
         }
     }
+
+    ::ng-deep input {
+        background-color: #fff !important;
+        color: black;
+    }
+
+    ::ng-deep a {
+        color: white;
+    }
 }
 
 .invalid-feedback {
@@ -79,7 +90,3 @@
     color: #343c59;
 }
 
-input {
-    background-color: #fff !important;
-    color: black;
-}

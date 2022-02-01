@@ -15,6 +15,7 @@ public interface IEmailService
     Task SendConfirmationEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
     Task SendMigrationEmail(EmailMigrationDto data);
+    Task SendPasswordResetEmail(PasswordResetEmailDto data);
 }
 
 public class EmailService : IEmailService
@@ -48,6 +49,11 @@ public class EmailService : IEmailService
     public async Task SendMigrationEmail(EmailMigrationDto data)
     {
         await SendEmailWithPost(ApiUrl + "/api/email/email-migration", data);
+    }
+
+    public async Task SendPasswordResetEmail(PasswordResetEmailDto data)
+    {
+        await SendEmailWithPost(ApiUrl + "/api/email/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url)

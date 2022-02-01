@@ -8,6 +8,8 @@ import { SplashContainerComponent } from './splash-container/splash-container.co
 import { RegisterComponent } from './register/register.component';
 import { AddEmailToAccountMigrationModalComponent } from './add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confirm-migration-email.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { ConfirmResetPasswordComponent } from './confirm-reset-password/confirm-reset-password.component';
 
 
 
@@ -17,7 +19,9 @@ import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confir
     SplashContainerComponent,
     RegisterComponent,
     AddEmailToAccountMigrationModalComponent,
-    ConfirmMigrationEmailComponent
+    ConfirmMigrationEmailComponent,
+    ResetPasswordComponent,
+    ConfirmResetPasswordComponent
   ],
   imports: [
     CommonModule,

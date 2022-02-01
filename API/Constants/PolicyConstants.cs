@@ -21,9 +21,7 @@ namespace API.Constants
         /// </summary>
         public const string DownloadRole = "Download";
 
-        public static readonly ImmutableArray<string> ValidRoles = new ImmutableArray<string>()
-        {
-            AdminRole, PlebRole, DownloadRole
-        };
+        public static readonly ImmutableArray<string> ValidRoles =
+            ImmutableArray.Create(AdminRole, PlebRole, DownloadRole);
     }
 }

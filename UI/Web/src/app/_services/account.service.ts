@@ -130,6 +130,14 @@ export class AccountService implements OnDestroy {
     return JSON.parse(atob(token.split('.')[1]));
   }
 
+  requestResetPasswordEmail(email: string) {
+    return this.httpClient.post<string>(this.baseUrl + 'account/forgot-password?email=' + encodeURIComponent(email), {}, {responseType: 'text' as 'json'});
+  }
+
+  confirmResetPasswordEmail(model: {email: string, token: string, password: string}) {
+    return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model);
+  }
+
   resetPassword(username: string, password: string) {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password}, {responseType: 'json' as 'text'});
   }

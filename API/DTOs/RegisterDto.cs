@@ -11,6 +11,5 @@ namespace API.DTOs
         [Required]
         [StringLength(32, MinimumLength = 6)]
         public string Password { get; set; }
-        public bool IsAdmin { get; init; }
     }
 }

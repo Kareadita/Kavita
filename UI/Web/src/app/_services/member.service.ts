@@ -25,7 +25,7 @@ export class MemberService {
   }
 
   deleteMember(username: string) {
-    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + username);
+    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + encodeURIComponent(username));
   }
 
   hasLibraryAccess(libraryId: number) {

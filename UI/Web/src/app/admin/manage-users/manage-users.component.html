@@ -56,7 +56,7 @@
                         {{member.lastActive | date: 'short'}}
                     </ng-template>
                 </div>
-                <div *ngIf="!member.isAdmin">Sharing: {{formatLibraries(member)}}</div>
+                <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>
                 <div>
                     Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
                     <ng-template #showRoles>
