@@ -6,7 +6,7 @@
     <span aria-hidden="true">&times;</span>
     </button>
 </div>
-<div class="modal-body" [innerHtml]="config.content | safeHtml">
+<div class="modal-body" style="overflow-x: auto" [innerHtml]="config.content | safeHtml">
 </div>
 <div class="modal-footer">
     <div *ngFor="let btn of config.buttons">

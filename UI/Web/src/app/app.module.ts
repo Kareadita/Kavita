@@ -36,6 +36,7 @@ import { PersonRolePipe } from './person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { PublicationStatusPipe } from './publication-status.pipe';
+import { RegistrationModule } from './registration/registration.module';
 
 
 @NgModule({
@@ -80,6 +81,7 @@ import { PublicationStatusPipe } from './publication-status.pipe';
     CardsModule,
     CollectionsModule,
     ReadingListModule,
+    RegistrationModule,
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

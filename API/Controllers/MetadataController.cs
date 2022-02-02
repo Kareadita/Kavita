@@ -111,7 +111,7 @@ public class MetadataController : BaseApiController
         {
             Title = t.ToDescription(),
             Value = t
-        }));
+        }).OrderBy(t => t.Title));
     }
 
     /// <summary>

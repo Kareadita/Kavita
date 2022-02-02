@@ -119,12 +119,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
 
     if (this.supressLibraryLink === false) {
-      this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
-        if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
-          this.libraryId = (this.entity as Series).libraryId;
-          this.libraryName = names[this.libraryId];
-        }
-      });
+      if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
+        this.libraryId = (this.entity as Series).libraryId;
+      }
+
+      if (this.libraryId !== undefined && this.libraryId > 0) {
+        this.libraryService.getLibraryName(this.libraryId).pipe(takeUntil(this.onDestroy)).subscribe(name => {
+          this.libraryName = name;
+        });
+      }
     }
     this.format = (this.entity as Series).format;
 

@@ -21,7 +21,6 @@ export class LibraryAccessModalComponent implements OnInit {
   isLoading: boolean = false;
 
   get hasSomeSelected() {
-    console.log(this.selections != null && this.selections.hasSomeSelected());
     return this.selections != null && this.selections.hasSomeSelected();
   }
 

@@ -329,7 +329,7 @@ namespace Kavita.Common
         }
 
         /// <summary>
-        /// This should NEVER be called except by <see cref="MigrateConfigFiles"/>
+        /// This should NEVER be called except by MigrateConfigFiles
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="updatedPath"></param>

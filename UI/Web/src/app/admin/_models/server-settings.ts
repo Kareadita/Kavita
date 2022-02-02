@@ -6,7 +6,6 @@ export interface ServerSettings {
     port: number;
     allowStatCollection: boolean;
     enableOpds: boolean;
-    enableAuthentication: boolean;
     baseUrl: string;
     bookmarksDirectory: string;
 }
