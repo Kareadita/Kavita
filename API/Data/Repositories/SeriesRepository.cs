@@ -835,7 +835,6 @@ public class SeriesRepository : ISeriesRepository
         {
             case LibraryType.Book:
                 return string.Empty;
-                break;
             case LibraryType.Comic:
                 return "Issue";
             case LibraryType.Manga:
