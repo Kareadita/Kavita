@@ -1,6 +1,6 @@
 import { LibraryType } from "./library";
 
-export interface RecentlyAddedItem {
+export interface SeriesGroup {
     seriesId: number;
     seriesName: string;
     created: string;
@@ -9,5 +9,6 @@ export interface RecentlyAddedItem {
     libraryType: LibraryType;
     volumeId: number;
     chapterId: number; 
-    id: number; // This is UI only, sent from backend but has no relation to any entity
+    id: number;  // This is UI only, sent from backend but has no relation to any entity
+    count: number; 
 }

@@ -31,7 +31,13 @@ namespace API.Entities
         /// Original Name on disk. Not exposed to UI.
         /// </summary>
         public string OriginalName { get; set; }
+        /// <summary>
+        /// Time of creation
+        /// </summary>
         public DateTime Created { get; set; }
+        /// <summary>
+        /// Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc
+        /// </summary>
         public DateTime LastModified { get; set; }
         /// <summary>
         /// Absolute path to the (managed) image file
