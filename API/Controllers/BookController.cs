@@ -77,11 +77,16 @@ namespace API.Controllers
             return File(content, contentType, $"{chapterId}-{file}");
         }
 
+        /// <summary>
+        /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
+        /// this is used to rewrite anchors in the book text so that we always load properly in FE
+        /// </summary>
+        /// <remarks>This is essentially building the table of contents</remarks>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/chapters")]
         public async Task<ActionResult<ICollection<BookChapterItem>>> GetBookChapters(int chapterId)
         {
-            // This will return a list of mappings from ID -> pagenum. ID will be the xhtml key and pagenum will be the reading order
-            // this is used to rewrite anchors in the book text so that we always load properly in FE
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
@@ -126,7 +131,7 @@ namespace API.Controllers
                 var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
                 if (tocPage == null) return Ok(chaptersList);
 
-                // Find all anchor tags, for each anchor we get inner text, to lower then titlecase on UI. Get href and generate page content
+                // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
                 var doc = new HtmlDocument();
                 var content = await book.Content.Html[tocPage].ReadContentAsync();
                 doc.LoadHtml(content);
@@ -252,7 +257,7 @@ namespace API.Controllers
             return BadRequest("Could not find the appropriate html for that page");
         }
 
-        private void LogBookErrors(EpubBookRef book, EpubTextContentFileRef contentFileRef, HtmlDocument doc)
+        private void LogBookErrors(EpubBookRef book, EpubContentFileRef contentFileRef, HtmlDocument doc)
         {
             _logger.LogError("{FilePath} has an invalid html file (Page {PageName})", book.FilePath, contentFileRef.FileName);
             foreach (var error in doc.ParseErrors)

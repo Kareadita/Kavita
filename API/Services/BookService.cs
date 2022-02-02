@@ -458,6 +458,11 @@ namespace API.Services
             return content;
         }
 
+        /// <summary>
+        /// Removes the leading ../
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public static string CleanContentKeys(string key)
         {
             return key.Replace("../", string.Empty);
