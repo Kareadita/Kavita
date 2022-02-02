@@ -368,7 +368,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
     /// <summary>
-    /// This returns a dictonary mapping seriesId -> list of chapters back for each series id passed
+    /// This returns a dictionary mapping seriesId -> list of chapters back for each series id passed
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
@@ -829,52 +829,19 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    private static RecentlyAddedItemDto CreateItem(RecentlyAddedSeries item, Chapter chapter, DateTime createdDate, string title, int count)
-    {
-        return new RecentlyAddedItemDto()
-        {
-            LibraryId = item.LibraryId,
-            LibraryType = item.LibraryType,
-            SeriesId = item.SeriesId,
-            SeriesName = item.SeriesName,
-            Created = createdDate,
-            Title = title,
-            ChapterId = chapter.Id,
-            Id = count,
-            Format = item.Format
-        };
-    }
-
-    private static RecentlyAddedItemDto CreateItemForVolume(RecentlyAddedSeries item, Volume volume, DateTime createdDate, string title, int count)
-    {
-        return new RecentlyAddedItemDto()
-        {
-            LibraryId = item.LibraryId,
-            LibraryType = item.LibraryType,
-            SeriesId = item.SeriesId,
-            SeriesName = item.SeriesName,
-            Created = createdDate,
-            Title = title,
-            VolumeId = volume.Id,
-            Id = count,
-            Format = item.Format
-        };
-    }
-
     private static string RecentlyAddedItemTitle(RecentlyAddedSeries item)
     {
-        var chapterTitle = "Chapter";
         switch (item.LibraryType)
         {
             case LibraryType.Book:
-                chapterTitle = "";
+                return string.Empty;
                 break;
             case LibraryType.Comic:
-                chapterTitle = "Issue";
-                break;
+                return "Issue";
+            case LibraryType.Manga:
+            default:
+                return "Chapter";
         }
-
-        return chapterTitle;
     }
 
     /// <summary>
