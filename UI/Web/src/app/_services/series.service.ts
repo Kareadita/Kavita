@@ -9,6 +9,7 @@ import { PaginatedResult } from '../_models/pagination';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
 import { SeriesFilter } from '../_models/series-filter';
+import { SeriesGroup } from '../_models/series-group';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
@@ -123,13 +124,11 @@ export class SeriesService {
     );
   }
 
+  getRecentlyUpdatedSeries() {
+    return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
+  }
   getRecentlyAddedChapters() {
-    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {}).pipe(
-      map(items => {
-        items.forEach((item, i) => item.id = i);
-        return items;
-      })
-    );
+    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {});
   }
 
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
@@ -144,9 +143,6 @@ export class SeriesService {
     }));
   }
 
-  // getContinueReading(libraryId: number = 0) {
-  //   return this.httpClient.get<InProgressChapter[]>(this.baseUrl + 'series/continue-reading?libraryId=' + libraryId);
-  // }
 
   refreshMetadata(series: Series) {
     return this.httpClient.post(this.baseUrl + 'series/refresh-metadata', {libraryId: series.libraryId, seriesId: series.id});

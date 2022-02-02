@@ -199,8 +199,6 @@ namespace API.Services.Tasks
                     _directoryService.FileSystem.Directory.Delete(directory, false);
                 }
             }
-
-
         }
     }
 }

@@ -8,6 +8,7 @@ import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
+import { SeriesGroup } from '../_models/series-group';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
@@ -28,6 +29,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isAdmin = false;
 
   recentlyAdded: Series[] = [];
+  recentlyUpdatedSeries: SeriesGroup[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
 
@@ -45,10 +47,14 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAdded.unshift(series);
           });
+          this.loadRecentlyAddedChapters();
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
           this.recentlyAdded = this.recentlyAdded.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
+          
+          this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+          this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         }
       });
   }
@@ -105,6 +111,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   loadRecentlyAddedChapters() {
+    this.seriesService.getRecentlyUpdatedSeries().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyUpdatedSeries = updatedSeries;
+    });
+
     this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyAddedChapters = updatedSeries;
     });

@@ -22,6 +22,10 @@
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" attr.aria-labelledby="{{title}}_{{entity?.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
+
+      <div class="count" *ngIf="count > 1">
+        <span class="badge badge-primary">{{count}}</span>
+      </div>
     </div>
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
