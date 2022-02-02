@@ -10,6 +10,7 @@ using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.OPDS;
+using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;

@@ -5,6 +5,7 @@ import { map, take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library, LibraryType } from '../_models/library';
 import { SearchResult } from '../_models/search-result';
+import { SearchResultGroup } from '../_models/search/search-result-group';
 
 
 @Injectable({
@@ -109,6 +110,13 @@ export class LibraryService {
       return of([]);
     }
     return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
+  }
+
+  search2(term: string) {
+    if (term === '') {
+      return of(new SearchResultGroup());
+    }
+    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'library/search2?queryString=' + encodeURIComponent(term));
   }
 
 }

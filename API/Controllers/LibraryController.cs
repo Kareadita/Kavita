@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -235,6 +236,22 @@ namespace API.Controllers
             if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
             var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), queryString);
+
+            return Ok(series);
+        }
+
+        [HttpGet("search2")]
+        public async Task<ActionResult<SearchResultGroupDto>> Search2(string queryString)
+        {
+            queryString = Uri.UnescapeDataString(queryString).Trim().Replace(@"%", string.Empty);
+
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            // Get libraries user has access to
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
+
+            if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+
+            var series = await _unitOfWork.SeriesRepository.SearchSeries2(userId, libraries.Select(l => l.Id).ToArray(), queryString);
 
             return Ok(series);
         }

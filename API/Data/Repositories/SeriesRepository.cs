@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Migrations;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
+using API.DTOs.ReadingLists;
+using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -64,6 +65,7 @@ public interface ISeriesRepository
     /// <param name="searchQuery">Series name to search for</param>
     /// <returns></returns>
     Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
+    Task<SearchResultGroupDto> SearchSeries2(int userId, int[] libraryIds, string searchQuery);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<bool> DeleteSeriesAsync(int seriesId);
@@ -146,6 +148,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => libraries.Contains(s.LibraryId) && s.Name.Equals(name) && s.Format == format)
             .CountAsync() > 1;
     }
+
 
     public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
     {
@@ -279,6 +282,68 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking()
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<SearchResultGroupDto> SearchSeries2(int userId, int[] libraryIds, string searchQuery)
+    {
+        // NOTE: This seems to work but can be a bit slow. Might be useful to cache some of the data
+        // TODO Apply filters as well...
+        var result = new SearchResultGroupDto();
+
+        var seriesIds = _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Id)
+            .ToList();
+
+        result.Series = await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
+                        || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
+                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+            .Include(s => s.Library)
+            .OrderBy(s => s.SortName)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        result.ReadingLists = await _context.ReadingList
+            .Where(rl => rl.AppUserId == userId || rl.Promoted)
+            .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
+            .AsSplitQuery()
+            .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        // TODO: Optimize this into 1 db trip
+        result.Collections = await _context.SeriesMetadata
+            .Where(sm => seriesIds.Contains(sm.SeriesId))
+            .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+            .AsSplitQuery()
+            .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        result.Persons = await _context.SeriesMetadata
+            .Where(sm => seriesIds.Contains(sm.SeriesId))
+            .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
+            .AsSplitQuery()
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        result.Genres = await _context.SeriesMetadata
+            .Where(sm => seriesIds.Contains(sm.SeriesId))
+            .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+            .AsSplitQuery()
+            .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        result.Tags = await _context.SeriesMetadata
+            .Where(sm => seriesIds.Contains(sm.SeriesId))
+            .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+            .AsSplitQuery()
+            .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        return result;
     }
 
 
