@@ -64,6 +64,26 @@
                 <label for="opds" class="form-check-label">Enable OPDS</label>
             </div>
         </div>
+        
+        <h4>Email Services (SMTP)</h4>
+        <div class="form-group">
+            <label for="smtp" aria-describedby="smtp-info">Custom SMTP Server</label>
+            <p class="accent" id="smtp-info">In order to use email functionality, like Forgot Password and Invite User, you must setup a SMTP server.</p>
+            <div class="form-check">
+                <input id="smtp" type="checkbox" class="form-check-input" formControlName="enableSmtp">
+                <label for="smtp" class="form-check-label">Enable Email</label>
+            </div>
+        </div>
+        <ng-container *ngIf="true"> (or disable everything)
+            <div class="form-group">
+                <label for="settings-tasks-backup">SMTP Host</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
+                <ng-template #taskBackupTooltip>How often Kavita will backup the database.</ng-template>
+                <span class="sr-only" id="settings-tasks-backup-help">How often Kavita will backup the database.</span>
+                <select class="form-control" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
+                    <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+                </select>
+            </div>
+        </ng-container>
 
         <h4>Reoccuring Tasks</h4>
         <div class="form-group">

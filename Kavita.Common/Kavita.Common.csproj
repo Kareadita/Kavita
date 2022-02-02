@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Flurl.Http" Version="3.2.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="8.33.0.40503">

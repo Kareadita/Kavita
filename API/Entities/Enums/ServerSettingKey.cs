@@ -71,6 +71,25 @@ namespace API.Entities.Enums
         /// </summary>
         [Description("BookmarkDirectory")]
         BookmarkDirectory = 12,
+        /// <summary>
+        /// If SMTP is enabled on the server
+        /// </summary>
+        [Description("EnableSmtp")]
+        EnableSmtp = 13,
+        [Description("SmtpHost")]
+        SmtpHost = 14,
+        [Description("SmtpPort")]
+        SmtpPort = 15,
+        [Description("SmtpUsername")]
+        SmtpUsername = 16,
+        [Description("SmtpPassword")]
+        SmtpPassword = 17,
+        [Description("SmtpSenderAddress")]
+        SmtpSenderAddress = 18,
+        [Description("SmtpSenderDisplayName")]
+        SmtpSenderDisplayName = 19,
+        [Description("SmtpEnableSsl")]
+        SmtpEnableSsl = 20,
 
     }
 }

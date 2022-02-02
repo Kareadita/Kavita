@@ -2,6 +2,7 @@
 using System.Linq;
 using API.DTOs;
 using API.DTOs.CollectionTags;
+using API.DTOs.Email;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
@@ -147,6 +148,9 @@ namespace API.Helpers
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();
+
+            CreateMap<IEnumerable<ServerSetting>, SmtpConfig>()
+                .ConvertUsing<SmtpConverter>();
 
         }
     }

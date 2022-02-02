@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
@@ -17,8 +15,6 @@ using API.Errors;
 using API.Extensions;
 using API.Services;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Flurl.Util;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -113,14 +109,6 @@ namespace API.Controllers
                     ApiKey = HashUtil.ApiKey()
                 };
 
-                // I am removing Authentication disabled code
-                // var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-                // if (!settings.EnableAuthentication && !registerDto.IsAdmin)
-                // {
-                //     _logger.LogInformation("User {UserName} is being registered as non-admin with no server authentication. Using default password", registerDto.Username);
-                //     registerDto.Password = AccountService.DefaultPassword;
-                // }
-
                 var result = await _userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded) return BadRequest(result.Errors);
 
@@ -131,22 +119,6 @@ namespace API.Controllers
 
                 var roleResult = await _userManager.AddToRoleAsync(user, PolicyConstants.AdminRole);
                 if (!roleResult.Succeeded) return BadRequest(result.Errors);
-
-                // // When we register an admin, we need to grant them access to all Libraries.
-                // if (registerDto.IsAdmin)
-                // {
-                //     _logger.LogInformation("{UserName} is being registered as admin. Granting access to all libraries",
-                //         user.UserName);
-                //     var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
-                //     foreach (var lib in libraries)
-                //     {
-                //         lib.AppUsers ??= new List<AppUser>();
-                //         lib.AppUsers.Add(user);
-                //     }
-                //
-                //     if (libraries.Any() && !await _unitOfWork.CommitAsync())
-                //         _logger.LogError("There was an issue granting library access. Please do this manually");
-                // }
 
                 return new UserDto
                 {
