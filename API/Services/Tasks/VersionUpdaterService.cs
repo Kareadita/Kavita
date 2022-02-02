@@ -67,8 +67,8 @@ public class VersionUpdaterService : IVersionUpdaterService
     private readonly IPresenceTracker _tracker;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 #pragma warning disable S1075
-    private static readonly string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
-    private static readonly string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
+    private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
+    private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 #pragma warning restore S1075
 
     public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
@@ -86,10 +86,12 @@ public class VersionUpdaterService : IVersionUpdaterService
     /// <summary>
     /// Fetches the latest release from Github
     /// </summary>
-    public async Task<UpdateNotificationDto> CheckForUpdate()
+    /// <returns>Latest update or null if current version is greater than latest update</returns>
+    public async Task<UpdateNotificationDto?> CheckForUpdate()
     {
         var update = await GetGithubRelease();
-        return CreateDto(update);
+        var dto = CreateDto(update);
+        return new Version(dto.UpdateVersion) <= new Version(dto.CurrentVersion) ? null : dto;
     }
 
     public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
