@@ -8,6 +8,7 @@ import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
+import { SeriesGroup } from '../_models/series-group';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
@@ -28,8 +29,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isAdmin = false;
 
   recentlyAdded: Series[] = [];
+  recentlyUpdatedSeries: SeriesGroup[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
-  recentlyAddedChaptersAlt: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
 
   private readonly onDestroy = new Subject<void>();
@@ -52,8 +53,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.recentlyAdded = this.recentlyAdded.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           
+          this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
           this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
-          this.recentlyAddedChaptersAlt = this.recentlyAddedChaptersAlt.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         }
       });
   }
@@ -110,12 +111,12 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   loadRecentlyAddedChapters() {
-    this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAddedChapters = updatedSeries;
+    this.seriesService.getRecentlyUpdatedSeries().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyUpdatedSeries = updatedSeries;
     });
 
-    this.seriesService.getRecentlyAddedChaptersAlt().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAddedChaptersAlt = updatedSeries;
+    this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyAddedChapters = updatedSeries;
     });
   }
 

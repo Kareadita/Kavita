@@ -11,23 +11,24 @@
     </ng-template>
 </app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added Series With Grouping">
+<app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series">
     <ng-template #carouselItem let-item let-position="idx">
-        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
-        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
+        <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" 
+        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
     </ng-template>
 </app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAddedChaptersAlt" title="Recently Added Chapters">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
-        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
-    </ng-template>
-</app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAdded" title="Recently Added Series" (sectionClick)="handleSectionClick($event)">
+<!-- <app-carousel-reel [items]="recentlyAdded" title="Recently Added Series" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
         <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="loadRecentlyAdded()"></app-series-card>
+    </ng-template>
+</app-carousel-reel> -->
+
+<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added">
+    <ng-template #carouselItem let-item let-position="idx">
+        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
+        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
     </ng-template>
 </app-carousel-reel>
 

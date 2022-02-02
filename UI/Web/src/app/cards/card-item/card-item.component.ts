@@ -69,6 +69,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
    @Input() supressArchiveWarning: boolean = false;
   /**
+    * The number of updates/items within the card. If less than 2, will not be shown.
+    */
+   @Input() count: number = 0;
+  /**
    * Event emitted when item is clicked
    */
   @Output() clicked = new EventEmitter<string>();
