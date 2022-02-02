@@ -1,0 +1,57 @@
+<form [formGroup]="typeaheadForm">
+      <div class="typeahead-input" (click)="onInputFocus($event)">
+        <div>
+          <input #input [id]="id" type="text" autocomplete="off" formControlName="typeahead">
+          <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+      </div>
+      <div class="dropdown" *ngIf="hasFocus">
+        
+        <ul class="list-group">
+            <ng-container *ngIf="seriesTemplate !== undefined && grouppedData.series.length > 0">
+                <li class="list-group-item section-header">Series</li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.series; let index = index;" (click)="handleResultlick(option)"  
+                        class="list-group-item" role="option" (mouseenter)="focusedIndex = index; updateHighlight();">
+                        <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="collectionTemplate !== undefined && grouppedData.collections.length > 0">
+                <li class="list-group-item section-header">Collections</li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.collections; let index = index;" (click)="handleResultlick(option)"  
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+        </ul>
+    </div>
+<!-- 
+
+        <ul class="list-group results" #results>
+          <li *ngFor="let option of data; let index = index;" (click)="handleResultlick(option)"  
+              class="list-group-item" role="option">
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+          </li>
+          <li *ngIf="data.length === 0 && notFoundTemplate !== undefined" class="list-group-item no-hover" role="status">
+            <ng-container [ngTemplateOutlet]="notFoundTemplate"></ng-container>
+          </li>
+        </ul>
+
+        <ul class="list-group results" #results>
+            <li *ngFor="let option of data; let index = index;" (click)="handleResultlick(option)"  
+                class="list-group-item" role="option">
+              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+            </li>
+            <li *ngIf="data.length === 0 && notFoundTemplate !== undefined" class="list-group-item no-hover" role="status">
+              <ng-container [ngTemplateOutlet]="notFoundTemplate"></ng-container>
+            </li>
+          </ul>
+      </div> -->
+
+  </form>

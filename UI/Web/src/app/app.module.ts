@@ -37,6 +37,7 @@ import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-m
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { PublicationStatusPipe } from './publication-status.pipe';
 import { RegistrationModule } from './registration/registration.module';
+import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 
 
 @NgModule({
@@ -57,6 +58,7 @@ import { RegistrationModule } from './registration/registration.module';
     PublicationStatusPipe,
     SeriesMetadataDetailComponent,
     AllSeriesComponent,
+    GroupedTypeaheadComponent,
   ],
   imports: [
     HttpClientModule,

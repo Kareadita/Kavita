@@ -9,6 +9,46 @@
             <fieldset class="form-inline">
               <div class="form-group" style="margin-bottom: 0px;">
                 <label for="nav-search" class="sr-only">Search series</label>
+                <app-grouped-typeahead
+                  id="nav-search"
+                  [minQueryLength]="2"
+                  initialValue=""
+                  [grouppedData]="searchResults2"
+                  (inputChanged)="onChangeSearch($event)"
+                >
+
+                <ng-template #seriesTemplate let-item>
+                  <div style="display: flex;padding: 5px;">
+                    <div style="width: 24px" class="mr-1">
+                      <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
+                    </div>
+                    <div class="ml-1">
+                      <app-series-format [format]="item.format"></app-series-format>
+                      <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName" [innerHTML]="item.name"></span>
+                      <ng-template #localizedName>
+                        <span [innerHTML]="item.localizedName"></span>
+                      </ng-template>
+                      <span class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #collectionTemplate let-item>
+                  <div style="display: flex;padding: 5px;">
+                    <div style="width: 24px" class="mr-1">
+                      <img class="mr-3 search-result" src="{{imageService.getCollectionCoverImage(item.id)}}">
+                    </div>
+                    <div class="ml-1">
+                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #notFoundTemplate let-notFound>
+                  No results found
+                </ng-template>
+
+                </app-grouped-typeahead>
                 <div class="ng-autocomplete">
                   <ng-autocomplete
                     #search 

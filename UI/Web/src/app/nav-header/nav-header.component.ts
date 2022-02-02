@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { isTemplateSpan } from 'typescript';
 import { ScrollService } from '../scroll.service';
 import { SearchResult } from '../_models/search-result';
+import { SearchResultGroup } from '../_models/search/search-result-group';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
@@ -24,6 +25,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   debounceTime = 300;
   imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResult[] = [];
+  searchResults2: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
   customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -89,6 +91,15 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }, err => {
         this.searchResults = [];
+        this.isLoading = false;
+        this.searchTerm = '';
+      });
+
+      this.libraryService.search2(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+        this.searchResults2 = results;
+        this.isLoading = false;
+      }, err => {
+        this.searchResults2.reset();
         this.isLoading = false;
         this.searchTerm = '';
       });

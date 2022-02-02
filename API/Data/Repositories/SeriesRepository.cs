@@ -314,7 +314,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        // TODO: Optimize this into 1 db trip
         result.Collections = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
