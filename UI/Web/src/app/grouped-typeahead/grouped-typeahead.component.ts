@@ -1,4 +1,4 @@
-import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { KEY_CODES } from '../shared/_services/utility.service';
@@ -28,19 +28,25 @@ export class GroupedTypeaheadComponent implements OnInit {
   /**
    * Emits when the input changes from user interaction
    */
-  @Output() inputChanged: EventEmitter<any> = new EventEmitter();
+  @Output() inputChanged: EventEmitter<string> = new EventEmitter();
+  /**
+   * Emits when something is clicked/selected
+   */
+  @Output() selected: EventEmitter<any> = new EventEmitter();
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;
   @ContentChild('seriesTemplate') seriesTemplate: TemplateRef<any> | undefined;
   @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
+  @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
+  @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
   @ContentChild('notFoundTemplate') notFoundTemplate!: TemplateRef<any>;
 
-  //searchResults!: Observable<any[]>;
   hasFocus: boolean = false;
   isLoading: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
   focusedIndex: number = 0;
+  focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
 
 
   constructor(private renderer2: Renderer2) { }
@@ -58,6 +64,7 @@ export class GroupedTypeaheadComponent implements OnInit {
       case KEY_CODES.DOWN_ARROW:
       case KEY_CODES.RIGHT_ARROW:
       {
+        // TODO: Figure out the group we are in to update focus index
         this.focusedIndex = Math.min(this.focusedIndex + 1, document.querySelectorAll(ITEM_QUERY_SELECTOR).length - 1);
         this.updateHighlight();
         break;
@@ -67,25 +74,15 @@ export class GroupedTypeaheadComponent implements OnInit {
       {
         this.focusedIndex = Math.max(this.focusedIndex - 1, 0);
         this.updateHighlight();
+        // BUG: Pressing down doesn't scroll the list
         break;
       }
       case KEY_CODES.ENTER:
       {
         document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
           if (item.classList.contains('active')) {
-            // this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
-            //   // This isn't giving back the filtered array, but everything
-            //   const result = this.settings.compareFn(res, (item.textContent || '').trim());
-            //   if (result.length === 1) {
-            //     if (item.classList.contains('add-item')) {
-            //       this.addNewItem(this.typeaheadControl.value);
-            //     } else {
-            //       this.toggleSelection(result[0]);
-            //     }
-            //     this.resetField();
-            //     this.focusedIndex = 0;
-            //   }
-            // });
+            this.handleResultlick(item);
+            this.resetField();
           }
         });
         break;
@@ -135,8 +132,14 @@ export class GroupedTypeaheadComponent implements OnInit {
     });
   }
 
-  handleResultlick(event: any) {
+  handleResultlick(item: any) {
+    this.selected.emit(item);
+  }
 
+  resetField() {
+    this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
+    this.focusedIndex = 0;
+    this.focusedIndexGroup = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
   }
 
   

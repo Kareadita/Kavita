@@ -23,6 +23,13 @@ input {
     background-color: #fff;
     min-height: 38px;
 
+    .close {
+        cursor: pointer;
+        position: absolute;
+        top: 7px;
+        right: 10px;
+    }
+
     input {
         outline: 0 !important;
         border-radius: .28571429rem;
@@ -53,6 +60,7 @@ input {
 
 .dropdown {
     width: 100%;
+    max-width: 600px;
     background: white;
     z-index:1000;
     margin: 2px 0 0;

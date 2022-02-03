@@ -318,9 +318,12 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .OrderBy(t => t.Title)
+            .Distinct()
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
+        // Figure out if you want like this or separated out
         result.Persons = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
@@ -332,6 +335,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .OrderBy(t => t.Title)
+            .Distinct()
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -339,6 +344,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .OrderBy(t => t.Title)
+            .Distinct()
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 

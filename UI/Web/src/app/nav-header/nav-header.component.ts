@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { isTemplateSpan } from 'typescript';
 import { ScrollService } from '../scroll.service';
+import { PersonRole } from '../_models/person';
 import { SearchResult } from '../_models/search-result';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 import { AccountService } from '../_services/account.service';
@@ -103,6 +104,52 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         this.isLoading = false;
         this.searchTerm = '';
       });
+  }
+
+  goTo(queryParamName: string, filter: any) {
+    let params: any = {};
+    params[queryParamName] = filter;
+    params['page'] = 1;
+    this.router.navigate(['all-series'], {queryParams: params});
+  }
+
+  goToPerson(role: PersonRole, filter: any) {
+    // TODO: Move this to utility service
+    switch(role) {
+      case PersonRole.Artist:
+        this.goTo('artist', filter);
+        break;
+      case PersonRole.Character:
+        this.goTo('character', filter);
+        break;
+      case PersonRole.Colorist:
+        this.goTo('colorist', filter);
+        break;
+      case PersonRole.Editor:
+        this.goTo('editor', filter);
+        break;
+      case PersonRole.Inker:
+        this.goTo('inker', filter);
+        break;
+      case PersonRole.CoverArtist:
+        this.goTo('coverArtist', filter);
+        break;
+      case PersonRole.Inker:
+        this.goTo('inker', filter);
+        break;
+      case PersonRole.Letterer:
+        this.goTo('letterer', filter);
+        break;
+      case PersonRole.Penciller:
+        this.goTo('penciller', filter);
+        break;
+      case PersonRole.Publisher:
+        this.goTo('publisher', filter);
+        break;
+      case PersonRole.Translator:
+        this.goTo('translator', filter);
+        break;
+    }
   }
 
   clickSearchResult(item: SearchResult) {

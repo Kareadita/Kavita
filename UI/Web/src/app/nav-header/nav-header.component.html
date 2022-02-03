@@ -18,7 +18,7 @@
                 >
 
                 <ng-template #seriesTemplate let-item>
-                  <div style="display: flex;padding: 5px;">
+                  <div style="display: flex;padding: 5px;" (selected)="clickSearchResult(item)">
                     <div style="width: 24px" class="mr-1">
                       <img class="mr-3 search-result" src="{{imageService.getSeriesCoverImage(item.seriesId)}}">
                     </div>
@@ -34,12 +34,30 @@
                 </ng-template>
 
                 <ng-template #collectionTemplate let-item>
-                  <div style="display: flex;padding: 5px;">
+                  <div style="display: flex;padding: 5px;" (selected)="goToPerson(item.role, item.id)">
                     <div style="width: 24px" class="mr-1">
                       <img class="mr-3 search-result" src="{{imageService.getCollectionCoverImage(item.id)}}">
                     </div>
                     <div class="ml-1">
                       <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #tagTemplate let-item>
+                  <div style="display: flex;padding: 5px;" (selected)="goTo('tag', item.id)">
+                    <div class="ml-1">
+                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #personTemplate let-item>
+                  <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
+                    <div class="ml-1">
+                      
+                      <div [innerHTML]="item.name"></div>
+                      <div>{{item.role | personRole}}</div>
                     </div>
                   </div>
                 </ng-template>
