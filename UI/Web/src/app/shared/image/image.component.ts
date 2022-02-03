@@ -23,6 +23,14 @@ export class ImageComponent implements OnChanges {
    * Height of the image. If not defined, will not be applied
    */
   @Input() height: string = '';
+  /**
+   * Max Width of the image. If not defined, will not be applied
+   */
+  @Input() maxWidth: string = '';
+  /**
+   * Max Height of the image. If not defined, will not be applied
+   */
+   @Input() maxHeight: string = '';
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
@@ -35,6 +43,14 @@ export class ImageComponent implements OnChanges {
 
     if (this.height != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'height', this.height);
+    }
+
+    if (this.maxWidth != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'max-width', this.maxWidth);
+    }
+
+    if (this.maxHeight != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'max-height', this.maxHeight);
     }
     
   }
