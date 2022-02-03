@@ -425,6 +425,8 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
         if (string.IsNullOrEmpty(query))
         {
             return BadRequest("You must pass a query parameter");
@@ -435,14 +437,36 @@ public class OpdsController : BaseApiController
 
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), query);
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+
+        var series = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin, libraries.Select(l => l.Id).ToArray(), query);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey);
         SetFeedId(feed, "search-series");
-        foreach (var seriesDto in series)
+        foreach (var seriesDto in series.Series)
         {
             feed.Entries.Add(CreateSeries(seriesDto, apiKey));
         }
+
+        foreach (var collection in series.Collections)
+        {
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = collection.Id.ToString(),
+                Title = collection.Title,
+                Summary = collection.Summary,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                        Prefix + $"{apiKey}/collections/{collection.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                        $"/api/image/collection-cover?collectionId={collection.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                        $"/api/image/collection-cover?collectionId={collection.Id}")
+                }
+            });
+        }
+        // TODO: Do Reading Lists
 
         return CreateXmlResult(SerializeXml(feed));
     }

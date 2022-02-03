@@ -64,8 +64,16 @@ public interface ISeriesRepository
     /// <param name="libraryIds"></param>
     /// <param name="searchQuery">Series name to search for</param>
     /// <returns></returns>
-    Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
-    Task<SearchResultGroupDto> SearchSeries2(int userId, int[] libraryIds, string searchQuery);
+    //Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
+    /// <summary>
+    /// Does not add user information like progress, ratings, etc.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="isAdmin"></param>
+    /// <param name="libraryIds"></param>
+    /// <param name="searchQuery"></param>
+    /// <returns></returns>
+    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<bool> DeleteSeriesAsync(int seriesId);
@@ -270,24 +278,23 @@ public class SeriesRepository : ISeriesRepository
         };
     }
 
-    public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
-    {
-        return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
-            .Include(s => s.Library)
-            .OrderBy(s => s.SortName)
-            .AsNoTracking()
-            .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-    }
+    // public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
+    // {
+    //     return await _context.Series
+    //         .Where(s => libraryIds.Contains(s.LibraryId))
+    //         .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
+    //                     || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
+    //                     || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+    //         .Include(s => s.Library)
+    //         .OrderBy(s => s.SortName)
+    //         .AsNoTracking()
+    //         .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
+    //         .ToListAsync();
+    // }
 
-    public async Task<SearchResultGroupDto> SearchSeries2(int userId, int[] libraryIds, string searchQuery)
+    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery)
     {
-        // NOTE: This seems to work but can be a bit slow. Might be useful to cache some of the data
-        // TODO Apply filters as well...
+
         var result = new SearchResultGroupDto();
 
         var seriesIds = _context.Series
@@ -314,12 +321,24 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        result.Collections = await _context.SeriesMetadata
-            .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-            .AsSplitQuery()
-            .OrderBy(t => t.Title)
-            .Distinct()
+        // TODO: This query doesn't work
+        // result.Collections = await _context.SeriesMetadata
+        //     .Where(sm => seriesIds.Contains(sm.SeriesId))
+        //     .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+        //     .AsSplitQuery()
+        //     .OrderBy(t => t.Title)
+        //     .Distinct()
+        //     //.DistinctBy(t => t.Title)
+        //     .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
+        //     .ToListAsync();
+        // This needs RBS
+        result.Collections =  await _context.CollectionTag
+            .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
+                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
+            .Where(s => s.Promoted || isAdmin)
+            .OrderBy(s => s.Title)
+            .AsNoTracking()
+            .OrderBy(c => c.NormalizedTitle)
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 

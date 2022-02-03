@@ -89,7 +89,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.searchTerm = val.trim();
 
-      this.libraryService.search2(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+      this.libraryService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
       }, err => {
@@ -148,7 +148,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchResults = new SearchResultGroup();
   }
-  
+
   clickSearchResult(item: SearchResult) {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;

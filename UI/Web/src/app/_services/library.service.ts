@@ -105,18 +105,18 @@ export class LibraryService {
     }));
   }
 
-  search(term: string) {
-    if (term === '') {
-      return of([]);
-    }
-    return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
-  }
+  // search(term: string) {
+  //   if (term === '') {
+  //     return of([]);
+  //   }
+  //   return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
+  // }
 
-  search2(term: string) {
+  search(term: string) {
     if (term === '') {
       return of(new SearchResultGroup());
     }
-    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'library/search2?queryString=' + encodeURIComponent(term));
+    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
   }
 
 }
