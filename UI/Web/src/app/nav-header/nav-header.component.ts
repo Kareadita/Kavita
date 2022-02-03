@@ -81,22 +81,26 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   moveFocus() {
-    document.getElementById('content')?.focus();
+    this.document.getElementById('content')?.focus();
+  }
+
+  clearSearch() {
+    this.searchResults2 = new SearchResultGroup();
   }
 
   onChangeSearch(val: string) {
       this.isLoading = true;
       this.searchTerm = val.trim();
-      this.libraryService.search(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
-        this.searchResults = results;
-        this.isLoading = false;
-      }, err => {
-        this.searchResults = [];
-        this.isLoading = false;
-        this.searchTerm = '';
-      });
+      // this.libraryService.search(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+      //   this.searchResults = results;
+      //   this.isLoading = false;
+      // }, err => {
+      //   this.searchResults = [];
+      //   this.isLoading = false;
+      //   this.searchTerm = '';
+      // });
 
-      this.libraryService.search2(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+      this.libraryService.search2(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults2 = results;
         this.isLoading = false;
       }, err => {

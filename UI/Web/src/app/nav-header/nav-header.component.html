@@ -15,6 +15,7 @@
                   initialValue=""
                   [grouppedData]="searchResults2"
                   (inputChanged)="onChangeSearch($event)"
+                  (clearField)="clearSearch()"
                 >
 
                 <ng-template #seriesTemplate let-item>
@@ -53,7 +54,7 @@
                 </ng-template>
 
                 <ng-template #personTemplate let-item>
-                  <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
+                  <div style="display: flex;padding: 5px;" class="clickable" (selected)="goTo('genres', item.id)">
                     <div class="ml-1">
                       
                       <div [innerHTML]="item.name"></div>

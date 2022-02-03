@@ -1,6 +1,8 @@
-import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 
@@ -11,7 +13,7 @@ const ITEM_QUERY_SELECTOR = '.list-group-item:not(.section-header)';
   templateUrl: './grouped-typeahead.component.html',
   styleUrls: ['./grouped-typeahead.component.scss']
 })
-export class GroupedTypeaheadComponent implements OnInit {
+export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   /**
    * Unique id to tie with a label element
    */
@@ -26,6 +28,10 @@ export class GroupedTypeaheadComponent implements OnInit {
   @Input() initialValue: string = '';
   @Input() grouppedData: SearchResultGroup = new SearchResultGroup();
   /**
+   * Number of milliseconds after typing before triggering inputChanged for data fetching
+   */
+  @Input() debounceTime: number = 200;
+  /**
    * Emits when the input changes from user interaction
    */
   @Output() inputChanged: EventEmitter<string> = new EventEmitter();
@@ -33,6 +39,10 @@ export class GroupedTypeaheadComponent implements OnInit {
    * Emits when something is clicked/selected
    */
   @Output() selected: EventEmitter<any> = new EventEmitter();
+  /**
+   * Emits an event when the field is cleared
+   */
+  @Output() clearField: EventEmitter<void> = new EventEmitter();
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;
@@ -41,6 +51,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
   @ContentChild('notFoundTemplate') notFoundTemplate!: TemplateRef<any>;
+  
 
   hasFocus: boolean = false;
   isLoading: boolean = false;
@@ -48,8 +59,10 @@ export class GroupedTypeaheadComponent implements OnInit {
   focusedIndex: number = 0;
   focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
 
+  private onDestroy: Subject<void> = new Subject();
 
-  constructor(private renderer2: Renderer2) { }
+
+  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
 
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: any) {
@@ -65,7 +78,7 @@ export class GroupedTypeaheadComponent implements OnInit {
       case KEY_CODES.RIGHT_ARROW:
       {
         // TODO: Figure out the group we are in to update focus index
-        this.focusedIndex = Math.min(this.focusedIndex + 1, document.querySelectorAll(ITEM_QUERY_SELECTOR).length - 1);
+        this.focusedIndex = Math.min(this.focusedIndex + 1, this.document.querySelectorAll(ITEM_QUERY_SELECTOR).length - 1);
         this.updateHighlight();
         break;
       }
@@ -79,7 +92,7 @@ export class GroupedTypeaheadComponent implements OnInit {
       }
       case KEY_CODES.ENTER:
       {
-        document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
+        this.document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
           if (item.classList.contains('active')) {
             this.handleResultlick(item);
             this.resetField();
@@ -99,12 +112,17 @@ export class GroupedTypeaheadComponent implements OnInit {
   ngOnInit(): void {
     this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
 
-    this.typeaheadForm.valueChanges.subscribe(change => {
+    this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntil(this.onDestroy)).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
       if (value != undefined && value.length >= this.minQueryLength) {
         this.inputChanged.emit(value);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+      this.onDestroy.next();
+      this.onDestroy.complete();
   }
 
   onInputFocus(event: any) {
@@ -115,7 +133,7 @@ export class GroupedTypeaheadComponent implements OnInit {
 
     if (this.inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
-      document.querySelector('body')?.click();
+      this.document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
@@ -140,12 +158,13 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
     this.focusedIndex = 0;
     this.focusedIndexGroup = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
+    this.clearField.emit();
   }
 
   
   // Updates the highlight to focus on the selected item
   updateHighlight() {
-    document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
+    this.document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
       if (index === this.focusedIndex && !item.classList.contains('no-hover')) {
         // apply active class
         this.renderer2.addClass(item, 'active');
