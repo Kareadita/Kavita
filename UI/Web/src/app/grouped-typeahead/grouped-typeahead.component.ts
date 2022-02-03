@@ -54,7 +54,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
   @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
-  @ContentChild('notFoundTemplate') notFoundTemplate!: TemplateRef<any>;
+  @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
   
 
   hasFocus: boolean = false;
@@ -64,6 +64,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
 
   private onDestroy: Subject<void> = new Subject();
+
+  get searchTerm() {
+    return this.typeaheadForm.get('typeahead')?.value || '';
+  }
 
 
   constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
@@ -82,6 +86,14 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
       case KEY_CODES.RIGHT_ARROW:
       {
         // TODO: Figure out the group we are in to update focus index
+        const currentActiveElement = Array.from(this.document.querySelectorAll(ITEM_QUERY_SELECTOR)).filter(item => item.classList.contains('active'));
+        if (currentActiveElement.length > 0) {
+          const group = currentActiveElement[0].getAttribute('aria-labelledby')?.split('-group')[0];
+          console.log('Group: ', group);
+
+
+
+        }
         this.focusedIndex = Math.min(this.focusedIndex + 1, this.document.querySelectorAll(ITEM_QUERY_SELECTOR).length - 1);
         this.updateHighlight();
         break;

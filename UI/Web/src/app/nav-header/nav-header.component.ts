@@ -25,8 +25,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   isLoading = false;
   debounceTime = 300;
   imageStyles = {width: '24px', 'margin-top': '5px'};
-  searchResults: SearchResult[] = [];
-  searchResults2: SearchResultGroup = new SearchResultGroup();
+  searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
   customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -84,27 +83,17 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.document.getElementById('content')?.focus();
   }
 
-  clearSearch() {
-    this.searchResults2 = new SearchResultGroup();
-  }
+  
 
   onChangeSearch(val: string) {
       this.isLoading = true;
       this.searchTerm = val.trim();
-      // this.libraryService.search(val).pipe(takeUntil(this.onDestroy)).subscribe(results => {
-      //   this.searchResults = results;
-      //   this.isLoading = false;
-      // }, err => {
-      //   this.searchResults = [];
-      //   this.isLoading = false;
-      //   this.searchTerm = '';
-      // });
 
       this.libraryService.search2(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
-        this.searchResults2 = results;
+        this.searchResults = results;
         this.isLoading = false;
       }, err => {
-        this.searchResults2.reset();
+        this.searchResults.reset();
         this.isLoading = false;
         this.searchTerm = '';
       });
@@ -156,11 +145,15 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  clearSearch() {
+    this.searchResults = new SearchResultGroup();
+  }
+  
   clickSearchResult(item: SearchResult) {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.searchViewRef.clear();
-    this.searchResults = [];
+    this.searchResults.reset();
     this.searchTerm = '';
     this.router.navigate(['library', libraryId, 'series', seriesId]);
   }

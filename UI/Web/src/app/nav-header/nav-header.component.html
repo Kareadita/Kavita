@@ -15,7 +15,7 @@
                   [minQueryLength]="2"
                   initialValue=""
                   placeholder="Search Series, Collections, Genres..."
-                  [grouppedData]="searchResults2"
+                  [grouppedData]="searchResults"
                   (inputChanged)="onChangeSearch($event)"
                   (clearField)="clearSearch()"
                 >
@@ -65,7 +65,7 @@
                   </div>
                 </ng-template>
 
-                <ng-template #notFoundTemplate let-notFound>
+                <ng-template #noResultsTemplate let-notFound>
                   No results found
                 </ng-template>
 
