@@ -28,6 +28,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @Input() initialValue: string = '';
   @Input() grouppedData: SearchResultGroup = new SearchResultGroup();
   /**
+   * Placeholder for the input
+   */
+  @Input() placeholder: string = '';
+  /**
    * Number of milliseconds after typing before triggering inputChanged for data fetching
    */
   @Input() debounceTime: number = 200;

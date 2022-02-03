@@ -9,10 +9,12 @@
             <fieldset class="form-inline">
               <div class="form-group" style="margin-bottom: 0px;">
                 <label for="nav-search" class="sr-only">Search series</label>
-                <app-grouped-typeahead
+                <div class="ng-autocomplete">
+                  <app-grouped-typeahead
                   id="nav-search"
                   [minQueryLength]="2"
                   initialValue=""
+                  placeholder="Search Series, Collections, Genres..."
                   [grouppedData]="searchResults2"
                   (inputChanged)="onChangeSearch($event)"
                   (clearField)="clearSearch()"
@@ -68,7 +70,8 @@
                 </ng-template>
 
                 </app-grouped-typeahead>
-                <div class="ng-autocomplete">
+                </div>
+                <!-- <div class="ng-autocomplete">
                   <ng-autocomplete
                     #search 
                     id="nav-search"
@@ -107,7 +110,7 @@
                   <ng-template #notFoundTemplate let-notFound>
                     No results found
                   </ng-template>
-                </div>
+                </div> -->
               </div>
             </fieldset>
           </div>

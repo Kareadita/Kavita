@@ -1,7 +1,7 @@
 <form [formGroup]="typeaheadForm">
       <div class="typeahead-input" (click)="onInputFocus($event)">
         <div>
-          <input #input [id]="id" type="text" autocomplete="off" formControlName="typeahead">
+          <input #input [id]="id" type="text" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder">
           <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">
             <span class="sr-only">Loading...</span>
           </div>
