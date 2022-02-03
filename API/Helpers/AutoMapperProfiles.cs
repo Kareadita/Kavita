@@ -148,10 +148,6 @@ namespace API.Helpers
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();
-
-            CreateMap<IEnumerable<ServerSetting>, SmtpConfig>()
-                .ConvertUsing<SmtpConverter>();
-
         }
     }
 }

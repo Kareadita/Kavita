@@ -102,6 +102,9 @@
     <Compile Remove="logs\**" />
     <Compile Remove="temp\**" />
     <Compile Remove="covers\**" />
+    <Compile Remove="DTOs\Email\SmtpConfig.cs" />
+    <Compile Remove="DTOs\Email\EmailOptionsDto.cs" />
+    <Compile Remove="Helpers\Converters\SmtpConverter.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs.Email;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -25,16 +20,11 @@ public interface IEmailService
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
-    private readonly IUnitOfWork _unitOfWork;
     private const string ApiUrl = "https://email.kavitareader.com";
 
-    private const string TemplatePath = @"{0}.html";
-    //private readonly SmtpConfig _smtpConfig;
-
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork)
+    public EmailService(ILogger<EmailService> logger)
     {
         _logger = logger;
-        _unitOfWork = unitOfWork;
 
         FlurlHttp.ConfigureClient(ApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -42,23 +32,11 @@ public class EmailService : IEmailService
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
+        var success = await SendEmailWithPost(ApiUrl + "/api/email/confirm", data);
+        if (!success)
         {
-            new ("{{InvitingUser}}", data.InvitingUser),
-            new ("{{Link}}", data.ServerConfirmationLink)
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Server", placeholders),
-            Body = UpdatePlaceHolders(GetEmailBody("EmailConfirm"), placeholders),
-            ToEmails = new List<string>()
-            {
-                data.EmailAddress
-            }
-        };
-
-        await SendEmail(emailOptions);
+            _logger.LogError("There was a critical error sending Confirmation email");
+        }
     }
 
     public async Task<bool> CheckIfAccessible(string host)
@@ -68,43 +46,12 @@ public class EmailService : IEmailService
 
     public async Task SendMigrationEmail(EmailMigrationDto data)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{Link}}", data.ServerConfirmationLink),
-            new ("{{User}}", data.Username),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("Please validate your email to complete email migration", placeholders),
-            Body = UpdatePlaceHolders(GetEmailBody("EmailMigration"), placeholders),
-            ToEmails = new List<string>()
-            {
-                data.EmailAddress
-            }
-        };
-
-        await SendEmail(emailOptions);
+        await SendEmailWithPost(ApiUrl + "/api/email/email-migration", data);
     }
 
     public async Task SendPasswordResetEmail(PasswordResetEmailDto data)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{Link}}", data.ServerConfirmationLink),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
-            Body = UpdatePlaceHolders(GetEmailBody("EmailPasswordReset"), placeholders),
-            ToEmails = new List<string>()
-            {
-                data.EmailAddress
-            }
-        };
-
-        await SendEmail(emailOptions);
+        await SendEmailWithPost(ApiUrl + "/api/email/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url)
@@ -131,85 +78,31 @@ public class EmailService : IEmailService
         }
         return false;
     }
-    //
-    //
-    // private static async Task<bool> SendEmailWithPost(string url, object data)
-    // {
-    //     try
-    //     {
-    //         var response = await (url)
-    //             .WithHeader("Accept", "application/json")
-    //             .WithHeader("User-Agent", "Kavita")
-    //             .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
-    //             .WithHeader("x-kavita-version", BuildInfo.Version)
-    //             .WithHeader("Content-Type", "application/json")
-    //             .WithTimeout(TimeSpan.FromSeconds(30))
-    //             .PostJsonAsync(data);
-    //
-    //         if (response.StatusCode != StatusCodes.Status200OK)
-    //         {
-    //             return false;
-    //         }
-    //     }
-    //     catch (Exception)
-    //     {
-    //         return false;
-    //     }
-    //     return true;
-    // }
-    //
-    private async Task SendEmail(EmailOptionsDto userEmailOptions)
+
+
+    private static async Task<bool> SendEmailWithPost(string url, object data)
     {
-        var smtpConfig = await _unitOfWork.SettingsRepository.GetSmtpConfig();
-        var mail = new MailMessage
+        try
         {
-            Subject = userEmailOptions.Subject,
-            Body = userEmailOptions.Body,
-            From = new MailAddress(smtpConfig.SenderAddress, smtpConfig.SenderDisplayName),
-            IsBodyHtml = smtpConfig.IsBodyHtml
-        };
+            var response = await (url)
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(30))
+                .PostJsonAsync(data);
 
-        foreach (var toEmail in userEmailOptions.ToEmails)
-        {
-            mail.To.Add(toEmail);
-        }
-
-
-        var smtpClient = new SmtpClient
-        {
-            Host = smtpConfig.Host,
-            Port = 587,
-            EnableSsl = true,
-            DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false,
-            Credentials = new NetworkCredential(smtpConfig.SenderAddress, smtpConfig.Password),
-            Timeout = 20000
-        };
-
-        mail.BodyEncoding = Encoding.Default;
-
-        await smtpClient.SendMailAsync(mail);
-    }
-
-    private static string GetEmailBody(string templateName)
-    {
-        var templateDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "templates", TemplatePath);
-        var body = File.ReadAllText(string.Format(templateDirectory, templateName));
-        return body;
-    }
-
-    private static string UpdatePlaceHolders(string text, IList<KeyValuePair<string, string>> keyValuePairs)
-    {
-        if (string.IsNullOrEmpty(text) || keyValuePairs == null) return text;
-
-        foreach (var (key, value) in keyValuePairs)
-        {
-            if (text.Contains(key))
+            if (response.StatusCode != StatusCodes.Status200OK)
             {
-                text = text.Replace(key, value);
+                return false;
             }
         }
-
-        return text;
+        catch (Exception)
+        {
+            return false;
+        }
+        return true;
     }
+
 }

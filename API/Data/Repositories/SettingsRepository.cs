@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -16,7 +15,6 @@ public interface ISettingsRepository
     Task<ServerSettingDto> GetSettingsDtoAsync();
     Task<ServerSetting> GetSettingAsync(ServerSettingKey key);
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
-    Task<SmtpConfig> GetSmtpConfig();
 }
 public class SettingsRepository : ISettingsRepository
 {
@@ -51,14 +49,5 @@ public class SettingsRepository : ISettingsRepository
     public async Task<IEnumerable<ServerSetting>> GetSettingsAsync()
     {
         return await _context.ServerSetting.ToListAsync();
-    }
-
-    public async Task<SmtpConfig> GetSmtpConfig()
-    {
-        var settings = await _context.ServerSetting
-            .Select(x => x)
-            .AsNoTracking()
-            .ToListAsync();
-        return _mapper.Map<SmtpConfig>(settings);
     }
 }
