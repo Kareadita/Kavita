@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 
@@ -62,6 +62,8 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   typeaheadForm: FormGroup = new FormGroup({});
   focusedIndex: number = 0;
   focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
+
+  prevSearchTerm: string = '';
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -131,7 +133,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntil(this.onDestroy)).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
       if (value != undefined && value.length >= this.minQueryLength) {
+
+        if (this.prevSearchTerm === value) return;
         this.inputChanged.emit(value);
+        this.prevSearchTerm = value;
       }
     });
   }

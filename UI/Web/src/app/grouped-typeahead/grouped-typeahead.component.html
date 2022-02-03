@@ -55,10 +55,6 @@
                 </ul>
             </ng-container>
 
-            <li class="list-group-item" *ngIf="grouppedData.persons.length || grouppedData.collections.length || grouppedData.series.length || grouppedData.persons.length || grouppedData.tags.length || grouppedData.genres.length">
-                Click to see more... <!-- TODO: Move this to a template -->
-            </li>
-
             <ng-container *ngIf="noResultsTemplate != undefined && searchTerm.length > 0 && !grouppedData.persons.length && !grouppedData.collections.length && !grouppedData.series.length && !grouppedData.persons.length && !grouppedData.tags.length && !grouppedData.genres.length">
                 <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
             </ng-container>
