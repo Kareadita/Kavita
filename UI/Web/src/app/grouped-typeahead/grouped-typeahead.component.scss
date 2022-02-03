@@ -1,4 +1,7 @@
 @use "../../theme/colors";
+form {
+    max-height: 38px;
+}
 
 input {
     width: 15px;
@@ -6,6 +9,10 @@ input {
     position: relative;
     left: 4px;
     border: none;
+}
+
+.search-result img {
+    width: 100% !important;
 }
 
 .typeahead-input {
@@ -41,7 +48,14 @@ input {
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-        width: 100%;
+        width: 300px;
+        transition-property: all;
+        transition-duration: 0.3s;
+    }
+    @media only screen and (min-width: 600px) {
+        input:focus {
+            width: calc(100vw - 400px);
+        }
     }
     input:empty {
         padding-top: 6px !important;
@@ -59,32 +73,61 @@ input {
 }
 
 .dropdown {
-    width: 100%;
+    width: 100vw;
+    height: calc(100vh - 53px); //header offset
+    background: rgba(0,0,0,0.5);
+    position: fixed;
+    justify-content: center;
+    left: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 3px;
+}
+
+.list-group {
     max-width: 600px;
-    background: white;
     z-index:1000;
-    margin: 2px 0 0;
-    border-radius: 4px;
-    margin-top: -7px;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
-    position: absolute;
-    max-height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
+    display: block;
+    flex: auto;
+    max-height: calc(100vh - 58px);
+    height: fit-content;
+    //background-color: colors.$dark-bg-color;
+}
 
-    .list-group-item {
-        padding: 5px 10px;
-    }
+.list-group.results {
+    max-height: unset;
+}
 
-
-    li {
-        list-style: none;
+@media only screen and (max-width: 600px) {
+    .list-group {
+        max-width: unset;
     }
 }
 
 .list-group-item {
+    padding: 5px 10px;
+}
+
+
+li {
+    list-style: none;
+    border-radius: 0px !important;
+    margin: 0 !important;
+}
+
+ul ul {
+    border-radius: 0px !important;
+}
+
+.list-group-item {
     cursor: pointer;
+}
+
+.section-header {
+    background: colors.$dark-item-accent-bg;
 }
 
 .spinner-border {

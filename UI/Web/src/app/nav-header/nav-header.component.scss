@@ -7,6 +7,10 @@ $bg-color: rgb(22, 27, 34);
     background-color: $bg-color;
 }
 
+.nav-item.dropdown {
+    position: unset;
+}
+
 .navbar-brand {
     font-family: "Spartan", sans-serif;
     font-weight: bold;
@@ -28,7 +32,6 @@ $bg-color: rgb(22, 27, 34);
 
 .ng-autocomplete {
     margin-bottom: 0px;
-    max-width: 400px;
 }
 
 .primary-text {
