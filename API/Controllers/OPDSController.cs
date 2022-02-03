@@ -466,7 +466,21 @@ public class OpdsController : BaseApiController
                 }
             });
         }
-        // TODO: Do Reading Lists
+
+        foreach (var readingListDto in series.ReadingLists)
+        {
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = readingListDto.Id.ToString(),
+                Title = readingListDto.Title,
+                Summary = readingListDto.Summary,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list/{readingListDto.Id}"),
+                }
+            });
+        }
+
 
         return CreateXmlResult(SerializeXml(feed));
     }
