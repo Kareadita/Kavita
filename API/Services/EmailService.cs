@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Email;
+using API.Entities.Enums;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -20,19 +22,25 @@ public interface IEmailService
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
-    private const string ApiUrl = "https://email.kavitareader.com";
+    private readonly IUnitOfWork _unitOfWork;
+    /// <summary>
+    /// This is used to intially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
+    /// </summary>
+    public static string DefaultApiUrl = "https://email.kavitareader.com";
 
-    public EmailService(ILogger<EmailService> logger)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
+        _unitOfWork = unitOfWork;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
+        // TODO: We need to call this when we change the url to a custom one
+        FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
     {
-        var success = await SendEmailWithPost(ApiUrl + "/api/email/confirm", data);
+        var success = await SendEmailWithPost(DefaultApiUrl + "/api/email/confirm", data);
         if (!success)
         {
             _logger.LogError("There was a critical error sending Confirmation email");
@@ -41,17 +49,20 @@ public class EmailService : IEmailService
 
     public async Task<bool> CheckIfAccessible(string host)
     {
-        return await SendEmailWithGet(ApiUrl + "/api/email/reachable?host=" + host);
+        // This is the only exception for using the default because we need an external service to check if the server is accessible for emails
+        return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
     }
 
     public async Task SendMigrationEmail(EmailMigrationDto data)
     {
-        await SendEmailWithPost(ApiUrl + "/api/email/email-migration", data);
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        await SendEmailWithPost(emailLink + "/api/email/email-migration", data);
     }
 
     public async Task SendPasswordResetEmail(PasswordResetEmailDto data)
     {
-        await SendEmailWithPost(ApiUrl + "/api/email/email-password-reset", data);
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url)
