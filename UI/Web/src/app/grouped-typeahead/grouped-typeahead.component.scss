@@ -128,6 +128,11 @@ ul ul {
 
 .section-header {
     background: colors.$dark-item-accent-bg;
+    cursor: default;
+}
+
+.section-header:hover {
+    background-color: colors.$dark-item-accent-bg !important;
 }
 
 .spinner-border {
