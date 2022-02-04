@@ -91,23 +91,23 @@
             <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
           </div>
           <div class="nav-item pr-2">
-            <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt" style="padding: 5px">
+            <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon">
               <i class="fa fa-cogs" aria-hidden="true" style="color: white"></i>
               <span class="sr-only">Server Settings</span>
             </a>
           </div>
-        </ng-container>
-        
+          
 
-        <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-          <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-            {{user.username | sentenceCase}}
-          </button>
-          <div ngbDropdownMenu>
-            <a ngbDropdownItem routerLink="/preferences/">Settings</a>
-            <a ngbDropdownItem (click)="logout()">Logout</a>
+          <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+            <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+              {{user.username | sentenceCase}}
+            </button>
+            <div ngbDropdownMenu>
+              <a ngbDropdownItem routerLink="/preferences/">Settings</a>
+              <a ngbDropdownItem (click)="logout()">Logout</a>
+            </div>
           </div>
-        </div>
+        </ng-container>
       </ng-container>
     </div>
 </nav>
