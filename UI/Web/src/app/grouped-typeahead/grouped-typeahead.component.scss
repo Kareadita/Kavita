@@ -41,6 +41,14 @@ input {
         right: 10px;
     }
 
+    @media only screen and (max-width:650px) {
+        .close {
+            top: 50%;
+            transform: translate(0, -60%);
+        }
+    }
+
+
     input {
         outline: 0 !important;
         border-radius: .28571429rem;
