@@ -77,7 +77,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
-    <ProjectReference Include="..\Kavita.Email\Kavita.Email.csproj" />
   </ItemGroup>
 
 

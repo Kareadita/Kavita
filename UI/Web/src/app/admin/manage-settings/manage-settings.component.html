@@ -66,24 +66,26 @@
         </div>
         
         <h4>Email Services (SMTP)</h4>
+        <p class="accent">Kavita comes out of the box with an email service to power flows like invite user, forgot password, etc. Emails sent via our service are deleted immediately. You can use your own
+            email service. Set the url of the email service and use the Test button to ensure it works. At any time you can reset to ours. There is no way to disable emails. 
+        </p>
         <div class="form-group">
-            <label for="smtp" aria-describedby="smtp-info">Custom SMTP Server</label>
-            <p class="accent" id="smtp-info">In order to use email functionality, like Forgot Password and Invite User, you must setup a SMTP server.</p>
-            <div class="form-check">
-                <input id="smtp" type="checkbox" class="form-check-input" formControlName="enableSmtp">
-                <label for="smtp" class="form-check-label">Enable Email</label>
+            <label for="settings-emailservice">Email Service Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailServiceTooltip" role="button" tabindex="0"></i>
+            <ng-template #emailServiceTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed, other files within directory will be deleted.</ng-template>
+            <span class="sr-only" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
+            <div class="input-group">
+                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" (click)="resetEmailServiceUrl()">
+                        Reset
+                    </button>
+                    <button class="btn btn-secondary" (click)="testEmailServiceUrl()">
+                        Test
+                    </button>
+                </div>
             </div>
         </div>
-        <ng-container *ngIf="true"> (or disable everything)
-            <div class="form-group">
-                <label for="settings-tasks-backup">SMTP Host</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
-                <ng-template #taskBackupTooltip>How often Kavita will backup the database.</ng-template>
-                <span class="sr-only" id="settings-tasks-backup-help">How often Kavita will backup the database.</span>
-                <select class="form-control" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
-                    <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
-                </select>
-            </div>
-        </ng-container>
+
 
         <h4>Reoccuring Tasks</h4>
         <div class="form-group">

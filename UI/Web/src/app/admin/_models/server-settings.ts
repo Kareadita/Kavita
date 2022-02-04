@@ -8,4 +8,5 @@ export interface ServerSettings {
     enableOpds: boolean;
     baseUrl: string;
     bookmarksDirectory: string;
+    emailServiceUrl: string;
 }

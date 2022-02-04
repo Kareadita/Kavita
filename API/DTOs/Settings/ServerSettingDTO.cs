@@ -32,5 +32,10 @@ namespace API.DTOs.Settings
         /// </summary>
         /// <remarks>If null or empty string, will default back to default install setting aka <see cref="DirectoryService.BookmarkDirectory"/></remarks>
         public string BookmarksDirectory { get; set; }
+        /// <summary>
+        /// Email service to use for the invite user flow, forgot password, etc.
+        /// </summary>
+        /// <remarks>If null or empty string, will default back to default install setting aka <see cref="EmailService.DefaultApiUrl"/></remarks>
+        public string EmailServiceUrl { get; set; }
     }
 }

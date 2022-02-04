@@ -17,25 +17,34 @@ public interface IEmailService
     Task<bool> CheckIfAccessible(string host);
     Task SendMigrationEmail(EmailMigrationDto data);
     Task SendPasswordResetEmail(PasswordResetEmailDto data);
+    Task<bool> TestConnectivity(string emailUrl);
 }
 
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+
     /// <summary>
-    /// This is used to intially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
+    /// This is used to initially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
     /// </summary>
-    public static string DefaultApiUrl = "https://email.kavitareader.com";
+    public const string DefaultApiUrl = "https://email.kavitareader.com";
 
     public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
 
-        // TODO: We need to call this when we change the url to a custom one
         FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+    }
+
+    public async Task<bool> TestConnectivity(string emailUrl)
+    {
+        FlurlHttp.ConfigureClient(emailUrl, cli =>
+            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+
+        return await SendEmailWithGet(emailUrl + "/api/email/test");
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)

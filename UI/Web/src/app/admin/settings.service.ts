@@ -25,6 +25,14 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset', {});
   }
 
+  resetEmailServerSettings() {
+    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
+  }
+
+  testEmailServerSettings(emailUrl: string) {
+    return this.http.post<boolean>(this.baseUrl + 'settings/test-email-url', {url: emailUrl}, {responseType: 'text' as 'json'});
+  }
+
   getTaskFrequencies() {
     return this.http.get<string[]>(this.baseUrl + 'settings/task-frequencies');
   }
