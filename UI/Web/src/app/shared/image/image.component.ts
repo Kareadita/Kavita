@@ -31,6 +31,10 @@ export class ImageComponent implements OnChanges {
    * Max Height of the image. If not defined, will not be applied
    */
    @Input() maxHeight: string = '';
+  /**
+   * Border Radius of the image. If not defined, will not be applied
+   */
+   @Input() borderRadius: string = '';
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
@@ -51,6 +55,10 @@ export class ImageComponent implements OnChanges {
 
     if (this.maxHeight != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'max-height', this.maxHeight);
+    }
+
+    if (this.borderRadius != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'border-radius', this.borderRadius);
     }
     
   }
