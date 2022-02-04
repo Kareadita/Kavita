@@ -309,6 +309,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
