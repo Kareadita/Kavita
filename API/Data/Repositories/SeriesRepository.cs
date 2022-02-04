@@ -950,7 +950,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId)
     {
-        var ret = await GetRecentlyAddedChaptersQuery(userId);
+        var ret = await GetRecentlyAddedChaptersQuery(userId, 150);
 
 
         var seriesMap = new Dictionary<string, GroupedSeriesDto>();
@@ -981,7 +981,7 @@ public class SeriesRepository : ISeriesRepository
         return seriesMap.Values.ToList();
     }
 
-    private async Task<List<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId)
+    private async Task<List<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 50)
     {
         var libraries = await _context.AppUser
             .Where(u => u.Id == userId)
@@ -1014,7 +1014,7 @@ public class SeriesRepository : ISeriesRepository
                 VolumeNumber = c.Volume.Number,
                 ChapterTitle = c.Title
             })
-            .Take(50)
+            .Take(maxRecords)
             .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
             .ToListAsync();
         return ret;
