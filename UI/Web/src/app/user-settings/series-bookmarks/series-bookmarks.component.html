@@ -5,7 +5,7 @@
     <li *ngFor="let series of series" class="list-group-item">
         <div>
             <h4>
-                <a id="series--{{series.name}}" href="/library/{{series.libraryId}}/series/{{series.id}}" >{{series.name | titlecase}}</a>
+                <a id="series--{{series.name}}" href="javascript:void(0);" (click)="viewBookmarks(series)">{{series.name | titlecase}}</a>
                 &nbsp;<span class="badge badge-secondary badge-pill">{{getBookmarkPages(series.id)}}</span>
                 <div class="float-right">
                     <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-danger mr-2 btn-sm" (click)="clearBookmarks(series)" [disabled]="clearingSeries[series.id]" placement="top" ngbTooltip="Clear Bookmarks" attr.aria-label="Clear Bookmarks">
@@ -26,8 +26,8 @@
                             <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                         </ng-template>
                     </button>
-                    <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-primary mr-2 btn-sm" (click)="viewBookmarks(series)" placement="top" ngbTooltip="View Bookmarks" attr.aria-label="View Bookmarks">
-                        <i class="fa fa-pen" title="View Bookmarks"></i>
+                    <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-primary mr-2 btn-sm" routerLink="/library/{{series.libraryId}}/series/{{series.id}}" placement="top" ngbTooltip="Open Series" attr.aria-label="Open Series">
+                        <i class="fa fa-eye" title="Open Series"></i>
                     </button>
                 </div>
             </h4>
