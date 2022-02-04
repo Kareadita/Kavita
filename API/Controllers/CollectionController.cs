@@ -51,7 +51,7 @@ namespace API.Controllers
         public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
         {
             queryString ??= "";
-            queryString = queryString.Replace(@"%", "");
+            queryString = queryString.Replace(@"%", string.Empty);
             if (queryString.Length == 0) return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
 
             return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString);

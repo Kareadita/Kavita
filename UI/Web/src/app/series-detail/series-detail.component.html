@@ -1,8 +1,7 @@
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">            
-            <img class="poster lazyload" [src]="imageSerivce.placeholderImage" [attr.data-src]="seriesImage" 
-            (error)="imageSerivce.updateErroredImage($event)" aria-hidden="true">
+            <app-image class="poster" maxWidth="300px" [imageUrl]="seriesImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters">

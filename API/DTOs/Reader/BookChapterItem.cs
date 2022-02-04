@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs
+namespace API.DTOs.Reader
 {
     public class BookChapterItem
     {
@@ -16,6 +16,6 @@ namespace API.DTOs
         /// Page Number to load for the chapter
         /// </summary>
         public int Page { get; set; }
-        public ICollection<BookChapterItem> Children { get; set; } 
+        public ICollection<BookChapterItem> Children { get; set; }
     }
 }

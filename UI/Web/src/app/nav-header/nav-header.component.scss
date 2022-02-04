@@ -3,8 +3,23 @@
 $primary-color: white;
 $bg-color: rgb(22, 27, 34);
 
+.btn:focus, .btn:hover {
+    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1);
+}
+
 .navbar {
     background-color: $bg-color;
+}
+
+/* small devices (phones, 650px and down) */
+@media only screen and (max-width:650px) { //370
+    .navbar-nav {
+        width: 34%;
+    }
+}
+
+.nav-item.dropdown {
+    position: unset;
 }
 
 .navbar-brand {
@@ -28,7 +43,6 @@ $bg-color: rgb(22, 27, 34);
 
 .ng-autocomplete {
     margin-bottom: 0px;
-    max-width: 400px;
 }
 
 .primary-text {
@@ -41,16 +55,19 @@ $bg-color: rgb(22, 27, 34);
     margin-top: 5px;
 }
 
+.form-inline .form-group {
+    width: 100%;
+}
+
+@media (min-width: 576px) {
+    .form-inline .form-group {
+        width: 100%;
+    }
+}
+
 @include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
     .ng-autocomplete {
         width: 100%; // 232px
-    }
-}
- 
-/* Extra small devices (phones, 300px and down) */
-@media only screen and (max-width: 300px) { //370
-    .ng-autocomplete {
-        max-width: 120px;
     }
 }
 

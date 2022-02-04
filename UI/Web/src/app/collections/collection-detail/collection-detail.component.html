@@ -1,12 +1,12 @@
 <div class="container-fluid" *ngIf="collectionTag !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">            
-            <img class="poster lazyload" [src]="imageService.placeholderImage" [attr.data-src]="tagImage" 
-            (error)="imageService.updateErroredImage($event)" aria-hidden="true">
+            <app-image class="poster" maxWidth="481px" [imageUrl]="tagImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
             <div class="row no-gutters">
                 <h2>
+
                     {{collectionTag.title}}
                 </h2>
             </div>
