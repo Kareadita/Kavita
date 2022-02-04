@@ -112,8 +112,11 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     // TODO: Move this to utility service
     this.clearSearch();
     switch(role) {
+      case PersonRole.Writer:
+        this.goTo('writers', filter);
+        break;
       case PersonRole.Artist:
-        this.goTo('artist', filter);
+        this.goTo('artists', filter);
         break;
       case PersonRole.Character:
         this.goTo('character', filter);
@@ -128,7 +131,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         this.goTo('inker', filter);
         break;
       case PersonRole.CoverArtist:
-        this.goTo('coverArtist', filter);
+        this.goTo('coverArtists', filter);
         break;
       case PersonRole.Inker:
         this.goTo('inker', filter);

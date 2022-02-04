@@ -150,6 +150,12 @@ export class UtilityService {
       anyChanged = true;
     }
 
+    const artists = snapshot.queryParamMap.get('artists');
+    if (artists !== undefined && artists !== null) {
+      filter.artists = [...filter.artists, ...artists.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
     const character = snapshot.queryParamMap.get('character');
     if (character !== undefined && character !== null) {
       filter.character = [...filter.character, ...character.split(',').map(item => parseInt(item, 10))];

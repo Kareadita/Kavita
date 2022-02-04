@@ -198,6 +198,7 @@ export class SeriesService {
       libraries: [],
       genres: [],
       writers: [],
+      artists: [],
       penciller: [],
       inker: [],
       colorist: [],
