@@ -240,11 +240,6 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
-        if (filter.SortOptions == null)
-        {
-            query = query.OrderBy(s => s.SortName);
-        }
-
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
