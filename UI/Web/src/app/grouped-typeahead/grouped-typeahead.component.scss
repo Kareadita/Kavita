@@ -70,7 +70,7 @@ input {
 }
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) { //370
+@media only screen and (max-width:650px) {
     .typeahead-input {
         width: 120px;
     }
@@ -90,7 +90,7 @@ input {
 }
 
 // Causes bleedover
-::ng-deep .bg-dark .dropdown .list-group-item.active {
+::ng-deep .bg-dark .dropdown .list-group-item.hover {
     background-color: colors.$dark-hover-color;
 }
 

@@ -19,7 +19,7 @@
                 <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
                 <ul class="list-group results" role="group" aria-describedby="series-group">
                     <li *ngFor="let option of grouppedData.series; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                        class="list-group-item" aria-labelledby="series-group" role="option" (mouseenter)="focusedIndex = index; focusedIndexGroup['series'] = index; updateHighlight();">
+                        class="list-group-item" aria-labelledby="series-group" role="option">
                         <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
                     </li>
                 </ul>
@@ -29,7 +29,7 @@
                 <li class="list-group-item section-header"><h5>Collections</h5></li>
                 <ul class="list-group results">
                     <li *ngFor="let option of grouppedData.collections; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                        class="list-group-item" role="option" (mouseenter)="focusedIndex = index; focusedIndexGroup['collections'] = index; updateHighlight();">
+                        class="list-group-item" role="option">
                         <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
                     </li>
                 </ul>
@@ -39,7 +39,7 @@
                 <li class="list-group-item section-header"><h5>Tags</h5></li>
                 <ul class="list-group results">
                     <li *ngFor="let option of grouppedData.tags; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                        class="list-group-item" role="option" (mouseenter)="focusedIndex = index; focusedIndexGroup['tags'] = index; updateHighlight();">
+                        class="list-group-item" role="option">
                         <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
                     </li>
                 </ul>
@@ -49,7 +49,7 @@
                 <li class="list-group-item section-header"><h5>Tags</h5></li>
                 <ul class="list-group results">
                     <li *ngFor="let option of grouppedData.persons; let index = index;" (click)="handleResultlick(option)" tabindex="0"
-                        class="list-group-item" role="option" (mouseenter)="focusedIndex = index; focusedIndexGroup['persons'] = index; updateHighlight();">
+                        class="list-group-item" role="option">
                         <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
                     </li>
                 </ul>

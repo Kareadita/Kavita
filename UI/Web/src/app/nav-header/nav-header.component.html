@@ -11,6 +11,7 @@
                 <label for="nav-search" class="sr-only">Search series</label>
                 <div class="ng-autocomplete">
                   <app-grouped-typeahead
+                  #search
                   id="nav-search"
                   [minQueryLength]="2"
                   initialValue=""
@@ -22,7 +23,7 @@
                 >
 
                 <ng-template #seriesTemplate let-item>
-                  <div style="display: flex;padding: 5px;" (selected)="clickSearchResult(item)">
+                  <div style="display: flex;padding: 5px;" (click)="clickSearchResult(item)">
                     <div style="width: 24px" class="mr-1">
                       <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
                     </div>
@@ -38,7 +39,7 @@
                 </ng-template>
 
                 <ng-template #collectionTemplate let-item>
-                  <div style="display: flex;padding: 5px;" (selected)="goToPerson(item.role, item.id)">
+                  <div style="display: flex;padding: 5px;" (click)="goToPerson(item.role, item.id)">
                     <div style="width: 24px" class="mr-1">
                       <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
@@ -49,7 +50,7 @@
                 </ng-template>
 
                 <ng-template #tagTemplate let-item>
-                  <div style="display: flex;padding: 5px;" (selected)="goTo('tag', item.id)">
+                  <div style="display: flex;padding: 5px;" (click)="goTo('tag', item.id)">
                     <div class="ml-1">
                       <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
                     </div>
@@ -57,7 +58,7 @@
                 </ng-template>
 
                 <ng-template #personTemplate let-item>
-                  <div style="display: flex;padding: 5px;" class="clickable" (selected)="goTo('genres', item.id)">
+                  <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
                     <div class="ml-1">
                       
                       <div [innerHTML]="item.name"></div>

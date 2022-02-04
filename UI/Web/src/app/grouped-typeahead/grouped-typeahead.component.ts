@@ -2,11 +2,9 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SearchResultGroup } from '../_models/search/search-result-group';
-
-const ITEM_QUERY_SELECTOR = '.list-group-item:not(.section-header)';
 
 @Component({
   selector: 'app-grouped-typeahead',
@@ -64,8 +62,6 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   hasFocus: boolean = false;
   isLoading: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
-  focusedIndex: number = -1;
-  focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
 
   prevSearchTerm: string = '';
 
@@ -148,36 +144,17 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
   handleResultlick(item: any) {
     this.selected.emit(item);
-    console.log('Selected ', item);
   }
 
   resetField() {
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
-    this.focusedIndex = 0;
-    this.focusedIndexGroup = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
     this.clearField.emit();
   }
 
-  
-  // Updates the highlight to focus on the selected item
-  updateHighlight() {
-    this.document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
-      if (index === this.focusedIndex && !item.classList.contains('no-hover')) {
-        // apply active class
-        this.renderer2.addClass(item, 'active');
-      } else {
-        // remove active class
-        this.renderer2.removeClass(item, 'active');
-      }
-    });
-  }
 
   close(event?: FocusEvent) {
-    console.log('close event: ', event);
     if (event) {
       // If the user is tabbing out of the input field, check if there are results first before closing
-      
-      console.log('hasData: ', this.hasData);
       if (this.hasData) {
         return;
       }
@@ -189,6 +166,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   open(event?: FocusEvent) {
     this.hasFocus = true;
     this.focusChanged.emit(this.hasFocus);
+  }
+
+  public clear() {
+    this.resetField();
   }
 
 }
