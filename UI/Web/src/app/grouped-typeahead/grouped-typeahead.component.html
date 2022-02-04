@@ -35,6 +35,16 @@
                 </ul>
             </ng-container>
 
+            <ng-container *ngIf="genreTemplate !== undefined && grouppedData.genres.length > 0">
+              <li class="list-group-item section-header"><h5>Genres</h5></li>
+              <ul class="list-group results">
+                  <li *ngFor="let option of grouppedData.genres; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                      class="list-group-item" role="option">
+                      <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                  </li>
+              </ul>
+          </ng-container>
+
             <ng-container *ngIf="tagTemplate !== undefined && grouppedData.tags.length > 0">
                 <li class="list-group-item section-header"><h5>Tags</h5></li>
                 <ul class="list-group results">
@@ -46,7 +56,7 @@
             </ng-container>
 
             <ng-container *ngIf="personTemplate !== undefined && grouppedData.persons.length > 0">
-                <li class="list-group-item section-header"><h5>Tags</h5></li>
+                <li class="list-group-item section-header"><h5>People</h5></li>
                 <ul class="list-group results">
                     <li *ngFor="let option of grouppedData.persons; let index = index;" (click)="handleResultlick(option)" tabindex="0"
                         class="list-group-item" role="option">

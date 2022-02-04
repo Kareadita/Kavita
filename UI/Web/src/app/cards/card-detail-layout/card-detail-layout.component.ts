@@ -367,7 +367,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     };
     this.collectionSettings.compareFn = (options: CollectionTag[], filter: string) => {
       const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
     }
 
     if (this.filterSettings.presets?.collectionTags && this.filterSettings.presets?.collectionTags.length > 0) {
