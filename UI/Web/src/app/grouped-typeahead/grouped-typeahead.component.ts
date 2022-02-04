@@ -47,6 +47,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
    * Emits an event when the field is cleared
    */
   @Output() clearField: EventEmitter<void> = new EventEmitter();
+  /**
+   * Emits when a change in the search field looses/gains focus
+   */
+  @Output() focusChanged: EventEmitter<boolean> = new EventEmitter();
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('itemTemplate') itemTemplate!: TemplateRef<any>;
@@ -77,6 +81,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: any) {
     this.hasFocus = false;
+    this.focusChanged.emit(this.hasFocus);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -120,6 +125,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
       }
       case KEY_CODES.ESC_KEY:
         this.hasFocus = false;
+        this.focusChanged.emit(this.hasFocus);
         event.stopPropagation();
         break;
       default:
@@ -157,6 +163,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
       this.document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
+      this.focusChanged.emit(this.hasFocus);
     }
    
     this.openDropdown();
@@ -173,6 +180,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
   handleResultlick(item: any) {
     this.selected.emit(item);
+    console.log('Selected ', item);
   }
 
   resetField() {

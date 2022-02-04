@@ -165,5 +165,9 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     });
   }
 
+  focusUpdate(searchFocused: boolean) {
+    console.log('search has focus', searchFocused);
+  }
+
   
 }

@@ -14,16 +14,17 @@
                   id="nav-search"
                   [minQueryLength]="2"
                   initialValue=""
-                  placeholder="Search Series, Collections, Genres..."
+                  placeholder="Search…"
                   [grouppedData]="searchResults"
                   (inputChanged)="onChangeSearch($event)"
                   (clearField)="clearSearch()"
+                  (focusChanged)="focusUpdate($event)"
                 >
 
                 <ng-template #seriesTemplate let-item>
                   <div style="display: flex;padding: 5px;" (selected)="clickSearchResult(item)">
                     <div style="width: 24px" class="mr-1">
-                      <app-image class="mr-3 search-result" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                      <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
                     </div>
                     <div class="ml-1">
                       <app-series-format [format]="item.format"></app-series-format>
@@ -39,7 +40,7 @@
                 <ng-template #collectionTemplate let-item>
                   <div style="display: flex;padding: 5px;" (selected)="goToPerson(item.role, item.id)">
                     <div style="width: 24px" class="mr-1">
-                      <app-image class="mr-3 search-result" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+                      <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
                     <div class="ml-1">
                       <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
