@@ -40,6 +40,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
 
   backToTopNeeded = false;
+  searchFocused: boolean = false;
   private readonly onDestroy = new Subject<void>();
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService, 
@@ -167,6 +168,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   focusUpdate(searchFocused: boolean) {
     console.log('search has focus', searchFocused);
+    this.searchFocused = searchFocused
+    return searchFocused;
   }
 
   

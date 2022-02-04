@@ -19,7 +19,6 @@ input {
     border: 1px solid #ccc;
     padding: 0px 6px;
     display: inline-block;
-    width: 100%;
     overflow: hidden;
     position: relative;
     z-index: 1;
@@ -29,6 +28,9 @@ input {
     cursor: text;
     background-color: #fff;
     min-height: 38px;
+    transition-property: all;
+    transition-duration: 0.3s;
+    display: block;
 
     .close {
         cursor: pointer;
@@ -51,14 +53,34 @@ input {
         width: 300px;
         transition-property: all;
         transition-duration: 0.3s;
+        display: block;
     }
-    @media only screen and (min-width: 600px) {
-        input:focus {
-            width: calc(100vw - 400px);
-        }
+
+    input:focus-visible {
+        width: calc(100vw - 400px);
     }
+
     input:empty {
         padding-top: 6px !important;
+    }
+}
+
+.typeahead-input.focused {
+    width: 100%;
+}
+
+/* small devices (phones, 650px and down) */
+@media only screen and (max-width:650px) { //370
+    .typeahead-input {
+        width: 120px;
+    }
+
+    input {
+        width: 100%
+    }
+
+    input:focus-visible {
+        width: 100% !important;
     }
 }
 

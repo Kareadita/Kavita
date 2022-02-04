@@ -133,6 +133,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     }
    
     this.openDropdown();
+    return this.hasFocus;
   }
 
   openDropdown() {
