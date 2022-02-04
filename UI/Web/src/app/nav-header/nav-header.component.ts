@@ -3,8 +3,8 @@ import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { isTemplateSpan } from 'typescript';
 import { ScrollService } from '../scroll.service';
+import { CollectionTag } from '../_models/collection-tag';
 import { PersonRole } from '../_models/person';
 import { SearchResult } from '../_models/search-result';
 import { SearchResultGroup } from '../_models/search/search-result-group';
@@ -104,11 +104,13 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     let params: any = {};
     params[queryParamName] = filter;
     params['page'] = 1;
+    this.clearSearch();
     this.router.navigate(['all-series'], {queryParams: params});
   }
 
   goToPerson(role: PersonRole, filter: any) {
     // TODO: Move this to utility service
+    this.clearSearch();
     switch(role) {
       case PersonRole.Artist:
         this.goTo('artist', filter);
@@ -147,18 +149,23 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   clearSearch() {
+    this.searchViewRef.clear();
+    this.searchTerm = '';
     this.searchResults = new SearchResultGroup();
   }
 
-  clickSearchResult(item: SearchResult) {
-    console.log('Click occured');
+  clickSeriesSearchResult(item: SearchResult) {
+    this.clearSearch();
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
-    this.searchViewRef.clear();
-    this.searchResults.reset();
-    this.searchTerm = '';
     this.router.navigate(['library', libraryId, 'series', seriesId]);
   }
+
+  clickCollectionSearchResult(item: CollectionTag) {
+    this.clearSearch();
+    this.router.navigate(['collections', item.id]);
+  }
+
 
   scrollToTop() {
     window.scroll({
@@ -168,7 +175,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   focusUpdate(searchFocused: boolean) {
-    console.log('search has focus', searchFocused);
     this.searchFocused = searchFocused
     return searchFocused;
   }

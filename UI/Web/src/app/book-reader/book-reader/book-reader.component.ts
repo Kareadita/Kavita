@@ -615,7 +615,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let margin = '15%';
     if (windowWidth <= 700) {
-      margin = '0%';
+      margin = '5%';
     }
     if (this.user) {
       if (windowWidth > 700) {

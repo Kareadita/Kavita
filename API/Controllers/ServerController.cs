@@ -25,22 +25,20 @@ namespace API.Controllers
         private readonly IConfiguration _config;
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
-        private readonly ICacheService _cacheService;
         private readonly IVersionUpdaterService _versionUpdaterService;
         private readonly IStatsService _statsService;
         private readonly ICleanupService _cleanupService;
         private readonly IEmailService _emailService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
-            IVersionUpdaterService versionUpdaterService, IStatsService statsService, ICleanupService cleanupService, IEmailService emailService)
+            IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
+            ICleanupService cleanupService, IEmailService emailService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
             _backupService = backupService;
             _archiveService = archiveService;
-            _cacheService = cacheService;
             _versionUpdaterService = versionUpdaterService;
             _statsService = statsService;
             _cleanupService = cleanupService;
@@ -111,6 +109,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Checks for updates, if no updates that are > current version installed, returns null
+        /// </summary>
         [HttpGet("check-update")]
         public async Task<ActionResult<UpdateNotificationDto>> CheckForUpdates()
         {

@@ -22,7 +22,7 @@ export class TypeaheadSettings<T> {
      */
     savedData!: T[] | T;
     /**
-     * Function to compare the elements. Should return all elements that fit the matching criteria.
+     * Function to compare the elements. Should return all elements that fit the matching criteria. This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
      */
     compareFn!:  ((optionList: T[], filter: string)  => T[]); 
     /**

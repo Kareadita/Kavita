@@ -56,6 +56,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('collectionTemplate') collectionTemplate: TemplateRef<any> | undefined;
   @ContentChild('tagTemplate') tagTemplate: TemplateRef<any> | undefined;
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
+  @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
   
 
@@ -147,6 +148,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   resetField() {
+    this.prevSearchTerm = '';
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
     this.clearField.emit();
   }
@@ -159,6 +161,9 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
         return;
       }
     }
+    if (this.searchTerm === '') {
+      this.resetField();
+    }
     this.hasFocus = false;
     this.focusChanged.emit(this.hasFocus);
   }
@@ -169,7 +174,8 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   public clear() {
-    this.resetField();
+    this.prevSearchTerm = '';
+    this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
   }
 
 }

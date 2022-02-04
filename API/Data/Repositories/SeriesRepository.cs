@@ -240,11 +240,6 @@ public class SeriesRepository : ISeriesRepository
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
 
-        if (filter.SortOptions == null)
-        {
-            query = query.OrderBy(s => s.SortName);
-        }
-
         var retSeries = query
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -314,6 +309,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
