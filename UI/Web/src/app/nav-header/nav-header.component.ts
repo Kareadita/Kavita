@@ -151,6 +151,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   clickSearchResult(item: SearchResult) {
+    console.log('Click occured');
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.searchViewRef.clear();

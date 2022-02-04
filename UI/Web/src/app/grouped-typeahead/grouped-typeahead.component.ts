@@ -80,8 +80,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: any) {
-    this.hasFocus = false;
-    this.focusChanged.emit(this.hasFocus);
+    this.close();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -90,8 +89,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
     switch(event.key) {
       case KEY_CODES.ESC_KEY:
-        this.hasFocus = false;
-        this.focusChanged.emit(this.hasFocus);
+        this.close();
         event.stopPropagation();
         break;
       default:
@@ -128,8 +126,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       this.document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
-      this.hasFocus = true;
-      this.focusChanged.emit(this.hasFocus);
+      this.open();
     }
    
     this.openDropdown();
@@ -169,6 +166,16 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
         this.renderer2.removeClass(item, 'active');
       }
     });
+  }
+
+  close() {
+    this.hasFocus = false;
+    this.focusChanged.emit(this.hasFocus);
+  }
+
+  open(event?: any) {
+    this.hasFocus = true;
+    this.focusChanged.emit(this.hasFocus);
   }
 
 }

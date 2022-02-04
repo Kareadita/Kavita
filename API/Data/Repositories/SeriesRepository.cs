@@ -61,13 +61,6 @@ public interface ISeriesRepository
     /// <summary>
     /// Does not add user information like progress, ratings, etc.
     /// </summary>
-    /// <param name="libraryIds"></param>
-    /// <param name="searchQuery">Series name to search for</param>
-    /// <returns></returns>
-    //Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery);
-    /// <summary>
-    /// Does not add user information like progress, ratings, etc.
-    /// </summary>
     /// <param name="userId"></param>
     /// <param name="isAdmin"></param>
     /// <param name="libraryIds"></param>

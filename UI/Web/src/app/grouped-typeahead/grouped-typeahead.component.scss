@@ -5,7 +5,7 @@ form {
 
 input {
     width: 15px;
-    opacity: 1px;
+    opacity: 1;
     position: relative;
     left: 4px;
     border: none;
@@ -93,6 +93,7 @@ input {
 ::ng-deep .bg-dark .dropdown .list-group-item.active {
     background-color: colors.$dark-hover-color;
 }
+
 
 .dropdown {
     width: 100vw;

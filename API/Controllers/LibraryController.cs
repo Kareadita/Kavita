@@ -234,6 +234,7 @@ namespace API.Controllers
             var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
 
             if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+            if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
             var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin, libraries.Select(l => l.Id).ToArray(), queryString);
