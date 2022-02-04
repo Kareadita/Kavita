@@ -104,7 +104,7 @@
                       </div>
                       <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
                           <li class="media my-4" *ngFor="let volume of seriesVolumes">
-                              <img class="mr-3" style="width: 74px;" src="{{imageService.getVolumeCoverImage(volume.id)}}" >
+                              <app-image class="mr-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
                               <div class="media-body">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>

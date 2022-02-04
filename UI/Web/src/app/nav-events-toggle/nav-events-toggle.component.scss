@@ -1,5 +1,10 @@
 @use "../../theme/colors";
 
+
+.btn:focus, .btn:hover {
+    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1); // TODO: Used in nav as well, move to dark for btn-icon focus
+}
+
 .small-spinner {
     width: 1rem;
     height: 1rem;

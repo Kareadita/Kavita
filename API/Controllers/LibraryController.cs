@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -224,17 +225,19 @@ namespace API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<SearchResultDto>>> Search(string queryString)
+        public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString)
         {
             queryString = Uri.UnescapeDataString(queryString).Trim().Replace(@"%", string.Empty);
 
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             // Get libraries user has access to
-            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
+            var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
 
             if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+            if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-            var series = await _unitOfWork.SeriesRepository.SearchSeries(libraries.Select(l => l.Id).ToArray(), queryString);
+            var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin, libraries.Select(l => l.Id).ToArray(), queryString);
 
             return Ok(series);
         }

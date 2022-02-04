@@ -1,0 +1,167 @@
+@use "../../theme/colors";
+form {
+    max-height: 38px;
+}
+
+input {
+    width: 15px;
+    opacity: 1;
+    position: relative;
+    left: 4px;
+    border: none;
+}
+
+.search-result img {
+    width: 100% !important;
+}
+
+.typeahead-input {
+    border: 1px solid #ccc;
+    padding: 0px 6px;
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    box-shadow: none;
+    border-radius: 4px;
+    cursor: text;
+    background-color: #fff;
+    min-height: 38px;
+    transition-property: all;
+    transition-duration: 0.3s;
+    display: block;
+
+    .close {
+        cursor: pointer;
+        position: absolute;
+        top: 7px;
+        right: 10px;
+    }
+
+    input {
+        outline: 0 !important;
+        border-radius: .28571429rem;
+        display: inline-block !important;
+        padding: 0px !important;
+        min-height: 0px !important;
+        max-width: 100% !important;
+        margin: 0px !important;
+        text-indent: 0 !important;
+        line-height: inherit !important;
+        box-shadow: none !important;
+        width: 300px;
+        transition-property: all;
+        transition-duration: 0.3s;
+        display: block;
+    }
+
+    input:focus-visible {
+        width: calc(100vw - 400px);
+    }
+
+    input:empty {
+        padding-top: 6px !important;
+    }
+}
+
+.typeahead-input.focused {
+    width: 100%;
+}
+
+/* small devices (phones, 650px and down) */
+@media only screen and (max-width:650px) {
+    .typeahead-input {
+        width: 120px;
+    }
+
+    input {
+        width: 100%
+    }
+
+    input:focus-visible {
+        width: 100% !important;
+    }
+}
+
+::ng-deep .bg-dark .typeahead-input {
+    color: #efefef;
+    background-color: colors.$dark-bg-color;
+}
+
+// Causes bleedover
+::ng-deep .bg-dark .dropdown .list-group-item.hover {
+    background-color: colors.$dark-hover-color;
+}
+
+
+.dropdown {
+    width: 100vw;
+    height: calc(100vh - 57px); //header offset
+    background: rgba(0,0,0,0.5);
+    position: fixed;
+    justify-content: center;
+    left: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.list-group {
+    max-width: 600px;
+    z-index:1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
+    flex: auto;
+    max-height: calc(100vh - 58px);
+    height: fit-content;
+    //background-color: colors.$dark-bg-color;
+}
+
+.list-group.results {
+    max-height: unset;
+}
+
+@media only screen and (max-width: 600px) {
+    .list-group {
+        max-width: unset;
+    }
+}
+
+.list-group-item {
+    padding: 5px 10px;
+}
+
+
+li {
+    list-style: none;
+    border-radius: 0px !important;
+    margin: 0 !important;
+}
+
+ul ul {
+    border-radius: 0px !important;
+}
+
+.list-group-item {
+    cursor: pointer;
+}
+
+.section-header {
+    background: colors.$dark-item-accent-bg;
+    cursor: default;
+}
+
+.section-header:hover {
+    background-color: colors.$dark-item-accent-bg !important;
+}
+
+.spinner-border {
+    position: absolute;
+    right: 10px;
+    margin: auto;
+    cursor: pointer;
+    top: 30%;
+}

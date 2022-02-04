@@ -17,6 +17,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SentenceCasePipe } from './sentence-case.pipe';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
+import { ImageComponent } from './image/image.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     CircularLoaderComponent,
     SentenceCasePipe,
     PersonBadgeComponent,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    ImageComponent
   ],
   imports: [
     CommonModule,
@@ -55,7 +57,8 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     TagBadgeComponent,
     CircularLoaderComponent,
     PersonBadgeComponent,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    ImageComponent
   ],
 })
 export class SharedModule { }
