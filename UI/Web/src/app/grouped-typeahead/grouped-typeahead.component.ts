@@ -75,6 +75,10 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     return this.typeaheadForm.get('typeahead')?.value || '';
   }
 
+  get hasData() {
+    return this.grouppedData.persons.length || this.grouppedData.collections.length || this.grouppedData.series.length || this.grouppedData.persons.length || this.grouppedData.tags.length || this.grouppedData.genres.length;
+  }
+
 
   constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
 
@@ -168,12 +172,21 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     });
   }
 
-  close() {
+  close(event?: FocusEvent) {
+    console.log('close event: ', event);
+    if (event) {
+      // If the user is tabbing out of the input field, check if there are results first before closing
+      
+      console.log('hasData: ', this.hasData);
+      if (this.hasData) {
+        return;
+      }
+    }
     this.hasFocus = false;
     this.focusChanged.emit(this.hasFocus);
   }
 
-  open(event?: any) {
+  open(event?: FocusEvent) {
     this.hasFocus = true;
     this.focusChanged.emit(this.hasFocus);
   }
