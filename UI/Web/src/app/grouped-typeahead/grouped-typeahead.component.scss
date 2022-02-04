@@ -97,7 +97,7 @@ input {
 
 .dropdown {
     width: 100vw;
-    height: calc(100vh - 53px); //header offset
+    height: calc(100vh - 57px); //header offset
     background: rgba(0,0,0,0.5);
     position: fixed;
     justify-content: center;
@@ -105,7 +105,7 @@ input {
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 3px;
+    margin-top: 10px;
 }
 
 .list-group {
