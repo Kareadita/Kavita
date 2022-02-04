@@ -25,22 +25,19 @@ namespace API.Data.Repositories;
 
 internal class RecentlyAddedSeries
 {
-    public int LibraryId { get; set; }
-    public LibraryType LibraryType { get; set; }
-    public DateTime Created { get; set; }
-    public int SeriesId { get; set; }
-    public string SeriesName { get; set; }
-    public Series Series { get; set; }
-    public IList<Chapter> Chapters { get; set; } // I don't know if I need this
-    public Chapter Chapter { get; set; } // for Alt implementation
-    public MangaFormat Format { get; set; }
-    public int ChapterId { get; set; } // for Alt implementation
-    public int VolumeId { get; set; } // for Alt implementation
-    public string ChapterNumber { get; set; }
-    public string ChapterRange { get; set; }
-    public string ChapterTitle { get; set; }
-    public bool IsSpecial { get; set; }
-    public int VolumeNumber { get; set; }
+    public int LibraryId { get; init; }
+    public LibraryType LibraryType { get; init; }
+    public DateTime Created { get; init; }
+    public int SeriesId { get; init; }
+    public string SeriesName { get; init; }
+    public MangaFormat Format { get; init; }
+    public int ChapterId { get; init; }
+    public int VolumeId { get; init; }
+    public string ChapterNumber { get; init; }
+    public string ChapterRange { get; init; }
+    public string ChapterTitle { get; init; }
+    public bool IsSpecial { get; init; }
+    public int VolumeNumber { get; init; }
 }
 
 public interface ISeriesRepository
@@ -1004,7 +1001,6 @@ public class SeriesRepository : ISeriesRepository
                 Created = c.Created,
                 SeriesId = c.Volume.Series.Id,
                 SeriesName = c.Volume.Series.Name,
-                Series = c.Volume.Series,
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,
