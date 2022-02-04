@@ -18,7 +18,6 @@ import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
-import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
@@ -69,7 +68,6 @@ import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead
     FormsModule, // EditCollection Modal
 
     NgbDropdownModule, // Nav
-    AutocompleteLibModule, // Nav
     NgbPopoverModule, // Nav Events toggle
     NgbRatingModule, // Series Detail
     NgbNavModule,

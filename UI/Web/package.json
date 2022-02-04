@@ -32,7 +32,6 @@
     "@ngx-lite/nav-drawer": "^0.4.6",
     "@ngx-lite/util": "0.0.0",
     "@types/file-saver": "^2.0.1",
-    "angular-ng-autocomplete": "^2.0.5",
     "bootstrap": "^4.5.0",
     "bowser": "^2.11.0",
     "file-saver": "^2.0.5",

@@ -278,20 +278,6 @@ public class SeriesRepository : ISeriesRepository
         };
     }
 
-    // public async Task<IEnumerable<SearchResultDto>> SearchSeries(int[] libraryIds, string searchQuery)
-    // {
-    //     return await _context.Series
-    //         .Where(s => libraryIds.Contains(s.LibraryId))
-    //         .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
-    //                     || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
-    //                     || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
-    //         .Include(s => s.Library)
-    //         .OrderBy(s => s.SortName)
-    //         .AsNoTracking()
-    //         .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
-    //         .ToListAsync();
-    // }
-
     public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery)
     {
 
@@ -321,17 +307,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        // TODO: This query doesn't work
-        // result.Collections = await _context.SeriesMetadata
-        //     .Where(sm => seriesIds.Contains(sm.SeriesId))
-        //     .SelectMany(sm => sm.CollectionTags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
-        //     .AsSplitQuery()
-        //     .OrderBy(t => t.Title)
-        //     .Distinct()
-        //     //.DistinctBy(t => t.Title)
-        //     .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
-        //     .ToListAsync();
-        // This needs RBS
         result.Collections =  await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
@@ -342,7 +317,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        // Figure out if you want like this or separated out
         result.Persons = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
@@ -371,13 +345,6 @@ public class SeriesRepository : ISeriesRepository
         return result;
     }
 
-
-
-
-
-
-
-
     public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
         var series = await _context.Series.Where(x => x.Id == seriesId)
@@ -389,9 +356,6 @@ public class SeriesRepository : ISeriesRepository
 
         return seriesList[0];
     }
-
-
-
 
     public async Task<bool> DeleteSeriesAsync(int seriesId)
     {
