@@ -3,7 +3,6 @@ import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { isTemplateSpan } from 'typescript';
 import { ScrollService } from '../scroll.service';
 import { PersonRole } from '../_models/person';
 import { SearchResult } from '../_models/search-result';
@@ -151,7 +150,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   clickSearchResult(item: SearchResult) {
-    console.log('Click occured');
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.searchViewRef.clear();
@@ -168,7 +166,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   focusUpdate(searchFocused: boolean) {
-    console.log('search has focus', searchFocused);
     this.searchFocused = searchFocused
     return searchFocused;
   }

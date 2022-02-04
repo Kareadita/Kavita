@@ -16,6 +16,9 @@ $dark-form-readonly: #434648;
 $dark-item-accent-bg: #292d32;
 
 
+$white-item-accent-bg: rgba(247, 247, 247, 1);
+
+
 //=========================
 //     Ratings
 //=========================
@@ -28,6 +31,7 @@ $rating-empty: #b0c4de;
 // :root {
 //   --drawer-background-color: #FFF;
 // }
+
 
 $theme-colors: (
   "primary": $primary-color,

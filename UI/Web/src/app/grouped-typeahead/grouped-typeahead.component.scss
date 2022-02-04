@@ -151,13 +151,34 @@ ul ul {
     cursor: pointer;
 }
 
-.section-header {
-    background: colors.$dark-item-accent-bg;
-    cursor: default;
+::ng-deep .bg-dark {
+    & .section-header {
+    
+        background: colors.$dark-item-accent-bg;
+        cursor: default;
+    }
+    
+    & .section-header:hover {
+        background-color: colors.$dark-item-accent-bg !important;
+    }
 }
 
-.section-header:hover {
-    background-color: colors.$dark-item-accent-bg !important;
+::ng-deep .bg-light {
+    & .section-header {
+    
+        background: colors.$white-item-accent-bg;
+        cursor: default;
+    }
+
+    & .section-header:hover, .list-group-item.section-header:hover {
+        background: colors.$white-item-accent-bg !important;
+    }
+    
+    & .list-group-item:hover {
+        background-color: colors.$primary-color !important;
+    }
+
+
 }
 
 .spinner-border {
