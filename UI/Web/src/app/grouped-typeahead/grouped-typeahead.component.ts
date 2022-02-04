@@ -161,6 +161,9 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
         return;
       }
     }
+    if (this.searchTerm === '') {
+      this.resetField();
+    }
     this.hasFocus = false;
     this.focusChanged.emit(this.hasFocus);
   }
@@ -171,7 +174,6 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   public clear() {
-    console.log('clear called');
     this.prevSearchTerm = '';
     this.typeaheadForm.get('typeahead')?.setValue(this.initialValue);
   }
