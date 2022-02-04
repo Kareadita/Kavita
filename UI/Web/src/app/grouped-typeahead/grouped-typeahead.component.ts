@@ -64,7 +64,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   hasFocus: boolean = false;
   isLoading: boolean = false;
   typeaheadForm: FormGroup = new FormGroup({});
-  focusedIndex: number = 0;
+  focusedIndex: number = -1;
   focusedIndexGroup: {[key:string]: number} = {'series': 0, 'collections': 0, 'tags': 0, 'genres': 0, 'persons': 0};
 
   prevSearchTerm: string = '';
@@ -89,40 +89,6 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     if (!this.hasFocus) { return; }
 
     switch(event.key) {
-      case KEY_CODES.DOWN_ARROW:
-      case KEY_CODES.RIGHT_ARROW:
-      {
-        // TODO: Figure out the group we are in to update focus index
-        const currentActiveElement = Array.from(this.document.querySelectorAll(ITEM_QUERY_SELECTOR)).filter(item => item.classList.contains('active'));
-        if (currentActiveElement.length > 0) {
-          const group = currentActiveElement[0].getAttribute('aria-labelledby')?.split('-group')[0];
-          console.log('Group: ', group);
-
-
-
-        }
-        this.focusedIndex = Math.min(this.focusedIndex + 1, this.document.querySelectorAll(ITEM_QUERY_SELECTOR).length - 1);
-        this.updateHighlight();
-        break;
-      }
-      case KEY_CODES.UP_ARROW:
-      case KEY_CODES.LEFT_ARROW:
-      {
-        this.focusedIndex = Math.max(this.focusedIndex - 1, 0);
-        this.updateHighlight();
-        // BUG: Pressing down doesn't scroll the list
-        break;
-      }
-      case KEY_CODES.ENTER:
-      {
-        this.document.querySelectorAll(ITEM_QUERY_SELECTOR).forEach((item, index) => {
-          if (item.classList.contains('active')) {
-            this.handleResultlick(item);
-            this.resetField();
-          }
-        });
-        break;
-      }
       case KEY_CODES.ESC_KEY:
         this.hasFocus = false;
         this.focusChanged.emit(this.hasFocus);
