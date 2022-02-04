@@ -41,6 +41,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
+      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
     });
   }
 
@@ -54,6 +55,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
+    this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
   }
 
   async saveSettings() {
@@ -88,6 +90,30 @@ export class ManageSettingsComponent implements OnInit {
         this.settingsForm.markAsTouched();
       }
     });
+  }
+
+  resetEmailServiceUrl() {
+    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+      this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
+      this.resetForm();
+      this.toastr.success('Email Service Reset');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
+  testEmailServiceUrl() {
+    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (successful: boolean) => {
+      if (successful) {
+        this.toastr.success('Email Service Url validated');
+      } else {
+        this.toastr.error('Email Service Url did not respond');
+      }
+      
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+    
   }
 
 }

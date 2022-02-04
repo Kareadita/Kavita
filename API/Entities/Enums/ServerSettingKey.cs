@@ -71,6 +71,10 @@ namespace API.Entities.Enums
         /// </summary>
         [Description("BookmarkDirectory")]
         BookmarkDirectory = 12,
-
+        /// <summary>
+        /// If SMTP is enabled on the server
+        /// </summary>
+        [Description("CustomEmailService")]
+        EmailServiceUrl = 13,
     }
 }

@@ -60,6 +60,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new () {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
                 new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
+                new () {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
             };
 
             foreach (var defaultSetting in DefaultSettings)

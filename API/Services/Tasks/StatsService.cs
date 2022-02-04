@@ -7,6 +7,7 @@ using API.DTOs.Stats;
 using API.Entities.Enums;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 

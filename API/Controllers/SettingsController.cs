@@ -4,14 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Email;
 using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Services;
 using AutoMapper;
+using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,15 +28,17 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly IDirectoryService _directoryService;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
         public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-            IDirectoryService directoryService, IMapper mapper)
+            IDirectoryService directoryService, IMapper mapper, IEmailService emailService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _taskScheduler = taskScheduler;
             _directoryService = directoryService;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
         [AllowAnonymous]
@@ -63,6 +68,36 @@ namespace API.Controllers
 
             return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
         }
+
+        /// <summary>
+        /// Resets the email service url
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("reset-email-url")]
+        public async Task<ActionResult<ServerSettingDto>> ResetEmailServiceUrlSettings()
+        {
+            _logger.LogInformation("{UserName} is resetting Email Service Url Setting", User.GetUsername());
+            var emailSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl);
+            emailSetting.Value = EmailService.DefaultApiUrl;
+            _unitOfWork.SettingsRepository.Update(emailSetting);
+
+            if (!await _unitOfWork.CommitAsync())
+            {
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+        }
+
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("test-email-url")]
+        public async Task<ActionResult<bool>> TestEmailServiceUrl(TestEmailDto dto)
+        {
+            return Ok(await _emailService.TestConnectivity(dto.Url));
+        }
+
+
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost]
@@ -172,6 +207,15 @@ namespace API.Controllers
                     {
                         await _taskScheduler.ScheduleStatsTasks();
                     }
+                }
+
+                if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
+                {
+                    setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
+                    FlurlHttp.ConfigureClient(setting.Value, cli =>
+                        cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+
+                    _unitOfWork.SettingsRepository.Update(setting);
                 }
             }
 

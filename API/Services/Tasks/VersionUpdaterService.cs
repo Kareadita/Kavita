@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
 using API.SignalR.Presence;
 using Flurl.Http;
-using Flurl.Http.Configuration;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Common.Helpers;
 using MarkdownDeep;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
@@ -42,15 +41,6 @@ internal class GithubReleaseMetadata
     /// </summary>
     // ReSharper disable once InconsistentNaming
     public string Published_At { get; init; }
-}
-
-public class UntrustedCertClientFactory : DefaultHttpClientFactory
-{
-    public override HttpMessageHandler CreateMessageHandler() {
-        return new HttpClientHandler {
-            ServerCertificateCustomValidationCallback = (_, _, _, _) => true
-        };
-    }
 }
 
 public interface IVersionUpdaterService
