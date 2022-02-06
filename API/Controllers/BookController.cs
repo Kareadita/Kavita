@@ -155,7 +155,7 @@ namespace API.Controllers
                         if (!string.IsNullOrEmpty(key) && mappings.ContainsKey(key))
                         {
                             var part = string.Empty;
-                            if (anchor.Attributes["href"].Value.Contains("#"))
+                            if (anchor.Attributes["href"].Value.Contains('#'))
                             {
                                 part = anchor.Attributes["href"].Value.Split("#")[1];
                             }
