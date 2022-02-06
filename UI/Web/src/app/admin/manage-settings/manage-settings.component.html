@@ -71,7 +71,7 @@
         </p>
         <div class="form-group">
             <label for="settings-emailservice">Email Service Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailServiceTooltip" role="button" tabindex="0"></i>
-            <ng-template #emailServiceTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed, other files within directory will be deleted.</ng-template>
+            <ng-template #emailServiceTooltip>Use fully qualified url of the email service. Do not include ending slash.</ng-template>
             <span class="sr-only" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
             <div class="input-group">
                 <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
