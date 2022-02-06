@@ -11,6 +11,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
+using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
 using API.Services;
@@ -509,7 +510,8 @@ namespace API.Controllers
                 await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
                 {
                     EmailAddress = user.Email,
-                    ServerConfirmationLink = emailLink
+                    ServerConfirmationLink = emailLink,
+                    InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
                 });
                 return Ok("Email sent");
             }
@@ -560,7 +562,8 @@ namespace API.Controllers
             {
                 EmailAddress = user.Email,
                 Username = user.UserName,
-                ServerConfirmationLink = emailLink
+                ServerConfirmationLink = emailLink,
+                InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
             });
 
 
