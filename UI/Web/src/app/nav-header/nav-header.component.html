@@ -29,7 +29,7 @@
                     </div>
                     <div class="ml-1">
                       <app-series-format [format]="item.format"></app-series-format>
-                      <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName" [innerHTML]="item.name"></span>
+                      <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
                       <ng-template #localizedName>
                         <span [innerHTML]="item.localizedName"></span>
                       </ng-template>
@@ -44,7 +44,11 @@
                       <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
                     <div class="ml-1">
-                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
+                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0">{{item.title}}</span>
+                      <span *ngIf="item.promoted">
+                        &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
+                        <span class="sr-only">(promoted)</span>
+                      </span>
                     </div>
                   </div>
                 </ng-template>
@@ -52,7 +56,7 @@
                 <ng-template #tagTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
                     <div class="ml-1">
-                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0" [innerHTML]="item.title"></span>
+                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0">{{item.title}}</span>
                     </div>
                   </div>
                 </ng-template>
