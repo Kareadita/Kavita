@@ -50,7 +50,8 @@ public class EmailService : IEmailService
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
     {
-        var success = await SendEmailWithPost(DefaultApiUrl + "/api/email/confirm", data);
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        var success = await SendEmailWithPost(emailLink + "/api/email/confirm", data);
         if (!success)
         {
             _logger.LogError("There was a critical error sending Confirmation email");
