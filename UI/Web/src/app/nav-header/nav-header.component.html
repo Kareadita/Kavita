@@ -44,7 +44,7 @@
                       <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
                     <div class="ml-1">
-                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0">{{item.title}}</span>
+                      <span>{{item.title}}</span>
                       <span *ngIf="item.promoted">
                         &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
                         <span class="sr-only">(promoted)</span>
@@ -56,7 +56,7 @@
                 <ng-template #tagTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
                     <div class="ml-1">
-                      <span *ngIf="item.title.toLowerCase().trim().indexOf(searchTerm) >= 0">{{item.title}}</span>
+                      <span>{{item.title}}</span>
                     </div>
                   </div>
                 </ng-template>
@@ -103,7 +103,7 @@
           <div class="nav-item">
             <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
           </div>
-          <div class="nav-item pr-2">
+          <div class="nav-item pr-2 not-xs-only">
             <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon">
               <i class="fa fa-cogs" aria-hidden="true" style="color: white"></i>
               <span class="sr-only">Server Settings</span>
@@ -116,6 +116,7 @@
               {{user.username | sentenceCase}}
             </button>
             <div ngbDropdownMenu>
+              <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
               <a ngbDropdownItem routerLink="/preferences/">Settings</a>
               <a ngbDropdownItem (click)="logout()">Logout</a>
             </div>

@@ -1,6 +1,8 @@
 import { Observable } from 'rxjs';
 import { FormControl } from '@angular/forms';
 
+export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
+
 export class TypeaheadSettings<T> {
     /**
      * How many ms between typing actions before pipeline to load data is triggered
@@ -24,7 +26,11 @@ export class TypeaheadSettings<T> {
     /**
      * Function to compare the elements. Should return all elements that fit the matching criteria. This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
      */
-    compareFn!:  ((optionList: T[], filter: string)  => T[]); 
+    compareFn!:  ((optionList: T[], filter: string)  => T[]);
+    /**
+     * Function which is used for comparing objects when keeping track of state. Useful over shallow equal when you have image urls that have random numbers on them.
+     */ 
+    singleCompareFn?: SelectionCompareFn<T>;
     /**
      * Function to fetch the data from the server. If data is mainatined in memory, wrap in an observable.
      */

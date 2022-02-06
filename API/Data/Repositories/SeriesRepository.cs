@@ -233,6 +233,14 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
+    /// <summary>
+    /// Gets all series
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="userId"></param>
+    /// <param name="userParams"></param>
+    /// <param name="filter"></param>
+    /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter);
@@ -637,34 +645,32 @@ public class SeriesRepository : ISeriesRepository
             )
             .AsNoTracking();
 
-        if (filter.SortOptions != null)
+        // If no sort options, default to using SortName
+        filter.SortOptions ??= new SortOptions()
         {
-            if (filter.SortOptions.IsAscending)
+            IsAscending = true,
+            SortField = SortField.SortName
+        };
+
+        if (filter.SortOptions.IsAscending)
+        {
+            query = filter.SortOptions.SortField switch
             {
-                if (filter.SortOptions.SortField == SortField.SortName)
-                {
-                    query = query.OrderBy(s => s.SortName);
-                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
-                {
-                    query = query.OrderBy(s => s.Created);
-                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
-                {
-                    query = query.OrderBy(s => s.LastModified);
-                }
-            }
-            else
+                SortField.SortName => query.OrderBy(s => s.SortName),
+                SortField.CreatedDate => query.OrderBy(s => s.Created),
+                SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
+                _ => query
+            };
+        }
+        else
+        {
+            query = filter.SortOptions.SortField switch
             {
-                if (filter.SortOptions.SortField == SortField.SortName)
-                {
-                    query = query.OrderByDescending(s => s.SortName);
-                } else if (filter.SortOptions.SortField == SortField.CreatedDate)
-                {
-                    query = query.OrderByDescending(s => s.Created);
-                } else if (filter.SortOptions.SortField == SortField.LastModifiedDate)
-                {
-                    query = query.OrderByDescending(s => s.LastModified);
-                }
-            }
+                SortField.SortName => query.OrderByDescending(s => s.SortName),
+                SortField.CreatedDate => query.OrderByDescending(s => s.Created),
+                SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
+                _ => query
+            };
         }
 
         return query;

@@ -281,10 +281,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   handleVolumeActionCallback(action: Action, volume: Volume) {
     switch(action) {
       case(Action.MarkAsRead):
-        this.markAsRead(volume);
+        this.markVolumeAsRead(volume);
         break;
       case(Action.MarkAsUnread):
-        this.markAsUnread(volume);
+        this.markVolumeAsUnread(volume);
         break;
       case(Action.Edit):
         this.openViewInfo(volume);
@@ -331,22 +331,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       if (result) {
         this.router.navigate(['library', this.libraryId]);
       }
-    });
-  }
-
-  markSeriesAsUnread(series: Series) {
-    this.seriesService.markUnread(series.id).subscribe(res => {
-      this.toastr.success(series.name + ' is now unread');
-      series.pagesRead = 0;
-      this.loadSeries(series.id);
-    });
-  }
-
-  markSeriesAsRead(series: Series) {
-    this.seriesService.markRead(series.id).subscribe(res => {
-      series.pagesRead = series.pages;
-      this.toastr.success(series.name + ' is now read');
-      this.loadSeries(series.id);
     });
   }
 
@@ -444,25 +428,23 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
-  markAsRead(vol: Volume) {
+  markVolumeAsRead(vol: Volume) {
     if (this.series === undefined) {
       return;
     }
-    const seriesId = this.series.id;
 
-    this.actionService.markVolumeAsRead(seriesId, vol, () => {
+    this.actionService.markVolumeAsRead(this.series.id, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
   }
 
-  markAsUnread(vol: Volume) {
+  markVolumeAsUnread(vol: Volume) {
     if (this.series === undefined) {
       return;
     }
-    const seriesId = this.series.id;
 
-    this.actionService.markVolumeAsUnread(seriesId, vol, () => {
+    this.actionService.markVolumeAsUnread(this.series.id, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -472,9 +454,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     if (this.series === undefined) {
       return;
     }
-    const seriesId = this.series.id;
     
-    this.actionService.markChapterAsRead(seriesId, chapter, () => {
+    this.actionService.markChapterAsRead(this.series.id, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -484,9 +465,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     if (this.series === undefined) {
       return;
     }
-    const seriesId = this.series.id;
 
-    this.actionService.markChapterAsUnread(seriesId, chapter, () => {
+    this.actionService.markChapterAsUnread(this.series.id, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
