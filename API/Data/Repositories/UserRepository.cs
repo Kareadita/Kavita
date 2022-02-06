@@ -31,6 +31,7 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     public void Delete(AppUser user);
+    void Delete(AppUserBookmark bookmark);
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
     Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
@@ -53,6 +54,7 @@ public interface IUserRepository
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUser>> GetAllUsers();
+
 }
 
 public class UserRepository : IUserRepository
@@ -86,6 +88,11 @@ public class UserRepository : IUserRepository
     public void Delete(AppUser user)
     {
         _context.AppUser.Remove(user);
+    }
+
+    public void Delete(AppUserBookmark bookmark)
+    {
+        _context.AppUserBookmark.Remove(bookmark);
     }
 
     /// <summary>

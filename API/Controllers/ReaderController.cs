@@ -560,13 +560,16 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
 
             if (user.Bookmarks == null) return Ok();
-            try {
-                user.Bookmarks = user.Bookmarks.Where(x =>
-                    x.ChapterId == bookmarkDto.ChapterId
-                    && x.AppUserId == user.Id
-                    && x.Page != bookmarkDto.Page).ToList();
+            try
+            {
+                var bookmarkToDelete = user.Bookmarks.SingleOrDefault(x =>
+                    x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id && x.Page == bookmarkDto.Page &&
+                    x.SeriesId == bookmarkDto.SeriesId);
 
-                _unitOfWork.UserRepository.Update(user);
+                if (bookmarkToDelete != null)
+                {
+                    _unitOfWork.UserRepository.Delete(bookmarkToDelete);
+                }
 
                 if (await _unitOfWork.CommitAsync())
                 {
