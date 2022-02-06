@@ -154,10 +154,11 @@ namespace API.Controllers
 
             var bookmarkDirectory =
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+
             var files = (await _unitOfWork.UserRepository.GetAllBookmarksByIds(downloadBookmarkDto.Bookmarks
                 .Select(b => b.Id)
                 .ToList()))
-                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, b.FileName)));
+                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, $"{b.ChapterId}_{b.FileName}")));
 
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
                 $"download_{user.Id}_{series.Id}_bookmarks");
