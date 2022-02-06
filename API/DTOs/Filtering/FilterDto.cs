@@ -80,7 +80,7 @@ namespace API.DTOs.Filtering
         /// <summary>
         /// Sorting Options for a query. Defaults to null, which uses the queries natural sorting order
         /// </summary>
-        public SortOptions SortOptions { get; init; } = null;
+        public SortOptions SortOptions { get; set; } = null;
         /// <summary>
         /// Age Ratings. Empty list will return everything back
         /// </summary>
