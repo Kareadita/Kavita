@@ -18,13 +18,6 @@
     </ng-template>
 </app-carousel-reel>
 
-
-<!-- <app-carousel-reel [items]="recentlyAdded" title="Recently Added Series" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="loadRecentlyAdded()"></app-series-card>
-    </ng-template>
-</app-carousel-reel> -->
-
 <app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added">
     <ng-template #carouselItem let-item let-position="idx">
         <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 

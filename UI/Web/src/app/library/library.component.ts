@@ -28,7 +28,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isLoading = false;
   isAdmin = false;
 
-  recentlyAdded: Series[] = [];
   recentlyUpdatedSeries: SeriesGroup[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
@@ -44,17 +43,16 @@ export class LibraryComponent implements OnInit, OnDestroy {
       this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
-          this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            this.recentlyAdded.unshift(series);
-          });
-          this.loadRecentlyAddedChapters();
+          this.loadRecentlyAdded();
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-          this.recentlyAdded = this.recentlyAdded.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           
           this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
           this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+        } else if (res.event === EVENTS.ScanSeries) {
+          // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
+          this.loadRecentlyAdded();
         }
       });
   }
@@ -80,9 +78,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   reloadSeries() {
-    this.loadRecentlyAdded();
     this.loadOnDeck();
-    this.loadRecentlyAddedChapters();
+    this.loadRecentlyAdded();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -104,13 +101,8 @@ export class LibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadRecentlyAdded() {
-    this.seriesService.getRecentlyAdded(0, 0, 20).pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAdded = updatedSeries.result;
-    });
-  }
 
-  loadRecentlyAddedChapters() {
+  loadRecentlyAdded() {
     this.seriesService.getRecentlyUpdatedSeries().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyUpdatedSeries = updatedSeries;
     });
