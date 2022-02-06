@@ -18,6 +18,22 @@ $bg-color: rgb(22, 27, 34);
     }
 }
 
+// On Really small screens, hide the server settings wheel and show it in nav
+.xs-only {
+    display: none;
+}
+.not-xs-only {
+    display: inherit;
+}
+@media only screen and (max-width:300px) {
+    .xs-only {
+        display: inherit;
+    }
+    .not-xs-only {
+        display: none;
+    }
+}
+
 .nav-item.dropdown {
     position: unset;
 }
