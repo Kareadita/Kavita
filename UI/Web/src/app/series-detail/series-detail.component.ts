@@ -200,13 +200,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.toastr.info('This series no longer exists');
           this.router.navigateByUrl('/libraries');
         }
-      } else if (event.event === EVENTS.RefreshMetadata) {
-        const seriesRemovedEvent = event.payload as RefreshMetadataEvent;
-        if (seriesRemovedEvent.seriesId === this.series.id) {
+      } else if (event.event === EVENTS.ScanSeries) {
+        const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
+        if (seriesCoverUpdatedEvent.seriesId === this.series.id) {
+          console.log('ScanSeries called')
           this.seriesService.getMetadata(this.series.id).pipe(take(1)).subscribe(metadata => {
             this.seriesMetadata = metadata;
             this.createHTML();
-          })
+          });
         }
       }
     });

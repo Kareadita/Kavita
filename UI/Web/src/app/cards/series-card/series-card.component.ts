@@ -61,13 +61,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     if (this.data) {
-      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
-
-      this.hubService.refreshMetadata.pipe(takeWhile(event => event.libraryId === this.libraryId), takeUntil(this.onDestroy)).subscribe((event: RefreshMetadataEvent) => {
-        if (this.data.id === event.seriesId) {
-          this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
-        }    
-      });
+      this.imageUrl = this.imageService.getSeriesCoverImage(this.data.id);
     }
   }
 
