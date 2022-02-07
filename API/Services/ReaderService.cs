@@ -24,6 +24,7 @@ public interface IReaderService
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
+    Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
 }
 
 public class ReaderService : IReaderService
@@ -364,5 +365,12 @@ public class ReaderService : IReaderService
         }
     }
 
-
+    public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
+    {
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber))
+        {
+            MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
+        }
+    }
 }

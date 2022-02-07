@@ -392,7 +392,17 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
-            await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
+            if (chapterNumber < 1.0f)
+            {
+                // This is a hack to track volume number. We need to map it back by x100
+                var volumeNumber = int.Parse($"{chapterNumber * 100f}");
+                await _readerService.MarkVolumesUntilAsRead(user, seriesId, volumeNumber);
+            }
+            else
+            {
+                await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
+            }
+
 
             _unitOfWork.UserRepository.Update(user);
 
