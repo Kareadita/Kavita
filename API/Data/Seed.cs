@@ -93,12 +93,9 @@ namespace API.Data
             await context.Database.EnsureCreatedAsync();
 
             var users = await context.AppUser.ToListAsync();
-            foreach (var user in users)
+            foreach (var user in users.Where(user => string.IsNullOrEmpty(user.ApiKey)))
             {
-                if (string.IsNullOrEmpty(user.ApiKey))
-                {
-                    user.ApiKey = HashUtil.ApiKey();
-                }
+                user.ApiKey = HashUtil.ApiKey();
             }
             await context.SaveChangesAsync();
         }

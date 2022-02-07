@@ -618,7 +618,7 @@ public class OpdsController : BaseApiController
     private static void AddPagination(Feed feed, PagedList<SeriesDto> list, string href)
     {
         var url = href;
-        if (href.Contains("?"))
+        if (href.Contains('?'))
         {
             url += "&amp;";
         }
