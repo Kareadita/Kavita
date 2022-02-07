@@ -25,6 +25,7 @@ $image-width: 160px;
     padding-left: 0px;
     padding-right: 0px;
     box-sizing: border-box;
+    position: relative;
 }
 
 .card-title {
@@ -106,6 +107,7 @@ $image-width: 160px;
 
         .bulk-mode {
             visibility: visible;
+            z-index: 101;
         }
 
         .overlay-item {
@@ -123,7 +125,23 @@ $image-width: 160px;
         top: 5px;
         right: 10px;
         position: absolute;
+        z-index: 100;
     }
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 230px;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.2);
+    transition: opacity 0.2s;
+}
+
+.card-overlay:hover {
+    opacity: 0;
 }
 
 .card-actions {
