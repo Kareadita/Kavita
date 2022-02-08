@@ -198,11 +198,10 @@ namespace API.Services
            try
            {
                var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
-               if (fileInfo.Exists)
-               {
-                   ExistOrCreate(targetDirectory);
-                   fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
-               }
+               if (!fileInfo.Exists) return;
+
+               ExistOrCreate(targetDirectory);
+               fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
            }
            catch (Exception ex)
            {

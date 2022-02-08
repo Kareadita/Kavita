@@ -38,6 +38,7 @@ namespace API.Extensions
             services.AddScoped<IReadingItemService, ReadingItemService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IBookmarkService, BookmarkService>();
 
             services.AddScoped<IFileSystem, FileSystem>();
             services.AddScoped<IFileService, FileService>();

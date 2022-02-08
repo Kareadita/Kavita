@@ -66,8 +66,8 @@ namespace API.Services.Tasks
             await SendProgress(0.7F);
             await DeleteTagCoverImages();
             await SendProgress(0.8F);
-            _logger.LogInformation("Cleaning old bookmarks");
-            await CleanupBookmarks();
+            //_logger.LogInformation("Cleaning old bookmarks");
+            //await CleanupBookmarks();
             await SendProgress(1F);
             _logger.LogInformation("Cleanup finished");
         }
@@ -172,33 +172,35 @@ namespace API.Services.Tasks
         /// <summary>
         /// Removes all files in the BookmarkDirectory that don't currently have bookmarks in the Database
         /// </summary>
-        public async Task CleanupBookmarks()
+        public Task CleanupBookmarks()
         {
+            // This is disabled for now while we test and validate a new method of deleting bookmarks
+            return Task.CompletedTask;
             // Search all files in bookmarks/ except bookmark files and delete those
-            var bookmarkDirectory =
-                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-            var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories).Select(Parser.Parser.NormalizePath);
-            var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
-                    b.FileName)));
-
-
-            var filesToDelete = allBookmarkFiles.AsEnumerable().Except(bookmarks).ToList();
-            _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count);
-
-            if (filesToDelete.Count == 0) return;
-
-            _directoryService.DeleteFiles(filesToDelete);
-
-            // Clear all empty directories
-            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, "", SearchOption.AllDirectories))
-            {
-                if (_directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
-                    _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
-                {
-                    _directoryService.FileSystem.Directory.Delete(directory, false);
-                }
-            }
+            // var bookmarkDirectory =
+            //     (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            // var allBookmarkFiles = _directoryService.GetFiles(bookmarkDirectory, searchOption: SearchOption.AllDirectories).Select(Parser.Parser.NormalizePath);
+            // var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
+            //     .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
+            //         b.FileName)));
+            //
+            //
+            // var filesToDelete = allBookmarkFiles.AsEnumerable().Except(bookmarks).ToList();
+            // _logger.LogDebug("[Bookmarks] Bookmark cleanup wants to delete {Count} files", filesToDelete.Count);
+            //
+            // if (filesToDelete.Count == 0) return;
+            //
+            // _directoryService.DeleteFiles(filesToDelete);
+            //
+            // // Clear all empty directories
+            // foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, "", SearchOption.AllDirectories))
+            // {
+            //     if (_directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
+            //         _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
+            //     {
+            //         _directoryService.FileSystem.Directory.Delete(directory, false);
+            //     }
+            // }
         }
     }
 }
