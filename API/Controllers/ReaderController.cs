@@ -28,12 +28,13 @@ namespace API.Controllers
         private readonly IReaderService _readerService;
         private readonly IDirectoryService _directoryService;
         private readonly ICleanupService _cleanupService;
+        private readonly IBookmarkService _bookmarkService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
             IReaderService readerService, IDirectoryService directoryService,
-            ICleanupService cleanupService)
+            ICleanupService cleanupService, IBookmarkService bookmarkService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
@@ -41,6 +42,7 @@ namespace API.Controllers
             _readerService = readerService;
             _directoryService = directoryService;
             _cleanupService = cleanupService;
+            _bookmarkService = bookmarkService;
         }
 
         /// <summary>
@@ -451,6 +453,7 @@ namespace API.Controllers
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
+                var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == dto.SeriesId).ToList();
                 user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
@@ -458,7 +461,7 @@ namespace API.Controllers
                 {
                     try
                     {
-                        await _cleanupService.CleanupBookmarks();
+                        await _bookmarkService.DeleteBookmarkFiles(bookmarksToRemove);
                     }
                     catch (Exception ex)
                     {
@@ -514,49 +517,17 @@ namespace API.Controllers
         {
             // Don't let user save past total pages.
             bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+            var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+            if (chapter == null) return BadRequest("Could not find cached image. Reload and try again.");
+            var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
 
-            try
+            if (await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             {
-                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-                var userBookmark =
-                    await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
-
-                // We need to get the image
-                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
-                var fileInfo = new FileInfo(path);
-
-                var bookmarkDirectory =
-                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
-                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
-
-
-               if (userBookmark == null)
-               {
-                   user.Bookmarks ??= new List<AppUserBookmark>();
-                   user.Bookmarks.Add(new AppUserBookmark()
-                   {
-                       Page = bookmarkDto.Page,
-                       VolumeId = bookmarkDto.VolumeId,
-                       SeriesId = bookmarkDto.SeriesId,
-                       ChapterId = bookmarkDto.ChapterId,
-                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
-
-                   });
-                   _unitOfWork.UserRepository.Update(user);
-               }
-
-               await _unitOfWork.CommitAsync();
-            }
-            catch (Exception)
-            {
-               await _unitOfWork.RollbackAsync();
-               return BadRequest("Could not save bookmark");
+                return Ok();
             }
 
-            return Ok();
+            return BadRequest("Could not save bookmark");
         }
 
         /// <summary>
@@ -568,27 +539,11 @@ namespace API.Controllers
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-
             if (user.Bookmarks == null) return Ok();
-            try
-            {
-                var bookmarkToDelete = user.Bookmarks.SingleOrDefault(x =>
-                    x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == user.Id && x.Page == bookmarkDto.Page &&
-                    x.SeriesId == bookmarkDto.SeriesId);
 
-                if (bookmarkToDelete != null)
-                {
-                    _unitOfWork.UserRepository.Delete(bookmarkToDelete);
-                }
-
-                if (await _unitOfWork.CommitAsync())
-                {
-                    return Ok();
-                }
-            }
-            catch (Exception)
+            if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
             {
-                await _unitOfWork.RollbackAsync();
+                return Ok();
             }
 
             return BadRequest("Could not remove bookmark");
