@@ -1,5 +1,8 @@
-import { Component, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ImageService } from 'src/app/_services/image.service';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 
 /**
  * This is used for images with placeholder fallback.
@@ -9,7 +12,7 @@ import { ImageService } from 'src/app/_services/image.service';
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss']
 })
-export class ImageComponent implements OnChanges {
+export class ImageComponent implements OnChanges, OnDestroy {
 
   /**
    * Source url to load image
@@ -38,7 +41,15 @@ export class ImageComponent implements OnChanges {
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
-  constructor(public imageService: ImageService, private renderer: Renderer2) { }
+  private readonly onDestroy = new Subject<void>();
+
+  constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService) {
+    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
+        if (res.event === EVENTS.CoverUpdate) {
+          this.imageUrl = this.imageService.randomize(this.imageUrl);
+        }
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.width != '') {
@@ -60,7 +71,11 @@ export class ImageComponent implements OnChanges {
     if (this.borderRadius != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'border-radius', this.borderRadius);
     }
-    
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
 }
