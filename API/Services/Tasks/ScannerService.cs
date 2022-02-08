@@ -379,6 +379,11 @@ public class ScannerService : IScannerService
                 await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
             }
 
+            foreach (var series in librarySeries)
+            {
+                await _messageHub.Clients.All.SendAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
+            }
+
             var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
             await _messageHub.Clients.All.SendAsync(SignalREvents.ScanLibraryProgress,
                 MessageFactory.ScanLibraryProgressEvent(library.Id, progress));

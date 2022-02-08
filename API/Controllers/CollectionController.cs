@@ -6,8 +6,10 @@ using API.Data;
 using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
@@ -17,11 +19,13 @@ namespace API.Controllers
     public class CollectionController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<MessageHub> _messageHub;
 
         /// <inheritdoc />
-        public CollectionController(IUnitOfWork unitOfWork)
+        public CollectionController(IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
         {
             _unitOfWork = unitOfWork;
+            _messageHub = messageHub;
         }
 
         /// <summary>
@@ -152,6 +156,7 @@ namespace API.Controllers
                 {
                     tag.CoverImageLocked = false;
                     tag.CoverImage = string.Empty;
+                    await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(tag.Id, "collection"));
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 

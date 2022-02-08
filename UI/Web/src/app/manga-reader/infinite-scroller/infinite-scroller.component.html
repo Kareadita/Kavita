@@ -4,7 +4,7 @@
     <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
     <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
     <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
-    <strong>Pages:</strong> {{pageNum}} / {{totalPages}}
+    <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
     <strong>At Top:</strong> {{atTop}}
     <strong>At Bottom:</strong> {{atBottom}}
     <strong>Total Height:</strong> {{getTotalHeight()}}
@@ -27,7 +27,7 @@
 </div>
 <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
     <img src="{{item.src}}" style="display: block" 
-    class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}" 
+    class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}" 
     *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" 
     (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
 </ng-container>

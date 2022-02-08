@@ -3,6 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
+import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
@@ -31,6 +32,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   recentlyUpdatedSeries: SeriesGroup[] = [];
   recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
+  recentlyAddedSeries: Series[] = [];
 
   private readonly onDestroy = new Subject<void>();
 
@@ -43,11 +45,16 @@ export class LibraryComponent implements OnInit, OnDestroy {
       this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
+
+          this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
+            this.recentlyAddedSeries.unshift(series);
+          });
           this.loadRecentlyAdded();
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-          this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           
+          this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
+          this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
           this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         } else if (res.event === EVENTS.ScanSeries) {
@@ -80,6 +87,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   reloadSeries() {
     this.loadOnDeck();
     this.loadRecentlyAdded();
+    this.loadRecentlyAddedSeries();
   }
 
   reloadInProgress(series: Series | boolean) {
@@ -98,6 +106,12 @@ export class LibraryComponent implements OnInit, OnDestroy {
   loadOnDeck() {
     this.seriesService.getOnDeck().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
+    });
+  }
+
+  loadRecentlyAddedSeries() {
+    this.seriesService.getRecentlyAdded().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+      this.recentlyAddedSeries = updatedSeries.result;
     });
   }
 

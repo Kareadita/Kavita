@@ -79,7 +79,7 @@ export class ImageService implements OnDestroy {
    * @returns Url with a random parameter attached
    */
   randomize(url: string) {
-    const r = Math.random() * 100 + 1;
+    const r = Math.round(Math.random() * 100 + 1);
     if (url.indexOf('&random') >= 0) {
       return url + 1;
     }
