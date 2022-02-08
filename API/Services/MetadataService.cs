@@ -241,11 +241,7 @@ public class MetadataService : IMetadataService
             }
 
             await _unitOfWork.CommitAsync();
-            // foreach (var series in nonLibrarySeries)
-            // {
-            //     // TODO: This can be removed, we use CoverUpdate elsewhere
-            //     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
-            // }
+
             _logger.LogInformation(
                 "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                 chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);

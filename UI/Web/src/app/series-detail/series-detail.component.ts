@@ -128,7 +128,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           this.actionInProgress = false;
           this.bulkSelectionService.deselectAll();
         });
-        
+
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
@@ -167,7 +167,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService, private messageHub: MessageHubService, 
+              public imageSerivce: ImageService, private messageHub: MessageHubService,
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -203,7 +203,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
         if (seriesCoverUpdatedEvent.seriesId === this.series.id) {
-          console.log('ScanSeries called')
           this.seriesService.getMetadata(this.series.id).pipe(take(1)).subscribe(metadata => {
             this.seriesMetadata = metadata;
             this.createHTML();
@@ -361,13 +360,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
         this.volumes = volumes; // volumes are already be sorted in the backend
         const vol0 = this.volumes.filter(v => v.number === 0);
-        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters); 
-        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10))); 
-        
-        
+        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10)));
+
+
         this.setContinuePoint();
 
-        
+
         const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
         this.hasSpecials = specials.length > 0
         if (this.hasSpecials) {
@@ -390,7 +389,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   /**
    * This will update the selected tab
-   * 
+   *
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
@@ -402,11 +401,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }
 
     // This shows Volumes tab
-    if (this.volumes.filter(v => v.number !== 0).length !== 0) {  
+    if (this.volumes.filter(v => v.number !== 0).length !== 0) {
       this.hasNonSpecialVolumeChapters = true;
     }
 
-    // If an update occured and we were on specials, re-activate Volumes/Chapters 
+    // If an update occured and we were on specials, re-activate Volumes/Chapters
     if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != TabID.Storyline) {
       this.activeTabId = TabID.Storyline;
     }
@@ -455,7 +454,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     if (this.series === undefined) {
       return;
     }
-    
+
     this.actionService.markChapterAsRead(this.series.id, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
@@ -505,9 +504,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes 
-    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background 
-    // to help the user make a good choice. 
+    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes
+    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background
+    // to help the user make a good choice.
 
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {

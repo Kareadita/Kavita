@@ -6,6 +6,10 @@
     border: 2px solid red;
 }
 
+.full-opacity {
+    opacity: 0;
+}
+
 .spacer {
     width: 100%;
     height: 300px;
@@ -24,10 +28,6 @@
 .full-width {
     width: 100% !important;
 }
-
-// .img-container {
-//     overflow: auto;
-// }
 
 
 @keyframes move-up-down {
