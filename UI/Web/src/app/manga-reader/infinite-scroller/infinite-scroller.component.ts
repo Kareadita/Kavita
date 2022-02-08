@@ -61,7 +61,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
-  @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
@@ -128,11 +128,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.ActionBar | DEBUG_MODES.Outline | DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
-  debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]'];
+  debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -188,9 +188,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.goToPage) {
       this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
-        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
+        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
 
         if (this.pageNum < page) {
           this.scrollingDirection = PAGING_DIRECTION.FORWARD;

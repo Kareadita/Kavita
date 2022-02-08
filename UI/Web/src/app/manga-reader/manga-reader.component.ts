@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { forkJoin, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { KEY_CODES, UtilityService, Breakpoint } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
@@ -126,7 +126,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * An event emiter when a page change occurs. Used soley by the webtoon reader.
    */
-   goToPageEvent: ReplaySubject<number> = new ReplaySubject<number>();
+   goToPageEvent!: BehaviorSubject<number>;
+
    /**
    * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
    */
@@ -430,6 +431,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.inSetup = true;
 
+    if (this.goToPageEvent) {
+      // There was a bug where goToPage was emitting old values into infinite scroller between chapter loads. We explicity clear it out between loads
+      // and we use a BehaviourSubject to ensure only latest value is sent
+      this.goToPageEvent.complete();
+    }
+
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
@@ -450,6 +457,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         page = this.maxPages - 1;
       }
       this.setPageNum(page);
+      this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
 
 
@@ -459,6 +467,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
       this.pageOptions = newOptions;
 
+      // TODO: Move this into ChapterInfo
       this.libraryService.getLibraryType(results.chapterInfo.libraryId).pipe(take(1)).subscribe(type => {
         this.libraryType = type;
         this.updateTitle(results.chapterInfo, type);
@@ -1027,7 +1036,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.setPageNum(page);
     this.refreshSlider.emit();
-    this.goToPageEvent.next(page);
+    this.goToPageEvent.next(page); 
     this.render();
   }
 
