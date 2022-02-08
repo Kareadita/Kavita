@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Extensions;
@@ -150,7 +151,12 @@ namespace API
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
-                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
+                    // Only run this if we are upgrading
+                    var usersWithRole = await userManager.GetUsersInRoleAsync(PolicyConstants.ChangePasswordRole);
+                    if (usersWithRole.Count == 0)
+                    {
+                        await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
+                    }
 
                     var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
                     try
