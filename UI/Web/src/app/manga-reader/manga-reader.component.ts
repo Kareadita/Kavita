@@ -221,6 +221,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
   libraryType: LibraryType = LibraryType.Manga;
+  /**
+   * Used for webtoon reader. When loading pages or data, this will disable the reader
+   */
+  inSetup: boolean = true;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -424,6 +428,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterPrefetched = false;
     this.pageNum = 0;
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    this.inSetup = true;
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
@@ -448,6 +453,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
+
       // Due to change detection rules in Angular, we need to re-create the options object to apply the change
       const newOptions: Options = Object.assign({}, this.pageOptions);
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
@@ -457,6 +463,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.libraryType = type;
         this.updateTitle(results.chapterInfo, type);
       });
+
+      this.inSetup = false;
 
 
 

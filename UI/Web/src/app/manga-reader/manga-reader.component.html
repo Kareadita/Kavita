@@ -27,7 +27,7 @@
         <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
-        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading">
+        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading && !inSetup">
             <app-infinite-scroller [pageNum]="pageNum" 
             [bufferPages]="5" 
             [goToPage]="goToPageEvent" 
