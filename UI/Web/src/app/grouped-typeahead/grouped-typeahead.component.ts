@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SearchResultGroup } from '../_models/search/search-result-group';
@@ -77,7 +77,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
 
-  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
+  constructor() { }
 
   @HostListener('window:click', ['$event'])
   handleDocumentClick(event: any) {
@@ -121,13 +121,6 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
     if (event) {
       event.stopPropagation();
       event.preventDefault();
-    }
-
-    if (this.inputElem) {
-      // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
-      this.document.querySelector('body')?.click();
-      this.inputElem.nativeElement.focus();
-      this.open();
     }
    
     this.openDropdown();
