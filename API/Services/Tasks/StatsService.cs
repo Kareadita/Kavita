@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -105,7 +106,9 @@ public class StatsService : IStatsService
             KavitaVersion = BuildInfo.Version.ToString(),
             DotnetVersion = Environment.Version.ToString(),
             IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
-            NumOfCores = Math.Max(Environment.ProcessorCount, 1)
+            NumOfCores = Math.Max(Environment.ProcessorCount, 1),
+            HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
+            NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count()
         };
 
         return serverInfo;
