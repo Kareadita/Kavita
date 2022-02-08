@@ -121,6 +121,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
     */
    previousScrollHeightMinusTop: number = 0;
+   /**
+    * Tracks the first load, until all the initial prefetched images are loaded. We use this to reduce opacity so images can load without jerk.
+    */
+   initFinished: boolean = false;
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
@@ -394,6 +398,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
 
   initWebtoonReader() {
+    this.initFinished = false;
     const [innerWidth, _] = this.getInnerDimensions();
     this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     this.imagesLoaded = {};
@@ -432,11 +437,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         .filter((img: any) => !img.complete)
         .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
+          this.debugLog('[Initialization] All images have loaded from initial prefetch, initFinished = true');
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
           // There needs to be a bit of time before we scroll
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
             this.scrollToCurrentPage();
+          } else {
+            this.initFinished = true;
           }
           
           this.allImagesLoaded = true;
@@ -501,6 +509,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (this.currentPageElem) {
         this.debugLog('[Scroll] Scrolling to page ', this.pageNum);
         this.currentPageElem.scrollIntoView({behavior: 'smooth'});
+        this.initFinished = true;
       }
     }, 600);
   }
