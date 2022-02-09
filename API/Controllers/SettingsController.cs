@@ -92,7 +92,7 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("test-email-url")]
-        public async Task<ActionResult<bool>> TestEmailServiceUrl(TestEmailDto dto)
+        public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
         {
             return Ok(await _emailService.TestConnectivity(dto.Url));
         }
