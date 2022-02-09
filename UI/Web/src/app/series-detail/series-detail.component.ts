@@ -203,10 +203,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
         if (seriesCoverUpdatedEvent.seriesId === this.series.id) {
-          this.seriesService.getMetadata(this.series.id).pipe(take(1)).subscribe(metadata => {
-            this.seriesMetadata = metadata;
-            this.createHTML();
-          });
+          this.loadSeries(this.series.id);
         }
       }
     });
