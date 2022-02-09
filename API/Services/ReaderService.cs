@@ -216,7 +216,7 @@ public class ReaderService : IReaderService
     /// Tries to find the next logical Chapter
     /// </summary>
     /// <example>
-    /// V1 → V2 → V3 chapter 0 → V3 chapter 10 → SP 01 → SP 02
+    /// V1 → V2 → V3 chapter 0 → V3 chapter 10 → V0 chapter 1 -> V0 chapter 2 -> SP 01 → SP 02
     /// </example>
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
@@ -232,7 +232,7 @@ public class ReaderService : IReaderService
         if (currentVolume.Number == 0)
         {
             // Handle specials by sorting on their Filename aka Range
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range), currentChapter.Range, dto => dto.Range);
             if (chapterId > 0) return chapterId;
         }
 
@@ -242,8 +242,10 @@ public class ReaderService : IReaderService
             {
                 // Handle Chapters within current Volume
                 // In this case, i need 0 first because 0 represents a full volume file.
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting), currentChapter.Number);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting),
+                    currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
+
             }
 
             if (volume.Number != currentVolume.Number + 1) continue;
@@ -257,9 +259,26 @@ public class ReaderService : IReaderService
             }
 
             var firstChapter = chapters.FirstOrDefault();
+            if (firstChapter == null) break;
+            var isSpecial = firstChapter.IsSpecial || currentChapter.IsSpecial;
+            if (isSpecial)
+            {
+                var chapterId = GetNextChapterId(volume.Chapters.OrderByNatural(x => x.Number),
+                    currentChapter.Range, dto => dto.Range);
+                if (chapterId > 0) return chapterId;
+            } else if (double.Parse(firstChapter.Number) > double.Parse(currentChapter.Number)) return firstChapter.Id;
+        }
+
+        // If we are the last volume and we didn't find any next volume, loop back to volume 0 and give the first chapter
+        // This has an added problem that it will loop up to the beginning always
+        // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
+        if (currentVolume.Number != 0 && currentVolume.Number == volumes.LastOrDefault()?.Number && volumes.Count > 1)
+        {
+            var chapterVolume = volumes.FirstOrDefault();
+            if (chapterVolume?.Number != 0) return -1;
+            var firstChapter = chapterVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
             if (firstChapter == null) return -1;
             return firstChapter.Id;
-
         }
 
         return -1;
@@ -268,7 +287,7 @@ public class ReaderService : IReaderService
     /// Tries to find the prev logical Chapter
     /// </summary>
     /// <example>
-    /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← SP 01 ← SP 02
+    /// V1 ← V2 ← V3 chapter 0 ← V3 chapter 10 ← V0 chapter 1 ← V0 chapter 2 ← SP 01 ← SP 02
     /// </example>
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
@@ -283,7 +302,7 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number, dto => dto.Number);
             if (chapterId > 0) return chapterId;
         }
 
@@ -291,7 +310,8 @@ public class ReaderService : IReaderService
         {
             if (volume.Number == currentVolume.Number)
             {
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(), currentChapter.Number);
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(),
+                    currentChapter.Number, dto => dto.Number);
                 if (chapterId > 0) return chapterId;
             }
             if (volume.Number == currentVolume.Number - 1)
@@ -302,6 +322,16 @@ public class ReaderService : IReaderService
                 return lastChapter.Id;
             }
         }
+
+        var lastVolume = volumes.OrderBy(v => v.Number).LastOrDefault();
+        if (currentVolume.Number == 0 && currentVolume.Number != lastVolume?.Number && lastVolume?.Chapters.Count > 1)
+        {
+            var lastChapter = lastVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+            if (lastChapter == null) return -1;
+            return lastChapter.Id;
+        }
+
+
         return -1;
     }
 
@@ -331,7 +361,7 @@ public class ReaderService : IReaderService
     }
 
 
-    private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber)
+    private static int GetNextChapterId(IEnumerable<ChapterDto> chapters, string currentChapterNumber, Func<ChapterDto, string> accessor)
     {
         var next = false;
         var chaptersList = chapters.ToList();
@@ -341,7 +371,9 @@ public class ReaderService : IReaderService
             {
                 return chapter.Id;
             }
-            if (currentChapterNumber.Equals(chapter.Number)) next = true;
+
+            var chapterNum = accessor(chapter);
+            if (currentChapterNumber.Equals(chapterNum)) next = true;
         }
 
         return -1;
