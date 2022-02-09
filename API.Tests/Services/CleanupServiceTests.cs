@@ -22,7 +22,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class CleanupServiceTests
+public class CleanupServiceTests : IDisposable
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IUnitOfWork _unitOfWork;

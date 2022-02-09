@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -56,7 +57,7 @@ internal class MockReadingItemService : IReadingItemService
     }
 }
 
-public class ParseScannedFilesTests
+public class ParseScannedFilesTests : IDisposable
 {
     private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
     private readonly IUnitOfWork _unitOfWork;
