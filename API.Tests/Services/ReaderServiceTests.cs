@@ -493,6 +493,49 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetNextChapterIdAsync_ShouldRollIntoChaptersFromVolume()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
+
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 4, 1);
+        Assert.NotEqual(-1, nextChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("1", actualChapter.Range);
+    }
+
+    [Fact]
     public async Task GetNextChapterIdAsync_ShouldNotMoveFromVolumeToSpecial()
     {
         await ResetDB();
@@ -772,6 +815,48 @@ public class ReaderServiceTests
         Assert.Equal("A.cbz", actualChapter.Range);
     }
 
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldMoveFromChapterToVolume()
+    {
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
+
+
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+        Assert.NotEqual(-1, prevChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.Equal("22", actualChapter.Range);
+    }
     #endregion
 
     #region GetContinuePoint
