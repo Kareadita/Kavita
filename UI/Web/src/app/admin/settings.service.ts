@@ -1,8 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { ServerSettings } from './_models/server-settings';
+
+/**
+ * Used only for the Test Email Service call
+ */
+export interface EmailTestResult {
+  successful: boolean;
+  errorMessage: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +37,7 @@ export class SettingsService {
   }
 
   testEmailServerSettings(emailUrl: string) {
-    return this.http.post<boolean>(this.baseUrl + 'settings/test-email-url', {url: emailUrl}, {responseType: 'text' as 'json'});
+    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {url: emailUrl});
   }
 
   getTaskFrequencies() {

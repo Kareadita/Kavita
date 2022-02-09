@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
 using API.Entities.Enums;
-using API.Services.Tasks;
 using Flurl.Http;
+using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
@@ -16,9 +16,9 @@ public interface IEmailService
 {
     Task SendConfirmationEmail(ConfirmationEmailDto data);
     Task<bool> CheckIfAccessible(string host);
-    Task SendMigrationEmail(EmailMigrationDto data);
-    Task SendPasswordResetEmail(PasswordResetEmailDto data);
-    Task<bool> TestConnectivity(string emailUrl);
+    Task<bool> SendMigrationEmail(EmailMigrationDto data);
+    Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
+    Task<EmailTestResultDto> TestConnectivity(string emailUrl);
 }
 
 public class EmailService : IEmailService
@@ -40,12 +40,23 @@ public class EmailService : IEmailService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<bool> TestConnectivity(string emailUrl)
+    public async Task<EmailTestResultDto> TestConnectivity(string emailUrl)
     {
-        FlurlHttp.ConfigureClient(emailUrl, cli =>
-            cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
+        // FlurlHttp.ConfigureClient(emailUrl, cli =>
+        //     cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
 
-        return await SendEmailWithGet(emailUrl + "/api/email/test");
+        var result = new EmailTestResultDto();
+        try
+        {
+            result.Successful = await SendEmailWithGet(emailUrl + "/api/email/test");
+        }
+        catch (KavitaException ex)
+        {
+            result.Successful = false;
+            result.ErrorMessage = ex.Message;
+        }
+
+        return result;
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
@@ -64,16 +75,16 @@ public class EmailService : IEmailService
         return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
     }
 
-    public async Task SendMigrationEmail(EmailMigrationDto data)
+    public async Task<bool> SendMigrationEmail(EmailMigrationDto data)
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        await SendEmailWithPost(emailLink + "/api/email/email-migration", data);
+        return await SendEmailWithPost(emailLink + "/api/email/email-migration", data);
     }
 
-    public async Task SendPasswordResetEmail(PasswordResetEmailDto data)
+    public async Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data)
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
+        return await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url)
@@ -94,9 +105,9 @@ public class EmailService : IEmailService
                 return true;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return false;
+            throw new KavitaException(ex.Message);
         }
         return false;
     }

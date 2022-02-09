@@ -4,9 +4,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { SettingsService } from '../settings.service';
+import { EmailTestResult, SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
+
 
 @Component({
   selector: 'app-manage-settings',
@@ -103,11 +104,11 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   testEmailServiceUrl() {
-    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (successful: boolean) => {
-      if (successful) {
+    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
+      if (result.successful) {
         this.toastr.success('Email Service Url validated');
       } else {
-        this.toastr.error('Email Service Url did not respond');
+        this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
       }
       
     }, (err: any) => {
