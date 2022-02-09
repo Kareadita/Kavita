@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
 using API.Entities.Enums;
-using API.Services.Tasks;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;

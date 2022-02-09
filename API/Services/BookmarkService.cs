@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.Repositories;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;

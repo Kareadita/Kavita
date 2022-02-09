@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace API.DTOs.Account;
+﻿namespace API.DTOs.Account;
 
 public class MigrateUserEmailDto
 {

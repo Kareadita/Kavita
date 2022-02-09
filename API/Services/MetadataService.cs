@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
-using API.Data.Scanner;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
