@@ -105,6 +105,11 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
     this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntil(this.onDestroy)).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
+
+      if (value != undefined && value != '' && !this.hasFocus) {
+        this.hasFocus = true;
+      }
+
       if (value != undefined && value.length >= this.minQueryLength) {
 
         if (this.prevSearchTerm === value) return;
