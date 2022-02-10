@@ -280,7 +280,7 @@ namespace API.Controllers
             {
                 dto.Roles.Add(PolicyConstants.PlebRole);
             }
-            if (existingRoles.Except(dto.Roles).Any())
+            if (existingRoles.Except(dto.Roles).Any() || dto.Roles.Except(existingRoles).Any())
             {
                 var roles = dto.Roles;
 
