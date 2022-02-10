@@ -22,7 +22,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class CleanupServiceTests : IDisposable
+public class CleanupServiceTests
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IUnitOfWork _unitOfWork;
@@ -60,8 +60,6 @@ public class CleanupServiceTests : IDisposable
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

@@ -22,7 +22,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class ReaderServiceTests : IDisposable
+public class ReaderServiceTests
 {
 
     private readonly IUnitOfWork _unitOfWork;
@@ -58,8 +58,6 @@ public class ReaderServiceTests : IDisposable
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

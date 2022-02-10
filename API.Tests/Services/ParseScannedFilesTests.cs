@@ -57,7 +57,7 @@ internal class MockReadingItemService : IReadingItemService
     }
 }
 
-public class ParseScannedFilesTests : IDisposable
+public class ParseScannedFilesTests
 {
     private readonly ILogger<ParseScannedFiles> _logger = Substitute.For<ILogger<ParseScannedFiles>>();
     private readonly IUnitOfWork _unitOfWork;
@@ -95,8 +95,6 @@ public class ParseScannedFilesTests : IDisposable
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

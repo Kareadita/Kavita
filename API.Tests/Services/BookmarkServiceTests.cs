@@ -21,7 +21,7 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class BookmarkServiceTests : IDisposable
+public class BookmarkServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly DbConnection _connection;
@@ -56,8 +56,6 @@ public class BookmarkServiceTests : IDisposable
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {
