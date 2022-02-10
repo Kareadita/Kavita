@@ -51,7 +51,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
           await this.confirmService.alert('Please click this link to confirm your email. You must confirm to be able to login. The link is in your logs. You may need to log out of the current account before clicking. <br/> <a href="' + this.emailLink + '" target="_blank">' + this.emailLink + '</a>');
           this.modal.close(true);
         } else {
-          await this.confirmService.alert('Please check your email (or logs) for the confirmation link. You must confirm to be able to login.');
+          await this.confirmService.alert('Please check your email (or logs under "Email Link") for the confirmation link. You must confirm to be able to login.');
           this.modal.close(true);
         }
       }, err => {
