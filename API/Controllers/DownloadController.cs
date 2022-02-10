@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -28,10 +29,11 @@ namespace API.Controllers
         private readonly IDownloadService _downloadService;
         private readonly IHubContext<MessageHub> _messageHub;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger<DownloadController> _logger;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager)
+            IDownloadService downloadService, IHubContext<MessageHub> messageHub, UserManager<AppUser> userManager, ILogger<DownloadController> logger)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
@@ -39,6 +41,7 @@ namespace API.Controllers
             _downloadService = downloadService;
             _messageHub = messageHub;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [HttpGet("volume-size")]
@@ -114,17 +117,34 @@ namespace API.Controllers
 
         private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
         {
-            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
-                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(downloadName), 0F));
-            if (files.Count == 1)
+            try
             {
-                return await GetFirstFileDownload(files);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                    MessageFactory.DownloadProgressEvent(User.GetUsername(),
+                        Path.GetFileNameWithoutExtension(downloadName), 0F));
+                if (files.Count == 1)
+                {
+                    await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                        MessageFactory.DownloadProgressEvent(User.GetUsername(),
+                            Path.GetFileNameWithoutExtension(downloadName), 1F));
+                    return await GetFirstFileDownload(files);
+                }
+
+                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
+                    tempFolder);
+                await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                    MessageFactory.DownloadProgressEvent(User.GetUsername(),
+                        Path.GetFileNameWithoutExtension(downloadName), 1F));
+                return File(fileBytes, DefaultContentType, downloadName);
             }
-            var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                tempFolder);
-            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
-                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(downloadName), 1F));
-            return File(fileBytes, DefaultContentType, downloadName);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception when trying to download files");
+                await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                    MessageFactory.DownloadProgressEvent(User.GetUsername(),
+                        Path.GetFileNameWithoutExtension(downloadName), 1F));
+                throw ex;
+            }
         }
 
         [HttpGet("series")]
@@ -160,9 +180,14 @@ namespace API.Controllers
                 .ToList()))
                 .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, $"{b.ChapterId}_{b.FileName}")));
 
+            var filename = $"{series.Name} - Bookmarks.zip";
+            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 0F));
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
                 $"download_{user.Id}_{series.Id}_bookmarks");
-            return File(fileBytes, DefaultContentType, $"{series.Name} - Bookmarks.zip");
+            await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
+                MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
+            return File(fileBytes, DefaultContentType, filename);
         }
 
     }
