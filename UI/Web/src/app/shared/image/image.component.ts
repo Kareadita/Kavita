@@ -51,7 +51,7 @@ export class ImageComponent implements OnChanges, OnDestroy {
           if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
 
           const tokens = this.imageUrl.split(updateEvent.entityType + 'Id=');
-          if (tokens.length > 1 && tokens[1] === (updateEvent.id + '')) {
+          if (tokens.length > 1 && tokens[1].split('&random=')[0] === (updateEvent.id + '')) {
             this.imageUrl = this.imageService.randomize(this.imageUrl);
           }
         }
