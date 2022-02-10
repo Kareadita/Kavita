@@ -402,9 +402,7 @@ namespace API.Controllers
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
 
-                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-                var emailLink =
-                    $"{Request.Scheme}://{host}{Request.PathBase}/registration/confirm-email?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(dto.Email)}";
+                var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogInformation("[Invite User]: Email Link: {Link}", emailLink);
                 if (dto.SendEmail)
                 {
@@ -556,7 +554,7 @@ namespace API.Controllers
                     "This user needs to migrate. Have them log out and login to trigger a migration flow");
             if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
-            var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
+            var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-email", user.Email);
             _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
             await _emailService.SendMigrationEmail(new EmailMigrationDto()
             {
@@ -594,6 +592,8 @@ namespace API.Controllers
                 var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
                 if (await _userManager.IsEmailConfirmedAsync(invitedUser))
                     return BadRequest($"User is already registered as {invitedUser.UserName}");
+
+                _logger.LogInformation("A user is attempting to login, but hasn't accepted email invite");
                 return BadRequest("User is already invited under this email and has yet to accepted invite.");
             }
 
