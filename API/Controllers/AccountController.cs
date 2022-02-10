@@ -479,10 +479,10 @@ namespace API.Controllers
             }
 
             var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", dto.Token);
-            if (!result) return BadRequest("Unable to reset password");
+            if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
 
             var errors = await _accountService.ChangeUserPassword(user, dto.Password);
-            return errors.Any() ? BadRequest(errors) : BadRequest("Unable to reset password");
+            return errors.Any() ? BadRequest(errors) : Ok("Password updated");
         }
 
 
