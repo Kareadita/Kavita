@@ -143,7 +143,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get areImagesWiderThanWindow() {
-    let [innerWidth, _] = this.getInnerDimensions();
+    let [_, innerWidth] = this.getInnerDimensions();
     return this.webtoonImageWidth > (innerWidth || document.documentElement.clientWidth);
   }
 
@@ -186,6 +186,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.initScrollHandler();
 
+    this.recalculateImageWidth();
+
     if (this.goToPage) {
       this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
         const isSamePage = this.pageNum === page;
@@ -218,12 +220,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
-        const [innerWidth, _] = this.getInnerDimensions();
-        this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        this.recalculateImageWidth();
         this.initScrollHandler();
         this.setPageNum(this.pageNum, true);
       });
     }
+  }
+
+  recalculateImageWidth() {
+    const [_, innerWidth] = this.getInnerDimensions();
+    this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   }
 
   getVerticalOffset() {
@@ -338,6 +344,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
+  /**
+   * 
+   * @returns Height, Width
+   */
   getInnerDimensions() {
     let innerHeight = window.innerHeight;
     let innerWidth = window.innerWidth;
@@ -399,8 +409,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   initWebtoonReader() {
     this.initFinished = false;
-    const [innerWidth, _] = this.getInnerDimensions();
-    this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    this.recalculateImageWidth();
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
