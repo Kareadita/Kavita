@@ -339,6 +339,7 @@ namespace API.Controllers
         public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
         {
             var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            if (adminUser == null) return Unauthorized("You need to login");
             _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
             // Check if there is an existing invite
