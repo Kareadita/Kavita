@@ -61,8 +61,6 @@ public class CleanupServiceTests
         return connection;
     }
 
-    public void Dispose() => _connection.Dispose();
-
     private async Task<bool> SeedDb()
     {
         await _context.Database.MigrateAsync();

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -10,15 +11,11 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
-using API.Services.Tasks;
-using API.SignalR;
 using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
-using NetVips;
 using NSubstitute;
 using Xunit;
 
@@ -26,10 +23,7 @@ namespace API.Tests.Services;
 
 public class BookmarkServiceTests
 {
-    private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
-
     private readonly DbConnection _connection;
     private readonly DataContext _context;
 
@@ -62,8 +56,6 @@ public class BookmarkServiceTests
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

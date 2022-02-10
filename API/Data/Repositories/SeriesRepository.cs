@@ -636,7 +636,7 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
                         && (!hasCollectionTagFilter ||
                             s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
-                        && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating))
+                        && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
                         && (!hasProgressFilter || seriesIds.Contains(s.Id))
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))

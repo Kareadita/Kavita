@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -94,8 +95,6 @@ public class ParseScannedFilesTests
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

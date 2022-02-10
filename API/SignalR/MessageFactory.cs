@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using API.DTOs.Update;
 
 namespace API.SignalR

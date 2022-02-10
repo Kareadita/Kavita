@@ -3,5 +3,5 @@
  */
 export interface CoverUpdateEvent {
     id: number;
-    entityType: 'series' | 'chapter' | 'volume' | 'collection';
+    entityType: 'series' | 'chapter' | 'volume' | 'collectionTag';
 }

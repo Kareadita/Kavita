@@ -388,6 +388,7 @@ namespace API.Services
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
                     Title = epubBook.Title,
                     Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
+                    LanguageISO = epubBook.Schema.Package.Metadata.Languages.FirstOrDefault() ?? string.Empty
 
                 };
                 // Parse tags not exposed via Library

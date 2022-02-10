@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using API.DTOs.Stats;
 using API.DTOs.Update;

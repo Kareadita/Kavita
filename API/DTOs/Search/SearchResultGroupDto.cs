@@ -2,7 +2,6 @@
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
-using API.Entities;
 
 namespace API.DTOs.Search;
 

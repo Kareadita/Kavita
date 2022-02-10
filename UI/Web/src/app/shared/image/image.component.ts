@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 
@@ -46,7 +47,13 @@ export class ImageComponent implements OnChanges, OnDestroy {
   constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService) {
     this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
         if (res.event === EVENTS.CoverUpdate) {
-          this.imageUrl = this.imageService.randomize(this.imageUrl);
+          const updateEvent = res.payload as CoverUpdateEvent;
+          if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
+
+          const tokens = this.imageUrl.split(updateEvent.entityType + 'Id=');
+          if (tokens.length > 1 && tokens[1] === (updateEvent.id + '')) {
+            this.imageUrl = this.imageService.randomize(this.imageUrl);
+          }
         }
       });
   }
