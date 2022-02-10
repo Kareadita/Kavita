@@ -5,7 +5,9 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScrollService } from '../scroll.service';
 import { CollectionTag } from '../_models/collection-tag';
+import { Library } from '../_models/library';
 import { PersonRole } from '../_models/person';
+import { ReadingList } from '../_models/reading-list';
 import { SearchResult } from '../_models/search-result';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 import { AccountService } from '../_services/account.service';
@@ -164,9 +166,18 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['library', libraryId, 'series', seriesId]);
   }
 
+  clickLibraryResult(item: Library) {
+    this.router.navigate(['library', item.id]);
+  }
+
   clickCollectionSearchResult(item: CollectionTag) {
     this.clearSearch();
     this.router.navigate(['collections', item.id]);
+  }
+
+  clickReadingListSearchResult(item: ReadingList) {
+    this.clearSearch();
+    this.router.navigate(['lists', item.id]);
   }
 
 

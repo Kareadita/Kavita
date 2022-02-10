@@ -1,7 +1,9 @@
+import { Library } from "../library";
 import { SearchResult } from "../search-result";
 import { Tag } from "../tag";
 
 export class SearchResultGroup {
+    libraries: Array<Library> = [];
     series: Array<SearchResult> = [];
     collections: Array<Tag> = [];
     readingLists: Array<Tag> = [];
@@ -10,6 +12,7 @@ export class SearchResultGroup {
     tags: Array<Tag> = [];
 
     reset() {
+        this.libraries = [];
         this.series = [];
         this.collections = [];
         this.readingLists = [];

@@ -22,6 +22,14 @@
                   (focusChanged)="focusUpdate($event)"
                 >
 
+                <ng-template #libraryTemplate let-item>
+                  <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
+                    <div class="ml-1">
+                      <span>{{item.name}}</span>
+                    </div>
+                  </div>
+                </ng-template>
+
                 <ng-template #seriesTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
                     <div style="width: 24px" class="mr-1">
@@ -43,6 +51,18 @@
                     <div style="width: 24px" class="mr-1">
                       <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
+                    <div class="ml-1">
+                      <span>{{item.title}}</span>
+                      <span *ngIf="item.promoted">
+                        &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
+                        <span class="sr-only">(promoted)</span>
+                      </span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <ng-template #readingListTemplate let-item>
+                  <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
                     <div class="ml-1">
                       <span>{{item.title}}</span>
                       <span *ngIf="item.promoted">

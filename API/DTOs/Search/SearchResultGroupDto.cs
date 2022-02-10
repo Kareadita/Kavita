@@ -10,6 +10,7 @@ namespace API.DTOs.Search;
 /// </summary>
 public class SearchResultGroupDto
 {
+    public IEnumerable<LibraryDto> Libraries { get; set; }
     public IEnumerable<SearchResultDto> Series { get; set; }
     public IEnumerable<CollectionTagDto> Collections { get; set; }
     public IEnumerable<ReadingListDto> ReadingLists { get; set; }

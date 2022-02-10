@@ -35,6 +35,26 @@
                 </ul>
             </ng-container>
 
+            <ng-container *ngIf="readingListTemplate !== undefined && grouppedData.readingLists.length > 0">
+                <li class="list-group-item section-header"><h5>Reading Lists</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.readingLists; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="libraryTemplate !== undefined && grouppedData.libraries.length > 0">
+                <li class="list-group-item section-header"><h5 id="libraries-group">Libraries</h5></li>
+                <ul class="list-group results" role="group" aria-describedby="libraries-group">
+                    <li *ngFor="let option of grouppedData.libraries; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" aria-labelledby="libraries-group" role="option">
+                        <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
             <ng-container *ngIf="genreTemplate !== undefined && grouppedData.genres.length > 0">
               <li class="list-group-item section-header"><h5>Genres</h5></li>
               <ul class="list-group results">
