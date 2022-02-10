@@ -23,6 +23,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
   registerForm: FormGroup = new FormGroup({});
   emailLink: string = '';
   emailLinkUrl: SafeUrl | undefined;
+  error: string = '';
 
   constructor(private accountService: AccountService, private modal: NgbActiveModal, 
     private serverService: ServerService, private confirmService: ConfirmService) {
@@ -43,6 +44,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
       const model = this.registerForm.getRawValue();
       model.sendEmail = canAccess;
       this.accountService.migrateUser(model).subscribe(async (email) => {
+        console.log(email);
         if (!canAccess) {
           // Display the email to the user
           this.emailLink = email;
@@ -52,6 +54,8 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
           await this.confirmService.alert('Please check your email (or logs) for the confirmation link. You must confirm to be able to login.');
           this.modal.close(true);
         }
+      }, err => {
+        this.error = err;
       });
     });
     
