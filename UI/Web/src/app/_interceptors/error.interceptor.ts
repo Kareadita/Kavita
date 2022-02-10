@@ -62,9 +62,15 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (Array.isArray(error.error)) {
       const modalStateErrors: any[] = [];
       if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
-        error.error.forEach((issue: {status: string, details: string, message: string}) => {
-          modalStateErrors.push(issue.details);
-        });
+        if (error.error[0].details === null) {
+          error.error.forEach((issue: {status: string, details: string, message: string}) => {
+            modalStateErrors.push(issue.message);
+          });
+        } else {
+          error.error.forEach((issue: {status: string, details: string, message: string}) => {
+            modalStateErrors.push(issue.details);
+          });
+        }
       } else {
         error.error.forEach((issue: {code: string, description: string}) => {
           modalStateErrors.push(issue.description);

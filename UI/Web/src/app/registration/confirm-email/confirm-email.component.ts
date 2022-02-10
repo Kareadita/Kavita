@@ -53,6 +53,7 @@ export class ConfirmEmailComponent implements OnInit {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
     }, err => {
+      console.log('error: ', err);
       this.errors = err;
     });
   }
