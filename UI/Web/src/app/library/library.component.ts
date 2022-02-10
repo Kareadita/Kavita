@@ -36,8 +36,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
-
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private router: Router, 
     private titleService: Title, public imageService: ImageService, 

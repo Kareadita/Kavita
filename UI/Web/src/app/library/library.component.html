@@ -11,6 +11,7 @@
     </ng-template>
 </app-carousel-reel>
 
+<!-- TODO: Refactor this so we can use series actions here -->
 <app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series">
     <ng-template #carouselItem let-item let-position="idx">
         <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" 
