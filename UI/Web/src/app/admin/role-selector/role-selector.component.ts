@@ -34,8 +34,8 @@ export class RoleSelectorComponent implements OnInit {
       this.selectedRoles = roles.map(item => {
         return {selected: false, data: item};
       });
-      this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
       this.preselect();
+      this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
     });
   }
 
