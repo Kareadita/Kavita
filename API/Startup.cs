@@ -144,7 +144,6 @@ namespace API
                 {
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                    var context = serviceProvider.GetRequiredService<DataContext>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
 
 
@@ -152,30 +151,7 @@ namespace API
                         logger, cacheService);
 
                     // Only run this if we are upgrading
-                    var usersWithRole = await userManager.GetUsersInRoleAsync(PolicyConstants.ChangePasswordRole);
-                    if (usersWithRole.Count == 0)
-                    {
-                        await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-                    }
-
-                    var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
-                    try
-                    {
-                        // If this is a new install, tables wont exist yet
-                        if (requiresCoverImageMigration)
-                        {
-                            MigrateCoverImages.ExtractToImages(context, directoryService, imageService);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        requiresCoverImageMigration = false;
-                    }
-
-                    if (requiresCoverImageMigration)
-                    {
-                        await MigrateCoverImages.UpdateDatabaseWithImages(context, directoryService);
-                    }
+                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                 }).GetAwaiter()
                     .GetResult();
             }
