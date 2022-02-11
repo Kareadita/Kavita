@@ -8,6 +8,9 @@
     <p>Your account does not have an email on file. This is a one-time migration. Please add your email to the account. A verficiation link will be sent to your email for you 
         to confirm and will then be allowed to authenticate with this server. This is required.
     </p>
+
+    <p class="text-danger" *ngIf="error.length > 0">{{error}}</p>
+
     <form [formGroup]="registerForm">
         <div class="form-group">
             <label for="username">Username</label>

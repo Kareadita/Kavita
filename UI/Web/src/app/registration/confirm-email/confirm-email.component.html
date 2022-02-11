@@ -1,14 +1,14 @@
-<!-- 
-<div class="text-danger" *ngIf="errors.length > 0">
-    <p>Errors:</p>
-    <ul>
-        <li *ngFor="let error of errors">{{error}}</li>
-    </ul>
-</div> -->
+
 <app-splash-container>
     <ng-container title><h2>Register</h2></ng-container>
     <ng-container body>
         <p>Complete the form to complete your registration</p>
+        <div class="text-danger" *ngIf="errors.length > 0">
+            <p>Errors:</p>
+            <ul>
+                <li *ngFor="let error of errors">{{error}}</li>
+            </ul>
+        </div>
         <form [formGroup]="registerForm" (ngSubmit)="submit()">
             <div class="form-group">
                 <label for="username">Username</label>

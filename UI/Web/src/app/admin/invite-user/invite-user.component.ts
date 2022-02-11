@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Library } from 'src/app/_models/library';
 import { AccountService } from 'src/app/_services/account.service';
@@ -30,7 +31,7 @@ export class InviteUserComponent implements OnInit {
   public get email() { return this.inviteForm.get('email'); }
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, 
-    private confirmService: ConfirmService) { }
+    private confirmService: ConfirmService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
@@ -57,10 +58,11 @@ export class InviteUserComponent implements OnInit {
       libraries: this.selectedLibraries,
       roles: this.selectedRoles,
       sendEmail: this.accessible
-    }).subscribe(email => {
-      this.emailLink = email;
+    }).subscribe(emailLink => {
+      this.emailLink = emailLink;
       this.isSending = false;
       if (this.accessible) {
+        this.toastr.info('Email sent to ' + email);
         this.modal.close(true);
       }
     }, err => {

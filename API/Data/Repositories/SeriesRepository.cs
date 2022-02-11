@@ -281,6 +281,14 @@ public class SeriesRepository : ISeriesRepository
             .Select(s => s.Id)
             .ToList();
 
+        result.Libraries = await _context.Library
+            .Where(l => libraryIds.Contains(l.Id))
+            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%"))
+            .OrderBy(l => l.Name)
+            .AsSplitQuery()
+            .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
         result.Series = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")

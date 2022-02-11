@@ -72,8 +72,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   processProgressEvent(event: Message<ProgressEvent>, eventType: string) {
     const scanEvent = event.payload as ProgressEvent;
-    console.log(event.event, event.payload);
-
 
     this.libraryService.getLibraryNames().subscribe(names => {
       const data = this.progressEventsSource.getValue();

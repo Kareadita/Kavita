@@ -49,6 +49,18 @@ export class ImageService implements OnDestroy {
     return this.getChapterCoverImage(item.chapterId);
   }
 
+  /**
+   * Returns the entity type from a cover image url. Undefied if not applicable
+   * @param url 
+   * @returns 
+   */
+  getEntityTypeFromUrl(url: string) {
+    if (url.indexOf('?') < 0) return undefined;
+    const part = url.split('?')[1];
+    const equalIndex = part.indexOf('=');
+    return part.substring(0, equalIndex).replace('Id', '');
+  }
+
   getVolumeCoverImage(volumeId: number) {
     return this.baseUrl + 'image/volume-cover?volumeId=' + volumeId;
   }

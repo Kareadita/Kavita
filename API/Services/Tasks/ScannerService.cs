@@ -250,6 +250,7 @@ public class ScannerService : IScannerService
 
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
         var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
         {

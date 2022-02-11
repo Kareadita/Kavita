@@ -149,7 +149,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Refresh started for ' + series.name);
+      this.toastr.success('Refresh covers queued for ' + series.name);
       if (callback) {
         callback(series);
       }

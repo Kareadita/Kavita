@@ -1,8 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { ReplaySubject, Subject } from 'rxjs';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
@@ -36,7 +36,10 @@ export class LibraryComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  seriesTrackBy = (index: number, item: any) => `${item.name}_${item.pagesRead}`;
+  /**
+   * We use this Replay subject to slow the amount of times we reload the UI
+   */
+  private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private router: Router, 
@@ -49,7 +52,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAddedSeries.unshift(series);
           });
-          this.loadRecentlyAdded();
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
           
@@ -59,9 +61,11 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         } else if (res.event === EVENTS.ScanSeries) {
           // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
-          this.loadRecentlyAdded();
+          this.loadRecentlyAdded$.next();
         }
       });
+
+      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe(() => this.loadRecentlyAdded());
   }
 
   ngOnInit(): void {

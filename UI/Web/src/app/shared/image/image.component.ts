@@ -49,10 +49,16 @@ export class ImageComponent implements OnChanges, OnDestroy {
         if (res.event === EVENTS.CoverUpdate) {
           const updateEvent = res.payload as CoverUpdateEvent;
           if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
+          const enityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
+          if (enityType === updateEvent.entityType) {
+            const tokens = this.imageUrl.split('?')[1].split('&random=');
 
-          const tokens = this.imageUrl.split(updateEvent.entityType + 'Id=');
-          if (tokens.length > 1 && tokens[1] === (updateEvent.id + '')) {
-            this.imageUrl = this.imageService.randomize(this.imageUrl);
+            //...seriesId=123&random=
+            const id = tokens[0].replace(enityType + 'Id=', '');
+            if (id === (updateEvent.id + '')) {
+              console.log('Image url: ', this.imageUrl, ' matches update event: ', updateEvent);
+              this.imageUrl = this.imageService.randomize(this.imageUrl);
+            }
           }
         }
       });
