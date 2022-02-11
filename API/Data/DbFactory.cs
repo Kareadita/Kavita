@@ -30,11 +30,6 @@ namespace API.Data
             };
         }
 
-        public static SeriesMetadata SeriesMetadata(ComicInfo info)
-        {
-            return SeriesMetadata(Array.Empty<CollectionTag>());
-        }
-
         public static Volume Volume(string volumeNumber)
         {
             return new Volume()
