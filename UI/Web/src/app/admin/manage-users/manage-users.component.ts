@@ -35,8 +35,10 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService,
               public messageHub: MessageHubService,
               private serverService: ServerService) {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
-      this.loggedInUsername = user.username;
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+      if (user) {
+        this.loggedInUsername = user.username;
+      }
     });
 
   }

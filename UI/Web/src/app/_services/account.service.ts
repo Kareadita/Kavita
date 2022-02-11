@@ -19,7 +19,10 @@ export class AccountService implements OnDestroy {
   currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
-  private currentUserSource = new ReplaySubject<User>(1);
+  private currentUserSource = new ReplaySubject<User | undefined>(1);
+  /**
+   * 
+   */
   currentUser$ = this.currentUserSource.asObservable();
 
   /**

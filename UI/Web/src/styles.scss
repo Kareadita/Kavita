@@ -1,14 +1,20 @@
+@use '../node_modules/swiper/swiper.scss' as swiper;
+@use '~bootstrap/scss/mixins/_breakpoints.scss' as breakpoints;
+
 // Import colors for overrides of bootstrap theme
 @import './theme/colors';
 @import './theme/toastr';
 
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
-@import '~bootstrap/scss/mixins/_breakpoints.scss';
 
-@import '~swiper/swiper.scss';
+
 
 @import './theme/dark.scss';
+
+
+
+
 
 // Global Styles
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
@@ -72,14 +78,16 @@ app-root {
 }
 
 
+
+
 // Utiliities
-@include media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+@include breakpoints.media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
   .phone-hidden {
     display: none;
   }
 }
 
-@include media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+@include breakpoints.media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
   .not-phone-hidden {
     display: none;
   }
