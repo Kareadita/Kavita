@@ -143,7 +143,7 @@ namespace API.Controllers
                 await _messageHub.Clients.All.SendAsync(SignalREvents.DownloadProgress,
                     MessageFactory.DownloadProgressEvent(User.GetUsername(),
                         Path.GetFileNameWithoutExtension(downloadName), 1F));
-                throw ex;
+                throw;
             }
         }
 
