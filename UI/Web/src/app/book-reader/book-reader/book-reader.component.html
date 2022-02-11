@@ -117,7 +117,7 @@
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
-        <div class="right {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
+        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         
         <div *ngIf="page !== undefined && scrollbarNeeded">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
