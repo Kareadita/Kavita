@@ -1,7 +1,9 @@
+
+@use '../../../../theme/colors';
 .clickable {
     cursor: pointer;
 }
 
 .clickable:hover, .clickable:focus {
-    background-color: lightgreen;
+    background-color: colors.$primary-color;
 }
