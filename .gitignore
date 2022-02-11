@@ -526,3 +526,5 @@ API/config/post-metadata/
 API.Tests/TestResults/
 UI/Web/.vscode/settings.json
 /API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
+/UI/Web/.angular/
+

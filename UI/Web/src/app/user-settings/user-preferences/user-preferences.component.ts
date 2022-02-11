@@ -83,7 +83,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) {
         this.user = user;
         this.isAdmin = this.accountService.hasAdminRole(user);

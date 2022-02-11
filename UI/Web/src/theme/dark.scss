@@ -1,6 +1,10 @@
 // All dark style overrides should live here
 
-@use "../../theme/colors";
+@use "./colors";
+
+// :root {
+//   --bs-body-color: #212529;
+// }
 
 .bg-dark {
   color: $dark-text-color;
@@ -155,7 +159,7 @@
 
     &::before {
       content: "";
-      background-image: url('../../assets/images/login-bg.jpg');
+      background-image: url('../assets/images/login-bg.jpg');
       background-size: cover;
       position: absolute;
       top: 0;

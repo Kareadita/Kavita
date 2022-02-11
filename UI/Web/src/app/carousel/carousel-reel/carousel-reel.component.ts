@@ -1,5 +1,7 @@
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
-import Swiper from 'swiper';
+import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { SwiperComponent } from 'swiper/angular';
+//import Swiper from 'swiper';
+//import { SwiperEvents, Swiper } from 'swiper/types';
 
 @Component({
   selector: 'app-carousel-reel',
@@ -13,9 +15,19 @@ export class CarouselReelComponent implements OnInit {
   @Input() title = '';
   @Output() sectionClick = new EventEmitter<string>();
 
+  @ViewChild('swiper', { static: false }) swiper?: SwiperComponent;
 
-  swiper!: Swiper;
+
+  //swiper!: Swiper;
   trackByIdentity: (index: number, item: any) => string;
+
+  get isEnd() {
+    return this.swiper?.swiperRef.isEnd;
+  }
+
+  get isBeginning() {
+    return this.swiper?.swiperRef.isBeginning;
+  }
 
   constructor() { 
     this.trackByIdentity = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
@@ -25,13 +37,13 @@ export class CarouselReelComponent implements OnInit {
 
   nextPage() {
     if (this.swiper) {
-      this.swiper.setProgress(this.swiper.progress + 0.25, 600);
+      this.swiper.swiperRef.setProgress(this.swiper.swiperRef.progress + 0.25, 600);
     }
   }
 
   prevPage() {
     if (this.swiper) {
-      this.swiper.setProgress(this.swiper.progress - 0.25, 600);
+      this.swiper.swiperRef.setProgress(this.swiper.swiperRef.progress - 0.25, 600);
     }
   }
 
@@ -39,7 +51,14 @@ export class CarouselReelComponent implements OnInit {
     this.sectionClick.emit(this.title);
   }
 
-  onSwiper(swiper: any) {
-    this.swiper = swiper;
-  }
+  // onSwiper(eventParams: Parameters<SwiperEvents['init']>) {
+  //   console.log('swiper: ', eventParams);
+  //   [this.swiper] = eventParams;
+  // }
+
+  // onSwiper(params: Swiper) {
+  //   // const [swiper] = params;
+  //   // console.log(swiper);
+  //   // return params;
+  // }
 }
